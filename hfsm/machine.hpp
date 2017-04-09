@@ -6,12 +6,25 @@
 
 #include <limits>
 
-namespace hfsm::detail {
+namespace hfsm {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext = void, typename TTime = float, unsigned TMaxSubstitutions = 4>
 class Machine {
+
+	using TypeInfo = detail::TypeInfo;
+
+	template <typename T, unsigned TCapacity>
+	using Array = detail::Array<T, TCapacity>;
+
+	template <typename T>
+	using ArrayView = detail::ArrayView<T>;
+
+	template <typename TKey, typename TValue, unsigned TCapacity, typename THasher = std::hash<TKey>>
+	using HashTable = detail::HashTable<TKey, TValue, TCapacity, THasher>;
+
+	//----------------------------------------------------------------------
 
 #pragma region Utility
 
