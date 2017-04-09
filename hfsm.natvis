@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	<Type Name="std::type_index">
+		<DisplayString Condition="_Tptr->_Data._UndecoratedName">{_Tptr->_Data._UndecoratedName,sb}</DisplayString>
+		<DisplayString Condition="_Tptr->_Data._DecoratedName[5]=='$'">
+			{&amp;_Tptr->_Data._DecoratedName[6],[strchr(_Tptr->_Data._DecoratedName,'@') - _Tptr->_Data._DecoratedName - 6]sb}
+			&lt;
+			{strstr(_Tptr->_Data._DecoratedName,"@V") + 2,[strstr(_Tptr->_Data._DecoratedName,"@?") - strstr(_Tptr->_Data._DecoratedName,"@V") - 2]sb}
+			&gt;
+		</DisplayString>
+		<DisplayString>{&amp;_Tptr->_Data._DecoratedName[4],[strchr(_Tptr->_Data._DecoratedName,'@') - _Tptr->_Data._DecoratedName - 4]sb}</DisplayString>
+		<Expand />
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::detail::ArrayView&lt;*&gt;">
+		<DisplayString>{_count} / {_capacity}</DisplayString>
+		<Expand>
+			<IndexListItems Condition="_count > 0">
+				<Size>_count</Size>
+				<ValueNode>*(($T1*) &amp;((Item*) (&amp;_count + 1))[$i])</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::detail::Array&lt;*,*&gt;">
+		<DisplayString>{_count} / {_capacity}</DisplayString>
+		<Expand>
+			<IndexListItems Condition="_count > 0">
+				<Size>_count</Size>
+				<ValueNode>*(($T1*) &amp;_storage[$i])</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::detail::HashTable&lt;*,*,*,*&gt;">
+		<DisplayString>{_count}</DisplayString>
+		<Expand>
+			<IndexListItems>
+				<Size>$T3</Size>
+				<ValueNode Condition="_items[$i]._hash &gt;&gt; USED_SHIFT != 0">_items[$i],na</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm::detail::HashTable&lt;*,*,*,*&gt;::Item">
+		<DisplayString>{_keyWrap} : {_value}</DisplayString>
+		<Expand>
+			<Item Name="key">_keyWrap</Item>
+			<Item Name="value">_value</Item>
+		</Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::detail::Wrap&lt;*&gt;">
+		<DisplayString>{*($T1*) &amp;_storage._Val}</DisplayString>
+		<Expand>
+			<ExpandedItem>*($T1*) &amp;_storage._Val</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	<Type Name="hfsm::Machine&lt;*&gt;::Parent">
+		<DisplayString>{forkType} ► {prongType}</DisplayString>
+		<Expand>
+			<Item Name="fork">forkType</Item>
+			<Item Name="prong">prongType</Item>
+		</Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::Machine&lt;*&gt;::StateRegistryT&lt;*&gt;">
+		<DisplayString>{_typeToIndex,na}</DisplayString>
+		<Expand>
+			<ExpandedItem>_typeToIndex,na</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::Machine&lt;*&gt;::Transition">
+		<DisplayString>{type}: {*(std::type_index*)stateType._storage}</DisplayString>
+		<Expand/>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::Machine&lt;*&gt;::S&lt;*&gt;">
+		<DisplayString>{_type}</DisplayString>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::Machine&lt;*&gt;::Fork">
+		<DisplayString>{activeType,na} ({resumableType,na}) ► {requestedType,na}</DisplayString>
+		<Expand>
+			<Item Name="type">type</Item>
+			<Item Name="active">activeType</Item>
+			<Item Name="resumable">resumableType</Item>
+			<Item Name="requested">requestedType</Item>
+		</Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::Machine&lt;*&gt;::C&lt;*&gt;">
+		<DisplayString>{_type}</DisplayString>
+		<Expand>
+			<Item Name="client">_host</Item>
+			<Item Name="fork">(Fork*) this,na</Item>
+			<Item Name="states">_subStates</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm::Machine&lt;*&gt;::C&lt;*&gt;::Sub&lt;*&gt;">
+		<DisplayString>{Width}</DisplayString>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::Machine&lt;*&gt;::P&lt;*&gt;">
+		<DisplayString>{_type}</DisplayString>
+		<Expand>
+			<Item Name="client">(State*) this,na</Item>
+			<Item Name="states">_subStates</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm::Machine&lt;*&gt;::P&lt;*&gt;::Sub&lt;*&gt;">
+		<DisplayString>{Width}</DisplayString>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::Machine&lt;*&gt;::R&lt;*&gt;">
+		<DisplayString>{_apex._type}</DisplayString>
+	</Type>
+
+	<Type Name="hfsm::Machine&lt;*&gt;::CompositeRoot&lt;*&gt;">
+		<DisplayString>{_apex._type}</DisplayString>
+		<Expand>
+			<ExpandedItem>(Root*) this,na</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm::Machine&lt;*&gt;::OrthogonalRoot&lt;*&gt;">
+		<DisplayString>{_apex._type}</DisplayString>
+		<Expand>
+			<ExpandedItem>(Root*) this,na</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	<Type Name="hfsm::Iterator&lt;*&gt;">
+		<DisplayString>[{_cursor}] = {_t[_cursor]}</DisplayString>
+		<Expand>
+			<ExpandedItem>_container</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+</AutoVisualizer>
