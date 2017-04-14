@@ -233,10 +233,10 @@ main(int /*argc*/, char* /*argv*/[]) {
 			>
 		> machine(_);
 
-		static_assert(machine.DeepWidth == 2);
-		static_assert(machine.StateCount == 13);
-		static_assert(machine.ForkCount == 5);
-		static_assert(machine.ProngCount == 10);
+		static_assert(machine.DeepWidth  == 2,  "");
+		static_assert(machine.StateCount == 13, "");
+		static_assert(machine.ForkCount  == 5,  "");
+		static_assert(machine.ProngCount == 10, "");
 
 		const Status created[] = {
 			Status{ Event::Enter, typeid(A) },

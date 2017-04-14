@@ -23,7 +23,7 @@ public:
 		INVALID		= (unsigned)-1,
 		DUMMY		= INVALID,
 	};
-	static_assert(BitCount<CAPACITY>::Value <= USED_SHIFT);
+	static_assert(CAPACITY <= HASH_MASK, "Capacity needs to be less than HASH_MASK 0x7fffffff");
 
 	using Hash		= unsigned;
 	using Key		= TKey;

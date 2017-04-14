@@ -45,7 +45,7 @@ private:
 	inline const T& get() const		{ return *reinterpret_cast<const T* const>(&_storage);	}
 
 	inline unsigned integer() const { return *reinterpret_cast<const unsigned* const>(&_storage); }
-	static_assert(sizeof(unsigned) < sizeof(Storage));
+	static_assert(sizeof(unsigned) < sizeof(Storage), "");
 
 private:
 	Storage _storage;
