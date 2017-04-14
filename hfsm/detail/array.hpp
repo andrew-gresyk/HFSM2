@@ -3,7 +3,8 @@
 #include "array_view.hpp"
 #include "iterator.hpp"
 
-namespace hfsm::detail {
+namespace hfsm {
+namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -21,6 +22,7 @@ public:
 	};
 
 	using View = ArrayView<T>;
+	using Item = typename View::Item;
 
 public:
 	Array()
@@ -54,4 +56,5 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
+}
 }

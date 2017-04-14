@@ -160,13 +160,13 @@ class Machine {
 
 	// shortened class names
 	template <typename T>
-	class _S;
+	struct _S;
 
 	template <typename, typename...>
-	class _C;
+	struct _C;
 
 	template <typename, typename...>
-	class _O;
+	struct _O;
 
 	template <typename>
 	class _R;
@@ -261,7 +261,7 @@ private:
 		friend class _B;
 
 		template <typename T>
-		friend class _S;
+		friend struct _S;
 
 	private:
 		inline void widePreSubstitute(Context& _, const Time time) const;
@@ -281,7 +281,7 @@ private:
 		friend class _B;
 
 		template <typename T>
-		friend class _S;
+		friend struct _S;
 
 	public:
 		inline void substitute(Control&, Context&, const Time) const {}
@@ -301,16 +301,7 @@ private:
 	//----------------------------------------------------------------------
 
 	template <typename T>
-	class _S {
-		template <typename, typename...>
-		friend class _C;
-
-		template <typename, typename...>
-		friend class _O;
-
-		template <typename>
-		friend class _R;
-
+	struct _S {
 		using Client = T;
 
 		enum {
@@ -321,7 +312,6 @@ private:
 			ProngCount	 = 0,
 		};
 
-	private:
 		_S(ForkPointers& /*forkPointers*/)												{}
 
 		inline void deepLink(StateRegistry& stateRegistry,
@@ -350,7 +340,6 @@ private:
 		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
 		inline void deepUpdate(Context& context, const Time time);
 
-	private:
 		Client _client;
 
 		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());
@@ -363,19 +352,10 @@ private:
 #pragma region Composite
 
 	template <typename T, typename... TS>
-	class _C final
+	struct _C final
 		: _S<T>
 		, public ForkT<T>
 	{
-		template <typename, typename...>
-		friend class _C;
-
-		template <typename, typename...>
-		friend class _O;
-
-		template <typename>
-		friend class _R;
-
 		using State = _S<T>;
 		using Client = typename State::Client;
 
@@ -486,7 +466,6 @@ private:
 			Width		 = sizeof...(TS),
 		};
 
-	private:
 		_C(ForkPointers& forkPointers);
 
 		inline void deepLink(StateRegistry& stateRegistry,
@@ -510,7 +489,6 @@ private:
 		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
 		inline void deepUpdate(Context& context, const Time time);
 
-	private:
 		SubStates _subStates;
 
 		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());
@@ -523,18 +501,9 @@ private:
 #pragma region Orthogonal
 
 	template <typename T, typename... TS>
-	class _O final
+	struct _O final
 		: _S<T>
 	{
-		template <typename, typename...>
-		friend class _C;
-
-		template <typename, typename...>
-		friend class _O;
-
-		template <typename>
-		friend class _R;
-
 		using State = _S<T>;
 
 		//······························································
@@ -555,7 +524,7 @@ private:
 
 			enum {
 				ReverseDepth = hfsm::detail::Max<Initial::ReverseDepth, Remaining::ReverseDepth>::Value,
-				DeepWidth	 = Initial::DeepWidth + Remaining::DeepWidth,
+				DeepWidth	 = Initial::DeepWidth  + Remaining::DeepWidth,
 				StateCount	 = Initial::StateCount + Remaining::StateCount,
 				ForkCount	 = Initial::ForkCount  + Remaining::ForkCount,
 				ProngCount	 = Initial::ProngCount + Remaining::ProngCount,
@@ -642,7 +611,6 @@ private:
 			Width		 = sizeof...(TS),
 		};
 
-	private:
 		_O(ForkPointers& forkPointers);
 
 		inline void deepLink(StateRegistry& stateRegistry,
@@ -666,7 +634,6 @@ private:
 		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
 		inline void deepUpdate(Context& context, const Time time);
 
-	private:
 		SubStates _subStates;
 
 		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());
@@ -718,7 +685,7 @@ private:
 		template <typename T>
 		inline void resume()	{ _requests << Transition(Transition::Type::Resume,   TypeInfo::get<T>());	}
 
-		inline unsigned id(const Transition request) const	{ return _stateRegistry[*request.stateType]; }
+		inline unsigned id(const Transition request) const	{ return _stateRegistry[*request.stateType];	}
 
 	protected:
 		void requestChange(const Transition request);
@@ -759,7 +726,7 @@ private:
 		template <typename T>
 		inline void resume()	{ _requests << Transition(Transition::Type::Resume,	  TypeInfo::get<T>());	}
 
-		inline unsigned requestCount() const { return _requests.count();											}
+		inline unsigned requestCount() const									{ return _requests.count();	}
 
 	private:
 		TransitionQueue& _requests;

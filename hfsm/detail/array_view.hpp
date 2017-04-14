@@ -3,7 +3,8 @@
 #include <assert.h>
 #include <type_traits>	// aligned_storage
 
-namespace hfsm::detail {
+namespace hfsm {
+namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -37,14 +38,6 @@ public:
 
 	template <typename TValue>
 	inline unsigned operator << (TValue&& value);
-
-	template <>
-	inline unsigned operator << (std::nullptr_t&&) {
-		assert(_count < _capacity);
-		get(_count) = nullptr;
-
-		return _count++;
-	}
 
 	inline		 Item* storage()							{ return &get(0);			}
 	inline const Item* storage() const						{ return &get(0);			}
@@ -198,4 +191,5 @@ ArrayView<T>::get(const unsigned i) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+}
 }

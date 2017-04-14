@@ -5,7 +5,8 @@
 
 #include <tuple>
 
-namespace hfsm::detail {
+namespace hfsm {
+namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Open-addressing, Robin Hood hashing associative container
@@ -309,4 +310,5 @@ HashTable<TK, TV, TC, TH>::skipVacantForward(const unsigned i) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+}
 }

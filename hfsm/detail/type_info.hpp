@@ -4,7 +4,8 @@
 
 #include <typeindex>
 
-namespace hfsm::detail {
+namespace hfsm {
+namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -19,8 +20,8 @@ public:
 public:
 	inline TypeInfo() = default;
 
-	inline TypeInfo(const std::type_index type)
-		: Base(type)
+	inline TypeInfo(std::type_info&& type)
+		: Base(std::move(std::type_index(type)))
 	{}
 
 	template <typename T>
@@ -29,4 +30,5 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 
+}
 }
