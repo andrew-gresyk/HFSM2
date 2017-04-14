@@ -117,9 +117,13 @@ class Machine {
 	struct ForkT
 		: Fork
 	{
-		ForkT(const Index index)
+		ForkT(const Index index,
+			  const Parent parent,
+			  Parents& forkParents)
 			: Fork(index, TypeInfo::get<T>())
-		{}
+		{
+			forkParents[index] = parent;
+		}
 	};
 
 	//----------------------------------------------------------------------
@@ -284,12 +288,11 @@ private:
 			ProngCount	 = 0,
 		};
 
-		_S(ForkPointers& /*forkPointers*/)												{}
-
-		inline void deepLink(StateRegistry& stateRegistry,
-							 const Parent parent,
-							 Parents& stateParents,
-							 Parents& forkParents);
+		_S(StateRegistry& stateRegistry,
+		   const Parent parent,
+		   Parents& stateParents,
+		   Parents& forkParents,
+		   ForkPointers& forkPointers);
 
 		inline void deepEnterInitial(Context& context, const Time time);
 
@@ -325,8 +328,8 @@ private:
 
 	template <typename T, typename... TS>
 	struct _C final
-		: _S<T>
-		, public ForkT<T>
+		: public ForkT<T>
+		, _S<T>
 	{
 		using State = _S<T>;
 		using Client = typename State::Client;
@@ -354,12 +357,11 @@ private:
 				ProngCount	 = Initial::ProngCount + Remaining::ProngCount,
 			};
 
-			Sub(ForkPointers& forkPointers);
-			
-			inline void wideLink(StateRegistry& stateRegistry,
-								 const Index fork,
-								 Parents& stateParents,
-								 Parents& forkParents);
+			Sub(StateRegistry& stateRegistry,
+				const Index fork,
+				Parents& stateParents,
+				Parents& forkParents,
+				ForkPointers& forkPointers);
 
 			inline void wideEnterInitial(Context& context, const Time time);
 
@@ -396,12 +398,11 @@ private:
 				ProngCount	 = Initial::ProngCount,
 			};
 
-			Sub(ForkPointers& forkPointers);
-
-			inline void wideLink(StateRegistry& stateRegistry,
-								 const Index fork,
-								 Parents& stateParents,
-								 Parents& forkParents);
+			Sub(StateRegistry& stateRegistry,
+				const Index fork,
+				Parents& stateParents,
+				Parents& forkParents,
+				ForkPointers& forkPointers);
 
 			inline void wideEnterInitial(Context& context, const Time time);
 
@@ -437,12 +438,11 @@ private:
 			Width		 = sizeof...(TS),
 		};
 
-		_C(ForkPointers& forkPointers);
-
-		inline void deepLink(StateRegistry& stateRegistry,
-							 const Parent parent,
-							 Parents& stateParents,
-							 Parents& forkParents);
+		_C(StateRegistry& stateRegistry,
+		   const Parent parent,
+		   Parents& stateParents,
+		   Parents& forkParents,
+		   ForkPointers& forkPointers);
 
 		inline void deepEnterInitial(Context& context, const Time time);
 
@@ -499,12 +499,11 @@ private:
 				ProngCount	 = Initial::ProngCount + Remaining::ProngCount,
 			};
 
-			Sub(ForkPointers& forkPointers);
-
-			inline void wideLink(StateRegistry& stateRegistry,
-								 const Parent parent,
-								 Parents& stateParents,
-								 Parents& forkParents);
+			Sub(StateRegistry& stateRegistry,
+				const Parent parent,
+				Parents& stateParents,
+				Parents& forkParents,
+				ForkPointers& forkPointers);
 
 			inline void wideEnterInitial(Context& context, const Time time);
 
@@ -540,12 +539,11 @@ private:
 				ProngCount	 = Initial::ProngCount,
 			};
 
-			Sub(ForkPointers& forkPointers);
-
-			inline void wideLink(StateRegistry& stateRegistry,
-								 const Parent parent,
-								 Parents& stateParents,
-								 Parents& forkParents);
+			Sub(StateRegistry& stateRegistry,
+				const Parent parent,
+				Parents& stateParents,
+				Parents& forkParents,
+				ForkPointers& forkPointers);
 
 			inline void wideEnterInitial(Context& context, const Time time);
 
@@ -581,12 +579,11 @@ private:
 			Width		 = sizeof...(TS),
 		};
 
-		_O(ForkPointers& forkPointers);
-
-		inline void deepLink(StateRegistry& stateRegistry,
-							 const Parent parent,
-							 Parents& stateParents,
-							 Parents& forkParents);
+		_O(StateRegistry& stateRegistry,
+		   const Parent parent,
+		   Parents& stateParents,
+		   Parents& forkParents,
+		   ForkPointers& forkPointers);
 
 		inline void deepEnterInitial(Context& context, const Time time);
 

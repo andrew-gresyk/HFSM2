@@ -149,11 +149,11 @@ Machine<TC, TD, TMS>::_B<TI>::widePostLeave(Context& context,
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T>
-void
-Machine<TC, TD, TMS>::_S<T>::deepLink(StateRegistry& stateRegistry,
-									  const Parent parent,
-									  Parents& stateParents,
-									  Parents& /*forkParents*/)
+Machine<TC, TD, TMS>::_S<T>::_S(StateRegistry& stateRegistry,
+								const Parent parent,
+								Parents& stateParents,
+								Parents& /*forkParents*/,
+								ForkPointers& /*forkPointers*/)
 {
 	const auto id = stateRegistry.add(TypeInfo::get<T>());
 	stateParents[id] = parent;
@@ -252,29 +252,18 @@ Machine<TC, TD, TMS>::_S<T>::deepUpdate(Context& context,
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(ForkPointers& forkPointers)
-	: initial(forkPointers)
-	, remaining(forkPointers)
+Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
+															const Index fork,
+															Parents& stateParents,
+															Parents& forkParents,
+															ForkPointers& forkPointers)
+	: initial(stateRegistry,
+			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename TI::Client>()),
+			  stateParents,
+			  forkParents,
+			  forkPointers)
+	, remaining(stateRegistry, fork, stateParents, forkParents, forkPointers)
 {}
-
-//··············································································
-
-template <typename TC, typename TD, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLink(StateRegistry& stateRegistry,
-																 const Index fork,
-																 Parents& stateParents,
-																 Parents& forkParents)
-{
-	initial.deepLink(stateRegistry,
-					 Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename TI::Client>()),
-					 stateParents,
-					 forkParents);
-
-	remaining.wideLink(stateRegistry, fork, stateParents, forkParents);
-}
 
 //··············································································
 
@@ -449,26 +438,17 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigne
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(ForkPointers& forkPointers)
-	: initial(forkPointers)
+Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
+													 const Index fork,
+													 Parents& stateParents,
+													 Parents& forkParents,
+													 ForkPointers& forkPointers)
+	: initial(stateRegistry,
+			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename TI::Client>()),
+			  stateParents,
+			  forkParents,
+			  forkPointers)
 {}
-
-//··············································································
-
-template <typename TC, typename TD, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLink(StateRegistry& stateRegistry,
-														  const Index fork,
-														  Parents& stateParents,
-														  Parents& forkParents)
-{
-	initial.deepLink(stateRegistry,
-					 Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename TI::Client>()),
-					 stateParents,
-					 forkParents);
-}
 
 //··············································································
 
@@ -634,29 +614,15 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
-Machine<TC, TD, TMS>::_C<T, TS...>::_C(ForkPointers& forkPointers)
-	: State(forkPointers)
-	, ForkT<T>(static_cast<Index>(forkPointers << this))
-	, _subStates(forkPointers)
+Machine<TC, TD, TMS>::_C<T, TS...>::_C(StateRegistry& stateRegistry,
+									   const Parent parent,
+									   Parents& stateParents,
+									   Parents& forkParents,
+									   ForkPointers& forkPointers)
+	: ForkT<T>(static_cast<Index>(forkPointers << this), parent, forkParents)
+	, State(stateRegistry, parent, stateParents, forkParents, forkPointers)
+	, _subStates(stateRegistry, Fork::self, stateParents, forkParents, forkPointers)
 {}
-
-//··············································································
-
-template <typename TC, typename TD, unsigned TMS>
-template <typename T, typename... TS>
-void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepLink(StateRegistry& stateRegistry,
-											 const Parent parent,
-											 Parents& stateParents,
-											 Parents& forkParents)
-{
-	const auto id = stateRegistry.add(TypeInfo::get<Client>());
-	stateParents[id] = parent;
-
-	forkParents[Fork::self] = parent;
-
-	_subStates.wideLink(stateRegistry, Fork::self, stateParents, forkParents);
-}
 
 //··············································································
 
@@ -860,25 +826,14 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdate(Context& context,
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <typename TI, typename... TR>
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::Sub(ForkPointers& forkPointers)
-	: initial(forkPointers)
-	, remaining(forkPointers)
+Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::Sub(StateRegistry& stateRegistry,
+														const Parent parent,
+														Parents& stateParents,
+														Parents& forkParents,
+														ForkPointers& forkPointers)
+	: initial(stateRegistry, parent, stateParents, forkParents, forkPointers)
+	, remaining(stateRegistry, parent, stateParents, forkParents, forkPointers)
 {}
-
-//··············································································
-
-template <typename TC, typename TD, unsigned TMS>
-template <typename T, typename... TS>
-template <typename TI, typename... TR>
-void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideLink(StateRegistry& stateRegistry,
-															 const Parent parent,
-															 Parents& stateParents,
-															 Parents& forkParents)
-{
-	initial.deepLink(stateRegistry, parent, stateParents, forkParents);
-	remaining.wideLink(stateRegistry, parent, stateParents, forkParents);
-}
 
 //··············································································
 
@@ -889,8 +844,8 @@ void
 Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideEnterInitial(Context& context,
 																	 const Time time)
 {
-	initial.deepLink(parent, stateParents, forkParents);
-	remaining.wideLink(stateRegistry, parent, stateParents, forkParents);
+	initial.deepEnterInitial(context, time);
+	remaining.wideEnterInitial(context, time);
 }
 
 //------------------------------------------------------------------------------
@@ -1029,23 +984,13 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideUpdate(Context& context,
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <typename TI>
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::Sub(ForkPointers& forkPointers)
-	: initial(forkPointers)
+Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::Sub(StateRegistry& stateRegistry,
+												 const Parent parent,
+												 Parents& stateParents,
+												 Parents& forkParents,
+												 ForkPointers& forkPointers)
+	: initial(stateRegistry, parent, stateParents, forkParents, forkPointers)
 {}
-
-//··············································································
-
-template <typename TC, typename TD, unsigned TMS>
-template <typename T, typename... TS>
-template <typename TI>
-void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideLink(StateRegistry& stateRegistry,
-													  const Parent parent,
-													  Parents& stateParents,
-													  Parents& forkParents)
-{
-	initial.deepLink(stateRegistry, parent, stateParents, forkParents);
-}
 
 //··············································································
 
@@ -1184,26 +1129,14 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideUpdate(Context& context,
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
-Machine<TC, TD, TMS>::_O<T, TS...>::_O(ForkPointers& forkPointers)
-	: State(forkPointers)
-	, _subStates(forkPointers)
+Machine<TC, TD, TMS>::_O<T, TS...>::_O(StateRegistry& stateRegistry,
+									   const Parent parent,
+									   Parents& stateParents,
+									   Parents& forkParents,
+									   ForkPointers& forkPointers)
+	: State(stateRegistry, parent, stateParents, forkParents, forkPointers)
+	, _subStates(stateRegistry, parent, stateParents, forkParents, forkPointers)
 {}
-
-//··············································································
-
-template <typename TC, typename TD, unsigned TMS>
-template <typename T, typename... TS>
-void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepLink(StateRegistry& stateRegistry,
-											 const Parent parent,
-											 Parents& stateParents,
-											 Parents& forkParents)
-{
-	const auto id = stateRegistry.add(TypeInfo::get<T>());
-	stateParents[id] = parent;
-
-	_subStates.wideLink(stateRegistry, parent, stateParents, forkParents);
-}
 
 //··············································································
 
@@ -1344,9 +1277,8 @@ template <typename T>
 Machine<TC, TD, TMS>::_R<T>::_R(Context& context,
 								const Time time /*= Time{}*/)
 	: _context(context)
-	, _apex(_forkPointers)
+	, _apex(_stateRegistry, Parent(), _stateParents, _forkParents, _forkPointers)
 {
-	_apex.deepLink(_stateRegistry, Parent(), _stateParents, _forkParents);
 	_apex.deepEnterInitial(_context, time);
 }
 
