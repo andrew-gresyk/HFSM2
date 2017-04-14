@@ -70,10 +70,6 @@ class Machine {
 
 	struct StateRegistry {
 	public:
-		template <typename T>
-		unsigned add();
-
-	protected:
 		virtual unsigned add(const TypeInfo stateType) = 0;
 	};
 
@@ -90,7 +86,6 @@ class Machine {
 	public:
 		inline unsigned operator[] (const TypeInfo stateType) const { return *_typeToIndex.find(*stateType); }
 
-	protected:
 		virtual unsigned add(const TypeInfo stateType) override;
 
 	private:
@@ -159,7 +154,7 @@ class Machine {
 	class TrackedTimed;
 
 	// shortened class names
-	template <typename T>
+	template <typename>
 	struct _S;
 
 	template <typename, typename...>
@@ -180,7 +175,7 @@ public:
 
 	class Bare {
 		template <typename...>
-		friend class _B;
+		friend struct _B;
 
 	protected:
 		using Control	 = Control;
@@ -188,12 +183,12 @@ public:
 		using Time		 = Time;
 		using Transition = Transition;
 
-	private:
-		inline void preSubstitute(Context&, const Time) const {}
-		inline void preEnter(Context&, const Time)  {}
-		inline void preUpdate(Context&, const Time) {}
-		inline void preTransition(Context&, const Time) const {}
-		inline void postLeave(Context&, const Time) {}
+	public:
+		inline void preSubstitute(Context&, const Time) const	{}
+		inline void preEnter(Context&, const Time)				{}
+		inline void preUpdate(Context&, const Time)				{}
+		inline void preTransition(Context&, const Time) const	{}
+		inline void postLeave(Context&, const Time)				{}
 	};
 
 	//······································································
@@ -202,15 +197,11 @@ private:
 	class Tracked
 		: public Bare
 	{
-		template <typename...>
-		friend class _B;
-
 	public:
 		inline unsigned entryCount() const				{ return _entryCount;			 }
 		inline unsigned updateCountAfterEntry() const	{ return _updateCountAfterEntry; }
 		inline unsigned totalUpdateCount() const		{ return _totalUpdateCount;		 }
 
-	private:
 		inline void preEnter(Context&, const Time)  {
 			++_entryCount;
 			_updateCountAfterEntry = 0;
@@ -232,14 +223,10 @@ private:
 	class Timed
 		: public Bare
 	{
-		template <typename...>
-		friend class _B;
-
 	public:
-		inline auto entryTime() const { return _entryTime; }
+		inline auto entryTime() const					{ return _entryTime;			}
 
-	private:
-		inline void preEnter(Context&, const Time time) { _entryTime = time; }
+		inline void preEnter(Context&, const Time time)	{ _entryTime = time;			}
 
 	private:
 		Time _entryTime;
@@ -248,22 +235,15 @@ private:
 	//······································································
 
 	template <typename...>
-	class _B;
+	struct _B;
 
 	// · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
 
 	template <typename TInjection, typename... TRest>
-	class _B<TInjection, TRest...>
+	struct _B<TInjection, TRest...>
 		: public TInjection
 		, public _B<TRest...>
 	{
-		template <typename...>
-		friend class _B;
-
-		template <typename T>
-		friend struct _S;
-
-	private:
 		inline void widePreSubstitute(Context& _, const Time time) const;
 		inline void widePreEnter(Context& _, const Time time);
 		inline void widePreUpdate(Context& _, const Time time);
@@ -271,26 +251,18 @@ private:
 		inline void widePostLeave(Context& _, const Time time);
 	};
 
-	 // · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
+	// · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
 
 	template <typename TInjection>
-	class _B<TInjection>
+	struct _B<TInjection>
 		: public TInjection
 	{
-		template <typename...>
-		friend class _B;
-
-		template <typename T>
-		friend struct _S;
-
-	public:
 		inline void substitute(Control&, Context&, const Time) const {}
 		inline void enter(Context&, const Time) {}
 		inline void update(Context&, const Time) {}
 		inline void transition(Control&, Context&, const Time) const {}
 		inline void leave(Context&, const Time) {}
 
-	private:
 		inline void widePreSubstitute(Context& _, const Time time) const;
 		inline void widePreEnter(Context& _, const Time time);
 		inline void widePreUpdate(Context& _, const Time time);

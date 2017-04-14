@@ -20,8 +20,8 @@ public:
 public:
 	inline TypeInfo() = default;
 
-	inline TypeInfo(std::type_info&& type)
-		: Base(std::move(std::type_index(type)))
+	inline TypeInfo(const std::type_index type)
+		: Base(type)
 	{}
 
 	template <typename T>

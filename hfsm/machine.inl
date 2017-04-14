@@ -16,15 +16,6 @@ Machine<TC, TD, TMS>::Fork::Fork(const Index index,
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TD, unsigned TMS>
-template <typename T>
-unsigned
-Machine<TC, TD, TMS>::StateRegistry::add() {
-	return add(TypeInfo::get<T>());
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, typename TD, unsigned TMS>
 template <unsigned TCapacity>
 unsigned
 Machine<TC, TD, TMS>::StateRegistryT<TCapacity>::add(const TypeInfo stateType) {
@@ -164,7 +155,7 @@ Machine<TC, TD, TMS>::_S<T>::deepLink(StateRegistry& stateRegistry,
 									  Parents& stateParents,
 									  Parents& /*forkParents*/)
 {
-	const auto id = stateRegistry.add<Client>();
+	const auto id = stateRegistry.add(TypeInfo::get<T>());
 	stateParents[id] = parent;
 }
 
@@ -262,8 +253,8 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(ForkPointers& forkPointers)
-	: initial(forkPointers)
-	, Remaining(forkPointers)
+	: Remaining(forkPointers)
+	, initial(forkPointers)
 {}
 
 //··············································································
@@ -644,7 +635,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 Machine<TC, TD, TMS>::_C<T, TS...>::_C(ForkPointers& forkPointers)
-	: _S(forkPointers)
+	: State(forkPointers)
 	, ForkT<T>(static_cast<Index>(forkPointers << this))
 	, _subStates(forkPointers)
 {}
@@ -659,12 +650,12 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepLink(StateRegistry& stateRegistry,
 											 Parents& stateParents,
 											 Parents& forkParents)
 {
-	const auto id = stateRegistry.add<Client>();
+	const auto id = stateRegistry.add(TypeInfo::get<Client>());
 	stateParents[id] = parent;
 
-	forkParents[self] = parent;
+	forkParents[Fork::self] = parent;
 
-	_subStates.wideLink(stateRegistry, self, stateParents, forkParents);
+	_subStates.wideLink(stateRegistry, Fork::self, stateParents, forkParents);
 }
 
 //··············································································
@@ -677,8 +668,9 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepEnterInitial(Context& context,
 {
 	State::deepEnter(context, time);
 
-	active = 0;
-	HSFM_DEBUG_ONLY(activeType = TypeInfo::get<typename SubStates::Initial::Client>());
+	Fork::active = 0;
+	HSFM_DEBUG_ONLY(Fork::activeType = TypeInfo::get<typename SubStates::Initial::Client>());
+
 	_subStates.wideEnterInitial(context, time);
 }
 
@@ -688,8 +680,8 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepForwardRequest(const enum Transition::Type transition) {
-	if (requested != INVALID_INDEX)
-		_subStates.wideForwardRequest(requested, transition);
+	if (Fork::requested != INVALID_INDEX)
+		_subStates.wideForwardRequest(Fork::requested, transition);
 	else
 		switch (transition) {
 		case Transition::Restart:
@@ -711,8 +703,8 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepRequestRestart() {
-	requested = 0;
-	HSFM_DEBUG_ONLY(requestedType.clear());
+	Fork::requested = 0;
+	HSFM_DEBUG_ONLY(Fork::requestedType.clear());
 
 	_subStates.wideRequestRestart();
 }
@@ -723,16 +715,17 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepRequestResume() {
-	requested = resumable != INVALID_INDEX ? resumable : 0;
+	Fork::requested = Fork::resumable != INVALID_INDEX ?
+		Fork::resumable : 0;
 
 #ifdef _DEBUG
-	if (resumable != INVALID_INDEX)
-		requestedType = resumableType;
+	if (Fork::resumable != INVALID_INDEX)
+		Fork::requestedType = Fork::resumableType;
 	else
-		requestedType.clear();
+		Fork::requestedType.clear();
 #endif
 
-	_subStates.wideRequestResume(requested);
+	_subStates.wideRequestResume(Fork::requested);
 }
 
 //------------------------------------------------------------------------------
@@ -744,12 +737,12 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepForwardSubstitute(Control& control,
 														  Context& context,
 														  const Time time) const
 {
-	assert(requested != INVALID_INDEX);
+	assert(Fork::requested != INVALID_INDEX);
 
-	if (requested == active)
-		_subStates.wideForwardSubstitute(requested, control, context, time);
+	if (Fork::requested == Fork::active)
+		_subStates.wideForwardSubstitute(Fork::requested, control, context, time);
 	else
-		_subStates.wideSubstitute(requested, control, context, time);
+		_subStates.wideSubstitute(Fork::requested, control, context, time);
 }
 
 //··············································································
@@ -761,10 +754,10 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepSubstitute(Control& control,
 												   Context& context,
 												   const Time time) const
 {
-	assert(requested != INVALID_INDEX);
+	assert(Fork::requested != INVALID_INDEX);
 
 	if (!State::deepSubstitute(control, context, time))
-		_subStates.wideSubstitute(requested, control, context, time);
+		_subStates.wideSubstitute(Fork::requested, control, context, time);
 }
 
 //------------------------------------------------------------------------------
@@ -775,22 +768,22 @@ void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context,
 														  const Time time)
 {
-	if (requested != INVALID_INDEX) {
-		if (active == requested)
-			_subStates.wideChangeTo(requested, context, time);
+	if (Fork::requested != INVALID_INDEX) {
+		if (Fork::active == Fork::requested)
+			_subStates.wideChangeTo(Fork::requested, context, time);
 		else {
-			_subStates.wideLeave(active, context, time);
+			_subStates.wideLeave(Fork::active, context, time);
 
-			resumable = active;
-			HSFM_DEBUG_ONLY(resumableType = activeType);
+			Fork::resumable = Fork::active;
+			HSFM_DEBUG_ONLY(Fork::resumableType = Fork::activeType);
 
-			active = requested;
-			HSFM_DEBUG_ONLY(activeType = requestedType);
+			Fork::active = Fork::requested;
+			HSFM_DEBUG_ONLY(Fork::activeType = Fork::requestedType);
 
-			requested = INVALID_INDEX;
-			HSFM_DEBUG_ONLY(requestedType.clear());
+			Fork::requested = INVALID_INDEX;
+			HSFM_DEBUG_ONLY(Fork::requestedType.clear());
 
-			_subStates.wideEnter(active, context, time);
+			_subStates.wideEnter(Fork::active, context, time);
 		}
 	}
 }
@@ -805,9 +798,9 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepEnter(Context& context,
 {
 	State::deepEnter(context, time);
 
-	assert(active == INVALID_INDEX);
-	std::swap(active, requested);
-	_subStates.wideEnter(active, context, time);
+	assert(Fork::active == INVALID_INDEX);
+	std::swap(Fork::active, Fork::requested);
+	_subStates.wideEnter(Fork::active, context, time);
 }
 
 //··············································································
@@ -818,13 +811,13 @@ void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepLeave(Context& context,
 											  const Time time)
 {
-	_subStates.wideLeave(active, context, time);
+	_subStates.wideLeave(Fork::active, context, time);
 
-	resumable = active;
-	HSFM_DEBUG_ONLY(resumableType = activeType);
+	Fork::resumable = Fork::active;
+	HSFM_DEBUG_ONLY(Fork::resumableType = Fork::activeType);
 
-	active = INVALID_INDEX;
-	HSFM_DEBUG_ONLY(activeType.clear());
+	Fork::active = INVALID_INDEX;
+	HSFM_DEBUG_ONLY(Fork::activeType.clear());
 
 	State::deepLeave(context, time);
 }
@@ -839,11 +832,11 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdateAndTransition(Control& control,
 															const Time time)
 {
 	if (State::deepUpdateAndTransition(control, context, time)) {
-		_subStates.wideUpdate(active, context, time);
+		_subStates.wideUpdate(Fork::active, context, time);
 
 		return true;
 	} else
-		return _subStates.wideUpdateAndTransition(active, control, context, time);
+		return _subStates.wideUpdateAndTransition(Fork::active, control, context, time);
 }
 
 //··············································································
@@ -855,7 +848,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdate(Context& context,
 											   const Time time)
 {
 	State::deepUpdate(context, time);
-	_subStates.wideUpdate(active, context, time);
+	_subStates.wideUpdate(Fork::active, context, time);
 }
 
 #pragma endregion
@@ -868,8 +861,8 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <typename TI, typename... TR>
 Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::Sub(ForkPointers& forkPointers)
-	: initial(forkPointers)
-	, Remaining(forkPointers)
+	: Remaining(forkPointers)
+	, initial(forkPointers)
 {}
 
 //··············································································
@@ -1192,7 +1185,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideUpdate(Context& context,
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 Machine<TC, TD, TMS>::_O<T, TS...>::_O(ForkPointers& forkPointers)
-	: _S(forkPointers)
+	: State(forkPointers)
 	, _subStates(forkPointers)
 {}
 
@@ -1206,7 +1199,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepLink(StateRegistry& stateRegistry,
 											 Parents& stateParents,
 											 Parents& forkParents)
 {
-	const auto id = stateRegistry.add<Client>();
+	const auto id = stateRegistry.add(TypeInfo::get<T>());
 	stateParents[id] = parent;
 
 	_subStates.wideLink(stateRegistry, parent, stateParents, forkParents);
