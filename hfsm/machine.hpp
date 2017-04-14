@@ -341,9 +341,7 @@ private:
 		//······························································
 
 		template <unsigned TN, typename TI, typename... TR>
-		struct Sub<TN, TI, TR...>
-			: Sub<TN + 1, TR...>
-		{
+		struct Sub<TN, TI, TR...> {
 			using Initial = TI;
 			using Remaining = Sub<TN + 1, TR...>;
 
@@ -380,6 +378,7 @@ private:
 			inline void wideUpdate(const unsigned prong, Context& context, const Time time);
 
 			Initial initial;
+			Remaining remaining;
 		};
 
 		//······························································
@@ -488,9 +487,7 @@ private:
 		//······························································
 
 		template <typename TI, typename... TR>
-		struct Sub<TI, TR...>
-			: Sub<TR...>
-		{
+		struct Sub<TI, TR...> {
 			using Initial = TI;
 			using Remaining = Sub<TR...>;
 
@@ -526,6 +523,7 @@ private:
 			inline void wideUpdate(Context& context, const Time time);
 
 			Initial initial;
+			Remaining remaining;
 		};
 
 		//······························································
@@ -708,6 +706,10 @@ private:
 
 #pragma endregion
 
+	//----------------------------------------------------------------------
+
+#pragma region Public Typedefs
+
 public:
 
 	using Base				= _B<Bare>;
@@ -751,6 +753,8 @@ public:
 	using OrthogonalRoot = _R<OrthogonalPeers<TSubStates...>>;
 
 	//----------------------------------------------------------------------
+
+#pragma endregion
 };
 
 ////////////////////////////////////////////////////////////////////////////////

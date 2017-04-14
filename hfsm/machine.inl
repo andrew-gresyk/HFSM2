@@ -253,8 +253,8 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(ForkPointers& forkPointers)
-	: Remaining(forkPointers)
-	, initial(forkPointers)
+	: initial(forkPointers)
+	, remaining(forkPointers)
 {}
 
 //··············································································
@@ -273,7 +273,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLink(StateRegistry& 
 					 stateParents,
 					 forkParents);
 
-	Remaining::wideLink(stateRegistry, fork, stateParents, forkParents);
+	remaining.wideLink(stateRegistry, fork, stateParents, forkParents);
 }
 
 //··············································································
@@ -300,7 +300,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardRequest(const
 	if (ProngIndex == prong)
 		initial.deepForwardRequest(transition);
 	else
-		Remaining::wideForwardRequest(prong, transition);
+		remaining.wideForwardRequest(prong, transition);
 }
 
 //··············································································
@@ -323,7 +323,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideRequestResume(const 
 	if (ProngIndex == prong)
 		initial.deepRequestResume();
 	else
-		Remaining::wideRequestResume(prong);
+		remaining.wideRequestResume(prong);
 }
 
 //------------------------------------------------------------------------------
@@ -340,7 +340,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(co
 	if (ProngIndex == prong)
 		initial.deepForwardSubstitute(control, context, time);
 	else
-		Remaining::wideForwardSubstitute(prong, control, context, time);
+		remaining.wideForwardSubstitute(prong, control, context, time);
 }
 
 //··············································································
@@ -357,7 +357,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(const uns
 	if (ProngIndex == prong)
 		initial.deepSubstitute(control, context, time);
 	else
-		Remaining::wideSubstitute(prong, control, context, time);
+		remaining.wideSubstitute(prong, control, context, time);
 }
 
 //------------------------------------------------------------------------------
@@ -373,7 +373,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeTo(const unsig
 	if (ProngIndex == prong)
 		initial.deepChangeToRequested(context, time);
 	else
-		Remaining::wideChangeTo(prong, context, time);
+		remaining.wideChangeTo(prong, context, time);
 }
 
 //··············································································
@@ -389,7 +389,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnter(const unsigned
 	if (ProngIndex == prong)
 		initial.deepEnter(context, time);
 	else
-		Remaining::wideEnter(prong, context, time);
+		remaining.wideEnter(prong, context, time);
 }
 
 //··············································································
@@ -405,7 +405,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLeave(const unsigned
 	if (ProngIndex == prong)
 		initial.deepLeave(context, time);
 	else
-		Remaining::wideLeave(prong, context, time);
+		remaining.wideLeave(prong, context, time);
 }
 
 //------------------------------------------------------------------------------
@@ -421,7 +421,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(
 {
 	return ProngIndex == prong ?
 		initial.deepUpdateAndTransition(control, context, time) :
-		Remaining::wideUpdateAndTransition(prong, control, context, time);
+		remaining.wideUpdateAndTransition(prong, control, context, time);
 }
 
 //··············································································
@@ -437,7 +437,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigne
 	if (ProngIndex == prong)
 		initial.deepUpdate(context, time);
 	else
-		Remaining::wideUpdate(prong, context, time);
+		remaining.wideUpdate(prong, context, time);
 }
 
 #pragma endregion
@@ -861,8 +861,8 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <typename TI, typename... TR>
 Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::Sub(ForkPointers& forkPointers)
-	: Remaining(forkPointers)
-	, initial(forkPointers)
+	: initial(forkPointers)
+	, remaining(forkPointers)
 {}
 
 //··············································································
@@ -877,7 +877,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideLink(StateRegistry& stat
 															 Parents& forkParents)
 {
 	initial.deepLink(stateRegistry, parent, stateParents, forkParents);
-	Remaining::wideLink(stateRegistry, parent, stateParents, forkParents);
+	remaining.wideLink(stateRegistry, parent, stateParents, forkParents);
 }
 
 //··············································································
@@ -890,7 +890,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideEnterInitial(Context& co
 																	 const Time time)
 {
 	initial.deepLink(parent, stateParents, forkParents);
-	Remaining::wideLink(stateRegistry, parent, stateParents, forkParents);
+	remaining.wideLink(stateRegistry, parent, stateParents, forkParents);
 }
 
 //------------------------------------------------------------------------------
@@ -901,7 +901,7 @@ template <typename TI, typename... TR>
 void
 Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideForwardRequest(const enum Transition::Type transition) {
 	initial.deepForwardRequest(transition);
-	Remaining::wideForwardRequest(transition);
+	remaining.wideForwardRequest(transition);
 }
 
 //··············································································
@@ -912,7 +912,7 @@ template <typename TI, typename... TR>
 void
 Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideRequestRestart() {
 	initial.deepRequestRestart();
-	Remaining::wideRequestRestart();
+	remaining.wideRequestRestart();
 }
 
 //··············································································
@@ -923,7 +923,7 @@ template <typename TI, typename... TR>
 void
 Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideRequestResume() {
 	initial.deepRequestResume();
-	Remaining::wideRequestResume();
+	remaining.wideRequestResume();
 }
 
 //------------------------------------------------------------------------------
@@ -937,7 +937,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideForwardSubstitute(Contro
 																		  const Time time) const
 {
 	initial.deepForwardSubstitute(control, context, time);
-	Remaining::wideForwardSubstitute(control, context, time);
+	remaining.wideForwardSubstitute(control, context, time);
 }
 
 //··············································································
@@ -951,7 +951,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideSubstitute(Control& cont
 																   const Time time) const
 {
 	initial.deepSubstitute(control, context, time);
-	Remaining::wideSubstitute(control, context, time);
+	remaining.wideSubstitute(control, context, time);
 }
 
 //------------------------------------------------------------------------------
@@ -964,7 +964,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideChangeToRequested(Contex
 																		  const Time time)
 {
 	initial.deepChangeToRequested(context, time);
-	Remaining::wideChangeToRequested(context, time);
+	remaining.wideChangeToRequested(context, time);
 }
 
 //··············································································
@@ -977,7 +977,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideEnter(Context& context,
 															  const Time time)
 {
 	initial.deepEnter(context, time);
-	Remaining::wideEnter(context, time);
+	remaining.wideEnter(context, time);
 }
 
 //··············································································
@@ -990,7 +990,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideLeave(Context& context,
 															  const Time time)
 {
 	initial.deepLeave(context, time);
-	Remaining::wideLeave(context, time);
+	remaining.wideLeave(context, time);
 }
 
 //------------------------------------------------------------------------------
@@ -1004,7 +1004,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideUpdateAndTransition(Cont
 																			const Time time)
 {
 	return initial.deepUpdateAndTransition(control, context, time)
-		|| Remaining::wideUpdateAndTransition(control, context, time);
+		|| remaining.wideUpdateAndTransition(control, context, time);
 }
 
 //··············································································
@@ -1017,7 +1017,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideUpdate(Context& context,
 															   const Time time)
 {
 	initial.deepUpdate(context, time);
-	Remaining::wideUpdate(context, time);
+	remaining.wideUpdate(context, time);
 }
 
 #pragma endregion
