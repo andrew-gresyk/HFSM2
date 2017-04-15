@@ -17,9 +17,13 @@ namespace Event {
 		Resume,
 		Schedule,
 
+		Apply,
+
 		COUNT
 	};
 };
+
+//------------------------------------------------------------------------------
 
 struct Status {
 	Event::Enum func;
@@ -30,6 +34,8 @@ struct Status {
 	}
 };
 
+//··············································································
+
 template <typename T>
 Status status(Event::Enum event) {
 	using Type = T;
@@ -37,7 +43,7 @@ Status status(Event::Enum event) {
 	return Status{ event, std::type_index(typeid(Type)) };
 }
 
-//··············································································
+//------------------------------------------------------------------------------
 
 struct Context {
 	using History = std::vector<Status>;
@@ -60,7 +66,7 @@ struct Context {
 	History history;
 };
 
-//··············································································
+//------------------------------------------------------------------------------
 
 using Machine = hfsm::Machine<Context>;
 
@@ -91,12 +97,39 @@ struct HistoryBase
 	}
 };
 
+//------------------------------------------------------------------------------
+
+struct Reacting {
+	Reacting(const hfsm::detail::TypeInfo type_)
+		: type(type_)
+	{}
+
+	void react(Context& _) {
+		_.history.push_back(Status{ Event::Apply, type });
+	}
+
+	hfsm::detail::TypeInfo type;
+};
+
+//··············································································
+
+template <typename T>
+struct ReactingT
+	: Reacting
+{
+	ReactingT()
+		: Reacting(hfsm::detail::TypeInfo::get<T>())
+	{}
+};
+
+//------------------------------------------------------------------------------
+
 template <typename T>
 using Base = Machine::BaseT<Machine::Tracked, Machine::Timed, HistoryBase<T>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct A : Base<A> {};
+struct A : Base<A>, ReactingT<A> {};
 
 //------------------------------------------------------------------------------
 
@@ -136,12 +169,12 @@ struct A_2
 
 //··············································································
 
-struct A_2_1 : Base<A_2_1> {};
-struct A_2_2 : Base<A_2_2> {};
+struct A_2_1 : Base<A_2_1>, ReactingT<A_2_1> {};
+struct A_2_2 : Base<A_2_2>, ReactingT<A_2_2> {};
 
 //------------------------------------------------------------------------------
 
-struct B : Base<B> {};
+struct B : Base<B>, ReactingT<B> {};
 
 struct B_1 : Base<B_1> {};
 struct B_1_1 : Base<B_1_1> {};
@@ -195,12 +228,16 @@ struct B_2_2
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void dummy(Reacting&) {}
+
+//------------------------------------------------------------------------------
+
 void
 main(int /*argc*/, char* /*argv*/[]) {
 	Context _;
 
 	{
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		//······························································
 
 		Machine::CompositeRoot<
 			Machine::Composite<A,
@@ -222,6 +259,8 @@ main(int /*argc*/, char* /*argv*/[]) {
 			>
 		> machine(_);
 
+		machine.apply(dummy);
+
 		static_assert(machine.DeepWidth  == 2,  "");
 		static_assert(machine.StateCount == 13, "");
 		static_assert(machine.ForkCount  == 5,  "");
@@ -233,7 +272,18 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(created);
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		//······························································
+
+		machine.apply([&_](Reacting& interface) {
+			interface.react(_);
+		});
+
+		const Status applied1[] = {
+			status<A>(Event::Apply),
+		};
+		_.assertHistory(applied1);
+
+		//······························································
 
 		machine.update(0.0f);
 		const Status update1[] = {
@@ -254,7 +304,19 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update1);
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		//······························································
+
+		machine.apply([&_](Reacting& interface) {
+			interface.react(_);
+		});
+
+		const Status applied2[] = {
+			status<A>(Event::Apply),
+			status<A_2_1>(Event::Apply),
+		};
+		_.assertHistory(applied2);
+
+		//······························································
 
 		machine.update(0.0f);
 		const Status update2[] = {
@@ -284,7 +346,18 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update2);
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		//······························································
+
+		machine.apply([&_](Reacting& interface) {
+			interface.react(_);
+		});
+
+		const Status applied3[] = {
+			status<B>(Event::Apply),
+		};
+		_.assertHistory(applied3);
+
+		//······························································
 
 		machine.update(0.0f);
 		const Status update3[] = {
@@ -317,7 +390,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update3);
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		//······························································
 
 		machine.update(0.0f);
 		const Status update4[] = {
@@ -346,7 +419,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update4);
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		//······························································
 
 		machine.update(0.0f);
 		const Status update5[] = {
@@ -369,7 +442,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update5);
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		//······························································
 
 		machine.update(0.0f);
 		const Status update6[] = {
@@ -403,7 +476,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update6);
 
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		//······························································
 	}
 
 	const Status destroyed[] = {

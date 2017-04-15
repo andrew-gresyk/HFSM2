@@ -1,10 +1,13 @@
 #pragma once
 
 #include "detail/array.hpp"
+#include "detail/callable_traits.hpp"
 #include "detail/hash_table.hpp"
 #include "detail/type_info.hpp"
 
+//#include <functional>
 #include <limits>
+#include <type_traits>
 
 namespace hfsm {
 
@@ -196,7 +199,6 @@ public:
 	};
 
 	//······································································
-private:
 
 	class Tracked
 		: public Bare
@@ -237,6 +239,7 @@ private:
 	};
 
 	//······································································
+private:
 
 	template <typename...>
 	struct _B;
@@ -315,6 +318,25 @@ private:
 		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
 		inline void deepUpdate(Context& context, const Time time);
 
+		//······························································
+
+		template <typename TCallable>
+		inline void deepApply(TCallable callable);
+
+		template <typename TCallable, typename TArgument>
+		inline 
+		typename std::enable_if<std::is_convertible<Client, TArgument>::value, void>::type
+		apply(TCallable callable) {
+			callable(_client);
+		}
+
+		template <typename TCallable, typename TArgument>
+		inline 
+		typename std::enable_if<!std::is_convertible<Client, TArgument>::value, void>::type
+		apply(TCallable) {}
+
+		//······························································
+
 		Client _client;
 
 		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());
@@ -379,6 +401,9 @@ private:
 			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context, const Time time);
 			inline void wideUpdate(const unsigned prong, Context& context, const Time time);
 
+			template <typename TCallable>
+			inline void wideApply(const unsigned prong, TCallable callable);
+
 			Initial initial;
 			Remaining remaining;
 		};
@@ -420,6 +445,9 @@ private:
 			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context, const Time time);
 			inline void wideUpdate(const unsigned prong, Context& context, const Time time);
 
+			template <typename TCallable>
+			inline void wideApply(const unsigned prong, TCallable callable);
+
 			Initial initial;
 		};
 
@@ -459,6 +487,9 @@ private:
 
 		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
 		inline void deepUpdate(Context& context, const Time time);
+
+		template <typename TCallable>
+		inline void deepApply(TCallable callable);
 
 		SubStates _subStates;
 
@@ -521,6 +552,13 @@ private:
 			inline bool wideUpdateAndTransition(Control& control, Context& context, const Time time);
 			inline void wideUpdate(Context& context, const Time time);
 
+			template <typename TCallable>
+			inline void wideApply(TCallable callable) {
+				initial.deepApply(callable);
+
+				remaining.wideApply(callable);
+			}
+
 			Initial initial;
 			Remaining remaining;
 		};
@@ -561,6 +599,11 @@ private:
 			inline bool wideUpdateAndTransition(Control& control, Context& context, const Time time);
 			inline void wideUpdate(Context& context, const Time time);
 
+			template <typename TCallable>
+			inline void wideApply(TCallable callable) {
+				initial.deepApply(callable);
+			}
+
 			Initial initial;
 		};
 
@@ -600,6 +643,13 @@ private:
 
 		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
 		inline void deepUpdate(Context& context, const Time time);
+
+		template <typename TCallable>
+		inline void deepApply(TCallable callable) {
+			State::deepApply(callable);
+
+			_subStates.wideApply(callable);
+		}
 
 		SubStates _subStates;
 
@@ -652,11 +702,14 @@ private:
 		template <typename T>
 		inline void resume()	{ _requests << Transition(Transition::Type::Resume,   TypeInfo::get<T>());	}
 
-		inline unsigned id(const Transition request) const	{ return _stateRegistry[*request.stateType];	}
+		template <typename TCallable>
+		inline void apply(TCallable callable)								{ _apex.deepApply(callable);	}
 
 	protected:
 		void requestChange(const Transition request);
 		void requestSchedule(const Transition request);
+
+		inline unsigned id(const Transition request) const	{ return _stateRegistry[*request.stateType];	}
 
 	private:
 		Context& _context;

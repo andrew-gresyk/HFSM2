@@ -243,6 +243,18 @@ Machine<TC, TD, TMS>::_S<T>::deepUpdate(Context& context,
 	_client.update(context, time);
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename T>
+template <typename TCallable>
+void
+Machine<TC, TD, TMS>::_S<T>::deepApply(TCallable callable) {
+	using Argument = typename detail::CallableTraits<TCallable>::Argument;
+
+	apply<TCallable, typename std::remove_reference<Argument>::type>(callable);
+}
+
 #pragma endregion
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -429,6 +441,21 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigne
 		remaining.wideUpdate(prong, context, time);
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+template <typename TCallable>
+void
+Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideApply(const unsigned prong,
+																  TCallable callable) {
+	if (ProngIndex == prong)
+		initial.deepApply(callable);
+	else
+		remaining.wideApply(prong, callable);
+}
+
 #pragma endregion
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -604,6 +631,21 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_
 	assert(ProngIndex == prong);
 
 	initial.deepUpdate(context, time);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+template <typename TCallable>
+void
+Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideApply(const unsigned HSFM_ASSERT_ONLY(prong),
+														   TCallable callable)
+{
+	assert(ProngIndex == prong);
+
+	initial.deepApply(callable);
 }
 
 #pragma endregion
@@ -815,6 +857,18 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdate(Context& context,
 {
 	State::deepUpdate(context, time);
 	_subStates.wideUpdate(Fork::active, context, time);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename T, typename... TS>
+template <typename TCallable>
+void
+Machine<TC, TD, TMS>::_C<T, TS...>::deepApply(TCallable callable) {
+	State::deepApply(callable);
+
+	_subStates.wideApply(Fork::active, callable);
 }
 
 #pragma endregion

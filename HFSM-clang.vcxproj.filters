@@ -41,6 +41,9 @@
     <ClInclude Include="hfsm\detail\array_view.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
+    <ClInclude Include="hfsm\detail\callable_traits.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="hfsm\machine.inl">
