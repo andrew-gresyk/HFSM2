@@ -351,7 +351,6 @@ private:
 	template <typename T, typename... TS>
 	struct _C final
 		: public ForkT<T>
-		, _S<T>
 	{
 		using State = _S<T>;
 		using Client = typename State::Client;
@@ -491,6 +490,7 @@ private:
 		template <typename TCallable>
 		inline void deepApply(TCallable callable);
 
+		State _state;
 		SubStates _subStates;
 
 		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());
@@ -503,10 +503,9 @@ private:
 #pragma region Orthogonal
 
 	template <typename T, typename... TS>
-	struct _O final
-		: _S<T>
-	{
+	struct _O final {
 		using State = _S<T>;
+		using Client = typename State::Client;
 
 		//······························································
 
@@ -645,12 +644,9 @@ private:
 		inline void deepUpdate(Context& context, const Time time);
 
 		template <typename TCallable>
-		inline void deepApply(TCallable callable) {
-			State::deepApply(callable);
+		inline void deepApply(TCallable callable);
 
-			_subStates.wideApply(callable);
-		}
-
+		State _state;
 		SubStates _subStates;
 
 		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());

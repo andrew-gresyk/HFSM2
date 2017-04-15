@@ -662,7 +662,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::_C(StateRegistry& stateRegistry,
 									   Parents& forkParents,
 									   ForkPointers& forkPointers)
 	: ForkT<T>(static_cast<Index>(forkPointers << this), parent, forkParents)
-	, State(stateRegistry, parent, stateParents, forkParents, forkPointers)
+	, _state(stateRegistry, parent, stateParents, forkParents, forkPointers)
 	, _subStates(stateRegistry, Fork::self, stateParents, forkParents, forkPointers)
 {}
 
@@ -674,7 +674,7 @@ void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepEnterInitial(Context& context,
 													 const Time time)
 {
-	State::deepEnter(context, time);
+	_state.deepEnter(context, time);
 
 	Fork::active = 0;
 	HSFM_DEBUG_ONLY(Fork::activeType = TypeInfo::get<typename SubStates::Initial::Client>());
@@ -764,7 +764,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepSubstitute(Control& control,
 {
 	assert(Fork::requested != INVALID_INDEX);
 
-	if (!State::deepSubstitute(control, context, time))
+	if (!_state.deepSubstitute(control, context, time))
 		_subStates.wideSubstitute(Fork::requested, control, context, time);
 }
 
@@ -804,10 +804,11 @@ void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepEnter(Context& context,
 											  const Time time)
 {
-	State::deepEnter(context, time);
+	_state.deepEnter(context, time);
 
 	assert(Fork::active == INVALID_INDEX);
 	std::swap(Fork::active, Fork::requested);
+
 	_subStates.wideEnter(Fork::active, context, time);
 }
 
@@ -827,7 +828,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepLeave(Context& context,
 	Fork::active = INVALID_INDEX;
 	HSFM_DEBUG_ONLY(Fork::activeType.clear());
 
-	State::deepLeave(context, time);
+	_state.deepLeave(context, time);
 }
 
 //------------------------------------------------------------------------------
@@ -839,7 +840,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdateAndTransition(Control& control,
 															Context& context,
 															const Time time)
 {
-	if (State::deepUpdateAndTransition(control, context, time)) {
+	if (_state.deepUpdateAndTransition(control, context, time)) {
 		_subStates.wideUpdate(Fork::active, context, time);
 
 		return true;
@@ -855,7 +856,7 @@ void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdate(Context& context,
 											   const Time time)
 {
-	State::deepUpdate(context, time);
+	_state.deepUpdate(context, time);
 	_subStates.wideUpdate(Fork::active, context, time);
 }
 
@@ -866,8 +867,7 @@ template <typename T, typename... TS>
 template <typename TCallable>
 void
 Machine<TC, TD, TMS>::_C<T, TS...>::deepApply(TCallable callable) {
-	State::deepApply(callable);
-
+	_state.deepApply(callable);
 	_subStates.wideApply(Fork::active, callable);
 }
 
@@ -1188,7 +1188,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::_O(StateRegistry& stateRegistry,
 									   Parents& stateParents,
 									   Parents& forkParents,
 									   ForkPointers& forkPointers)
-	: State(stateRegistry, parent, stateParents, forkParents, forkPointers)
+	: _state(stateRegistry, parent, stateParents, forkParents, forkPointers)
 	, _subStates(stateRegistry, parent, stateParents, forkParents, forkPointers)
 {}
 
@@ -1200,7 +1200,7 @@ void
 Machine<TC, TD, TMS>::_O<T, TS...>::deepEnterInitial(Context& context,
 													 const Time time)
 {
-	State::deepEnter(context, time);
+	_state.deepEnter(context, time);
 	_subStates.wideEnterInitial(context, time);
 }
 
@@ -1252,7 +1252,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepSubstitute(Control& control,
 												   Context& context,
 												   const Time time) const
 {
-	if (!State::deepSubstitute(control, context, time))
+	if (!_state.deepSubstitute(control, context, time))
 		_subStates.wideSubstitute(control, context, time);
 }
 
@@ -1275,7 +1275,7 @@ void
 Machine<TC, TD, TMS>::_O<T, TS...>::deepEnter(Context& context,
 											  const Time time)
 {
-	State::deepEnter(context, time);
+	_state.deepEnter(context, time);
 	_subStates.wideEnter(context, time);
 }
 
@@ -1288,7 +1288,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepLeave(Context& context,
 											  const Time time)
 {
 	_subStates.wideLeave(context, time);
-	State::deepLeave(context, time);
+	_state.deepLeave(context, time);
 }
 
 //------------------------------------------------------------------------------
@@ -1300,7 +1300,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepUpdateAndTransition(Control& control,
 															Context& context,
 															const Time time)
 {
-	if (State::deepUpdateAndTransition(control, context, time)) {
+	if (_state.deepUpdateAndTransition(control, context, time)) {
 		_subStates.wideUpdate(context, time);
 
 		return true;
@@ -1316,8 +1316,19 @@ void
 Machine<TC, TD, TMS>::_O<T, TS...>::deepUpdate(Context& context,
 											   const Time time)
 {
-	State::deepUpdate(context, time);
+	_state.deepUpdate(context, time);
 	_subStates.wideUpdate(context, time);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename T, typename... TS>
+template <typename TCallable>
+void
+Machine<TC, TD, TMS>::_O<T, TS...>::deepApply(TCallable callable) {
+	_state.deepApply(callable);
+	_subStates.wideApply(callable);
 }
 
 #pragma endregion
