@@ -2,6 +2,8 @@
 
 #include "utility.hpp"
 
+#include <assert.h>
+
 namespace hfsm {
 namespace detail {
 

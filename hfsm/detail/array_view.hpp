@@ -1,7 +1,6 @@
 #pragma once
 
 #include <assert.h>
-#include <type_traits>	// aligned_storage
 
 namespace hfsm {
 namespace detail {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utility.hpp"
+#include <type_traits>	// aligned_storage
 
 namespace hfsm {
 namespace detail {

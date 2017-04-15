@@ -3,6 +3,7 @@
 #include "utility.hpp"
 #include "wrap.hpp"
 
+#include <assert.h>
 #include <tuple>
 
 namespace hfsm {
