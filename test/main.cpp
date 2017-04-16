@@ -389,12 +389,12 @@ main(int /*argc*/, char* /*argv*/[]) {
 		assert(!machine.isActive<A_2>());
 		assert(!machine.isActive<A_2_1>());
 		assert(!machine.isActive<A_2_2>());
-		assert(!machine.isActive<B>());
+		assert( machine.isActive<B>());
 		assert( machine.isActive<B_1>());
 		assert( machine.isActive<B_1_1>());
-		assert( machine.isActive<B_1_2>());
+		assert(!machine.isActive<B_1_2>());
 		assert( machine.isActive<B_2>());
-		assert( machine.isActive<B_2_1>());
+		assert(!machine.isActive<B_2_1>());
 		assert( machine.isActive<B_2_2>());
 
 		//······························································
