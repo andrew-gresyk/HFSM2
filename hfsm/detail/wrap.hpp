@@ -24,10 +24,10 @@ public:
 	template <typename... Ts>
 	inline void create(Ts&&... ts)			{ new (&get()) Item(std::forward<Ts>(ts)...);	}
 
-	inline Wrap(const Item item)							{ get() = item;					}
+	inline Wrap(const Item& item)							{ get() = item;					}
 	inline Wrap(Item&& item)								{ get() = std::move(item);		}
 
-	inline Wrap& operator = (const Item item)	{ get() = item;				return *this;	}
+	inline Wrap& operator = (const Item& item)	{ get() = item;				return *this;	}
 	inline Wrap& operator = (Item&& item)		{ get() = std::move(item);	return *this;	}
 
 	inline void clear()										{ fill(_storage, 0);			}

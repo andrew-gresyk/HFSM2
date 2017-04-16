@@ -293,6 +293,21 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		//······························································
 
+		assert( machine.isActive<A>());
+		assert( machine.isActive<A_1>());
+		assert(!machine.isActive<A_2>());
+		assert(!machine.isActive<A_2_1>());
+		assert(!machine.isActive<A_2_2>());
+		assert(!machine.isActive<B>());
+		assert(!machine.isActive<B_1>());
+		assert(!machine.isActive<B_1_1>());
+		assert(!machine.isActive<B_1_2>());
+		assert(!machine.isActive<B_2>());
+		assert(!machine.isActive<B_2_1>());
+		assert(!machine.isActive<B_2_2>());
+
+		//······························································
+
 		machine.apply([&_](Reacting& interface) {
 			interface.react(_);
 		});
@@ -337,6 +352,8 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		//······························································
 
+		//······························································
+
 		machine.update(0.0f);
 		const Status update2[] = {
 			status<A>(Event::Update),
@@ -364,6 +381,21 @@ main(int /*argc*/, char* /*argv*/[]) {
 			status<B_2_2>(Event::Enter),
 		};
 		_.assertHistory(update2);
+
+		//······························································
+
+		assert(!machine.isActive<A>());
+		assert(!machine.isActive<A_1>());
+		assert(!machine.isActive<A_2>());
+		assert(!machine.isActive<A_2_1>());
+		assert(!machine.isActive<A_2_2>());
+		assert(!machine.isActive<B>());
+		assert( machine.isActive<B_1>());
+		assert( machine.isActive<B_1_1>());
+		assert( machine.isActive<B_1_2>());
+		assert( machine.isActive<B_2>());
+		assert( machine.isActive<B_2_1>());
+		assert( machine.isActive<B_2_2>());
 
 		//······························································
 

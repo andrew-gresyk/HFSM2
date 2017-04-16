@@ -1397,6 +1397,28 @@ Machine<TC, TD, TMS>::_R<TA>::update(const Time time) {
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TA>
+template <typename T>
+bool
+Machine<TC, TD, TMS>::_R<TA>::isActive() {
+	using Type = T;
+
+	const auto stateType = TypeInfo::get<Type>();
+	const auto state = _stateRegistry[*stateType];
+
+	for (auto parent = _stateParents[state]; parent; parent = _forkParents[parent.fork]) {
+		const auto& fork = *_forkPointers[parent.fork];
+
+		if (parent.prong != fork.active)
+			return false;
+	}
+
+	return true;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename TA>
 void
 Machine<TC, TD, TMS>::_R<TA>::requestChange(const Transition request) {
 	const unsigned state = id(request);

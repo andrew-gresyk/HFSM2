@@ -698,6 +698,9 @@ private:
 		template <typename T>
 		inline void resume()	{ _requests << Transition(Transition::Type::Resume,   TypeInfo::get<T>());	}
 
+		template <typename T>
+		inline bool isActive();
+
 		template <typename TCallable>
 		inline void apply(TCallable callable)								{ _apex.deepApply(callable);	}
 
