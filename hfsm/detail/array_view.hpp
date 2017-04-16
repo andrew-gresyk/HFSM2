@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assert.h>
+#include <utility>
 
 namespace hfsm {
 namespace detail {

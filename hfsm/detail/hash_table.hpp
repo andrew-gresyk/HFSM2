@@ -221,7 +221,8 @@ typename HashTable<TK, TV, TC, TH>::Value*
 HashTable<TK, TV, TC, TH>::find(const Key key) {
 	const unsigned index = locate(key);
 
-	return index != INVALID ? _items[index].value() : nullptr;
+	return index != INVALID ?
+		_items[index].value() : nullptr;
 }
 
 //··············································································
@@ -231,7 +232,8 @@ const typename HashTable<TK, TV, TC, TH>::Value*
 HashTable<TK, TV, TC, TH>::find(const Key key) const {
 	const unsigned index = locate(key);
 
-	return index != INVALID ? _items[index].value() : nullptr;
+	return index != INVALID ?
+		_items[index].value() : nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -242,7 +244,7 @@ HashTable<TK, TV, TC, TH>::measure() const {
 	unsigned itemCount = 0;
 	unsigned totalProbeCount = 0;
 
-	for (unsigned i = 0; i < hfsm::detail::count(_items); ++i)
+	for (unsigned i = 0; i < CAPACITY; ++i)
 		if (_items[i].occupied()) {
 			++itemCount;
 			assert(itemCount <= _count); // superfluous, but break at the first offending item
@@ -293,15 +295,15 @@ HashTable<TK, TV, TC, TH>::probeCount(const unsigned i) const {
 template <typename TK, typename TV, unsigned TC, typename TH>
 unsigned
 HashTable<TK, TV, TC, TH>::skipVacantForward(const unsigned i) const {
-	assert(0 <= i && i <= limit());
+	assert(0 <= i && i <= CAPACITY);
 
-	if (i < limit()) {
+	if (i < CAPACITY) {
 		unsigned n = i;
 		for (; _items[n].vacant(); ++n)
-			if (n < limit())
+			if (n < CAPACITY)
 				continue;
 			else
-				return limit();
+				return CAPACITY;
 
 		return n;
 	}

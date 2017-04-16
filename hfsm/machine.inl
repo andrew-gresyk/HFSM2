@@ -1055,7 +1055,7 @@ void
 Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideEnterInitial(Context& context,
 															  const Time time)
 {
-	initial.deepLink(parent, stateParents, forkParents);
+	initial.deepEnterInitial(context, time);
 }
 
 //------------------------------------------------------------------------------
