@@ -14,7 +14,7 @@ class ArrayView {
 public:
 	using Item = T;
 
-	template <typename T>
+	template <typename>
 	friend class Iterator;
 
 protected:
@@ -104,7 +104,7 @@ T&
 ArrayView<T>::grow() {
 	assert(_count < _capacity);
 
-	T& item = get(_count++);
+	auto& item = get(_count++);
 	item = Item();
 
 	return item;
@@ -118,7 +118,7 @@ T&
 ArrayView<T>::emplace(TS&&... ts) {
 	assert(_count < _capacity);
 
-	T& item = get(_count++);
+	auto& item = get(_count++);
 	return *new (&item) Item(std::forward<TS>(ts)...);
 }
 

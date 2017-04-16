@@ -1338,9 +1338,9 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepApply(TCallable callable) {
 #pragma region Root
 
 template <typename TC, typename TD, unsigned TMS>
-template <typename T>
-Machine<TC, TD, TMS>::_R<T>::_R(Context& context,
-								const Time time /*= Time{}*/)
+template <typename TA>
+Machine<TC, TD, TMS>::_R<TA>::_R(Context& context,
+								 const Time time /*= Time{}*/)
 	: _context(context)
 	, _apex(_stateRegistry, Parent(), _stateParents, _forkParents, _forkPointers)
 {
@@ -1350,17 +1350,17 @@ Machine<TC, TD, TMS>::_R<T>::_R(Context& context,
 //··············································································
 
 template <typename TC, typename TD, unsigned TMS>
-template <typename T>
-Machine<TC, TD, TMS>::_R<T>::~_R() {
+template <typename TA>
+Machine<TC, TD, TMS>::_R<TA>::~_R() {
 	_apex.deepLeave(_context, Time{});
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TD, unsigned TMS>
-template <typename T>
+template <typename TA>
 void
-Machine<TC, TD, TMS>::_R<T>::update(const Time time) {
+Machine<TC, TD, TMS>::_R<TA>::update(const Time time) {
 	Control control(_requests);
 	_apex.deepUpdateAndTransition(control, _context, time);
 
@@ -1396,9 +1396,9 @@ Machine<TC, TD, TMS>::_R<T>::update(const Time time) {
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TD, unsigned TMS>
-template <typename T>
+template <typename TA>
 void
-Machine<TC, TD, TMS>::_R<T>::requestChange(const Transition request) {
+Machine<TC, TD, TMS>::_R<TA>::requestChange(const Transition request) {
 	const unsigned state = id(request);
 
 	for (auto parent = _stateParents[state]; parent; parent = _forkParents[parent.fork]) {
@@ -1414,9 +1414,9 @@ Machine<TC, TD, TMS>::_R<T>::requestChange(const Transition request) {
 //··············································································
 
 template <typename TC, typename TD, unsigned TMS>
-template <typename T>
+template <typename TA>
 void
-Machine<TC, TD, TMS>::_R<T>::requestSchedule(const Transition request) {
+Machine<TC, TD, TMS>::_R<TA>::requestSchedule(const Transition request) {
 	const unsigned state = id(request);
 
 	const auto parent = _stateParents[state];

@@ -68,6 +68,33 @@ struct Context {
 
 //------------------------------------------------------------------------------
 
+template <typename T, typename TControl>
+void
+changeTo(TControl& control, Context::History& history) {
+	control.template changeTo<T>();
+	history.push_back(Status{ Event::Restart, std::type_index{ typeid(T) } });
+}
+
+//··············································································
+
+template <typename T, typename TControl>
+void
+resume(TControl& control, Context::History& history) {
+	control.template resume<T>();
+	history.push_back(Status{ Event::Resume, std::type_index{ typeid(T) } });
+}
+
+//··············································································
+
+template <typename T, typename TControl>
+void
+schedule(TControl& control, Context::History& history) {
+	control.template schedule<T>();
+	history.push_back(Status{ Event::Schedule, std::type_index{ typeid(T) } });
+}
+
+//------------------------------------------------------------------------------
+
 using Machine = hfsm::Machine<Context>;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,8 +166,7 @@ struct A_1
 	: Base<A_1>
 {
 	void transition(Control& control, Context& _, const Time) const {
-		control.changeTo<A_2>();
-		_.history.push_back(status<A_2>(Event::Restart));
+		changeTo<A_2>(control, _.history);
 	}
 };
 
@@ -155,13 +181,11 @@ struct A_2
 	void transition(Control& control, Context& _, const Time) const {
 		switch (entryCount()) {
 		case 1:
-			control.changeTo<B_2_2>();
-			_.history.push_back(status<B_2_2>(Event::Restart));
+			changeTo<B_2_2>(control, _.history);
 			break;
 
 		case 2:
-			control.resume<B>();
-			_.history.push_back(status<B>(Event::Resume));
+			resume<B>(control, _.history);
 			break;
 		}
 	}
@@ -188,8 +212,7 @@ struct B_2_1
 	: Base<B_2_1>
 {
 	void substitute(Control& control, Context& _, const Time) const {
-		control.resume<B_2_2>();
-		_.history.push_back(status<B_2_2>(Event::Resume));
+		resume<B_2_2>(control, _.history);
 	}
 };
 
@@ -206,23 +229,19 @@ struct B_2_2
 	void transition(Control& control, Context& _, const Time) const {
 		switch (totalUpdateCount()) {
 		case 1:
-			control.resume<A>();
-			_.history.push_back(status<A>(Event::Resume));
+			resume<A>(control, _.history);
 			break;
 
 		case 2:
-			control.changeTo<B>();
-			_.history.push_back(status<B>(Event::Restart));
+			changeTo<B>(control, _.history);
 			break;
 
 		case 3:
-			control.schedule<A_2_2>();
-			_.history.push_back(status<A_2_2>(Event::Schedule));
-
-			control.resume<A>();
-			_.history.push_back(status<A>(Event::Resume));
+			schedule<A_2_2>(control, _.history);
+			resume<A>(control, _.history);
 			break;
 		}
+
 	}
 };
 

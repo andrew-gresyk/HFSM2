@@ -658,9 +658,9 @@ private:
 
 #pragma region Root
 
-	template <typename T>
+	template <typename TA>
 	class _R final {
-		using Apex = T;
+		using Apex = TA;
 
 		enum : unsigned {
 			StateCapacity = (unsigned) 1.3 * Apex::StateCount,
