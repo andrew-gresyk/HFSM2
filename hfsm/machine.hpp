@@ -324,14 +324,14 @@ private:
 		inline void deepApply(TCallable callable);
 
 		template <typename TCallable, typename TArgument>
-		inline 
+		inline
 		typename std::enable_if<std::is_convertible<Client, TArgument>::value, void>::type
 		apply(TCallable callable) {
 			callable(_client);
 		}
 
 		template <typename TCallable, typename TArgument>
-		inline 
+		inline
 		typename std::enable_if<!std::is_convertible<Client, TArgument>::value, void>::type
 		apply(TCallable) {}
 
@@ -339,7 +339,7 @@ private:
 
 		Client _client;
 
-		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());
+		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
 	};
 
 #pragma endregion
@@ -493,7 +493,7 @@ private:
 		State _state;
 		SubStates _subStates;
 
-		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());
+		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
 	};
 
 #pragma endregion
@@ -649,7 +649,7 @@ private:
 		State _state;
 		SubStates _subStates;
 
-		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<T>());
+		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
 	};
 
 #pragma endregion

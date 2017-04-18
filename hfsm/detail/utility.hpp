@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory.h>			// memset()
 #if defined _DEBUG && _MSC_VER
 	#include <intrin.h>		// __debugbreak()
 #endif
@@ -16,9 +17,13 @@
 
 #ifdef _DEBUG
 	#define HSFM_DEBUG_ONLY(x)		x
-	#define HSFM_ASSERT_ONLY(x)		x
 #else
 	#define HSFM_DEBUG_ONLY(x)
+#endif
+
+#ifndef NDEBUG
+	#define HSFM_ASSERT_ONLY(x)		x
+#else
 	#define HSFM_ASSERT_ONLY(x)
 #endif
 
@@ -95,7 +100,7 @@ struct Max {
 template <unsigned t>
 struct PowerOf2 {
 	enum {
-		Value = !(t & t - 1)
+		Value = !(t & (t - 1))
 	};
 };
 

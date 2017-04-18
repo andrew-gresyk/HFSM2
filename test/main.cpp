@@ -1,4 +1,4 @@
-#include "hfsm/machine.hpp"
+#include "../hfsm/machine.hpp"
 
 #include <algorithm>
 #include <vector>
@@ -251,7 +251,7 @@ void dummy(Reacting&) {}
 
 //------------------------------------------------------------------------------
 
-void
+int
 main(int /*argc*/, char* /*argv*/[]) {
 	Context _;
 
@@ -335,7 +335,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 			status<A_2_1>(Event::Enter),
 		};
 		_.assertHistory(update1);
-		
+
 		assert(!machine.isResumable<A>());
 		assert( machine.isResumable<A_1>());
 		assert(!machine.isResumable<A_2>());
@@ -542,6 +542,8 @@ main(int /*argc*/, char* /*argv*/[]) {
 		status<A>(Event::Leave),
 	};
 	_.assertHistory(destroyed);
+
+	return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
