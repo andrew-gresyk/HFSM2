@@ -1415,6 +1415,23 @@ Machine<TC, TD, TMS>::_R<TA>::isActive() {
 	return true;
 }
 
+//··············································································
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename TA>
+template <typename T>
+bool
+Machine<TC, TD, TMS>::_R<TA>::isResumable() {
+	using Type = T;
+
+	const auto stateType = TypeInfo::get<Type>();
+	const auto state	 = _stateRegistry[*stateType];
+	const auto parent	 = _stateParents[state];
+	const auto& fork	 = *_forkPointers[parent.fork];
+
+	return parent.prong == fork.resumable;
+}
+
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TD, unsigned TMS>
@@ -1445,7 +1462,7 @@ Machine<TC, TD, TMS>::_R<TA>::requestSchedule(const Transition request) {
 	auto& fork = *_forkPointers[parent.fork];
 
 	fork.resumable = parent.prong;
-	HSFM_DEBUG_ONLY(fork.requestedType = parent.prongType);
+	HSFM_DEBUG_ONLY(fork.resumableType = parent.prongType);
 
 	// check that the fork isn't active
 	HSFM_ASSERT_ONLY(const auto forksParent = _stateParents[fork.self]);

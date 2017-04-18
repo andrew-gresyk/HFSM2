@@ -1,6 +1,8 @@
 #pragma once
 
-#include <intrin.h>		// __debugbreak()
+#if defined _DEBUG && _MSC_VER
+	#include <intrin.h>		// __debugbreak()
+#endif
 
 //------------------------------------------------------------------------------
 

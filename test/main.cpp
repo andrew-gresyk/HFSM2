@@ -291,8 +291,6 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(created);
 
-		//······························································
-
 		assert( machine.isActive<A>());
 		assert( machine.isActive<A_1>());
 		assert(!machine.isActive<A_2>());
@@ -337,6 +335,19 @@ main(int /*argc*/, char* /*argv*/[]) {
 			status<A_2_1>(Event::Enter),
 		};
 		_.assertHistory(update1);
+		
+		assert(!machine.isResumable<A>());
+		assert( machine.isResumable<A_1>());
+		assert(!machine.isResumable<A_2>());
+		assert(!machine.isResumable<A_2_1>());
+		assert(!machine.isResumable<A_2_2>());
+		assert(!machine.isResumable<B>());
+		assert(!machine.isResumable<B_1>());
+		assert(!machine.isResumable<B_1_1>());
+		assert(!machine.isResumable<B_1_2>());
+		assert(!machine.isResumable<B_2>());
+		assert(!machine.isResumable<B_2_1>());
+		assert(!machine.isResumable<B_2_2>());
 
 		//······························································
 
@@ -349,8 +360,6 @@ main(int /*argc*/, char* /*argv*/[]) {
 			status<A_2_1>(Event::Apply),
 		};
 		_.assertHistory(applied2);
-
-		//······························································
 
 		//······························································
 
@@ -381,8 +390,6 @@ main(int /*argc*/, char* /*argv*/[]) {
 			status<B_2_2>(Event::Enter),
 		};
 		_.assertHistory(update2);
-
-		//······························································
 
 		assert(!machine.isActive<A>());
 		assert(!machine.isActive<A_1>());
@@ -488,7 +495,6 @@ main(int /*argc*/, char* /*argv*/[]) {
 			status<B>(Event::Restart),
 
 			status<B_2_1>(Event::Substitute),
-
 			status<B_2_2>(Event::Resume),
 		};
 		_.assertHistory(update5);

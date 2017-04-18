@@ -658,9 +658,9 @@ private:
 
 #pragma region Root
 
-	template <typename TA>
+	template <typename TApex>
 	class _R final {
-		using Apex = TA;
+		using Apex = TApex;
 
 		enum : unsigned {
 			StateCapacity = (unsigned) 1.3 * Apex::StateCount,
@@ -700,6 +700,9 @@ private:
 
 		template <typename T>
 		inline bool isActive();
+
+		template <typename T>
+		inline bool isResumable();
 
 		template <typename TCallable>
 		inline void apply(TCallable callable)								{ _apex.deepApply(callable);	}
