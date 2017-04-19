@@ -1,0 +1,50 @@
+# depslib dependency file v1.0
+1492560753 source:c:\work\hfsm\test\main.cpp
+	"../hfsm/machine.hpp"
+	<algorithm>
+	<vector>
+
+1492560986 c:\work\hfsm\hfsm\machine.hpp
+	"detail/array.hpp"
+	"detail/callable_traits.hpp"
+	"detail/hash_table.hpp"
+	"detail/type_info.hpp"
+	<limits>
+	<type_traits>
+	"machine.inl"
+
+1492556939 c:\work\hfsm\hfsm\detail\array.hpp
+	"array_view.hpp"
+	"iterator.hpp"
+	<assert.h>
+
+1492556939 c:\work\hfsm\hfsm\detail\array_view.hpp
+	<assert.h>
+	<utility>
+
+1492556939 c:\work\hfsm\hfsm\detail\iterator.hpp
+	"utility.hpp"
+	<assert.h>
+
+1492561277 c:\work\hfsm\hfsm\detail\utility.hpp
+	<memory.h>
+	<intrin.h>
+
+1492556939 c:\work\hfsm\hfsm\detail\callable_traits.hpp
+
+1492556939 c:\work\hfsm\hfsm\detail\hash_table.hpp
+	"utility.hpp"
+	"wrap.hpp"
+	<assert.h>
+	<tuple>
+
+1492556939 c:\work\hfsm\hfsm\detail\wrap.hpp
+	"utility.hpp"
+	<type_traits>
+
+1492556939 c:\work\hfsm\hfsm\detail\type_info.hpp
+	"wrap.hpp"
+	<typeindex>
+
+1492556939 c:\work\hfsm\hfsm\machine.inl
+

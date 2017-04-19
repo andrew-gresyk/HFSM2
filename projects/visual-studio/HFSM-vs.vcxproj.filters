@@ -12,44 +12,47 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test\main.cpp">
+    <ClInclude Include="..\..\hfsm\machine.hpp">
+      <Filter>hfsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hfsm\detail\array.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hfsm\detail\array_view.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hfsm\detail\callable_traits.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hfsm\detail\hash_table.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hfsm\detail\iterator.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hfsm\detail\type_info.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hfsm\detail\utility.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\hfsm\detail\wrap.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\hfsm\machine.inl">
+      <Filter>hfsm</Filter>
+    </None>
+    <None Include="..\..\.gitignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\test\main.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="hfsm\detail\utility.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="hfsm\detail\wrap.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="hfsm\detail\type_info.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="hfsm\detail\iterator.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="hfsm\detail\hash_table.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="hfsm\detail\array.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="hfsm\machine.hpp">
-      <Filter>hfsm</Filter>
-    </ClInclude>
-    <ClInclude Include="hfsm\detail\array_view.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="hfsm\detail\callable_traits.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="hfsm\machine.inl">
-      <Filter>hfsm</Filter>
-    </None>
-    <None Include=".gitignore" />
+    <Text Include="..\..\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="hfsm.natvis" />

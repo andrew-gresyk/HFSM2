@@ -1,9 +1,9 @@
 ﻿/comp0.VC.db
-
 /binaries-32
 /binaries-64
-
+/build
+/hfsm_test.dir/Debug
 /ipch
-
+/Win32
 .vs
 *.user
