@@ -45,6 +45,7 @@
       <Filter>hfsm</Filter>
     </None>
     <None Include="..\..\.gitignore" />
+    <None Include="..\..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp">

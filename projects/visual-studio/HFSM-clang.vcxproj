@@ -32,6 +32,7 @@
   <ItemGroup>
     <None Include="..\..\.gitignore" />
     <None Include="..\..\hfsm\machine.inl" />
+    <None Include="..\..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp" />
