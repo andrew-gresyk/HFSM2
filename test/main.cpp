@@ -34,7 +34,7 @@ struct Status {
 	}
 };
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 Status status(Event::Enum event) {
@@ -75,7 +75,7 @@ changeTo(TControl& control, Context::History& history) {
 	history.push_back(Status{ Event::Restart, std::type_index{ typeid(T) } });
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T, typename TControl>
 void
@@ -84,7 +84,7 @@ resume(TControl& control, Context::History& history) {
 	history.push_back(Status{ Event::Resume, std::type_index{ typeid(T) } });
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T, typename TControl>
 void
@@ -138,7 +138,7 @@ struct Reacting {
 	hfsm::detail::TypeInfo type;
 };
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 struct ReactingT
@@ -191,7 +191,7 @@ struct A_2
 	}
 };
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct A_2_1 : Base<A_2_1>, ReactingT<A_2_1> {};
 struct A_2_2 : Base<A_2_2>, ReactingT<A_2_2> {};
@@ -206,7 +206,7 @@ struct B_1_2 : Base<B_1_2> {};
 
 struct B_2 : Base<B_2> {};
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_1
 	: Base<B_2_1>
@@ -216,7 +216,7 @@ struct B_2_1
 	}
 };
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_2
 	: Base<B_2_2>
@@ -256,7 +256,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 	Context _;
 
 	{
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		Machine::CompositeRoot<
 			Machine::Composite<A,
@@ -304,7 +304,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		assert(!machine.isActive<B_2_1>());
 		assert(!machine.isActive<B_2_2>());
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.apply([&_](Reacting& interface) {
 			interface.react(_);
@@ -315,7 +315,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(applied1);
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.update(0.0f);
 		const Status update1[] = {
@@ -349,7 +349,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		assert(!machine.isResumable<B_2_1>());
 		assert(!machine.isResumable<B_2_2>());
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.apply([&_](Reacting& interface) {
 			interface.react(_);
@@ -361,7 +361,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(applied2);
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.update(0.0f);
 		const Status update2[] = {
@@ -404,7 +404,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		assert(!machine.isActive<B_2_1>());
 		assert( machine.isActive<B_2_2>());
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.apply([&_](Reacting& interface) {
 			interface.react(_);
@@ -415,7 +415,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(applied3);
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.update(0.0f);
 		const Status update3[] = {
@@ -448,7 +448,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update3);
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.update(0.0f);
 		const Status update4[] = {
@@ -477,7 +477,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update4);
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.update(0.0f);
 		const Status update5[] = {
@@ -499,7 +499,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update5);
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.update(0.0f);
 		const Status update6[] = {
@@ -533,7 +533,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 		};
 		_.assertHistory(update6);
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	}
 
 	const Status destroyed[] = {

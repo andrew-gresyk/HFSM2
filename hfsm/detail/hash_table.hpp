@@ -3,7 +3,7 @@
 #include "utility.hpp"
 #include "wrap.hpp"
 
-#include <assert.h>
+#include <cassert>
 #include <tuple>
 
 namespace hfsm {
@@ -120,7 +120,7 @@ HashTable<TK, TV, TC, TH>::Item::Item(const Hash hash, const Key key)
 	, _keyWrap(key)
 {}
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TK, typename TV, unsigned TC, typename TH>
 HashTable<TK, TV, TC, TH>::Item::Item(const Hash hash, const Key key, const Value value)
@@ -225,7 +225,7 @@ HashTable<TK, TV, TC, TH>::find(const Key key) {
 		_items[index].value() : nullptr;
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TK, typename TV, unsigned TC, typename TH>
 const typename HashTable<TK, TV, TC, TH>::Value*

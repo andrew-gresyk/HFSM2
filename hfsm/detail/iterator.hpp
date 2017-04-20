@@ -2,7 +2,7 @@
 
 #include "utility.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 namespace hfsm {
 namespace detail {

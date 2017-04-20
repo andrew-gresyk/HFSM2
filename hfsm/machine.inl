@@ -42,7 +42,7 @@ Machine<TC, TD, TMS>::_B<TI, TR...>::widePreSubstitute(Context& context,
 	_B<TR...>::widePreSubstitute(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TI, typename... TR>
@@ -54,7 +54,7 @@ Machine<TC, TD, TMS>::_B<TI, TR...>::widePreEnter(Context& context,
 	_B<TR...>::widePreEnter(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TI, typename... TR>
@@ -66,7 +66,7 @@ Machine<TC, TD, TMS>::_B<TI, TR...>::widePreUpdate(Context& context,
 	_B<TR...>::widePreUpdate(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TI, typename... TR>
@@ -78,7 +78,7 @@ Machine<TC, TD, TMS>::_B<TI, TR...>::widePreTransition(Context& context,
 	_B<TR...>::widePreTransition(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TI, typename... TR>
@@ -101,7 +101,7 @@ Machine<TC, TD, TMS>::_B<TI>::widePreSubstitute(Context& context,
 	TI::preSubstitute(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TI>
@@ -112,7 +112,7 @@ Machine<TC, TD, TMS>::_B<TI>::widePreEnter(Context& context,
 	TI::preEnter(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TI>
@@ -123,7 +123,7 @@ Machine<TC, TD, TMS>::_B<TI>::widePreUpdate(Context& context,
 	TI::preUpdate(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TI>
@@ -134,7 +134,7 @@ Machine<TC, TD, TMS>::_B<TI>::widePreTransition(Context& context,
 	TI::preTransition(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TI>
@@ -145,7 +145,7 @@ Machine<TC, TD, TMS>::_B<TI>::widePostLeave(Context& context,
 	TI::postLeave(context, time);
 }
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//==============================================================================
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T>
@@ -199,7 +199,7 @@ Machine<TC, TD, TMS>::_S<T>::deepLeave(Context& context,
 	_client.widePostLeave(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T>
@@ -231,7 +231,7 @@ Machine<TC, TD, TMS>::_S<T>::deepUpdateAndTransition(Control& control,
 	return requestCountBefore < control.requestCount();
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T>
@@ -277,7 +277,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& state
 	, remaining(stateRegistry, fork, stateParents, forkParents, forkPointers)
 {}
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -304,7 +304,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardRequest(const
 		remaining.wideForwardRequest(prong, transition);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -314,7 +314,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -344,7 +344,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(co
 		remaining.wideForwardSubstitute(prong, control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -377,7 +377,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeTo(const unsig
 		remaining.wideChangeTo(prong, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -393,7 +393,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnter(const unsigned
 		remaining.wideEnter(prong, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -425,7 +425,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(
 		remaining.wideUpdateAndTransition(prong, control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -458,7 +458,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideApply(const unsigned
 
 #pragma endregion
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//==============================================================================
 
 #pragma region Composite::Substate
 
@@ -477,7 +477,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistr
 			  forkPointers)
 {}
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -503,7 +503,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsign
 	initial.deepForwardRequest(transition);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -513,7 +513,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -541,7 +541,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const uns
 	initial.deepForwardSubstitute(control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -572,7 +572,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeTo(const unsigned HSF
 	initial.deepChangeToRequested(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -587,7 +587,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_A
 	initial.deepEnter(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -618,7 +618,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(const u
 	return initial.deepUpdateAndTransition(control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -650,7 +650,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideApply(const unsigned HSFM_A
 
 #pragma endregion
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//==============================================================================
 
 #pragma region Composite
 
@@ -666,7 +666,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::_C(StateRegistry& stateRegistry,
 	, _subStates(stateRegistry, Fork::self, stateParents, forkParents, forkPointers)
 {}
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -705,7 +705,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepForwardRequest(const enum Transition::Ty
 		}
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -717,7 +717,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepRequestRestart() {
 	_subStates.wideRequestRestart();
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -753,7 +753,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepForwardSubstitute(Control& control,
 		_subStates.wideSubstitute(Fork::requested, control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -796,7 +796,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context,
 	}
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -812,7 +812,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepEnter(Context& context,
 	_subStates.wideEnter(Fork::active, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -848,7 +848,7 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdateAndTransition(Control& control,
 		return _subStates.wideUpdateAndTransition(Fork::active, control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -889,7 +889,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::Sub(StateRegistry& stateRegi
 	, remaining(stateRegistry, parent, stateParents, forkParents, forkPointers)
 {}
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -913,7 +913,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideForwardRequest(const enu
 	remaining.wideForwardRequest(transition);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -924,7 +924,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideRequestRestart() {
 	remaining.wideRequestRestart();
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -949,7 +949,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideForwardSubstitute(Contro
 	remaining.wideForwardSubstitute(control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -976,7 +976,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideChangeToRequested(Contex
 	remaining.wideChangeToRequested(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -989,7 +989,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideEnter(Context& context,
 	remaining.wideEnter(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1016,7 +1016,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideUpdateAndTransition(Cont
 		|| remaining.wideUpdateAndTransition(control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1031,7 +1031,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideUpdate(Context& context,
 
 #pragma endregion
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//==============================================================================
 
 #pragma region Orthogonal::Substate
 
@@ -1046,7 +1046,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::Sub(StateRegistry& stateRegistry,
 	: initial(stateRegistry, parent, stateParents, forkParents, forkPointers)
 {}
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1068,7 +1068,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideForwardRequest(const enum Trans
 	initial.deepForwardRequest(transition);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1078,7 +1078,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1101,7 +1101,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideForwardSubstitute(Control& cont
 	initial.deepForwardSubstitute(control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1126,7 +1126,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideChangeToRequested(Context& cont
 	initial.deepChangeToRequested(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1138,7 +1138,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideEnter(Context& context,
 	initial.deepEnter(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1163,7 +1163,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideUpdateAndTransition(Control& co
 	return initial.deepUpdateAndTransition(control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1177,7 +1177,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideUpdate(Context& context,
 
 #pragma endregion
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//==============================================================================
 
 #pragma region Orthogonal
 
@@ -1192,7 +1192,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::_O(StateRegistry& stateRegistry,
 	, _subStates(stateRegistry, parent, stateParents, forkParents, forkPointers)
 {}
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1213,7 +1213,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepForwardRequest(const enum Transition::Ty
 	_subStates.wideForwardRequest(transition);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1222,7 +1222,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepRequestRestart() {
 	_subStates.wideRequestRestart();
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1243,7 +1243,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepForwardSubstitute(Control& control,
 	_subStates.wideForwardSubstitute(control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1267,7 +1267,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepChangeToRequested(Context& context,
 	_subStates.wideChangeToRequested(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1279,7 +1279,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepEnter(Context& context,
 	_subStates.wideEnter(context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1308,7 +1308,7 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepUpdateAndTransition(Control& control,
 		return _subStates.wideUpdateAndTransition(control, context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
@@ -1347,7 +1347,7 @@ Machine<TC, TD, TMS>::_R<TA>::_R(Context& context,
 	_apex.deepEnterInitial(_context, time);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TA>
@@ -1415,7 +1415,7 @@ Machine<TC, TD, TMS>::_R<TA>::isActive() {
 	return true;
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TA>
@@ -1450,7 +1450,7 @@ Machine<TC, TD, TMS>::_R<TA>::requestChange(const Transition request) {
 	_apex.deepForwardRequest(request.type);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TD, unsigned TMS>
 template <typename TA>

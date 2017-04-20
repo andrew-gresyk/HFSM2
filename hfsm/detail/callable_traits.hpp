@@ -19,7 +19,7 @@ namespace detail {
 template <unsigned TIndex, typename... TTypes>
 struct Get;
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <unsigned TIndex, typename TFirst, typename... TRest>
 struct Get<TIndex, TFirst, TRest...>
@@ -28,14 +28,14 @@ struct Get<TIndex, TFirst, TRest...>
 	static_assert(TIndex <= 1 + sizeof...(TRest), "");
 };
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TFirst, typename... TRest>
 struct Get<0, TFirst, TRest...> {
 	using Type = TFirst;
 };
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TLast>
 struct Get<0, TLast> {
@@ -49,7 +49,7 @@ struct CallableTraits
 	: CallableTraits<decltype(&T::operator())>
 {};
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TReturn, typename... TArguments>
 struct CallableTraits<TReturn(TArguments...)> {
@@ -64,7 +64,7 @@ struct CallableTraits<TReturn(*)(TArguments...)>
 	: CallableTraits<TReturn(TArguments...)>
 {};
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename ClassType, typename TReturn, typename... TArguments>
 struct CallableTraits<TReturn(ClassType::*)(TArguments...)>
@@ -73,7 +73,7 @@ struct CallableTraits<TReturn(ClassType::*)(TArguments...)>
 	typedef ClassType& Class;
 };
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename ClassType, typename TReturn, typename... TArguments>
 struct CallableTraits<TReturn(ClassType::*)(TArguments...) const>
@@ -82,7 +82,7 @@ struct CallableTraits<TReturn(ClassType::*)(TArguments...) const>
 	typedef const ClassType& Class;
 };
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename FunctionType>
 struct CallableTraits<std::function<FunctionType>>

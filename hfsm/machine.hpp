@@ -5,7 +5,6 @@
 #include "detail/hash_table.hpp"
 #include "detail/type_info.hpp"
 
-//#include <functional>
 #include <limits>
 #include <type_traits>
 
@@ -76,7 +75,7 @@ class Machine {
 		virtual unsigned add(const TypeInfo stateType) = 0;
 	};
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <unsigned TCapacity>
 	class StateRegistryT
@@ -114,7 +113,7 @@ class Machine {
 	};
 	using ForkPointers = ArrayView<Fork*>;
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename T>
 	struct ForkT
@@ -198,7 +197,7 @@ public:
 		inline void postLeave(Context&, const Time)				{}
 	};
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class Tracked
 		: public Bare
@@ -224,7 +223,7 @@ public:
 		unsigned _totalUpdateCount = 0;
 	};
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class Timed
 		: public Bare
@@ -238,7 +237,7 @@ public:
 		Time _entryTime;
 	};
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 private:
 
 	template <typename...>
@@ -318,8 +317,8 @@ private:
 		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
 		inline void deepUpdate(Context& context, const Time time);
 
-		//······························································
-
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		
 		template <typename TCallable>
 		inline void deepApply(TCallable callable);
 
@@ -335,7 +334,7 @@ private:
 		typename std::enable_if<!std::is_convertible<Client, TArgument>::value, void>::type
 		apply(TCallable) {}
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		Client _client;
 
@@ -355,14 +354,14 @@ private:
 		using State = _S<T>;
 		using Client = typename State::Client;
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #pragma region Substate
 
 		template <unsigned TN, typename...>
 		struct Sub;
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		template <unsigned TN, typename TI, typename... TR>
 		struct Sub<TN, TI, TR...> {
@@ -407,7 +406,7 @@ private:
 			Remaining remaining;
 		};
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		template <unsigned TN, typename TI>
 		struct Sub<TN, TI> {
@@ -454,7 +453,7 @@ private:
 
 #pragma endregion
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		enum {
 			ReverseDepth = SubStates::ReverseDepth + 1,
@@ -507,14 +506,14 @@ private:
 		using State = _S<T>;
 		using Client = typename State::Client;
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #pragma region Substate
 
 		template <typename...>
 		struct Sub;
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		template <typename TI, typename... TR>
 		struct Sub<TI, TR...> {
@@ -562,7 +561,7 @@ private:
 			Remaining remaining;
 		};
 
-		//······························································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		template <typename TI>
 		struct Sub<TI> {
@@ -610,7 +609,7 @@ private:
 
 #pragma endregion
 
-		//······································································
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		enum {
 			ReverseDepth = SubStates::ReverseDepth + 1,
@@ -772,12 +771,12 @@ public:
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TClient>
 	using State = _S<TClient>;
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TClient, typename... TSubStates>
 	using Composite	= _C<TClient, TSubStates...>;
@@ -785,7 +784,7 @@ public:
 	template <typename... TSubStates>
 	using CompositePeers = _C<Base, TSubStates...>;
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TClient, typename... TSubStates>
 	using Orthogonal = _O<TClient, TSubStates...>;
@@ -793,7 +792,7 @@ public:
 	template <typename... TSubStates>
 	using OrthogonalPeers = _O<Base, TSubStates...>;
 
-	//······································································
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TState>
 	using Root = _R<TState>;

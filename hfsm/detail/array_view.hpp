@@ -1,7 +1,7 @@
 #pragma once
 
-#include <assert.h>
-#include <utility>
+#include <cassert>
+#include <utility>	// std::forward() / std::move()
 
 namespace hfsm {
 namespace detail {
@@ -80,7 +80,7 @@ ArrayView<T>::ArrayView(const unsigned capacity)
 	: _capacity(capacity)
 {}
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 ArrayView<T>::ArrayView(const unsigned capacity, unsigned& count)
@@ -89,7 +89,7 @@ ArrayView<T>::ArrayView(const unsigned capacity, unsigned& count)
 	count = resize(count);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 ArrayView<T>::~ArrayView() {
@@ -111,7 +111,7 @@ ArrayView<T>::grow() {
 	return item;
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 template <typename... TS>
@@ -123,7 +123,7 @@ ArrayView<T>::emplace(TS&&... ts) {
 	return *new (&item) Item(std::forward<TS>(ts)...);
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 unsigned
@@ -156,7 +156,7 @@ ArrayView<T>::operator << (const TValue& value) {
 	return _count++;
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 template <typename TValue>
@@ -179,7 +179,7 @@ ArrayView<T>::get(const unsigned i) {
 	return data()[i];
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 const T&

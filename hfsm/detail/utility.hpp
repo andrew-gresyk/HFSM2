@@ -68,7 +68,7 @@ end(const T(& a)[TCapacity]) {
 	return &a[TCapacity];
 }
 
-//··············································································
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TReturn, typename T, unsigned TCapacity>
 inline

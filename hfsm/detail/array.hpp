@@ -3,7 +3,7 @@
 #include "array_view.hpp"
 #include "iterator.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 namespace hfsm {
 namespace detail {
