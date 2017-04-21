@@ -105,9 +105,9 @@ class Machine {
 		#pragma pack(pop)
 
 		HSFM_DEBUG_ONLY(const TypeInfo type);
-		HSFM_DEBUG_ONLY(TypeInfo activeType);
-		HSFM_DEBUG_ONLY(TypeInfo resumableType);
-		HSFM_DEBUG_ONLY(TypeInfo requestedType);
+		HSFM_ASSERT_ONLY(TypeInfo activeType);
+		HSFM_ASSERT_ONLY(TypeInfo resumableType);
+		HSFM_ASSERT_ONLY(TypeInfo requestedType);
 
 		Fork(const Index index, const TypeInfo type_);
 	};
