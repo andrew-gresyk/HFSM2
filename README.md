@@ -1,7 +1,5 @@
 # HFSM (Hierarchical Finite State Machine) Framework
 
-
-## Description
 Header-only heriarchical FSM framework in C++14, completely static (no dynamic allocations), built with variadic templates.
 
 
@@ -57,7 +55,7 @@ int main() {
 
 ## Transitions
 
-From within a state:
+Initiated from within a state:
 ```cpp
 struct MyState1
     : M::Base

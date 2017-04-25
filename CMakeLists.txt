@@ -3,6 +3,8 @@ project (HFSM CXX)
 
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_EXTENSIONS Off)
+set (CMAKE_CXX_FLAGS "-Wall -Wno-unknown-pragmas -Werror")
+set (CMAKE_C_FLAGS "-Wall -Wno-unknown-pragmas -Werror")
 
 file (GLOB_RECURSE SRCS test/*.cpp)
 file (GLOB_RECURSE HDRS hfsm/*.hpp)

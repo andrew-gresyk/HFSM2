@@ -184,10 +184,10 @@ public:
 		friend struct _B;
 
 	protected:
-		using Control	 = Control;
-		using Context	 = Context;
-		using Time		 = Time;
-		using Transition = Transition;
+		using Control	 = typename Machine::Control;
+		using Context	 = typename Machine::Context;
+		using Time		 = typename Machine::Time;
+		using Transition = typename Machine::Transition;
 
 	public:
 		inline void preSubstitute(Context&, const Time) const	{}
