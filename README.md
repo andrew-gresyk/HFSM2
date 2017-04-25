@@ -4,12 +4,15 @@ Header-only heriarchical FSM framework in C++14, completely static (no dynamic a
 
 
 ## Compiler Support
+
 - Visual Studio 2015+
 - Visual Studio 2017 with Clang codegen v2
-- GCC 6.3.0
+- GCC 6.3.1
+- Clang 3.9.1
 
 
 ## Basic Usage
+
 ```cpp
 // 1. Include HFSM header:
 #include <hfsm/machine.hpp>
@@ -81,6 +84,7 @@ int main() {
 
 
 ## Framework Update Sequence (Pseudo-Code)
+
 ```cpp
 template <...>
 void Machine<...>::Root::update() {
@@ -103,6 +107,7 @@ void Machine<...>::Root::update() {
 
 
 ## State Method Call Sequence During State Transitions (Pseudo-Code)
+
 ```cpp
     activeState.update();
     activeState.transition() {
@@ -118,3 +123,11 @@ void Machine<...>::Root::update() {
     activeState.update();
     activeState.transition();
 ```
+
+## Special Thanks
+
+- [philsquared](https://github.com/philsquared)
+- [romaincheminade](https://github.com/romaincheminade)
+- [tcbrindle](https://github.com/tcbrindle)
+- programming community at [Splash Damage](http://www.splashdamage.com/)
+- everybody at [C++::London](https://www.meetup.com/CppLondon/) meetup

@@ -44,16 +44,11 @@
     <None Include="..\..\hfsm\machine.inl">
       <Filter>hfsm</Filter>
     </None>
-    <None Include="..\..\.gitignore" />
-    <None Include="..\..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp">
       <Filter>test</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="hfsm.natvis" />

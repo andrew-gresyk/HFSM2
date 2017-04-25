@@ -30,15 +30,10 @@
     <ClInclude Include="..\..\hfsm\machine.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\.gitignore" />
     <None Include="..\..\hfsm\machine.inl" />
-    <None Include="..\..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="hfsm.natvis" />
