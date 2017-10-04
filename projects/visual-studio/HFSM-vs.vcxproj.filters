@@ -39,10 +39,16 @@
     <ClInclude Include="..\..\hfsm\detail\wrap.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test\test.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\hfsm\machine.inl">
       <Filter>hfsm</Filter>
+    </None>
+    <None Include="..\..\test\test.inl">
+      <Filter>test</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

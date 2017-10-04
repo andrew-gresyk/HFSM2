@@ -243,7 +243,7 @@ private:
 	template <typename...>
 	struct _B;
 
-	// · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TInjection, typename... TRest>
 	struct _B<TInjection, TRest...>
@@ -257,7 +257,7 @@ private:
 		inline void widePostLeave(Context& _, const Time time);
 	};
 
-	// · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TInjection>
 	struct _B<TInjection>
@@ -320,19 +320,23 @@ private:
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		
 		template <typename TCallable>
-		inline void deepApply(TCallable callable);
+		inline void deepInvoke(TCallable callable);
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		template <typename TCallable, typename TArgument>
 		inline
 		typename std::enable_if<std::is_convertible<Client, TArgument>::value, void>::type
-		apply(TCallable callable) {
+		visit(TCallable callable) {
 			callable(_client);
 		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		template <typename TCallable, typename TArgument>
 		inline
 		typename std::enable_if<!std::is_convertible<Client, TArgument>::value, void>::type
-		apply(TCallable) {}
+		visit(TCallable) {}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -400,7 +404,7 @@ private:
 			inline void wideUpdate(const unsigned prong, Context& context, const Time time);
 
 			template <typename TCallable>
-			inline void wideApply(const unsigned prong, TCallable callable);
+			inline void wideInvoke(const unsigned prong, TCallable callable);
 
 			Initial initial;
 			Remaining remaining;
@@ -444,7 +448,7 @@ private:
 			inline void wideUpdate(const unsigned prong, Context& context, const Time time);
 
 			template <typename TCallable>
-			inline void wideApply(const unsigned prong, TCallable callable);
+			inline void wideInvoke(const unsigned prong, TCallable callable);
 
 			Initial initial;
 		};
@@ -487,7 +491,7 @@ private:
 		inline void deepUpdate(Context& context, const Time time);
 
 		template <typename TCallable>
-		inline void deepApply(TCallable callable);
+		inline void deepInvoke(TCallable callable);
 
 		State _state;
 		SubStates _subStates;
@@ -551,11 +555,7 @@ private:
 			inline void wideUpdate(Context& context, const Time time);
 
 			template <typename TCallable>
-			inline void wideApply(TCallable callable) {
-				initial.deepApply(callable);
-
-				remaining.wideApply(callable);
-			}
+			inline void wideInvoke(TCallable callable);
 
 			Initial initial;
 			Remaining remaining;
@@ -598,9 +598,7 @@ private:
 			inline void wideUpdate(Context& context, const Time time);
 
 			template <typename TCallable>
-			inline void wideApply(TCallable callable) {
-				initial.deepApply(callable);
-			}
+			inline void wideInvoke(TCallable callable);
 
 			Initial initial;
 		};
@@ -643,7 +641,7 @@ private:
 		inline void deepUpdate(Context& context, const Time time);
 
 		template <typename TCallable>
-		inline void deepApply(TCallable callable);
+		inline void deepInvoke(TCallable callable);
 
 		State _state;
 		SubStates _subStates;
@@ -686,6 +684,10 @@ private:
 		_R(Context& context, const Time time = Time{});
 		~_R();
 
+		// TODO:
+		// void enter();
+		// void leave();
+
 		void update(const Time time);
 
 		template <typename T>
@@ -704,7 +706,7 @@ private:
 		inline bool isResumable();
 
 		template <typename TCallable>
-		inline void apply(TCallable callable)								{ _apex.deepApply(callable);	}
+		inline void visit(TCallable callable)								{ _apex.deepInvoke(callable);	}
 
 	protected:
 		void requestChange(const Transition request);
@@ -752,8 +754,6 @@ private:
 	private:
 		TransitionQueue& _requests;
 	};
-
-	//----------------------------------------------------------------------
 
 #pragma endregion
 

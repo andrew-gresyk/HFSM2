@@ -28,9 +28,11 @@
     <ClInclude Include="..\..\hfsm\detail\utility.hpp" />
     <ClInclude Include="..\..\hfsm\detail\wrap.hpp" />
     <ClInclude Include="..\..\hfsm\machine.hpp" />
+    <ClInclude Include="..\..\test\test.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\hfsm\machine.inl" />
+    <None Include="..\..\test\test.inl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp" />

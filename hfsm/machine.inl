@@ -249,10 +249,10 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T>
 template <typename TCallable>
 void
-Machine<TC, TD, TMS>::_S<T>::deepApply(TCallable callable) {
+Machine<TC, TD, TMS>::_S<T>::deepInvoke(TCallable callable) {
 	using Argument = typename detail::CallableTraits<TCallable>::Argument;
 
-	apply<TCallable, typename std::remove_reference<Argument>::type>(callable);
+	visit<TCallable, typename std::remove_reference<Argument>::type>(callable);
 }
 
 #pragma endregion
@@ -448,12 +448,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 template <typename TCallable>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideApply(const unsigned prong,
-																  TCallable callable) {
+Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideInvoke(const unsigned prong,
+																   TCallable callable)
+{
 	if (ProngIndex == prong)
-		initial.deepApply(callable);
+		initial.deepInvoke(callable);
 	else
-		remaining.wideApply(prong, callable);
+		remaining.wideInvoke(prong, callable);
 }
 
 #pragma endregion
@@ -640,12 +641,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 template <typename TCallable>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideApply(const unsigned HSFM_ASSERT_ONLY(prong),
-														   TCallable callable)
+Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideInvoke(const unsigned HSFM_ASSERT_ONLY(prong),
+															TCallable callable)
 {
 	assert(ProngIndex == prong);
 
-	initial.deepApply(callable);
+	initial.deepInvoke(callable);
 }
 
 #pragma endregion
@@ -866,9 +867,9 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <typename TCallable>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepApply(TCallable callable) {
-	_state.deepApply(callable);
-	_subStates.wideApply(Fork::active, callable);
+Machine<TC, TD, TMS>::_C<T, TS...>::deepInvoke(TCallable callable) {
+	_state.deepInvoke(callable);
+	_subStates.wideInvoke(Fork::active, callable);
 }
 
 #pragma endregion
@@ -1029,6 +1030,19 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideUpdate(Context& context,
 	remaining.wideUpdate(context, time);
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename T, typename... TS>
+template <typename TI, typename... TR>
+template <typename TCallable>
+void
+Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideInvoke(TCallable callable) {
+	initial.deepInvoke(callable);
+
+	remaining.wideInvoke(callable);
+}
+
 #pragma endregion
 
 //==============================================================================
@@ -1173,6 +1187,17 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideUpdate(Context& context,
 														const Time time)
 {
 	initial.deepUpdate(context, time);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TD, unsigned TMS>
+template <typename T, typename... TS>
+template <typename TI>
+template <typename TCallable>
+void
+Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideInvoke(TCallable callable) {
+	initial.deepInvoke(callable);
 }
 
 #pragma endregion
@@ -1326,9 +1351,9 @@ template <typename TC, typename TD, unsigned TMS>
 template <typename T, typename... TS>
 template <typename TCallable>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepApply(TCallable callable) {
-	_state.deepApply(callable);
-	_subStates.wideApply(callable);
+Machine<TC, TD, TMS>::_O<T, TS...>::deepInvoke(TCallable callable) {
+	_state.deepInvoke(callable);
+	_subStates.wideInvoke(callable);
 }
 
 #pragma endregion

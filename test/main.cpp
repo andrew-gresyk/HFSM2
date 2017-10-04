@@ -1,130 +1,7 @@
-#include "../hfsm/machine.hpp"
-
-#include <algorithm>
-#include <vector>
+#include "test.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
-
-namespace Event {
-	enum Enum : unsigned {
-		Substitute,
-		Enter,
-		Update,
-		Transition,
-		Leave,
-
-		Restart,
-		Resume,
-		Schedule,
-
-		Apply,
-
-		COUNT
-	};
-};
-
-//------------------------------------------------------------------------------
-
-struct Status {
-	Event::Enum func;
-	hfsm::detail::TypeInfo state;
-
-	inline bool operator == (const Status& reference) const {
-		return func == reference.func && state == reference.state;
-	}
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T>
-Status status(Event::Enum event) {
-	using Type = T;
-
-	return Status{ event, std::type_index(typeid(Type)) };
-}
-
-//------------------------------------------------------------------------------
-
-struct Context {
-	using History = std::vector<Status>;
-
-	template <unsigned TCapacity>
-	void assertHistory(const Status(&reference)[TCapacity]) {
-		const unsigned historySize = (unsigned)history.size();
-		const unsigned referenceSize = hfsm::detail::count(reference);
-		assert(historySize == referenceSize);
-
-		for (unsigned i = 0; i < std::min(historySize, referenceSize); ++i) {
-			HSFM_ASSERT_ONLY(const auto h = history[i]);
-			HSFM_ASSERT_ONLY(const auto r = reference[i]);
-			assert(h == r);
-		}
-
-		history.clear();
-	}
-
-	History history;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename T, typename TControl>
-void
-changeTo(TControl& control, Context::History& history) {
-	control.template changeTo<T>();
-	history.push_back(Status{ Event::Restart, std::type_index{ typeid(T) } });
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T, typename TControl>
-void
-resume(TControl& control, Context::History& history) {
-	control.template resume<T>();
-	history.push_back(Status{ Event::Resume, std::type_index{ typeid(T) } });
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T, typename TControl>
-void
-schedule(TControl& control, Context::History& history) {
-	control.template schedule<T>();
-	history.push_back(Status{ Event::Schedule, std::type_index{ typeid(T) } });
-}
-
-//------------------------------------------------------------------------------
-
-using Machine = hfsm::Machine<Context>;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-struct HistoryBase
-	: Machine::Bare
-{
-	void preSubstitute(Context& _, const Time) const {
-		_.history.push_back(Status{ Event::Substitute, hfsm::detail::TypeInfo::get<T>() });
-	}
-
-	void preEnter(Context& _, const Time) {
-		_.history.push_back(Status{ Event::Enter, hfsm::detail::TypeInfo::get<T>() });
-	}
-
-	void preUpdate(Context& _, const Time) {
-		_.history.push_back(Status{ Event::Update, hfsm::detail::TypeInfo::get<T>() });
-	}
-
-	void preTransition(Context& _, const Time) const {
-		_.history.push_back(Status{ Event::Transition, hfsm::detail::TypeInfo::get<T>() });
-	}
-
-	void postLeave(Context& _, const Time) {
-		_.history.push_back(Status{ Event::Leave, hfsm::detail::TypeInfo::get<T>() });
-	}
-};
-
-//------------------------------------------------------------------------------
+//	static interface for event reaction using visit()
 
 struct Reacting {
 	Reacting(const hfsm::detail::TypeInfo type_)
@@ -138,7 +15,10 @@ struct Reacting {
 	hfsm::detail::TypeInfo type;
 };
 
+void dummy(Reacting&) {}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//	typed helper for Reacting
 
 template <typename T>
 struct ReactingT
@@ -149,14 +29,13 @@ struct ReactingT
 	{}
 };
 
-//------------------------------------------------------------------------------
-
-template <typename T>
-using Base = Machine::BaseT<Machine::Tracked, Machine::Timed, HistoryBase<T>>;
-
 ////////////////////////////////////////////////////////////////////////////////
+//	user states
 
-struct A : Base<A>, ReactingT<A> {};
+struct A
+	: Base<A>
+	, ReactingT<A>
+{};
 
 //------------------------------------------------------------------------------
 
@@ -241,15 +120,10 @@ struct B_2_2
 			resume<A>(control, _.history);
 			break;
 		}
-
 	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-
-void dummy(Reacting&) {}
-
-//------------------------------------------------------------------------------
 
 int
 main(int /*argc*/, char* /*argv*/[]) {
@@ -278,11 +152,11 @@ main(int /*argc*/, char* /*argv*/[]) {
 			>
 		> machine(_);
 
-		machine.apply(dummy);
+		machine.visit(dummy);
 
-		static_assert(machine.DeepWidth  == 2,  "");
+		static_assert(machine.DeepWidth  ==  2, "");
 		static_assert(machine.StateCount == 13, "");
-		static_assert(machine.ForkCount  == 5,  "");
+		static_assert(machine.ForkCount  ==  5, "");
 		static_assert(machine.ProngCount == 10, "");
 
 		const Status created[] = {
@@ -306,7 +180,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.apply([&_](Reacting& interface) {
+		machine.visit([&_](Reacting& interface) {
 			interface.react(_);
 		});
 
@@ -351,7 +225,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.apply([&_](Reacting& interface) {
+		machine.visit([&_](Reacting& interface) {
 			interface.react(_);
 		});
 
@@ -406,7 +280,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.apply([&_](Reacting& interface) {
+		machine.visit([&_](Reacting& interface) {
 			interface.react(_);
 		});
 
