@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\hfsm\detail\array.hpp" />
     <ClInclude Include="..\..\hfsm\detail\array_view.hpp" />
-    <ClInclude Include="..\..\hfsm\detail\callable_traits.hpp" />
     <ClInclude Include="..\..\hfsm\detail\hash_table.hpp" />
     <ClInclude Include="..\..\hfsm\detail\iterator.hpp" />
     <ClInclude Include="..\..\hfsm\detail\type_info.hpp" />

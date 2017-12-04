@@ -1,41 +1,194 @@
-#include "test.hpp"
+#include "../hfsm/machine.hpp"
+
+#include <algorithm>
+#include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
-//	static interface for event reaction using visit()
 
-struct Reacting {
-	Reacting(const hfsm::detail::TypeInfo type_)
-		: type(type_)
-	{}
+namespace Event {
+	enum Enum : unsigned {
+		Substitute,
+		Enter,
+		Update,
+		Transition,
+		ReactionRequest,
+		Reaction,
+		Leave,
 
-	void react(Context& _) {
-		_.history.push_back(Status{ Event::Apply, type });
-	}
+		Restart,
+		Resume,
+		Schedule,
 
-	hfsm::detail::TypeInfo type;
+		COUNT
+	};
 };
 
-void dummy(Reacting&) {}
+//------------------------------------------------------------------------------
+
+struct Status {
+	Event::Enum func;
+	hfsm::detail::TypeInfo state;
+
+	inline bool operator == (const Status& reference) const {
+		return func == reference.func && state == reference.state;
+	}
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-//	typed helper for Reacting
 
 template <typename T>
-struct ReactingT
-	: Reacting
+Status status(Event::Enum event) {
+	using Type = T;
+
+	return Status{ event, std::type_index(typeid(Type)) };
+}
+
+//------------------------------------------------------------------------------
+
+struct Context {
+	using History = std::vector<Status>;
+
+	template <unsigned TCapacity>
+	void assertHistory(const Status (&reference)[TCapacity]) {
+		const unsigned historySize = (unsigned)history.size();
+		const unsigned referenceSize = hfsm::detail::count(reference);
+		assert(historySize == referenceSize);
+
+		for (unsigned i = 0; i < std::min(historySize, referenceSize); ++i) {
+			HSFM_ASSERT_ONLY(const auto h = history[i]);
+			HSFM_ASSERT_ONLY(const auto r = reference[i]);
+			assert(h == r);
+		}
+
+		history.clear();
+	}
+
+	float deltaTime = 0.0f;
+
+	History history;
+};
+using M = hfsm::Machine<Context>;
+
+//------------------------------------------------------------------------------
+
+class Timed
+	: public M::Bare
 {
-	ReactingT()
-		: Reacting(hfsm::detail::TypeInfo::get<T>())
-	{}
+public:
+	void preEnter(Context&)		{ _elapsed = 0.0f;			}
+	void preUpdate(Context& _)	{ _elapsed += _.deltaTime;	}
+
+	auto elapsed() const		{ return _elapsed;			}
+
+private:
+	float _elapsed;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+class Tracked
+	: public M::Bare
+{
+public:
+	void preEnter(Context&) {
+		++_entryCount;
+		_currentUpdateCount = 0;
+	}
+
+	void preUpdate(Context&) {
+		++_currentUpdateCount;
+		++_totalUpdateCount;
+	}
+
+	unsigned entryCount() const			{ return _entryCount;			}
+	unsigned currentUpdateCount() const { return _currentUpdateCount;	}
+	unsigned totalUpdateCount() const	{ return _totalUpdateCount;		}
+
+private:
+	unsigned _entryCount = 0;
+	unsigned _currentUpdateCount = 0;
+	unsigned _totalUpdateCount = 0;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+struct Action {};
+
+template <typename T>
+struct HistoryBase
+	: M::Bare
+{
+	void preSubstitute(Context& _) const {
+		_.history.push_back(Status{ Event::Substitute, hfsm::detail::TypeInfo::get<T>() });
+	}
+
+	void preEnter(Context& _) {
+		_.history.push_back(Status{ Event::Enter, hfsm::detail::TypeInfo::get<T>() });
+	}
+
+	void preUpdate(Context& _) {
+		_.history.push_back(Status{ Event::Update, hfsm::detail::TypeInfo::get<T>() });
+	}
+
+	void preTransition(Context& _) const {
+		_.history.push_back(Status{ Event::Transition, hfsm::detail::TypeInfo::get<T>() });
+	}
+
+	void preReact(const Action&, Context& _) {
+		_.history.push_back(Status{ Event::ReactionRequest, hfsm::detail::TypeInfo::get<T>() });
+	}
+
+	void postLeave(Context& _) {
+		_.history.push_back(Status{ Event::Leave, hfsm::detail::TypeInfo::get<T>() });
+	}
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+using Base = M::BaseT<Tracked, Timed, HistoryBase<T>>;
+
+//------------------------------------------------------------------------------
+
+template <typename T>
+void
+changeTo(M::Control& control, Context::History& history) {
+	control.template changeTo<T>();
+	history.push_back(Status{ Event::Restart, std::type_index{ typeid(T) } });
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+void
+resume(M::Control& control, Context::History& history) {
+	control.template resume<T>();
+	history.push_back(Status{ Event::Resume, std::type_index{ typeid(T) } });
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+void
+schedule(M::Control& control, Context::History& history) {
+	control.template schedule<T>();
+	history.push_back(Status{ Event::Schedule, std::type_index{ typeid(T) } });
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+struct Reacting
+	: Base<T>
+{
+	void react(const Action&, M::Control&, Context& _) {
+		_.history.push_back(Status{ Event::Reaction, std::type_index{ typeid(T) } });
+	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//	user states
 
-struct A
-	: Base<A>
-	, ReactingT<A>
-{};
+struct A : Reacting<A> {};
 
 //------------------------------------------------------------------------------
 
@@ -44,7 +197,7 @@ struct A_2;
 struct A_1
 	: Base<A_1>
 {
-	void transition(Control& control, Context& _, const Time) const {
+	void transition(Control& control, Context& _) const {
 		changeTo<A_2>(control, _.history);
 	}
 };
@@ -57,7 +210,7 @@ struct B_2_2;
 struct A_2
 	: Base<A_2>
 {
-	void transition(Control& control, Context& _, const Time) const {
+	void transition(Control& control, Context& _) const {
 		switch (entryCount()) {
 		case 1:
 			changeTo<B_2_2>(control, _.history);
@@ -72,12 +225,12 @@ struct A_2
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct A_2_1 : Base<A_2_1>, ReactingT<A_2_1> {};
-struct A_2_2 : Base<A_2_2>, ReactingT<A_2_2> {};
+struct A_2_1 : Reacting<A_2_1> {};
+struct A_2_2 : Reacting<A_2_2> {};
 
 //------------------------------------------------------------------------------
 
-struct B : Base<B>, ReactingT<B> {};
+struct B : Reacting<B> {};
 
 struct B_1 : Base<B_1> {};
 struct B_1_1 : Base<B_1_1> {};
@@ -90,7 +243,7 @@ struct B_2 : Base<B_2> {};
 struct B_2_1
 	: Base<B_2_1>
 {
-	void substitute(Control& control, Context& _, const Time) const {
+	void substitute(Control& control, Context& _) const {
 		resume<B_2_2>(control, _.history);
 	}
 };
@@ -100,12 +253,12 @@ struct B_2_1
 struct B_2_2
 	: Base<B_2_2>
 {
-	void substitute(Control& control, Context&, const Time) const {
+	void substitute(Control& control, Context&) const {
 		if (entryCount() == 2)
 			control.resume<A>();
 	}
 
-	void transition(Control& control, Context& _, const Time) const {
+	void transition(Control& control, Context& _) const {
 		switch (totalUpdateCount()) {
 		case 1:
 			resume<A>(control, _.history);
@@ -126,37 +279,35 @@ struct B_2_2
 ////////////////////////////////////////////////////////////////////////////////
 
 int
-main(int /*argc*/, char* /*argv*/[]) {
+main(int, char*[]) {
 	Context _;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		Machine::CompositeRoot<
-			Machine::Composite<A,
-				Machine::State<A_1>,
-				Machine::Composite<A_2,
-					Machine::State<A_2_1>,
-					Machine::State<A_2_2>
+		M::PeerRoot<
+			M::Composite<A,
+				A_1,
+				M::Composite<A_2,
+					A_2_1,
+					A_2_2
 				>
 			>,
-			Machine::Orthogonal<B,
-				Machine::Composite<B_1,
-					Machine::State<B_1_1>,
-					Machine::State<B_1_2>
+			M::Orthogonal<B,
+				M::Composite<B_1,
+					B_1_1,
+					B_1_2
 				>,
-				Machine::Composite<B_2,
-					Machine::State<B_2_1>,
-					Machine::State<B_2_2>
+				M::Composite<B_2,
+					B_2_1,
+					B_2_2
 				>
 			>
 		> machine(_);
 
-		machine.visit(dummy);
-
 		static_assert(machine.DeepWidth  ==  2, "");
 		static_assert(machine.StateCount == 13, "");
-		static_assert(machine.ForkCount  ==  5, "");
+		static_assert(machine.ForkCount  ==  6, "");
 		static_assert(machine.ProngCount == 10, "");
 
 		const Status created[] = {
@@ -180,18 +331,18 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.visit([&_](Reacting& interface) {
-			interface.react(_);
-		});
+		machine.react(Action{});
 
-		const Status applied1[] = {
-			status<A>(Event::Apply),
+		const Status reacted1[] = {
+			status<A>(Event::ReactionRequest),
+			status<A>(Event::Reaction),
+			status<A_1>(Event::ReactionRequest),
 		};
-		_.assertHistory(applied1);
+		_.assertHistory(reacted1);
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.update(0.0f);
+		machine.update();
 		const Status update1[] = {
 			status<A>(Event::Update),
 			status<A>(Event::Transition),
@@ -225,19 +376,20 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.visit([&_](Reacting& interface) {
-			interface.react(_);
-		});
+		machine.react(Action{});
 
-		const Status applied2[] = {
-			status<A>(Event::Apply),
-			status<A_2_1>(Event::Apply),
+		const Status reacted2[] = {
+			status<A>(Event::ReactionRequest),
+			status<A>(Event::Reaction),
+			status<A_2>(Event::ReactionRequest),
+			status<A_2_1>(Event::ReactionRequest),
+			status<A_2_1>(Event::Reaction),
 		};
-		_.assertHistory(applied2);
+		_.assertHistory(reacted2);
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.update(0.0f);
+		machine.update();
 		const Status update2[] = {
 			status<A>(Event::Update),
 			status<A>(Event::Transition),
@@ -280,18 +432,21 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.visit([&_](Reacting& interface) {
-			interface.react(_);
-		});
+		machine.react(Action{});
 
-		const Status applied3[] = {
-			status<B>(Event::Apply),
+		const Status reacted3[] = {
+			status<B>(Event::ReactionRequest),
+			status<B>(Event::Reaction),
+			status<B_1>(Event::ReactionRequest),
+			status<B_1_1>(Event::ReactionRequest),
+			status<B_2>(Event::ReactionRequest),
+			status<B_2_2>(Event::ReactionRequest),
 		};
-		_.assertHistory(applied3);
+		_.assertHistory(reacted3);
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.update(0.0f);
+		machine.update();
 		const Status update3[] = {
 			status<B>(Event::Update),
 			status<B>(Event::Transition),
@@ -324,7 +479,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.update(0.0f);
+		machine.update();
 		const Status update4[] = {
 			status<A>(Event::Update),
 			status<A>(Event::Transition),
@@ -353,7 +508,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.update(0.0f);
+		machine.update();
 		const Status update5[] = {
 			status<B>(Event::Update),
 			status<B>(Event::Transition),
@@ -375,7 +530,7 @@ main(int /*argc*/, char* /*argv*/[]) {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.update(0.0f);
+		machine.update();
 		const Status update6[] = {
 			status<B>(Event::Update),
 			status<B>(Event::Transition),

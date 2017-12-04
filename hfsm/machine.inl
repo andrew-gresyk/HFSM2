@@ -4,9 +4,9 @@ namespace hfsm {
 
 #pragma region Utility
 
-template <typename TC, typename TD, unsigned TMS>
-Machine<TC, TD, TMS>::Fork::Fork(const Index index,
-								 const TypeInfo HSFM_DEBUG_ONLY(type_))
+template <typename TC, unsigned TMS>
+M<TC, TMS>::Fork::Fork(const Index index,
+					   const TypeInfo HSFM_DEBUG_ONLY(type_))
 	: self(index)
 #ifdef _DEBUG
 	, type(type_)
@@ -15,10 +15,10 @@ Machine<TC, TD, TMS>::Fork::Fork(const Index index,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <unsigned TCapacity>
 unsigned
-Machine<TC, TD, TMS>::StateRegistryT<TCapacity>::add(const TypeInfo stateType) {
+M<TC, TMS>::StateRegistryT<TCapacity>::add(const TypeInfo stateType) {
 	const unsigned index = _typeToIndex.count();
 
 	HSFM_CHECKED(_typeToIndex.insert(*stateType, index));
@@ -30,130 +30,139 @@ Machine<TC, TD, TMS>::StateRegistryT<TCapacity>::add(const TypeInfo stateType) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma region State
+#pragma region Injections
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_B<TI, TR...>::widePreSubstitute(Context& context,
-													   const Time time) const
-{
-	TI::preSubstitute(context, time);
-	_B<TR...>::widePreSubstitute(context, time);
+M<TC, TMS>::_B<TI, TR...>::widePreSubstitute(Context& context) const {
+	TI::preSubstitute(context);
+	_B<TR...>::widePreSubstitute(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_B<TI, TR...>::widePreEnter(Context& context,
-												  const Time time)
-{
-	TI::preEnter(context, time);
-	_B<TR...>::widePreEnter(context, time);
+M<TC, TMS>::_B<TI, TR...>::widePreEnter(Context& context) {
+	TI::preEnter(context);
+	_B<TR...>::widePreEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_B<TI, TR...>::widePreUpdate(Context& context,
-												   const Time time)
-{
-	TI::preUpdate(context, time);
-	_B<TR...>::widePreUpdate(context, time);
+M<TC, TMS>::_B<TI, TR...>::widePreUpdate(Context& context) {
+	TI::preUpdate(context);
+	_B<TR...>::widePreUpdate(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_B<TI, TR...>::widePreTransition(Context& context,
-													   const Time time) const
-{
-	TI::preTransition(context, time);
-	_B<TR...>::widePreTransition(context, time);
+M<TC, TMS>::_B<TI, TR...>::widePreTransition(Context& context) const {
+	TI::preTransition(context);
+	_B<TR...>::widePreTransition(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
+template <typename TI, typename... TR>
+template <typename TEvent>
+void
+M<TC, TMS>::_B<TI, TR...>::widePreReact(const TEvent& event,
+										Context& context)
+{
+	TI::preReact(event, context);
+	_B<TR...>::widePreReact(event, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
 template <typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_B<TI, TR...>::widePostLeave(Context& context,
-												   const Time time)
-{
-	TI::postLeave(context, time);
-	_B<TR...>::widePostLeave(context, time);
+M<TC, TMS>::_B<TI, TR...>::widePostLeave(Context& context) {
+	TI::postLeave(context);
+	_B<TR...>::widePostLeave(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI>
 void
-Machine<TC, TD, TMS>::_B<TI>::widePreSubstitute(Context& context,
-												const Time time) const
-{
-	TI::preSubstitute(context, time);
+M<TC, TMS>::_B<TI>::widePreSubstitute(Context& context) const {
+	TI::preSubstitute(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI>
 void
-Machine<TC, TD, TMS>::_B<TI>::widePreEnter(Context& context,
-										   const Time time)
-{
-	TI::preEnter(context, time);
+M<TC, TMS>::_B<TI>::widePreEnter(Context& context) {
+	TI::preEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI>
 void
-Machine<TC, TD, TMS>::_B<TI>::widePreUpdate(Context& context,
-											const Time time)
-{
-	TI::preUpdate(context, time);
+M<TC, TMS>::_B<TI>::widePreUpdate(Context& context) {
+	TI::preUpdate(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI>
 void
-Machine<TC, TD, TMS>::_B<TI>::widePreTransition(Context& context,
-												const Time time) const
-{
-	TI::preTransition(context, time);
+M<TC, TMS>::_B<TI>::widePreTransition(Context& context) const {
+	TI::preTransition(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TI>
+template <typename TEvent>
 void
-Machine<TC, TD, TMS>::_B<TI>::widePostLeave(Context& context,
-											const Time time)
+M<TC, TMS>::_B<TI>::widePreReact(const TEvent& event,
+								 Context& context)
 {
-	TI::postLeave(context, time);
+	TI::preReact(event, context);
 }
 
-//==============================================================================
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
+template <typename TI>
+void
+M<TC, TMS>::_B<TI>::widePostLeave(Context& context) {
+	TI::postLeave(context);
+}
+
+#pragma endregion
+
+////////////////////////////////////////////////////////////////////////////////
+
+#pragma region State
+
+template <typename TC, unsigned TMS>
 template <typename T>
-Machine<TC, TD, TMS>::_S<T>::_S(StateRegistry& stateRegistry,
-								const Parent parent,
-								Parents& stateParents,
-								Parents& /*forkParents*/,
-								ForkPointers& /*forkPointers*/)
+M<TC, TMS>::_S<T>::_S(StateRegistry& stateRegistry,
+					  const Parent parent,
+					  Parents& stateParents,
+					  Parents& /*forkParents*/,
+					  ForkPointers& /*forkPointers*/)
 {
 	const auto id = stateRegistry.add(TypeInfo::get<T>());
 	stateParents[id] = parent;
@@ -161,98 +170,90 @@ Machine<TC, TD, TMS>::_S<T>::_S(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T>
 void
-Machine<TC, TD, TMS>::_S<T>::deepEnterInitial(Context& context,
-											  const Time time)
-{
-	deepEnter(context, time);
+M<TC, TMS>::_S<T>::deepEnterInitial(Context& context) {
+	deepEnter(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T>
 bool
-Machine<TC, TD, TMS>::_S<T>::deepSubstitute(Control& control,
-											Context& context,
-											const Time time) const
+M<TC, TMS>::_S<T>::deepSubstitute(Control& control,
+								  Context& context) const
 {
 	const unsigned requestCountBefore = control.requestCount();
 
-	_client.widePreSubstitute(context, time);
-	_client.substitute(control, context, time);
+	_client.widePreSubstitute(context);
+	_client.substitute(control, context);
 
 	return requestCountBefore < control.requestCount();
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T>
 void
-Machine<TC, TD, TMS>::_S<T>::deepLeave(Context& context,
-									   const Time time)
-{
-	_client.leave(context, time);
-	_client.widePostLeave(context, time);
+M<TC, TMS>::_S<T>::deepLeave(Context& context) {
+	_client.leave(context);
+	_client.widePostLeave(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T>
 void
-Machine<TC, TD, TMS>::_S<T>::deepEnter(Context& context,
-									   const Time time)
-{
-	_client.widePreEnter(context, time);
-	_client.enter(context, time);
+M<TC, TMS>::_S<T>::deepEnter(Context& context) {
+	_client.widePreEnter(context);
+	_client.enter(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T>
 bool
-Machine<TC, TD, TMS>::_S<T>::deepUpdateAndTransition(Control& control,
-													 Context& context,
-													 const Time time)
+M<TC, TMS>::_S<T>::deepUpdateAndTransition(Control& control,
+										   Context& context)
 {
-	_client.widePreUpdate(context, time);
-	_client.update(context, time);
+	_client.widePreUpdate(context);
+	_client.update(context);
 
 	const unsigned requestCountBefore = control.requestCount();
 
-	_client.widePreTransition(context, time);
-	_client.transition(control, context, time);
+	_client.widePreTransition(context);
+	_client.transition(control, context);
 
 	return requestCountBefore < control.requestCount();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T>
 void
-Machine<TC, TD, TMS>::_S<T>::deepUpdate(Context& context,
-										const Time time)
-{
-	_client.widePreUpdate(context, time);
-	_client.update(context, time);
+M<TC, TMS>::_S<T>::deepUpdate(Context& context) {
+	_client.widePreUpdate(context);
+	_client.update(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T>
-template <typename TCallable>
+template <typename TEvent>
 void
-Machine<TC, TD, TMS>::_S<T>::deepInvoke(TCallable callable) {
-	using Argument = typename detail::CallableTraits<TCallable>::Argument;
-
-	visit<TCallable, typename std::remove_reference<Argument>::type>(callable);
+M<TC, TMS>::_S<T>::deepReact(const TEvent& event,
+							 Control& control,
+							 Context& context)
+{
+	_client.widePreReact(event, context);
+	_client.react(event, control, context);
 }
 
 #pragma endregion
@@ -261,16 +262,16 @@ Machine<TC, TD, TMS>::_S<T>::deepInvoke(TCallable callable) {
 
 #pragma region Composite::Substate
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
-															const Index fork,
-															Parents& stateParents,
-															Parents& forkParents,
-															ForkPointers& forkPointers)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
+												  const Index fork,
+												  Parents& stateParents,
+												  Parents& forkParents,
+												  ForkPointers& forkPointers)
 	: initial(stateRegistry,
-			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename TI::Client>()),
+			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<TI>()),
 			  stateParents,
 			  forkParents,
 			  forkPointers)
@@ -279,26 +280,24 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& state
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context,
-																		 const Time time)
-{
-	initial.deepEnterInitial(context, time);
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context) {
+	initial.deepEnterInitial(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardRequest(const unsigned prong,
-																		   const enum Transition::Type transition)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardRequest(const unsigned prong,
+																 const enum Transition::Type transition)
 {
-	if (ProngIndex == prong)
+	if (prong == ProngIndex)
 		initial.deepForwardRequest(transition);
 	else
 		remaining.wideForwardRequest(prong, transition);
@@ -306,22 +305,32 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardRequest(const
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideRequestRestart() {
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideRequestRemain() {
+	initial.deepRequestRemain();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideRequestResume(const unsigned prong) {
-	if (ProngIndex == prong)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideRequestResume(const unsigned prong) {
+	if (prong == ProngIndex)
 		initial.deepRequestResume();
 	else
 		remaining.wideRequestResume(prong);
@@ -329,132 +338,127 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideRequestResume(const 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
-																			  Control& control,
-																			  Context& context,
-																			  const Time time) const
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
+																	Control& control,
+																	Context& context) const
 {
-	if (ProngIndex == prong)
-		initial.deepForwardSubstitute(control, context, time);
+	if (prong == ProngIndex)
+		initial.deepForwardSubstitute(control, context);
 	else
-		remaining.wideForwardSubstitute(prong, control, context, time);
+		remaining.wideForwardSubstitute(prong, control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(const unsigned prong,
-																	   Control& control,
-																	   Context& context,
-																	   const Time time) const
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(const unsigned prong,
+															 Control& control,
+															 Context& context) const
 {
-	if (ProngIndex == prong)
-		initial.deepSubstitute(control, context, time);
+	if (prong == ProngIndex)
+		initial.deepSubstitute(control, context);
 	else
-		remaining.wideSubstitute(prong, control, context, time);
+		remaining.wideSubstitute(prong, control, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeTo(const unsigned prong,
-																	 Context& context,
-																	 const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeTo(const unsigned prong,
+														   Context& context)
 {
-	if (ProngIndex == prong)
-		initial.deepChangeToRequested(context, time);
+	if (prong == ProngIndex)
+		initial.deepChangeToRequested(context);
 	else
-		remaining.wideChangeTo(prong, context, time);
+		remaining.wideChangeTo(prong, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnter(const unsigned prong,
-																  Context& context,
-																  const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnter(const unsigned prong,
+														Context& context)
 {
-	if (ProngIndex == prong)
-		initial.deepEnter(context, time);
+	if (prong == ProngIndex)
+		initial.deepEnter(context);
 	else
-		remaining.wideEnter(prong, context, time);
+		remaining.wideEnter(prong, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLeave(const unsigned prong,
-																  Context& context,
-																  const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLeave(const unsigned prong,
+														Context& context)
 {
-	if (ProngIndex == prong)
-		initial.deepLeave(context, time);
+	if (prong == ProngIndex)
+		initial.deepLeave(context);
 	else
-		remaining.wideLeave(prong, context, time);
+		remaining.wideLeave(prong, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 bool
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(const unsigned prong,
-																				Control& control,
-																				Context& context,
-																				const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(const unsigned prong,
+																	  Control& control,
+																	  Context& context)
 {
-	return ProngIndex == prong ?
-		initial.deepUpdateAndTransition(control, context, time) :
-		remaining.wideUpdateAndTransition(prong, control, context, time);
+	return prong == ProngIndex ?
+		initial.deepUpdateAndTransition(control, context) :
+		remaining.wideUpdateAndTransition(prong, control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigned prong,
-																   Context& context,
-																   const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigned prong,
+														 Context& context)
 {
-	if (ProngIndex == prong)
-		initial.deepUpdate(context, time);
+	if (prong == ProngIndex)
+		initial.deepUpdate(context);
 	else
-		remaining.wideUpdate(prong, context, time);
+		remaining.wideUpdate(prong, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
-template <typename TCallable>
+template <typename TEvent>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideInvoke(const unsigned prong,
-																   TCallable callable)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideReact(const unsigned prong,
+														const TEvent& event,
+														Control& control,
+														Context& context)
 {
-	if (ProngIndex == prong)
-		initial.deepInvoke(callable);
+	if (prong == ProngIndex)
+		initial.deepReact(event, control, context);
 	else
-		remaining.wideInvoke(prong, callable);
+		remaining.wideReact(prong, event, control, context);
 }
 
 #pragma endregion
@@ -463,16 +467,16 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideInvoke(const unsigne
 
 #pragma region Composite::Substate
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
-													 const Index fork,
-													 Parents& stateParents,
-													 Parents& forkParents,
-													 ForkPointers& forkPointers)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
+										   const Index fork,
+										   Parents& stateParents,
+										   Parents& forkParents,
+										   ForkPointers& forkPointers)
 	: initial(stateRegistry,
-			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename TI::Client>()),
+			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<TI>()),
 			  stateParents,
 			  forkParents,
 			  forkPointers)
@@ -480,173 +484,176 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistr
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context,
-																  const Time time)
-{
-	initial.deepEnterInitial(context, time);
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
+	initial.deepEnterInitial(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsigned HSFM_ASSERT_ONLY(prong),
-																	const enum Transition::Type transition)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsigned HSFM_ASSERT_ONLY(prong),
+														  const enum Transition::Type transition)
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
 	initial.deepForwardRequest(transition);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRestart() {
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRemain() {
+	initial.deepRequestRemain();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestResume(const unsigned HSFM_ASSERT_ONLY(prong)) {
-	assert(ProngIndex == prong);
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestResume(const unsigned HSFM_ASSERT_ONLY(prong)) {
+	assert(prong == ProngIndex);
 
 	initial.deepRequestResume();
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
-																	   Control& control,
-																	   Context& context,
-																	   const Time time) const
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
+															 Control& control,
+															 Context& context) const
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
-	initial.deepForwardSubstitute(control, context, time);
+	initial.deepForwardSubstitute(control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
-																Control& control,
-																Context& context,
-																const Time time) const
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
+													  Control& control,
+													  Context& context) const
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
-	initial.deepSubstitute(control, context, time);
+	initial.deepSubstitute(control, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeTo(const unsigned HSFM_ASSERT_ONLY(prong),
-															  Context& context,
-															  const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeTo(const unsigned HSFM_ASSERT_ONLY(prong),
+													Context& context)
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
-	initial.deepChangeToRequested(context, time);
+	initial.deepChangeToRequested(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_ASSERT_ONLY(prong),
-														   Context& context,
-														   const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_ASSERT_ONLY(prong),
+												 Context& context)
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
-	initial.deepEnter(context, time);
+	initial.deepEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_ASSERT_ONLY(prong),
-														   Context& context,
-														   const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_ASSERT_ONLY(prong),
+												 Context& context)
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
-	initial.deepLeave(context, time);
+	initial.deepLeave(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 bool
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(const unsigned HSFM_ASSERT_ONLY(prong),
-																		 Control& control,
-																		 Context& context,
-																		 const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(const unsigned HSFM_ASSERT_ONLY(prong),
+															   Control& control,
+															   Context& context)
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
-	return initial.deepUpdateAndTransition(control, context, time);
+	return initial.deepUpdateAndTransition(control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_ASSERT_ONLY(prong),
-															Context& context,
-															const Time time)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_ASSERT_ONLY(prong),
+												  Context& context)
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
-	initial.deepUpdate(context, time);
+	initial.deepUpdate(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
-template <typename TCallable>
+template <typename TEvent>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideInvoke(const unsigned HSFM_ASSERT_ONLY(prong),
-															TCallable callable)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideReact(const unsigned HSFM_ASSERT_ONLY(prong),
+												 const TEvent& event,
+												 Control& control,
+												 Context& context)
 {
-	assert(ProngIndex == prong);
+	assert(prong == ProngIndex);
 
-	initial.deepInvoke(callable);
+	initial.deepReact(event, control, context);
 }
 
 #pragma endregion
@@ -655,13 +662,13 @@ Machine<TC, TD, TMS>::_C<T, TS...>::Sub<TN, TI>::wideInvoke(const unsigned HSFM_
 
 #pragma region Composite
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-Machine<TC, TD, TMS>::_C<T, TS...>::_C(StateRegistry& stateRegistry,
-									   const Parent parent,
-									   Parents& stateParents,
-									   Parents& forkParents,
-									   ForkPointers& forkPointers)
+M<TC, TMS>::_C<T, TS...>::_C(StateRegistry& stateRegistry,
+							 const Parent parent,
+							 Parents& stateParents,
+							 Parents& forkParents,
+							 ForkPointers& forkPointers)
 	: ForkT<T>(static_cast<Index>(forkPointers << this), parent, forkParents)
 	, _state(stateRegistry, parent, stateParents, forkParents, forkPointers)
 	, _subStates(stateRegistry, Fork::self, stateParents, forkParents, forkPointers)
@@ -669,30 +676,35 @@ Machine<TC, TD, TMS>::_C<T, TS...>::_C(StateRegistry& stateRegistry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepEnterInitial(Context& context,
-													 const Time time)
-{
-	_state.deepEnter(context, time);
+M<TC, TMS>::_C<T, TS...>::deepEnterInitial(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX &&
+		   Fork::requested == INVALID_INDEX);
 
-	Fork::active = 0;
 	HSFM_DEBUG_ONLY(Fork::activeType = TypeInfo::get<typename SubStates::Initial::Client>());
+	Fork::active = 0;
 
-	_subStates.wideEnterInitial(context, time);
+	_state.deepEnter(context);
+	_subStates.wideEnterInitial(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepForwardRequest(const enum Transition::Type transition) {
+M<TC, TMS>::_C<T, TS...>::deepForwardRequest(const enum Transition::Type transition) {
 	if (Fork::requested != INVALID_INDEX)
 		_subStates.wideForwardRequest(Fork::requested, transition);
 	else
 		switch (transition) {
+		case Transition::Remain:
+			deepRequestRemain();
+			break;
+
 		case Transition::Restart:
 			deepRequestRestart();
 			break;
@@ -708,168 +720,187 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepForwardRequest(const enum Transition::Ty
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepRequestRestart() {
+M<TC, TMS>::_C<T, TS...>::deepRequestRemain() {
+	if (Fork::active == INVALID_INDEX) {
+		HSFM_DEBUG_ONLY(Fork::requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
+		Fork::requested = 0;
+	}
+
+	_subStates.wideRequestRemain();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_C<T, TS...>::deepRequestRestart() {
+	HSFM_DEBUG_ONLY(Fork::requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
 	Fork::requested = 0;
-	HSFM_DEBUG_ONLY(Fork::requestedType.clear());
 
 	_subStates.wideRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepRequestResume() {
-	Fork::requested = Fork::resumable != INVALID_INDEX ?
-		Fork::resumable : 0;
-
-#ifdef _DEBUG
-	if (Fork::resumable != INVALID_INDEX)
-		Fork::requestedType = Fork::resumableType;
-	else
-		Fork::requestedType.clear();
-#endif
+M<TC, TMS>::_C<T, TS...>::deepRequestResume() {
+	if (Fork::resumable != INVALID_INDEX) {
+		HSFM_DEBUG_ONLY(Fork::requestedType = Fork::resumableType);
+		Fork::requested = Fork::resumable;
+	} else {
+		HSFM_DEBUG_ONLY(Fork::requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
+		Fork::requested = 0;
+	}
 
 	_subStates.wideRequestResume(Fork::requested);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepForwardSubstitute(Control& control,
-														  Context& context,
-														  const Time time) const
+M<TC, TMS>::_C<T, TS...>::deepForwardSubstitute(Control& control,
+												Context& context) const
 {
 	assert(Fork::requested != INVALID_INDEX);
 
 	if (Fork::requested == Fork::active)
-		_subStates.wideForwardSubstitute(Fork::requested, control, context, time);
+		_subStates.wideForwardSubstitute(Fork::requested, control, context);
 	else
-		_subStates.wideSubstitute(Fork::requested, control, context, time);
+		_subStates.wideSubstitute(Fork::requested, control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepSubstitute(Control& control,
-												   Context& context,
-												   const Time time) const
+M<TC, TMS>::_C<T, TS...>::deepSubstitute(Control& control,
+										 Context& context) const
 {
-	assert(Fork::requested != INVALID_INDEX);
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::requested != INVALID_INDEX);
 
-	if (!_state.deepSubstitute(control, context, time))
-		_subStates.wideSubstitute(Fork::requested, control, context, time);
+	if (!_state.deepSubstitute(control, context))
+		_subStates.wideSubstitute(Fork::requested, control, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context,
-														  const Time time)
-{
+M<TC, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context) {
+	assert(Fork::active != INVALID_INDEX);
+
 	if (Fork::requested != INVALID_INDEX) {
-		if (Fork::active == Fork::requested)
-			_subStates.wideChangeTo(Fork::requested, context, time);
+		if (Fork::requested == Fork::active)
+			_subStates.wideChangeTo(Fork::requested, context);
 		else {
-			_subStates.wideLeave(Fork::active, context, time);
+			_subStates.wideLeave(Fork::active, context);
 
-			Fork::resumable = Fork::active;
 			HSFM_DEBUG_ONLY(Fork::resumableType = Fork::activeType);
+			Fork::resumable = Fork::active;
 
-			Fork::active = Fork::requested;
 			HSFM_DEBUG_ONLY(Fork::activeType = Fork::requestedType);
+			Fork::active = Fork::requested;
 
-			Fork::requested = INVALID_INDEX;
 			HSFM_DEBUG_ONLY(Fork::requestedType.clear());
+			Fork::requested = INVALID_INDEX;
 
-			_subStates.wideEnter(Fork::active, context, time);
+			_subStates.wideEnter(Fork::active, context);
 		}
 	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepEnter(Context& context,
-											  const Time time)
-{
-	_state.deepEnter(context, time);
+M<TC, TMS>::_C<T, TS...>::deepEnter(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::requested != INVALID_INDEX);
 
-	assert(Fork::active == INVALID_INDEX);
-	std::swap(Fork::active, Fork::requested);
+	HSFM_DEBUG_ONLY(Fork::activeType = Fork::requestedType);
+	Fork::active = Fork::requested;
 
-	_subStates.wideEnter(Fork::active, context, time);
+	HSFM_DEBUG_ONLY(Fork::requestedType.clear());
+	Fork::requested = INVALID_INDEX;
+
+	_state.deepEnter(context);
+	_subStates.wideEnter(Fork::active, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepLeave(Context& context,
-											  const Time time)
-{
-	_subStates.wideLeave(Fork::active, context, time);
+M<TC, TMS>::_C<T, TS...>::deepLeave(Context& context) {
+	assert(Fork::active != INVALID_INDEX);
 
-	Fork::resumable = Fork::active;
+	_subStates.wideLeave(Fork::active, context);
+	_state.deepLeave(context);
+
 	HSFM_DEBUG_ONLY(Fork::resumableType = Fork::activeType);
+	Fork::resumable = Fork::active;
 
-	Fork::active = INVALID_INDEX;
 	HSFM_DEBUG_ONLY(Fork::activeType.clear());
-
-	_state.deepLeave(context, time);
+	Fork::active = INVALID_INDEX;
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 bool
-Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdateAndTransition(Control& control,
-															Context& context,
-															const Time time)
+M<TC, TMS>::_C<T, TS...>::deepUpdateAndTransition(Control& control,
+												  Context& context)
 {
-	if (_state.deepUpdateAndTransition(control, context, time)) {
-		_subStates.wideUpdate(Fork::active, context, time);
+	assert(Fork::active != INVALID_INDEX);
+
+	if (_state.deepUpdateAndTransition(control, context)) {
+		_subStates.wideUpdate(Fork::active, context);
 
 		return true;
 	} else
-		return _subStates.wideUpdateAndTransition(Fork::active, control, context, time);
+		return _subStates.wideUpdateAndTransition(Fork::active, control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepUpdate(Context& context,
-											   const Time time)
-{
-	_state.deepUpdate(context, time);
-	_subStates.wideUpdate(Fork::active, context, time);
+M<TC, TMS>::_C<T, TS...>::deepUpdate(Context& context) {
+	assert(Fork::active != INVALID_INDEX);
+
+	_state.deepUpdate(context);
+	_subStates.wideUpdate(Fork::active, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TCallable>
+template <typename TEvent>
 void
-Machine<TC, TD, TMS>::_C<T, TS...>::deepInvoke(TCallable callable) {
-	_state.deepInvoke(callable);
-	_subStates.wideInvoke(Fork::active, callable);
+M<TC, TMS>::_C<T, TS...>::deepReact(const TEvent& event,
+									Control& control,
+									Context& context)
+{
+	assert(Fork::active != INVALID_INDEX);
+
+	_state.deepReact(event, control, context);
+	_subStates.wideReact(Fork::active, event, control, context);
 }
 
 #pragma endregion
@@ -878,169 +909,196 @@ Machine<TC, TD, TMS>::_C<T, TS...>::deepInvoke(TCallable callable) {
 
 #pragma region Orthogonal::Substate
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::Sub(StateRegistry& stateRegistry,
-														const Parent parent,
-														Parents& stateParents,
-														Parents& forkParents,
-														ForkPointers& forkPointers)
-	: initial(stateRegistry, parent, stateParents, forkParents, forkPointers)
-	, remaining(stateRegistry, parent, stateParents, forkParents, forkPointers)
+template <unsigned TN, typename TI, typename... TR>
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
+											  const Index fork,
+											  Parents& stateParents,
+											  Parents& forkParents,
+											  ForkPointers& forkPointers)
+	: initial(stateRegistry,
+			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename Initial::Client>()),
+			  stateParents,
+			  forkParents,
+			  forkPointers)
+	, remaining(stateRegistry, fork, stateParents, forkParents, forkPointers)
 {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideEnterInitial(Context& context,
-																	 const Time time)
-{
-	initial.deepEnterInitial(context, time);
-	remaining.wideEnterInitial(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context) {
+	initial.deepEnterInitial(context);
+	remaining.wideEnterInitial(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideForwardRequest(const enum Transition::Type transition) {
-	initial.deepForwardRequest(transition);
-	remaining.wideForwardRequest(transition);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardRequest(const unsigned prong,
+																 const enum Transition::Type transition)
+{
+	if (prong == ProngIndex) {
+		initial.deepForwardRequest(transition);
+		remaining.wideForwardRequest(prong, Transition::Remain);
+	} else {
+		initial.deepForwardRequest(Transition::Remain);
+		remaining.wideForwardRequest(prong, transition);
+	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideRequestRestart() {
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideRequestRemain() {
+	initial.deepRequestRemain();
+	remaining.wideRequestRemain();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideRequestRestart() {
 	initial.deepRequestRestart();
 	remaining.wideRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideRequestResume() {
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideRequestResume() {
 	initial.deepRequestResume();
 	remaining.wideRequestResume();
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideForwardSubstitute(Control& control,
-																		  Context& context,
-																		  const Time time) const
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
+																	Control& control,
+																	Context& context) const
 {
-	initial.deepForwardSubstitute(control, context, time);
-	remaining.wideForwardSubstitute(control, context, time);
+	if (prong == ProngIndex)
+		initial.deepForwardSubstitute(control, context);
+	else
+		remaining.wideForwardSubstitute(prong, control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideSubstitute(Control& control,
-																   Context& context,
-																   const Time time) const
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(Control& control,
+																	Context& context) const
 {
-	initial.deepSubstitute(control, context, time);
-	remaining.wideSubstitute(control, context, time);
+	initial.deepForwardSubstitute(control, context);
+	remaining.wideForwardSubstitute(control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(Control& control,
+															 Context& context) const
+{
+	initial.deepSubstitute(control, context);
+	remaining.wideSubstitute(control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(Context& context) {
+	initial.deepChangeToRequested(context);
+	remaining.wideChangeToRequested(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideChangeToRequested(Context& context,
-																		  const Time time)
-{
-	initial.deepChangeToRequested(context, time);
-	remaining.wideChangeToRequested(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnter(Context& context) {
+	initial.deepEnter(context);
+	remaining.wideEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideEnter(Context& context,
-															  const Time time)
-{
-	initial.deepEnter(context, time);
-	remaining.wideEnter(context, time);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TD, unsigned TMS>
-template <typename T, typename... TS>
-template <typename TI, typename... TR>
-void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideLeave(Context& context,
-															  const Time time)
-{
-	initial.deepLeave(context, time);
-	remaining.wideLeave(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideLeave(Context& context) {
+	initial.deepLeave(context);
+	remaining.wideLeave(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 bool
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideUpdateAndTransition(Control& control,
-																			Context& context,
-																			const Time time)
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(Control& control,
+																	  Context& context)
 {
-	return initial.deepUpdateAndTransition(control, context, time)
-		|| remaining.wideUpdateAndTransition(control, context, time);
+	return initial.deepUpdateAndTransition(control, context)
+		|| remaining.wideUpdateAndTransition(control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
+template <unsigned TN, typename TI, typename... TR>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideUpdate(Context& context,
-															   const Time time)
-{
-	initial.deepUpdate(context, time);
-	remaining.wideUpdate(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(Context& context) {
+	initial.deepUpdate(context);
+	remaining.wideUpdate(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI, typename... TR>
-template <typename TCallable>
+template <unsigned TN, typename TI, typename... TR>
+template <typename TEvent>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideInvoke(TCallable callable) {
-	initial.deepInvoke(callable);
-
-	remaining.wideInvoke(callable);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideReact(const TEvent& event,
+														Control& control,
+														Context& context)
+{
+	initial.deepReact(event, control, context);
+	remaining.wideReact(event, control, context);
 }
 
 #pragma endregion
@@ -1049,155 +1107,181 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI, TR...>::wideInvoke(TCallable callabl
 
 #pragma region Orthogonal::Substate
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::Sub(StateRegistry& stateRegistry,
-												 const Parent parent,
-												 Parents& stateParents,
-												 Parents& forkParents,
-												 ForkPointers& forkPointers)
-	: initial(stateRegistry, parent, stateParents, forkParents, forkPointers)
+template <unsigned TN, typename TI>
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
+										   const Index fork,
+										   Parents& stateParents,
+										   Parents& forkParents,
+										   ForkPointers& forkPointers)
+	: initial(stateRegistry,
+			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename Initial::Client>()),
+			  stateParents,
+			  forkParents,
+			  forkPointers)
 {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideEnterInitial(Context& context,
-															  const Time time)
-{
-	initial.deepEnterInitial(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
+	initial.deepEnterInitial(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideForwardRequest(const enum Transition::Type transition) {
-	initial.deepForwardRequest(transition);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsigned HSFM_ASSERT_ONLY(prong),
+														  const enum Transition::Type transition)
+{
+	assert(prong <= ProngIndex);
+
+	if (prong == ProngIndex)
+		initial.deepForwardRequest(transition);
+	else
+		initial.deepForwardRequest(Transition::Remain);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideRequestRestart() {
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideRequestRemain() {
+	initial.deepRequestRemain();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideRequestResume() {
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideRequestResume() {
 	initial.deepRequestResume();
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideForwardSubstitute(Control& control,
-																   Context& context,
-																   const Time time) const
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
+															 Control& control,
+															 Context& context) const
 {
-	initial.deepForwardSubstitute(control, context, time);
+	assert(prong == ProngIndex);
+
+	initial.deepForwardSubstitute(control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideSubstitute(Control& control,
-															Context& context,
-															const Time time) const
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(Control& control,
+															 Context& context) const
 {
-	initial.deepSubstitute(control, context, time);
+	initial.deepForwardSubstitute(control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideSubstitute(Control& control,
+													  Context& context) const
+{
+	initial.deepSubstitute(control, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideChangeToRequested(Context& context,
-																   const Time time)
-{
-	initial.deepChangeToRequested(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideChangeToRequested(Context& context) {
+	initial.deepChangeToRequested(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideEnter(Context& context,
-													   const Time time)
-{
-	initial.deepEnter(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnter(Context& context) {
+	initial.deepEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideLeave(Context& context,
-													   const Time time)
-{
-	initial.deepLeave(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideLeave(Context& context) {
+	initial.deepLeave(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 bool
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideUpdateAndTransition(Control& control,
-																	 Context& context,
-																	 const Time time)
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(Control& control,
+															   Context& context)
 {
-	return initial.deepUpdateAndTransition(control, context, time);
+	return initial.deepUpdateAndTransition(control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
+template <unsigned TN, typename TI>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideUpdate(Context& context,
-														const Time time)
-{
-	initial.deepUpdate(context, time);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdate(Context& context) {
+	initial.deepUpdate(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TI>
-template <typename TCallable>
+template <unsigned TN, typename TI>
+template <typename TEvent>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideInvoke(TCallable callable) {
-	initial.deepInvoke(callable);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideReact(const TEvent& event,
+											 Control& control,
+											 Context& context)
+{
+	initial.deepReact(event, control, context);
 }
 
 #pragma endregion
@@ -1206,154 +1290,215 @@ Machine<TC, TD, TMS>::_O<T, TS...>::Sub<TI>::wideInvoke(TCallable callable) {
 
 #pragma region Orthogonal
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-Machine<TC, TD, TMS>::_O<T, TS...>::_O(StateRegistry& stateRegistry,
-									   const Parent parent,
-									   Parents& stateParents,
-									   Parents& forkParents,
-									   ForkPointers& forkPointers)
-	: _state(stateRegistry, parent, stateParents, forkParents, forkPointers)
-	, _subStates(stateRegistry, parent, stateParents, forkParents, forkPointers)
+M<TC, TMS>::_O<T, TS...>::_O(StateRegistry& stateRegistry,
+							 const Parent parent,
+							 Parents& stateParents,
+							 Parents& forkParents,
+							 ForkPointers& forkPointers)
+	: ForkT<T>(static_cast<Index>(forkPointers << this), parent, forkParents)
+	, _state(stateRegistry, parent, stateParents, forkParents, forkPointers)
+	, _subStates(stateRegistry, Fork::self, stateParents, forkParents, forkPointers)
 {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepEnterInitial(Context& context,
-													 const Time time)
-{
-	_state.deepEnter(context, time);
-	_subStates.wideEnterInitial(context, time);
+M<TC, TMS>::_O<T, TS...>::deepEnterInitial(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX &&
+		   Fork::requested == INVALID_INDEX);
+
+	_state.deepEnter(context);
+	_subStates.wideEnterInitial(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepForwardRequest(const enum Transition::Type transition) {
-	_subStates.wideForwardRequest(transition);
+M<TC, TMS>::_O<T, TS...>::deepForwardRequest(const enum Transition::Type transition) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	if (Fork::requested != INVALID_INDEX)
+		_subStates.wideForwardRequest(Fork::requested, transition);
+	else
+		switch (transition) {
+		case Transition::Remain:
+			deepRequestRemain();
+			break;
+
+		case Transition::Restart:
+			deepRequestRestart();
+			break;
+
+		case Transition::Resume:
+			deepRequestResume();
+			break;
+
+		default:
+			assert(false);
+		}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepRequestRestart() {
+M<TC, TMS>::_O<T, TS...>::deepRequestRemain() {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_subStates.wideRequestRemain();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_O<T, TS...>::deepRequestRestart() {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
 	_subStates.wideRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepRequestResume() {
+M<TC, TMS>::_O<T, TS...>::deepRequestResume() {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
 	_subStates.wideRequestResume();
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepForwardSubstitute(Control& control,
-														  Context& context,
-														  const Time time) const
+M<TC, TMS>::_O<T, TS...>::deepForwardSubstitute(Control& control,
+												Context& context) const
 {
-	_subStates.wideForwardSubstitute(control, context, time);
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	if (Fork::requested != INVALID_INDEX)
+		_subStates.wideForwardSubstitute(Fork::requested, control, context);
+	else
+		_subStates.wideForwardSubstitute(control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepSubstitute(Control& control,
-												   Context& context,
-												   const Time time) const
+M<TC, TMS>::_O<T, TS...>::deepSubstitute(Control& control,
+										 Context& context) const
 {
-	if (!_state.deepSubstitute(control, context, time))
-		_subStates.wideSubstitute(control, context, time);
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	if (!_state.deepSubstitute(control, context))
+		_subStates.wideSubstitute(control, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepChangeToRequested(Context& context,
-														  const Time time)
-{
-	_subStates.wideChangeToRequested(context, time);
+M<TC, TMS>::_O<T, TS...>::deepChangeToRequested(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_subStates.wideChangeToRequested(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepEnter(Context& context,
-											  const Time time)
-{
-	_state.deepEnter(context, time);
-	_subStates.wideEnter(context, time);
+M<TC, TMS>::_O<T, TS...>::deepEnter(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_state.deepEnter(context);
+	_subStates.wideEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepLeave(Context& context,
-											  const Time time)
-{
-	_subStates.wideLeave(context, time);
-	_state.deepLeave(context, time);
+M<TC, TMS>::_O<T, TS...>::deepLeave(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_subStates.wideLeave(context);
+	_state.deepLeave(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 bool
-Machine<TC, TD, TMS>::_O<T, TS...>::deepUpdateAndTransition(Control& control,
-															Context& context,
-															const Time time)
+M<TC, TMS>::_O<T, TS...>::deepUpdateAndTransition(Control& control,
+												  Context& context)
 {
-	if (_state.deepUpdateAndTransition(control, context, time)) {
-		_subStates.wideUpdate(context, time);
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	if (_state.deepUpdateAndTransition(control, context)) {
+		_subStates.wideUpdate(context);
 
 		return true;
 	} else
-		return _subStates.wideUpdateAndTransition(control, context, time);
+		return _subStates.wideUpdateAndTransition(control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepUpdate(Context& context,
-											   const Time time)
-{
-	_state.deepUpdate(context, time);
-	_subStates.wideUpdate(context, time);
+M<TC, TMS>::_O<T, TS...>::deepUpdate(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_state.deepUpdate(context);
+	_subStates.wideUpdate(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
-template <typename TCallable>
+template <typename TEvent>
 void
-Machine<TC, TD, TMS>::_O<T, TS...>::deepInvoke(TCallable callable) {
-	_state.deepInvoke(callable);
-	_subStates.wideInvoke(callable);
+M<TC, TMS>::_O<T, TS...>::deepReact(const TEvent& event,
+									Control& control,
+									Context& context)
+{
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_state.deepReact(event, control, context);
+	_subStates.wideReact(event, control, context);
 }
 
 #pragma endregion
@@ -1362,46 +1507,68 @@ Machine<TC, TD, TMS>::_O<T, TS...>::deepInvoke(TCallable callable) {
 
 #pragma region Root
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TA>
-Machine<TC, TD, TMS>::_R<TA>::_R(Context& context,
-								 const Time time /*= Time{}*/)
+M<TC, TMS>::_R<TA>::_R(Context& context)
 	: _context(context)
 	, _apex(_stateRegistry, Parent(), _stateParents, _forkParents, _forkPointers)
 {
-	_apex.deepEnterInitial(_context, time);
+	_apex.deepEnterInitial(_context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TA>
-Machine<TC, TD, TMS>::_R<TA>::~_R() {
-	_apex.deepLeave(_context, Time{});
+M<TC, TMS>::_R<TA>::~_R() {
+	_apex.deepLeave(_context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TA>
 void
-Machine<TC, TD, TMS>::_R<TA>::update(const Time time) {
+M<TC, TMS>::_R<TA>::update() {
 	Control control(_requests);
-	_apex.deepUpdateAndTransition(control, _context, time);
+	_apex.deepUpdateAndTransition(control, _context);
 
+	processRequests();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename TA>
+template <typename TEvent>
+void
+M<TC, TMS>::_R<TA>::react(const TEvent& event) {
+	Control control(_requests);
+	_apex.deepReact(event, control, _context);
+
+	processRequests();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename TA>
+void
+M<TC, TMS>::_R<TA>::processRequests() {
 	for (unsigned i = 0; i < MaxSubstitutions && _requests.count(); ++i) {
 		unsigned changeCount = 0;
 
-		for (const auto& transition : _requests)
-			switch (transition.type) {
+		for (const auto& request : _requests)
+			switch (request.type) {
 			case Transition::Restart:
 			case Transition::Resume:
-				requestChange(transition);
+				requestImmediate(request);
+
 				++changeCount;
 				break;
 
 			case Transition::Schedule:
-				requestSchedule(transition);
+				requestScheduled(request);
 				break;
 
 			default:
@@ -1411,20 +1578,20 @@ Machine<TC, TD, TMS>::_R<TA>::update(const Time time) {
 
 		if (changeCount > 0) {
 			Control substitutionControl(_requests);
-			_apex.deepForwardSubstitute(substitutionControl, _context, time);
+			_apex.deepForwardSubstitute(substitutionControl, _context);
 		}
 	}
 
-	_apex.deepChangeToRequested(_context, time);
+	_apex.deepChangeToRequested(_context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TA>
 template <typename T>
 bool
-Machine<TC, TD, TMS>::_R<TA>::isActive() {
+M<TC, TMS>::_R<TA>::isActive() {
 	using Type = T;
 
 	const auto stateType = TypeInfo::get<Type>();
@@ -1433,43 +1600,52 @@ Machine<TC, TD, TMS>::_R<TA>::isActive() {
 	for (auto parent = _stateParents[state]; parent; parent = _forkParents[parent.fork]) {
 		const auto& fork = *_forkPointers[parent.fork];
 
-		if (parent.prong != fork.active)
-			return false;
+		if (fork.active == INVALID_INDEX)
+			continue;
+		else
+			return parent.prong == fork.active;
 	}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TA>
 template <typename T>
 bool
-Machine<TC, TD, TMS>::_R<TA>::isResumable() {
+M<TC, TMS>::_R<TA>::isResumable() {
 	using Type = T;
 
 	const auto stateType = TypeInfo::get<Type>();
-	const auto state	 = _stateRegistry[*stateType];
-	const auto parent	 = _stateParents[state];
-	const auto& fork	 = *_forkPointers[parent.fork];
+	const auto state = _stateRegistry[*stateType];
 
-	return parent.prong == fork.resumable;
+	for (auto parent = _stateParents[state]; parent; parent = _forkParents[parent.fork]) {
+		const auto& fork = *_forkPointers[parent.fork];
+
+		if (fork.active == INVALID_INDEX)
+			continue;
+		else
+			return parent.prong == fork.resumable;
+	}
+
+	return false;
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TA>
 void
-Machine<TC, TD, TMS>::_R<TA>::requestChange(const Transition request) {
+M<TC, TMS>::_R<TA>::requestImmediate(const Transition request) {
 	const unsigned state = id(request);
 
 	for (auto parent = _stateParents[state]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
 
-		fork.requested = parent.prong;
 		HSFM_DEBUG_ONLY(fork.requestedType = parent.prongType);
+		fork.requested = parent.prong;
 	}
 
 	_apex.deepForwardRequest(request.type);
@@ -1477,17 +1653,17 @@ Machine<TC, TD, TMS>::_R<TA>::requestChange(const Transition request) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TD, unsigned TMS>
+template <typename TC, unsigned TMS>
 template <typename TA>
 void
-Machine<TC, TD, TMS>::_R<TA>::requestSchedule(const Transition request) {
+M<TC, TMS>::_R<TA>::requestScheduled(const Transition request) {
 	const unsigned state = id(request);
 
 	const auto parent = _stateParents[state];
 	auto& fork = *_forkPointers[parent.fork];
 
-	fork.resumable = parent.prong;
 	HSFM_DEBUG_ONLY(fork.resumableType = parent.prongType);
+	fork.resumable = parent.prong;
 
 	// check that the fork isn't active
 	HSFM_ASSERT_ONLY(const auto forksParent = _stateParents[fork.self]);

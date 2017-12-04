@@ -1,7 +1,6 @@
 #pragma once
 
 #include "detail/array.hpp"
-#include "detail/callable_traits.hpp"
 #include "detail/hash_table.hpp"
 #include "detail/type_info.hpp"
 
@@ -12,8 +11,8 @@ namespace hfsm {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext = void, typename TTime = float, unsigned TMaxSubstitutions = 4>
-class Machine {
+template <typename TContext, unsigned TMaxSubstitutions = 4>
+class M {
 
 	using TypeInfo = detail::TypeInfo;
 
@@ -30,9 +29,11 @@ class Machine {
 
 #pragma region Utility
 
+public:
 	using Context = TContext;
-	using Time = TTime;
+	class Control;
 
+private:
 	using Index = unsigned char;
 	enum : Index { INVALID_INDEX = std::numeric_limits<Index>::max() };
 
@@ -132,6 +133,7 @@ class Machine {
 
 	struct Transition {
 		enum Type {
+			Remain,
 			Restart,
 			Resume,
 			Schedule,
@@ -154,11 +156,6 @@ class Machine {
 	using TransitionQueue = ArrayView<Transition>;
 
 	//----------------------------------------------------------------------
-
-	class Control;
-
-	class TrackedTimed;
-
 	// shortened class names
 	template <typename>
 	struct _S;
@@ -172,11 +169,37 @@ class Machine {
 	template <typename>
 	class _R;
 
+	//----------------------------------------------------------------------
+
+	template <typename... TS>
+	struct WrapState;
+
+	template <typename T>
+	struct WrapState<T> {
+		using Type = _S<T>;
+	};
+
+	template <typename T>
+	struct WrapState<_S<T>> {
+		using Type = _S<T>;
+	};
+
+	template <typename T, typename... TS>
+	struct WrapState<_C<T, TS...>> {
+		using Type = _C<T, TS...>;
+	};
+
+	template <typename T, typename... TS>
+	struct WrapState<_O<T, TS...>> {
+		using Type = _O<T, TS...>;
+	};
+
 #pragma endregion
 
 	//----------------------------------------------------------------------
 
-#pragma region State
+#pragma region Injections
+
 public:
 
 	class Bare {
@@ -184,57 +207,18 @@ public:
 		friend struct _B;
 
 	protected:
-		using Control	 = typename Machine::Control;
-		using Context	 = typename Machine::Context;
-		using Time		 = typename Machine::Time;
-		using Transition = typename Machine::Transition;
+		using Control	 = typename M::Control;
+		using Context	 = typename M::Context;
+		using Transition = typename M::Transition;
 
 	public:
-		inline void preSubstitute(Context&, const Time) const	{}
-		inline void preEnter(Context&, const Time)				{}
-		inline void preUpdate(Context&, const Time)				{}
-		inline void preTransition(Context&, const Time) const	{}
-		inline void postLeave(Context&, const Time)				{}
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	class Tracked
-		: public Bare
-	{
-	public:
-		inline unsigned entryCount() const				{ return _entryCount;			 }
-		inline unsigned updateCountAfterEntry() const	{ return _updateCountAfterEntry; }
-		inline unsigned totalUpdateCount() const		{ return _totalUpdateCount;		 }
-
-		inline void preEnter(Context&, const Time)  {
-			++_entryCount;
-			_updateCountAfterEntry = 0;
-		}
-
-		inline void preUpdate(Context&, const Time) {
-			++_updateCountAfterEntry;
-			++_totalUpdateCount;
-		}
-
-	private:
-		unsigned _entryCount = 0;
-		unsigned _updateCountAfterEntry = 0;
-		unsigned _totalUpdateCount = 0;
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	class Timed
-		: public Bare
-	{
-	public:
-		inline auto entryTime() const					{ return _entryTime;			}
-
-		inline void preEnter(Context&, const Time time)	{ _entryTime = time;			}
-
-	private:
-		Time _entryTime;
+		inline void preSubstitute(Context&) const		{}
+		inline void preEnter(Context&)					{}
+		inline void preUpdate(Context&)					{}
+		inline void preTransition(Context&) const		{}
+		template <typename TEvent>
+		inline void preReact(const TEvent&, Context&)	{}
+		inline void postLeave(Context&)					{}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -250,11 +234,13 @@ private:
 		: public TInjection
 		, public _B<TRest...>
 	{
-		inline void widePreSubstitute(Context& _, const Time time) const;
-		inline void widePreEnter(Context& _, const Time time);
-		inline void widePreUpdate(Context& _, const Time time);
-		inline void widePreTransition(Context& _, const Time time) const;
-		inline void widePostLeave(Context& _, const Time time);
+		inline void widePreSubstitute(Context& context) const;
+		inline void widePreEnter(Context& context);
+		inline void widePreUpdate(Context& context);
+		inline void widePreTransition(Context& context) const;
+		template <typename TEvent>
+		inline void widePreReact(const TEvent& event, Context& context);
+		inline void widePostLeave(Context& context);
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -263,20 +249,28 @@ private:
 	struct _B<TInjection>
 		: public TInjection
 	{
-		inline void substitute(Control&, Context&, const Time) const {}
-		inline void enter(Context&, const Time) {}
-		inline void update(Context&, const Time) {}
-		inline void transition(Control&, Context&, const Time) const {}
-		inline void leave(Context&, const Time) {}
+		inline void substitute(Control&, Context) const			{}
+		inline void enter(Context)								{}
+		inline void update(Context)								{}
+		inline void transition(Control&, Context) const			{}
+		template <typename TEvent>
+		inline void react(const TEvent&, Control&, Context&)	{}
+		inline void leave(Context)								{}
 
-		inline void widePreSubstitute(Context& _, const Time time) const;
-		inline void widePreEnter(Context& _, const Time time);
-		inline void widePreUpdate(Context& _, const Time time);
-		inline void widePreTransition(Context& _, const Time time) const;
-		inline void widePostLeave(Context& _, const Time time);
+		inline void widePreSubstitute(Context& context) const;
+		inline void widePreEnter(Context& context);
+		inline void widePreUpdate(Context& context);
+		inline void widePreTransition(Context& context) const;
+		template <typename TEvent>
+		inline void widePreReact(const TEvent& event, Context& context);
+		inline void widePostLeave(Context& context);
 	};
 
+#pragma endregion
+
 	//----------------------------------------------------------------------
+
+#pragma region State
 
 	template <typename T>
 	struct _S {
@@ -288,6 +282,7 @@ private:
 			StateCount	 = 1,
 			ForkCount	 = 0,
 			ProngCount	 = 0,
+			Width		 = 1,
 		};
 
 		_S(StateRegistry& stateRegistry,
@@ -296,49 +291,25 @@ private:
 		   Parents& forkParents,
 		   ForkPointers& forkPointers);
 
-		inline void deepEnterInitial(Context& context, const Time time);
+		inline void deepEnterInitial(Context& context);
 
-		inline void deepForwardRequest(const enum Transition::Type /*type*/)			{}
-		inline void deepRequestRestart()												{}
-		inline void deepRequestResume()													{}
+		inline void deepForwardRequest(const enum Transition::Type)				{}
+		inline void deepRequestRemain()											{}
+		inline void deepRequestRestart()										{}
+		inline void deepRequestResume()											{}
 
-		inline void deepForwardSubstitute(Control& /*control*/,
-										  Context& /*context*/,
-										  const Time /*time*/) const					{}
+		inline void deepForwardSubstitute(Control&, Context&) const				{}
+		inline bool deepSubstitute(Control& control, Context& context) const;
 
-		inline bool deepSubstitute(Control& control,
-								   Context& context,
-								   const Time time) const;
+		inline void deepChangeToRequested(Context&)	{}
+		inline void deepEnter(Context& context);
+		inline void deepLeave(Context& context);
 
-		inline void deepChangeToRequested(Context& /*context*/, const Time /*time*/)	{}
-		inline void deepEnter(Context& context, const Time time);
-		inline void deepLeave(Context& context, const Time time);
-
-		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
-		inline void deepUpdate(Context& context, const Time time);
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		inline bool deepUpdateAndTransition(Control& control, Context& context);
+		inline void deepUpdate(Context& context);
 		
-		template <typename TCallable>
-		inline void deepInvoke(TCallable callable);
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		template <typename TCallable, typename TArgument>
-		inline
-		typename std::enable_if<std::is_convertible<Client, TArgument>::value, void>::type
-		visit(TCallable callable) {
-			callable(_client);
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		template <typename TCallable, typename TArgument>
-		inline
-		typename std::enable_if<!std::is_convertible<Client, TArgument>::value, void>::type
-		visit(TCallable) {}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		template <typename TEvent>
+		inline void deepReact(const TEvent& event, Control& control, Context& context);
 
 		Client _client;
 
@@ -360,7 +331,7 @@ private:
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#pragma region Substate
+#pragma region Substates
 
 		template <unsigned TN, typename...>
 		struct Sub;
@@ -369,7 +340,7 @@ private:
 
 		template <unsigned TN, typename TI, typename... TR>
 		struct Sub<TN, TI, TR...> {
-			using Initial = TI;
+			using Initial = typename WrapState<TI>::Type;
 			using Remaining = Sub<TN + 1, TR...>;
 
 			enum {
@@ -387,24 +358,25 @@ private:
 				Parents& forkParents,
 				ForkPointers& forkPointers);
 
-			inline void wideEnterInitial(Context& context, const Time time);
+			inline void wideEnterInitial(Context& context);
 
 			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
+			inline void wideRequestRemain();
 			inline void wideRequestRestart();
-			inline void wideRequestResume(const unsigned stateIndex);
+			inline void wideRequestResume(const unsigned prong);
 
-			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context, const Time time) const;
-			inline void wideSubstitute(const unsigned prong, Control& control, Context& context, const Time time) const;
+			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
+			inline void wideSubstitute(const unsigned prong, Control& control, Context& context) const;
 
-			inline void wideChangeTo(const unsigned prong, Context& context, const Time time);
-			inline void wideEnter(const unsigned prong, Context& context, const Time time);
-			inline void wideLeave(const unsigned prong, Context& context, const Time time);
+			inline void wideChangeTo(const unsigned prong, Context& context);
+			inline void wideEnter(const unsigned prong, Context& context);
+			inline void wideLeave(const unsigned prong, Context& context);
 
-			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context, const Time time);
-			inline void wideUpdate(const unsigned prong, Context& context, const Time time);
+			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
+			inline void wideUpdate(const unsigned prong, Context& context);
 
-			template <typename TCallable>
-			inline void wideInvoke(const unsigned prong, TCallable callable);
+			template <typename TEvent>
+			inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
 
 			Initial initial;
 			Remaining remaining;
@@ -414,7 +386,7 @@ private:
 
 		template <unsigned TN, typename TI>
 		struct Sub<TN, TI> {
-			using Initial = TI;
+			using Initial = typename WrapState<TI>::Type;
 
 			enum {
 				ProngIndex	 = TN,
@@ -431,24 +403,25 @@ private:
 				Parents& forkParents,
 				ForkPointers& forkPointers);
 
-			inline void wideEnterInitial(Context& context, const Time time);
+			inline void wideEnterInitial(Context& context);
 
 			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
+			inline void wideRequestRemain();
 			inline void wideRequestRestart();
-			inline void wideRequestResume(const unsigned stateIndex);
+			inline void wideRequestResume(const unsigned prong);
 
-			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context, const Time time) const;
-			inline void wideSubstitute(const unsigned prong, Control& control, Context& context, const Time time) const;
+			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
+			inline void wideSubstitute(const unsigned prong, Control& control, Context& context) const;
 
-			inline void wideChangeTo(const unsigned prong, Context& context, const Time time);
-			inline void wideEnter(const unsigned prong, Context& context, const Time time);
-			inline void wideLeave(const unsigned prong, Context& context, const Time time);
+			inline void wideChangeTo(const unsigned prong, Context& context);
+			inline void wideEnter(const unsigned prong, Context& context);
+			inline void wideLeave(const unsigned prong, Context& context);
 
-			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context, const Time time);
-			inline void wideUpdate(const unsigned prong, Context& context, const Time time);
+			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
+			inline void wideUpdate(const unsigned prong, Context& context);
 
-			template <typename TCallable>
-			inline void wideInvoke(const unsigned prong, TCallable callable);
+			template <typename TEvent>
+			inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
 
 			Initial initial;
 		};
@@ -474,24 +447,25 @@ private:
 		   Parents& forkParents,
 		   ForkPointers& forkPointers);
 
-		inline void deepEnterInitial(Context& context, const Time time);
+		inline void deepEnterInitial(Context& context);
 
 		inline void deepForwardRequest(const enum Transition::Type transition);
+		inline void deepRequestRemain();
 		inline void deepRequestRestart();
 		inline void deepRequestResume();
 
-		inline void deepForwardSubstitute(Control& control, Context& context, const Time time) const;
-		inline void deepSubstitute(Control& control, Context& context, const Time time) const;
+		inline void deepForwardSubstitute(Control& control, Context& context) const;
+		inline void deepSubstitute(Control& control, Context& context) const;
 
-		inline void deepChangeToRequested(Context& context, const Time time);
-		inline void deepEnter(Context& context, const Time time);
-		inline void deepLeave(Context& context, const Time time);
+		inline void deepChangeToRequested(Context& context);
+		inline void deepEnter(Context& context);
+		inline void deepLeave(Context& context);
 
-		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
-		inline void deepUpdate(Context& context, const Time time);
+		inline bool deepUpdateAndTransition(Control& control, Context& context);
+		inline void deepUpdate(Context& context);
 
-		template <typename TCallable>
-		inline void deepInvoke(TCallable callable);
+		template <typename TEvent>
+		inline void deepReact(const TEvent& event, Control& control, Context& context);
 
 		State _state;
 		SubStates _subStates;
@@ -506,25 +480,28 @@ private:
 #pragma region Orthogonal
 
 	template <typename T, typename... TS>
-	struct _O final {
+	struct _O final
+		: public ForkT<T>
+	{
 		using State = _S<T>;
 		using Client = typename State::Client;
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#pragma region Substate
+#pragma region Substates
 
-		template <typename...>
+		template <unsigned TN, typename...>
 		struct Sub;
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		template <typename TI, typename... TR>
-		struct Sub<TI, TR...> {
-			using Initial = TI;
-			using Remaining = Sub<TR...>;
+		template <unsigned TN, typename TI, typename... TR>
+		struct Sub<TN, TI, TR...> {
+			using Initial = typename WrapState<TI>::Type;
+			using Remaining = Sub<TN + 1, TR...>;
 
 			enum {
+				ProngIndex	 = TN,
 				ReverseDepth = hfsm::detail::Max<Initial::ReverseDepth, Remaining::ReverseDepth>::Value,
 				DeepWidth	 = Initial::DeepWidth  + Remaining::DeepWidth,
 				StateCount	 = Initial::StateCount + Remaining::StateCount,
@@ -533,29 +510,31 @@ private:
 			};
 
 			Sub(StateRegistry& stateRegistry,
-				const Parent parent,
+				const Index fork,
 				Parents& stateParents,
 				Parents& forkParents,
 				ForkPointers& forkPointers);
 
-			inline void wideEnterInitial(Context& context, const Time time);
+			inline void wideEnterInitial(Context& context);
 
-			inline void wideForwardRequest(const enum Transition::Type transition);
+			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
+			inline void wideRequestRemain();
 			inline void wideRequestRestart();
 			inline void wideRequestResume();
 
-			inline void wideForwardSubstitute(Control& control, Context& context, const Time time) const;
-			inline void wideSubstitute(Control& control, Context& context, const Time time) const;
+			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
+			inline void wideForwardSubstitute(Control& control, Context& context) const;
+			inline void wideSubstitute(Control& control, Context& context) const;
 
-			inline void wideChangeToRequested(Context& context, const Time time);
-			inline void wideEnter(Context& context, const Time time);
-			inline void wideLeave(Context& context, const Time time);
+			inline void wideChangeToRequested(Context& context);
+			inline void wideEnter(Context& context);
+			inline void wideLeave(Context& context);
 
-			inline bool wideUpdateAndTransition(Control& control, Context& context, const Time time);
-			inline void wideUpdate(Context& context, const Time time);
+			inline bool wideUpdateAndTransition(Control& control, Context& context);
+			inline void wideUpdate(Context& context);
 
-			template <typename TCallable>
-			inline void wideInvoke(TCallable callable);
+			template <typename TEvent>
+			inline void wideReact(const TEvent& event, Control& control, Context& context);
 
 			Initial initial;
 			Remaining remaining;
@@ -563,11 +542,12 @@ private:
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		template <typename TI>
-		struct Sub<TI> {
-			using Initial = TI;
+		template <unsigned TN, typename TI>
+		struct Sub<TN, TI> {
+			using Initial = typename WrapState<TI>::Type;
 
 			enum {
+				ProngIndex	 = TN,
 				ReverseDepth = Initial::ReverseDepth,
 				DeepWidth	 = Initial::DeepWidth,
 				StateCount	 = Initial::StateCount,
@@ -576,34 +556,36 @@ private:
 			};
 
 			Sub(StateRegistry& stateRegistry,
-				const Parent parent,
+				const Index fork,
 				Parents& stateParents,
 				Parents& forkParents,
 				ForkPointers& forkPointers);
 
-			inline void wideEnterInitial(Context& context, const Time time);
+			inline void wideEnterInitial(Context& context);
 
-			inline void wideForwardRequest(const enum Transition::Type transition);
+			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
+			inline void wideRequestRemain();
 			inline void wideRequestRestart();
 			inline void wideRequestResume();
 
-			inline void wideForwardSubstitute(Control& control, Context& context, const Time time) const;
-			inline void wideSubstitute(Control& control, Context& context, const Time time) const;
+			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
+			inline void wideForwardSubstitute(Control& control, Context& context) const;
+			inline void wideSubstitute(Control& control, Context& context) const;
 
-			inline void wideChangeToRequested(Context& context, const Time time);
-			inline void wideEnter(Context& context, const Time time);
-			inline void wideLeave(Context& context, const Time time);
+			inline void wideChangeToRequested(Context& context);
+			inline void wideEnter(Context& context);
+			inline void wideLeave(Context& context);
 
-			inline bool wideUpdateAndTransition(Control& control, Context& context, const Time time);
-			inline void wideUpdate(Context& context, const Time time);
+			inline bool wideUpdateAndTransition(Control& control, Context& context);
+			inline void wideUpdate(Context& context);
 
-			template <typename TCallable>
-			inline void wideInvoke(TCallable callable);
+			template <typename TEvent>
+			inline void wideReact(const TEvent& event, Control& control, Context& context);
 
 			Initial initial;
 		};
 
-		using SubStates = Sub<TS...>;
+		using SubStates = Sub<0, TS...>;
 
 #pragma endregion
 
@@ -613,7 +595,7 @@ private:
 			ReverseDepth = SubStates::ReverseDepth + 1,
 			DeepWidth	 = SubStates::DeepWidth,
 			StateCount	 = State::StateCount + SubStates::StateCount,
-			ForkCount	 = SubStates::ForkCount,
+			ForkCount	 = SubStates::ForkCount + 1,
 			ProngCount	 = SubStates::ProngCount,
 			Width		 = sizeof...(TS),
 		};
@@ -624,24 +606,25 @@ private:
 		   Parents& forkParents,
 		   ForkPointers& forkPointers);
 
-		inline void deepEnterInitial(Context& context, const Time time);
+		inline void deepEnterInitial(Context& context);
 
 		inline void deepForwardRequest(const enum Transition::Type transition);
+		inline void deepRequestRemain();
 		inline void deepRequestRestart();
 		inline void deepRequestResume();
 
-		inline void deepForwardSubstitute(Control& control, Context& context, const Time time) const;
-		inline void deepSubstitute(Control& control, Context& context, const Time time) const;
+		inline void deepForwardSubstitute(Control& control, Context& context) const;
+		inline void deepSubstitute(Control& control, Context& context) const;
 
-		inline void deepChangeToRequested(Context& context, const Time time);
-		inline void deepEnter(Context& context, const Time time);
-		inline void deepLeave(Context& context, const Time time);
+		inline void deepChangeToRequested(Context& context);
+		inline void deepEnter(Context& context);
+		inline void deepLeave(Context& context);
 
-		inline bool deepUpdateAndTransition(Control& control, Context& context, const Time time);
-		inline void deepUpdate(Context& context, const Time time);
+		inline bool deepUpdateAndTransition(Control& control, Context& context);
+		inline void deepUpdate(Context& context);
 
-		template <typename TCallable>
-		inline void deepInvoke(TCallable callable);
+		template <typename TEvent>
+		inline void deepReact(const TEvent& event, Control& control, Context& context);
 
 		State _state;
 		SubStates _subStates;
@@ -657,7 +640,7 @@ private:
 
 	template <typename TApex>
 	class _R final {
-		using Apex = TApex;
+		using Apex = typename WrapState<TApex>::Type;
 
 		enum : unsigned {
 			StateCapacity = (unsigned) 1.3 * Apex::StateCount,
@@ -681,14 +664,13 @@ private:
 		static_assert(StateCount < std::numeric_limits<Index>::max(), "Too many states in the hierarchy. Change 'Index' type.");
 
 	public:
-		_R(Context& context, const Time time = Time{});
+		_R(Context& context);
 		~_R();
 
-		// TODO:
-		// void enter();
-		// void leave();
+		void update();
 
-		void update(const Time time);
+		template <typename TEvent>
+		inline void react(const TEvent& event);
 
 		template <typename T>
 		inline void changeTo()	{ _requests << Transition(Transition::Type::Restart,  TypeInfo::get<T>());	}
@@ -705,12 +687,10 @@ private:
 		template <typename T>
 		inline bool isResumable();
 
-		template <typename TCallable>
-		inline void visit(TCallable callable)								{ _apex.deepInvoke(callable);	}
-
 	protected:
-		void requestChange(const Transition request);
-		void requestSchedule(const Transition request);
+		void processRequests();
+		void requestImmediate(const Transition request);
+		void requestScheduled(const Transition request);
 
 		inline unsigned id(const Transition request) const	{ return _stateRegistry[*request.stateType];	}
 
@@ -729,6 +709,8 @@ private:
 	};
 
 	//----------------------------------------------------------------------
+
+public:
 
 	class Control final {
 		template <typename>
@@ -761,52 +743,48 @@ private:
 
 #pragma region Public Typedefs
 
-public:
-
-	using Base				= _B<Bare>;
-	using TrackedBase		= _B<Tracked>;
-	using TimedBase			= _B<Timed>;
-	using TrackedTimedBase	= _B<Tracked, Timed>;
+	using Base = _B<Bare>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TClient>
-	using State = _S<TClient>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename TClient, typename... TSubStates>
-	using Composite	= _C<TClient, TSubStates...>;
+	template <typename TState, typename... TSubStates>
+	using Composite	= _C<TState, TSubStates...>;
 
 	template <typename... TSubStates>
 	using CompositePeers = _C<Base, TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TClient, typename... TSubStates>
-	using Orthogonal = _O<TClient, TSubStates...>;
+	template <typename TState, typename... TSubStates>
+	using Orthogonal = _O<TState, TSubStates...>;
 
 	template <typename... TSubStates>
 	using OrthogonalPeers = _O<Base, TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	using Root = _R<TState>;
+	template <typename TState, typename... TSubStates>
+	using Root = _R<Composite<TState, TSubStates...>>;
 
 	template <typename... TSubStates>
-	using CompositeRoot = _R<CompositePeers<TSubStates...>>;
+	using PeerRoot = _R<CompositePeers<TSubStates...>>;
+
+	template <typename TState, typename... TSubStates>
+	using OrthogonalRoot = _R<Orthogonal<TState, TSubStates...>>;
 
 	template <typename... TSubStates>
-	using OrthogonalRoot = _R<OrthogonalPeers<TSubStates...>>;
+	using OrthogonalPeerRoot = _R<OrthogonalPeers<TSubStates...>>;
 
 	//----------------------------------------------------------------------
 
 #pragma endregion
 };
+
+template <typename TContext, unsigned TMaxSubstitutions = 4>
+using Machine = M<TContext, TMaxSubstitutions>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
