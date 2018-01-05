@@ -26,20 +26,21 @@ using M = hfsm::Machine<OwnerClass>;
 
 // 4. Define states:
 struct MyState1 : M::Bare {
-
-   // 5. Override some of the following state functions:
-   void substitute(Control& c, Context& _, const Time t);
-   void enter(Context& _, const Time t);
-   void update(Context& _, const Time t);
-   void transition(Control& c, Context& _, const Time t);
-   void leave(Context& _, const Time t);
+	// 5. Override some of the following state functions:
+	void substitute(Control& c, Context& _);
+	void enter(Context& _);
+	void update(Context& _);
+	void transition(Control& c, Context& _);
+	void leave(Context& _);
 };
+struct MyState2 : M::Bare { /* .. */ };
+struct MyState3 : M::Bare { /* .. */ };
 
 // 6. Declare state machine structure:
-using MyFSM = M::CompositeRoot<
-   M::State<MyState1>,
-   M::State<MyState2>,
-   M::State<MyState3>
+using MyFSM = M::PeerRoot<
+	MyState1,
+	MyState2,
+	MyState3
 >;
 
 int main() {
@@ -48,8 +49,9 @@ int main() {
     MyFSM fsm(context);
 
     // 8. Kick off periodic updates:
-    while (true)
-        fsm.update(deltaTime);
+    bool running = true;
+    while (running)
+       fsm.update();
 
     return 0;
 }
@@ -60,12 +62,20 @@ int main() {
 
 Initiated from within a state:
 ```cpp
+struct MyState2;
+
 struct MyState1
     : M::Base
 {
-    void transition(Control& c, Context& _, const Time t) {
+    void transition(Control& c, Context& _) {
         c.changeTo<MyState2>();
     }
+}
+
+struct MyState2
+    : M::Base
+{
+    /* .. */
 }
 ```
 <br>
@@ -76,7 +86,7 @@ int main() {
     /* ... */
 
     fsm.changeTo<MyState2>(); // processed during the following .update():
-    fsm.update(deltaTime);
+    fsm.update();
 
     /* ... */
 }
