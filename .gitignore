@@ -1,9 +1,11 @@
-﻿/comp0.VC.db
-/binaries-32
+﻿/binaries-32
 /binaries-64
 /build
 /hfsm_test.dir/Debug
-/ipch
-/Win32
-.vs
+/projects/codelite/.codelite
+/projects/codelite/Debug
+/projects/codelite/Makefile
+/projects/codelite/*.mk
+/projects/codelite/*.txt
+/projects/visual-studio/.vs
 *.user
