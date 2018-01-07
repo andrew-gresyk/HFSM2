@@ -15,7 +15,7 @@ class Wrap;
 template <typename T>
 class Wrap {
 	using Item = T;
-	using Storage = typename std::aligned_storage<sizeof(Item)>::type;
+	using Storage = typename std::aligned_storage<sizeof(Item), sizeof(Item)>::type;
 
 public:
 	inline Wrap() = default;

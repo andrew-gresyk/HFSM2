@@ -154,7 +154,7 @@ template <typename T>
 void
 changeTo(M::Control& control, Context::History& history) {
 	control.template changeTo<T>();
-	history.push_back(Status{ Event::Restart, std::type_index{ typeid(T) } });
+	history.push_back(Status{ Event::Restart, hfsm::detail::TypeInfo::get<T>() });
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -163,7 +163,7 @@ template <typename T>
 void
 resume(M::Control& control, Context::History& history) {
 	control.template resume<T>();
-	history.push_back(Status{ Event::Resume, std::type_index{ typeid(T) } });
+	history.push_back(Status{ Event::Resume, hfsm::detail::TypeInfo::get<T>() });
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -172,7 +172,7 @@ template <typename T>
 void
 schedule(M::Control& control, Context::History& history) {
 	control.template schedule<T>();
-	history.push_back(Status{ Event::Schedule, std::type_index{ typeid(T) } });
+	history.push_back(Status{ Event::Schedule, hfsm::detail::TypeInfo::get<T>() });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -182,7 +182,7 @@ struct Reacting
 	: Base<T>
 {
 	void react(const Action&, M::Control&, Context& _) {
-		_.history.push_back(Status{ Event::Reaction, std::type_index{ typeid(T) } });
+		_.history.push_back(Status{ Event::Reaction, hfsm::detail::TypeInfo::get<T>() });
 	}
 };
 

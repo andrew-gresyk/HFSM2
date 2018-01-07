@@ -1662,13 +1662,12 @@ M<TC, TMS>::_R<TA>::requestScheduled(const Transition request) {
 	const auto parent = _stateParents[state];
 	auto& fork = *_forkPointers[parent.fork];
 
-	HSFM_DEBUG_ONLY(fork.resumableType = parent.prongType);
-	fork.resumable = parent.prong;
-
-	// check that the fork isn't active
 	HSFM_ASSERT_ONLY(const auto forksParent = _stateParents[fork.self]);
 	HSFM_ASSERT_ONLY(const auto& forksFork = *_forkPointers[forksParent.fork]);
-	assert(!forksFork.activeType);
+	assert(forksFork.active == INVALID_INDEX);
+
+	HSFM_DEBUG_ONLY(fork.resumableType = parent.prongType);
+	fork.resumable = parent.prong;
 }
 
 #pragma endregion

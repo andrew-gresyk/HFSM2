@@ -44,16 +44,16 @@ using MyFSM = M::PeerRoot<
 >;
 
 int main() {
-    // 7. Create context and state machine instances:
-    Context context;
-    MyFSM fsm(context);
+	// 7. Create context and state machine instances:
+	Context context;
+	MyFSM fsm(context);
 
-    // 8. Kick off periodic updates:
-    bool running = true;
-    while (running)
-       fsm.update();
+	// 8. Kick off periodic updates:
+	bool running = true;
+	while (running)
+	   fsm.update();
 
-    return 0;
+	return 0;
 }
 ```
 
@@ -65,17 +65,17 @@ Initiated from within a state:
 struct MyState2;
 
 struct MyState1
-    : M::Base
+	: M::Base
 {
-    void transition(Control& c, Context& _) {
-        c.changeTo<MyState2>();
-    }
+	void transition(Control& c, Context& _) {
+		c.changeTo<MyState2>();
+	}
 }
 
 struct MyState2
-    : M::Base
+	: M::Base
 {
-    /* .. */
+	/* .. */
 }
 ```
 <br>
@@ -83,12 +83,12 @@ struct MyState2
 Initiated from the outside of a state machine:
 ```cpp
 int main() {
-    /* ... */
+	/* ... */
 
-    fsm.changeTo<MyState2>(); // processed during the following .update():
-    fsm.update();
+	fsm.changeTo<MyState2>(); // processed during the following .update():
+	fsm.update();
 
-    /* ... */
+	/* ... */
 }
 ```
 
@@ -98,20 +98,20 @@ int main() {
 ```cpp
 template <...>
 void Machine<...>::Root::update() {
-    Control control;
+	Control control;
 
-    activeState.update();
-    activeState.transition(control);
+	activeState.update();
+	activeState.transition(control);
 
-    while (control.requests.size() > 0) {
-        nextState = control.requests[0].state;
-        nextState.substitute(control);
-    }
+	while (control.requests.size() > 0) {
+		nextState = control.requests[0].state;
+		nextState.substitute(control);
+	}
 
-    if (nextState != activeState) {
-        activeState.leave();
-        nextState.enter();
-    }
+	if (nextState != activeState) {
+		activeState.leave();
+		nextState.enter();
+	}
 }
 ```
 
@@ -119,19 +119,19 @@ void Machine<...>::Root::update() {
 ## State Method Call Sequence During State Transitions (Pseudo-Code)
 
 ```cpp
-    activeState.update();
-    activeState.transition() {
-        fsm.changeTo<NextState>();
-    }
+	activeState.update();
+	activeState.transition() {
+		fsm.changeTo<NextState>();
+	}
 
-    nextState.substitute() {} // no state transitions initiated
+	nextState.substitute() {} // no state transitions initiated
 
-    activeState.leave();
-    activeState = nextState;
-    activeState.enter();
+	activeState.leave();
+	activeState = nextState;
+	activeState.enter();
 
-    activeState.update();
-    activeState.transition();
+	activeState.update();
+	activeState.transition();
 ```
 
 ## Special Thanks
