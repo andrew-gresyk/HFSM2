@@ -139,5 +139,6 @@ void Machine<...>::Root::update() {
 - [philsquared](https://github.com/philsquared)
 - [romaincheminade](https://github.com/romaincheminade)
 - [tcbrindle](https://github.com/tcbrindle)
+- [kgreenek](https://github.com/kgreenek)
 - programming community at [Splash Damage](http://www.splashdamage.com/)
 - everybody at [C++::London](https://www.meetup.com/CppLondon/) meetup
