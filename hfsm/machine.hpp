@@ -249,13 +249,13 @@ private:
 	struct _B<TInjection>
 		: public TInjection
 	{
-		inline void substitute(Control&, Context) const			{}
-		inline void enter(Context)								{}
-		inline void update(Context)								{}
-		inline void transition(Control&, Context) const			{}
+		inline void substitute(Control&, Context&) const			{}
+		inline void enter(Context&)								{}
+		inline void update(Context&)								{}
+		inline void transition(Control&, Context&) const			{}
 		template <typename TEvent>
 		inline void react(const TEvent&, Control&, Context&)	{}
-		inline void leave(Context)								{}
+		inline void leave(Context&)								{}
 
 		inline void widePreSubstitute(Context& context) const;
 		inline void widePreEnter(Context& context);
