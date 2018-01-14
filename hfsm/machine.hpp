@@ -291,25 +291,25 @@ private:
 		   Parents& forkParents,
 		   ForkPointers& forkPointers);
 
+		inline void deepForwardSubstitute(Control&, Context&) const				{}
+		inline bool deepSubstitute(Control& control, Context& context) const;
+
 		inline void deepEnterInitial(Context& context);
+		inline void deepEnter(Context& context);
+
+		inline bool deepUpdateAndTransition(Control& control, Context& context);
+		inline void deepUpdate(Context& context);
+
+		template <typename TEvent>
+		inline void deepReact(const TEvent& event, Control& control, Context& context);
+		
+		inline void deepLeave(Context& context);
 
 		inline void deepForwardRequest(const enum Transition::Type)				{}
 		inline void deepRequestRemain()											{}
 		inline void deepRequestRestart()										{}
 		inline void deepRequestResume()											{}
-
-		inline void deepForwardSubstitute(Control&, Context&) const				{}
-		inline bool deepSubstitute(Control& control, Context& context) const;
-
 		inline void deepChangeToRequested(Context&)	{}
-		inline void deepEnter(Context& context);
-		inline void deepLeave(Context& context);
-
-		inline bool deepUpdateAndTransition(Control& control, Context& context);
-		inline void deepUpdate(Context& context);
-		
-		template <typename TEvent>
-		inline void deepReact(const TEvent& event, Control& control, Context& context);
 
 		Client _client;
 
@@ -358,25 +358,25 @@ private:
 				Parents& forkParents,
 				ForkPointers& forkPointers);
 
-			inline void wideEnterInitial(Context& context);
-
-			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-			inline void wideRequestRemain();
-			inline void wideRequestRestart();
-			inline void wideRequestResume(const unsigned prong);
-
 			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
 			inline void wideSubstitute(const unsigned prong, Control& control, Context& context) const;
 
-			inline void wideChangeTo(const unsigned prong, Context& context);
+			inline void wideEnterInitial(Context& context);
 			inline void wideEnter(const unsigned prong, Context& context);
-			inline void wideLeave(const unsigned prong, Context& context);
 
 			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
 			inline void wideUpdate(const unsigned prong, Context& context);
 
 			template <typename TEvent>
 			inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
+
+			inline void wideLeave(const unsigned prong, Context& context);
+
+			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
+			inline void wideRequestRemain();
+			inline void wideRequestRestart();
+			inline void wideRequestResume(const unsigned prong);
+			inline void wideChangeToRequested(const unsigned prong, Context& context);
 
 			Initial initial;
 			Remaining remaining;
@@ -403,25 +403,25 @@ private:
 				Parents& forkParents,
 				ForkPointers& forkPointers);
 
-			inline void wideEnterInitial(Context& context);
-
-			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-			inline void wideRequestRemain();
-			inline void wideRequestRestart();
-			inline void wideRequestResume(const unsigned prong);
-
 			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
 			inline void wideSubstitute(const unsigned prong, Control& control, Context& context) const;
 
-			inline void wideChangeTo(const unsigned prong, Context& context);
+			inline void wideEnterInitial(Context& context);
 			inline void wideEnter(const unsigned prong, Context& context);
-			inline void wideLeave(const unsigned prong, Context& context);
 
 			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
 			inline void wideUpdate(const unsigned prong, Context& context);
 
 			template <typename TEvent>
 			inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
+
+			inline void wideLeave(const unsigned prong, Context& context);
+
+			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
+			inline void wideRequestRemain();
+			inline void wideRequestRestart();
+			inline void wideRequestResume(const unsigned prong);
+			inline void wideChangeToRequested(const unsigned prong, Context& context);
 
 			Initial initial;
 		};
@@ -447,25 +447,25 @@ private:
 		   Parents& forkParents,
 		   ForkPointers& forkPointers);
 
-		inline void deepEnterInitial(Context& context);
-
-		inline void deepForwardRequest(const enum Transition::Type transition);
-		inline void deepRequestRemain();
-		inline void deepRequestRestart();
-		inline void deepRequestResume();
-
 		inline void deepForwardSubstitute(Control& control, Context& context) const;
 		inline void deepSubstitute(Control& control, Context& context) const;
 
-		inline void deepChangeToRequested(Context& context);
+		inline void deepEnterInitial(Context& context);
 		inline void deepEnter(Context& context);
-		inline void deepLeave(Context& context);
 
 		inline bool deepUpdateAndTransition(Control& control, Context& context);
 		inline void deepUpdate(Context& context);
 
 		template <typename TEvent>
 		inline void deepReact(const TEvent& event, Control& control, Context& context);
+
+		inline void deepLeave(Context& context);
+
+		inline void deepForwardRequest(const enum Transition::Type transition);
+		inline void deepRequestRemain();
+		inline void deepRequestRestart();
+		inline void deepRequestResume();
+		inline void deepChangeToRequested(Context& context);
 
 		State _state;
 		SubStates _subStates;
@@ -515,26 +515,26 @@ private:
 				Parents& forkParents,
 				ForkPointers& forkPointers);
 
-			inline void wideEnterInitial(Context& context);
-
-			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-			inline void wideRequestRemain();
-			inline void wideRequestRestart();
-			inline void wideRequestResume();
-
 			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
 			inline void wideForwardSubstitute(Control& control, Context& context) const;
 			inline void wideSubstitute(Control& control, Context& context) const;
 
-			inline void wideChangeToRequested(Context& context);
+			inline void wideEnterInitial(Context& context);
 			inline void wideEnter(Context& context);
-			inline void wideLeave(Context& context);
 
 			inline bool wideUpdateAndTransition(Control& control, Context& context);
 			inline void wideUpdate(Context& context);
 
 			template <typename TEvent>
 			inline void wideReact(const TEvent& event, Control& control, Context& context);
+
+			inline void wideLeave(Context& context);
+
+			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
+			inline void wideRequestRemain();
+			inline void wideRequestRestart();
+			inline void wideRequestResume();
+			inline void wideChangeToRequested(Context& context);
 
 			Initial initial;
 			Remaining remaining;
@@ -561,26 +561,26 @@ private:
 				Parents& forkParents,
 				ForkPointers& forkPointers);
 
-			inline void wideEnterInitial(Context& context);
-
-			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-			inline void wideRequestRemain();
-			inline void wideRequestRestart();
-			inline void wideRequestResume();
-
 			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
 			inline void wideForwardSubstitute(Control& control, Context& context) const;
 			inline void wideSubstitute(Control& control, Context& context) const;
 
-			inline void wideChangeToRequested(Context& context);
+			inline void wideEnterInitial(Context& context);
 			inline void wideEnter(Context& context);
-			inline void wideLeave(Context& context);
 
 			inline bool wideUpdateAndTransition(Control& control, Context& context);
 			inline void wideUpdate(Context& context);
 
 			template <typename TEvent>
 			inline void wideReact(const TEvent& event, Control& control, Context& context);
+
+			inline void wideLeave(Context& context);
+
+			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
+			inline void wideRequestRemain();
+			inline void wideRequestRestart();
+			inline void wideRequestResume();
+			inline void wideChangeToRequested(Context& context);
 
 			Initial initial;
 		};
@@ -606,25 +606,25 @@ private:
 		   Parents& forkParents,
 		   ForkPointers& forkPointers);
 
-		inline void deepEnterInitial(Context& context);
-
-		inline void deepForwardRequest(const enum Transition::Type transition);
-		inline void deepRequestRemain();
-		inline void deepRequestRestart();
-		inline void deepRequestResume();
-
 		inline void deepForwardSubstitute(Control& control, Context& context) const;
 		inline void deepSubstitute(Control& control, Context& context) const;
 
-		inline void deepChangeToRequested(Context& context);
+		inline void deepEnterInitial(Context& context);
 		inline void deepEnter(Context& context);
-		inline void deepLeave(Context& context);
 
 		inline bool deepUpdateAndTransition(Control& control, Context& context);
 		inline void deepUpdate(Context& context);
 
 		template <typename TEvent>
 		inline void deepReact(const TEvent& event, Control& control, Context& context);
+
+		inline void deepLeave(Context& context);
+
+		inline void deepForwardRequest(const enum Transition::Type transition);
+		inline void deepRequestRemain();
+		inline void deepRequestRestart();
+		inline void deepRequestResume();
+		inline void deepChangeToRequested(Context& context);
 
 		State _state;
 		SubStates _subStates;
@@ -673,10 +673,10 @@ private:
 		inline void react(const TEvent& event);
 
 		template <typename T>
-		inline void changeTo()	{ _requests << Transition(Transition::Type::Restart,  TypeInfo::get<T>());	}
+		inline void schedule()	{ _requests << Transition(Transition::Type::Schedule, TypeInfo::get<T>());	}
 
 		template <typename T>
-		inline void schedule()	{ _requests << Transition(Transition::Type::Schedule, TypeInfo::get<T>());	}
+		inline void changeTo()	{ _requests << Transition(Transition::Type::Restart,  TypeInfo::get<T>());	}
 
 		template <typename T>
 		inline void resume()	{ _requests << Transition(Transition::Type::Resume,   TypeInfo::get<T>());	}
@@ -723,10 +723,10 @@ public:
 
 	public:
 		template <typename T>
-		inline void changeTo()	{ _requests << Transition(Transition::Type::Restart,  TypeInfo::get<T>());	}
+		inline void schedule()	{ _requests << Transition(Transition::Type::Schedule, TypeInfo::get<T>());	}
 
 		template <typename T>
-		inline void schedule()	{ _requests << Transition(Transition::Type::Schedule, TypeInfo::get<T>());	}
+		inline void changeTo()	{ _requests << Transition(Transition::Type::Restart,  TypeInfo::get<T>());	}
 
 		template <typename T>
 		inline void resume()	{ _requests << Transition(Transition::Type::Resume,	  TypeInfo::get<T>());	}

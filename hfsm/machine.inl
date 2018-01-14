@@ -172,15 +172,6 @@ M<TC, TMS>::_S<T>::_S(StateRegistry& stateRegistry,
 
 template <typename TC, unsigned TMS>
 template <typename T>
-void
-M<TC, TMS>::_S<T>::deepEnterInitial(Context& context) {
-	deepEnter(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T>
 bool
 M<TC, TMS>::_S<T>::deepSubstitute(Control& control,
 								  Context& context) const
@@ -198,9 +189,8 @@ M<TC, TMS>::_S<T>::deepSubstitute(Control& control,
 template <typename TC, unsigned TMS>
 template <typename T>
 void
-M<TC, TMS>::_S<T>::deepLeave(Context& context) {
-	_client.leave(context);
-	_client.widePostLeave(context);
+M<TC, TMS>::_S<T>::deepEnterInitial(Context& context) {
+	deepEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -246,6 +236,16 @@ M<TC, TMS>::_S<T>::deepUpdate(Context& context) {
 
 template <typename TC, unsigned TMS>
 template <typename T>
+void
+M<TC, TMS>::_S<T>::deepLeave(Context& context) {
+	_client.leave(context);
+	_client.widePostLeave(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T>
 template <typename TEvent>
 void
 M<TC, TMS>::_S<T>::deepReact(const TEvent& event,
@@ -278,7 +278,39 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
 	, remaining(stateRegistry, fork, stateParents, forkParents, forkPointers)
 {}
 
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
+																	Control& control,
+																	Context& context) const
+{
+	if (prong == ProngIndex)
+		initial.deepForwardSubstitute(control, context);
+	else
+		remaining.wideForwardSubstitute(prong, control, context);
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(const unsigned prong,
+															 Control& control,
+															 Context& context) const
+{
+	if (prong == ProngIndex)
+		initial.deepSubstitute(control, context);
+	else
+		remaining.wideSubstitute(prong, control, context);
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -286,6 +318,84 @@ template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context) {
 	initial.deepEnterInitial(context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnter(const unsigned prong,
+														Context& context)
+{
+	if (prong == ProngIndex)
+		initial.deepEnter(context);
+	else
+		remaining.wideEnter(prong, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+bool
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(const unsigned prong,
+																	  Control& control,
+																	  Context& context)
+{
+	return prong == ProngIndex ?
+		initial.deepUpdateAndTransition(control, context) :
+		remaining.wideUpdateAndTransition(prong, control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigned prong,
+														 Context& context)
+{
+	if (prong == ProngIndex)
+		initial.deepUpdate(context);
+	else
+		remaining.wideUpdate(prong, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+template <typename TEvent>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideReact(const unsigned prong,
+														const TEvent& event,
+														Control& control,
+														Context& context)
+{
+	if (prong == ProngIndex)
+		initial.deepReact(event, control, context);
+	else
+		remaining.wideReact(prong, event, control, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLeave(const unsigned prong,
+														Context& context)
+{
+	if (prong == ProngIndex)
+		initial.deepLeave(context);
+	else
+		remaining.wideLeave(prong, context);
 }
 
 //------------------------------------------------------------------------------
@@ -342,123 +452,13 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
-																	Control& control,
-																	Context& context) const
-{
-	if (prong == ProngIndex)
-		initial.deepForwardSubstitute(control, context);
-	else
-		remaining.wideForwardSubstitute(prong, control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(const unsigned prong,
-															 Control& control,
-															 Context& context) const
-{
-	if (prong == ProngIndex)
-		initial.deepSubstitute(control, context);
-	else
-		remaining.wideSubstitute(prong, control, context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeTo(const unsigned prong,
-														   Context& context)
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(const unsigned prong,
+																	Context& context)
 {
 	if (prong == ProngIndex)
 		initial.deepChangeToRequested(context);
 	else
-		remaining.wideChangeTo(prong, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnter(const unsigned prong,
-														Context& context)
-{
-	if (prong == ProngIndex)
-		initial.deepEnter(context);
-	else
-		remaining.wideEnter(prong, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLeave(const unsigned prong,
-														Context& context)
-{
-	if (prong == ProngIndex)
-		initial.deepLeave(context);
-	else
-		remaining.wideLeave(prong, context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-bool
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(const unsigned prong,
-																	  Control& control,
-																	  Context& context)
-{
-	return prong == ProngIndex ?
-		initial.deepUpdateAndTransition(control, context) :
-		remaining.wideUpdateAndTransition(prong, control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigned prong,
-														 Context& context)
-{
-	if (prong == ProngIndex)
-		initial.deepUpdate(context);
-	else
-		remaining.wideUpdate(prong, context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-template <typename TEvent>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideReact(const unsigned prong,
-														const TEvent& event,
-														Control& control,
-														Context& context)
-{
-	if (prong == ProngIndex)
-		initial.deepReact(event, control, context);
-	else
-		remaining.wideReact(prong, event, control, context);
+		remaining.wideChangeToRequested(prong, context);
 }
 
 #pragma endregion
@@ -481,62 +481,6 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
 			  forkParents,
 			  forkPointers)
 {}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsigned HSFM_ASSERT_ONLY(prong),
-														  const enum Transition::Type transition)
-{
-	assert(prong == ProngIndex);
-
-	initial.deepForwardRequest(transition);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRemain() {
-	initial.deepRequestRemain();
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRestart() {
-	initial.deepRequestRestart();
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestResume(const unsigned HSFM_ASSERT_ONLY(prong)) {
-	assert(prong == ProngIndex);
-
-	initial.deepRequestResume();
-}
 
 //------------------------------------------------------------------------------
 
@@ -574,12 +518,8 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeTo(const unsigned HSFM_ASSERT_ONLY(prong),
-													Context& context)
-{
-	assert(prong == ProngIndex);
-
-	initial.deepChangeToRequested(context);
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
+	initial.deepEnterInitial(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -594,20 +534,6 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_ASSERT_ONLY
 	assert(prong == ProngIndex);
 
 	initial.deepEnter(context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_ASSERT_ONLY(prong),
-												 Context& context)
-{
-	assert(prong == ProngIndex);
-
-	initial.deepLeave(context);
 }
 
 //------------------------------------------------------------------------------
@@ -656,6 +582,80 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideReact(const unsigned HSFM_ASSERT_ONLY
 	initial.deepReact(event, control, context);
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_ASSERT_ONLY(prong),
+												 Context& context)
+{
+	assert(prong == ProngIndex);
+
+	initial.deepLeave(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsigned HSFM_ASSERT_ONLY(prong),
+														  const enum Transition::Type transition)
+{
+	assert(prong == ProngIndex);
+
+	initial.deepForwardRequest(transition);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRemain() {
+	initial.deepRequestRemain();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRestart() {
+	initial.deepRequestRestart();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestResume(const unsigned HSFM_ASSERT_ONLY(prong)) {
+	assert(prong == ProngIndex);
+
+	initial.deepRequestResume();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeToRequested(const unsigned HSFM_ASSERT_ONLY(prong),
+															 Context& context)
+{
+	assert(prong == ProngIndex);
+
+	initial.deepChangeToRequested(context);
+}
+
 #pragma endregion
 
 //==============================================================================
@@ -674,7 +674,38 @@ M<TC, TMS>::_C<T, TS...>::_C(StateRegistry& stateRegistry,
 	, _subStates(stateRegistry, Fork::self, stateParents, forkParents, forkPointers)
 {}
 
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_C<T, TS...>::deepForwardSubstitute(Control& control,
+												Context& context) const
+{
+	assert(Fork::requested != INVALID_INDEX);
+
+	if (Fork::requested == Fork::active)
+		_subStates.wideForwardSubstitute(Fork::requested, control, context);
+	else
+		_subStates.wideSubstitute(Fork::requested, control, context);
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_C<T, TS...>::deepSubstitute(Control& control,
+										 Context& context) const
+{
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::requested != INVALID_INDEX);
+
+	if (!_state.deepSubstitute(control, context))
+		_subStates.wideSubstitute(Fork::requested, control, context);
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -689,6 +720,89 @@ M<TC, TMS>::_C<T, TS...>::deepEnterInitial(Context& context) {
 
 	_state.deepEnter(context);
 	_subStates.wideEnterInitial(context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_C<T, TS...>::deepEnter(Context& context) {
+	assert(Fork::active == INVALID_INDEX &&
+		   Fork::requested != INVALID_INDEX);
+
+	HSFM_DEBUG_ONLY(Fork::activeType = Fork::requestedType);
+	Fork::active = Fork::requested;
+
+	HSFM_DEBUG_ONLY(Fork::requestedType.clear());
+	Fork::requested = INVALID_INDEX;
+
+	_state.deepEnter(context);
+	_subStates.wideEnter(Fork::active, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+bool
+M<TC, TMS>::_C<T, TS...>::deepUpdateAndTransition(Control& control,
+												  Context& context)
+{
+	assert(Fork::active != INVALID_INDEX);
+
+	if (_state.deepUpdateAndTransition(control, context)) {
+		_subStates.wideUpdate(Fork::active, context);
+
+		return true;
+	} else
+		return _subStates.wideUpdateAndTransition(Fork::active, control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_C<T, TS...>::deepUpdate(Context& context) {
+	assert(Fork::active != INVALID_INDEX);
+
+	_state.deepUpdate(context);
+	_subStates.wideUpdate(Fork::active, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <typename TEvent>
+void
+M<TC, TMS>::_C<T, TS...>::deepReact(const TEvent& event,
+									Control& control,
+									Context& context)
+{
+	assert(Fork::active != INVALID_INDEX);
+
+	_state.deepReact(event, control, context);
+	_subStates.wideReact(Fork::active, event, control, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_C<T, TS...>::deepLeave(Context& context) {
+	assert(Fork::active != INVALID_INDEX);
+
+	_subStates.wideLeave(Fork::active, context);
+	_state.deepLeave(context);
+
+	HSFM_DEBUG_ONLY(Fork::resumableType = Fork::activeType);
+	Fork::resumable = Fork::active;
+
+	HSFM_DEBUG_ONLY(Fork::activeType.clear());
+	Fork::active = INVALID_INDEX;
 }
 
 //------------------------------------------------------------------------------
@@ -761,38 +875,7 @@ M<TC, TMS>::_C<T, TS...>::deepRequestResume() {
 	_subStates.wideRequestResume(Fork::requested);
 }
 
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_C<T, TS...>::deepForwardSubstitute(Control& control,
-												Context& context) const
-{
-	assert(Fork::requested != INVALID_INDEX);
-
-	if (Fork::requested == Fork::active)
-		_subStates.wideForwardSubstitute(Fork::requested, control, context);
-	else
-		_subStates.wideSubstitute(Fork::requested, control, context);
-}
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_C<T, TS...>::deepSubstitute(Control& control,
-										 Context& context) const
-{
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::requested != INVALID_INDEX);
-
-	if (!_state.deepSubstitute(control, context))
-		_subStates.wideSubstitute(Fork::requested, control, context);
-}
-
-//------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -802,7 +885,7 @@ M<TC, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context) {
 
 	if (Fork::requested != INVALID_INDEX) {
 		if (Fork::requested == Fork::active)
-			_subStates.wideChangeTo(Fork::requested, context);
+			_subStates.wideChangeToRequested(Fork::requested, context);
 		else {
 			_subStates.wideLeave(Fork::active, context);
 
@@ -818,89 +901,6 @@ M<TC, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context) {
 			_subStates.wideEnter(Fork::active, context);
 		}
 	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_C<T, TS...>::deepEnter(Context& context) {
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::requested != INVALID_INDEX);
-
-	HSFM_DEBUG_ONLY(Fork::activeType = Fork::requestedType);
-	Fork::active = Fork::requested;
-
-	HSFM_DEBUG_ONLY(Fork::requestedType.clear());
-	Fork::requested = INVALID_INDEX;
-
-	_state.deepEnter(context);
-	_subStates.wideEnter(Fork::active, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_C<T, TS...>::deepLeave(Context& context) {
-	assert(Fork::active != INVALID_INDEX);
-
-	_subStates.wideLeave(Fork::active, context);
-	_state.deepLeave(context);
-
-	HSFM_DEBUG_ONLY(Fork::resumableType = Fork::activeType);
-	Fork::resumable = Fork::active;
-
-	HSFM_DEBUG_ONLY(Fork::activeType.clear());
-	Fork::active = INVALID_INDEX;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-bool
-M<TC, TMS>::_C<T, TS...>::deepUpdateAndTransition(Control& control,
-												  Context& context)
-{
-	assert(Fork::active != INVALID_INDEX);
-
-	if (_state.deepUpdateAndTransition(control, context)) {
-		_subStates.wideUpdate(Fork::active, context);
-
-		return true;
-	} else
-		return _subStates.wideUpdateAndTransition(Fork::active, control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_C<T, TS...>::deepUpdate(Context& context) {
-	assert(Fork::active != INVALID_INDEX);
-
-	_state.deepUpdate(context);
-	_subStates.wideUpdate(Fork::active, context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <typename TEvent>
-void
-M<TC, TMS>::_C<T, TS...>::deepReact(const TEvent& event,
-									Control& control,
-									Context& context)
-{
-	assert(Fork::active != INVALID_INDEX);
-
-	_state.deepReact(event, control, context);
-	_subStates.wideReact(Fork::active, event, control, context);
 }
 
 #pragma endregion
@@ -925,7 +925,49 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
 	, remaining(stateRegistry, fork, stateParents, forkParents, forkPointers)
 {}
 
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
+																	Control& control,
+																	Context& context) const
+{
+	if (prong == ProngIndex)
+		initial.deepForwardSubstitute(control, context);
+	else
+		remaining.wideForwardSubstitute(prong, control, context);
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(Control& control,
+																	Context& context) const
+{
+	initial.deepForwardSubstitute(control, context);
+	remaining.wideForwardSubstitute(control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(Control& control,
+															 Context& context) const
+{
+	initial.deepSubstitute(control, context);
+	remaining.wideSubstitute(control, context);
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -934,6 +976,67 @@ void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context) {
 	initial.deepEnterInitial(context);
 	remaining.wideEnterInitial(context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnter(Context& context) {
+	initial.deepEnter(context);
+	remaining.wideEnter(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+bool
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(Control& control,
+																	  Context& context)
+{
+	return initial.deepUpdateAndTransition(control, context)
+		|| remaining.wideUpdateAndTransition(control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(Context& context) {
+	initial.deepUpdate(context);
+	remaining.wideUpdate(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+template <typename TEvent>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideReact(const TEvent& event,
+														Control& control,
+														Context& context)
+{
+	initial.deepReact(event, control, context);
+	remaining.wideReact(event, control, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideLeave(Context& context) {
+	initial.deepLeave(context);
+	remaining.wideLeave(context);
 }
 
 //------------------------------------------------------------------------------
@@ -993,112 +1096,9 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
-																	Control& control,
-																	Context& context) const
-{
-	if (prong == ProngIndex)
-		initial.deepForwardSubstitute(control, context);
-	else
-		remaining.wideForwardSubstitute(prong, control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(Control& control,
-																	Context& context) const
-{
-	initial.deepForwardSubstitute(control, context);
-	remaining.wideForwardSubstitute(control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(Control& control,
-															 Context& context) const
-{
-	initial.deepSubstitute(control, context);
-	remaining.wideSubstitute(control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(Context& context) {
 	initial.deepChangeToRequested(context);
 	remaining.wideChangeToRequested(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnter(Context& context) {
-	initial.deepEnter(context);
-	remaining.wideEnter(context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideLeave(Context& context) {
-	initial.deepLeave(context);
-	remaining.wideLeave(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-bool
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(Control& control,
-																	  Context& context)
-{
-	return initial.deepUpdateAndTransition(control, context)
-		|| remaining.wideUpdateAndTransition(control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(Context& context) {
-	initial.deepUpdate(context);
-	remaining.wideUpdate(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI, typename... TR>
-template <typename TEvent>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideReact(const TEvent& event,
-														Control& control,
-														Context& context)
-{
-	initial.deepReact(event, control, context);
-	remaining.wideReact(event, control, context);
 }
 
 #pragma endregion
@@ -1122,7 +1122,46 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
 			  forkPointers)
 {}
 
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
+															 Control& control,
+															 Context& context) const
+{
+	assert(prong == ProngIndex);
+
+	initial.deepForwardSubstitute(control, context);
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(Control& control,
+															 Context& context) const
+{
+	initial.deepForwardSubstitute(control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideSubstitute(Control& control,
+													  Context& context) const
+{
+	initial.deepSubstitute(control, context);
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -1130,6 +1169,62 @@ template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
 	initial.deepEnterInitial(context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnter(Context& context) {
+	initial.deepEnter(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+bool
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(Control& control,
+															   Context& context)
+{
+	return initial.deepUpdateAndTransition(control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdate(Context& context) {
+	initial.deepUpdate(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+template <typename TEvent>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideReact(const TEvent& event,
+												 Control& control,
+												 Context& context)
+{
+	initial.deepReact(event, control, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideLeave(Context& context) {
+	initial.deepLeave(context);
 }
 
 //------------------------------------------------------------------------------
@@ -1179,46 +1274,7 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideRequestResume() {
 	initial.deepRequestResume();
 }
 
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
-															 Control& control,
-															 Context& context) const
-{
-	assert(prong == ProngIndex);
-
-	initial.deepForwardSubstitute(control, context);
-}
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(Control& control,
-															 Context& context) const
-{
-	initial.deepForwardSubstitute(control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideSubstitute(Control& control,
-													  Context& context) const
-{
-	initial.deepSubstitute(control, context);
-}
-
-//------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -1226,62 +1282,6 @@ template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideChangeToRequested(Context& context) {
 	initial.deepChangeToRequested(context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnter(Context& context) {
-	initial.deepEnter(context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideLeave(Context& context) {
-	initial.deepLeave(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-bool
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(Control& control,
-															   Context& context)
-{
-	return initial.deepUpdateAndTransition(control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdate(Context& context) {
-	initial.deepUpdate(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-template <typename TEvent>
-void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideReact(const TEvent& event,
-											 Control& control,
-											 Context& context)
-{
-	initial.deepReact(event, control, context);
 }
 
 #pragma endregion
@@ -1302,7 +1302,39 @@ M<TC, TMS>::_O<T, TS...>::_O(StateRegistry& stateRegistry,
 	, _subStates(stateRegistry, Fork::self, stateParents, forkParents, forkPointers)
 {}
 
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_O<T, TS...>::deepForwardSubstitute(Control& control,
+												Context& context) const
+{
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	if (Fork::requested != INVALID_INDEX)
+		_subStates.wideForwardSubstitute(Fork::requested, control, context);
+	else
+		_subStates.wideForwardSubstitute(control, context);
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_O<T, TS...>::deepSubstitute(Control& control,
+										 Context& context) const
+{
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	if (!_state.deepSubstitute(control, context))
+		_subStates.wideSubstitute(control, context);
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -1314,6 +1346,81 @@ M<TC, TMS>::_O<T, TS...>::deepEnterInitial(Context& context) {
 
 	_state.deepEnter(context);
 	_subStates.wideEnterInitial(context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_O<T, TS...>::deepEnter(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_state.deepEnter(context);
+	_subStates.wideEnter(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+bool
+M<TC, TMS>::_O<T, TS...>::deepUpdateAndTransition(Control& control,
+												  Context& context)
+{
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	if (_state.deepUpdateAndTransition(control, context)) {
+		_subStates.wideUpdate(context);
+
+		return true;
+	} else
+		return _subStates.wideUpdateAndTransition(control, context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_O<T, TS...>::deepUpdate(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_state.deepUpdate(context);
+	_subStates.wideUpdate(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <typename TEvent>
+void
+M<TC, TMS>::_O<T, TS...>::deepReact(const TEvent& event,
+									Control& control,
+									Context& context)
+{
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_state.deepReact(event, control, context);
+	_subStates.wideReact(event, control, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_O<T, TS...>::deepLeave(Context& context) {
+	assert(Fork::active    == INVALID_INDEX &&
+		   Fork::resumable == INVALID_INDEX);
+
+	_subStates.wideLeave(context);
+	_state.deepLeave(context);
 }
 
 //------------------------------------------------------------------------------
@@ -1382,39 +1489,7 @@ M<TC, TMS>::_O<T, TS...>::deepRequestResume() {
 	_subStates.wideRequestResume();
 }
 
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_O<T, TS...>::deepForwardSubstitute(Control& control,
-												Context& context) const
-{
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::resumable == INVALID_INDEX);
-
-	if (Fork::requested != INVALID_INDEX)
-		_subStates.wideForwardSubstitute(Fork::requested, control, context);
-	else
-		_subStates.wideForwardSubstitute(control, context);
-}
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_O<T, TS...>::deepSubstitute(Control& control,
-										 Context& context) const
-{
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::resumable == INVALID_INDEX);
-
-	if (!_state.deepSubstitute(control, context))
-		_subStates.wideSubstitute(control, context);
-}
-
-//------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -1424,81 +1499,6 @@ M<TC, TMS>::_O<T, TS...>::deepChangeToRequested(Context& context) {
 		   Fork::resumable == INVALID_INDEX);
 
 	_subStates.wideChangeToRequested(context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_O<T, TS...>::deepEnter(Context& context) {
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::resumable == INVALID_INDEX);
-
-	_state.deepEnter(context);
-	_subStates.wideEnter(context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_O<T, TS...>::deepLeave(Context& context) {
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::resumable == INVALID_INDEX);
-
-	_subStates.wideLeave(context);
-	_state.deepLeave(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-bool
-M<TC, TMS>::_O<T, TS...>::deepUpdateAndTransition(Control& control,
-												  Context& context)
-{
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::resumable == INVALID_INDEX);
-
-	if (_state.deepUpdateAndTransition(control, context)) {
-		_subStates.wideUpdate(context);
-
-		return true;
-	} else
-		return _subStates.wideUpdateAndTransition(control, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-void
-M<TC, TMS>::_O<T, TS...>::deepUpdate(Context& context) {
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::resumable == INVALID_INDEX);
-
-	_state.deepUpdate(context);
-	_subStates.wideUpdate(context);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <typename TEvent>
-void
-M<TC, TMS>::_O<T, TS...>::deepReact(const TEvent& event,
-									Control& control,
-									Context& context)
-{
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::resumable == INVALID_INDEX);
-
-	_state.deepReact(event, control, context);
-	_subStates.wideReact(event, control, context);
 }
 
 #pragma endregion
