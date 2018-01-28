@@ -13,7 +13,6 @@ namespace hfsm {
 
 template <typename TContext, unsigned TMaxSubstitutions = 4>
 class M {
-
 	using TypeInfo = detail::TypeInfo;
 
 	template <typename T, unsigned TCapacity>
@@ -37,7 +36,7 @@ private:
 	using Index = unsigned char;
 	enum : Index { INVALID_INDEX = std::numeric_limits<Index>::max() };
 
-	enum { MaxSubstitutions = TMaxSubstitutions };
+	enum : unsigned { MaxSubstitutions = TMaxSubstitutions };
 
 	//----------------------------------------------------------------------
 
@@ -82,7 +81,7 @@ private:
 	class StateRegistryT
 		: public StateRegistry
 	{
-		enum { Capacity = TCapacity };
+		enum : unsigned { Capacity = TCapacity };
 
 		using TypeToIndex = HashTable<TypeInfo::Native, unsigned, Capacity>;
 
@@ -156,7 +155,7 @@ private:
 	using TransitionQueue = ArrayView<Transition>;
 
 	//----------------------------------------------------------------------
-	// shortened class names
+
 	template <typename>
 	struct _S;
 
@@ -212,10 +211,10 @@ public:
 		using Transition = typename M::Transition;
 
 	public:
-		inline void preSubstitute(Context&) const		{}
+		inline void preSubstitute(Context&)				{}
 		inline void preEnter(Context&)					{}
 		inline void preUpdate(Context&)					{}
-		inline void preTransition(Context&) const		{}
+		inline void preTransition(Context&)				{}
 		template <typename TEvent>
 		inline void preReact(const TEvent&, Context&)	{}
 		inline void postLeave(Context&)					{}
@@ -234,10 +233,10 @@ private:
 		: public TInjection
 		, public _B<TRest...>
 	{
-		inline void widePreSubstitute(Context& context) const;
+		inline void widePreSubstitute(Context& context);
 		inline void widePreEnter(Context& context);
 		inline void widePreUpdate(Context& context);
-		inline void widePreTransition(Context& context) const;
+		inline void widePreTransition(Context& context);
 		template <typename TEvent>
 		inline void widePreReact(const TEvent& event, Context& context);
 		inline void widePostLeave(Context& context);
@@ -249,387 +248,21 @@ private:
 	struct _B<TInjection>
 		: public TInjection
 	{
-		inline void substitute(Control&, Context&) const			{}
+		inline void substitute(Control&, Context&)				{}
 		inline void enter(Context&)								{}
-		inline void update(Context&)								{}
-		inline void transition(Control&, Context&) const			{}
+		inline void update(Context&)							{}
+		inline void transition(Control&, Context&)				{}
 		template <typename TEvent>
 		inline void react(const TEvent&, Control&, Context&)	{}
 		inline void leave(Context&)								{}
 
-		inline void widePreSubstitute(Context& context) const;
+		inline void widePreSubstitute(Context& context);
 		inline void widePreEnter(Context& context);
 		inline void widePreUpdate(Context& context);
-		inline void widePreTransition(Context& context) const;
+		inline void widePreTransition(Context& context);
 		template <typename TEvent>
 		inline void widePreReact(const TEvent& event, Context& context);
 		inline void widePostLeave(Context& context);
-	};
-
-#pragma endregion
-
-	//----------------------------------------------------------------------
-
-#pragma region State
-
-	template <typename T>
-	struct _S {
-		using Client = T;
-
-		enum {
-			ReverseDepth = 1,
-			DeepWidth	 = 0,
-			StateCount	 = 1,
-			ForkCount	 = 0,
-			ProngCount	 = 0,
-			Width		 = 1,
-		};
-
-		_S(StateRegistry& stateRegistry,
-		   const Parent parent,
-		   Parents& stateParents,
-		   Parents& forkParents,
-		   ForkPointers& forkPointers);
-
-		inline void deepForwardSubstitute(Control&, Context&) const				{}
-		inline bool deepSubstitute(Control& control, Context& context) const;
-
-		inline void deepEnterInitial(Context& context);
-		inline void deepEnter(Context& context);
-
-		inline bool deepUpdateAndTransition(Control& control, Context& context);
-		inline void deepUpdate(Context& context);
-
-		template <typename TEvent>
-		inline void deepReact(const TEvent& event, Control& control, Context& context);
-		
-		inline void deepLeave(Context& context);
-
-		inline void deepForwardRequest(const enum Transition::Type)				{}
-		inline void deepRequestRemain()											{}
-		inline void deepRequestRestart()										{}
-		inline void deepRequestResume()											{}
-		inline void deepChangeToRequested(Context&)	{}
-
-		Client _client;
-
-		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
-	};
-
-#pragma endregion
-
-	//----------------------------------------------------------------------
-
-#pragma region Composite
-
-	template <typename T, typename... TS>
-	struct _C final
-		: public ForkT<T>
-	{
-		using State = _S<T>;
-		using Client = typename State::Client;
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#pragma region Substates
-
-		template <unsigned TN, typename...>
-		struct Sub;
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		template <unsigned TN, typename TI, typename... TR>
-		struct Sub<TN, TI, TR...> {
-			using Initial = typename WrapState<TI>::Type;
-			using Remaining = Sub<TN + 1, TR...>;
-
-			enum {
-				ProngIndex	 = TN,
-				ReverseDepth = hfsm::detail::Max<Initial::ReverseDepth, Remaining::ReverseDepth>::Value,
-				DeepWidth	 = hfsm::detail::Max<Initial::DeepWidth, Remaining::DeepWidth>::Value,
-				StateCount	 = Initial::StateCount + Remaining::StateCount,
-				ForkCount	 = Initial::ForkCount  + Remaining::ForkCount,
-				ProngCount	 = Initial::ProngCount + Remaining::ProngCount,
-			};
-
-			Sub(StateRegistry& stateRegistry,
-				const Index fork,
-				Parents& stateParents,
-				Parents& forkParents,
-				ForkPointers& forkPointers);
-
-			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
-			inline void wideSubstitute(const unsigned prong, Control& control, Context& context) const;
-
-			inline void wideEnterInitial(Context& context);
-			inline void wideEnter(const unsigned prong, Context& context);
-
-			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
-			inline void wideUpdate(const unsigned prong, Context& context);
-
-			template <typename TEvent>
-			inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
-
-			inline void wideLeave(const unsigned prong, Context& context);
-
-			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-			inline void wideRequestRemain();
-			inline void wideRequestRestart();
-			inline void wideRequestResume(const unsigned prong);
-			inline void wideChangeToRequested(const unsigned prong, Context& context);
-
-			Initial initial;
-			Remaining remaining;
-		};
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		template <unsigned TN, typename TI>
-		struct Sub<TN, TI> {
-			using Initial = typename WrapState<TI>::Type;
-
-			enum {
-				ProngIndex	 = TN,
-				ReverseDepth = Initial::ReverseDepth,
-				DeepWidth	 = hfsm::detail::Max<1, Initial::DeepWidth>::Value,
-				StateCount	 = Initial::StateCount,
-				ForkCount	 = Initial::ForkCount,
-				ProngCount	 = Initial::ProngCount,
-			};
-
-			Sub(StateRegistry& stateRegistry,
-				const Index fork,
-				Parents& stateParents,
-				Parents& forkParents,
-				ForkPointers& forkPointers);
-
-			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
-			inline void wideSubstitute(const unsigned prong, Control& control, Context& context) const;
-
-			inline void wideEnterInitial(Context& context);
-			inline void wideEnter(const unsigned prong, Context& context);
-
-			inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
-			inline void wideUpdate(const unsigned prong, Context& context);
-
-			template <typename TEvent>
-			inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
-
-			inline void wideLeave(const unsigned prong, Context& context);
-
-			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-			inline void wideRequestRemain();
-			inline void wideRequestRestart();
-			inline void wideRequestResume(const unsigned prong);
-			inline void wideChangeToRequested(const unsigned prong, Context& context);
-
-			Initial initial;
-		};
-
-		using SubStates = Sub<0, TS...>;
-
-#pragma endregion
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		enum {
-			ReverseDepth = SubStates::ReverseDepth + 1,
-			DeepWidth	 = SubStates::DeepWidth,
-			StateCount	 = State::StateCount + SubStates::StateCount,
-			ForkCount	 = SubStates::ForkCount + 1,
-			ProngCount	 = SubStates::ProngCount + sizeof...(TS),
-			Width		 = sizeof...(TS),
-		};
-
-		_C(StateRegistry& stateRegistry,
-		   const Parent parent,
-		   Parents& stateParents,
-		   Parents& forkParents,
-		   ForkPointers& forkPointers);
-
-		inline void deepForwardSubstitute(Control& control, Context& context) const;
-		inline void deepSubstitute(Control& control, Context& context) const;
-
-		inline void deepEnterInitial(Context& context);
-		inline void deepEnter(Context& context);
-
-		inline bool deepUpdateAndTransition(Control& control, Context& context);
-		inline void deepUpdate(Context& context);
-
-		template <typename TEvent>
-		inline void deepReact(const TEvent& event, Control& control, Context& context);
-
-		inline void deepLeave(Context& context);
-
-		inline void deepForwardRequest(const enum Transition::Type transition);
-		inline void deepRequestRemain();
-		inline void deepRequestRestart();
-		inline void deepRequestResume();
-		inline void deepChangeToRequested(Context& context);
-
-		State _state;
-		SubStates _subStates;
-
-		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
-	};
-
-#pragma endregion
-
-	//----------------------------------------------------------------------
-
-#pragma region Orthogonal
-
-	template <typename T, typename... TS>
-	struct _O final
-		: public ForkT<T>
-	{
-		using State = _S<T>;
-		using Client = typename State::Client;
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#pragma region Substates
-
-		template <unsigned TN, typename...>
-		struct Sub;
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		template <unsigned TN, typename TI, typename... TR>
-		struct Sub<TN, TI, TR...> {
-			using Initial = typename WrapState<TI>::Type;
-			using Remaining = Sub<TN + 1, TR...>;
-
-			enum {
-				ProngIndex	 = TN,
-				ReverseDepth = hfsm::detail::Max<Initial::ReverseDepth, Remaining::ReverseDepth>::Value,
-				DeepWidth	 = Initial::DeepWidth  + Remaining::DeepWidth,
-				StateCount	 = Initial::StateCount + Remaining::StateCount,
-				ForkCount	 = Initial::ForkCount  + Remaining::ForkCount,
-				ProngCount	 = Initial::ProngCount + Remaining::ProngCount,
-			};
-
-			Sub(StateRegistry& stateRegistry,
-				const Index fork,
-				Parents& stateParents,
-				Parents& forkParents,
-				ForkPointers& forkPointers);
-
-			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
-			inline void wideForwardSubstitute(Control& control, Context& context) const;
-			inline void wideSubstitute(Control& control, Context& context) const;
-
-			inline void wideEnterInitial(Context& context);
-			inline void wideEnter(Context& context);
-
-			inline bool wideUpdateAndTransition(Control& control, Context& context);
-			inline void wideUpdate(Context& context);
-
-			template <typename TEvent>
-			inline void wideReact(const TEvent& event, Control& control, Context& context);
-
-			inline void wideLeave(Context& context);
-
-			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-			inline void wideRequestRemain();
-			inline void wideRequestRestart();
-			inline void wideRequestResume();
-			inline void wideChangeToRequested(Context& context);
-
-			Initial initial;
-			Remaining remaining;
-		};
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		template <unsigned TN, typename TI>
-		struct Sub<TN, TI> {
-			using Initial = typename WrapState<TI>::Type;
-
-			enum {
-				ProngIndex	 = TN,
-				ReverseDepth = Initial::ReverseDepth,
-				DeepWidth	 = Initial::DeepWidth,
-				StateCount	 = Initial::StateCount,
-				ForkCount	 = Initial::ForkCount,
-				ProngCount	 = Initial::ProngCount,
-			};
-
-			Sub(StateRegistry& stateRegistry,
-				const Index fork,
-				Parents& stateParents,
-				Parents& forkParents,
-				ForkPointers& forkPointers);
-
-			inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context) const;
-			inline void wideForwardSubstitute(Control& control, Context& context) const;
-			inline void wideSubstitute(Control& control, Context& context) const;
-
-			inline void wideEnterInitial(Context& context);
-			inline void wideEnter(Context& context);
-
-			inline bool wideUpdateAndTransition(Control& control, Context& context);
-			inline void wideUpdate(Context& context);
-
-			template <typename TEvent>
-			inline void wideReact(const TEvent& event, Control& control, Context& context);
-
-			inline void wideLeave(Context& context);
-
-			inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-			inline void wideRequestRemain();
-			inline void wideRequestRestart();
-			inline void wideRequestResume();
-			inline void wideChangeToRequested(Context& context);
-
-			Initial initial;
-		};
-
-		using SubStates = Sub<0, TS...>;
-
-#pragma endregion
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		enum {
-			ReverseDepth = SubStates::ReverseDepth + 1,
-			DeepWidth	 = SubStates::DeepWidth,
-			StateCount	 = State::StateCount + SubStates::StateCount,
-			ForkCount	 = SubStates::ForkCount + 1,
-			ProngCount	 = SubStates::ProngCount,
-			Width		 = sizeof...(TS),
-		};
-
-		_O(StateRegistry& stateRegistry,
-		   const Parent parent,
-		   Parents& stateParents,
-		   Parents& forkParents,
-		   ForkPointers& forkPointers);
-
-		inline void deepForwardSubstitute(Control& control, Context& context) const;
-		inline void deepSubstitute(Control& control, Context& context) const;
-
-		inline void deepEnterInitial(Context& context);
-		inline void deepEnter(Context& context);
-
-		inline bool deepUpdateAndTransition(Control& control, Context& context);
-		inline void deepUpdate(Context& context);
-
-		template <typename TEvent>
-		inline void deepReact(const TEvent& event, Control& control, Context& context);
-
-		inline void deepLeave(Context& context);
-
-		inline void deepForwardRequest(const enum Transition::Type transition);
-		inline void deepRequestRemain();
-		inline void deepRequestRestart();
-		inline void deepRequestResume();
-		inline void deepChangeToRequested(Context& context);
-
-		State _state;
-		SubStates _subStates;
-
-		HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
 	};
 
 #pragma endregion
@@ -654,7 +287,7 @@ private:
 		using TransitionQueueStorage = Array<Transition, Apex::ForkCount>;
 
 	public:
-		enum {
+		enum : unsigned {
 			DeepWidth	= Apex::DeepWidth,
 			StateCount	= Apex::StateCount,
 			ForkCount	= Apex::ForkCount,
@@ -688,7 +321,7 @@ private:
 		inline bool isResumable();
 
 	protected:
-		void processRequests();
+		void processTransitions();
 		void requestImmediate(const Transition request);
 		void requestScheduled(const Transition request);
 

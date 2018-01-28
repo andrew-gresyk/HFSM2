@@ -29,6 +29,16 @@
     <ClInclude Include="..\..\hfsm\machine.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\hfsm\detail\machine_composite.inl" />
+    <None Include="..\..\hfsm\detail\machine_composite_methods.inl" />
+    <None Include="..\..\hfsm\detail\machine_composite_sub_1.inl" />
+    <None Include="..\..\hfsm\detail\machine_composite_sub_2.inl" />
+    <None Include="..\..\hfsm\detail\machine_orthogonal.inl" />
+    <None Include="..\..\hfsm\detail\machine_orthogonal_methods.inl" />
+    <None Include="..\..\hfsm\detail\machine_orthogonal_sub_1.inl" />
+    <None Include="..\..\hfsm\detail\machine_orthogonal_sub_2.inl" />
+    <None Include="..\..\hfsm\detail\machine_state.inl" />
+    <None Include="..\..\hfsm\detail\machine_state_methods.inl" />
     <None Include="..\..\hfsm\machine.inl" />
   </ItemGroup>
   <ItemGroup>
