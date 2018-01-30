@@ -1,4 +1,4 @@
-namespace hfsm {
+﻿namespace hfsm {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -162,6 +162,8 @@ M<TC, TMS>::_R<TA>::_R(Context& context)
 	: _context(context)
 	, _apex(_stateRegistry, Parent(), _stateParents, _forkParents, _forkPointers)
 {
+	K9_IF_STRUCTURE_REPORT(getStateNames());
+
 	_apex.deepEnterInitial(_context);
 }
 
@@ -196,43 +198,8 @@ M<TC, TMS>::_R<TA>::react(const TEvent& event) {
 	Control control(_requests);
 	_apex.deepReact(event, control, _context);
 
-	processTransitions();
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, unsigned TMS>
-template <typename TA>
-void
-M<TC, TMS>::_R<TA>::processTransitions() {
-	for (unsigned i = 0; i < MaxSubstitutions && _requests.count(); ++i) {
-		unsigned changeCount = 0;
-
-		for (const auto& request : _requests)
-			switch (request.type) {
-			case Transition::Restart:
-			case Transition::Resume:
-				requestImmediate(request);
-
-				++changeCount;
-				break;
-
-			case Transition::Schedule:
-				requestScheduled(request);
-				break;
-
-			default:
-				assert(false);
-			}
-		_requests.clear();
-
-		if (changeCount > 0) {
-			Control substitutionControl(_requests);
-			_apex.deepForwardSubstitute(substitutionControl, _context);
-		}
-	}
-
-	_apex.deepChangeToRequested(_context);
+	if (_requests.count())
+		processTransitions();
 }
 
 //------------------------------------------------------------------------------
@@ -284,6 +251,57 @@ M<TC, TMS>::_R<TA>::isResumable() {
 template <typename TC, unsigned TMS>
 template <typename TA>
 void
+M<TC, TMS>::_R<TA>::processTransitions() {
+	K9_IF_STRUCTURE_REPORT(_lastTransitions.clear());
+
+	for (unsigned i = 0;
+		i < MaxSubstitutions && _requests.count();
+		++i)
+	{
+		unsigned changeCount = 0;
+
+		for (const auto& request : _requests) {
+			K9_IF_STRUCTURE_REPORT(_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Update));
+
+			switch (request.type) {
+			case Transition::Restart:
+			case Transition::Resume:
+				requestImmediate(request);
+
+				++changeCount;
+				break;
+
+			case Transition::Schedule:
+				requestScheduled(request);
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+		_requests.clear();
+
+		if (changeCount > 0) {
+			Control substitutionControl(_requests);
+			_apex.deepForwardSubstitute(substitutionControl, _context);
+			
+		#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+			for (auto request : _requests)
+				_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Substitute);
+		#endif
+		}
+	}
+
+	_apex.deepChangeToRequested(_context);
+
+	K9_IF_STRUCTURE_REPORT(udpateActivity());
+}
+
+ // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename TA>
+void
 M<TC, TMS>::_R<TA>::requestImmediate(const Transition request) {
 	const unsigned state = id(request);
 
@@ -315,6 +333,112 @@ M<TC, TMS>::_R<TA>::requestScheduled(const Transition request) {
 	HSFM_DEBUG_ONLY(fork.resumableType = parent.prongType);
 	fork.resumable = parent.prong;
 }
+
+//------------------------------------------------------------------------------
+
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+
+template <typename TC, unsigned TMS>
+template <typename TA>
+void
+M<TC, TMS>::_R<TA>::getStateNames() {
+	_stateInfos.clear();
+	_apex.deepGetNames((unsigned) -1, StateInfo::Composite, 0, _stateInfos);
+
+	for (unsigned s = 0; s < _stateInfos.count(); ++s) {
+		const auto& state = _stateInfos[s];
+		auto& prefix      = _prefixes[s];
+
+		if (state.depth == 0)
+			prefix[0] = L'\0';
+		else {
+			const auto mark = state.depth * 2 - 1;
+
+			prefix[mark + 2] = L'\0';
+			prefix[mark + 1] = state.name[0] != '\0' ? L' ' : L'─';
+			prefix[mark + 0] = state.region == StateInfo::Composite ? L'└' : L'╙';
+
+			for (unsigned d = mark; d > 0; --d)
+				prefix[d - 1] = L' ';
+
+			for (unsigned r = s; r > state.parent; --r) {
+				auto& prefixAbove = _prefixes[r - 1];
+
+				switch (prefixAbove[mark]) {
+				case L' ':
+					prefixAbove[mark] = state.region == StateInfo::Composite ? L'│' : L'║';
+					break;
+				case L'└':
+					prefixAbove[mark] = L'├';
+					break;
+				case L'╙':
+					prefixAbove[mark] = L'╟';
+					break;
+				}
+			}
+		}
+	}
+
+	_structure.clear();
+	for (unsigned s = 0; s < _stateInfos.count(); ++s) {
+		const auto& state = _stateInfos[s];
+		auto& prefix = _prefixes[s];
+		const auto space = state.depth * 2;
+
+		if (state.name[0] != L'\0') {
+			_structure << StructureEntry { false, &prefix[0], state.name };
+			_activityHistory << (char) 0;
+		} else if (s + 1 < _stateInfos.count()) {
+			auto& nextPrefix = _prefixes[s + 1];
+
+			if (s > 0)
+				for (unsigned c = 0; c <= space; ++c)
+					nextPrefix[c] = prefix[c];
+
+			const auto mark = space + 1;
+
+			switch (nextPrefix[mark]) {
+			case L'├':
+				nextPrefix[mark] = s == 0 ? L'┌' : L'┬';
+				break;
+			case L'╟':
+				nextPrefix[mark] = s == 0 ? L'╓' : L'╥';
+				break;
+			}
+		}
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename TA>
+void
+M<TC, TMS>::_R<TA>::udpateActivity() {
+	for (auto item : _structure)
+		item.isActive = false;
+
+	unsigned index = 0;
+	_apex.deepIsActive(true, index, _structure);
+
+	for (unsigned i = 0; i < _structure.count(); ++i) {
+		auto& activity = _activityHistory[i];
+
+		if (_structure[i].isActive) {
+			if (activity > 0)
+				activity = activity < std::numeric_limits<char>::max() ? activity + 1 : activity;
+			else
+				activity = +1;
+		} else {
+			if (activity > 0)
+				activity = -1;
+			else
+				activity = activity > std::numeric_limits<char>::min() ? activity - 1 : activity;
+		}
+	}
+}
+
+#endif
 
 #pragma endregion
 

@@ -4,11 +4,10 @@ namespace hfsm {
 
 template <typename TContext, unsigned TMaxSubstitutions>
 template <typename T, typename... TS>
-struct M<TContext, TMaxSubstitutions>::_O final
-	: public ForkT<T>
-{
+struct M<TContext, TMaxSubstitutions>::_O final {
 	using Client = T;
-	using State = _S<T>;
+	using Fork	 = ForkT<Client>;
+	using State  = _S<Client>;
 
 	//----------------------------------------------------------------------
 
@@ -24,7 +23,7 @@ struct M<TContext, TMaxSubstitutions>::_O final
 
 		enum : unsigned {
 			ProngIndex	 = TN,
-			ReverseDepth = hfsm::detail::Max<Initial::ReverseDepth, Remaining::ReverseDepth>::Value,
+			ReverseDepth = detail::Max<Initial::ReverseDepth, Remaining::ReverseDepth>::Value,
 			DeepWidth	 = Initial::DeepWidth  + Remaining::DeepWidth,
 			StateCount	 = Initial::StateCount + Remaining::StateCount,
 			ForkCount	 = Initial::ForkCount  + Remaining::ForkCount,
@@ -57,6 +56,20 @@ struct M<TContext, TMaxSubstitutions>::_O final
 		inline void wideRequestRestart();
 		inline void wideRequestResume();
 		inline void wideChangeToRequested(Context& context);
+
+	#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+		enum : unsigned {
+			NameCount	 = Initial::NameCount  + Remaining::NameCount,
+		};
+
+		void wideGetNames(const unsigned parent,
+						  const unsigned depth,
+						  StateInfos& stateInfos) const;
+
+		void wideIsActive(const bool active,
+						  unsigned& index,
+						  MachineStructure& structure) const;
+	#endif
 
 		Initial initial;
 		Remaining remaining;
@@ -104,6 +117,20 @@ struct M<TContext, TMaxSubstitutions>::_O final
 		inline void wideRequestResume();
 		inline void wideChangeToRequested(Context& context);
 
+	#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+		enum : unsigned {
+			NameCount	 = Initial::NameCount,
+		};
+
+		void wideGetNames(const unsigned parent,
+						  const unsigned depth,
+						  StateInfos& stateInfos) const;
+
+		void wideIsActive(const bool active,
+						  unsigned& index,
+						  MachineStructure& structure) const;
+	#endif
+
 		Initial initial;
 	};
 
@@ -146,6 +173,22 @@ struct M<TContext, TMaxSubstitutions>::_O final
 	inline void deepRequestResume();
 	inline void deepChangeToRequested(Context& context);
 
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+	enum : unsigned {
+		NameCount	 = State::NameCount  + SubStates::NameCount,
+	};
+
+	void deepGetNames(const unsigned parent,
+					  const enum StateInfo::RegionType region,
+					  const unsigned depth,
+					  StateInfos& stateInfos) const;
+
+	void deepIsActive(const bool isActive,
+					  unsigned& index,
+					  MachineStructure& structure) const;
+#endif
+
+	Fork _fork;
 	State _state;
 	SubStates _subStates;
 

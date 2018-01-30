@@ -194,6 +194,38 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(Context& con
 	remaining.wideChangeToRequested(context);
 }
 
+//------------------------------------------------------------------------------
+
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideGetNames(const unsigned parent,
+														   const unsigned depth,
+														   StateInfos& _stateInfos) const
+{
+	initial.deepGetNames(parent, StateInfo::Orthogonal, depth, _stateInfos);
+	remaining.wideGetNames(parent, depth, _stateInfos);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+template <unsigned TN, typename TI, typename... TR>
+void
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideIsActive(const bool isActive,
+														   unsigned& index,
+														   MachineStructure& structure) const
+{
+	initial.deepIsActive(isActive, index, structure);
+	remaining.wideIsActive(isActive, index, structure);
+}
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }

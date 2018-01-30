@@ -10,7 +10,7 @@ M<TC, TMS>::_S<T>::_S(StateRegistry& stateRegistry,
 					  Parents& /*forkParents*/,
 					  ForkPointers& /*forkPointers*/)
 {
-	const auto id = stateRegistry.add(TypeInfo::get<T>());
+	const auto id = stateRegistry.add(TypeInfo::get<Client>());
 	stateParents[id] = parent;
 }
 
@@ -101,6 +101,59 @@ M<TC, TMS>::_S<T>::deepLeave(Context& context) {
 	_client.leave(context);
 	_client.widePostLeave(context);
 }
+
+//------------------------------------------------------------------------------
+
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+
+template <typename TC, unsigned TMS>
+template <typename T>
+const char*
+M<TC, TMS>::_S<T>::name() {
+	if (isBare())
+		return "";
+	else {
+		const char* const raw = TypeInfo::get<Client>()->name();
+
+		switch (raw[0]) {
+		case 's':				// struct
+			return raw + 7;
+		case 'c':				// class
+			return raw + 6;
+		default:
+			assert(false);
+			return '\0';
+		}
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T>
+void
+M<TC, TMS>::_S<T>::deepGetNames(const unsigned parent,
+								const enum StateInfo::RegionType region,
+								const unsigned depth,
+								StateInfos& _stateInfos) const
+{
+	_stateInfos << StateInfo { parent, region, depth, name() };
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T>
+void
+M<TC, TMS>::_S<T>::deepIsActive(const bool isActive,
+								unsigned& index,
+								MachineStructure& structure) const
+{
+	if (!isBare())
+		structure[index++].isActive = isActive;
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -42,6 +42,25 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	inline void deepRequestResume()											{}
 	inline void deepChangeToRequested(Context&)	{}
 
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+	static constexpr bool isBare() { return std::is_same<Client, _B<Bare>>::value; }
+
+	enum : unsigned {
+		NameCount	 = isBare() ? 0 : 1,
+	};
+
+	static const char* name();
+
+	void deepGetNames(const unsigned parent,
+					  const enum StateInfo::RegionType region,
+					  const unsigned depth,
+					  StateInfos& stateInfos) const;
+
+	void deepIsActive(const bool isActive,
+					  unsigned& index,
+					  MachineStructure& structure) const;
+#endif
+
 	Client _client;
 
 	HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());

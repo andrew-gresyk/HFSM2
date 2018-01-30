@@ -4,10 +4,27 @@
 #include "detail/hash_table.hpp"
 #include "detail/type_info.hpp"
 
-#include <limits>
 #include <type_traits>
 
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+	#define K9_IF_STRUCTURE_REPORT(x)	x
+#else
+	#define K9_IF_STRUCTURE_REPORT(x)
+#endif
+
 namespace hfsm {
+
+//------------------------------------------------------------------------------
+
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+struct StructureEntry {
+	bool isActive;
+	const wchar_t* prefix;
+	const char* name;
+};
+using MachineStructure = detail::ArrayView<StructureEntry>;
+using MachineActivity  = detail::ArrayView<char>;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -193,6 +210,37 @@ private:
 		using Type = _O<T, TS...>;
 	};
 
+	//----------------------------------------------------------------------
+
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+	struct StateInfo {
+		enum RegionType {
+			Composite,
+			Orthogonal,
+		};
+		
+		StateInfo() {}
+
+		StateInfo(const unsigned parent_,
+				  const RegionType region_,
+				  const unsigned depth_,				  
+				  const char* const name_)
+			: parent(parent_)
+			, region(region_)
+			, depth(depth_)
+			, name(name_)
+		{}
+
+		unsigned parent;
+		RegionType region;
+		unsigned depth;
+		const char* name;
+	};
+	using StateInfos = detail::ArrayView<StateInfo>;
+
+	using StateStructure = detail::ArrayView<StructureEntry>;
+#endif
+
 #pragma endregion
 
 	//----------------------------------------------------------------------
@@ -275,26 +323,41 @@ private:
 	class _R final {
 		using Apex = typename WrapState<TApex>::Type;
 
+	public:
+		enum : unsigned {
+			ReverseDepth  = Apex::ReverseDepth,
+			DeepWidth	  = Apex::DeepWidth,
+			StateCount	  = Apex::StateCount,
+			ForkCount	  = Apex::ForkCount,
+			ProngCount	  = Apex::ProngCount,
+			Width		  = Apex::Width,
+		};
+		static_assert(StateCount < std::numeric_limits<Index>::max(), "Too many states in the hierarchy. Change 'Index' type.");
+
+	private:
 		enum : unsigned {
 			StateCapacity = (unsigned) 1.3 * Apex::StateCount,
-			ForkCapacity  = Apex::ForkCount,
 		};
 
 		using StateRegistryImpl		 = StateRegistryT<StateCapacity>;
-		using StateParentStorage	 = Array<Parent, Apex::StateCount>;
-		using ForkParentStorage		 = Array<Parent, Apex::ForkCount>;
-		using ForkPointerStorage	 = Array<Fork*, ForkCapacity>;
-		using TransitionQueueStorage = Array<Transition, Apex::ForkCount>;
+		using StateParentStorage	 = Array<Parent, StateCount>;
+		using ForkParentStorage		 = Array<Parent, ForkCount>;
+		using ForkPointerStorage	 = Array<Fork*, ForkCount>;
+		using TransitionQueueStorage = Array<Transition, ForkCount>;
 
-	public:
+	#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
-			DeepWidth	= Apex::DeepWidth,
-			StateCount	= Apex::StateCount,
-			ForkCount	= Apex::ForkCount,
-			ProngCount	= Apex::ProngCount,
-			Width		= Apex::Width,
+			NameCount	  = Apex::NameCount,
 		};
-		static_assert(StateCount < std::numeric_limits<Index>::max(), "Too many states in the hierarchy. Change 'Index' type.");
+
+		using Prefix				 = detail::StaticArray<wchar_t, ReverseDepth * 2 + 2>;
+		using Prefixes				 = detail::StaticArray<Prefix, StateCount>;
+
+		using StateInfoStorage		 = detail::Array<StateInfo, StateCount>;
+
+		using StructureStorage		 = detail::Array<StructureEntry, NameCount>;
+		using ActivityHistoryStorage = detail::Array<char, NameCount>;
+	#endif
 
 	public:
 		_R(Context& context);
@@ -306,13 +369,13 @@ private:
 		inline void react(const TEvent& event);
 
 		template <typename T>
-		inline void schedule()	{ _requests << Transition(Transition::Type::Schedule, TypeInfo::get<T>());	}
-
-		template <typename T>
 		inline void changeTo()	{ _requests << Transition(Transition::Type::Restart,  TypeInfo::get<T>());	}
 
 		template <typename T>
 		inline void resume()	{ _requests << Transition(Transition::Type::Resume,   TypeInfo::get<T>());	}
+
+		template <typename T>
+		inline void schedule()	{ _requests << Transition(Transition::Type::Schedule, TypeInfo::get<T>());	}
 
 		template <typename T>
 		inline bool isActive();
@@ -320,12 +383,22 @@ private:
 		template <typename T>
 		inline bool isResumable();
 
+	#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+		const MachineStructure& structure() const									{ return _structure;		};
+		const MachineActivity& activity() const										{ return _activityHistory;	};
+	#endif
+
 	protected:
 		void processTransitions();
 		void requestImmediate(const Transition request);
 		void requestScheduled(const Transition request);
 
 		inline unsigned id(const Transition request) const	{ return _stateRegistry[*request.stateType];	}
+
+	#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+		void getStateNames();
+		void udpateActivity();
+	#endif
 
 	private:
 		Context& _context;
@@ -339,6 +412,41 @@ private:
 		TransitionQueueStorage _requests;
 
 		Apex _apex;
+
+	#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+		Prefixes _prefixes;
+		StateInfoStorage _stateInfos;
+
+		StructureStorage _structure;
+		ActivityHistoryStorage _activityHistory;
+
+		struct DebugTransitionInfo {
+			typename Transition::Type type;
+			TypeInfo state;
+
+			enum Source {
+				Update,
+				Substitute,
+				Linger,
+
+				COUNT
+			};
+			Source source;
+
+			inline DebugTransitionInfo() = default;
+
+			inline DebugTransitionInfo(const Transition transition,
+									   const Source source_)
+				: type(transition.type)
+				, state(transition.stateType)
+				, source(source_)
+			{
+				assert(source_ < Source::COUNT);
+			}
+		};
+		using DebugTransitionInfos = Array<DebugTransitionInfo, 2 * ForkCount>;
+		DebugTransitionInfos _lastTransitions;
+	#endif
 	};
 
 	//----------------------------------------------------------------------
@@ -356,13 +464,13 @@ public:
 
 	public:
 		template <typename T>
-		inline void schedule()	{ _requests << Transition(Transition::Type::Schedule, TypeInfo::get<T>());	}
-
-		template <typename T>
 		inline void changeTo()	{ _requests << Transition(Transition::Type::Restart,  TypeInfo::get<T>());	}
 
 		template <typename T>
 		inline void resume()	{ _requests << Transition(Transition::Type::Resume,	  TypeInfo::get<T>());	}
+
+		template <typename T>
+		inline void schedule()	{ _requests << Transition(Transition::Type::Schedule, TypeInfo::get<T>());	}
 
 		inline unsigned requestCount() const									{ return _requests.count();	}
 

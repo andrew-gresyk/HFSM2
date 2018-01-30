@@ -1,3 +1,4 @@
+#define K9_MACHINE_ENABLE_STRUCTURE_REPORT
 #include "../hfsm/machine.hpp"
 
 #include <algorithm>
@@ -197,7 +198,7 @@ struct A_2;
 struct A_1
 	: Base<A_1>
 {
-	void transition(Control& control, Context& _) const {
+	void transition(Control& control, Context& _) {
 		changeTo<A_2>(control, _.history);
 	}
 };
@@ -210,7 +211,7 @@ struct B_2_2;
 struct A_2
 	: Base<A_2>
 {
-	void transition(Control& control, Context& _) const {
+	void transition(Control& control, Context& _) {
 		switch (entryCount()) {
 		case 1:
 			changeTo<B_2_2>(control, _.history);
@@ -243,7 +244,7 @@ struct B_2 : Base<B_2> {};
 struct B_2_1
 	: Base<B_2_1>
 {
-	void substitute(Control& control, Context& _) const {
+	void substitute(Control& control, Context& _) {
 		resume<B_2_2>(control, _.history);
 	}
 };
@@ -253,12 +254,12 @@ struct B_2_1
 struct B_2_2
 	: Base<B_2_2>
 {
-	void substitute(Control& control, Context&) const {
+	void substitute(Control& control, Context&) {
 		if (entryCount() == 2)
 			control.resume<A>();
 	}
 
-	void transition(Control& control, Context& _) const {
+	void transition(Control& control, Context& _) {
 		switch (totalUpdateCount()) {
 		case 1:
 			resume<A>(control, _.history);

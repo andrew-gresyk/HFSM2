@@ -71,6 +71,9 @@
     <None Include="..\..\hfsm\detail\machine_state_methods.inl">
       <Filter>hfsm\detail</Filter>
     </None>
+    <None Include="..\..\hfsm\detail\array.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp">

@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\hfsm\machine.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\hfsm\detail\array.inl" />
     <None Include="..\..\hfsm\detail\machine_composite.inl" />
     <None Include="..\..\hfsm\detail\machine_composite_methods.inl" />
     <None Include="..\..\hfsm\detail\machine_composite_sub_1.inl" />
@@ -45,7 +46,9 @@
     <ClCompile Include="..\..\test\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="hfsm.natvis" />
+    <Natvis Include="hfsm.natvis">
+      <SubType>Designer</SubType>
+    </Natvis>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

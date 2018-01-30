@@ -9,9 +9,9 @@ M<TC, TMS>::_C<T, TS...>::_C(StateRegistry& stateRegistry,
 							 Parents& stateParents,
 							 Parents& forkParents,
 							 ForkPointers& forkPointers)
-	: ForkT<T>(static_cast<Index>(forkPointers << this), parent, forkParents)
+	: _fork(static_cast<Index>(forkPointers << &_fork), parent, forkParents)
 	, _state(stateRegistry, parent, stateParents, forkParents, forkPointers)
-	, _subStates(stateRegistry, Fork::self, stateParents, forkParents, forkPointers)
+	, _subStates(stateRegistry, _fork.self, stateParents, forkParents, forkPointers)
 {}
 
 //------------------------------------------------------------------------------
@@ -22,12 +22,12 @@ void
 M<TC, TMS>::_C<T, TS...>::deepForwardSubstitute(Control& control,
 												Context& context)
 {
-	assert(Fork::requested != INVALID_INDEX);
+	assert(_fork.requested != INVALID_INDEX);
 
-	if (Fork::requested == Fork::active)
-		_subStates.wideForwardSubstitute(Fork::requested, control, context);
+	if (_fork.requested == _fork.active)
+		_subStates.wideForwardSubstitute(_fork.requested, control, context);
 	else
-		_subStates.wideSubstitute(Fork::requested, control, context);
+		_subStates.wideSubstitute(_fork.requested, control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -38,11 +38,11 @@ void
 M<TC, TMS>::_C<T, TS...>::deepSubstitute(Control& control,
 										 Context& context)
 {
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::requested != INVALID_INDEX);
+	assert(_fork.active    == INVALID_INDEX &&
+		   _fork.requested != INVALID_INDEX);
 
 	if (!_state.deepSubstitute(control, context))
-		_subStates.wideSubstitute(Fork::requested, control, context);
+		_subStates.wideSubstitute(_fork.requested, control, context);
 }
 
 //------------------------------------------------------------------------------
@@ -51,12 +51,12 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepEnterInitial(Context& context) {
-	assert(Fork::active    == INVALID_INDEX &&
-		   Fork::resumable == INVALID_INDEX &&
-		   Fork::requested == INVALID_INDEX);
+	assert(_fork.active    == INVALID_INDEX &&
+		   _fork.resumable == INVALID_INDEX &&
+		   _fork.requested == INVALID_INDEX);
 
-	HSFM_DEBUG_ONLY(Fork::activeType = TypeInfo::get<typename SubStates::Initial::Client>());
-	Fork::active = 0;
+	HSFM_DEBUG_ONLY(_fork.activeType = TypeInfo::get<typename SubStates::Initial::Client>());
+	_fork.active = 0;
 
 	_state.deepEnter(context);
 	_subStates.wideEnterInitial(context);
@@ -68,17 +68,17 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepEnter(Context& context) {
-	assert(Fork::active	   == INVALID_INDEX &&
-		   Fork::requested != INVALID_INDEX);
+	assert(_fork.active	   == INVALID_INDEX &&
+		   _fork.requested != INVALID_INDEX);
 
-	HSFM_DEBUG_ONLY(Fork::activeType = Fork::requestedType);
-	Fork::active = Fork::requested;
+	HSFM_DEBUG_ONLY(_fork.activeType = _fork.requestedType);
+	_fork.active = _fork.requested;
 
-	HSFM_DEBUG_ONLY(Fork::requestedType.clear());
-	Fork::requested = INVALID_INDEX;
+	HSFM_DEBUG_ONLY(_fork.requestedType.clear());
+	_fork.requested = INVALID_INDEX;
 
 	_state.deepEnter(context);
-	_subStates.wideEnter(Fork::active, context);
+	_subStates.wideEnter(_fork.active, context);
 }
 
 //------------------------------------------------------------------------------
@@ -89,14 +89,14 @@ bool
 M<TC, TMS>::_C<T, TS...>::deepUpdateAndTransition(Control& control,
 												  Context& context)
 {
-	assert(Fork::active != INVALID_INDEX);
+	assert(_fork.active != INVALID_INDEX);
 
 	if (_state.deepUpdateAndTransition(control, context)) {
-		_subStates.wideUpdate(Fork::active, context);
+		_subStates.wideUpdate(_fork.active, context);
 
 		return true;
 	} else
-		return _subStates.wideUpdateAndTransition(Fork::active, control, context);
+		return _subStates.wideUpdateAndTransition(_fork.active, control, context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -105,10 +105,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepUpdate(Context& context) {
-	assert(Fork::active != INVALID_INDEX);
+	assert(_fork.active != INVALID_INDEX);
 
 	_state.deepUpdate(context);
-	_subStates.wideUpdate(Fork::active, context);
+	_subStates.wideUpdate(_fork.active, context);
 }
 
 //------------------------------------------------------------------------------
@@ -121,10 +121,10 @@ M<TC, TMS>::_C<T, TS...>::deepReact(const TEvent& event,
 									Control& control,
 									Context& context)
 {
-	assert(Fork::active != INVALID_INDEX);
+	assert(_fork.active != INVALID_INDEX);
 
 	_state.deepReact(event, control, context);
-	_subStates.wideReact(Fork::active, event, control, context);
+	_subStates.wideReact(_fork.active, event, control, context);
 }
 
 //------------------------------------------------------------------------------
@@ -133,16 +133,16 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepLeave(Context& context) {
-	assert(Fork::active != INVALID_INDEX);
+	assert(_fork.active != INVALID_INDEX);
 
-	_subStates.wideLeave(Fork::active, context);
+	_subStates.wideLeave(_fork.active, context);
 	_state.deepLeave(context);
 
-	HSFM_DEBUG_ONLY(Fork::resumableType = Fork::activeType);
-	Fork::resumable = Fork::active;
+	HSFM_DEBUG_ONLY(_fork.resumableType = _fork.activeType);
+	_fork.resumable = _fork.active;
 
-	HSFM_DEBUG_ONLY(Fork::activeType.clear());
-	Fork::active = INVALID_INDEX;
+	HSFM_DEBUG_ONLY(_fork.activeType.clear());
+	_fork.active = INVALID_INDEX;
 }
 
 //------------------------------------------------------------------------------
@@ -151,8 +151,8 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepForwardRequest(const enum Transition::Type transition) {
-	if (Fork::requested != INVALID_INDEX)
-		_subStates.wideForwardRequest(Fork::requested, transition);
+	if (_fork.requested != INVALID_INDEX)
+		_subStates.wideForwardRequest(_fork.requested, transition);
 	else
 		switch (transition) {
 		case Transition::Remain:
@@ -178,9 +178,9 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepRequestRemain() {
-	if (Fork::active == INVALID_INDEX) {
-		HSFM_DEBUG_ONLY(Fork::requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
-		Fork::requested = 0;
+	if (_fork.active == INVALID_INDEX) {
+		HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
+		_fork.requested = 0;
 	}
 
 	_subStates.wideRequestRemain();
@@ -192,8 +192,8 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepRequestRestart() {
-	HSFM_DEBUG_ONLY(Fork::requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
-	Fork::requested = 0;
+	HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
+	_fork.requested = 0;
 
 	_subStates.wideRequestRestart();
 }
@@ -204,15 +204,15 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepRequestResume() {
-	if (Fork::resumable != INVALID_INDEX) {
-		HSFM_DEBUG_ONLY(Fork::requestedType = Fork::resumableType);
-		Fork::requested = Fork::resumable;
+	if (_fork.resumable != INVALID_INDEX) {
+		HSFM_DEBUG_ONLY(_fork.requestedType = _fork.resumableType);
+		_fork.requested = _fork.resumable;
 	} else {
-		HSFM_DEBUG_ONLY(Fork::requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
-		Fork::requested = 0;
+		HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Client>());
+		_fork.requested = 0;
 	}
 
-	_subStates.wideRequestResume(Fork::requested);
+	_subStates.wideRequestResume(_fork.requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -221,27 +221,56 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 void
 M<TC, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context) {
-	assert(Fork::active != INVALID_INDEX);
+	assert(_fork.active != INVALID_INDEX);
 
-	if (Fork::requested != INVALID_INDEX) {
-		if (Fork::requested == Fork::active)
-			_subStates.wideChangeToRequested(Fork::requested, context);
-		else {
-			_subStates.wideLeave(Fork::active, context);
+	if (_fork.requested == _fork.active)
+		_subStates.wideChangeToRequested(_fork.requested, context);
+	else if (_fork.requested != INVALID_INDEX) {
+		_subStates.wideLeave(_fork.active, context);
 
-			HSFM_DEBUG_ONLY(Fork::resumableType = Fork::activeType);
-			Fork::resumable = Fork::active;
+		HSFM_DEBUG_ONLY(_fork.resumableType = _fork.activeType);
+		_fork.resumable = _fork.active;
 
-			HSFM_DEBUG_ONLY(Fork::activeType = Fork::requestedType);
-			Fork::active = Fork::requested;
+		HSFM_DEBUG_ONLY(_fork.activeType = _fork.requestedType);
+		_fork.active = _fork.requested;
 
-			HSFM_DEBUG_ONLY(Fork::requestedType.clear());
-			Fork::requested = INVALID_INDEX;
+		HSFM_DEBUG_ONLY(_fork.requestedType.clear());
+		_fork.requested = INVALID_INDEX;
 
-			_subStates.wideEnter(Fork::active, context);
-		}
+		_subStates.wideEnter(_fork.active, context);
 	}
 }
+
+//------------------------------------------------------------------------------
+
+#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_C<T, TS...>::deepGetNames(const unsigned parent,
+									   const enum StateInfo::RegionType region,
+									   const unsigned depth,
+									   StateInfos& _stateInfos) const
+{
+	_state.deepGetNames(parent, region, depth, _stateInfos);
+	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, unsigned TMS>
+template <typename T, typename... TS>
+void
+M<TC, TMS>::_C<T, TS...>::deepIsActive(const bool isActive,
+									   unsigned& index,
+									   MachineStructure& structure) const
+{
+	_state.deepIsActive(isActive, index, structure);
+	_subStates.wideIsActive(isActive ? _fork.active : INVALID_INDEX, index, structure);
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 

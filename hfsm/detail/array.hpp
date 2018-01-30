@@ -4,6 +4,7 @@
 #include "iterator.hpp"
 
 #include <cassert>
+#include <limits>
 
 namespace hfsm {
 namespace detail {
@@ -11,6 +12,46 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 4)
+
+template <typename T, unsigned TCapacity>
+class StaticArray {
+public:
+	enum {
+		CAPACITY  = TCapacity,
+		ALIGNMENT = alignof(T)
+	};
+
+	using Item  = T;
+	using Index = unsigned char;
+	static_assert(CAPACITY <= std::numeric_limits<Index>::max(), "");
+
+public:
+	inline StaticArray() = default;
+
+	inline StaticArray(const char value)			{ hfsm::detail::fill(value);				}
+
+	inline void nullify()							{ hfsm::detail::nullify(_items);			}
+	inline void fill(const char value)				{ hfsm::detail::fill(_items, value);		}
+
+	// element access
+	inline		 Item* storage()					{ return &_items[0];						}
+	inline const Item* storage() const				{ return &_items[0];						}
+
+	inline		 Item& operator[] (const unsigned i);
+	inline const Item& operator[] (const unsigned i) const;
+
+	inline const unsigned count() const				{ return CAPACITY;							}
+
+private:
+	Item _items[CAPACITY];
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+struct StaticArray<T, 0> {};
+
+//------------------------------------------------------------------------------
 
 template <typename T, unsigned TCapacity>
 class Array
@@ -60,3 +101,5 @@ private:
 
 }
 }
+
+#include "array.inl"
