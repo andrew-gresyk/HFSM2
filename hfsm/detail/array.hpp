@@ -28,7 +28,7 @@ public:
 public:
 	inline StaticArray() = default;
 
-	inline StaticArray(const char value)			{ hfsm::detail::fill(value);				}
+	inline StaticArray(const char value)			{ hfsm::detail::fill(_items, value);		}
 
 	inline void nullify()							{ hfsm::detail::nullify(_items);			}
 	inline void fill(const char value)				{ hfsm::detail::fill(_items, value);		}

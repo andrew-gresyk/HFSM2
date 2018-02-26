@@ -122,7 +122,7 @@ M<TC, TMS>::_S<T>::name() {
 			return raw + 6;
 		default:
 			assert(false);
-			return '\0';
+			return "\0";
 		}
 	}
 }
