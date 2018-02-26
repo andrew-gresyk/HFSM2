@@ -11,7 +11,7 @@ dist: trusty
 
 compiler:
   - clang
-  - gcc
+#  - gcc
   
 script:
   - mkdir build
