@@ -1,0 +1,19 @@
+language: cpp
+
+sudo: false
+
+notifications:
+  email: false
+
+os: linux
+
+dist: trusty
+
+compiler:
+  - clang
+  - gcc
+  
+script:
+  - mkdir build
+  - cd build
+  - cmake .. && make
