@@ -1,4 +1,4 @@
-# HFSM (Hierarchical Finite State Machine) Framework
+# HFSM (Hierarchical Finite State Machine) Framework [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM)
 
 Header-only heriarchical FSM framework in C++14, completely static (no dynamic allocations), built with variadic templates.
 
