@@ -9,23 +9,9 @@ os: linux
 dist: trusty
 #dist: precise
 
-#compiler:
-#  - clang
-#  - gcc
-
 matrix:
   include:
   
-    # GCC 4.8
-    - env: COMPILER=g++-4.8 BUILD_TYPE=Debug
-      addons: &gcc48
-        apt:
-          packages: g++-4.8
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-4.8 BUILD_TYPE=Release
-      addons: *gcc48
-
     # GCC 4.9
     - env: COMPILER=g++-4.9 BUILD_TYPE=Debug
       addons: &gcc49
@@ -150,8 +136,12 @@ matrix:
     - env: COMPILER=clang++-5.0 BUILD_TYPE=Release
       addons: *clang5
 
+  # Travis machines have 2 cores
+  - JOBS=2
+
 script:
   - cd "${TRAVIS_BUILD_DIR}"
   - mkdir build && cd build
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+  - cmake --build . -- -j${JOBS}
   - make
