@@ -286,7 +286,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 			_apex.deepForwardSubstitute(substitutionControl, _context);
 			
 		#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
-			for (auto request : _requests)
+			for (const auto& request : _requests)
 				_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Substitute);
 		#endif
 		}
@@ -415,7 +415,7 @@ template <typename TC, unsigned TMS>
 template <typename TA>
 void
 M<TC, TMS>::_R<TA>::udpateActivity() {
-	for (auto item : _structure)
+	for (auto& item : _structure)
 		item.isActive = false;
 
 	unsigned index = 0;

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HFSM-clang", "HFSM-clang.vcxproj", "{83F1B5D6-83D0-442D-BAFA-391346823CF7}"
 EndProject
@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-411A-839A-B41294202103}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\.gitignore = ..\..\.gitignore
+		..\..\.travis.yml = ..\..\.travis.yml
 		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
 		..\..\README.md = ..\..\README.md
 	EndProjectSection
@@ -41,5 +42,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3BE666E0-1098-42CF-B1FD-F0F0CA579F4C}
 	EndGlobalSection
 EndGlobal
