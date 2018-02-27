@@ -136,12 +136,8 @@ matrix:
     - env: COMPILER=clang++-5.0 BUILD_TYPE=Release
       addons: *clang5
 
-  # Travis machines have 2 cores
-  - JOBS=2
-
 script:
   - cd "${TRAVIS_BUILD_DIR}"
   - mkdir build && cd build
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-  - cmake --build . -- -j${JOBS}
   - make
