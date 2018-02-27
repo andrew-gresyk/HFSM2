@@ -1,19 +1,56 @@
-language: cpp
+#sudo: false
 
-sudo: false
+language: cpp
 
 notifications:
   email: false
 
-os: linux
+#os: linux
 
 dist: trusty
+#dist: precise
 
-compiler:
-  - clang
+#compiler:
+#  - clang
 #  - gcc
-  
+
+matrix:
+  include:
+
+    # GCC 5
+    - env: COMPILER=g++-5 BUILD_TYPE=Debug
+      addons: &gcc5
+        apt:
+          packages: g++-5
+          sources:
+            - ubuntu-toolchain-r-test
+
+    - env: COMPILER=g++-5 BUILD_TYPE=Release
+      addons: *gcc5
+
+    # GCC 6
+    - env: COMPILER=g++-6 BUILD_TYPE=Debug
+      addons: &gcc6
+        apt:
+          packages: g++-6
+          sources:
+            - ubuntu-toolchain-r-test
+
+    - env: COMPILER=g++-6 BUILD_TYPE=Release
+      addons: *gcc6
+
+    # GCC 7
+    - env: COMPILER=g++-7 BUILD_TYPE=Debug
+      addons: &gcc7
+        apt:
+          packages: g++-7
+          sources:
+            - ubuntu-toolchain-r-test
+
+    - env: COMPILER=g++-7 BUILD_TYPE=Release
+      addons: *gcc7
+
 script:
-  - mkdir build
-  - cd build
-  - cmake .. && make
+  - cd "${TRAVIS_BUILD_DIR}"
+  - mkdir build && cd build
+  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE && make
