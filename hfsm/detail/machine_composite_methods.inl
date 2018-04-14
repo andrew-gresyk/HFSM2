@@ -243,7 +243,7 @@ M<TC, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context) {
 
 //------------------------------------------------------------------------------
 
-#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>

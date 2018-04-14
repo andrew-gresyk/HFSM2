@@ -1,5 +1,5 @@
-#define K9_MACHINE_ENABLE_STRUCTURE_REPORT
-#include "../hfsm/machine.hpp"
+#define HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#include <hfsm/machine.hpp>
 
 #include <algorithm>
 #include <vector>

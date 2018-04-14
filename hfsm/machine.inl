@@ -162,9 +162,11 @@ M<TC, TMS>::_R<TA>::_R(Context& context)
 	: _context(context)
 	, _apex(_stateRegistry, Parent(), _stateParents, _forkParents, _forkPointers)
 {
-	K9_IF_STRUCTURE_REPORT(getStateNames());
+	HFSM_IF_STRUCTURE_REPORT(getStateNames());
 
 	_apex.deepEnterInitial(_context);
+
+	HFSM_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -252,7 +254,7 @@ template <typename TC, unsigned TMS>
 template <typename TA>
 void
 M<TC, TMS>::_R<TA>::processTransitions() {
-	K9_IF_STRUCTURE_REPORT(_lastTransitions.clear());
+	HFSM_IF_STRUCTURE_REPORT(_lastTransitions.clear());
 
 	for (unsigned i = 0;
 		i < MaxSubstitutions && _requests.count();
@@ -261,7 +263,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 		unsigned changeCount = 0;
 
 		for (const auto& request : _requests) {
-			K9_IF_STRUCTURE_REPORT(_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Update));
+			HFSM_IF_STRUCTURE_REPORT(_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Update));
 
 			switch (request.type) {
 			case Transition::Restart:
@@ -285,7 +287,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 			Control substitutionControl(_requests);
 			_apex.deepForwardSubstitute(substitutionControl, _context);
 			
-		#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+		#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
 			for (const auto& request : _requests)
 				_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Substitute);
 		#endif
@@ -294,7 +296,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 
 	_apex.deepChangeToRequested(_context);
 
-	K9_IF_STRUCTURE_REPORT(udpateActivity());
+	HFSM_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -336,7 +338,7 @@ M<TC, TMS>::_R<TA>::requestScheduled(const Transition request) {
 
 //------------------------------------------------------------------------------
 
-#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TA>

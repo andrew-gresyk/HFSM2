@@ -104,7 +104,7 @@ M<TC, TMS>::_S<T>::deepLeave(Context& context) {
 
 //------------------------------------------------------------------------------
 
-#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T>

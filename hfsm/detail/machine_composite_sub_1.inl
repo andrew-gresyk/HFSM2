@@ -203,7 +203,7 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(const unsign
 
 //------------------------------------------------------------------------------
 
-#ifdef K9_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
