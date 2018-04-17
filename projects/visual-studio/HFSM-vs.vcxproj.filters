@@ -12,70 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\hfsm\machine.hpp">
-      <Filter>hfsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\hfsm\detail\array.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\hfsm\detail\array_view.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\hfsm\detail\hash_table.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\hfsm\detail\iterator.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\hfsm\detail\type_info.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\hfsm\detail\utility.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\hfsm\detail\wrap.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\hfsm\machine.inl">
-      <Filter>hfsm</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_composite.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_composite_methods.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_composite_sub_1.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_composite_sub_2.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_orthogonal.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_orthogonal_methods.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_orthogonal_sub_1.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_orthogonal_sub_2.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_state.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\machine_state_methods.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\hfsm\detail\array.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -85,5 +21,69 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="hfsm.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\hfsm\machine.hpp">
+      <Filter>hfsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\array.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\array_view.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\hash_table.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\iterator.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\type_info.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\utility.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\wrap.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\hfsm\machine.inl">
+      <Filter>hfsm</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\array.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_composite.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_composite_methods.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_composite_sub_2.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal_methods.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_1.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_state.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_state_methods.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
   </ItemGroup>
 </Project>

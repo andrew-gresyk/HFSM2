@@ -19,30 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\hfsm\detail\array.hpp" />
-    <ClInclude Include="..\..\hfsm\detail\array_view.hpp" />
-    <ClInclude Include="..\..\hfsm\detail\hash_table.hpp" />
-    <ClInclude Include="..\..\hfsm\detail\iterator.hpp" />
-    <ClInclude Include="..\..\hfsm\detail\type_info.hpp" />
-    <ClInclude Include="..\..\hfsm\detail\utility.hpp" />
-    <ClInclude Include="..\..\hfsm\detail\wrap.hpp" />
-    <ClInclude Include="..\..\hfsm\machine.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\hfsm\detail\array.inl" />
-    <None Include="..\..\hfsm\detail\machine_composite.inl" />
-    <None Include="..\..\hfsm\detail\machine_composite_methods.inl" />
-    <None Include="..\..\hfsm\detail\machine_composite_sub_1.inl" />
-    <None Include="..\..\hfsm\detail\machine_composite_sub_2.inl" />
-    <None Include="..\..\hfsm\detail\machine_orthogonal.inl" />
-    <None Include="..\..\hfsm\detail\machine_orthogonal_methods.inl" />
-    <None Include="..\..\hfsm\detail\machine_orthogonal_sub_1.inl" />
-    <None Include="..\..\hfsm\detail\machine_orthogonal_sub_2.inl" />
-    <None Include="..\..\hfsm\detail\machine_state.inl" />
-    <None Include="..\..\hfsm\detail\machine_state_methods.inl" />
-    <None Include="..\..\hfsm\machine.inl" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\streetlight.cpp" />
   </ItemGroup>
@@ -50,6 +26,30 @@
     <Natvis Include="hfsm.natvis">
       <SubType>Designer</SubType>
     </Natvis>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\hfsm\detail\array.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\array_view.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\hash_table.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\iterator.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\type_info.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\utility.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\wrap.hpp" />
+    <ClInclude Include="..\..\include\hfsm\machine.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\hfsm\detail\array.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_composite.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_composite_methods.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_composite_sub_2.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal_methods.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_1.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_state.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_state_methods.inl" />
+    <None Include="..\..\include\hfsm\machine.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -135,7 +135,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -150,7 +150,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -167,7 +167,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -186,7 +186,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest</AdditionalOptions>
     </ClCompile>
     <Link>

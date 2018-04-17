@@ -115,15 +115,21 @@ M<TC, TMS>::_S<T>::name() {
 	else {
 		const char* const raw = TypeInfo::get<Client>()->name();
 
-		switch (raw[0]) {
-		case 's':				// struct
-			return raw + 7;
-		case 'c':				// class
-			return raw + 6;
-		default:
-			assert(false);
-			return "\0";
-		}
+		unsigned first =
+
+		#if defined(_MSC_VER)
+			raw[0] == 's' ? 7 : // Struct
+			raw[0] == 'c' ? 6 : // Class
+		#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+			raw[0] ? 1 :
+		#endif
+			0;
+
+		for (auto c = first; raw[c]; ++c)
+			if (raw[c] == ':')
+				first = c + 1;
+
+		return raw + first;
 	}
 }
 

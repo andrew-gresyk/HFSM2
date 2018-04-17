@@ -1,6 +1,6 @@
-﻿/binaries-32
-/binaries-64
+﻿/.idea
 /build
+/cmake*
 /hfsm_test.dir/Debug
 /projects/codelite/.codelite
 /projects/codelite/Debug
