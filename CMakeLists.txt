@@ -18,7 +18,7 @@ set(CMAKE_C_FLAGS "${extra_cxx_flags} ${CMAKE_C_FLAGS}")
 add_library(hfsm INTERFACE)
 target_include_directories(
   hfsm INTERFACE
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/hfsm>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
