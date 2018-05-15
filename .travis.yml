@@ -52,6 +52,16 @@ matrix:
     - env: COMPILER=g++-7 BUILD_TYPE=Release
       addons: *gcc7
 
+    # GCC 8
+    - env: COMPILER=g++-8 BUILD_TYPE=Debug
+      addons: &gcc8
+        apt:
+          packages: g++-8
+          sources: ubuntu-toolchain-r-test
+
+    - env: COMPILER=g++-8 BUILD_TYPE=Release
+      addons: *gcc8
+
     # Clang 3.6
     - env: COMPILER=clang++-3.6 BUILD_TYPE=Debug
       addons: &clang36
@@ -135,6 +145,20 @@ matrix:
 
     - env: COMPILER=clang++-5.0 BUILD_TYPE=Release
       addons: *clang5
+
+    # Clang 6.0
+    - env: COMPILER=clang++-6.0 BUILD_TYPE=Debug
+      addons: &clang6
+        apt:
+          packages:
+            - clang-6.0
+            - g++-6
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-6.0
+
+    - env: COMPILER=clang++-6.0 BUILD_TYPE=Release
+      addons: *clang6
 
 script:
   - cd "${TRAVIS_BUILD_DIR}"
