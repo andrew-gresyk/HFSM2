@@ -286,7 +286,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 		if (changeCount > 0) {
 			Control substitutionControl(_requests);
 			_apex.deepForwardSubstitute(substitutionControl, _context);
-			
+
 		#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
 			for (const auto& request : _requests)
 				_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Substitute);
@@ -299,7 +299,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 	HFSM_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
- // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
 template <typename TA>
@@ -347,18 +347,22 @@ M<TC, TMS>::_R<TA>::getStateNames() {
 	_stateInfos.clear();
 	_apex.deepGetNames((unsigned) -1, StateInfo::Composite, 0, _stateInfos);
 
+	unsigned margin = (unsigned) -1;
 	for (unsigned s = 0; s < _stateInfos.count(); ++s) {
 		const auto& state = _stateInfos[s];
 		auto& prefix      = _prefixes[s];
+
+		if (margin > state.depth && state.name[0] != '\0')
+			margin = state.depth;
 
 		if (state.depth == 0)
 			prefix[0] = L'\0';
 		else {
 			const auto mark = state.depth * 2 - 1;
 
-			prefix[mark + 2] = L'\0';
-			prefix[mark + 1] = state.name[0] != '\0' ? L' ' : L'─';
 			prefix[mark + 0] = state.region == StateInfo::Composite ? L'└' : L'╙';
+			prefix[mark + 1] = L' ';
+			prefix[mark + 2] = L'\0';
 
 			for (unsigned d = mark; d > 0; --d)
 				prefix[d - 1] = L' ';
@@ -380,6 +384,8 @@ M<TC, TMS>::_R<TA>::getStateNames() {
 			}
 		}
 	}
+	if (margin > 0)
+		margin -= 1;
 
 	_structure.clear();
 	for (unsigned s = 0; s < _stateInfos.count(); ++s) {
@@ -388,7 +394,7 @@ M<TC, TMS>::_R<TA>::getStateNames() {
 		const auto space = state.depth * 2;
 
 		if (state.name[0] != L'\0') {
-			_structure << StructureEntry { false, &prefix[0], state.name };
+			_structure << StructureEntry { false, &prefix[margin * 2], state.name };
 			_activityHistory << (char) 0;
 		} else if (s + 1 < _stateInfos.count()) {
 			auto& nextPrefix = _prefixes[s + 1];
@@ -401,10 +407,10 @@ M<TC, TMS>::_R<TA>::getStateNames() {
 
 			switch (nextPrefix[mark]) {
 			case L'├':
-				nextPrefix[mark] = s == 0 ? L'┌' : L'┬';
+				nextPrefix[mark] = state.depth == margin ? L'┌' : L'┬';
 				break;
 			case L'╟':
-				nextPrefix[mark] = s == 0 ? L'╓' : L'╥';
+				nextPrefix[mark] = state.depth == margin ? L'╓' : L'╥';
 				break;
 			}
 		}
