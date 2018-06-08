@@ -29,6 +29,7 @@
 #pragma once
 
 #include <assert.h>
+#include <string.h>
 
 #include <limits>
 #include <typeindex>

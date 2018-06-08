@@ -36,15 +36,6 @@ namespace detail {
 template <typename T>
 inline
 void
-nullify(T& a) {
-	::memset(&a, 0, sizeof(a));
-}
-
-//------------------------------------------------------------------------------
-
-template <typename T>
-inline
-void
 fill(T& a, const char value) {
 	memset(&a, (int) value, sizeof(a));
 }
