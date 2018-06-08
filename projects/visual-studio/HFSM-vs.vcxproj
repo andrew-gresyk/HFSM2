@@ -23,11 +23,6 @@
     <ClCompile Include="..\..\test\streetlight.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="hfsm.natvis">
-      <SubType>Designer</SubType>
-    </Natvis>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\hfsm\detail\array.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\array_view.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\hash_table.hpp" />
@@ -39,17 +34,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm\detail\array.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_composite.inl" />
+    <None Include="..\..\include\hfsm\detail\array_view.inl" />
+    <None Include="..\..\include\hfsm\detail\hash_table.inl" />
+    <None Include="..\..\include\hfsm\detail\iterator.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_composite.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_composite_methods.inl" />
     <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl" />
     <None Include="..\..\include\hfsm\detail\machine_composite_sub_2.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_methods.inl" />
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_1.inl" />
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_state.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_state.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_state_methods.inl" />
     <None Include="..\..\include\hfsm\machine.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\hfsm.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

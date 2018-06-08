@@ -454,6 +454,6 @@ M<TC, TMS>::_R<TA>::udpateActivity() {
 
 }
 
-#include "detail/machine_state.inl"
-#include "detail/machine_composite.inl"
-#include "detail/machine_orthogonal.inl"
+#include "detail/machine_state.hpp"
+#include "detail/machine_composite.hpp"
+#include "detail/machine_orthogonal.hpp"

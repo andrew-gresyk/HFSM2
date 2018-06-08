@@ -2,8 +2,6 @@
 
 #include "wrap.hpp"
 
-#include <typeindex>
-
 namespace hfsm {
 namespace detail {
 

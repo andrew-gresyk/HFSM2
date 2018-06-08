@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory.h>			// memset()
 #if defined _DEBUG && _MSC_VER
 	#include <intrin.h>		// __debugbreak()
 #endif

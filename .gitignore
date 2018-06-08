@@ -1,7 +1,7 @@
 ﻿/.idea
 /binaries-*
 /build
-/cmake*
+/cmake-*
 /hfsm_test.dir/Debug
 /projects/codelite/.codelite
 /projects/codelite/Debug

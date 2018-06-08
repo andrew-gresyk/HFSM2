@@ -33,7 +33,7 @@ struct M<TContext, TMaxSubstitutions>::_S {
 
 	template <typename TEvent>
 	inline void deepReact(const TEvent& event, Control& control, Context& context);
-		
+
 	inline void deepLeave(Context& context);
 
 	inline void deepForwardRequest(const enum Transition::Type)				{}

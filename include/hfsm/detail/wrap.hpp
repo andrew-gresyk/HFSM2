@@ -1,7 +1,5 @@
 #pragma once
 
-#include <type_traits>	// aligned_storage
-
 namespace hfsm {
 namespace detail {
 

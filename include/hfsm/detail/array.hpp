@@ -3,9 +3,6 @@
 #include "array_view.hpp"
 #include "iterator.hpp"
 
-#include <cassert>
-#include <limits>
-
 namespace hfsm {
 namespace detail {
 
@@ -18,29 +15,19 @@ class StaticArray {
 public:
 	enum {
 		CAPACITY  = TCapacity,
-		ALIGNMENT = alignof(T)
 	};
 
 	using Item  = T;
-	using Index = unsigned char;
+	using Index = unsigned char; // TODO: adjust to CAPACITY
 	static_assert(CAPACITY <= std::numeric_limits<Index>::max(), "");
 
 public:
 	inline StaticArray() = default;
 
-	inline StaticArray(const char value)			{ hfsm::detail::fill(_items, value);		}
-
-	inline void nullify()							{ hfsm::detail::nullify(_items);			}
-	inline void fill(const char value)				{ hfsm::detail::fill(_items, value);		}
-
-	// element access
-	inline		 Item* storage()					{ return &_items[0];						}
-	inline const Item* storage() const				{ return &_items[0];						}
-
 	inline		 Item& operator[] (const unsigned i);
 	inline const Item& operator[] (const unsigned i) const;
 
-	inline const unsigned count() const				{ return CAPACITY;							}
+	inline const unsigned count() const						{ return CAPACITY; }
 
 private:
 	Item _items[CAPACITY];
@@ -73,15 +60,6 @@ public:
 	{
 		assert(&View::get(0) == _storage);
 	}
-
-	Array(unsigned& count)
-		: View(CAPACITY, count)
-	{
-		assert(&View::get(0) == _storage);
-	}
-
-	inline void nullify()						{ hfsm::detail::nullify(_storage);					  }
-	inline void fill(const char value)			{ hfsm::detail::fill(_storage, value);				  }
 
 	inline Iterator<	  Array>  begin()		{ return Iterator<		Array>(*this, View::first()); }
 	inline Iterator<const Array>  begin() const { return Iterator<const Array>(*this, View::first()); }

@@ -20,9 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="hfsm.natvis" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\hfsm\machine.hpp">
       <Filter>hfsm</Filter>
     </ClInclude>
@@ -55,9 +52,6 @@
     <None Include="..\..\include\hfsm\detail\array.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_composite.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
     <None Include="..\..\include\hfsm\detail\machine_composite_methods.inl">
       <Filter>hfsm\detail</Filter>
     </None>
@@ -65,9 +59,6 @@
       <Filter>hfsm\detail</Filter>
     </None>
     <None Include="..\..\include\hfsm\detail\machine_composite_sub_2.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal.inl">
       <Filter>hfsm\detail</Filter>
     </None>
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_methods.inl">
@@ -79,11 +70,29 @@
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_state.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
     <None Include="..\..\include\hfsm\detail\machine_state_methods.inl">
       <Filter>hfsm\detail</Filter>
     </None>
+    <None Include="..\..\include\hfsm\detail\array_view.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\hash_table.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\iterator.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_composite.hpp">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_orthogonal.hpp">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_state.hpp">
+      <Filter>hfsm\detail</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\hfsm.natvis" />
   </ItemGroup>
 </Project>
