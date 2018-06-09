@@ -564,4 +564,4 @@ using Machine = M<TContext, TMaxSubstitutions>;
 
 }
 
-#include "machine.inl"
+#include "detail/machine.inl"

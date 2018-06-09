@@ -49,9 +49,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\hfsm\machine.inl">
-      <Filter>hfsm</Filter>
-    </None>
     <None Include="..\..\include\hfsm\detail\array.inl">
       <Filter>hfsm\detail</Filter>
     </None>
@@ -92,6 +89,9 @@
       <Filter>hfsm\detail</Filter>
     </None>
     <None Include="..\..\include\hfsm\detail\machine_state.hpp">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine.inl">
       <Filter>hfsm\detail</Filter>
     </None>
   </ItemGroup>

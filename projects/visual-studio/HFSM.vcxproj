@@ -38,6 +38,7 @@
     <None Include="..\..\include\hfsm\detail\array_view.inl" />
     <None Include="..\..\include\hfsm\detail\hash_table.inl" />
     <None Include="..\..\include\hfsm\detail\iterator.inl" />
+    <None Include="..\..\include\hfsm\detail\machine.inl" />
     <None Include="..\..\include\hfsm\detail\machine_composite.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_composite_methods.inl" />
     <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl" />
@@ -48,7 +49,6 @@
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm\detail\machine_state.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_state_methods.inl" />
-    <None Include="..\..\include\hfsm\machine.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\..\hfsm.natvis" />
