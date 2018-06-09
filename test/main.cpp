@@ -1,5 +1,6 @@
 #define HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
-#include <hfsm/machine.hpp>
+//#include <hfsm/machine.hpp>
+#include <hfsm/machine_single.hpp>
 
 #include <algorithm>
 #include <vector>

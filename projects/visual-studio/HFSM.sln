@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HFSM-clang", "HFSM-clang.vcxproj", "{83F1B5D6-83D0-442D-BAFA-391346823CF7}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HFSM-vs", "HFSM-vs.vcxproj", "{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-411A-839A-B41294202103}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\.gitignore = ..\..\.gitignore
@@ -15,30 +11,36 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-41
 		..\..\README.md = ..\..\README.md
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HFSM", "HFSM.vcxproj", "{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "HFSM-tools", "HFSM-tools.pyproj", "{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
+		Debug|32 = Debug|32
+		Debug|64 = Debug|64
+		Debug|Any CPU = Debug|Any CPU
+		Release|32 = Release|32
+		Release|64 = Release|64
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{83F1B5D6-83D0-442D-BAFA-391346823CF7}.Debug|x64.ActiveCfg = Debug|x64
-		{83F1B5D6-83D0-442D-BAFA-391346823CF7}.Debug|x64.Build.0 = Debug|x64
-		{83F1B5D6-83D0-442D-BAFA-391346823CF7}.Debug|x86.ActiveCfg = Debug|Win32
-		{83F1B5D6-83D0-442D-BAFA-391346823CF7}.Debug|x86.Build.0 = Debug|Win32
-		{83F1B5D6-83D0-442D-BAFA-391346823CF7}.Release|x64.ActiveCfg = Release|x64
-		{83F1B5D6-83D0-442D-BAFA-391346823CF7}.Release|x64.Build.0 = Release|x64
-		{83F1B5D6-83D0-442D-BAFA-391346823CF7}.Release|x86.ActiveCfg = Release|Win32
-		{83F1B5D6-83D0-442D-BAFA-391346823CF7}.Release|x86.Build.0 = Release|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x64.ActiveCfg = Debug|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x64.Build.0 = Debug|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x86.ActiveCfg = Debug|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x86.Build.0 = Debug|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x64.ActiveCfg = Release|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x64.Build.0 = Release|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x86.ActiveCfg = Release|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x86.Build.0 = Release|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|32.ActiveCfg = Debug|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|32.Build.0 = Debug|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|64.ActiveCfg = Debug|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|64.Build.0 = Debug|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|32.ActiveCfg = Release|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|32.Build.0 = Release|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|64.ActiveCfg = Release|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|64.Build.0 = Release|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|Any CPU.ActiveCfg = Release|Win32
+		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Debug|32.ActiveCfg = Debug|Any CPU
+		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Debug|64.ActiveCfg = Debug|Any CPU
+		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Release|32.ActiveCfg = Release|Any CPU
+		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Release|64.ActiveCfg = Release|Any CPU
+		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

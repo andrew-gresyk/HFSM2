@@ -44,6 +44,9 @@
     <ClInclude Include="..\..\include\hfsm\detail\wrap.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\machine_single.hpp">
+      <Filter>hfsm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm\machine.inl">
