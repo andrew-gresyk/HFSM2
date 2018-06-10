@@ -1,3 +1,4 @@
+// HFSM (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 //
 // Licensed under the MIT License;

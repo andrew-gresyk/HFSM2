@@ -19,46 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\main.cpp" />
+    <ClCompile Include="..\..\examples\basic_streetlight\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\hfsm\detail\array.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\array_view.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\hash_table.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\iterator.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\type_info.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\utility.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\wrap.hpp" />
-    <ClInclude Include="..\..\include\hfsm\machine.hpp" />
-    <ClInclude Include="..\..\include\hfsm\machine_single.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\include\hfsm\detail\array.inl" />
-    <None Include="..\..\include\hfsm\detail\array_view.inl" />
-    <None Include="..\..\include\hfsm\detail\hash_table.inl" />
-    <None Include="..\..\include\hfsm\detail\iterator.inl" />
-    <None Include="..\..\include\hfsm\detail\machine.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_composite.hpp" />
-    <None Include="..\..\include\hfsm\detail\machine_composite_methods.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_composite_sub_2.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal.hpp" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal_methods.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_1.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_state.hpp" />
-    <None Include="..\..\include\hfsm\detail\machine_state_methods.inl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="..\..\hfsm.natvis" />
+    <Text Include="..\..\examples\basic_streetlight\CMakeLists.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}</ProjectGuid>
+    <ProjectGuid>{C543B4D9-A8AC-47B7-8376-AB4B110C144E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>HFSM</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>HFSM</ProjectName>
+    <ProjectName>basic_streetlight</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -94,15 +66,19 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="HFSM.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="HFSM.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="HFSM.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="HFSM.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -135,9 +111,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -150,9 +125,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -167,9 +141,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -186,9 +159,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/std:c++latest</AdditionalOptions>
     </ClCompile>
     <Link>

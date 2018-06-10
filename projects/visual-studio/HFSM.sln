@@ -15,6 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HFSM", "HFSM.vcxproj", "{08
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "HFSM-tools", "HFSM-tools.pyproj", "{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{EDEB0687-3B3E-429D-9213-0A3EED99821D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic_streetlight", "basic_streetlight.vcxproj", "{C543B4D9-A8AC-47B7-8376-AB4B110C144E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|32 = Debug|32
@@ -41,9 +45,22 @@ Global
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Release|32.ActiveCfg = Release|Any CPU
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Release|64.ActiveCfg = Release|Any CPU
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Debug|32.ActiveCfg = Debug|Win32
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Debug|32.Build.0 = Debug|Win32
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Debug|64.ActiveCfg = Debug|x64
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Debug|64.Build.0 = Debug|x64
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Release|32.ActiveCfg = Release|Win32
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Release|32.Build.0 = Release|Win32
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Release|64.ActiveCfg = Release|x64
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Release|64.Build.0 = Release|x64
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E}.Release|Any CPU.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C543B4D9-A8AC-47B7-8376-AB4B110C144E} = {EDEB0687-3B3E-429D-9213-0A3EED99821D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3BE666E0-1098-42CF-B1FD-F0F0CA579F4C}

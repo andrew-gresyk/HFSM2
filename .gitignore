@@ -1,12 +1,7 @@
-﻿/.idea
-/binaries-*
+﻿/binaries-*
 /build
-/cmake-*
 /hfsm_test.dir/Debug
-/projects/codelite/.codelite
-/projects/codelite/Debug
-/projects/codelite/Makefile
-/projects/codelite/*.mk
-/projects/codelite/*.txt
-/projects/visual-studio/.vs
+.idea
+.vs
+cmake-*
 *.user
