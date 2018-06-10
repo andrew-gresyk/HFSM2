@@ -7,11 +7,10 @@ notifications:
 
 os: linux
 dist: trusty
-#dist: precise
 
 matrix:
   include:
-  
+
     # GCC 4.9
     - env: COMPILER=g++-4.9 BUILD_TYPE=Debug
       addons: &gcc49
@@ -162,6 +161,11 @@ matrix:
 
 script:
   - cd "${TRAVIS_BUILD_DIR}"
+  - mkdir build && cd build
+  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+  - make
+
+  - cd "${TRAVIS_BUILD_DIR}/examples/basic_streetlight"
   - mkdir build && cd build
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
   - make
