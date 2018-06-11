@@ -19,42 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\main.cpp" />
+    <ClCompile Include="..\..\examples\basic_event\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\hfsm\detail\array.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\array_view.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\hash_table.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\iterator.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\type_info.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\utility.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\wrap.hpp" />
-    <ClInclude Include="..\..\include\hfsm\machine.hpp" />
-    <ClInclude Include="..\..\include\hfsm\machine_single.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\include\hfsm\detail\array.inl" />
-    <None Include="..\..\include\hfsm\detail\array_view.inl" />
-    <None Include="..\..\include\hfsm\detail\hash_table.inl" />
-    <None Include="..\..\include\hfsm\detail\iterator.inl" />
-    <None Include="..\..\include\hfsm\detail\machine.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_composite.hpp" />
-    <None Include="..\..\include\hfsm\detail\machine_composite_methods.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_composite_sub_2.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal.hpp" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal_methods.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_1.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_state.hpp" />
-    <None Include="..\..\include\hfsm\detail\machine_state_methods.inl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="..\..\hfsm.natvis" />
+    <Text Include="..\..\examples\basic_event\CMakeLists.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}</ProjectGuid>
+    <ProjectGuid>{AA58BDD0-0F56-43E9-816C-37BA6C30F97C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>

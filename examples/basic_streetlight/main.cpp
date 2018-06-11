@@ -39,7 +39,7 @@ using M = hfsm::Machine<Context>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// forward declared state to transition into
+// forward declared for Red::transition()
 struct Off;
 
 // top-level region in the hierarchy
