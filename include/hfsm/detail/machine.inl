@@ -287,7 +287,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 			Control substitutionControl(_requests);
 			_apex.deepForwardSubstitute(substitutionControl, _context);
 
-		#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+		#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 			for (const auto& request : _requests)
 				_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Substitute);
 		#endif
@@ -338,7 +338,7 @@ M<TC, TMS>::_R<TA>::requestScheduled(const Transition request) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TA>

@@ -907,7 +907,7 @@ public:
 }
 }
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	#define HFSM_IF_STRUCTURE_REPORT(x)	x
 #else
 	#define HFSM_IF_STRUCTURE_REPORT(x)
@@ -917,7 +917,7 @@ namespace hfsm {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 struct StructureEntry {
 	bool isActive;
 	const wchar_t* prefix;
@@ -1113,7 +1113,7 @@ private:
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	struct StateInfo {
 		enum RegionType {
 			Composite,
@@ -1246,7 +1246,7 @@ private:
 		using ForkPointerStorage	 = Array<Fork*, ForkCount>;
 		using TransitionQueueStorage = Array<Transition, ForkCount>;
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
 			NameCount	  = Apex::NameCount,
 		};
@@ -1284,7 +1284,7 @@ private:
 		template <typename T>
 		inline bool isResumable();
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		const MachineStructure& structure() const									{ return _structure;		};
 		const MachineActivity& activity() const										{ return _activityHistory;	};
 	#endif
@@ -1296,7 +1296,7 @@ private:
 
 		inline unsigned id(const Transition request) const	{ return _stateRegistry[*request.stateType];	}
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		void getStateNames();
 		void udpateActivity();
 	#endif
@@ -1314,7 +1314,7 @@ private:
 
 		Apex _apex;
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		Prefixes _prefixes;
 		StateInfoStorage _stateInfos;
 
@@ -1721,7 +1721,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 			Control substitutionControl(_requests);
 			_apex.deepForwardSubstitute(substitutionControl, _context);
 
-		#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+		#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 			for (const auto& request : _requests)
 				_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Substitute);
 		#endif
@@ -1772,7 +1772,7 @@ M<TC, TMS>::_R<TA>::requestScheduled(const Transition request) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TA>
@@ -1932,7 +1932,7 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	inline void deepRequestResume()											{}
 	inline void deepChangeToRequested(Context&)	{}
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr bool isBare() { return std::is_same<Client, _B<Bare>>::value; }
 
 	enum : unsigned {
@@ -2066,7 +2066,7 @@ M<TC, TMS>::_S<T>::deepLeave(Context& context) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T>
@@ -2184,7 +2184,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 		inline void wideRequestResume(const unsigned prong);
 		inline void wideChangeToRequested(const unsigned prong, Context& context);
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
 			NameCount	 = Initial::NameCount  + Remaining::NameCount,
 		};
@@ -2243,7 +2243,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 		inline void wideRequestResume(const unsigned prong);
 		inline void wideChangeToRequested(const unsigned prong, Context& context);
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
 			NameCount	 = Initial::NameCount,
 		};
@@ -2299,7 +2299,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 	inline void deepRequestResume();
 	inline void deepChangeToRequested(Context& context);
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	enum : unsigned {
 		NameCount	 = State::NameCount  + SubStates::NameCount,
 	};
@@ -2569,7 +2569,7 @@ M<TC, TMS>::_C<T, TS...>::deepChangeToRequested(Context& context) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -2806,7 +2806,7 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(const unsign
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -3034,7 +3034,7 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeToRequested(const unsigned HSFM
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -3124,7 +3124,7 @@ struct M<TContext, TMaxSubstitutions>::_O final {
 		inline void wideRequestResume();
 		inline void wideChangeToRequested(Context& context);
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
 			NameCount	 = Initial::NameCount  + Remaining::NameCount,
 		};
@@ -3184,7 +3184,7 @@ struct M<TContext, TMaxSubstitutions>::_O final {
 		inline void wideRequestResume();
 		inline void wideChangeToRequested(Context& context);
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
 			NameCount	 = Initial::NameCount,
 		};
@@ -3240,7 +3240,7 @@ struct M<TContext, TMaxSubstitutions>::_O final {
 	inline void deepRequestResume();
 	inline void deepChangeToRequested(Context& context);
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	enum : unsigned {
 		NameCount	 = State::NameCount  + SubStates::NameCount,
 	};
@@ -3483,7 +3483,7 @@ M<TC, TMS>::_O<T, TS...>::deepChangeToRequested(Context& context) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -3713,7 +3713,7 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(Context& con
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
@@ -3929,7 +3929,7 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideChangeToRequested(Context& context) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename T, typename... TS>

@@ -42,7 +42,7 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	inline void deepRequestResume()											{}
 	inline void deepChangeToRequested(Context&)	{}
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr bool isBare() { return std::is_same<Client, _B<Bare>>::value; }
 
 	enum : unsigned {

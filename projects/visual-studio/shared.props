@@ -13,7 +13,7 @@
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>_UNICODE;UNICODE;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/std:c++latest</AdditionalOptions>
+      <AdditionalOptions>/std:c++latest /permissive-</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

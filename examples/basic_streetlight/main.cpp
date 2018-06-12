@@ -1,8 +1,18 @@
-// HFSM (hierarchical state machine for games and interactive applications)
+﻿// HFSM (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 //
 // Streetlight FSM example:
 // Cycle between R-Y-G-Y-B three times, then turn off
+
+// State structure:
+//
+// Root
+//  ├ On
+//  │  ├ Red
+//  │  ├ YellowDownwards
+//  │  ├ YellowUpwards
+//  │  └ Green
+//  └ Off
 
 // Output:
 //
@@ -22,7 +32,7 @@
 //   Red
 // Off
 
-#define HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#define HFSM_ENABLE_STRUCTURE_REPORT
 #include <hfsm/machine_single.hpp>
 
 #include <iostream>

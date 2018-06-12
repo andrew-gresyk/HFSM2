@@ -1,4 +1,4 @@
-#define HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#define HFSM_ENABLE_STRUCTURE_REPORT
 //#include <hfsm/machine.hpp>
 #include <hfsm/machine_single.hpp>
 

@@ -40,7 +40,7 @@
 #include "detail/hash_table.hpp"
 #include "detail/type_info.hpp"
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	#define HFSM_IF_STRUCTURE_REPORT(x)	x
 #else
 	#define HFSM_IF_STRUCTURE_REPORT(x)
@@ -50,7 +50,7 @@ namespace hfsm {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 struct StructureEntry {
 	bool isActive;
 	const wchar_t* prefix;
@@ -246,7 +246,7 @@ private:
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	struct StateInfo {
 		enum RegionType {
 			Composite,
@@ -379,7 +379,7 @@ private:
 		using ForkPointerStorage	 = Array<Fork*, ForkCount>;
 		using TransitionQueueStorage = Array<Transition, ForkCount>;
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
 			NameCount	  = Apex::NameCount,
 		};
@@ -417,7 +417,7 @@ private:
 		template <typename T>
 		inline bool isResumable();
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		const MachineStructure& structure() const									{ return _structure;		};
 		const MachineActivity& activity() const										{ return _activityHistory;	};
 	#endif
@@ -429,7 +429,7 @@ private:
 
 		inline unsigned id(const Transition request) const	{ return _stateRegistry[*request.stateType];	}
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		void getStateNames();
 		void udpateActivity();
 	#endif
@@ -447,7 +447,7 @@ private:
 
 		Apex _apex;
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		Prefixes _prefixes;
 		StateInfoStorage _stateInfos;
 

@@ -2,19 +2,19 @@
 
 Header-only heriarchical FSM framework in C++14, completely static (no dynamic allocations), built with variadic templates.
 
-
 ## Compiler Support
 
 - Visual Studio 14.u3, 15.7
 - GCC 4.9, 5.4, 6.3, 7.3, 8.0
 - Clang 3.6, 3.7, 3.8, 3.9, 4.0, 5.0, 6.0
 
+---
 
 ## Basic Usage
 
 ```cpp
 // 1. Include HFSM header:
-#include <hfsm/machine.hpp>
+#include <hfsm/machine_single.hpp>
 
 // 2. Define interface class between the FSM and its owner
 //    (also ok to use the owner object itself):
@@ -25,119 +25,109 @@ using M = hfsm::Machine<OwnerClass>;
 
 // 4. Define states:
 struct MyState1 : M::Bare {
-	// 5. Override some of the following state functions:
-	void substitute(Control& c, Context& _);
-	void enter(Context& _);
-	void update(Context& _);
-	void transition(Control& c, Context& _);
-	void leave(Context& _);
+    // 5. Override some of the following state functions:
+    void enter(Context& _);
+    void update(Context& _);
+    void transition(Control& c, Context& _);
+    void leave(Context& _);
 };
+
 struct MyState2 : M::Bare { /* .. */ };
+struct MySubState1 : M::Bare { /* .. */ };
+struct MySubState2 : M::Bare { /* .. */ };
+
 struct MyState3 : M::Bare { /* .. */ };
+struct MyOrthogonalState1 : M::Bare { /* .. */ };
+struct MyOrthogonalState2 : M::Bare { /* .. */ };
 
 // 6. Declare state machine structure:
 using MyFSM = M::PeerRoot<
-	MyState1,
-	MyState2,
-	MyState3
+    MyState1,
+    M::Composite<MyState2,
+        MySubState1,
+        MySubState2,
+    >,
+    M::Orthogonal<MyState3,
+        MyOrthogonalState1,
+        MyOrthogonalState2,
+    >
 >;
 
 int main() {
-	// 7. Create context and state machine instances:
-	Context context;
-	MyFSM fsm(context);
+    // 7. Create context and state machine instances:
+    Context context;
+    MyFSM fsm(context);
 
-	// 8. Kick off periodic updates:
-	bool running = true;
-	while (running)
-	   fsm.update();
+    // 8. Kick off periodic updates:
+    bool running = true;
+    while (running)
+        fsm.update();
 
-	return 0;
+    return 0;
 }
 ```
 
+---
 
-## Transitions
+## Feature Highlights
 
-Initiated from within a state:
-```cpp
-struct MyState2;
+- Permissive [MIT License](LICENSE.md)
+- Written in widely-supported modern(ish) C++ 14
+- 100% NoUML-compliant
+- Not hamstrung by restrictive event reaction-based approach, but supports powerful event handling
+- Hierarchical, with composite (sub-machine) and orthogonal regions
+- Header-only
+- Fully static, no dynamic allocations
+- Uses inline-friendly compile-time pylymorphism, no virtual methods were harmed
+- Type-safe transitions: `FSM.changeTo<TargetState>()`
+- Gamedev-friendly, supports explicit `State::update()`
+- Scaleable, supports state re-use via state injections
+- Debug-assisted, includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
+- Convenient, minimal boilerplate
 
-struct MyState1
-	: M::Base
-{
-	void transition(Control& c, Context& _) {
-		c.changeTo<MyState2>();
-	}
-}
+---
 
-struct MyState2
-	: M::Base
-{
-	/* .. */
-}
-```
-<br>
+## Documentation
 
-Initiated from the outside of a state machine:
-```cpp
-int main() {
-	/* ... */
+- [Tutorial](doc/tutorial.md)
 
-	fsm.changeTo<MyState2>(); // processed during the following .update():
-	fsm.update();
+### Design
 
-	/* ... */
-}
-```
+- Another FSM lib?
+- NoUML compliance
+- Proactive vs. reactive approach
+- Gamedev requirements
+- Alternatives
 
+### In-Depth
 
-## Framework Update Sequence (Pseudo-Code)
+- Context and M:: 'namespace'
+- Basic state methods
+- Basic transitions
+- Roots and regions
+- Transitions within hierarchy
+- Active chain
+- Quering state activation status
+- Substitutions, aka State guards on steroids
+- Event handling
+- State reuse with injections
+- Structure and activity report API
+- Assisted debugging with custom .natvis
 
-```cpp
-template <...>
-void Machine<...>::Root::update() {
-	Control control;
+---
 
-	activeState.update();
-	activeState.transition(control);
+## Get Updates
 
-	while (control.requests.size() > 0) {
-		nextState = control.requests[0].state;
-		nextState.substitute(control);
-	}
+- [blog](https://andrew-gresyk.github.io/)
+- [twitter](https://www.twitter.com/andrew_gresyk)
 
-	if (nextState != activeState) {
-		activeState.leave();
-		nextState.enter();
-	}
-}
-```
-
-
-## State Method Call Sequence During State Transitions (Pseudo-Code)
-
-```cpp
-	activeState.update();
-	activeState.transition() {
-		fsm.changeTo<NextState>();
-	}
-
-	nextState.substitute() {} // no state transitions initiated
-
-	activeState.leave();
-	activeState = nextState;
-	activeState.enter();
-
-	activeState.update();
-	activeState.transition();
-```
+---
 
 ## Special Thanks
 
-- [philsquared](https://github.com/philsquared)
-- [romaincheminade](https://github.com/romaincheminade)
-- [tcbrindle](https://github.com/tcbrindle)
-- [kgreenek](https://github.com/kgreenek)
-- programming community at [Splash Damage](http://www.splashdamage.com/)
+- [Phil Nash](https://github.com/philsquared)
+- [Romain Cheminade](https://github.com/romaincheminade)
+- [Tristan Brindle](https://github.com/tcbrindle)
+- [Kevin Greene](https://github.com/kgreenek)
 - everybody at [C++::London](https://www.meetup.com/CppLondon/) meetup
+- programming community at [Splash Damage](http://www.splashdamage.com/)

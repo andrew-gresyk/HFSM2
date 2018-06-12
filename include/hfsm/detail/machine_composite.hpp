@@ -56,7 +56,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 		inline void wideRequestResume(const unsigned prong);
 		inline void wideChangeToRequested(const unsigned prong, Context& context);
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
 			NameCount	 = Initial::NameCount  + Remaining::NameCount,
 		};
@@ -115,7 +115,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 		inline void wideRequestResume(const unsigned prong);
 		inline void wideChangeToRequested(const unsigned prong, Context& context);
 
-	#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
 			NameCount	 = Initial::NameCount,
 		};
@@ -171,7 +171,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 	inline void deepRequestResume();
 	inline void deepChangeToRequested(Context& context);
 
-#ifdef HFSM_MACHINE_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	enum : unsigned {
 		NameCount	 = State::NameCount  + SubStates::NameCount,
 	};
