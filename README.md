@@ -89,37 +89,14 @@ int main() {
 
 ## Documentation
 
-- [Tutorial](doc/tutorial.md)
-
-### Design
-
-- Another FSM lib?
-- NoUML compliance
-- Proactive vs. reactive approach
-- Gamedev requirements
-- Alternatives
-
-### In-Depth
-
-- Context and M:: 'namespace'
-- Basic state methods
-- Basic transitions
-- Roots and regions
-- Transitions within hierarchy
-- Active chain
-- Quering state activation status
-- Substitutions, aka State guards on steroids
-- Event handling
-- State reuse with injections
-- Structure and activity report API
-- Assisted debugging with custom .natvis
+See [Wiki](../../wiki) for [Tutorial](../../wiki/Tutorial) and docs.
 
 ---
 
 ## Get Updates
 
-- [blog](https://andrew-gresyk.github.io/)
-- [twitter](https://www.twitter.com/andrew_gresyk)
+- [Blog](https://andrew-gresyk.github.io/)
+- [Twitter](https://www.twitter.com/andrew_gresyk)
 
 ---
 
