@@ -13,14 +13,14 @@
 			&gt;
 		</DisplayString>
 		<DisplayString>{&amp;_Tptr->_Data._DecoratedName[4],[strchr(_Tptr->_Data._DecoratedName,'@') - _Tptr->_Data._DecoratedName - 4]sb}</DisplayString>
-		<Expand />
+    <Expand HideRawView="true" />
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm::detail::ArrayView&lt;*&gt;">
 		<DisplayString>{_count} / {_capacity}</DisplayString>
-		<Expand>
+		<Expand HideRawView="true">
 			<IndexListItems Condition="_count > 0">
 				<Size>_count</Size>
 				<ValueNode>*(($T1*) &amp;((Item*) (&amp;_count + 1))[$i])</ValueNode>
@@ -32,7 +32,7 @@
 
 	<Type Name="hfsm::detail::Array&lt;*,*&gt;">
 		<DisplayString>{_count} / {_capacity}</DisplayString>
-		<Expand>
+		<Expand HideRawView="true">
 			<IndexListItems Condition="_count > 0">
 				<Size>_count</Size>
 				<ValueNode>*(($T1*) &amp;_storage[$i])</ValueNode>
@@ -64,7 +64,7 @@
 
 	<Type Name="hfsm::detail::Wrap&lt;*&gt;">
 		<DisplayString>{*($T1*) &amp;_storage._Val}</DisplayString>
-		<Expand>
+    <Expand HideRawView="true">
 			<ExpandedItem>*($T1*) &amp;_storage._Val</ExpandedItem>
 		</Expand>
 	</Type>
@@ -74,45 +74,37 @@
 	<Type Name="hfsm::StructureEntry">
 		<DisplayString Condition=" isActive">█ {prefix,sub}{name,sb}</DisplayString>
 		<DisplayString Condition="!isActive">░ {prefix,sub}{name,sb}</DisplayString>
-	</Type>
+    <Expand HideRawView="true" />
+  </Type>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 	<Type Name="hfsm::M&lt;*&gt;::Parent">
 		<DisplayString>{forkType} ► {prongType}</DisplayString>
-		<Expand>
-			<Item Name="fork">forkType</Item>
-			<Item Name="prong">prongType</Item>
-		</Expand>
-	</Type>
+    <Expand HideRawView="true" />
+  </Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm::M&lt;*&gt;::StateRegistryT&lt;*&gt;">
 		<DisplayString>{_typeToIndex,na}</DisplayString>
-		<Expand>
+		<Expand HideRawView="true">
 			<ExpandedItem>_typeToIndex,na</ExpandedItem>
 		</Expand>
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::M&lt;*&gt;::Transition">
-		<DisplayString>{type}: {*(std::type_index*)stateType._storage}</DisplayString>
-		<Expand/>
-	</Type>
-
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
-
-	<Type Name="hfsm::M&lt;*&gt;::_S&lt;*&gt;">
-		<DisplayString>{_type}</DisplayString>
+  <Type Name="hfsm::M&lt;*&gt;::Transition">
+		<DisplayString>{type}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
+		<Expand HideRawView="true" />
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm::M&lt;*&gt;::Fork">
 		<DisplayString>[{type}] &lt;{resumableType,na}&gt; ◄ &lt;{activeType,na}&gt; ► &lt;{requestedType,na}&gt;</DisplayString>
-		<Expand>
+    <Expand HideRawView="true">
 			<Item Name="type">type</Item>
 			<Item Name="active">activeType</Item>
 			<Item Name="resumable">resumableType</Item>
@@ -120,19 +112,32 @@
 		</Expand>
 	</Type>
 
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::M&lt;*&gt;::_S&lt;*&gt;">
+		<DisplayString>{_type}</DisplayString>
+    <Expand HideRawView="true">
+			<Item Name="client">_client</Item>
+		</Expand>
+  </Type>
+
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::Machine&lt;*&gt;::C&lt;*&gt;">
-		<DisplayString>{*((Fork*) this)}</DisplayString>
+	<Type Name="hfsm::Machine&lt;*&gt;::_C&lt;*&gt;">
+		<DisplayString>{_fork}</DisplayString>
 		<Expand>
-			<Item Name="client">_state</Item>
-			<Item Name="states">_subStates</Item>
+			<Item Name="head">_state</Item>
+			<Item Name="sub-states">_subStates</Item>
 		</Expand>
 	</Type>
 
-	<Type Name="hfsm::Machine&lt;*&gt;::C&lt;*&gt;::Sub&lt;*&gt;">
-		<DisplayString>{initial} {remaining}</DisplayString>
-	</Type>
+	<Type Name="hfsm::Machine&lt;*&gt;::_C&lt;*&gt;::Sub&lt;*&gt;" Priority="Low">
+    <DisplayString>{initial} {remaining}</DisplayString>
+  </Type>
+
+	<Type Name="hfsm::Machine&lt;*&gt;::_C&lt;*&gt;::Sub&lt;*&gt;">
+    <DisplayString>{initial}</DisplayString>
+  </Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 

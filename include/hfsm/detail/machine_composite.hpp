@@ -3,11 +3,11 @@ namespace hfsm {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext, unsigned TMaxSubstitutions>
-template <typename T, typename... TS>
+template <typename TH, typename... TS>
 struct M<TContext, TMaxSubstitutions>::_C final {
-	using Client = T;
-	using Fork	 = ForkT<Client>;
-	using State  = _S<Client>;
+	using Head	= TH;
+	using Fork	= ForkT<Head>;
+	using State	= _S<Head>;
 
 	//----------------------------------------------------------------------
 
@@ -189,7 +189,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 	State _state;
 	SubStates _subStates;
 
-	HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
+	HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Head>());
 };
 
 ////////////////////////////////////////////////////////////////////////////////
