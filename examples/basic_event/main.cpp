@@ -33,12 +33,13 @@ struct Context {};
 using M = hfsm::Machine<Context>;
 
 struct PrimaryEvent {};
-struct SecondaryEvent {};
+struct SecondaryEvent { int payload; };
 
 using TransitionEvent = char;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// forward declared for Reactive::transition()
 struct Target;
 
 struct Reactive

@@ -1,6 +1,5 @@
 #define HFSM_ENABLE_STRUCTURE_REPORT
-//#include <hfsm/machine.hpp>
-#include <hfsm/machine_single.hpp>
+#include <hfsm/machine.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -57,8 +56,8 @@ struct Context {
 		assert(historySize == referenceSize);
 
 		for (unsigned i = 0; i < std::min(historySize, referenceSize); ++i) {
-			HSFM_ASSERT_ONLY(const auto h = history[i]);
-			HSFM_ASSERT_ONLY(const auto r = reference[i]);
+			HSFM_IF_ASSERT(const auto h = history[i]);
+			HSFM_IF_ASSERT(const auto r = reference[i]);
 			assert(h == r);
 		}
 

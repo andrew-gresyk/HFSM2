@@ -55,7 +55,7 @@ M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context) {
 		   _fork.resumable == INVALID_INDEX &&
 		   _fork.requested == INVALID_INDEX);
 
-	HSFM_DEBUG_ONLY(_fork.activeType = TypeInfo::get<typename SubStates::Initial::Head>());
+	HSFM_IF_DEBUG(_fork.activeType = TypeInfo::get<typename SubStates::Initial::Head>());
 	_fork.active = 0;
 
 	_state.deepEnter(context);
@@ -71,10 +71,10 @@ M<TC, TMS>::_C<TH, TS...>::deepEnter(Context& context) {
 	assert(_fork.active	   == INVALID_INDEX &&
 		   _fork.requested != INVALID_INDEX);
 
-	HSFM_DEBUG_ONLY(_fork.activeType = _fork.requestedType);
+	HSFM_IF_DEBUG(_fork.activeType = _fork.requestedType);
 	_fork.active = _fork.requested;
 
-	HSFM_DEBUG_ONLY(_fork.requestedType.clear());
+	HSFM_IF_DEBUG(_fork.requestedType.clear());
 	_fork.requested = INVALID_INDEX;
 
 	_state.deepEnter(context);
@@ -138,10 +138,10 @@ M<TC, TMS>::_C<TH, TS...>::deepLeave(Context& context) {
 	_subStates.wideLeave(_fork.active, context);
 	_state.deepLeave(context);
 
-	HSFM_DEBUG_ONLY(_fork.resumableType = _fork.activeType);
+	HSFM_IF_DEBUG(_fork.resumableType = _fork.activeType);
 	_fork.resumable = _fork.active;
 
-	HSFM_DEBUG_ONLY(_fork.activeType.clear());
+	HSFM_IF_DEBUG(_fork.activeType.clear());
 	_fork.active = INVALID_INDEX;
 }
 
@@ -179,7 +179,7 @@ template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepRequestRemain() {
 	if (_fork.active == INVALID_INDEX) {
-		HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
+		HSFM_IF_DEBUG(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
 		_fork.requested = 0;
 	}
 
@@ -192,7 +192,7 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepRequestRestart() {
-	HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
+	HSFM_IF_DEBUG(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
 	_fork.requested = 0;
 
 	_subStates.wideRequestRestart();
@@ -205,10 +205,10 @@ template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepRequestResume() {
 	if (_fork.resumable != INVALID_INDEX) {
-		HSFM_DEBUG_ONLY(_fork.requestedType = _fork.resumableType);
+		HSFM_IF_DEBUG(_fork.requestedType = _fork.resumableType);
 		_fork.requested = _fork.resumable;
 	} else {
-		HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
+		HSFM_IF_DEBUG(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
 		_fork.requested = 0;
 	}
 
@@ -228,13 +228,13 @@ M<TC, TMS>::_C<TH, TS...>::deepChangeToRequested(Context& context) {
 	else if (_fork.requested != INVALID_INDEX) {
 		_subStates.wideLeave(_fork.active, context);
 
-		HSFM_DEBUG_ONLY(_fork.resumableType = _fork.activeType);
+		HSFM_IF_DEBUG(_fork.resumableType = _fork.activeType);
 		_fork.resumable = _fork.active;
 
-		HSFM_DEBUG_ONLY(_fork.activeType = _fork.requestedType);
+		HSFM_IF_DEBUG(_fork.activeType = _fork.requestedType);
 		_fork.active = _fork.requested;
 
-		HSFM_DEBUG_ONLY(_fork.requestedType.clear());
+		HSFM_IF_DEBUG(_fork.requestedType.clear());
 		_fork.requested = INVALID_INDEX;
 
 		_subStates.wideEnter(_fork.active, context);

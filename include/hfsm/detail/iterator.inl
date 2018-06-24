@@ -5,7 +5,7 @@ namespace detail {
 
 template <typename TContainer>
 bool
-Iterator<TContainer>::operator != (const Iterator<TContainer>& HSFM_ASSERT_ONLY(dummy)) const {
+Iterator<TContainer>::operator != (const Iterator<TContainer>& HSFM_IF_ASSERT(dummy)) const {
 	assert(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
@@ -25,7 +25,7 @@ Iterator<TContainer>::operator ++() {
 
 template <typename TContainer>
 bool
-Iterator<const TContainer>::operator != (const Iterator<const TContainer>& HSFM_ASSERT_ONLY(dummy)) const {
+Iterator<const TContainer>::operator != (const Iterator<const TContainer>& HSFM_IF_ASSERT(dummy)) const {
 	assert(&_container == &dummy._container);
 
 	return _cursor != _container.limit();

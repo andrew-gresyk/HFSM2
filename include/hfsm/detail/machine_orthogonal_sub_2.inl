@@ -11,7 +11,10 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
 										   Parents& forkParents,
 										   ForkPointers& forkPointers)
 	: initial(stateRegistry,
-			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename Initial::Head>()),
+			  Parent(fork,
+					 ProngIndex
+					 HSFM_IF_DEBUG(, TypeInfo::get<T>())
+					 HSFM_IF_DEBUG(, TypeInfo::get<typename Initial::Head>())),
 			  stateParents,
 			  forkParents,
 			  forkPointers)
@@ -23,7 +26,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 															 Control& control,
 															 Context& context)
 {

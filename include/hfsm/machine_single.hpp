@@ -191,15 +191,15 @@ ArrayView<T>::get(const unsigned i) const {
 #endif
 
 #ifdef _DEBUG
-	#define HSFM_DEBUG_ONLY(x)		x
+	#define HSFM_IF_DEBUG(...)		__VA_ARGS__
 #else
-	#define HSFM_DEBUG_ONLY(x)
+	#define HSFM_IF_DEBUG(...)
 #endif
 
 #ifndef NDEBUG
-	#define HSFM_ASSERT_ONLY(x)		x
+	#define HSFM_IF_ASSERT(...)		__VA_ARGS__
 #else
-	#define HSFM_ASSERT_ONLY(x)
+	#define HSFM_IF_ASSERT(...)
 #endif
 
 //------------------------------------------------------------------------------
@@ -411,7 +411,7 @@ namespace detail {
 
 template <typename TContainer>
 bool
-Iterator<TContainer>::operator != (const Iterator<TContainer>& HSFM_ASSERT_ONLY(dummy)) const {
+Iterator<TContainer>::operator != (const Iterator<TContainer>& HSFM_IF_ASSERT(dummy)) const {
 	assert(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
@@ -431,7 +431,7 @@ Iterator<TContainer>::operator ++() {
 
 template <typename TContainer>
 bool
-Iterator<const TContainer>::operator != (const Iterator<const TContainer>& HSFM_ASSERT_ONLY(dummy)) const {
+Iterator<const TContainer>::operator != (const Iterator<const TContainer>& HSFM_IF_ASSERT(dummy)) const {
 	assert(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
@@ -900,10 +900,18 @@ public:
 }
 }
 
+//------------------------------------------------------------------------------
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	#define HFSM_IF_STRUCTURE_REPORT(x)	x
+	#define HFSM_IF_STRUCTURE_REPORT(...)	__VA_ARGS__
 #else
-	#define HFSM_IF_STRUCTURE_REPORT(x)
+	#define HFSM_IF_STRUCTURE_REPORT(...)
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	#define HFSM_IF_LOG_INTERFACE(...)	__VA_ARGS__
+#else
+	#define HFSM_IF_LOG_INTERFACE(...)
 #endif
 
 namespace hfsm {
@@ -918,6 +926,29 @@ struct StructureEntry {
 };
 using MachineStructure = detail::ArrayView<StructureEntry>;
 using MachineActivity  = detail::ArrayView<char>;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+struct LoggerInterface {
+	enum class Method {
+		Substitute,
+		Enter,
+		Update,
+		Transition,
+		React,
+		Leave,
+	};
+	virtual void record(const char* state, const Method method) = 0;
+};
+
+template <typename>
+struct MethodTraits {};
+
+template <typename TReturn, typename TState, typename... TArgs>
+struct MethodTraits<TReturn(TState::*)(TArgs...)> {
+	using Return = TReturn;
+	using State  = TState;
+};
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -956,21 +987,19 @@ private:
 			Index prong = INVALID_INDEX;
 		#pragma pack(pop)
 
-		HSFM_DEBUG_ONLY(TypeInfo forkType);
-		HSFM_DEBUG_ONLY(TypeInfo prongType);
+		HSFM_IF_DEBUG(TypeInfo forkType);
+		HSFM_IF_DEBUG(TypeInfo prongType);
 
 		inline Parent() = default;
 
 		inline Parent(const Index fork_,
-					  const Index prong_,
-					  const TypeInfo HSFM_DEBUG_ONLY(forkType_),
-					  const TypeInfo HSFM_DEBUG_ONLY(prongType_))
+					  const Index prong_
+					  HSFM_IF_DEBUG(, const TypeInfo forkType_)
+					  HSFM_IF_DEBUG(, const TypeInfo prongType_))
 			: fork(fork_)
 			, prong(prong_)
-		#ifdef _DEBUG
-			, forkType(forkType_)
-			, prongType(prongType_)
-		#endif
+			HSFM_IF_DEBUG(, forkType(forkType_))
+			HSFM_IF_DEBUG(, prongType(prongType_))
 		{}
 
 		inline explicit operator bool() const { return fork != INVALID_INDEX && prong != INVALID_INDEX; }
@@ -1014,10 +1043,10 @@ private:
 			Index requested = INVALID_INDEX;
 		#pragma pack(pop)
 
-		HSFM_DEBUG_ONLY(const TypeInfo type);
-		HSFM_ASSERT_ONLY(TypeInfo activeType);
-		HSFM_ASSERT_ONLY(TypeInfo resumableType);
-		HSFM_ASSERT_ONLY(TypeInfo requestedType);
+		HSFM_IF_DEBUG(const TypeInfo type);
+		HSFM_IF_ASSERT(TypeInfo activeType);
+		HSFM_IF_ASSERT(TypeInfo resumableType);
+		HSFM_IF_ASSERT(TypeInfo requestedType);
 
 		Fork(const Index index, const TypeInfo type_);
 	};
@@ -1277,6 +1306,10 @@ private:
 		const MachineActivity& activity() const										{ return _activityHistory;	};
 	#endif
 
+	#ifdef HFSM_ENABLE_LOG_INTERFACE
+		void attachLogger(LoggerInterface* const logger) { _logger = logger; }
+	#endif
+
 	protected:
 		void processTransitions();
 		void requestImmediate(const Transition request);
@@ -1335,6 +1368,10 @@ private:
 		};
 		using DebugTransitionInfos = Array<DebugTransitionInfo, 2 * ForkCount>;
 		DebugTransitionInfos _lastTransitions;
+	#endif
+
+	#ifdef HFSM_ENABLE_LOG_INTERFACE
+		LoggerInterface* _logger;
 	#endif
 	};
 
@@ -1424,11 +1461,9 @@ namespace hfsm {
 
 template <typename TC, unsigned TMS>
 M<TC, TMS>::Fork::Fork(const Index index,
-					   const TypeInfo HSFM_DEBUG_ONLY(type_))
+					   const TypeInfo HSFM_IF_DEBUG(type_))
 	: self(index)
-#ifdef _DEBUG
-	, type(type_)
-#endif
+	HSFM_IF_DEBUG(, type(type_))
 {}
 
 //------------------------------------------------------------------------------
@@ -1724,7 +1759,7 @@ M<TC, TMS>::_R<TA>::requestImmediate(const Transition request) {
 	for (auto parent = _stateParents[state]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
 
-		HSFM_DEBUG_ONLY(fork.requestedType = parent.prongType);
+		HSFM_IF_DEBUG(fork.requestedType = parent.prongType);
 		fork.requested = parent.prong;
 	}
 
@@ -1742,11 +1777,11 @@ M<TC, TMS>::_R<TA>::requestScheduled(const Transition request) {
 	const auto parent = _stateParents[state];
 	auto& fork = *_forkPointers[parent.fork];
 
-	HSFM_ASSERT_ONLY(const auto forksParent = _stateParents[fork.self]);
-	HSFM_ASSERT_ONLY(const auto& forksFork = *_forkPointers[forksParent.fork]);
+	HSFM_IF_ASSERT(const auto forksParent = _stateParents[fork.self]);
+	HSFM_IF_ASSERT(const auto& forksFork = *_forkPointers[forksParent.fork]);
 	assert(forksFork.active == INVALID_INDEX);
 
-	HSFM_DEBUG_ONLY(fork.resumableType = parent.prongType);
+	HSFM_IF_DEBUG(fork.resumableType = parent.prongType);
 	fork.resumable = parent.prong;
 }
 
@@ -1872,9 +1907,9 @@ namespace hfsm {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext, unsigned TMaxSubstitutions>
-template <typename T>
+template <typename TH>
 struct M<TContext, TMaxSubstitutions>::_S {
-	using Client = T;
+	using Head = TH;
 
 	enum : unsigned {
 		ReverseDepth = 1,
@@ -1912,7 +1947,7 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	inline void deepChangeToRequested(Context&)	{}
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	static constexpr bool isBare() { return std::is_same<Client, _B<Bare>>::value; }
+	static constexpr bool isBare() { return std::is_same<Head, _B<Bare>>::value; }
 
 	enum : unsigned {
 		NameCount	 = isBare() ? 0 : 1,
@@ -1930,9 +1965,9 @@ struct M<TContext, TMaxSubstitutions>::_S {
 					  MachineStructure& structure) const;
 #endif
 
-	Client _client;
+	Head _head;
 
-	HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
+	HSFM_IF_DEBUG(const TypeInfo _type = TypeInfo::get<Head>());
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1944,29 +1979,29 @@ namespace hfsm {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TC, unsigned TMS>
-template <typename T>
-M<TC, TMS>::_S<T>::_S(StateRegistry& stateRegistry,
-					  const Parent parent,
-					  Parents& stateParents,
-					  Parents& /*forkParents*/,
-					  ForkPointers& /*forkPointers*/)
+template <typename TH>
+M<TC, TMS>::_S<TH>::_S(StateRegistry& stateRegistry,
+					   const Parent parent,
+					   Parents& stateParents,
+					   Parents& /*forkParents*/,
+					   ForkPointers& /*forkPointers*/)
 {
-	const auto id = stateRegistry.add(TypeInfo::get<Client>());
+	const auto id = stateRegistry.add(TypeInfo::get<Head>());
 	stateParents[id] = parent;
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 bool
-M<TC, TMS>::_S<T>::deepSubstitute(Control& control,
-								  Context& context)
+M<TC, TMS>::_S<TH>::deepSubstitute(Control& control,
+								   Context& context)
 {
 	const unsigned requestCountBefore = control.requestCount();
 
-	_client.widePreSubstitute(context);
-	_client.substitute(control, context);
+	_head.widePreSubstitute(context);
+	_head.substitute(control, context);
 
 	return requestCountBefore < control.requestCount();
 }
@@ -1974,37 +2009,37 @@ M<TC, TMS>::_S<T>::deepSubstitute(Control& control,
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepEnterInitial(Context& context) {
+M<TC, TMS>::_S<TH>::deepEnterInitial(Context& context) {
 	deepEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepEnter(Context& context) {
-	_client.widePreEnter(context);
-	_client.enter(context);
+M<TC, TMS>::_S<TH>::deepEnter(Context& context) {
+	_head.widePreEnter(context);
+	_head.enter(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 bool
-M<TC, TMS>::_S<T>::deepUpdateAndTransition(Control& control,
-										   Context& context)
+M<TC, TMS>::_S<TH>::deepUpdateAndTransition(Control& control,
+											Context& context)
 {
-	_client.widePreUpdate(context);
-	_client.update(context);
+	_head.widePreUpdate(context);
+	_head.update(context);
 
 	const unsigned requestCountBefore = control.requestCount();
 
-	_client.widePreTransition(context);
-	_client.transition(control, context);
+	_head.widePreTransition(context);
+	_head.transition(control, context);
 
 	return requestCountBefore < control.requestCount();
 }
@@ -2012,35 +2047,35 @@ M<TC, TMS>::_S<T>::deepUpdateAndTransition(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepUpdate(Context& context) {
-	_client.widePreUpdate(context);
-	_client.update(context);
+M<TC, TMS>::_S<TH>::deepUpdate(Context& context) {
+	_head.widePreUpdate(context);
+	_head.update(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 template <typename TEvent>
 void
-M<TC, TMS>::_S<T>::deepReact(const TEvent& event,
-							 Control& control,
-							 Context& context)
+M<TC, TMS>::_S<TH>::deepReact(const TEvent& event,
+							  Control& control,
+							  Context& context)
 {
-	_client.widePreReact(event, context);
-	_client.react(event, control, context);
+	_head.widePreReact(event, context);
+	_head.react(event, control, context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepLeave(Context& context) {
-	_client.leave(context);
-	_client.widePostLeave(context);
+M<TC, TMS>::_S<TH>::deepLeave(Context& context) {
+	_head.leave(context);
+	_head.widePostLeave(context);
 }
 
 //------------------------------------------------------------------------------
@@ -2048,13 +2083,13 @@ M<TC, TMS>::_S<T>::deepLeave(Context& context) {
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 const char*
-M<TC, TMS>::_S<T>::name() {
+M<TC, TMS>::_S<TH>::name() {
 	if (isBare())
 		return "";
 	else {
-		const char* const raw = TypeInfo::get<Client>()->name();
+		const char* const raw = TypeInfo::get<Head>()->name();
 
 		unsigned first =
 
@@ -2077,12 +2112,12 @@ M<TC, TMS>::_S<T>::name() {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepGetNames(const unsigned parent,
-								const enum StateInfo::RegionType region,
-								const unsigned depth,
-								StateInfos& _stateInfos) const
+M<TC, TMS>::_S<TH>::deepGetNames(const unsigned parent,
+								 const enum StateInfo::RegionType region,
+								 const unsigned depth,
+								 StateInfos& _stateInfos) const
 {
 	_stateInfos << StateInfo { parent, region, depth, name() };
 }
@@ -2090,11 +2125,11 @@ M<TC, TMS>::_S<T>::deepGetNames(const unsigned parent,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepIsActive(const bool isActive,
-								unsigned& index,
-								MachineStructure& structure) const
+M<TC, TMS>::_S<TH>::deepIsActive(const bool isActive,
+								 unsigned& index,
+								 MachineStructure& structure) const
 {
 	if (!isBare())
 		structure[index++].isActive = isActive;
@@ -2296,7 +2331,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 	State _state;
 	SubStates _subStates;
 
-	HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Head>());
+	HSFM_IF_DEBUG(const TypeInfo _type = TypeInfo::get<Head>());
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2360,7 +2395,7 @@ M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context) {
 		   _fork.resumable == INVALID_INDEX &&
 		   _fork.requested == INVALID_INDEX);
 
-	HSFM_DEBUG_ONLY(_fork.activeType = TypeInfo::get<typename SubStates::Initial::Head>());
+	HSFM_IF_DEBUG(_fork.activeType = TypeInfo::get<typename SubStates::Initial::Head>());
 	_fork.active = 0;
 
 	_state.deepEnter(context);
@@ -2376,10 +2411,10 @@ M<TC, TMS>::_C<TH, TS...>::deepEnter(Context& context) {
 	assert(_fork.active	   == INVALID_INDEX &&
 		   _fork.requested != INVALID_INDEX);
 
-	HSFM_DEBUG_ONLY(_fork.activeType = _fork.requestedType);
+	HSFM_IF_DEBUG(_fork.activeType = _fork.requestedType);
 	_fork.active = _fork.requested;
 
-	HSFM_DEBUG_ONLY(_fork.requestedType.clear());
+	HSFM_IF_DEBUG(_fork.requestedType.clear());
 	_fork.requested = INVALID_INDEX;
 
 	_state.deepEnter(context);
@@ -2443,10 +2478,10 @@ M<TC, TMS>::_C<TH, TS...>::deepLeave(Context& context) {
 	_subStates.wideLeave(_fork.active, context);
 	_state.deepLeave(context);
 
-	HSFM_DEBUG_ONLY(_fork.resumableType = _fork.activeType);
+	HSFM_IF_DEBUG(_fork.resumableType = _fork.activeType);
 	_fork.resumable = _fork.active;
 
-	HSFM_DEBUG_ONLY(_fork.activeType.clear());
+	HSFM_IF_DEBUG(_fork.activeType.clear());
 	_fork.active = INVALID_INDEX;
 }
 
@@ -2484,7 +2519,7 @@ template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepRequestRemain() {
 	if (_fork.active == INVALID_INDEX) {
-		HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
+		HSFM_IF_DEBUG(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
 		_fork.requested = 0;
 	}
 
@@ -2497,7 +2532,7 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepRequestRestart() {
-	HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
+	HSFM_IF_DEBUG(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
 	_fork.requested = 0;
 
 	_subStates.wideRequestRestart();
@@ -2510,10 +2545,10 @@ template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepRequestResume() {
 	if (_fork.resumable != INVALID_INDEX) {
-		HSFM_DEBUG_ONLY(_fork.requestedType = _fork.resumableType);
+		HSFM_IF_DEBUG(_fork.requestedType = _fork.resumableType);
 		_fork.requested = _fork.resumable;
 	} else {
-		HSFM_DEBUG_ONLY(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
+		HSFM_IF_DEBUG(_fork.requestedType = TypeInfo::get<typename SubStates::Initial::Head>());
 		_fork.requested = 0;
 	}
 
@@ -2533,13 +2568,13 @@ M<TC, TMS>::_C<TH, TS...>::deepChangeToRequested(Context& context) {
 	else if (_fork.requested != INVALID_INDEX) {
 		_subStates.wideLeave(_fork.active, context);
 
-		HSFM_DEBUG_ONLY(_fork.resumableType = _fork.activeType);
+		HSFM_IF_DEBUG(_fork.resumableType = _fork.activeType);
 		_fork.resumable = _fork.active;
 
-		HSFM_DEBUG_ONLY(_fork.activeType = _fork.requestedType);
+		HSFM_IF_DEBUG(_fork.activeType = _fork.requestedType);
 		_fork.active = _fork.requested;
 
-		HSFM_DEBUG_ONLY(_fork.requestedType.clear());
+		HSFM_IF_DEBUG(_fork.requestedType.clear());
 		_fork.requested = INVALID_INDEX;
 
 		_subStates.wideEnter(_fork.active, context);
@@ -2593,7 +2628,10 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
 												  Parents& forkParents,
 												  ForkPointers& forkPointers)
 	: initial(stateRegistry,
-			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename Initial::Head>()),
+			  Parent(fork,
+					 ProngIndex
+					 HSFM_IF_DEBUG(, TypeInfo::get<T>())
+					 HSFM_IF_DEBUG(, TypeInfo::get<typename Initial::Head>())),
 			  stateParents,
 			  forkParents,
 			  forkPointers)
@@ -2831,7 +2869,10 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
 										   Parents& forkParents,
 										   ForkPointers& forkPointers)
 	: initial(stateRegistry,
-			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename Initial::Head>()),
+			  Parent(fork,
+					 ProngIndex
+					 HSFM_IF_DEBUG(, TypeInfo::get<T>())
+					 HSFM_IF_DEBUG(, TypeInfo::get<typename Initial::Head>())),
 			  stateParents,
 			  forkParents,
 			  forkPointers)
@@ -2843,7 +2884,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 															 Control& control,
 															 Context& context)
 {
@@ -2858,7 +2899,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 													  Control& control,
 													  Context& context)
 {
@@ -2883,7 +2924,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_IF_ASSERT(prong),
 												 Context& context)
 {
 	assert(prong == ProngIndex);
@@ -2897,7 +2938,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 bool
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(const unsigned HSFM_IF_ASSERT(prong),
 															   Control& control,
 															   Context& context)
 {
@@ -2912,7 +2953,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_IF_ASSERT(prong),
 												  Context& context)
 {
 	assert(prong == ProngIndex);
@@ -2927,7 +2968,7 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 template <typename TEvent>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideReact(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideReact(const unsigned HSFM_IF_ASSERT(prong),
 												 const TEvent& event,
 												 Control& control,
 												 Context& context)
@@ -2943,7 +2984,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_IF_ASSERT(prong),
 												 Context& context)
 {
 	assert(prong == ProngIndex);
@@ -2957,7 +2998,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsigned HSFM_IF_ASSERT(prong),
 														  const enum Transition::Type transition)
 {
 	assert(prong == ProngIndex);
@@ -2991,7 +3032,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestResume(const unsigned HSFM_ASSERT_ONLY(prong)) {
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestResume(const unsigned HSFM_IF_ASSERT(prong)) {
 	assert(prong == ProngIndex);
 
 	initial.deepRequestResume();
@@ -3003,7 +3044,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeToRequested(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeToRequested(const unsigned HSFM_IF_ASSERT(prong),
 															 Context& context)
 {
 	assert(prong == ProngIndex);
@@ -3238,7 +3279,7 @@ struct M<TContext, TMaxSubstitutions>::_O final {
 	State _state;
 	SubStates _subStates;
 
-	HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Head>());
+	HSFM_IF_DEBUG(const TypeInfo _type = TypeInfo::get<Head>());
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3507,7 +3548,10 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
 											  Parents& forkParents,
 											  ForkPointers& forkPointers)
 	: initial(stateRegistry,
-			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename Initial::Head>()),
+			  Parent(fork,
+					 ProngIndex
+					 HSFM_IF_DEBUG(, TypeInfo::get<T>())
+					 HSFM_IF_DEBUG(, TypeInfo::get<typename Initial::Head>())),
 			  stateParents,
 			  forkParents,
 			  forkPointers)
@@ -3738,7 +3782,10 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
 										   Parents& forkParents,
 										   ForkPointers& forkPointers)
 	: initial(stateRegistry,
-			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename Initial::Head>()),
+			  Parent(fork,
+					 ProngIndex
+					 HSFM_IF_DEBUG(, TypeInfo::get<T>())
+					 HSFM_IF_DEBUG(, TypeInfo::get<typename Initial::Head>())),
 			  stateParents,
 			  forkParents,
 			  forkPointers)
@@ -3750,7 +3797,7 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_ASSERT_ONLY(prong),
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 															 Control& control,
 															 Context& context)
 {
@@ -3939,3 +3986,6 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideIsActive(const bool isActive,
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+
+#undef HFSM_IF_STRUCTURE_REPORT
+#undef HFSM_IF_LOG_INTERFACE

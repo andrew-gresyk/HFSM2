@@ -3,29 +3,29 @@ namespace hfsm {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TC, unsigned TMS>
-template <typename T>
-M<TC, TMS>::_S<T>::_S(StateRegistry& stateRegistry,
-					  const Parent parent,
-					  Parents& stateParents,
-					  Parents& /*forkParents*/,
-					  ForkPointers& /*forkPointers*/)
+template <typename TH>
+M<TC, TMS>::_S<TH>::_S(StateRegistry& stateRegistry,
+					   const Parent parent,
+					   Parents& stateParents,
+					   Parents& /*forkParents*/,
+					   ForkPointers& /*forkPointers*/)
 {
-	const auto id = stateRegistry.add(TypeInfo::get<Client>());
+	const auto id = stateRegistry.add(TypeInfo::get<Head>());
 	stateParents[id] = parent;
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 bool
-M<TC, TMS>::_S<T>::deepSubstitute(Control& control,
-								  Context& context)
+M<TC, TMS>::_S<TH>::deepSubstitute(Control& control,
+								   Context& context)
 {
 	const unsigned requestCountBefore = control.requestCount();
 
-	_client.widePreSubstitute(context);
-	_client.substitute(control, context);
+	_head.widePreSubstitute(context);
+	_head.substitute(control, context);
 
 	return requestCountBefore < control.requestCount();
 }
@@ -33,37 +33,37 @@ M<TC, TMS>::_S<T>::deepSubstitute(Control& control,
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepEnterInitial(Context& context) {
+M<TC, TMS>::_S<TH>::deepEnterInitial(Context& context) {
 	deepEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepEnter(Context& context) {
-	_client.widePreEnter(context);
-	_client.enter(context);
+M<TC, TMS>::_S<TH>::deepEnter(Context& context) {
+	_head.widePreEnter(context);
+	_head.enter(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 bool
-M<TC, TMS>::_S<T>::deepUpdateAndTransition(Control& control,
-										   Context& context)
+M<TC, TMS>::_S<TH>::deepUpdateAndTransition(Control& control,
+											Context& context)
 {
-	_client.widePreUpdate(context);
-	_client.update(context);
+	_head.widePreUpdate(context);
+	_head.update(context);
 
 	const unsigned requestCountBefore = control.requestCount();
 
-	_client.widePreTransition(context);
-	_client.transition(control, context);
+	_head.widePreTransition(context);
+	_head.transition(control, context);
 
 	return requestCountBefore < control.requestCount();
 }
@@ -71,35 +71,35 @@ M<TC, TMS>::_S<T>::deepUpdateAndTransition(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepUpdate(Context& context) {
-	_client.widePreUpdate(context);
-	_client.update(context);
+M<TC, TMS>::_S<TH>::deepUpdate(Context& context) {
+	_head.widePreUpdate(context);
+	_head.update(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 template <typename TEvent>
 void
-M<TC, TMS>::_S<T>::deepReact(const TEvent& event,
-							 Control& control,
-							 Context& context)
+M<TC, TMS>::_S<TH>::deepReact(const TEvent& event,
+							  Control& control,
+							  Context& context)
 {
-	_client.widePreReact(event, context);
-	_client.react(event, control, context);
+	_head.widePreReact(event, context);
+	_head.react(event, control, context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepLeave(Context& context) {
-	_client.leave(context);
-	_client.widePostLeave(context);
+M<TC, TMS>::_S<TH>::deepLeave(Context& context) {
+	_head.leave(context);
+	_head.widePostLeave(context);
 }
 
 //------------------------------------------------------------------------------
@@ -107,13 +107,13 @@ M<TC, TMS>::_S<T>::deepLeave(Context& context) {
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 const char*
-M<TC, TMS>::_S<T>::name() {
+M<TC, TMS>::_S<TH>::name() {
 	if (isBare())
 		return "";
 	else {
-		const char* const raw = TypeInfo::get<Client>()->name();
+		const char* const raw = TypeInfo::get<Head>()->name();
 
 		unsigned first =
 
@@ -136,12 +136,12 @@ M<TC, TMS>::_S<T>::name() {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepGetNames(const unsigned parent,
-								const enum StateInfo::RegionType region,
-								const unsigned depth,
-								StateInfos& _stateInfos) const
+M<TC, TMS>::_S<TH>::deepGetNames(const unsigned parent,
+								 const enum StateInfo::RegionType region,
+								 const unsigned depth,
+								 StateInfos& _stateInfos) const
 {
 	_stateInfos << StateInfo { parent, region, depth, name() };
 }
@@ -149,11 +149,11 @@ M<TC, TMS>::_S<T>::deepGetNames(const unsigned parent,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, unsigned TMS>
-template <typename T>
+template <typename TH>
 void
-M<TC, TMS>::_S<T>::deepIsActive(const bool isActive,
-								unsigned& index,
-								MachineStructure& structure) const
+M<TC, TMS>::_S<TH>::deepIsActive(const bool isActive,
+								 unsigned& index,
+								 MachineStructure& structure) const
 {
 	if (!isBare())
 		structure[index++].isActive = isActive;

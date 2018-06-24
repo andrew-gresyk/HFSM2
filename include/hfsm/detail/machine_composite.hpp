@@ -189,7 +189,7 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 	State _state;
 	SubStates _subStates;
 
-	HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Head>());
+	HSFM_IF_DEBUG(const TypeInfo _type = TypeInfo::get<Head>());
 };
 
 ////////////////////////////////////////////////////////////////////////////////

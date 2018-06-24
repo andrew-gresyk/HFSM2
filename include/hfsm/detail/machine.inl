@@ -6,11 +6,9 @@
 
 template <typename TC, unsigned TMS>
 M<TC, TMS>::Fork::Fork(const Index index,
-					   const TypeInfo HSFM_DEBUG_ONLY(type_))
+					   const TypeInfo HSFM_IF_DEBUG(type_))
 	: self(index)
-#ifdef _DEBUG
-	, type(type_)
-#endif
+	HSFM_IF_DEBUG(, type(type_))
 {}
 
 //------------------------------------------------------------------------------
@@ -310,7 +308,7 @@ M<TC, TMS>::_R<TA>::requestImmediate(const Transition request) {
 	for (auto parent = _stateParents[state]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
 
-		HSFM_DEBUG_ONLY(fork.requestedType = parent.prongType);
+		HSFM_IF_DEBUG(fork.requestedType = parent.prongType);
 		fork.requested = parent.prong;
 	}
 
@@ -328,11 +326,11 @@ M<TC, TMS>::_R<TA>::requestScheduled(const Transition request) {
 	const auto parent = _stateParents[state];
 	auto& fork = *_forkPointers[parent.fork];
 
-	HSFM_ASSERT_ONLY(const auto forksParent = _stateParents[fork.self]);
-	HSFM_ASSERT_ONLY(const auto& forksFork = *_forkPointers[forksParent.fork]);
+	HSFM_IF_ASSERT(const auto forksParent = _stateParents[fork.self]);
+	HSFM_IF_ASSERT(const auto& forksFork = *_forkPointers[forksParent.fork]);
 	assert(forksFork.active == INVALID_INDEX);
 
-	HSFM_DEBUG_ONLY(fork.resumableType = parent.prongType);
+	HSFM_IF_DEBUG(fork.resumableType = parent.prongType);
 	fork.resumable = parent.prong;
 }
 

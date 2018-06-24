@@ -3,9 +3,9 @@ namespace hfsm {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext, unsigned TMaxSubstitutions>
-template <typename T>
+template <typename TH>
 struct M<TContext, TMaxSubstitutions>::_S {
-	using Client = T;
+	using Head = TH;
 
 	enum : unsigned {
 		ReverseDepth = 1,
@@ -43,7 +43,7 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	inline void deepChangeToRequested(Context&)	{}
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	static constexpr bool isBare() { return std::is_same<Client, _B<Bare>>::value; }
+	static constexpr bool isBare() { return std::is_same<Head, _B<Bare>>::value; }
 
 	enum : unsigned {
 		NameCount	 = isBare() ? 0 : 1,
@@ -61,9 +61,9 @@ struct M<TContext, TMaxSubstitutions>::_S {
 					  MachineStructure& structure) const;
 #endif
 
-	Client _client;
+	Head _head;
 
-	HSFM_DEBUG_ONLY(const TypeInfo _type = TypeInfo::get<Client>());
+	HSFM_IF_DEBUG(const TypeInfo _type = TypeInfo::get<Head>());
 };
 
 ////////////////////////////////////////////////////////////////////////////////

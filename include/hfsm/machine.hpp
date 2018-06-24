@@ -40,10 +40,18 @@
 #include "detail/hash_table.hpp"
 #include "detail/type_info.hpp"
 
+//------------------------------------------------------------------------------
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	#define HFSM_IF_STRUCTURE_REPORT(x)	x
+	#define HFSM_IF_STRUCTURE_REPORT(...)	__VA_ARGS__
 #else
-	#define HFSM_IF_STRUCTURE_REPORT(x)
+	#define HFSM_IF_STRUCTURE_REPORT(...)
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	#define HFSM_IF_LOG_INTERFACE(...)	__VA_ARGS__
+#else
+	#define HFSM_IF_LOG_INTERFACE(...)
 #endif
 
 namespace hfsm {
@@ -58,6 +66,29 @@ struct StructureEntry {
 };
 using MachineStructure = detail::ArrayView<StructureEntry>;
 using MachineActivity  = detail::ArrayView<char>;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+struct LoggerInterface {
+	enum class Method {
+		Substitute,
+		Enter,
+		Update,
+		Transition,
+		React,
+		Leave,
+	};
+	virtual void record(const char* state, const Method method) = 0;
+};
+
+template <typename>
+struct MethodTraits {};
+
+template <typename TReturn, typename TState, typename... TArgs>
+struct MethodTraits<TReturn(TState::*)(TArgs...)> {
+	using Return = TReturn;
+	using State  = TState;
+};
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,21 +128,19 @@ private:
 			Index prong = INVALID_INDEX;
 		#pragma pack(pop)
 
-		HSFM_DEBUG_ONLY(TypeInfo forkType);
-		HSFM_DEBUG_ONLY(TypeInfo prongType);
+		HSFM_IF_DEBUG(TypeInfo forkType);
+		HSFM_IF_DEBUG(TypeInfo prongType);
 
 		inline Parent() = default;
 
 		inline Parent(const Index fork_,
-					  const Index prong_,
-					  const TypeInfo HSFM_DEBUG_ONLY(forkType_),
-					  const TypeInfo HSFM_DEBUG_ONLY(prongType_))
+					  const Index prong_
+					  HSFM_IF_DEBUG(, const TypeInfo forkType_)
+					  HSFM_IF_DEBUG(, const TypeInfo prongType_))
 			: fork(fork_)
 			, prong(prong_)
-		#ifdef _DEBUG
-			, forkType(forkType_)
-			, prongType(prongType_)
-		#endif
+			HSFM_IF_DEBUG(, forkType(forkType_))
+			HSFM_IF_DEBUG(, prongType(prongType_))
 		{}
 
 		inline explicit operator bool() const { return fork != INVALID_INDEX && prong != INVALID_INDEX; }
@@ -155,10 +184,10 @@ private:
 			Index requested = INVALID_INDEX;
 		#pragma pack(pop)
 
-		HSFM_DEBUG_ONLY(const TypeInfo type);
-		HSFM_ASSERT_ONLY(TypeInfo activeType);
-		HSFM_ASSERT_ONLY(TypeInfo resumableType);
-		HSFM_ASSERT_ONLY(TypeInfo requestedType);
+		HSFM_IF_DEBUG(const TypeInfo type);
+		HSFM_IF_ASSERT(TypeInfo activeType);
+		HSFM_IF_ASSERT(TypeInfo resumableType);
+		HSFM_IF_ASSERT(TypeInfo requestedType);
 
 		Fork(const Index index, const TypeInfo type_);
 	};
@@ -422,6 +451,10 @@ private:
 		const MachineActivity& activity() const										{ return _activityHistory;	};
 	#endif
 
+	#ifdef HFSM_ENABLE_LOG_INTERFACE
+		void attachLogger(LoggerInterface* const logger) { _logger = logger; }
+	#endif
+
 	protected:
 		void processTransitions();
 		void requestImmediate(const Transition request);
@@ -480,6 +513,10 @@ private:
 		};
 		using DebugTransitionInfos = Array<DebugTransitionInfo, 2 * ForkCount>;
 		DebugTransitionInfos _lastTransitions;
+	#endif
+
+	#ifdef HFSM_ENABLE_LOG_INTERFACE
+		LoggerInterface* _logger;
 	#endif
 	};
 
@@ -566,3 +603,6 @@ using Machine = M<TContext, TMaxSubstitutions>;
 }
 
 #include "detail/machine.inl"
+
+#undef HFSM_IF_STRUCTURE_REPORT
+#undef HFSM_IF_LOG_INTERFACE

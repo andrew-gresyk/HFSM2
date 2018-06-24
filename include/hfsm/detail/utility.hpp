@@ -15,15 +15,15 @@
 #endif
 
 #ifdef _DEBUG
-	#define HSFM_DEBUG_ONLY(x)		x
+	#define HSFM_IF_DEBUG(...)		__VA_ARGS__
 #else
-	#define HSFM_DEBUG_ONLY(x)
+	#define HSFM_IF_DEBUG(...)
 #endif
 
 #ifndef NDEBUG
-	#define HSFM_ASSERT_ONLY(x)		x
+	#define HSFM_IF_ASSERT(...)		__VA_ARGS__
 #else
-	#define HSFM_ASSERT_ONLY(x)
+	#define HSFM_IF_ASSERT(...)
 #endif
 
 //------------------------------------------------------------------------------

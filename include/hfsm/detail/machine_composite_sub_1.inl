@@ -11,7 +11,10 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::Sub(StateRegistry& stateRegistry,
 												  Parents& forkParents,
 												  ForkPointers& forkPointers)
 	: initial(stateRegistry,
-			  Parent(fork, ProngIndex, TypeInfo::get<T>(), TypeInfo::get<typename Initial::Head>()),
+			  Parent(fork,
+					 ProngIndex
+					 HSFM_IF_DEBUG(, TypeInfo::get<T>())
+					 HSFM_IF_DEBUG(, TypeInfo::get<typename Initial::Head>())),
 			  stateParents,
 			  forkParents,
 			  forkPointers)
