@@ -36,25 +36,26 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 			Parents& forkParents,
 			ForkPointers& forkPointers);
 
-		inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context);
-		inline void wideSubstitute(const unsigned prong, Control& control, Context& context);
+		inline void wideForwardSubstitute	(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideSubstitute			(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideEnterInitial(Context& context);
-		inline void wideEnter(const unsigned prong, Context& context);
+		inline void wideEnterInitial		(										 Context& context, LoggerInterface* const logger);
+		inline void wideEnter				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
-		inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
-		inline void wideUpdate(const unsigned prong, Context& context);
+		inline bool wideUpdateAndTransition	(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideUpdate				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 		template <typename TEvent>
-		inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
+		inline void wideReact				(const unsigned prong,
+											 const TEvent& event,  Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideLeave(const unsigned prong, Context& context);
+		inline void wideLeave				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 		inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
 		inline void wideRequestRemain();
 		inline void wideRequestRestart();
 		inline void wideRequestResume(const unsigned prong);
-		inline void wideChangeToRequested(const unsigned prong, Context& context);
+		inline void wideChangeToRequested	(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
@@ -95,25 +96,26 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 			Parents& forkParents,
 			ForkPointers& forkPointers);
 
-		inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context);
-		inline void wideSubstitute(const unsigned prong, Control& control, Context& context);
+		inline void wideForwardSubstitute	(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideSubstitute			(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideEnterInitial(Context& context);
-		inline void wideEnter(const unsigned prong, Context& context);
+		inline void wideEnterInitial		(										 Context& context, LoggerInterface* const logger);
+		inline void wideEnter				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
-		inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
-		inline void wideUpdate(const unsigned prong, Context& context);
+		inline bool wideUpdateAndTransition	(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideUpdate				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 		template <typename TEvent>
-		inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
+		inline void wideReact				(const unsigned prong, const TEvent& event,
+																   Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideLeave(const unsigned prong, Context& context);
+		inline void wideLeave				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 		inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
 		inline void wideRequestRemain();
 		inline void wideRequestRestart();
 		inline void wideRequestResume(const unsigned prong);
-		inline void wideChangeToRequested(const unsigned prong, Context& context);
+		inline void wideChangeToRequested	(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
@@ -151,25 +153,26 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
 
-	inline void deepForwardSubstitute(Control& control, Context& context);
-	inline void deepSubstitute(Control& control, Context& context);
+	inline void deepForwardSubstitute	(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
 
-	inline void deepEnterInitial(Context& context);
-	inline void deepEnter(Context& context);
+	inline void deepEnterInitial		(				   Context& context, LoggerInterface* const logger);
+	inline void deepEnter				(				   Context& context, LoggerInterface* const logger);
 
-	inline bool deepUpdateAndTransition(Control& control, Context& context);
-	inline void deepUpdate(Context& context);
+	inline bool deepUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepUpdate				(				   Context& context, LoggerInterface* const logger);
 
 	template <typename TEvent>
-	inline void deepReact(const TEvent& event, Control& control, Context& context);
+	inline void deepReact				(const TEvent& event,
+										 Control& control, Context& context, LoggerInterface* const logger);
 
-	inline void deepLeave(Context& context);
+	inline void deepLeave				(				   Context& context, LoggerInterface* const logger);
 
 	inline void deepForwardRequest(const enum Transition::Type transition);
 	inline void deepRequestRemain();
 	inline void deepRequestRestart();
 	inline void deepRequestResume();
-	inline void deepChangeToRequested(Context& context);
+	inline void deepChangeToRequested	(				   Context& context, LoggerInterface* const logger);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	enum : unsigned {

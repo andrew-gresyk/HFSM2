@@ -28,11 +28,12 @@ template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 															 Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepForwardSubstitute(control, context);
+	initial.deepForwardSubstitute(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -43,11 +44,12 @@ template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 													  Control& control,
-													  Context& context)
+													  Context& context,
+													  LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepSubstitute(control, context);
+	initial.deepSubstitute(control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -56,8 +58,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context,
+														LoggerInterface* const logger)
+{
+	initial.deepEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -67,11 +71,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_IF_ASSERT(prong),
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepEnter(context);
+	initial.deepEnter(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -82,11 +87,12 @@ template <unsigned TN, typename TI>
 bool
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(const unsigned HSFM_IF_ASSERT(prong),
 															   Control& control,
-															   Context& context)
+															   Context& context,
+															   LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	return initial.deepUpdateAndTransition(control, context);
+	return initial.deepUpdateAndTransition(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -96,11 +102,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_IF_ASSERT(prong),
-												  Context& context)
+												  Context& context,
+												  LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepUpdate(context);
+	initial.deepUpdate(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -113,11 +120,12 @@ void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideReact(const unsigned HSFM_IF_ASSERT(prong),
 												 const TEvent& event,
 												 Control& control,
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepReact(event, control, context);
+	initial.deepReact(event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -127,11 +135,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_IF_ASSERT(prong),
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepLeave(context);
+	initial.deepLeave(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -187,11 +196,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeToRequested(const unsigned HSFM_IF_ASSERT(prong),
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepChangeToRequested(context);
+	initial.deepChangeToRequested(context, logger);
 }
 
 //------------------------------------------------------------------------------

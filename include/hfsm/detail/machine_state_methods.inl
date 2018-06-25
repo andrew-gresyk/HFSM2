@@ -20,8 +20,11 @@ template <typename TC, unsigned TMS>
 template <typename TH>
 bool
 M<TC, TMS>::_S<TH>::deepSubstitute(Control& control,
-								   Context& context)
+								   Context& context,
+								   LoggerInterface* const HFSM_IF_LOGGER(logger))
 {
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::substitute), LoggerInterface::Method::Substitute>(*logger));
+
 	const unsigned requestCountBefore = control.requestCount();
 
 	_head.widePreSubstitute(context);
@@ -35,8 +38,10 @@ M<TC, TMS>::_S<TH>::deepSubstitute(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH>
 void
-M<TC, TMS>::_S<TH>::deepEnterInitial(Context& context) {
-	deepEnter(context);
+M<TC, TMS>::_S<TH>::deepEnterInitial(Context& context,
+									 LoggerInterface* const logger)
+{
+	deepEnter(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -44,7 +49,11 @@ M<TC, TMS>::_S<TH>::deepEnterInitial(Context& context) {
 template <typename TC, unsigned TMS>
 template <typename TH>
 void
-M<TC, TMS>::_S<TH>::deepEnter(Context& context) {
+M<TC, TMS>::_S<TH>::deepEnter(Context& context,
+							  LoggerInterface* const HFSM_IF_LOGGER(logger))
+{
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::enter), LoggerInterface::Method::Enter>(*logger));
+
 	_head.widePreEnter(context);
 	_head.enter(context);
 }
@@ -55,10 +64,15 @@ template <typename TC, unsigned TMS>
 template <typename TH>
 bool
 M<TC, TMS>::_S<TH>::deepUpdateAndTransition(Control& control,
-											Context& context)
+											Context& context,
+											LoggerInterface* const HFSM_IF_LOGGER(logger))
 {
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::update), LoggerInterface::Method::Update>(*logger));
+
 	_head.widePreUpdate(context);
 	_head.update(context);
+
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::transition), LoggerInterface::Method::Transition>(*logger));
 
 	const unsigned requestCountBefore = control.requestCount();
 
@@ -73,7 +87,11 @@ M<TC, TMS>::_S<TH>::deepUpdateAndTransition(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH>
 void
-M<TC, TMS>::_S<TH>::deepUpdate(Context& context) {
+M<TC, TMS>::_S<TH>::deepUpdate(Context& context,
+							   LoggerInterface* const HFSM_IF_LOGGER(logger))
+{
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::update), LoggerInterface::Method::Update>(*logger));
+
 	_head.widePreUpdate(context);
 	_head.update(context);
 }
@@ -86,8 +104,11 @@ template <typename TEvent>
 void
 M<TC, TMS>::_S<TH>::deepReact(const TEvent& event,
 							  Control& control,
-							  Context& context)
+							  Context& context,
+							  LoggerInterface* const HFSM_IF_LOGGER(logger))
 {
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::react<TEvent>), LoggerInterface::Method::React>(*logger));
+
 	_head.widePreReact(event, context);
 	_head.react(event, control, context);
 }
@@ -97,14 +118,18 @@ M<TC, TMS>::_S<TH>::deepReact(const TEvent& event,
 template <typename TC, unsigned TMS>
 template <typename TH>
 void
-M<TC, TMS>::_S<TH>::deepLeave(Context& context) {
+M<TC, TMS>::_S<TH>::deepLeave(Context& context,
+							  LoggerInterface* const HFSM_IF_LOGGER(logger))
+{
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::leave), LoggerInterface::Method::Leave>(*logger));
+
 	_head.leave(context);
 	_head.widePostLeave(context);
 }
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 
 template <typename TC, unsigned TMS>
 template <typename TH>
@@ -133,7 +158,11 @@ M<TC, TMS>::_S<TH>::name() {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TH>

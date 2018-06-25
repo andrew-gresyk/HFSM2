@@ -29,12 +29,13 @@ template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
 																	Control& control,
-																	Context& context)
+																	Context& context,
+																	LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepForwardSubstitute(control, context);
+		initial  .deepForwardSubstitute(	   control, context, logger);
 	else
-		remaining.wideForwardSubstitute(prong, control, context);
+		remaining.wideForwardSubstitute(prong, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -45,12 +46,13 @@ template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(const unsigned prong,
 															 Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepSubstitute(control, context);
+		initial  .deepSubstitute(		control, context, logger);
 	else
-		remaining.wideSubstitute(prong, control, context);
+		remaining.wideSubstitute(prong, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -59,8 +61,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context,
+															   LoggerInterface* const logger)
+{
+	initial.deepEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -70,12 +74,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnter(const unsigned prong,
-														Context& context)
+														Context& context,
+														LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepEnter(context);
+		initial  .deepEnter(	   context, logger);
 	else
-		remaining.wideEnter(prong, context);
+		remaining.wideEnter(prong, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -86,11 +91,12 @@ template <unsigned TN, typename TI, typename... TR>
 bool
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(const unsigned prong,
 																	  Control& control,
-																	  Context& context)
+																	  Context& context,
+																	  LoggerInterface* const logger)
 {
 	return prong == ProngIndex ?
-		initial.deepUpdateAndTransition(control, context) :
-		remaining.wideUpdateAndTransition(prong, control, context);
+		initial  .deepUpdateAndTransition(		 control, context, logger) :
+		remaining.wideUpdateAndTransition(prong, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -100,12 +106,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigned prong,
-														 Context& context)
+														 Context& context,
+														 LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepUpdate(context);
+		initial  .deepUpdate(		context, logger);
 	else
-		remaining.wideUpdate(prong, context);
+		remaining.wideUpdate(prong, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -118,12 +125,13 @@ void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideReact(const unsigned prong,
 														const TEvent& event,
 														Control& control,
-														Context& context)
+														Context& context,
+														LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepReact(event, control, context);
+		initial  .deepReact(	   event, control, context, logger);
 	else
-		remaining.wideReact(prong, event, control, context);
+		remaining.wideReact(prong, event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -133,12 +141,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLeave(const unsigned prong,
-														Context& context)
+														Context& context,
+														LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepLeave(context);
+		initial  .deepLeave(	   context, logger);
 	else
-		remaining.wideLeave(prong, context);
+		remaining.wideLeave(prong, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +160,7 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardRequest(const unsigned 
 																 const enum Transition::Type transition)
 {
 	if (prong == ProngIndex)
-		initial.deepForwardRequest(transition);
+		initial	 .deepForwardRequest(		transition);
 	else
 		remaining.wideForwardRequest(prong, transition);
 }
@@ -196,12 +205,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(const unsigned prong,
-																	Context& context)
+																	Context& context,
+																	LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepChangeToRequested(context);
+		initial	 .deepChangeToRequested(	   context, logger);
 	else
-		remaining.wideChangeToRequested(prong, context);
+		remaining.wideChangeToRequested(prong, context, logger);
 }
 
 //------------------------------------------------------------------------------

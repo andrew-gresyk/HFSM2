@@ -20,14 +20,15 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepForwardSubstitute(Control& control,
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(_fork.requested != INVALID_INDEX);
 
 	if (_fork.requested == _fork.active)
-		_subStates.wideForwardSubstitute(_fork.requested, control, context);
+		_subStates.wideForwardSubstitute(_fork.requested, control, context, logger);
 	else
-		_subStates.wideSubstitute(_fork.requested, control, context);
+		_subStates.wideSubstitute		(_fork.requested, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -36,13 +37,14 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepSubstitute(Control& control,
-										  Context& context)
+										  Context& context,
+										  LoggerInterface* const logger)
 {
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.requested != INVALID_INDEX);
 
-	if (!_state.deepSubstitute(control, context))
-		_subStates.wideSubstitute(_fork.requested, control, context);
+	if (!_state	  .deepSubstitute(				   control, context, logger))
+		_subStates.wideSubstitute(_fork.requested, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -50,7 +52,9 @@ M<TC, TMS>::_C<TH, TS...>::deepSubstitute(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context,
+											LoggerInterface* const logger)
+{
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX &&
 		   _fork.requested == INVALID_INDEX);
@@ -58,8 +62,8 @@ M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context) {
 	HSFM_IF_DEBUG(_fork.activeType = TypeInfo::get<typename SubStates::Initial::Head>());
 	_fork.active = 0;
 
-	_state.deepEnter(context);
-	_subStates.wideEnterInitial(context);
+	_state	  .deepEnter	   (context, logger);
+	_subStates.wideEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -67,7 +71,9 @@ M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context) {
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepEnter(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepEnter(Context& context,
+									 LoggerInterface* const logger)
+{
 	assert(_fork.active	   == INVALID_INDEX &&
 		   _fork.requested != INVALID_INDEX);
 
@@ -77,8 +83,8 @@ M<TC, TMS>::_C<TH, TS...>::deepEnter(Context& context) {
 	HSFM_IF_DEBUG(_fork.requestedType.clear());
 	_fork.requested = INVALID_INDEX;
 
-	_state.deepEnter(context);
-	_subStates.wideEnter(_fork.active, context);
+	_state	  .deepEnter(			   context, logger);
+	_subStates.wideEnter(_fork.active, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -87,16 +93,17 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 bool
 M<TC, TMS>::_C<TH, TS...>::deepUpdateAndTransition(Control& control,
-												   Context& context)
+												   Context& context,
+												   LoggerInterface* const logger)
 {
 	assert(_fork.active != INVALID_INDEX);
 
-	if (_state.deepUpdateAndTransition(control, context)) {
-		_subStates.wideUpdate(_fork.active, context);
+	if (_state.deepUpdateAndTransition(control, context, logger)) {
+		_subStates.wideUpdate(_fork.active, context, logger);
 
 		return true;
 	} else
-		return _subStates.wideUpdateAndTransition(_fork.active, control, context);
+		return _subStates.wideUpdateAndTransition(_fork.active, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -104,11 +111,13 @@ M<TC, TMS>::_C<TH, TS...>::deepUpdateAndTransition(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepUpdate(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepUpdate(Context& context,
+									  LoggerInterface* const logger)
+{
 	assert(_fork.active != INVALID_INDEX);
 
-	_state.deepUpdate(context);
-	_subStates.wideUpdate(_fork.active, context);
+	_state	  .deepUpdate(				context, logger);
+	_subStates.wideUpdate(_fork.active, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -119,12 +128,13 @@ template <typename TEvent>
 void
 M<TC, TMS>::_C<TH, TS...>::deepReact(const TEvent& event,
 									 Control& control,
-									 Context& context)
+									 Context& context,
+									 LoggerInterface* const logger)
 {
 	assert(_fork.active != INVALID_INDEX);
 
-	_state.deepReact(event, control, context);
-	_subStates.wideReact(_fork.active, event, control, context);
+	_state	  .deepReact(			   event, control, context, logger);
+	_subStates.wideReact(_fork.active, event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -132,11 +142,13 @@ M<TC, TMS>::_C<TH, TS...>::deepReact(const TEvent& event,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepLeave(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepLeave(Context& context,
+									 LoggerInterface* const logger)
+{
 	assert(_fork.active != INVALID_INDEX);
 
-	_subStates.wideLeave(_fork.active, context);
-	_state.deepLeave(context);
+	_subStates.wideLeave(_fork.active, context, logger);
+	_state	  .deepLeave(			   context, logger);
 
 	HSFM_IF_DEBUG(_fork.resumableType = _fork.activeType);
 	_fork.resumable = _fork.active;
@@ -220,13 +232,15 @@ M<TC, TMS>::_C<TH, TS...>::deepRequestResume() {
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepChangeToRequested(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepChangeToRequested(Context& context,
+												 LoggerInterface* const logger)
+{
 	assert(_fork.active != INVALID_INDEX);
 
 	if (_fork.requested == _fork.active)
-		_subStates.wideChangeToRequested(_fork.requested, context);
+		_subStates.wideChangeToRequested(_fork.requested, context, logger);
 	else if (_fork.requested != INVALID_INDEX) {
-		_subStates.wideLeave(_fork.active, context);
+		_subStates.wideLeave(_fork.active, context, logger);
 
 		HSFM_IF_DEBUG(_fork.resumableType = _fork.activeType);
 		_fork.resumable = _fork.active;
@@ -237,7 +251,7 @@ M<TC, TMS>::_C<TH, TS...>::deepChangeToRequested(Context& context) {
 		HSFM_IF_DEBUG(_fork.requestedType.clear());
 		_fork.requested = INVALID_INDEX;
 
-		_subStates.wideEnter(_fork.active, context);
+		_subStates.wideEnter(_fork.active, context, logger);
 	}
 }
 

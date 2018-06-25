@@ -28,11 +28,12 @@ template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 															 Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepForwardSubstitute(control, context);
+	initial.deepForwardSubstitute(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -42,9 +43,10 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
-	initial.deepForwardSubstitute(control, context);
+	initial.deepForwardSubstitute(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -54,9 +56,10 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideSubstitute(Control& control,
-													  Context& context)
+													  Context& context,
+													  LoggerInterface* const logger)
 {
-	initial.deepSubstitute(control, context);
+	initial.deepSubstitute(control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -65,8 +68,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context,
+														LoggerInterface* const logger)
+{
+	initial.deepEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -75,8 +80,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnter(Context& context) {
-	initial.deepEnter(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnter(Context& context,
+												 LoggerInterface* const logger)
+{
+	initial.deepEnter(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -86,9 +93,10 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 bool
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(Control& control,
-															   Context& context)
+															   Context& context,
+															   LoggerInterface* const logger)
 {
-	return initial.deepUpdateAndTransition(control, context);
+	return initial.deepUpdateAndTransition(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -97,8 +105,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdate(Context& context) {
-	initial.deepUpdate(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdate(Context& context,
+												  LoggerInterface* const logger)
+{
+	initial.deepUpdate(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -110,9 +120,10 @@ template <typename TEvent>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideReact(const TEvent& event,
 												 Control& control,
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
-	initial.deepReact(event, control, context);
+	initial.deepReact(event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -121,8 +132,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideLeave(Context& context) {
-	initial.deepLeave(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideLeave(Context& context,
+												 LoggerInterface* const logger)
+{
+	initial.deepLeave(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -178,8 +191,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideChangeToRequested(Context& context) {
-	initial.deepChangeToRequested(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideChangeToRequested(Context& context,
+															 LoggerInterface* const logger)
+{
+	initial.deepChangeToRequested(context, logger);
 }
 
 //------------------------------------------------------------------------------

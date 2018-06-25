@@ -32,7 +32,9 @@
 //   Red
 // Off
 
+// optional: enable FSM structure report in debugger
 #define HFSM_ENABLE_STRUCTURE_REPORT
+
 #include <hfsm/machine_single.hpp>
 
 #include <iostream>

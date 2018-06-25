@@ -29,12 +29,13 @@ template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
 																	Control& control,
-																	Context& context)
+																	Context& context,
+																	LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepForwardSubstitute(control, context);
+		initial  .deepForwardSubstitute(	   control, context, logger);
 	else
-		remaining.wideForwardSubstitute(prong, control, context);
+		remaining.wideForwardSubstitute(prong, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -44,10 +45,11 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(Control& control,
-																	Context& context)
+																	Context& context,
+																	LoggerInterface* const logger)
 {
-	initial.deepForwardSubstitute(control, context);
-	remaining.wideForwardSubstitute(control, context);
+	initial	 .deepForwardSubstitute(control, context, logger);
+	remaining.wideForwardSubstitute(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -57,10 +59,11 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
-	initial.deepSubstitute(control, context);
-	remaining.wideSubstitute(control, context);
+	initial	 .deepSubstitute(control, context, logger);
+	remaining.wideSubstitute(control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -69,9 +72,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
-	remaining.wideEnterInitial(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context,
+															   LoggerInterface* const logger)
+{
+	initial  .deepEnterInitial(context, logger);
+	remaining.wideEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -80,9 +85,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnter(Context& context) {
-	initial.deepEnter(context);
-	remaining.wideEnter(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnter(Context& context,
+														LoggerInterface* const logger)
+{
+	initial  .deepEnter(context, logger);
+	remaining.wideEnter(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -92,10 +99,11 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 bool
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(Control& control,
-																	  Context& context)
+																	  Context& context,
+																	  LoggerInterface* const logger)
 {
-	return initial.deepUpdateAndTransition(control, context)
-		|| remaining.wideUpdateAndTransition(control, context);
+	return initial  .deepUpdateAndTransition(control, context, logger)
+		|| remaining.wideUpdateAndTransition(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -104,9 +112,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(Context& context) {
-	initial.deepUpdate(context);
-	remaining.wideUpdate(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(Context& context,
+														 LoggerInterface* const logger)
+{
+	initial  .deepUpdate(context, logger);
+	remaining.wideUpdate(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -118,10 +128,11 @@ template <typename TEvent>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideReact(const TEvent& event,
 														Control& control,
-														Context& context)
+														Context& context,
+														LoggerInterface* const logger)
 {
-	initial.deepReact(event, control, context);
-	remaining.wideReact(event, control, context);
+	initial  .deepReact(event, control, context, logger);
+	remaining.wideReact(event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -130,9 +141,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideLeave(Context& context) {
-	initial.deepLeave(context);
-	remaining.wideLeave(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideLeave(Context& context,
+														LoggerInterface* const logger)
+{
+	initial	 .deepLeave(context, logger);
+	remaining.wideLeave(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -192,9 +205,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(Context& context) {
-	initial.deepChangeToRequested(context);
-	remaining.wideChangeToRequested(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(Context& context,
+																	LoggerInterface* const logger)
+{
+	initial	 .deepChangeToRequested(context, logger);
+	remaining.wideChangeToRequested(context, logger);
 }
 
 //------------------------------------------------------------------------------

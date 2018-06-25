@@ -156,15 +156,17 @@ M<TC, TMS>::_B<TI>::widePostLeave(Context& context) {
 
 template <typename TC, unsigned TMS>
 template <typename TA>
-M<TC, TMS>::_R<TA>::_R(Context& context)
+M<TC, TMS>::_R<TA>::_R(Context& context
+					   HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr))
 	: _context(context)
 	, _apex(_stateRegistry, Parent(), _stateParents, _forkParents, _forkPointers)
+	HFSM_IF_LOGGER(, _logger(logger))
 {
-	HFSM_IF_STRUCTURE_REPORT(getStateNames());
+	HFSM_IF_STRUCTURE(getStateNames());
 
-	_apex.deepEnterInitial(_context);
+	_apex.deepEnterInitial(_context, HFSM_LOGGER_OR(_logger, nullptr));
 
-	HFSM_IF_STRUCTURE_REPORT(udpateActivity());
+	HFSM_IF_STRUCTURE(udpateActivity());
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -172,7 +174,7 @@ M<TC, TMS>::_R<TA>::_R(Context& context)
 template <typename TC, unsigned TMS>
 template <typename TA>
 M<TC, TMS>::_R<TA>::~_R() {
-	_apex.deepLeave(_context);
+	_apex.deepLeave(_context, HFSM_LOGGER_OR(_logger, nullptr));
 }
 
 //------------------------------------------------------------------------------
@@ -182,7 +184,7 @@ template <typename TA>
 void
 M<TC, TMS>::_R<TA>::update() {
 	Control control(_requests);
-	_apex.deepUpdateAndTransition(control, _context);
+	_apex.deepUpdateAndTransition(control, _context, HFSM_LOGGER_OR(_logger, nullptr));
 
 	if (_requests.count())
 		processTransitions();
@@ -196,7 +198,7 @@ template <typename TEvent>
 void
 M<TC, TMS>::_R<TA>::react(const TEvent& event) {
 	Control control(_requests);
-	_apex.deepReact(event, control, _context);
+	_apex.deepReact(event, control, _context, HFSM_LOGGER_OR(_logger, nullptr));
 
 	if (_requests.count())
 		processTransitions();
@@ -252,7 +254,7 @@ template <typename TC, unsigned TMS>
 template <typename TA>
 void
 M<TC, TMS>::_R<TA>::processTransitions() {
-	HFSM_IF_STRUCTURE_REPORT(_lastTransitions.clear());
+	HFSM_IF_STRUCTURE(_lastTransitions.clear());
 
 	for (unsigned i = 0;
 		i < MaxSubstitutions && _requests.count();
@@ -261,7 +263,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 		unsigned changeCount = 0;
 
 		for (const auto& request : _requests) {
-			HFSM_IF_STRUCTURE_REPORT(_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Update));
+			HFSM_IF_STRUCTURE(_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Update));
 
 			switch (request.type) {
 			case Transition::Restart:
@@ -283,7 +285,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 
 		if (changeCount > 0) {
 			Control substitutionControl(_requests);
-			_apex.deepForwardSubstitute(substitutionControl, _context);
+			_apex.deepForwardSubstitute(substitutionControl, _context, HFSM_LOGGER_OR(_logger, nullptr));
 
 		#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 			for (const auto& request : _requests)
@@ -292,9 +294,9 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 		}
 	}
 
-	_apex.deepChangeToRequested(_context);
+	_apex.deepChangeToRequested(_context, HFSM_LOGGER_OR(_logger, nullptr));
 
-	HFSM_IF_STRUCTURE_REPORT(udpateActivity());
+	HFSM_IF_STRUCTURE(udpateActivity());
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

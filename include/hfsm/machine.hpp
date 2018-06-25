@@ -43,15 +43,17 @@
 //------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	#define HFSM_IF_STRUCTURE_REPORT(...)	__VA_ARGS__
+	#define HFSM_IF_STRUCTURE(...)	__VA_ARGS__
 #else
-	#define HFSM_IF_STRUCTURE_REPORT(...)
+	#define HFSM_IF_STRUCTURE(...)
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
-	#define HFSM_IF_LOG_INTERFACE(...)	__VA_ARGS__
+	#define HFSM_IF_LOGGER(...)		__VA_ARGS__
+	#define HFSM_LOGGER_OR(y, n)	y
 #else
-	#define HFSM_IF_LOG_INTERFACE(...)
+	#define HFSM_IF_LOGGER(...)
+	#define HFSM_LOGGER_OR(y, n)	n
 #endif
 
 namespace hfsm {
@@ -80,15 +82,8 @@ struct LoggerInterface {
 	};
 	virtual void record(const char* state, const Method method) = 0;
 };
-
-template <typename>
-struct MethodTraits {};
-
-template <typename TReturn, typename TState, typename... TArgs>
-struct MethodTraits<TReturn(TState::*)(TArgs...)> {
-	using Return = TReturn;
-	using State  = TState;
-};
+#else
+using LoggerInterface = void;
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -423,7 +418,9 @@ private:
 	#endif
 
 	public:
-		_R(Context& context);
+		_R(Context& context
+		   HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr));
+
 		~_R();
 
 		void update();
@@ -447,12 +444,12 @@ private:
 		inline bool isResumable();
 
 	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-		const MachineStructure& structure() const									{ return _structure;		};
-		const MachineActivity& activity() const										{ return _activityHistory;	};
+		const MachineStructure& structure() const								{ return _structure;		};
+		const MachineActivity&  activity()  const								{ return _activityHistory;	};
 	#endif
 
 	#ifdef HFSM_ENABLE_LOG_INTERFACE
-		void attachLogger(LoggerInterface* const logger) { _logger = logger; }
+		void attachLogger(LoggerInterface* const logger)						{ _logger = logger;			}
 	#endif
 
 	protected:
@@ -515,9 +512,7 @@ private:
 		DebugTransitionInfos _lastTransitions;
 	#endif
 
-	#ifdef HFSM_ENABLE_LOG_INTERFACE
-		LoggerInterface* _logger;
-	#endif
+		HFSM_IF_LOGGER(LoggerInterface* _logger);
 	};
 
 	//----------------------------------------------------------------------
@@ -604,5 +599,6 @@ using Machine = M<TContext, TMaxSubstitutions>;
 
 #include "detail/machine.inl"
 
-#undef HFSM_IF_STRUCTURE_REPORT
-#undef HFSM_IF_LOG_INTERFACE
+#undef HFSM_IF_STRUCTURE
+#undef HFSM_IF_LOGGER
+#undef HFSM_LOGGER_OR

@@ -903,15 +903,17 @@ public:
 //------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	#define HFSM_IF_STRUCTURE_REPORT(...)	__VA_ARGS__
+	#define HFSM_IF_STRUCTURE(...)	__VA_ARGS__
 #else
-	#define HFSM_IF_STRUCTURE_REPORT(...)
+	#define HFSM_IF_STRUCTURE(...)
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
-	#define HFSM_IF_LOG_INTERFACE(...)	__VA_ARGS__
+	#define HFSM_IF_LOGGER(...)		__VA_ARGS__
+	#define HFSM_LOGGER_OR(y, n)	y
 #else
-	#define HFSM_IF_LOG_INTERFACE(...)
+	#define HFSM_IF_LOGGER(...)
+	#define HFSM_LOGGER_OR(y, n)	n
 #endif
 
 namespace hfsm {
@@ -940,15 +942,8 @@ struct LoggerInterface {
 	};
 	virtual void record(const char* state, const Method method) = 0;
 };
-
-template <typename>
-struct MethodTraits {};
-
-template <typename TReturn, typename TState, typename... TArgs>
-struct MethodTraits<TReturn(TState::*)(TArgs...)> {
-	using Return = TReturn;
-	using State  = TState;
-};
+#else
+using LoggerInterface = void;
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1278,7 +1273,9 @@ private:
 	#endif
 
 	public:
-		_R(Context& context);
+		_R(Context& context
+		   HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr));
+
 		~_R();
 
 		void update();
@@ -1302,12 +1299,12 @@ private:
 		inline bool isResumable();
 
 	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-		const MachineStructure& structure() const									{ return _structure;		};
-		const MachineActivity& activity() const										{ return _activityHistory;	};
+		const MachineStructure& structure() const								{ return _structure;		};
+		const MachineActivity&  activity()  const								{ return _activityHistory;	};
 	#endif
 
 	#ifdef HFSM_ENABLE_LOG_INTERFACE
-		void attachLogger(LoggerInterface* const logger) { _logger = logger; }
+		void attachLogger(LoggerInterface* const logger)						{ _logger = logger;			}
 	#endif
 
 	protected:
@@ -1370,9 +1367,7 @@ private:
 		DebugTransitionInfos _lastTransitions;
 	#endif
 
-	#ifdef HFSM_ENABLE_LOG_INTERFACE
-		LoggerInterface* _logger;
-	#endif
+		HFSM_IF_LOGGER(LoggerInterface* _logger);
 	};
 
 	//----------------------------------------------------------------------
@@ -1607,15 +1602,17 @@ M<TC, TMS>::_B<TI>::widePostLeave(Context& context) {
 
 template <typename TC, unsigned TMS>
 template <typename TA>
-M<TC, TMS>::_R<TA>::_R(Context& context)
+M<TC, TMS>::_R<TA>::_R(Context& context
+					   HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr))
 	: _context(context)
 	, _apex(_stateRegistry, Parent(), _stateParents, _forkParents, _forkPointers)
+	HFSM_IF_LOGGER(, _logger(logger))
 {
-	HFSM_IF_STRUCTURE_REPORT(getStateNames());
+	HFSM_IF_STRUCTURE(getStateNames());
 
-	_apex.deepEnterInitial(_context);
+	_apex.deepEnterInitial(_context, HFSM_LOGGER_OR(_logger, nullptr));
 
-	HFSM_IF_STRUCTURE_REPORT(udpateActivity());
+	HFSM_IF_STRUCTURE(udpateActivity());
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1623,7 +1620,7 @@ M<TC, TMS>::_R<TA>::_R(Context& context)
 template <typename TC, unsigned TMS>
 template <typename TA>
 M<TC, TMS>::_R<TA>::~_R() {
-	_apex.deepLeave(_context);
+	_apex.deepLeave(_context, HFSM_LOGGER_OR(_logger, nullptr));
 }
 
 //------------------------------------------------------------------------------
@@ -1633,7 +1630,7 @@ template <typename TA>
 void
 M<TC, TMS>::_R<TA>::update() {
 	Control control(_requests);
-	_apex.deepUpdateAndTransition(control, _context);
+	_apex.deepUpdateAndTransition(control, _context, HFSM_LOGGER_OR(_logger, nullptr));
 
 	if (_requests.count())
 		processTransitions();
@@ -1647,7 +1644,7 @@ template <typename TEvent>
 void
 M<TC, TMS>::_R<TA>::react(const TEvent& event) {
 	Control control(_requests);
-	_apex.deepReact(event, control, _context);
+	_apex.deepReact(event, control, _context, HFSM_LOGGER_OR(_logger, nullptr));
 
 	if (_requests.count())
 		processTransitions();
@@ -1703,7 +1700,7 @@ template <typename TC, unsigned TMS>
 template <typename TA>
 void
 M<TC, TMS>::_R<TA>::processTransitions() {
-	HFSM_IF_STRUCTURE_REPORT(_lastTransitions.clear());
+	HFSM_IF_STRUCTURE(_lastTransitions.clear());
 
 	for (unsigned i = 0;
 		i < MaxSubstitutions && _requests.count();
@@ -1712,7 +1709,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 		unsigned changeCount = 0;
 
 		for (const auto& request : _requests) {
-			HFSM_IF_STRUCTURE_REPORT(_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Update));
+			HFSM_IF_STRUCTURE(_lastTransitions << DebugTransitionInfo(request, DebugTransitionInfo::Update));
 
 			switch (request.type) {
 			case Transition::Restart:
@@ -1734,7 +1731,7 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 
 		if (changeCount > 0) {
 			Control substitutionControl(_requests);
-			_apex.deepForwardSubstitute(substitutionControl, _context);
+			_apex.deepForwardSubstitute(substitutionControl, _context, HFSM_LOGGER_OR(_logger, nullptr));
 
 		#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 			for (const auto& request : _requests)
@@ -1743,9 +1740,9 @@ M<TC, TMS>::_R<TA>::processTransitions() {
 		}
 	}
 
-	_apex.deepChangeToRequested(_context);
+	_apex.deepChangeToRequested(_context, HFSM_LOGGER_OR(_logger, nullptr));
 
-	HFSM_IF_STRUCTURE_REPORT(udpateActivity());
+	HFSM_IF_STRUCTURE(udpateActivity());
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1926,35 +1923,38 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
 
-	inline void deepForwardSubstitute(Control&, Context&)					{}
-	inline bool deepSubstitute(Control& control, Context& context);
+	inline void deepForwardSubstitute	(Control&,		   Context&,		 LoggerInterface* const)		{}
+	inline bool deepSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
 
-	inline void deepEnterInitial(Context& context);
-	inline void deepEnter(Context& context);
+	inline void deepEnterInitial		(				   Context& context, LoggerInterface* const logger);
+	inline void deepEnter				(				   Context& context, LoggerInterface* const logger);
 
-	inline bool deepUpdateAndTransition(Control& control, Context& context);
-	inline void deepUpdate(Context& context);
+	inline bool deepUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepUpdate				(				   Context& context, LoggerInterface* const logger);
 
 	template <typename TEvent>
-	inline void deepReact(const TEvent& event, Control& control, Context& context);
+	inline void deepReact				(const TEvent& event,
+										 Control& control, Context& context, LoggerInterface* const logger);
 
-	inline void deepLeave(Context& context);
+	inline void deepLeave				(				   Context& context, LoggerInterface* const logger);
 
-	inline void deepForwardRequest(const enum Transition::Type)				{}
-	inline void deepRequestRemain()											{}
-	inline void deepRequestRestart()										{}
-	inline void deepRequestResume()											{}
-	inline void deepChangeToRequested(Context&)	{}
+	inline void deepForwardRequest(const enum Transition::Type)												{}
+	inline void deepRequestRemain()																			{}
+	inline void deepRequestRestart()																		{}
+	inline void deepRequestResume()																			{}
+	inline void deepChangeToRequested	(				   Context&,		 LoggerInterface* const)		{}
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	static constexpr bool isBare() { return std::is_same<Head, _B<Bare>>::value; }
+#if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
+	static constexpr bool isBare()		{ return std::is_same<Head, _B<Bare>>::value; }
 
 	enum : unsigned {
 		NameCount	 = isBare() ? 0 : 1,
 	};
 
 	static const char* name();
+#endif
 
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	void deepGetNames(const unsigned parent,
 					  const enum StateInfo::RegionType region,
 					  const unsigned depth,
@@ -1963,6 +1963,26 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	void deepIsActive(const bool isActive,
 					  unsigned& index,
 					  MachineStructure& structure) const;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	template <typename>
+	struct MemberTraits;
+
+	template <typename TReturn, typename TState, typename... TArgs>
+	struct MemberTraits<TReturn(TState::*)(TArgs...)> {
+		using State = TState;
+	};
+
+	template <typename THead, LoggerInterface::Method>
+	typename std::enable_if< std::is_same<typename MemberTraits<THead>::State, Base>::value>::type
+	log(LoggerInterface&) const {}
+
+	template <typename THead, LoggerInterface::Method TMethod>
+	typename std::enable_if<!std::is_same<typename MemberTraits<THead>::State, Base>::value>::type
+	log(LoggerInterface& logger) const {
+		logger.record(name(), TMethod);
+	}
 #endif
 
 	Head _head;
@@ -1996,8 +2016,11 @@ template <typename TC, unsigned TMS>
 template <typename TH>
 bool
 M<TC, TMS>::_S<TH>::deepSubstitute(Control& control,
-								   Context& context)
+								   Context& context,
+								   LoggerInterface* const HFSM_IF_LOGGER(logger))
 {
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::substitute), LoggerInterface::Method::Substitute>(*logger));
+
 	const unsigned requestCountBefore = control.requestCount();
 
 	_head.widePreSubstitute(context);
@@ -2011,8 +2034,10 @@ M<TC, TMS>::_S<TH>::deepSubstitute(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH>
 void
-M<TC, TMS>::_S<TH>::deepEnterInitial(Context& context) {
-	deepEnter(context);
+M<TC, TMS>::_S<TH>::deepEnterInitial(Context& context,
+									 LoggerInterface* const logger)
+{
+	deepEnter(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2020,7 +2045,11 @@ M<TC, TMS>::_S<TH>::deepEnterInitial(Context& context) {
 template <typename TC, unsigned TMS>
 template <typename TH>
 void
-M<TC, TMS>::_S<TH>::deepEnter(Context& context) {
+M<TC, TMS>::_S<TH>::deepEnter(Context& context,
+							  LoggerInterface* const HFSM_IF_LOGGER(logger))
+{
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::enter), LoggerInterface::Method::Enter>(*logger));
+
 	_head.widePreEnter(context);
 	_head.enter(context);
 }
@@ -2031,10 +2060,15 @@ template <typename TC, unsigned TMS>
 template <typename TH>
 bool
 M<TC, TMS>::_S<TH>::deepUpdateAndTransition(Control& control,
-											Context& context)
+											Context& context,
+											LoggerInterface* const HFSM_IF_LOGGER(logger))
 {
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::update), LoggerInterface::Method::Update>(*logger));
+
 	_head.widePreUpdate(context);
 	_head.update(context);
+
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::transition), LoggerInterface::Method::Transition>(*logger));
 
 	const unsigned requestCountBefore = control.requestCount();
 
@@ -2049,7 +2083,11 @@ M<TC, TMS>::_S<TH>::deepUpdateAndTransition(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH>
 void
-M<TC, TMS>::_S<TH>::deepUpdate(Context& context) {
+M<TC, TMS>::_S<TH>::deepUpdate(Context& context,
+							   LoggerInterface* const HFSM_IF_LOGGER(logger))
+{
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::update), LoggerInterface::Method::Update>(*logger));
+
 	_head.widePreUpdate(context);
 	_head.update(context);
 }
@@ -2062,8 +2100,11 @@ template <typename TEvent>
 void
 M<TC, TMS>::_S<TH>::deepReact(const TEvent& event,
 							  Control& control,
-							  Context& context)
+							  Context& context,
+							  LoggerInterface* const HFSM_IF_LOGGER(logger))
 {
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::react<TEvent>), LoggerInterface::Method::React>(*logger));
+
 	_head.widePreReact(event, context);
 	_head.react(event, control, context);
 }
@@ -2073,14 +2114,18 @@ M<TC, TMS>::_S<TH>::deepReact(const TEvent& event,
 template <typename TC, unsigned TMS>
 template <typename TH>
 void
-M<TC, TMS>::_S<TH>::deepLeave(Context& context) {
+M<TC, TMS>::_S<TH>::deepLeave(Context& context,
+							  LoggerInterface* const HFSM_IF_LOGGER(logger))
+{
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::leave), LoggerInterface::Method::Leave>(*logger));
+
 	_head.leave(context);
 	_head.widePostLeave(context);
 }
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 
 template <typename TC, unsigned TMS>
 template <typename TH>
@@ -2109,7 +2154,11 @@ M<TC, TMS>::_S<TH>::name() {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TH>
@@ -2178,25 +2227,26 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 			Parents& forkParents,
 			ForkPointers& forkPointers);
 
-		inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context);
-		inline void wideSubstitute(const unsigned prong, Control& control, Context& context);
+		inline void wideForwardSubstitute	(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideSubstitute			(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideEnterInitial(Context& context);
-		inline void wideEnter(const unsigned prong, Context& context);
+		inline void wideEnterInitial		(										 Context& context, LoggerInterface* const logger);
+		inline void wideEnter				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
-		inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
-		inline void wideUpdate(const unsigned prong, Context& context);
+		inline bool wideUpdateAndTransition	(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideUpdate				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 		template <typename TEvent>
-		inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
+		inline void wideReact				(const unsigned prong,
+											 const TEvent& event,  Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideLeave(const unsigned prong, Context& context);
+		inline void wideLeave				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 		inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
 		inline void wideRequestRemain();
 		inline void wideRequestRestart();
 		inline void wideRequestResume(const unsigned prong);
-		inline void wideChangeToRequested(const unsigned prong, Context& context);
+		inline void wideChangeToRequested	(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
@@ -2237,25 +2287,26 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 			Parents& forkParents,
 			ForkPointers& forkPointers);
 
-		inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context);
-		inline void wideSubstitute(const unsigned prong, Control& control, Context& context);
+		inline void wideForwardSubstitute	(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideSubstitute			(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideEnterInitial(Context& context);
-		inline void wideEnter(const unsigned prong, Context& context);
+		inline void wideEnterInitial		(										 Context& context, LoggerInterface* const logger);
+		inline void wideEnter				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
-		inline bool wideUpdateAndTransition(const unsigned prong, Control& control, Context& context);
-		inline void wideUpdate(const unsigned prong, Context& context);
+		inline bool wideUpdateAndTransition	(const unsigned prong, Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideUpdate				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 		template <typename TEvent>
-		inline void wideReact(const unsigned prong, const TEvent& event, Control& control, Context& context);
+		inline void wideReact				(const unsigned prong, const TEvent& event,
+																   Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideLeave(const unsigned prong, Context& context);
+		inline void wideLeave				(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 		inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
 		inline void wideRequestRemain();
 		inline void wideRequestRestart();
 		inline void wideRequestResume(const unsigned prong);
-		inline void wideChangeToRequested(const unsigned prong, Context& context);
+		inline void wideChangeToRequested	(const unsigned prong,					 Context& context, LoggerInterface* const logger);
 
 	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
@@ -2293,25 +2344,26 @@ struct M<TContext, TMaxSubstitutions>::_C final {
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
 
-	inline void deepForwardSubstitute(Control& control, Context& context);
-	inline void deepSubstitute(Control& control, Context& context);
+	inline void deepForwardSubstitute	(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
 
-	inline void deepEnterInitial(Context& context);
-	inline void deepEnter(Context& context);
+	inline void deepEnterInitial		(				   Context& context, LoggerInterface* const logger);
+	inline void deepEnter				(				   Context& context, LoggerInterface* const logger);
 
-	inline bool deepUpdateAndTransition(Control& control, Context& context);
-	inline void deepUpdate(Context& context);
+	inline bool deepUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepUpdate				(				   Context& context, LoggerInterface* const logger);
 
 	template <typename TEvent>
-	inline void deepReact(const TEvent& event, Control& control, Context& context);
+	inline void deepReact				(const TEvent& event,
+										 Control& control, Context& context, LoggerInterface* const logger);
 
-	inline void deepLeave(Context& context);
+	inline void deepLeave				(				   Context& context, LoggerInterface* const logger);
 
 	inline void deepForwardRequest(const enum Transition::Type transition);
 	inline void deepRequestRemain();
 	inline void deepRequestRestart();
 	inline void deepRequestResume();
-	inline void deepChangeToRequested(Context& context);
+	inline void deepChangeToRequested	(				   Context& context, LoggerInterface* const logger);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	enum : unsigned {
@@ -2360,14 +2412,15 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepForwardSubstitute(Control& control,
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(_fork.requested != INVALID_INDEX);
 
 	if (_fork.requested == _fork.active)
-		_subStates.wideForwardSubstitute(_fork.requested, control, context);
+		_subStates.wideForwardSubstitute(_fork.requested, control, context, logger);
 	else
-		_subStates.wideSubstitute(_fork.requested, control, context);
+		_subStates.wideSubstitute		(_fork.requested, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2376,13 +2429,14 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
 M<TC, TMS>::_C<TH, TS...>::deepSubstitute(Control& control,
-										  Context& context)
+										  Context& context,
+										  LoggerInterface* const logger)
 {
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.requested != INVALID_INDEX);
 
-	if (!_state.deepSubstitute(control, context))
-		_subStates.wideSubstitute(_fork.requested, control, context);
+	if (!_state	  .deepSubstitute(				   control, context, logger))
+		_subStates.wideSubstitute(_fork.requested, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2390,7 +2444,9 @@ M<TC, TMS>::_C<TH, TS...>::deepSubstitute(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context,
+											LoggerInterface* const logger)
+{
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX &&
 		   _fork.requested == INVALID_INDEX);
@@ -2398,8 +2454,8 @@ M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context) {
 	HSFM_IF_DEBUG(_fork.activeType = TypeInfo::get<typename SubStates::Initial::Head>());
 	_fork.active = 0;
 
-	_state.deepEnter(context);
-	_subStates.wideEnterInitial(context);
+	_state	  .deepEnter	   (context, logger);
+	_subStates.wideEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2407,7 +2463,9 @@ M<TC, TMS>::_C<TH, TS...>::deepEnterInitial(Context& context) {
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepEnter(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepEnter(Context& context,
+									 LoggerInterface* const logger)
+{
 	assert(_fork.active	   == INVALID_INDEX &&
 		   _fork.requested != INVALID_INDEX);
 
@@ -2417,8 +2475,8 @@ M<TC, TMS>::_C<TH, TS...>::deepEnter(Context& context) {
 	HSFM_IF_DEBUG(_fork.requestedType.clear());
 	_fork.requested = INVALID_INDEX;
 
-	_state.deepEnter(context);
-	_subStates.wideEnter(_fork.active, context);
+	_state	  .deepEnter(			   context, logger);
+	_subStates.wideEnter(_fork.active, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2427,16 +2485,17 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 bool
 M<TC, TMS>::_C<TH, TS...>::deepUpdateAndTransition(Control& control,
-												   Context& context)
+												   Context& context,
+												   LoggerInterface* const logger)
 {
 	assert(_fork.active != INVALID_INDEX);
 
-	if (_state.deepUpdateAndTransition(control, context)) {
-		_subStates.wideUpdate(_fork.active, context);
+	if (_state.deepUpdateAndTransition(control, context, logger)) {
+		_subStates.wideUpdate(_fork.active, context, logger);
 
 		return true;
 	} else
-		return _subStates.wideUpdateAndTransition(_fork.active, control, context);
+		return _subStates.wideUpdateAndTransition(_fork.active, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2444,11 +2503,13 @@ M<TC, TMS>::_C<TH, TS...>::deepUpdateAndTransition(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepUpdate(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepUpdate(Context& context,
+									  LoggerInterface* const logger)
+{
 	assert(_fork.active != INVALID_INDEX);
 
-	_state.deepUpdate(context);
-	_subStates.wideUpdate(_fork.active, context);
+	_state	  .deepUpdate(				context, logger);
+	_subStates.wideUpdate(_fork.active, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2459,12 +2520,13 @@ template <typename TEvent>
 void
 M<TC, TMS>::_C<TH, TS...>::deepReact(const TEvent& event,
 									 Control& control,
-									 Context& context)
+									 Context& context,
+									 LoggerInterface* const logger)
 {
 	assert(_fork.active != INVALID_INDEX);
 
-	_state.deepReact(event, control, context);
-	_subStates.wideReact(_fork.active, event, control, context);
+	_state	  .deepReact(			   event, control, context, logger);
+	_subStates.wideReact(_fork.active, event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2472,11 +2534,13 @@ M<TC, TMS>::_C<TH, TS...>::deepReact(const TEvent& event,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepLeave(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepLeave(Context& context,
+									 LoggerInterface* const logger)
+{
 	assert(_fork.active != INVALID_INDEX);
 
-	_subStates.wideLeave(_fork.active, context);
-	_state.deepLeave(context);
+	_subStates.wideLeave(_fork.active, context, logger);
+	_state	  .deepLeave(			   context, logger);
 
 	HSFM_IF_DEBUG(_fork.resumableType = _fork.activeType);
 	_fork.resumable = _fork.active;
@@ -2560,13 +2624,15 @@ M<TC, TMS>::_C<TH, TS...>::deepRequestResume() {
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_C<TH, TS...>::deepChangeToRequested(Context& context) {
+M<TC, TMS>::_C<TH, TS...>::deepChangeToRequested(Context& context,
+												 LoggerInterface* const logger)
+{
 	assert(_fork.active != INVALID_INDEX);
 
 	if (_fork.requested == _fork.active)
-		_subStates.wideChangeToRequested(_fork.requested, context);
+		_subStates.wideChangeToRequested(_fork.requested, context, logger);
 	else if (_fork.requested != INVALID_INDEX) {
-		_subStates.wideLeave(_fork.active, context);
+		_subStates.wideLeave(_fork.active, context, logger);
 
 		HSFM_IF_DEBUG(_fork.resumableType = _fork.activeType);
 		_fork.resumable = _fork.active;
@@ -2577,7 +2643,7 @@ M<TC, TMS>::_C<TH, TS...>::deepChangeToRequested(Context& context) {
 		HSFM_IF_DEBUG(_fork.requestedType.clear());
 		_fork.requested = INVALID_INDEX;
 
-		_subStates.wideEnter(_fork.active, context);
+		_subStates.wideEnter(_fork.active, context, logger);
 	}
 }
 
@@ -2646,12 +2712,13 @@ template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
 																	Control& control,
-																	Context& context)
+																	Context& context,
+																	LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepForwardSubstitute(control, context);
+		initial  .deepForwardSubstitute(	   control, context, logger);
 	else
-		remaining.wideForwardSubstitute(prong, control, context);
+		remaining.wideForwardSubstitute(prong, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2662,12 +2729,13 @@ template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(const unsigned prong,
 															 Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepSubstitute(control, context);
+		initial  .deepSubstitute(		control, context, logger);
 	else
-		remaining.wideSubstitute(prong, control, context);
+		remaining.wideSubstitute(prong, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2676,8 +2744,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context,
+															   LoggerInterface* const logger)
+{
+	initial.deepEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2687,12 +2757,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideEnter(const unsigned prong,
-														Context& context)
+														Context& context,
+														LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepEnter(context);
+		initial  .deepEnter(	   context, logger);
 	else
-		remaining.wideEnter(prong, context);
+		remaining.wideEnter(prong, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2703,11 +2774,12 @@ template <unsigned TN, typename TI, typename... TR>
 bool
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(const unsigned prong,
 																	  Control& control,
-																	  Context& context)
+																	  Context& context,
+																	  LoggerInterface* const logger)
 {
 	return prong == ProngIndex ?
-		initial.deepUpdateAndTransition(control, context) :
-		remaining.wideUpdateAndTransition(prong, control, context);
+		initial  .deepUpdateAndTransition(		 control, context, logger) :
+		remaining.wideUpdateAndTransition(prong, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2717,12 +2789,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(const unsigned prong,
-														 Context& context)
+														 Context& context,
+														 LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepUpdate(context);
+		initial  .deepUpdate(		context, logger);
 	else
-		remaining.wideUpdate(prong, context);
+		remaining.wideUpdate(prong, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2735,12 +2808,13 @@ void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideReact(const unsigned prong,
 														const TEvent& event,
 														Control& control,
-														Context& context)
+														Context& context,
+														LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepReact(event, control, context);
+		initial  .deepReact(	   event, control, context, logger);
 	else
-		remaining.wideReact(prong, event, control, context);
+		remaining.wideReact(prong, event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2750,12 +2824,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideLeave(const unsigned prong,
-														Context& context)
+														Context& context,
+														LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepLeave(context);
+		initial  .deepLeave(	   context, logger);
 	else
-		remaining.wideLeave(prong, context);
+		remaining.wideLeave(prong, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2768,7 +2843,7 @@ M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideForwardRequest(const unsigned 
 																 const enum Transition::Type transition)
 {
 	if (prong == ProngIndex)
-		initial.deepForwardRequest(transition);
+		initial	 .deepForwardRequest(		transition);
 	else
 		remaining.wideForwardRequest(prong, transition);
 }
@@ -2813,12 +2888,13 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(const unsigned prong,
-																	Context& context)
+																	Context& context,
+																	LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepChangeToRequested(context);
+		initial	 .deepChangeToRequested(	   context, logger);
 	else
-		remaining.wideChangeToRequested(prong, context);
+		remaining.wideChangeToRequested(prong, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2886,11 +2962,12 @@ template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 															 Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepForwardSubstitute(control, context);
+	initial.deepForwardSubstitute(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2901,11 +2978,12 @@ template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 													  Control& control,
-													  Context& context)
+													  Context& context,
+													  LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepSubstitute(control, context);
+	initial.deepSubstitute(control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2914,8 +2992,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
+M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context,
+														LoggerInterface* const logger)
+{
+	initial.deepEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2925,11 +3005,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_IF_ASSERT(prong),
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepEnter(context);
+	initial.deepEnter(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2940,11 +3021,12 @@ template <unsigned TN, typename TI>
 bool
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(const unsigned HSFM_IF_ASSERT(prong),
 															   Control& control,
-															   Context& context)
+															   Context& context,
+															   LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	return initial.deepUpdateAndTransition(control, context);
+	return initial.deepUpdateAndTransition(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2954,11 +3036,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_IF_ASSERT(prong),
-												  Context& context)
+												  Context& context,
+												  LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepUpdate(context);
+	initial.deepUpdate(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2971,11 +3054,12 @@ void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideReact(const unsigned HSFM_IF_ASSERT(prong),
 												 const TEvent& event,
 												 Control& control,
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepReact(event, control, context);
+	initial.deepReact(event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -2985,11 +3069,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_IF_ASSERT(prong),
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepLeave(context);
+	initial.deepLeave(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3045,11 +3130,12 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeToRequested(const unsigned HSFM_IF_ASSERT(prong),
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepChangeToRequested(context);
+	initial.deepChangeToRequested(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3123,26 +3209,29 @@ struct M<TContext, TMaxSubstitutions>::_O final {
 			Parents& forkParents,
 			ForkPointers& forkPointers);
 
-		inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context);
-		inline void wideForwardSubstitute(Control& control, Context& context);
-		inline void wideSubstitute(Control& control, Context& context);
+		inline void wideForwardSubstitute	(const unsigned prong,
+											 Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideEnterInitial(Context& context);
-		inline void wideEnter(Context& context);
+		inline void wideForwardSubstitute	(Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
 
-		inline bool wideUpdateAndTransition(Control& control, Context& context);
-		inline void wideUpdate(Context& context);
+		inline void wideEnterInitial		(				   Context& context, LoggerInterface* const logger);
+		inline void wideEnter				(				   Context& context, LoggerInterface* const logger);
+
+		inline bool wideUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideUpdate				(				   Context& context, LoggerInterface* const logger);
 
 		template <typename TEvent>
-		inline void wideReact(const TEvent& event, Control& control, Context& context);
+		inline void wideReact				(const TEvent& event,
+											 Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideLeave(Context& context);
+		inline void wideLeave				(				   Context& context, LoggerInterface* const logger);
 
 		inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
 		inline void wideRequestRemain();
 		inline void wideRequestRestart();
 		inline void wideRequestResume();
-		inline void wideChangeToRequested(Context& context);
+		inline void wideChangeToRequested	(				   Context& context, LoggerInterface* const logger);
 
 	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
@@ -3183,26 +3272,29 @@ struct M<TContext, TMaxSubstitutions>::_O final {
 			Parents& forkParents,
 			ForkPointers& forkPointers);
 
-		inline void wideForwardSubstitute(const unsigned prong, Control& control, Context& context);
-		inline void wideForwardSubstitute(Control& control, Context& context);
-		inline void wideSubstitute(Control& control, Context& context);
+		inline void wideForwardSubstitute	(const unsigned prong,
+											 Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideEnterInitial(Context& context);
-		inline void wideEnter(Context& context);
+		inline void wideForwardSubstitute	(Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
 
-		inline bool wideUpdateAndTransition(Control& control, Context& context);
-		inline void wideUpdate(Context& context);
+		inline void wideEnterInitial		(				   Context& context, LoggerInterface* const logger);
+		inline void wideEnter				(				   Context& context, LoggerInterface* const logger);
+
+		inline bool wideUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
+		inline void wideUpdate				(				   Context& context, LoggerInterface* const logger);
 
 		template <typename TEvent>
-		inline void wideReact(const TEvent& event, Control& control, Context& context);
+		inline void wideReact				(const TEvent& event,
+											 Control& control, Context& context, LoggerInterface* const logger);
 
-		inline void wideLeave(Context& context);
+		inline void wideLeave				(				   Context& context, LoggerInterface* const logger);
 
 		inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
 		inline void wideRequestRemain();
 		inline void wideRequestRestart();
 		inline void wideRequestResume();
-		inline void wideChangeToRequested(Context& context);
+		inline void wideChangeToRequested	(				   Context& context, LoggerInterface* const logger);
 
 	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 		enum : unsigned {
@@ -3240,25 +3332,26 @@ struct M<TContext, TMaxSubstitutions>::_O final {
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
 
-	inline void deepForwardSubstitute(Control& control, Context& context);
-	inline void deepSubstitute(Control& control, Context& context);
+	inline void deepForwardSubstitute	(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
 
-	inline void deepEnterInitial(Context& context);
-	inline void deepEnter(Context& context);
+	inline void deepEnterInitial		(				   Context& context, LoggerInterface* const logger);
+	inline void deepEnter				(				   Context& context, LoggerInterface* const logger);
 
-	inline bool deepUpdateAndTransition(Control& control, Context& context);
-	inline void deepUpdate(Context& context);
+	inline bool deepUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepUpdate				(				   Context& context, LoggerInterface* const logger);
 
 	template <typename TEvent>
-	inline void deepReact(const TEvent& event, Control& control, Context& context);
+	inline void deepReact				(const TEvent& event,
+										 Control& control, Context& context, LoggerInterface* const logger);
 
-	inline void deepLeave(Context& context);
+	inline void deepLeave				(				   Context& context, LoggerInterface* const logger);
 
 	inline void deepForwardRequest(const enum Transition::Type transition);
 	inline void deepRequestRemain();
 	inline void deepRequestRestart();
 	inline void deepRequestResume();
-	inline void deepChangeToRequested(Context& context);
+	inline void deepChangeToRequested	(				   Context& context, LoggerInterface* const logger);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	enum : unsigned {
@@ -3308,15 +3401,16 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
 M<TC, TMS>::_O<TH, TS...>::deepForwardSubstitute(Control& control,
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX);
 
 	if (_fork.requested != INVALID_INDEX)
-		_subStates.wideForwardSubstitute(_fork.requested, control, context);
+		_subStates.wideForwardSubstitute(_fork.requested, control, context, logger);
 	else
-		_subStates.wideForwardSubstitute(control, context);
+		_subStates.wideForwardSubstitute(				  control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3325,13 +3419,14 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
 M<TC, TMS>::_O<TH, TS...>::deepSubstitute(Control& control,
-										  Context& context)
+										  Context& context,
+										  LoggerInterface* const logger)
 {
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX);
 
-	if (!_state.deepSubstitute(control, context))
-		_subStates.wideSubstitute(control, context);
+	if (!_state	  .deepSubstitute(control, context, logger))
+		_subStates.wideSubstitute(control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3339,13 +3434,15 @@ M<TC, TMS>::_O<TH, TS...>::deepSubstitute(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_O<TH, TS...>::deepEnterInitial(Context& context) {
+M<TC, TMS>::_O<TH, TS...>::deepEnterInitial(Context& context,
+											LoggerInterface* const logger)
+{
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX &&
 		   _fork.requested == INVALID_INDEX);
 
-	_state.deepEnter(context);
-	_subStates.wideEnterInitial(context);
+	_state	  .deepEnter	   (context, logger);
+	_subStates.wideEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3353,12 +3450,14 @@ M<TC, TMS>::_O<TH, TS...>::deepEnterInitial(Context& context) {
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_O<TH, TS...>::deepEnter(Context& context) {
+M<TC, TMS>::_O<TH, TS...>::deepEnter(Context& context,
+									 LoggerInterface* const logger)
+{
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX);
 
-	_state.deepEnter(context);
-	_subStates.wideEnter(context);
+	_state	  .deepEnter(context, logger);
+	_subStates.wideEnter(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3367,17 +3466,18 @@ template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 bool
 M<TC, TMS>::_O<TH, TS...>::deepUpdateAndTransition(Control& control,
-												   Context& context)
+												   Context& context,
+												   LoggerInterface* const logger)
 {
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX);
 
-	if (_state.deepUpdateAndTransition(control, context)) {
-		_subStates.wideUpdate(context);
+	if (_state.deepUpdateAndTransition(control, context, logger)) {
+		_subStates.wideUpdate(context, logger);
 
 		return true;
 	} else
-		return _subStates.wideUpdateAndTransition(control, context);
+		return _subStates.wideUpdateAndTransition(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3385,12 +3485,14 @@ M<TC, TMS>::_O<TH, TS...>::deepUpdateAndTransition(Control& control,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_O<TH, TS...>::deepUpdate(Context& context) {
+M<TC, TMS>::_O<TH, TS...>::deepUpdate(Context& context,
+									  LoggerInterface* const logger)
+{
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX);
 
-	_state.deepUpdate(context);
-	_subStates.wideUpdate(context);
+	_state	  .deepUpdate(context, logger);
+	_subStates.wideUpdate(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3401,13 +3503,14 @@ template <typename TEvent>
 void
 M<TC, TMS>::_O<TH, TS...>::deepReact(const TEvent& event,
 									 Control& control,
-									 Context& context)
+									 Context& context,
+									 LoggerInterface* const logger)
 {
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX);
 
-	_state.deepReact(event, control, context);
-	_subStates.wideReact(event, control, context);
+	_state	  .deepReact(event, control, context, logger);
+	_subStates.wideReact(event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3415,12 +3518,14 @@ M<TC, TMS>::_O<TH, TS...>::deepReact(const TEvent& event,
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_O<TH, TS...>::deepLeave(Context& context) {
+M<TC, TMS>::_O<TH, TS...>::deepLeave(Context& context,
+									 LoggerInterface* const logger)
+{
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX);
 
-	_subStates.wideLeave(context);
-	_state.deepLeave(context);
+	_subStates.wideLeave(context, logger);
+	_state	  .deepLeave(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3494,11 +3599,13 @@ M<TC, TMS>::_O<TH, TS...>::deepRequestResume() {
 template <typename TC, unsigned TMS>
 template <typename TH, typename... TS>
 void
-M<TC, TMS>::_O<TH, TS...>::deepChangeToRequested(Context& context) {
+M<TC, TMS>::_O<TH, TS...>::deepChangeToRequested(Context& context,
+												 LoggerInterface* const logger)
+{
 	assert(_fork.active    == INVALID_INDEX &&
 		   _fork.resumable == INVALID_INDEX);
 
-	_subStates.wideChangeToRequested(context);
+	_subStates.wideChangeToRequested(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3566,12 +3673,13 @@ template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(const unsigned prong,
 																	Control& control,
-																	Context& context)
+																	Context& context,
+																	LoggerInterface* const logger)
 {
 	if (prong == ProngIndex)
-		initial.deepForwardSubstitute(control, context);
+		initial  .deepForwardSubstitute(	   control, context, logger);
 	else
-		remaining.wideForwardSubstitute(prong, control, context);
+		remaining.wideForwardSubstitute(prong, control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3581,10 +3689,11 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideForwardSubstitute(Control& control,
-																	Context& context)
+																	Context& context,
+																	LoggerInterface* const logger)
 {
-	initial.deepForwardSubstitute(control, context);
-	remaining.wideForwardSubstitute(control, context);
+	initial	 .deepForwardSubstitute(control, context, logger);
+	remaining.wideForwardSubstitute(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3594,10 +3703,11 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideSubstitute(Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
-	initial.deepSubstitute(control, context);
-	remaining.wideSubstitute(control, context);
+	initial	 .deepSubstitute(control, context, logger);
+	remaining.wideSubstitute(control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3606,9 +3716,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
-	remaining.wideEnterInitial(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnterInitial(Context& context,
+															   LoggerInterface* const logger)
+{
+	initial  .deepEnterInitial(context, logger);
+	remaining.wideEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3617,9 +3729,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnter(Context& context) {
-	initial.deepEnter(context);
-	remaining.wideEnter(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideEnter(Context& context,
+														LoggerInterface* const logger)
+{
+	initial  .deepEnter(context, logger);
+	remaining.wideEnter(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3629,10 +3743,11 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 bool
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdateAndTransition(Control& control,
-																	  Context& context)
+																	  Context& context,
+																	  LoggerInterface* const logger)
 {
-	return initial.deepUpdateAndTransition(control, context)
-		|| remaining.wideUpdateAndTransition(control, context);
+	return initial  .deepUpdateAndTransition(control, context, logger)
+		|| remaining.wideUpdateAndTransition(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3641,9 +3756,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(Context& context) {
-	initial.deepUpdate(context);
-	remaining.wideUpdate(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideUpdate(Context& context,
+														 LoggerInterface* const logger)
+{
+	initial  .deepUpdate(context, logger);
+	remaining.wideUpdate(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3655,10 +3772,11 @@ template <typename TEvent>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideReact(const TEvent& event,
 														Control& control,
-														Context& context)
+														Context& context,
+														LoggerInterface* const logger)
 {
-	initial.deepReact(event, control, context);
-	remaining.wideReact(event, control, context);
+	initial  .deepReact(event, control, context, logger);
+	remaining.wideReact(event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3667,9 +3785,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideLeave(Context& context) {
-	initial.deepLeave(context);
-	remaining.wideLeave(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideLeave(Context& context,
+														LoggerInterface* const logger)
+{
+	initial	 .deepLeave(context, logger);
+	remaining.wideLeave(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3729,9 +3849,11 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI, typename... TR>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(Context& context) {
-	initial.deepChangeToRequested(context);
-	remaining.wideChangeToRequested(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI, TR...>::wideChangeToRequested(Context& context,
+																	LoggerInterface* const logger)
+{
+	initial	 .deepChangeToRequested(context, logger);
+	remaining.wideChangeToRequested(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3799,11 +3921,12 @@ template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_IF_ASSERT(prong),
 															 Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
 	assert(prong == ProngIndex);
 
-	initial.deepForwardSubstitute(control, context);
+	initial.deepForwardSubstitute(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3813,9 +3936,10 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(Control& control,
-															 Context& context)
+															 Context& context,
+															 LoggerInterface* const logger)
 {
-	initial.deepForwardSubstitute(control, context);
+	initial.deepForwardSubstitute(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3825,9 +3949,10 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideSubstitute(Control& control,
-													  Context& context)
+													  Context& context,
+													  LoggerInterface* const logger)
 {
-	initial.deepSubstitute(control, context);
+	initial.deepSubstitute(control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3836,8 +3961,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context) {
-	initial.deepEnterInitial(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context,
+														LoggerInterface* const logger)
+{
+	initial.deepEnterInitial(context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3846,8 +3973,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnter(Context& context) {
-	initial.deepEnter(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideEnter(Context& context,
+												 LoggerInterface* const logger)
+{
+	initial.deepEnter(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3857,9 +3986,10 @@ template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 bool
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(Control& control,
-															   Context& context)
+															   Context& context,
+															   LoggerInterface* const logger)
 {
-	return initial.deepUpdateAndTransition(control, context);
+	return initial.deepUpdateAndTransition(control, context, logger);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3868,8 +3998,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdate(Context& context) {
-	initial.deepUpdate(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideUpdate(Context& context,
+												  LoggerInterface* const logger)
+{
+	initial.deepUpdate(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3881,9 +4013,10 @@ template <typename TEvent>
 void
 M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideReact(const TEvent& event,
 												 Control& control,
-												 Context& context)
+												 Context& context,
+												 LoggerInterface* const logger)
 {
-	initial.deepReact(event, control, context);
+	initial.deepReact(event, control, context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3892,8 +4025,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideLeave(Context& context) {
-	initial.deepLeave(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideLeave(Context& context,
+												 LoggerInterface* const logger)
+{
+	initial.deepLeave(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3949,8 +4084,10 @@ template <typename TC, unsigned TMS>
 template <typename T, typename... TS>
 template <unsigned TN, typename TI>
 void
-M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideChangeToRequested(Context& context) {
-	initial.deepChangeToRequested(context);
+M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideChangeToRequested(Context& context,
+															 LoggerInterface* const logger)
+{
+	initial.deepChangeToRequested(context, logger);
 }
 
 //------------------------------------------------------------------------------
@@ -3987,5 +4124,6 @@ M<TC, TMS>::_O<T, TS...>::Sub<TN, TI>::wideIsActive(const bool isActive,
 
 }
 
-#undef HFSM_IF_STRUCTURE_REPORT
-#undef HFSM_IF_LOG_INTERFACE
+#undef HFSM_IF_STRUCTURE
+#undef HFSM_IF_LOGGER
+#undef HFSM_LOGGER_OR

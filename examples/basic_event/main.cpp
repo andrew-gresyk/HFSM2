@@ -21,7 +21,9 @@
 //	  EnableIfHandler: reacting to a <non-class event>
 //	    changed to Target
 
+// optional: enable FSM structure report in debugger
 #define HFSM_ENABLE_STRUCTURE_REPORT
+
 #include <hfsm/machine_single.hpp>
 
 #include <iostream>
@@ -146,11 +148,27 @@ main() {
 	std::cout << "sending PrimaryEvent:\n";
 	machine.react(PrimaryEvent{});
 
+	// output:
+	//	ConcreteHandler: reacting to PrimaryEvent
+	//	TemplateHandler: reacting to TEvent
+	//	EnableIfHandler: reacting to a <class event>
+
 	std::cout << "\nsending SecondaryEvent:\n";
 	machine.react(SecondaryEvent{});
 
+	// output:
+	//	ConcreteHandler: reacting to SecondaryEvent
+	//	TemplateHandler: reacting to TEvent
+	//	EnableIfHandler: reacting to a <class event>
+
 	std::cout << "\nsending TransitionEvent (aka 'char'):\n";
 	machine.react(TransitionEvent{});
+
+	// output:
+	//	Reactive: reacting to TransitionEvent (aka 'char')
+	//	TemplateHandler: reacting to TEvent
+	//	EnableIfHandler: reacting to a <non-class event>
+	//	  changed to Target
 
 	std::cout<< std::endl;
 	return 0;
