@@ -1,12 +1,17 @@
+[![Standard](https://img.shields.io/badge/c%2B%2B-14/17/20-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Build status](https://ci.appveyor.com/api/projects/status/49gona9jtghvvi6g?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/hfsm)
+[![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM)
+
 # HFSM (Hierarchical Finite State Machine) Framework
 
 Header-only heriarchical FSM framework in C++14, completely static (no dynamic allocations), built with variadic templates.
 
 ## Compiler Support
 
-- Visual Studio 14.u3, 15.7 [![Build status](https://ci.appveyor.com/api/projects/status/49gona9jtghvvi6g?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/hfsm)
-- GCC 4.9, 5.4, 6.3, 7.3, 8.0 [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM)
-- Clang 3.6, 3.7, 3.8, 3.9, 4.0, 5.0, 6.0 [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM)
+- Visual Studio 14.u3, 15.7
+- GCC 4.9, 5.4, 6.3, 7.3, 8.0
+- Clang 3.6, 3.7, 3.8, 3.9, 4.0, 5.0, 6.0
 
 ---
 
