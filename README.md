@@ -4,9 +4,9 @@ Header-only heriarchical FSM framework in C++14, completely static (no dynamic a
 
 ## Compiler Support
 
-[![Build status](https://ci.appveyor.com/api/projects/status/github/andrew-gresyk/HFSM?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/HFSM)- Visual Studio 14.u3, 15.7
-[![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM) - GCC 4.9, 5.4, 6.3, 7.3, 8.0
-- Clang 3.6, 3.7, 3.8, 3.9, 4.0, 5.0, 6.0
+- Visual Studio 14.u3, 15.7 [![Build status](https://ci.appveyor.com/api/projects/status/49gona9jtghvvi6g?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/hfsm)
+- GCC 4.9, 5.4, 6.3, 7.3, 8.0 [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM)
+- Clang 3.6, 3.7, 3.8, 3.9, 4.0, 5.0, 6.0 [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM)
 
 ---
 
