@@ -1,0 +1,18 @@
+version: "{build}"
+
+image:
+- Visual Studio 2015
+- Visual Studio 2017
+
+platform:
+- Win32
+- x64
+
+configuration:
+- Debug
+- Release
+
+build:
+  project: projects\visual-studio\HFSM.sln
+  parallel: true
+  verbosity: normal
