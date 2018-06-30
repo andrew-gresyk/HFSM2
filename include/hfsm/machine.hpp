@@ -80,8 +80,27 @@ struct LoggerInterface {
 		React,
 		Leave,
 	};
-	virtual void record(const char* state, const Method method) = 0;
+
+	virtual void record(const std::type_index& state,
+						const char* const stateName,
+						const Method method,
+						const char* const methodName) = 0;
 };
+
+static const char* methodName(const LoggerInterface::Method method) {
+	switch (method) {
+		case LoggerInterface::Method::Substitute:	return "Substitute"	"()";
+		case LoggerInterface::Method::Enter:		return "Enter"		"()";
+		case LoggerInterface::Method::Update:		return "Update"		"()";
+		case LoggerInterface::Method::Transition:	return "Transition"	"()";
+		case LoggerInterface::Method::React:		return "React"		"()";
+		case LoggerInterface::Method::Leave:		return "Leave"		"()";
+
+		default:
+			HSFM_BREAK();
+			return nullptr;
+	}
+}
 #else
 using LoggerInterface = void;
 #endif

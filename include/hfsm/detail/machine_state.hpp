@@ -44,16 +44,16 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	inline void deepChangeToRequested	(				   Context&,		 LoggerInterface* const)		{}
 
 #if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
-	static constexpr bool isBare()		{ return std::is_same<Head, _B<Bare>>::value; }
+	static constexpr bool isBare()		{ return std::is_same<Head, Base>::value; }
 
 	enum : unsigned {
 		NameCount	 = isBare() ? 0 : 1,
 	};
-
-	static const char* name();
 #endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	static const char* name();
+
 	void deepGetNames(const unsigned parent,
 					  const enum StateInfo::RegionType region,
 					  const unsigned depth,
@@ -65,6 +65,8 @@ struct M<TContext, TMaxSubstitutions>::_S {
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
+	static const char* fullName();
+
 	template <typename>
 	struct MemberTraits;
 
@@ -73,14 +75,14 @@ struct M<TContext, TMaxSubstitutions>::_S {
 		using State = TState;
 	};
 
-	template <typename THead, LoggerInterface::Method>
-	typename std::enable_if< std::is_same<typename MemberTraits<THead>::State, Base>::value>::type
+	template <typename TMethodType, LoggerInterface::Method>
+	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Base>::value>::type
 	log(LoggerInterface&) const {}
 
-	template <typename THead, LoggerInterface::Method TMethod>
-	typename std::enable_if<!std::is_same<typename MemberTraits<THead>::State, Base>::value>::type
+	template <typename TMethodType, LoggerInterface::Method TMethodId>
+	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Base>::value>::type
 	log(LoggerInterface& logger) const {
-		logger.record(name(), TMethod);
+		logger.record(typeid(Head), fullName(), TMethodId, methodName(TMethodId));
 	}
 #endif
 

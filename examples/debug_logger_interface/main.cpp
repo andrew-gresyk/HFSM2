@@ -8,36 +8,35 @@
 //	--- ctor: ---
 //
 //	Top::Enter()
-//	From::Enter()
+//	Top::From::Enter()
 //
 //	-- update: --
 //
 //	Top::Update()
 //	Top::Transition()
-//	From::Update()
-//	From::Transition()
+//	Top::From::Update()
+//	Top::From::Transition()
 //
 //	-- react: ---
 //
 //	Top::React()
-//	From::React()
-//	To::Substitute()
-//	From::Leave()
-//	To::Enter()
+//	Top::From::React()
+//	Top::To::Substitute()
+//	Top::From::Leave()
+//	Top::To::Enter()
 //
 //	-- detach: --
 //
 //
 //	--- dtor: ---
 //
-//	To::Leave()
+//	Top::To::Leave()
 //	Top::Leave()
 //
 //	--- done! ---
 
 // enable logger functionality
 #define HFSM_ENABLE_LOG_INTERFACE
-
 #include <hfsm/machine_single.hpp>
 
 #include <iostream>
@@ -56,15 +55,12 @@ struct Logger
 	: hfsm::LoggerInterface
 {
 	// hfsm::LoggerInterface
-	void record(const char* state, const Method method) override {
-		switch (method) {
-			case Method::Substitute:	std::cout << state << "::Substitute" "()\n"; break;
-			case Method::Enter:			std::cout << state << "::Enter"		 "()\n"; break;
-			case Method::Update:		std::cout << state << "::Update"	 "()\n"; break;
-			case Method::Transition:	std::cout << state << "::Transition" "()\n"; break;
-			case Method::React:			std::cout << state << "::React"		 "()\n"; break;
-			case Method::Leave:			std::cout << state << "::Leave"		 "()\n"; break;
-		}
+	void record(const std::type_index& /*state*/,
+				const char* const stateName,
+				const Method /*method*/,
+				const char* const methodName) override
+	{
+		std::cout << stateName << "::" << methodName << "\n";
 	}
 };
 
@@ -143,7 +139,7 @@ int main() {
 
 		// output:
 		//	Top::Enter()
-		//	From::Enter()
+		//	Top::From::Enter()
 
 		std::cout << "\n-- update: --\n\n";
 
@@ -153,8 +149,8 @@ int main() {
 		// output:
 		//	Top::Update()
 		//	Top::Transition()
-		//	From::Update()
-		//	From::Transition()
+		//	Top::From::Update()
+		//	Top::From::Transition()
 
 		std::cout << "\n-- react: ---\n\n";
 
@@ -162,10 +158,10 @@ int main() {
 
 		// output:
 		//	Top::React()
-		//	From::React()
-		//	To::Substitute()
-		//	From::Leave()
-		//	To::Enter()
+		//	Top::From::React()
+		//	Top::To::Substitute()
+		//	Top::From::Leave()
+		//	Top::To::Enter()
 
 		std::cout << "\n-- detach: --\n\n";
 
@@ -184,7 +180,7 @@ int main() {
 	}
 
 	// output:
-	//	To::Leave()
+	//	Top::To::Leave()
 	//	Top::Leave()
 
 	std::cout << "\n--- done! ---\n\n";

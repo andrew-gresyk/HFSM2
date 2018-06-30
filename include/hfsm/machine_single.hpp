@@ -940,8 +940,27 @@ struct LoggerInterface {
 		React,
 		Leave,
 	};
-	virtual void record(const char* state, const Method method) = 0;
+
+	virtual void record(const std::type_index& state,
+						const char* const stateName,
+						const Method method,
+						const char* const methodName) = 0;
 };
+
+static const char* methodName(const LoggerInterface::Method method) {
+	switch (method) {
+		case LoggerInterface::Method::Substitute:	return "Substitute"	"()";
+		case LoggerInterface::Method::Enter:		return "Enter"		"()";
+		case LoggerInterface::Method::Update:		return "Update"		"()";
+		case LoggerInterface::Method::Transition:	return "Transition"	"()";
+		case LoggerInterface::Method::React:		return "React"		"()";
+		case LoggerInterface::Method::Leave:		return "Leave"		"()";
+
+		default:
+			HSFM_BREAK();
+			return nullptr;
+	}
+}
 #else
 using LoggerInterface = void;
 #endif
@@ -1945,16 +1964,16 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	inline void deepChangeToRequested	(				   Context&,		 LoggerInterface* const)		{}
 
 #if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
-	static constexpr bool isBare()		{ return std::is_same<Head, _B<Bare>>::value; }
+	static constexpr bool isBare()		{ return std::is_same<Head, Base>::value; }
 
 	enum : unsigned {
 		NameCount	 = isBare() ? 0 : 1,
 	};
-
-	static const char* name();
 #endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	static const char* name();
+
 	void deepGetNames(const unsigned parent,
 					  const enum StateInfo::RegionType region,
 					  const unsigned depth,
@@ -1966,6 +1985,8 @@ struct M<TContext, TMaxSubstitutions>::_S {
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
+	static const char* fullName();
+
 	template <typename>
 	struct MemberTraits;
 
@@ -1974,14 +1995,14 @@ struct M<TContext, TMaxSubstitutions>::_S {
 		using State = TState;
 	};
 
-	template <typename THead, LoggerInterface::Method>
-	typename std::enable_if< std::is_same<typename MemberTraits<THead>::State, Base>::value>::type
+	template <typename TMethodType, LoggerInterface::Method>
+	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Base>::value>::type
 	log(LoggerInterface&) const {}
 
-	template <typename THead, LoggerInterface::Method TMethod>
-	typename std::enable_if<!std::is_same<typename MemberTraits<THead>::State, Base>::value>::type
+	template <typename TMethodType, LoggerInterface::Method TMethodId>
+	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Base>::value>::type
 	log(LoggerInterface& logger) const {
-		logger.record(name(), TMethod);
+		logger.record(typeid(Head), fullName(), TMethodId, methodName(TMethodId));
 	}
 #endif
 
@@ -2125,7 +2146,7 @@ M<TC, TMS>::_S<TH>::deepLeave(Context& context,
 
 //------------------------------------------------------------------------------
 
-#if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TH>
@@ -2154,11 +2175,7 @@ M<TC, TMS>::_S<TH>::name() {
 	}
 }
 
-#endif
-
 //------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TH>
@@ -2182,6 +2199,35 @@ M<TC, TMS>::_S<TH>::deepIsActive(const bool isActive,
 {
 	if (!isBare())
 		structure[index++].isActive = isActive;
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+
+template <typename TC, unsigned TMS>
+template <typename TH>
+const char*
+M<TC, TMS>::_S<TH>::fullName() {
+	if (isBare())
+		return "";
+	else {
+		const char* const raw = TypeInfo::get<Head>()->name();
+
+		unsigned first =
+
+		#if defined(_MSC_VER)
+			raw[0] == 's' ? 7 : // Struct
+			raw[0] == 'c' ? 6 : // Class
+		#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+			raw[0] ? 1 :
+		#endif
+			0;
+
+		return raw + first;
+	}
 }
 
 #endif

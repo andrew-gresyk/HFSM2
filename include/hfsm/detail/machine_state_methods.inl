@@ -129,7 +129,7 @@ M<TC, TMS>::_S<TH>::deepLeave(Context& context,
 
 //------------------------------------------------------------------------------
 
-#if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TH>
@@ -158,11 +158,7 @@ M<TC, TMS>::_S<TH>::name() {
 	}
 }
 
-#endif
-
 //------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 template <typename TC, unsigned TMS>
 template <typename TH>
@@ -186,6 +182,35 @@ M<TC, TMS>::_S<TH>::deepIsActive(const bool isActive,
 {
 	if (!isBare())
 		structure[index++].isActive = isActive;
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+
+template <typename TC, unsigned TMS>
+template <typename TH>
+const char*
+M<TC, TMS>::_S<TH>::fullName() {
+	if (isBare())
+		return "";
+	else {
+		const char* const raw = TypeInfo::get<Head>()->name();
+
+		unsigned first =
+
+		#if defined(_MSC_VER)
+			raw[0] == 's' ? 7 : // Struct
+			raw[0] == 'c' ? 6 : // Class
+		#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+			raw[0] ? 1 :
+		#endif
+			0;
+
+		return raw + first;
+	}
 }
 
 #endif
