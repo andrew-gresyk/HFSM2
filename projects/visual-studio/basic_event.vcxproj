@@ -19,16 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\examples\basic_event\main.cpp" />
+    <Text Include="..\..\examples\advanced_event_handling\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\examples\basic_event\CMakeLists.txt" />
+    <ClCompile Include="..\..\examples\advanced_event_handling\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{AA58BDD0-0F56-43E9-816C-37BA6C30F97C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>advanced_event_handling</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

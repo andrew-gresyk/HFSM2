@@ -12,9 +12,6 @@ platform:
 - 32
 - 64
 
-before_build:
-- set CXXFLAGS="/permissive- /std:c++latest"
-
 build:
   parallel: true
   verbosity: normal
