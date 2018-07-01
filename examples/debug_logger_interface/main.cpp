@@ -7,31 +7,31 @@
 //
 //	--- ctor: ---
 //
-//	Top::Enter()
-//	Top::From::Enter()
+//	Top::enter()
+//	Top::From::enter()
 //
 //	-- update: --
 //
-//	Top::Update()
-//	Top::Transition()
-//	Top::From::Update()
-//	Top::From::Transition()
+//	Top::update()
+//	Top::transition()
+//	Top::From::update()
+//	Top::From::transition()
 //
 //	-- react: ---
 //
-//	Top::React()
-//	Top::From::React()
-//	Top::To::Substitute()
-//	Top::From::Leave()
-//	Top::To::Enter()
+//	Top::react()
+//	Top::From::react()
+//	Top::To::rubstitute()
+//	Top::From::leave()
+//	Top::To::enter()
 //
 //	-- detach: --
 //
 //
 //	--- dtor: ---
 //
-//	Top::To::Leave()
-//	Top::Leave()
+//	Top::To::leave()
+//	Top::leave()
 //
 //	--- done! ---
 
@@ -60,7 +60,7 @@ struct Logger
 				const Method /*method*/,
 				const char* const methodName) override
 	{
-		std::cout << stateName << "::" << methodName << "\n";
+		std::cout << stateName << "::" << methodName << "()\n";
 	}
 };
 
@@ -138,8 +138,8 @@ int main() {
 		FSM machine(context, &logger);
 
 		// output:
-		//	Top::Enter()
-		//	Top::From::Enter()
+		//	Top::enter()
+		//	Top::From::enter()
 
 		std::cout << "\n-- update: --\n\n";
 
@@ -147,21 +147,21 @@ int main() {
 		machine.update();
 
 		// output:
-		//	Top::Update()
-		//	Top::Transition()
-		//	Top::From::Update()
-		//	Top::From::Transition()
+		//	Top::update()
+		//	Top::transition()
+		//	Top::From::update()
+		//	Top::From::transition()
 
 		std::cout << "\n-- react: ---\n\n";
 
 		machine.react(1);
 
 		// output:
-		//	Top::React()
-		//	Top::From::React()
-		//	Top::To::Substitute()
-		//	Top::From::Leave()
-		//	Top::To::Enter()
+		//	Top::react()
+		//	Top::From::react()
+		//	Top::To::rubstitute()
+		//	Top::From::leave()
+		//	Top::To::enter()
 
 		std::cout << "\n-- detach: --\n\n";
 
@@ -180,8 +180,8 @@ int main() {
 	}
 
 	// output:
-	//	Top::To::Leave()
-	//	Top::Leave()
+	//	Top::To::leave()
+	//	Top::leave()
 
 	std::cout << "\n--- done! ---\n\n";
 
