@@ -21,7 +21,7 @@
 //
 //	Top::react()
 //	Top::From::react()
-//	Top::To::rubstitute()
+//	Top::To::substitute()
 //	Top::From::leave()
 //	Top::To::enter()
 //
@@ -159,7 +159,7 @@ int main() {
 		// output:
 		//	Top::react()
 		//	Top::From::react()
-		//	Top::To::rubstitute()
+		//	Top::To::substitute()
 		//	Top::From::leave()
 		//	Top::To::enter()
 
