@@ -47,7 +47,7 @@ install(
 
 # Install hfsm headers.
 install(
-  DIRECTORY "${PROJECT_NAME}"
+  DIRECTORY "include/${PROJECT_NAME}"
   DESTINATION "${include_install_dir}"
 )
 
