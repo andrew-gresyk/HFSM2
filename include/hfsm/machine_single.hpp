@@ -2124,7 +2124,7 @@ M<TC, TMS>::_S<TH>::deepReact(const TEvent& event,
 							  Context& context,
 							  LoggerInterface* const HFSM_IF_LOGGER(logger))
 {
-	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::react<TEvent>), LoggerInterface::Method::React>(*logger));
+	HFSM_IF_LOGGER(if (logger) log<decltype(&Head::template react<TEvent>), LoggerInterface::Method::React>(*logger));
 
 	_head.widePreReact(event, context);
 	_head.react(event, control, context);
