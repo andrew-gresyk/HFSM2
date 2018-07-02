@@ -89,12 +89,12 @@ struct LoggerInterface {
 
 static const char* methodName(const LoggerInterface::Method method) {
 	switch (method) {
-		case LoggerInterface::Method::Substitute:	return "substitute"	"()";
-		case LoggerInterface::Method::Enter:		return "enter"		"()";
-		case LoggerInterface::Method::Update:		return "update"		"()";
-		case LoggerInterface::Method::Transition:	return "transition"	"()";
-		case LoggerInterface::Method::React:		return "react"		"()";
-		case LoggerInterface::Method::Leave:		return "leave"		"()";
+		case LoggerInterface::Method::Substitute:	return "substitute";
+		case LoggerInterface::Method::Enter:		return "enter";
+		case LoggerInterface::Method::Update:		return "update";
+		case LoggerInterface::Method::Transition:	return "transition";
+		case LoggerInterface::Method::React:		return "react";
+		case LoggerInterface::Method::Leave:		return "leave";
 
 		default:
 			HSFM_BREAK();
