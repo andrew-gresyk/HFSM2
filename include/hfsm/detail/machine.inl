@@ -157,7 +157,7 @@ M<TC, TMS>::_B<TI>::widePostLeave(Context& context) {
 template <typename TC, unsigned TMS>
 template <typename TA>
 M<TC, TMS>::_R<TA>::_R(Context& context
-					   HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr))
+					   HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context(context)
 	, _apex(_stateRegistry, Parent(), _stateParents, _forkParents, _forkPointers)
 	HFSM_IF_LOGGER(, _logger(logger))
