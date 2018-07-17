@@ -140,21 +140,28 @@ M<TC, TMS>::_S<TH>::name() {
 	else {
 		const char* const raw = TypeInfo::get<Head>()->name();
 
-		unsigned first =
+	#if defined(_MSC_VER)
 
-		#if defined(_MSC_VER)
+		unsigned first =
 			raw[0] == 's' ? 7 : // Struct
 			raw[0] == 'c' ? 6 : // Class
-		#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-			raw[0] ? 1 :
-		#endif
-			0;
+							0;
 
 		for (auto c = first; raw[c]; ++c)
 			if (raw[c] == ':')
 				first = c + 1;
 
 		return raw + first;
+
+	#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+
+		return raw;
+
+	#else
+
+		return raw;
+
+	#endif
 	}
 }
 
@@ -199,17 +206,23 @@ M<TC, TMS>::_S<TH>::fullName() {
 	else {
 		const char* const raw = TypeInfo::get<Head>()->name();
 
-		unsigned first =
+	#if defined(_MSC_VER)
 
-		#if defined(_MSC_VER)
+		unsigned first =
 			raw[0] == 's' ? 7 : // Struct
 			raw[0] == 'c' ? 6 : // Class
-		#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-			raw[0] ? 1 :
-		#endif
-			0;
-
+							0;
 		return raw + first;
+
+	#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+
+		return raw;
+
+	#else
+
+		return raw;
+
+	#endif
 	}
 }
 
