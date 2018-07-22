@@ -34,6 +34,7 @@
 #include <string.h>
 
 #include <typeindex>
+#include <utility>
 
 #include "detail/lib_utility.hpp"
 #include "detail/lib_iterator.hpp"
@@ -98,11 +99,10 @@ struct _M {
 	};
 
 	using PayloadList = TPayloadList;
-	//using Transition = TransitionT<PayloadList>;
 
 	using TransitionControl = TransitionControlT<Context, PayloadList>;
 
-	using TypeInfo = TypeInfo;
+	using TypeInfo = ::hfsm::detail::TypeInfo;
 
 	using Bare = Bare<Context, PayloadList>;
 	using Base = Base<Context, PayloadList>;

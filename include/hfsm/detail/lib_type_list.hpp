@@ -31,14 +31,6 @@ struct TypeListBuilder<NIndex, TFirst, TRest...>
 	static constexpr TypeListIndex index() {
 		return std::is_same<T, Type>::value ? INDEX : Base::template index<T>();
 	}
-
-	template <typename TCheck>
-	struct Index {
-		using Check = TCheck;
-		enum : TypeListIndex {
-			VALUE = std::is_same<Check, Type>::value ? INDEX : Base::template Index<Check>::VALUE
-		};
-	};
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -55,14 +47,6 @@ struct TypeListBuilder<NIndex, TFirst> {
 	static constexpr auto index() {
 		return std::is_same<T, Type>::value ? INDEX : INVALID_TYPE_LIST_INDEX;
 	}
-
-	template <typename TCheck>
-	struct Index {
-		using Check = TCheck;
-		enum : TypeListIndex {
-			VALUE = std::is_same<Check, Type>::value ? INDEX : INVALID_TYPE_LIST_INDEX
-		};
-	};
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,26 +70,15 @@ struct TypeListT
 		INVALID_INDEX = (IndexType) - 1,
 	};
 
-	template <typename TCheck>
-	struct Index {
-		using Check = TCheck;
-		enum : IndexType {
-			VALUE = Base::template Index<Check>::VALUE
-		};
-	};
+	template <typename T>
+	static constexpr IndexType index() {
+		return Base::template index<T>();
+	}
 
 	template <typename T>
 	static constexpr bool contains() {
 		return Base::template index<T>() != INVALID_TYPE_LIST_INDEX;
 	}
-
-	template <typename TCheck>
-	struct Contains {
-		using Check = TCheck;
-		enum : bool {
-			VALUE = Base::template Index<Check>::VALUE != INVALID_TYPE_LIST_INDEX
-		};
-	};
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -140,10 +113,10 @@ class VariantT {
 public:
 	inline VariantT() = default;
 
-	template <typename T, typename = typename std::enable_if<Types::template Contains<T>::VALUE>::type>
+	template <typename T, typename = typename std::enable_if<Types::template contains<T>()>::type>
 	inline VariantT(T* const p)
 		: _pointer(p)
-		, _index(Types::template Index<T>::VALUE)
+		, _index(Types::template index<T>())
 	{
 		assert((((uintptr_t) this) & 0x7) == 0);
 		assert(_index != INVALID_INDEX);
@@ -157,9 +130,9 @@ public:
 	}
 
 	template <typename T>
-	inline typename std::enable_if<Types::template Contains<T>::VALUE, T>::type*
+	inline typename std::enable_if<Types::template contains<T>(), T>::type*
 	get() {
-		const auto INDEX = Types::template Index<T>::VALUE;
+		const auto INDEX = Types::template index<T>();
 
 		assert(INDEX == _index);
 

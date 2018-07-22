@@ -1,8 +1,6 @@
 version: "{build}"
 
-image:
-- Visual Studio 2015
-- Visual Studio 2017
+image: Visual Studio 2017
 
 configuration:
 - Debug
@@ -13,5 +11,9 @@ platform:
 - 64
 
 build:
+  project: projects\visual-studio\HFSM.sln
   parallel: true
-  verbosity: normal
+  verbosity: minimal
+
+test_script:
+- cmd: binaries-64\test-15-Debug-64.exe

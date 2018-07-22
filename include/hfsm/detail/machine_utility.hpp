@@ -163,14 +163,6 @@ struct TransitionT {
 		COUNT
 	};
 
-	template <typename TCheck>
-	struct Contains {
-		using Check = TCheck;
-		enum : bool {
-			VALUE = PayloadList::template Contains<Check>::VALUE
-		};
-	};
-
 	inline TransitionT() = default;
 
 	inline TransitionT(const Type type_,
@@ -181,7 +173,12 @@ struct TransitionT {
 		assert(type_ < Type::COUNT);
 	}
 
-	template <typename T, typename = typename std::enable_if<Contains<T>::VALUE, T>::type>
+	template <typename T>
+	static constexpr bool contains() {
+		return PayloadList::template contains<T>();
+	}
+
+	template <typename T, typename = typename std::enable_if<contains<T>(), T>::type>
 	inline TransitionT(const Type type_,
 					   const TypeInfo stateType_,
 					   T* const payload_)

@@ -104,7 +104,7 @@ _R<TC, TPL, TMS, TA>::schedule(const std::type_index state) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE>::type
+typename std::enable_if<TPL::template contains<TPayload>()>::type
 _R<TC, TPL, TMS, TA>::changeTo(const std::type_index state,
 							   TPayload* const payload)
 {
@@ -121,7 +121,7 @@ _R<TC, TPL, TMS, TA>::changeTo(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE>::type
+typename std::enable_if<TPL::template contains<TPayload>()>::type
 _R<TC, TPL, TMS, TA>::resume(const std::type_index state,
 							 TPayload* const payload)
 {
@@ -138,7 +138,7 @@ _R<TC, TPL, TMS, TA>::resume(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE>::type
+typename std::enable_if<TPL::template contains<TPayload>()>::type
 _R<TC, TPL, TMS, TA>::schedule(const std::type_index state,
 							   TPayload* const payload)
 {
@@ -175,7 +175,7 @@ _R<TC, TPL, TMS, TA>::isStateDataSet(const std::type_index state) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE>::type
+typename std::enable_if<TPL::template contains<TPayload>()>::type
 _R<TC, TPL, TMS, TA>::setStateData(const std::type_index state,
 								   TPayload* const payload)
 {
@@ -188,7 +188,7 @@ _R<TC, TPL, TMS, TA>::setStateData(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE, TPayload>::type*
+typename std::enable_if<TPL::template contains<TPayload>(), TPayload>::type*
 _R<TC, TPL, TMS, TA>::getStateData(const std::type_index state) {
 	auto& stateInfo = _stateRegistry[state];
 	auto& payload = stateInfo.payload;

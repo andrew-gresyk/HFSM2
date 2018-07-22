@@ -34,6 +34,7 @@
 #include <string.h>
 
 #include <typeindex>
+#include <utility>
 
 
 #if defined _DEBUG && _MSC_VER
@@ -900,14 +901,6 @@ struct TypeListBuilder<NIndex, TFirst, TRest...>
 	static constexpr TypeListIndex index() {
 		return std::is_same<T, Type>::value ? INDEX : Base::template index<T>();
 	}
-
-	template <typename TCheck>
-	struct Index {
-		using Check = TCheck;
-		enum : TypeListIndex {
-			VALUE = std::is_same<Check, Type>::value ? INDEX : Base::template Index<Check>::VALUE
-		};
-	};
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -924,14 +917,6 @@ struct TypeListBuilder<NIndex, TFirst> {
 	static constexpr auto index() {
 		return std::is_same<T, Type>::value ? INDEX : INVALID_TYPE_LIST_INDEX;
 	}
-
-	template <typename TCheck>
-	struct Index {
-		using Check = TCheck;
-		enum : TypeListIndex {
-			VALUE = std::is_same<Check, Type>::value ? INDEX : INVALID_TYPE_LIST_INDEX
-		};
-	};
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -955,26 +940,15 @@ struct TypeListT
 		INVALID_INDEX = (IndexType) - 1,
 	};
 
-	template <typename TCheck>
-	struct Index {
-		using Check = TCheck;
-		enum : IndexType {
-			VALUE = Base::template Index<Check>::VALUE
-		};
-	};
+	template <typename T>
+	static constexpr IndexType index() {
+		return Base::template index<T>();
+	}
 
 	template <typename T>
 	static constexpr bool contains() {
 		return Base::template index<T>() != INVALID_TYPE_LIST_INDEX;
 	}
-
-	template <typename TCheck>
-	struct Contains {
-		using Check = TCheck;
-		enum : bool {
-			VALUE = Base::template Index<Check>::VALUE != INVALID_TYPE_LIST_INDEX
-		};
-	};
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1009,10 +983,10 @@ class VariantT {
 public:
 	inline VariantT() = default;
 
-	template <typename T, typename = typename std::enable_if<Types::template Contains<T>::VALUE>::type>
+	template <typename T, typename = typename std::enable_if<Types::template contains<T>()>::type>
 	inline VariantT(T* const p)
 		: _pointer(p)
-		, _index(Types::template Index<T>::VALUE)
+		, _index(Types::template index<T>())
 	{
 		assert((((uintptr_t) this) & 0x7) == 0);
 		assert(_index != INVALID_INDEX);
@@ -1026,9 +1000,9 @@ public:
 	}
 
 	template <typename T>
-	inline typename std::enable_if<Types::template Contains<T>::VALUE, T>::type*
+	inline typename std::enable_if<Types::template contains<T>(), T>::type*
 	get() {
-		const auto INDEX = Types::template Index<T>::VALUE;
+		const auto INDEX = Types::template index<T>();
 
 		assert(INDEX == _index);
 
@@ -1367,14 +1341,6 @@ struct TransitionT {
 		COUNT
 	};
 
-	template <typename TCheck>
-	struct Contains {
-		using Check = TCheck;
-		enum : bool {
-			VALUE = PayloadList::template Contains<Check>::VALUE
-		};
-	};
-
 	inline TransitionT() = default;
 
 	inline TransitionT(const Type type_,
@@ -1385,7 +1351,12 @@ struct TransitionT {
 		assert(type_ < Type::COUNT);
 	}
 
-	template <typename T, typename = typename std::enable_if<Contains<T>::VALUE, T>::type>
+	template <typename T>
+	static constexpr bool contains() {
+		return PayloadList::template contains<T>();
+	}
+
+	template <typename T, typename = typename std::enable_if<contains<T>(), T>::type>
 	inline TransitionT(const Type type_,
 					   const TypeInfo stateType_,
 					   T* const payload_)
@@ -1537,7 +1508,7 @@ template <typename TPL, LongIndex NC>
 StateInfoT<TPL>&
 StateRegistryT<TPL, NC>::operator[] (const TypeInfo type) {
 	auto* const result = _table.find(*type);
-	HSFM_CHECKED(result);
+	assert(result);
 
 	return *result;
 }
@@ -1548,7 +1519,7 @@ template <typename TPL, LongIndex NC>
 const StateInfoT<TPL>&
 StateRegistryT<TPL, NC>::operator[] (const TypeInfo type) const {
 	const auto* const result = _table.find(*type);
-	HSFM_CHECKED(result);
+	assert(result);
 
 	return *result;
 }
@@ -1937,11 +1908,10 @@ struct _M {
 	};
 
 	using PayloadList = TPayloadList;
-	//using Transition = TransitionT<PayloadList>;
 
 	using TransitionControl = TransitionControlT<Context, PayloadList>;
 
-	using TypeInfo = TypeInfo;
+	using TypeInfo = ::hfsm::detail::TypeInfo;
 
 	using Bare = Bare<Context, PayloadList>;
 	using Base = Base<Context, PayloadList>;
@@ -4210,44 +4180,44 @@ public:
 	inline void schedule(const std::type_index state);
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE>::type
+	inline typename std::enable_if<StateList::template contains<TState>()>::type
 	changeTo()												{ changeTo(typeid(TState));		}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE>::type
+	inline typename std::enable_if<StateList::template contains<TState>()>::type
 	resume	()												{ resume  (typeid(TState));		}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE>::type
+	inline typename std::enable_if<StateList::template contains<TState>()>::type
 	schedule()												{ schedule(typeid(TState));		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template Contains<TPayload>::VALUE>::type
+	inline typename std::enable_if<TPayloadList::template contains<TPayload>()>::type
 	changeTo(const std::type_index state, TPayload* const payload);
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template Contains<TPayload>::VALUE>::type
+	inline typename std::enable_if<TPayloadList::template contains<TPayload>()>::type
 	resume(const std::type_index state, TPayload* const payload);
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template Contains<TPayload>::VALUE>::type
+	inline typename std::enable_if<TPayloadList::template contains<TPayload>()>::type
 	schedule(const std::type_index state, TPayload* const payload);
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE &&
-								 PayloadList::template Contains<TPayload>::VALUE>::type
+	inline typename std::enable_if<StateList::template contains<TState>() &&
+								 PayloadList::template contains<TPayload>()>::type
 	changeTo(TPayload* const payload)				{ changeTo(typeid(TState), payload);	}
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE &&
-								 PayloadList::template Contains<TPayload>::VALUE>::type
+	inline typename std::enable_if<StateList::template contains<TState>() &&
+								 PayloadList::template contains<TPayload>()>::type
 	resume	(TPayload* const payload)				{ resume  (typeid(TState), payload);	}
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE &&
-								 PayloadList::template Contains<TPayload>::VALUE>::type
+	inline typename std::enable_if<StateList::template contains<TState>() &&
+								 PayloadList::template contains<TPayload>()>::type
 	schedule(TPayload* const payload)				{ schedule(typeid(TState), payload);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4257,29 +4227,29 @@ public:
 	inline bool isStateDataSet(const std::type_index state);
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template Contains<TPayload>::VALUE>::type
+	inline typename std::enable_if<TPayloadList::template contains<TPayload>()>::type
 	setStateData(const std::type_index state, TPayload* const payload);
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template Contains<TPayload>::VALUE, TPayload>::type*
+	inline typename std::enable_if<TPayloadList::template contains<TPayload>(), TPayload>::type*
 	getStateData(const std::type_index state);
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE>::type
+	inline typename std::enable_if<StateList::template contains<TState>()>::type
 	resetStateData()							{ resetStateData(typeid(TState));			}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE, bool>::type
+	inline typename std::enable_if<StateList::template contains<TState>(), bool>::type
 	isStateDataSet()							{ return isStateDataSet(typeid(TState));	}
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE &&
-								 PayloadList::template Contains<TPayload>::VALUE>::type
+	inline typename std::enable_if<StateList::template contains<TState>() &&
+								 PayloadList::template contains<TPayload>()>::type
 	setStateData(TPayload* const payload)		{ setStateData(typeid(TState), payload);	}
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE &&
-								 PayloadList::template Contains<TPayload>::VALUE, TPayload>::type*
+	inline typename std::enable_if<StateList::template contains<TState>() &&
+								 PayloadList::template contains<TPayload>(), TPayload>::type*
 	getStateData()						{ return getStateData<TPayload>(typeid(TState));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4289,15 +4259,15 @@ public:
 	inline bool isScheduled(const std::type_index state)	{ return isResumable(state);	}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE, bool>::type
+	inline typename std::enable_if<StateList::template contains<TState>(), bool>::type
 	isActive()										{ return isActive	(typeid(TState));	}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE, bool>::type
+	inline typename std::enable_if<StateList::template contains<TState>(), bool>::type
 	isResumable()									{ return isResumable(typeid(TState));	}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template Contains<TState>::VALUE, bool>::type
+	inline typename std::enable_if<StateList::template contains<TState>(), bool>::type
 	isScheduled()									{ return isScheduled(typeid(TState));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4457,7 +4427,7 @@ _R<TC, TPL, TMS, TA>::schedule(const std::type_index state) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE>::type
+typename std::enable_if<TPL::template contains<TPayload>()>::type
 _R<TC, TPL, TMS, TA>::changeTo(const std::type_index state,
 							   TPayload* const payload)
 {
@@ -4474,7 +4444,7 @@ _R<TC, TPL, TMS, TA>::changeTo(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE>::type
+typename std::enable_if<TPL::template contains<TPayload>()>::type
 _R<TC, TPL, TMS, TA>::resume(const std::type_index state,
 							 TPayload* const payload)
 {
@@ -4491,7 +4461,7 @@ _R<TC, TPL, TMS, TA>::resume(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE>::type
+typename std::enable_if<TPL::template contains<TPayload>()>::type
 _R<TC, TPL, TMS, TA>::schedule(const std::type_index state,
 							   TPayload* const payload)
 {
@@ -4528,7 +4498,7 @@ _R<TC, TPL, TMS, TA>::isStateDataSet(const std::type_index state) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE>::type
+typename std::enable_if<TPL::template contains<TPayload>()>::type
 _R<TC, TPL, TMS, TA>::setStateData(const std::type_index state,
 								   TPayload* const payload)
 {
@@ -4541,7 +4511,7 @@ _R<TC, TPL, TMS, TA>::setStateData(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template Contains<TPayload>::VALUE, TPayload>::type*
+typename std::enable_if<TPL::template contains<TPayload>(), TPayload>::type*
 _R<TC, TPL, TMS, TA>::getStateData(const std::type_index state) {
 	auto& stateInfo = _stateRegistry[state];
 	auto& payload = stateInfo.payload;

@@ -7,7 +7,7 @@ template <typename TPL, LongIndex NC>
 StateInfoT<TPL>&
 StateRegistryT<TPL, NC>::operator[] (const TypeInfo type) {
 	auto* const result = _table.find(*type);
-	HSFM_CHECKED(result);
+	assert(result);
 
 	return *result;
 }
@@ -18,7 +18,7 @@ template <typename TPL, LongIndex NC>
 const StateInfoT<TPL>&
 StateRegistryT<TPL, NC>::operator[] (const TypeInfo type) const {
 	const auto* const result = _table.find(*type);
-	HSFM_CHECKED(result);
+	assert(result);
 
 	return *result;
 }
