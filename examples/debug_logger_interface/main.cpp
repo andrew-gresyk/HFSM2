@@ -128,13 +128,13 @@ int main() {
 						Top::To
 				>;
 
-	static_assert(FSM::StateList::Contains<Top>::VALUE, "");
-	static_assert(FSM::StateList::Contains<Top::From>::VALUE, "");
-	static_assert(FSM::StateList::Contains<Top::To>::VALUE, "");
+	static_assert(FSM::StateList::contains<Top>(), "");
+	static_assert(FSM::StateList::contains<Top::From>(), "");
+	static_assert(FSM::StateList::contains<Top::To>(), "");
 
-	static_assert(FSM::StateList::Index<Top>::VALUE == 0, "");
-	static_assert(FSM::StateList::Index<Top::From>::VALUE == 1, "");
-	static_assert(FSM::StateList::Index<Top::To>::VALUE == 2, "");
+	static_assert(FSM::StateList::index<Top>() == 0, "");
+	static_assert(FSM::StateList::index<Top::From>() == 1, "");
+	static_assert(FSM::StateList::index<Top::To>() == 2, "");
 
 	{
 		// shared data storage instance
