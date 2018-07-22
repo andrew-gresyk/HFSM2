@@ -16,4 +16,4 @@ build:
   verbosity: minimal
 
 test_script:
-- cmd: binaries-64\test-15-Debug-64.exe
+- cmd: binaries-%PLATFORM%\test-15-%CONFIGURATION%-%PLATFORM%.exe
