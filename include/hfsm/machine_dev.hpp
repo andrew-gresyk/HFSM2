@@ -104,8 +104,8 @@ struct _M {
 
 	using TypeInfo = ::hfsm::detail::TypeInfo;
 
-	using Bare = Bare<Context, PayloadList>;
-	using Base = Base<Context, PayloadList>;
+	using Bare = ::hfsm::detail::Bare<Context, PayloadList>;
+	using Base = ::hfsm::detail::Base<Context, PayloadList>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;

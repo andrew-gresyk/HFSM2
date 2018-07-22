@@ -34,7 +34,7 @@ public:
 		inline Item()
 			: _hash(0)
 		{
-			assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0);
+			HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x3) == 0));
 		}
 
 		inline Item(const Hash hash, const Key key);
@@ -118,8 +118,8 @@ private:
 	inline LongIndex skipVacantForward(const LongIndex i) const;
 
 private:
-	LongIndex _count = 0;
 	Items _items;
+	LongIndex _count = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

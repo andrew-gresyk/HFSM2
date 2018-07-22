@@ -39,7 +39,7 @@ struct StructureStateInfo {
 		, region(region_)
 		, depth(depth_)
 	{
-		assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 	}
 
 	alignas(alignof(char*)) const char* name;
@@ -87,7 +87,7 @@ struct alignas(alignof(TypeInfo)) TransitionInfoT {
 		, method(method_)
 		, transition(get<PayloadList>(transition_.type))
 	{
-		assert((((uintptr_t) this) & 0x7) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
 		assert(method_ < ::hfsm::Method::COUNT);
 	}
 

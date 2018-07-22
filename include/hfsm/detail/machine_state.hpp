@@ -17,7 +17,7 @@ struct _S final {
 	using StateList			= TypeListT<Head>;
 	HSFM_IF_DEBUG(StateList stateList);
 
-	using Base				= Base<Context, PayloadList>;
+	using Base				= ::hfsm::detail::Base<Context, PayloadList>;
 
 	enum : LongIndex {
 		REVERSE_DEPTH = 1,
@@ -48,7 +48,7 @@ struct _S final {
 
 	inline void deepExit			 (Control& control);
 
-	inline void deepForwardRequest	 (const enum Transition::Type)					{}
+	inline void deepForwardRequest	 (const typename Transition::Type)					{}
 	inline void deepRequestRemain	 ()												{}
 	inline void deepRequestRestart	 ()												{}
 	inline void deepRequestResume	 ()												{}

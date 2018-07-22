@@ -29,7 +29,7 @@ struct TypeListBuilder<NIndex, TFirst, TRest...>
 
 	template <typename T>
 	static constexpr TypeListIndex index() {
-		return std::is_same<T, Type>::value ? INDEX : Base::template index<T>();
+		return std::is_same<T, Type>::value ? NIndex : Base::template index<T>();
 	}
 };
 
@@ -45,7 +45,7 @@ struct TypeListBuilder<NIndex, TFirst> {
 
 	template <typename T>
 	static constexpr auto index() {
-		return std::is_same<T, Type>::value ? INDEX : INVALID_TYPE_LIST_INDEX;
+		return std::is_same<T, Type>::value ? NIndex : INVALID_TYPE_LIST_INDEX;
 	}
 };
 
@@ -118,7 +118,7 @@ public:
 		: _pointer(p)
 		, _index(Types::template index<T>())
 	{
-		assert((((uintptr_t) this) & 0x7) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
 		assert(_index != INVALID_INDEX);
 	}
 

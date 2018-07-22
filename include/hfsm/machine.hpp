@@ -605,7 +605,7 @@ public:
 		inline Item()
 			: _hash(0)
 		{
-			assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0);
+			HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x3) == 0));
 		}
 
 		inline Item(const Hash hash, const Key key);
@@ -689,8 +689,8 @@ private:
 	inline LongIndex skipVacantForward(const LongIndex i) const;
 
 private:
-	LongIndex _count = 0;
 	Items _items;
+	LongIndex _count = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -899,7 +899,7 @@ struct TypeListBuilder<NIndex, TFirst, TRest...>
 
 	template <typename T>
 	static constexpr TypeListIndex index() {
-		return std::is_same<T, Type>::value ? INDEX : Base::template index<T>();
+		return std::is_same<T, Type>::value ? NIndex : Base::template index<T>();
 	}
 };
 
@@ -915,7 +915,7 @@ struct TypeListBuilder<NIndex, TFirst> {
 
 	template <typename T>
 	static constexpr auto index() {
-		return std::is_same<T, Type>::value ? INDEX : INVALID_TYPE_LIST_INDEX;
+		return std::is_same<T, Type>::value ? NIndex : INVALID_TYPE_LIST_INDEX;
 	}
 };
 
@@ -988,7 +988,7 @@ public:
 		: _pointer(p)
 		, _index(Types::template index<T>())
 	{
-		assert((((uintptr_t) this) & 0x7) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
 		assert(_index != INVALID_INDEX);
 	}
 
@@ -1217,7 +1217,7 @@ struct Parent {
 		  fork(fork_)
 		, prong(prong_)
 	{
-		assert((((uintptr_t) this) & 0x1) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x1) == 0));
 	}
 
 	inline explicit operator bool() const {
@@ -1302,7 +1302,7 @@ struct Fork {
 		: HSFM_IF_DEBUG(type(type_),)
 		  self(self_)
 	{
-		assert((((uintptr_t) this) & 0x3) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x3) == 0));
 	}
 };
 
@@ -1420,11 +1420,11 @@ template <typename TContext, typename TPayloadList>
 class TransitionControlT final
 	: public ControlT<TContext>
 {
-	using Context = TContext;
-	using Base = ControlT<Context>;
-	using PayloadList = TPayloadList;
-	using Transition = TransitionT<PayloadList>;
-	using TransitionType = enum Transition::Type;
+	using Context		  = TContext;
+	using Base			  = ControlT<Context>;
+	using PayloadList	  = TPayloadList;
+	using Transition	  = TransitionT<PayloadList>;
+	using TransitionType  = typename Transition::Type;
 	using TransitionQueue = TransitionQueueT<TPayloadList>;
 
 	template <typename, typename, ShortIndex, typename>
@@ -1642,7 +1642,7 @@ struct StructureStateInfo {
 		, region(region_)
 		, depth(depth_)
 	{
-		assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 	}
 
 	alignas(alignof(char*)) const char* name;
@@ -1690,7 +1690,7 @@ struct alignas(alignof(TypeInfo)) TransitionInfoT {
 		, method(method_)
 		, transition(get<PayloadList>(transition_.type))
 	{
-		assert((((uintptr_t) this) & 0x7) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
 		assert(method_ < ::hfsm::Method::COUNT);
 	}
 
@@ -1913,8 +1913,8 @@ struct _M {
 
 	using TypeInfo = ::hfsm::detail::TypeInfo;
 
-	using Bare = Bare<Context, PayloadList>;
-	using Base = Base<Context, PayloadList>;
+	using Bare = ::hfsm::detail::Bare<Context, PayloadList>;
+	using Base = ::hfsm::detail::Base<Context, PayloadList>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;
@@ -2016,7 +2016,7 @@ struct _S final {
 	using StateList			= TypeListT<Head>;
 	HSFM_IF_DEBUG(StateList stateList);
 
-	using Base				= Base<Context, PayloadList>;
+	using Base				= ::hfsm::detail::Base<Context, PayloadList>;
 
 	enum : LongIndex {
 		REVERSE_DEPTH = 1,
@@ -2047,7 +2047,7 @@ struct _S final {
 
 	inline void deepExit			 (Control& control);
 
-	inline void deepForwardRequest	 (const enum Transition::Type)					{}
+	inline void deepForwardRequest	 (const typename Transition::Type)					{}
 	inline void deepRequestRemain	 ()												{}
 	inline void deepRequestRestart	 ()												{}
 	inline void deepRequestResume	 ()												{}
@@ -2312,7 +2312,7 @@ struct _CS<TContext, TPayloadList, NIndex, TInitial, TRemaining...> {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using Initial			= typename WrapState<Context, PayloadList, TInitial>::Type;
 	using Remaining			= _CS<Context, PayloadList, NIndex + 1, TRemaining...>;
@@ -2387,7 +2387,7 @@ struct _CS<TContext, TPayloadList, NIndex, TInitial> {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using Initial			= typename WrapState<Context, PayloadList, TInitial>::Type;
 	using StateList			= typename Initial::StateList;
@@ -2880,7 +2880,7 @@ struct _C final {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using ControlLock		= ControlLockT<Context, PayloadList>;
 	using Head				= THead;
@@ -3239,7 +3239,7 @@ struct _OS<TContext, TPayloadList, NIndex, TInitial, TRemaining...> {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using Initial			= typename WrapState<Context, PayloadList, TInitial>::Type;
 	using Remaining			= _OS<Context, PayloadList, NIndex + 1, TRemaining...>;
@@ -3316,7 +3316,7 @@ struct _OS<TContext, TPayloadList, NIndex, TInitial> {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using Initial			= typename WrapState<Context, PayloadList, TInitial>::Type;
 	using StateList			= typename Initial::StateList;
@@ -3789,7 +3789,7 @@ struct _O final {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using ControlLock		= ControlLockT<Context, PayloadList>;
 	using Head				= THead;
@@ -4132,8 +4132,8 @@ public:
 		PRONG_COUNT				 = Apex::PRONG_COUNT,
 		WIDTH					 = Apex::WIDTH,
 	};
-	static_assert(STATE_COUNT < (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
-	static_assert(STATE_COUNT == StateList::SIZE, "STATE_COUNT != StateList::SIZE");
+	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
+	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
 	enum : LongIndex {

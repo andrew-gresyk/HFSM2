@@ -19,7 +19,7 @@ struct _CS<TContext, TPayloadList, NIndex, TInitial, TRemaining...> {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using Initial			= typename WrapState<Context, PayloadList, TInitial>::Type;
 	using Remaining			= _CS<Context, PayloadList, NIndex + 1, TRemaining...>;
@@ -94,7 +94,7 @@ struct _CS<TContext, TPayloadList, NIndex, TInitial> {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using Initial			= typename WrapState<Context, PayloadList, TInitial>::Type;
 	using StateList			= typename Initial::StateList;

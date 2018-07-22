@@ -39,7 +39,7 @@ struct Parent {
 		  fork(fork_)
 		, prong(prong_)
 	{
-		assert((((uintptr_t) this) & 0x1) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x1) == 0));
 	}
 
 	inline explicit operator bool() const {
@@ -124,7 +124,7 @@ struct Fork {
 		: HSFM_IF_DEBUG(type(type_),)
 		  self(self_)
 	{
-		assert((((uintptr_t) this) & 0x3) == 0);
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x3) == 0));
 	}
 };
 
@@ -242,11 +242,11 @@ template <typename TContext, typename TPayloadList>
 class TransitionControlT final
 	: public ControlT<TContext>
 {
-	using Context = TContext;
-	using Base = ControlT<Context>;
-	using PayloadList = TPayloadList;
-	using Transition = TransitionT<PayloadList>;
-	using TransitionType = enum Transition::Type;
+	using Context		  = TContext;
+	using Base			  = ControlT<Context>;
+	using PayloadList	  = TPayloadList;
+	using Transition	  = TransitionT<PayloadList>;
+	using TransitionType  = typename Transition::Type;
 	using TransitionQueue = TransitionQueueT<TPayloadList>;
 
 	template <typename, typename, ShortIndex, typename>

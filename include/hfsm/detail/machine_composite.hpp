@@ -13,7 +13,7 @@ struct _C final {
 	using PayloadList		= TPayloadList;
 	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= enum Transition::Type;
+	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, PayloadList>;
 	using ControlLock		= ControlLockT<Context, PayloadList>;
 	using Head				= THead;

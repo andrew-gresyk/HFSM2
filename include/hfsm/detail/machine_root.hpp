@@ -31,8 +31,8 @@ public:
 		PRONG_COUNT				 = Apex::PRONG_COUNT,
 		WIDTH					 = Apex::WIDTH,
 	};
-	static_assert(STATE_COUNT < (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
-	static_assert(STATE_COUNT == StateList::SIZE, "STATE_COUNT != StateList::SIZE");
+	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
+	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
 	enum : LongIndex {
