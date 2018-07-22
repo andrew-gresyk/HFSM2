@@ -44,7 +44,7 @@ struct TypeListBuilder<NIndex, TFirst> {
 	using Type = TFirst;
 
 	template <typename T>
-	static constexpr auto index() {
+	static constexpr TypeListIndex index() {
 		return std::is_same<T, Type>::value ? (TypeListIndex) INDEX : INVALID_TYPE_LIST_INDEX;
 	}
 };
