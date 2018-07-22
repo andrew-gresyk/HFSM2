@@ -36,6 +36,16 @@
 #include <typeindex>
 #include <utility>
 
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_ALIGNMENT_CHEKS
+	#define HFSM_IF_ALIGNMENT_CHEKS(...)	__VA_ARGS__
+#else
+	#define HFSM_IF_ALIGNMENT_CHEKS(...)
+#endif
+
+//------------------------------------------------------------------------------
+
 #include "detail/lib_utility.hpp"
 #include "detail/lib_iterator.hpp"
 #include "detail/lib_array_view.hpp"
@@ -64,14 +74,6 @@
 	#define HFSM_IF_STRUCTURE(...)	__VA_ARGS__
 #else
 	#define HFSM_IF_STRUCTURE(...)
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_ALIGNMENT_CHEKS
-	#define HFSM_IF_ALIGNMENT_CHEKS(...)	__VA_ARGS__
-#else
-	#define HFSM_IF_ALIGNMENT_CHEKS(...)
 #endif
 
 //------------------------------------------------------------------------------
