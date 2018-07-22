@@ -1,43 +1,46 @@
 ﻿// HFSM (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 //
-// Attachable logger example
+// Attachable logger example:
 
 // Full output:
 //
-//	--- ctor: ---
+//	---------- ctor: ---------
 //
 //	Top::enter()
 //	Top::From::enter()
 //
-//	-- update: --
+//	--------- update: --------
 //
 //	Top::update()
-//	Top::transition()
 //	Top::From::update()
-//	Top::From::transition()
 //
-//	-- react: ---
+//	--------- react: ---------
 //
 //	Top::react()
 //	Top::From::react()
-//	Top::To::substitute()
-//	Top::From::leave()
+//	changeTo<Top::To>()
+//	Top::To::guard()
+//	Top::From::exit()
 //	Top::To::enter()
 //
-//	-- detach: --
+//	-- external transition: --
+//
+//	changeTo<Top::From>()
+//
+//	--------- detach: --------
 //
 //
-//	--- dtor: ---
+//	---------- dtor: ---------
 //
-//	Top::To::leave()
-//	Top::leave()
+//	Top::To::exit()
+//	Top::exit()
 //
-//	--- done! ---
+//	---------- done! ---------
 
 // enable logger functionality
 #define HFSM_ENABLE_LOG_INTERFACE
-#include <hfsm/machine_single.hpp>
+#include <hfsm/machine.hpp>
 
 #include <iostream>
 
@@ -54,13 +57,16 @@ using M = hfsm::Machine<Context>;
 struct Logger
 	: hfsm::LoggerInterface
 {
-	// hfsm::LoggerInterface
-	void record(const std::type_index& /*state*/,
-				const char* const stateName,
-				const Method /*method*/,
-				const char* const methodName) override
+	void recordMethod(const std::type_index state,
+					  const Method method) override
 	{
-		std::cout << stateName << "::" << methodName << "()\n";
+		std::cout << hfsm::stateName(state) << "::" << hfsm::methodName(method) << "()\n";
+	}
+
+	void recordTransition(const Transition transition,
+						  const std::type_index state) override
+	{
+		std::cout << hfsm::transitionName(transition) << "<" << hfsm::stateName(state) << ">()\n";
 	}
 };
 
@@ -71,13 +77,12 @@ struct Top
 	: M::Base
 {
 	// all state methods:
-	void substitute(Control&, Context&)				{}	// not going to be called in this example
-	void enter(Context&)							{}
-	void update(Context&)							{}
-	void transition(Control&, Context&)				{}
+	void guard(TransitionControl&)					{}	// not going to be called in this example
+	void enter(Control&)							{}
+	void update(TransitionControl&)					{}
 	template <typename TEvent>
-	void react(const TEvent&, Control&, Context&)	{}
-	void leave(Context&)							{}
+	void react(const TEvent&, TransitionControl&)	{}
+	void exit(Control&)								{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -89,13 +94,12 @@ struct Top
 		: M::Base // necessary boilerplate!
 	{
 		// all state methods:
-		void substitute(Control&, Context&)				{}	// not going to be called in this example
-		void enter(Context&)							{}
-		void update(Context&)							{}
-		void transition(Control&, Context&)				{}
+		void guard(TransitionControl&)					{}	// not going to be called in this example
+		void enter(Control&)							{}
+		void update(TransitionControl&)					{}
 		template <typename TEvent>
-		void react(const TEvent&, Control& control, Context&)	{ control.changeTo<To>(); }
-		void leave(Context&)							{}
+		void react(const TEvent&, TransitionControl& control)	{ control.changeTo<To>(); }
+		void exit(Control&)								{}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -105,13 +109,12 @@ struct Top
 		: M::Base
 	{
 		// all state methods:
-		void substitute(Control&, Context&)				{}
-		void enter(Context&)							{}
-		void update(Context&)							{}
-		void transition(Control&, Context&)				{}
+		void guard(TransitionControl&)					{}
+		void enter(Control&)							{}
+		void update(TransitionControl&)					{}
 		template <typename TEvent>
-		void react(const TEvent&, Control&, Context&)	{}	// not going to be called in this example
-		void leave(Context&)							{}
+		void react(const TEvent&, TransitionControl&)	{}	// not going to be called in this example
+		void exit(Control&)								{}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -121,9 +124,17 @@ struct Top
 
 int main() {
 	using FSM = M::Root<Top,
-					Top::From,
-					Top::To
+						Top::From,
+						Top::To
 				>;
+
+	static_assert(FSM::StateList::Contains<Top>::VALUE, "");
+	static_assert(FSM::StateList::Contains<Top::From>::VALUE, "");
+	static_assert(FSM::StateList::Contains<Top::To>::VALUE, "");
+
+	static_assert(FSM::StateList::Index<Top>::VALUE == 0, "");
+	static_assert(FSM::StateList::Index<Top::From>::VALUE == 1, "");
+	static_assert(FSM::StateList::Index<Top::To>::VALUE == 2, "");
 
 	{
 		// shared data storage instance
@@ -132,7 +143,7 @@ int main() {
 		// logger
 		Logger logger;
 
-		std::cout << "--- ctor: ---\n\n";
+		std::cout << "\n---------- ctor: ---------\n\n";
 
 		// state machine instance - all initial states are activated
 		FSM machine(context, &logger);
@@ -141,29 +152,35 @@ int main() {
 		//	Top::enter()
 		//	Top::From::enter()
 
-		std::cout << "\n-- update: --\n\n";
+		std::cout << "\n--------- update: --------\n\n";
 
 		// first update
 		machine.update();
 
 		// output:
 		//	Top::update()
-		//	Top::transition()
 		//	Top::From::update()
-		//	Top::From::transition()
 
-		std::cout << "\n-- react: ---\n\n";
+		std::cout << "\n--------- react: ---------\n\n";
 
 		machine.react(1);
 
 		// output:
 		//	Top::react()
 		//	Top::From::react()
-		//	Top::To::substitute()
-		//	Top::From::leave()
+		//	changeTo<Top::To>()
+		//	Top::To::guard()
+		//	Top::From::exit()
 		//	Top::To::enter()
 
-		std::cout << "\n-- detach: --\n\n";
+		std::cout << "\n-- external transition: --\n\n";
+
+		machine.changeTo<Top::From>();
+
+		// output:
+		//	changeTo<Top::From>()
+
+		std::cout << "\n--------- detach: --------\n\n";
 
 		// detach logger and update again
 		machine.attachLogger(nullptr);
@@ -171,7 +188,7 @@ int main() {
 
 		// no output, since logger is detached
 
-		std::cout << "\n--- dtor: ---\n\n";
+		std::cout << "\n---------- dtor: ---------\n\n";
 
 		// re-attach logger for destruction log
 		machine.attachLogger(&logger);
@@ -180,10 +197,10 @@ int main() {
 	}
 
 	// output:
-	//	Top::To::leave()
-	//	Top::leave()
+	//	Top::To::exit()
+	//	Top::exit()
 
-	std::cout << "\n--- done! ---\n\n";
+	std::cout << "\n---------- done! ---------\n\n";
 
 	return 0;
 }

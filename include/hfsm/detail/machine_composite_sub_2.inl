@@ -1,239 +1,197 @@
 namespace hfsm {
+namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::Sub(StateRegistry& stateRegistry,
-										   const Index fork,
-										   Parents& stateParents,
-										   Parents& forkParents,
-										   ForkPointers& forkPointers)
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
+_CS<TC, TPL, NI, TI>::_CS(StateRegistryBase& stateRegistry,
+						  const ShortIndex fork,
+						  const TypeInfo parentInfo,
+						  Parents& forkParents,
+						  ForkPointers& forkPointers)
 	: initial(stateRegistry,
 			  Parent(fork,
-					 ProngIndex
-					 HSFM_IF_DEBUG(, TypeInfo::get<T>())
-					 HSFM_IF_DEBUG(, TypeInfo::get<typename Initial::Head>())),
-			  stateParents,
+					 PRONG_INDEX,
+					 parentInfo,
+					 TypeInfo::get<typename Initial::Head>()),
 			  forkParents,
 			  forkPointers)
 {}
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
+void
+_CS<TC, TPL, NI, TI>::wideRegister(StateRegistryBase& stateRegistry,
+								   const ShortIndex fork,
+								   const TypeInfo parentInfo)
+{
+	initial.deepRegister(stateRegistry,
+						 Parent(fork,
+								PRONG_INDEX,
+								parentInfo,
+								TypeInfo::get<typename Initial::Head>()));
+}
+
 //------------------------------------------------------------------------------
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardSubstitute(const unsigned HSFM_IF_ASSERT(prong),
-															 Control& control,
-															 Context& context,
-															 LoggerInterface* const logger)
+_CS<TC, TPL, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
+									   TransitionControl& control)
 {
-	assert(prong == ProngIndex);
+	assert(prong == PRONG_INDEX);
 
-	initial.deepForwardSubstitute(control, context, logger);
+	initial.deepForwardGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideSubstitute(const unsigned HSFM_IF_ASSERT(prong),
-													  Control& control,
-													  Context& context,
-													  LoggerInterface* const logger)
+_CS<TC, TPL, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
+								TransitionControl& control)
 {
-	assert(prong == ProngIndex);
+	assert(prong == PRONG_INDEX);
 
-	initial.deepSubstitute(control, context, logger);
+	initial.deepGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnterInitial(Context& context,
-														LoggerInterface* const logger)
-{
-	initial.deepEnterInitial(context, logger);
+_CS<TC, TPL, NI, TI>::wideEnterInitial(Control& control) {
+	initial.deepEnterInitial(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideEnter(const unsigned HSFM_IF_ASSERT(prong),
-												 Context& context,
-												 LoggerInterface* const logger)
+_CS<TC, TPL, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
+								Control& control)
 {
-	assert(prong == ProngIndex);
+	assert(prong == PRONG_INDEX);
 
-	initial.deepEnter(context, logger);
+	initial.deepEnter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 bool
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdateAndTransition(const unsigned HSFM_IF_ASSERT(prong),
-															   Control& control,
-															   Context& context,
-															   LoggerInterface* const logger)
+_CS<TC, TPL, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
+								 TransitionControl& control)
 {
-	assert(prong == ProngIndex);
+	assert(prong == PRONG_INDEX);
 
-	return initial.deepUpdateAndTransition(control, context, logger);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
-void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideUpdate(const unsigned HSFM_IF_ASSERT(prong),
-												  Context& context,
-												  LoggerInterface* const logger)
-{
-	assert(prong == ProngIndex);
-
-	initial.deepUpdate(context, logger);
+	return initial.deepUpdate(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 template <typename TEvent>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideReact(const unsigned HSFM_IF_ASSERT(prong),
-												 const TEvent& event,
-												 Control& control,
-												 Context& context,
-												 LoggerInterface* const logger)
+_CS<TC, TPL, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
+								const TEvent& event,
+								TransitionControl& control)
 {
-	assert(prong == ProngIndex);
+	assert(prong == PRONG_INDEX);
 
-	initial.deepReact(event, control, context, logger);
+	initial.deepReact(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideLeave(const unsigned HSFM_IF_ASSERT(prong),
-												 Context& context,
-												 LoggerInterface* const logger)
+_CS<TC, TPL, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
+							   Control& control)
 {
-	assert(prong == ProngIndex);
+	assert(prong == PRONG_INDEX);
 
-	initial.deepLeave(context, logger);
+	initial.deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideForwardRequest(const unsigned HSFM_IF_ASSERT(prong),
-														  const enum Transition::Type transition)
+_CS<TC, TPL, NI, TI>::wideForwardRequest(const ShortIndex HSFM_IF_ASSERT(prong),
+										 const TransitionType transition)
 {
-	assert(prong == ProngIndex);
+	assert(prong == PRONG_INDEX);
 
 	initial.deepForwardRequest(transition);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRemain() {
+_CS<TC, TPL, NI, TI>::wideRequestRemain() {
 	initial.deepRequestRemain();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestRestart() {
+_CS<TC, TPL, NI, TI>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideRequestResume(const unsigned HSFM_IF_ASSERT(prong)) {
-	assert(prong == ProngIndex);
+_CS<TC, TPL, NI, TI>::wideRequestResume(const ShortIndex HSFM_IF_ASSERT(prong)) {
+	assert(prong == PRONG_INDEX);
 
 	initial.deepRequestResume();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideChangeToRequested(const unsigned HSFM_IF_ASSERT(prong),
-															 Context& context,
-															 LoggerInterface* const logger)
+_CS<TC, TPL, NI, TI>::wideChangeToRequested(const ShortIndex HSFM_IF_ASSERT(prong),
+											Control& control)
 {
-	assert(prong == ProngIndex);
+	assert(prong == PRONG_INDEX);
 
-	initial.deepChangeToRequested(context, logger);
+	initial.deepChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideGetNames(const unsigned parent,
-													const unsigned depth,
-													StateInfos& _stateInfos) const
+_CS<TC, TPL, NI, TI>::wideGetNames(const LongIndex parent,
+								   const ShortIndex depth,
+								   StructureStateInfos& _stateInfos) const
 {
-	initial.deepGetNames(parent, StateInfo::Composite, depth, _stateInfos);
+	initial.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, unsigned TMS>
-template <typename T, typename... TS>
-template <unsigned TN, typename TI>
+template <typename TC, typename TPL, ShortIndex NI, typename TI>
 void
-M<TC, TMS>::_C<T, TS...>::Sub<TN, TI>::wideIsActive(const unsigned prong,
-													unsigned& index,
-													MachineStructure& structure) const
+_CS<TC, TPL, NI, TI>::wideIsActive(const ShortIndex prong,
+								   LongIndex& index,
+								   MachineStructure& structure) const
 {
-	initial.deepIsActive(prong == ProngIndex, index, structure);
+	initial.deepIsActive(prong == PRONG_INDEX, index, structure);
 }
 
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
+}
 }

@@ -1,197 +1,75 @@
 namespace hfsm {
+namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext, unsigned TMaxSubstitutions>
-template <typename TH, typename... TS>
-struct M<TContext, TMaxSubstitutions>::_O final {
-	using Head	= TH;
-	using Fork	= ForkT<Head>;
-	using State	= _S<Head>;
+template <typename TContext,
+		  typename TPayloadList,
+		  typename THead,
+		  typename... TSubStates>
+struct _O final {
+	using Context			= TContext;
+	using Control			= ControlT<Context>;
+	using PayloadList		= TPayloadList;
+	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
+	using Transition		= TransitionT<PayloadList>;
+	using TransitionType	= enum Transition::Type;
+	using TransitionControl	= TransitionControlT<Context, PayloadList>;
+	using ControlLock		= ControlLockT<Context, PayloadList>;
+	using Head				= THead;
+	using Fork				= ForkT<Head>;
+	using State				= _S<Context, PayloadList, Head>;
+	using SubStates			= _OS<Context, PayloadList, 0, TSubStates...>;
+	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
+	HSFM_IF_DEBUG(StateList stateList);
 
-	//----------------------------------------------------------------------
-
-	template <unsigned TN, typename...>
-	struct Sub;
-
-	//----------------------------------------------------------------------
-
-	template <unsigned TN, typename TI, typename... TR>
-	struct Sub<TN, TI, TR...> {
-		using Initial = typename WrapState<TI>::Type;
-		using Remaining = Sub<TN + 1, TR...>;
-
-		enum : unsigned {
-			ProngIndex	 = TN,
-			ReverseDepth = detail::Max<Initial::ReverseDepth, Remaining::ReverseDepth>::Value,
-			DeepWidth	 = Initial::DeepWidth  + Remaining::DeepWidth,
-			StateCount	 = Initial::StateCount + Remaining::StateCount,
-			ForkCount	 = Initial::ForkCount  + Remaining::ForkCount,
-			ProngCount	 = Initial::ProngCount + Remaining::ProngCount,
-		};
-
-		Sub(StateRegistry& stateRegistry,
-			const Index fork,
-			Parents& stateParents,
-			Parents& forkParents,
-			ForkPointers& forkPointers);
-
-		inline void wideForwardSubstitute	(const unsigned prong,
-											 Control& control, Context& context, LoggerInterface* const logger);
-
-		inline void wideForwardSubstitute	(Control& control, Context& context, LoggerInterface* const logger);
-		inline void wideSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
-
-		inline void wideEnterInitial		(				   Context& context, LoggerInterface* const logger);
-		inline void wideEnter				(				   Context& context, LoggerInterface* const logger);
-
-		inline bool wideUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
-		inline void wideUpdate				(				   Context& context, LoggerInterface* const logger);
-
-		template <typename TEvent>
-		inline void wideReact				(const TEvent& event,
-											 Control& control, Context& context, LoggerInterface* const logger);
-
-		inline void wideLeave				(				   Context& context, LoggerInterface* const logger);
-
-		inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-		inline void wideRequestRemain();
-		inline void wideRequestRestart();
-		inline void wideRequestResume();
-		inline void wideChangeToRequested	(				   Context& context, LoggerInterface* const logger);
-
-	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-		enum : unsigned {
-			NameCount	 = Initial::NameCount  + Remaining::NameCount,
-		};
-
-		void wideGetNames(const unsigned parent,
-						  const unsigned depth,
-						  StateInfos& stateInfos) const;
-
-		void wideIsActive(const bool active,
-						  unsigned& index,
-						  MachineStructure& structure) const;
-	#endif
-
-		Initial initial;
-		Remaining remaining;
+	enum : LongIndex {
+		REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1,
+		DEEP_WIDTH	  = SubStates::DEEP_WIDTH,
+		STATE_COUNT	  = State::STATE_COUNT + SubStates::STATE_COUNT,
+		FORK_COUNT	  = SubStates::FORK_COUNT + 1,
+		PRONG_COUNT	  = SubStates::PRONG_COUNT,
+		WIDTH		  = sizeof...(TSubStates),
 	};
 
-	//----------------------------------------------------------------------
-
-	template <unsigned TN, typename TI>
-	struct Sub<TN, TI> {
-		using Initial = typename WrapState<TI>::Type;
-
-		enum : unsigned {
-			ProngIndex	 = TN,
-			ReverseDepth = Initial::ReverseDepth,
-			DeepWidth	 = Initial::DeepWidth,
-			StateCount	 = Initial::StateCount,
-			ForkCount	 = Initial::ForkCount,
-			ProngCount	 = Initial::ProngCount,
-		};
-
-		Sub(StateRegistry& stateRegistry,
-			const Index fork,
-			Parents& stateParents,
-			Parents& forkParents,
-			ForkPointers& forkPointers);
-
-		inline void wideForwardSubstitute	(const unsigned prong,
-											 Control& control, Context& context, LoggerInterface* const logger);
-
-		inline void wideForwardSubstitute	(Control& control, Context& context, LoggerInterface* const logger);
-		inline void wideSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
-
-		inline void wideEnterInitial		(				   Context& context, LoggerInterface* const logger);
-		inline void wideEnter				(				   Context& context, LoggerInterface* const logger);
-
-		inline bool wideUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
-		inline void wideUpdate				(				   Context& context, LoggerInterface* const logger);
-
-		template <typename TEvent>
-		inline void wideReact				(const TEvent& event,
-											 Control& control, Context& context, LoggerInterface* const logger);
-
-		inline void wideLeave				(				   Context& context, LoggerInterface* const logger);
-
-		inline void wideForwardRequest(const unsigned prong, const enum Transition::Type transition);
-		inline void wideRequestRemain();
-		inline void wideRequestRestart();
-		inline void wideRequestResume();
-		inline void wideChangeToRequested	(				   Context& context, LoggerInterface* const logger);
-
-	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-		enum : unsigned {
-			NameCount	 = Initial::NameCount,
-		};
-
-		void wideGetNames(const unsigned parent,
-						  const unsigned depth,
-						  StateInfos& stateInfos) const;
-
-		void wideIsActive(const bool active,
-						  unsigned& index,
-						  MachineStructure& structure) const;
-	#endif
-
-		Initial initial;
-	};
-
-	using SubStates = Sub<0, TS...>;
-
-	//----------------------------------------------------------------------
-
-	enum : unsigned {
-		ReverseDepth = SubStates::ReverseDepth + 1,
-		DeepWidth	 = SubStates::DeepWidth,
-		StateCount	 = State::StateCount + SubStates::StateCount,
-		ForkCount	 = SubStates::ForkCount + 1,
-		ProngCount	 = SubStates::ProngCount,
-		Width		 = sizeof...(TS),
-	};
-
-	_O(StateRegistry& stateRegistry,
+	_O(StateRegistryBase& stateRegistry,
 	   const Parent parent,
-	   Parents& stateParents,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
 
-	inline void deepForwardSubstitute	(Control& control, Context& context, LoggerInterface* const logger);
-	inline void deepSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepRegister		 (StateRegistryBase& stateRegistry, const Parent parent);
 
-	inline void deepEnterInitial		(				   Context& context, LoggerInterface* const logger);
-	inline void deepEnter				(				   Context& context, LoggerInterface* const logger);
+	inline void deepForwardGuard	 (TransitionControl& control);
+	inline void deepGuard			 (TransitionControl& control);
 
-	inline bool deepUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
-	inline void deepUpdate				(				   Context& context, LoggerInterface* const logger);
+	inline void deepEnterInitial	 (Control& control);
+	inline void deepEnter			 (Control& control);
+
+	inline bool deepUpdate			 (TransitionControl& control);
 
 	template <typename TEvent>
-	inline void deepReact				(const TEvent& event,
-										 Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepReact			 (const TEvent& event, TransitionControl& control);
 
-	inline void deepLeave				(				   Context& context, LoggerInterface* const logger);
+	inline void deepExit			 (Control& control);
 
-	inline void deepForwardRequest(const enum Transition::Type transition);
-	inline void deepRequestRemain();
-	inline void deepRequestRestart();
-	inline void deepRequestResume();
-	inline void deepChangeToRequested	(				   Context& context, LoggerInterface* const logger);
+	inline void deepForwardRequest	 (const TransitionType transition);
+	inline void deepRequestRemain	 ();
+	inline void deepRequestRestart	 ();
+	inline void deepRequestResume	 ();
+	inline void deepChangeToRequested(Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	enum : unsigned {
-		NameCount	 = State::NameCount  + SubStates::NameCount,
+	enum : LongIndex {
+		NAME_COUNT	 = State::NAME_COUNT  + SubStates::NAME_COUNT,
 	};
 
-	void deepGetNames(const unsigned parent,
-					  const enum StateInfo::RegionType region,
-					  const unsigned depth,
-					  StateInfos& stateInfos) const;
+	void deepGetNames(const LongIndex parent,
+					  const enum StructureStateInfo::RegionType region,
+					  const ShortIndex depth,
+					  StructureStateInfos& stateInfos) const;
 
 	void deepIsActive(const bool isActive,
-					  unsigned& index,
+					  LongIndex& index,
 					  MachineStructure& structure) const;
 #endif
 
@@ -205,7 +83,6 @@ struct M<TContext, TMaxSubstitutions>::_O final {
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+}
 
-#include "machine_orthogonal_methods.inl"
-#include "machine_orthogonal_sub_1.inl"
-#include "machine_orthogonal_sub_2.inl"
+#include "machine_orthogonal.inl"

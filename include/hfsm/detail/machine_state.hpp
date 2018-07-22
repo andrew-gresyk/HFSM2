@@ -1,72 +1,81 @@
 namespace hfsm {
+namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext, unsigned TMaxSubstitutions>
-template <typename TH>
-struct M<TContext, TMaxSubstitutions>::_S {
-	using Head = TH;
+template <typename TContext,
+		  typename TPayloadList,
+		  typename THead>
+struct _S final {
+	using Context			= TContext;
+	using Control			= ControlT<Context>;
+	using PayloadList		= TPayloadList;
+	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
+	using Transition		= TransitionT<PayloadList>;
+	using TransitionControl	= TransitionControlT<Context, PayloadList>;
+	using Head				= THead;
+	using StateList			= TypeListT<Head>;
+	HSFM_IF_DEBUG(StateList stateList);
 
-	enum : unsigned {
-		ReverseDepth = 1,
-		DeepWidth	 = 0,
-		StateCount	 = 1,
-		ForkCount	 = 0,
-		ProngCount	 = 0,
-		Width		 = 1,
+	using Base				= Base<Context, PayloadList>;
+
+	enum : LongIndex {
+		REVERSE_DEPTH = 1,
+		DEEP_WIDTH	  = 0,
+		STATE_COUNT	  = 1,
+		FORK_COUNT	  = 0,
+		PRONG_COUNT	  = 0,
+		WIDTH		  = 1,
 	};
 
-	_S(StateRegistry& stateRegistry,
+	_S(StateRegistryBase& stateRegistry,
 	   const Parent parent,
-	   Parents& stateParents,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
 
-	inline void deepForwardSubstitute	(Control&,		   Context&,		 LoggerInterface* const)		{}
-	inline bool deepSubstitute			(Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepRegister		 (StateRegistryBase& stateRegistry, const Parent parent);
 
-	inline void deepEnterInitial		(				   Context& context, LoggerInterface* const logger);
-	inline void deepEnter				(				   Context& context, LoggerInterface* const logger);
+	inline void deepForwardGuard	 (TransitionControl&)							{}
+	inline bool deepGuard			 (TransitionControl& control);
 
-	inline bool deepUpdateAndTransition	(Control& control, Context& context, LoggerInterface* const logger);
-	inline void deepUpdate				(				   Context& context, LoggerInterface* const logger);
+	inline void deepEnterInitial	 (Control& control);
+	inline void deepEnter			 (Control& control);
+
+	inline bool deepUpdate			 (TransitionControl& control);
 
 	template <typename TEvent>
-	inline void deepReact				(const TEvent& event,
-										 Control& control, Context& context, LoggerInterface* const logger);
+	inline void deepReact			 (const TEvent& event, TransitionControl& control);
 
-	inline void deepLeave				(				   Context& context, LoggerInterface* const logger);
+	inline void deepExit			 (Control& control);
 
-	inline void deepForwardRequest(const enum Transition::Type)												{}
-	inline void deepRequestRemain()																			{}
-	inline void deepRequestRestart()																		{}
-	inline void deepRequestResume()																			{}
-	inline void deepChangeToRequested	(				   Context&,		 LoggerInterface* const)		{}
+	inline void deepForwardRequest	 (const enum Transition::Type)					{}
+	inline void deepRequestRemain	 ()												{}
+	inline void deepRequestRestart	 ()												{}
+	inline void deepRequestResume	 ()												{}
+	inline void deepChangeToRequested(Control&)										{}
 
 #if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
-	static constexpr bool isBare()		{ return std::is_same<Head, Base>::value; }
+	static constexpr bool isBare()	 { return std::is_same<Head, Base>::value;		 }
 
-	enum : unsigned {
-		NameCount	 = isBare() ? 0 : 1,
+	enum : LongIndex {
+		NAME_COUNT	 = isBare() ? 0 : 1,
 	};
 #endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static const char* name();
 
-	void deepGetNames(const unsigned parent,
-					  const enum StateInfo::RegionType region,
-					  const unsigned depth,
-					  StateInfos& stateInfos) const;
+	void deepGetNames(const LongIndex parent,
+					  const enum StructureStateInfo::RegionType region,
+					  const ShortIndex depth,
+					  StructureStateInfos& stateInfos) const;
 
 	void deepIsActive(const bool isActive,
-					  unsigned& index,
+					  LongIndex& index,
 					  MachineStructure& structure) const;
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
-	static const char* fullName();
-
 	template <typename>
 	struct MemberTraits;
 
@@ -82,17 +91,18 @@ struct M<TContext, TMaxSubstitutions>::_S {
 	template <typename TMethodType, LoggerInterface::Method TMethodId>
 	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Base>::value>::type
 	log(LoggerInterface& logger) const {
-		logger.record(typeid(Head), fullName(), TMethodId, methodName(TMethodId));
+		logger.recordMethod(typeid(Head), TMethodId);
 	}
 #endif
 
 	Head _head;
 
-	HSFM_IF_DEBUG(const TypeInfo _type = TypeInfo::get<Head>());
+	HSFM_IF_DEBUG(const std::type_index _type = typeid(Head));
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+}
 
-#include "machine_state_methods.inl"
+#include "machine_state.inl"

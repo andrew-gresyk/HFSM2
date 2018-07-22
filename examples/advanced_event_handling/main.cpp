@@ -23,8 +23,7 @@
 
 // optional: enable FSM structure report in debugger
 #define HFSM_ENABLE_STRUCTURE_REPORT
-
-#include <hfsm/machine_single.hpp>
+#include <hfsm/machine.hpp>
 
 #include <iostream>
 
@@ -48,7 +47,7 @@ struct Reactive
 	: M::Base
 {
 	// handle a single event type - TransitionEvent
-	void react(const TransitionEvent&, Control& control, Context&)  {
+	void react(const TransitionEvent&, TransitionControl& control)  {
 		std::cout << "  Reactive: reacting to TransitionEvent\n";
 
 		control.changeTo<Target>();
@@ -71,12 +70,12 @@ struct Reactive
 		: M::Base
 	{
 		// handle two event types - PrimaryEvent
-		void react(const PrimaryEvent&, Control&, Context&)  {
+		void react(const PrimaryEvent&, TransitionControl&)  {
 			std::cout << "  ConcreteHandler: reacting to PrimaryEvent\n";
 		}
 
 		// and SecondaryEvent
-		void react(const SecondaryEvent&, Control&, Context&)  {
+		void react(const SecondaryEvent&, TransitionControl&)  {
 			std::cout << "  ConcreteHandler: reacting to SecondaryEvent\n";
 		}
 
@@ -91,7 +90,7 @@ struct Reactive
 	{
 		// handle all possible event types
 		template <typename TEvent>
-		void react(const TEvent&, Control&, Context&)  {
+		void react(const TEvent&, TransitionControl&)  {
 			std::cout << "  TemplateHandler: reacting to TEvent\n";
 		}
 	};
@@ -104,14 +103,14 @@ struct Reactive
 		// use std::enable_if to build more complex conditional event handling
 		template <typename TEvent>
 		typename std::enable_if<std::is_class<TEvent>::value>::type
-		react(const TEvent&, Control&, Context&)  {
+		react(const TEvent&, TransitionControl&)  {
 			std::cout << "  EnableIfHandler: reacting to a <class event>\n";
 		}
 
 		// but remember to cover all the remaining cases
 		template <typename TEvent>
 		typename std::enable_if<!std::is_class<TEvent>::value>::type
-		react(const TEvent&, Control&, Context&)  {
+		react(const TEvent&, TransitionControl&)  {
 			std::cout << "  EnableIfHandler: reacting to a <non-class event>\n";
 		}
 	};
@@ -124,7 +123,7 @@ struct Reactive
 struct Target
 	: M::Base
 {
-	void enter(Context&) {
+	void enter(Control&) {
 		std::cout << "    changed to Target\n";
 	}
 };

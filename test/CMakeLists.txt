@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # hfsm_test target
 #-------------------------------------------------------------------------------
-add_executable(hfsm_test main.cpp)
+add_executable(hfsm_test main.cpp deprecated.cpp)
 target_link_libraries(hfsm_test hfsm)
 add_dependencies(hfsm_test hfsm)
 

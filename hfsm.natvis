@@ -23,7 +23,7 @@
 		<Expand HideRawView="true">
 			<IndexListItems Condition="_count > 0">
 				<Size>_count</Size>
-				<ValueNode>*(($T1*) &amp;((Item*) (&amp;_count + 1))[$i])</ValueNode>
+				<ValueNode>*(($T1*) &amp;((Item*) (&amp;_count + 2))[$i])</ValueNode>
 			</IndexListItems>
 		</Expand>
 	</Type>
@@ -63,9 +63,9 @@
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm::detail::Wrap&lt;*&gt;">
-		<DisplayString>{*($T1*) &amp;_storage._Val}</DisplayString>
+		<DisplayString>{*($T1*) &amp;_storage}</DisplayString>
     <Expand HideRawView="true">
-			<ExpandedItem>*($T1*) &amp;_storage._Val</ExpandedItem>
+			<ExpandedItem>*($T1*) &amp;_storage</ExpandedItem>
 		</Expand>
 	</Type>
 
