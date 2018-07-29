@@ -48,98 +48,104 @@ struct Context {
 // convenience typedef
 using M = hfsm::Machine<Context>;
 
-////////////////////////////////////////////////////////////////////////////////
+#define S(s) struct s
 
-// forward declared for Red::transition()
-struct Off;
+// state machine structure
+using FSM = M::PeerRoot<
+				// sub-machine ..
+				M::Composite<S(On),
+					// .. with 4 sub-states
+					S(Red),
+					S(YellowDownwards),
+					S(YellowUpwards),
+					S(Green)
+				>,
+				S(Off)
+			>;
+
+#undef S
+
+////////////////////////////////////////////////////////////////////////////////
 
 // top-level region in the hierarchy
 struct On
-	: M::Base // necessary boilerplate!
+	: FSM::Base // necessary boilerplate!
 {
 	// called on state entry
 	void enter(Control& control) {
 		control.context().cycleCount = 0;
 		std::cout << "On" << std::endl;
 	}
+};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
-	// forward declared for Red::transition()
-	struct YellowDownwards;
+// sub-states
+struct Red
+	: FSM::Base
+{
+	void enter(Control& control) {
+		++control.context().cycleCount;
+		std::cout << "  Red" << std::endl;
+	}
 
-	// sub-states
-	struct Red
-		: M::Base
-	{
-		void enter(Control& control) {
-			++control.context().cycleCount;
-			std::cout << "  Red" << std::endl;
-		}
+	// state can initiate transitions to _any_ other state
+	void update(TransitionControl& control) {
+		// multiple transitions can be initiated, can be useful in a hierarchy
+		if (control.context().cycleCount > 3)
+			control.changeTo<Off>();
+		else
+			control.changeTo<YellowDownwards>();
+	}
+};
 
-		// state can initiate transitions to _any_ other state
-		void update(TransitionControl& control) {
-			// multiple transitions can be initiated, can be useful in a hierarchy
-			if (control.context().cycleCount > 3)
-				control.changeTo<Off>();
-			else
-				control.changeTo<YellowDownwards>();
-		}
-	};
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+struct YellowDownwards
+	: FSM::Base
+{
+	void enter(Control&) {
+		std::cout << "    Yellow v" << std::endl;
+	}
 
-	// forward declared for transition()
-	struct Green;
+	void update(TransitionControl& control) {
+		control.changeTo<Green>();
+	}
+};
 
-	struct YellowDownwards
-		: M::Base
-	{
-		void enter(Control&) {
-			std::cout << "    Yellow v" << std::endl;
-		}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		void update(TransitionControl& control) {
-			control.changeTo<Green>();
-		}
-	};
+struct YellowUpwards
+	: FSM::Base
+{
+	void enter(Control&) {
+		std::cout << "    Yellow ^" << std::endl;
+	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	void update(TransitionControl& control) {
+		control.changeTo<Red>();
+	}
+};
 
-	struct YellowUpwards
-		: M::Base
-	{
-		void enter(Control&) {
-			std::cout << "    Yellow ^" << std::endl;
-		}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		void update(TransitionControl& control) {
-			control.changeTo<Red>();
-		}
-	};
+struct Green
+	: FSM::Base
+{
+	void enter(Control&) {
+		std::cout << "      Green" << std::endl;
+	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	struct Green
-		: M::Base
-	{
-		void enter(Control&) {
-			std::cout << "      Green" << std::endl;
-		}
-
-		void update(TransitionControl& control) {
-			control.changeTo<YellowUpwards>();
-		}
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	void update(TransitionControl& control) {
+		control.changeTo<YellowUpwards>();
+	}
 };
 
 //------------------------------------------------------------------------------
 
 // another top-level state
 struct Off
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&) {
 		std::cout << "Off" << std::endl;
@@ -153,18 +159,7 @@ main() {
 	// shared data storage instance
 	Context context;
 
-	// state machine structure
-	M::PeerRoot<
-		// sub-machine ..
-		M::Composite<On,
-			// .. with 4 sub-states
-			On::Red,
-			On::YellowDownwards,
-			On::YellowUpwards,
-			On::Green
-		>,
-		Off
-	> machine(context);
+	FSM::Instance machine(context);
 
 	while (machine.isActive<Off>() == false)
 		machine.update();

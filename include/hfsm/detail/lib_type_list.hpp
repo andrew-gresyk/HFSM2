@@ -5,47 +5,41 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using TypeListIndex = unsigned char;
-
-enum : TypeListIndex { INVALID_TYPE_LIST_INDEX = (TypeListIndex) -1 };
-
-//------------------------------------------------------------------------------
-
-template <TypeListIndex, typename...>
+template <LongIndex, typename...>
 struct TypeListBuilder;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <TypeListIndex NIndex, typename TFirst, typename... TRest>
+template <LongIndex NIndex, typename TFirst, typename... TRest>
 struct TypeListBuilder<NIndex, TFirst, TRest...>
 	: TypeListBuilder<NIndex + 1, TRest...>
 {
-	enum : TypeListIndex { INDEX = NIndex };
+	static constexpr LongIndex INDEX = NIndex;
 
-	static_assert(INDEX < (1 << 8 * sizeof(TypeListIndex)), "Too many types");
+	static_assert(INDEX < (1 << 8 * sizeof(LongIndex)), "Too many types");
 
 	using Type = TFirst;
 	using Base = TypeListBuilder<INDEX + 1, TRest...>;
 
 	template <typename T>
-	static constexpr TypeListIndex index() {
-		return std::is_same<T, Type>::value ? (TypeListIndex) INDEX : Base::template index<T>();
+	static constexpr LongIndex index() {
+		return std::is_same<T, Type>::value ? INDEX : Base::template index<T>();
 	}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <TypeListIndex NIndex, typename TFirst>
+template <LongIndex NIndex, typename TFirst>
 struct TypeListBuilder<NIndex, TFirst> {
-	enum : TypeListIndex { INDEX = NIndex };
+	static constexpr LongIndex INDEX = NIndex;
 
-	static_assert(NIndex < (1 << 8 * sizeof(TypeListIndex)), "Too many types");
+	static_assert(NIndex < (1 << 8 * sizeof(LongIndex)), "Too many types");
 
 	using Type = TFirst;
 
 	template <typename T>
-	static constexpr TypeListIndex index() {
-		return std::is_same<T, Type>::value ? (TypeListIndex) INDEX : INVALID_TYPE_LIST_INDEX;
+	static constexpr LongIndex index() {
+		return std::is_same<T, Type>::value ? INDEX : INVALID_LONG_INDEX;
 	}
 };
 
@@ -63,21 +57,16 @@ struct TypeListT
 	using Base = TypeListBuilder<0, Ts...>;
 	using Container = VariantT<Ts...>;
 
-	using IndexType = typename UnsignedIndex<sizeof...(Ts)>::Type;
-
-	enum : IndexType {
-		SIZE = sizeof...(Ts),
-		INVALID_INDEX = (IndexType) - 1,
-	};
+	static constexpr LongIndex SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr IndexType index() {
+	static constexpr LongIndex index() {
 		return Base::template index<T>();
 	}
 
 	template <typename T>
 	static constexpr bool contains() {
-		return Base::template index<T>() != INVALID_TYPE_LIST_INDEX;
+		return Base::template index<T>() != INVALID_LONG_INDEX;
 	}
 };
 
@@ -103,12 +92,11 @@ struct MergeT<TypeListT<Ts1...>, TypeListT<Ts2...>> {
 
 #pragma pack(push, 1)
 
+// TODO: add assignment op and templated type conversion op
+
 template <typename... Ts>
 class VariantT {
 	using Types = TypeListT<Ts...>;
-	using IndexType = typename Types::IndexType;
-
-	enum : IndexType { INVALID_INDEX = Types::INVALID_INDEX };
 
 public:
 	inline VariantT() = default;
@@ -119,19 +107,19 @@ public:
 		, _index(Types::template index<T>())
 	{
 		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
-		assert(_index != INVALID_INDEX);
+		assert(_index != INVALID_LONG_INDEX);
 	}
 
-	inline explicit operator bool() const { return _index != INVALID_INDEX; }
+	inline explicit operator bool() const { return _index != INVALID_LONG_INDEX; }
 
 	inline void reset() {
 		_pointer = nullptr;
-		_index = INVALID_INDEX;
+		_index = INVALID_LONG_INDEX;
 	}
 
 	template <typename T>
 	inline typename std::enable_if<Types::template contains<T>(), T>::type*
-	get() {
+	get() const {
 		const auto INDEX = Types::template index<T>();
 
 		assert(INDEX == _index);
@@ -142,7 +130,7 @@ public:
 
 private:
 	alignas(alignof(void*)) void* _pointer = nullptr;
-	IndexType _index = INVALID_INDEX;
+	LongIndex _index = INVALID_LONG_INDEX;
 };
 
 #pragma pack(pop)

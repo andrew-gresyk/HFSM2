@@ -7,34 +7,34 @@
 //
 //	---------- ctor: ---------
 //
-//	Top::enter()
-//	Top::From::enter()
+//	enter()
+//	From::enter()
 //
 //	--------- update: --------
 //
-//	Top::update()
-//	Top::From::update()
+//	update()
+//	From::update()
 //
 //	--------- react: ---------
 //
-//	Top::react()
-//	Top::From::react()
-//	changeTo<Top::To>()
-//	Top::To::guard()
-//	Top::From::exit()
-//	Top::To::enter()
+//	react()
+//	From::react()
+//	changeTo<To>()
+//	To::guard()
+//	From::exit()
+//	To::enter()
 //
 //	-- external transition: --
 //
-//	changeTo<Top::From>()
+//	changeTo<From>()
 //
 //	--------- detach: --------
 //
 //
 //	---------- dtor: ---------
 //
-//	Top::To::exit()
-//	Top::exit()
+//	To::exit()
+//	exit()
 //
 //	---------- done! ---------
 
@@ -52,21 +52,40 @@ struct Context {};
 // convenience typedef
 using M = hfsm::Machine<Context>;
 
+#define S(s) struct s
+
+using FSM = M::Root<S(Top),
+				S(From),
+				S(To)
+			>;
+
+#undef S
+
+//------------------------------------------------------------------------------
+
+static_assert(FSM::contains<Top>(),	 "");
+static_assert(FSM::contains<From>(), "");
+static_assert(FSM::contains<To>(),	 "");
+
+static_assert(FSM::stateId<Top>()  == 0, "");
+static_assert(FSM::stateId<From>() == 1, "");
+static_assert(FSM::stateId<To>()   == 2, "");
+
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Logger
 	: hfsm::LoggerInterface
 {
-	void recordMethod(const std::type_index state,
+	void recordMethod(const hfsm::StateID /*origin*/,
 					  const Method method) override
 	{
-		std::cout << hfsm::stateName(state) << "::" << hfsm::methodName(method) << "()\n";
+		std::cout << /*hfsm::stateName(origin) << "::" <<*/ hfsm::methodName(method) << "()\n";
 	}
 
 	void recordTransition(const Transition transition,
-						  const std::type_index state) override
+						  const hfsm::StateID /*target*/) override
 	{
-		std::cout << hfsm::transitionName(transition) << "<" << hfsm::stateName(state) << ">()\n";
+		std::cout << hfsm::transitionName(transition) << "<" << /*hfsm::stateName(target) << ">()"*/ "\n";
 	}
 };
 
@@ -74,7 +93,7 @@ struct Logger
 
 // top-level state in the hierarchy
 struct Top
-	: M::Base
+	: FSM::Base // necessary boilerplate!
 {
 	// all state methods:
 	void guard(TransitionControl&)					{}	// not going to be called in this example
@@ -83,59 +102,41 @@ struct Top
 	template <typename TEvent>
 	void react(const TEvent&, TransitionControl&)	{}
 	void exit(Control&)								{}
+};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// forward declared for Red::transition()
-	struct To;
+// initial state
+struct From
+	: FSM::Base
+{
+	// all state methods:
+	void guard(TransitionControl&)					{}	// not going to be called in this example
+	void enter(Control&)							{}
+	void update(TransitionControl&)					{}
+	template <typename TEvent>
+	void react(const TEvent&, TransitionControl& control)	{ control.changeTo<To>(); }
+	void exit(Control&)								{}
+};
 
-	// initial state
-	struct From
-		: M::Base // necessary boilerplate!
-	{
-		// all state methods:
-		void guard(TransitionControl&)					{}	// not going to be called in this example
-		void enter(Control&)							{}
-		void update(TransitionControl&)					{}
-		template <typename TEvent>
-		void react(const TEvent&, TransitionControl& control)	{ control.changeTo<To>(); }
-		void exit(Control&)								{}
-	};
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	// transition target state
-	struct To
-		: M::Base
-	{
-		// all state methods:
-		void guard(TransitionControl&)					{}
-		void enter(Control&)							{}
-		void update(TransitionControl&)					{}
-		template <typename TEvent>
-		void react(const TEvent&, TransitionControl&)	{}	// not going to be called in this example
-		void exit(Control&)								{}
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// transition target state
+struct To
+	: FSM::Base
+{
+	// all state methods:
+	void guard(TransitionControl&)					{}
+	void enter(Control&)							{}
+	void update(TransitionControl&)					{}
+	template <typename TEvent>
+	void react(const TEvent&, TransitionControl&)	{}	// not going to be called in this example
+	void exit(Control&)								{}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 int main() {
-	using FSM = M::Root<Top,
-						Top::From,
-						Top::To
-				>;
-
-	static_assert(FSM::StateList::contains<Top>(), "");
-	static_assert(FSM::StateList::contains<Top::From>(), "");
-	static_assert(FSM::StateList::contains<Top::To>(), "");
-
-	static_assert(FSM::StateList::index<Top>() == 0, "");
-	static_assert(FSM::StateList::index<Top::From>() == 1, "");
-	static_assert(FSM::StateList::index<Top::To>() == 2, "");
-
 	{
 		// shared data storage instance
 		Context context;
@@ -146,11 +147,11 @@ int main() {
 		std::cout << "\n---------- ctor: ---------\n\n";
 
 		// state machine instance - all initial states are activated
-		FSM machine(context, &logger);
+		FSM::Instance machine(context, &logger);
 
 		// output:
-		//	Top::enter()
-		//	Top::From::enter()
+		//	enter()
+		//	From::enter()
 
 		std::cout << "\n--------- update: --------\n\n";
 
@@ -158,27 +159,27 @@ int main() {
 		machine.update();
 
 		// output:
-		//	Top::update()
-		//	Top::From::update()
+		//	update()
+		//	From::update()
 
 		std::cout << "\n--------- react: ---------\n\n";
 
 		machine.react(1);
 
 		// output:
-		//	Top::react()
-		//	Top::From::react()
-		//	changeTo<Top::To>()
-		//	Top::To::guard()
-		//	Top::From::exit()
-		//	Top::To::enter()
+		//	react()
+		//	From::react()
+		//	changeTo<To>()
+		//	To::guard()
+		//	From::exit()
+		//	To::enter()
 
 		std::cout << "\n-- external transition: --\n\n";
 
-		machine.changeTo<Top::From>();
+		machine.changeTo<From>();
 
 		// output:
-		//	changeTo<Top::From>()
+		//	changeTo<From>()
 
 		std::cout << "\n--------- detach: --------\n\n";
 
@@ -197,8 +198,8 @@ int main() {
 	}
 
 	// output:
-	//	Top::To::exit()
-	//	Top::exit()
+	//	To::exit()
+	//	exit()
 
 	std::cout << "\n---------- done! ---------\n\n";
 

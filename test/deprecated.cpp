@@ -26,7 +26,7 @@ namespace Event {
 //------------------------------------------------------------------------------
 
 struct Status {
-	hfsm::detail::TypeInfo state;
+	std::type_index state;
 	Event::Enum func;
 
 	inline bool operator == (const Status& reference) const {
@@ -71,8 +71,34 @@ using M = hfsm::Machine<Context>;
 
 //------------------------------------------------------------------------------
 
+#define S(s) struct s
+
+using FSM = M::PeerRoot<
+				M::Composite<S(A),
+					S(A_1),
+					M::Composite<S(A_2),
+						S(A_2_1),
+						S(A_2_2)
+					>
+				>,
+				M::Orthogonal<S(B),
+					M::Composite<S(B_1),
+						S(B_1_1),
+						S(B_1_2)
+					>,
+					M::Composite<S(B_2),
+						S(B_2_1),
+						S(B_2_2)
+					>
+				>
+			>;
+
+#undef S
+
+////////////////////////////////////////////////////////////////////////////////
+
 class Timed
-	: public M::Bare
+	: public FSM::Bare
 {
 public:
 	void preEnter(Context&)		{ _elapsed = 0.0f;			}
@@ -87,7 +113,7 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class Tracked
-	: public M::Bare
+	: public FSM::Bare
 {
 public:
 	void preEnter(Context&) {
@@ -116,59 +142,59 @@ struct Action {};
 
 template <typename T>
 struct HistoryBase
-	: M::Bare
+	: FSM::Bare
 {
 	void preGuard(Context& _) const {
-		_.history.push_back(Status{ M::TypeInfo::get<T>(), Event::GUARD });
+		_.history.push_back(Status{ typeid(T), Event::GUARD });
 	}
 
 	void preEnter(Context& _) {
-		_.history.push_back(Status{ M::TypeInfo::get<T>(), Event::ENTER });
+		_.history.push_back(Status{ typeid(T), Event::ENTER });
 	}
 
 	void preUpdate(Context& _) {
-		_.history.push_back(Status{ M::TypeInfo::get<T>(), Event::UPDATE });
+		_.history.push_back(Status{ typeid(T), Event::UPDATE });
 	}
 
 	void preReact(const Action&, Context& _) {
-		_.history.push_back(Status{ M::TypeInfo::get<T>(), Event::REACT_REQUEST });
+		_.history.push_back(Status{ typeid(T), Event::REACT_REQUEST });
 	}
 
 	void postExit(Context& _) {
-		_.history.push_back(Status{ M::TypeInfo::get<T>(), Event::EXIT });
+		_.history.push_back(Status{ typeid(T), Event::EXIT });
 	}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-using Base = M::BaseT<Tracked, Timed, HistoryBase<T>>;
+using Base = FSM::BaseT<Tracked, Timed, HistoryBase<T>>;
 
 //------------------------------------------------------------------------------
 
 template <typename T>
 void
-changeTo(M::TransitionControl& control, Context::History& history) {
+changeTo(FSM::TransitionControl& control, Context::History& history) {
 	control.template changeTo<T>();
-	history.push_back(Status{ M::TypeInfo::get<T>(), Event::RESTART });
+	history.push_back(Status{ typeid(T), Event::RESTART });
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 void
-resume(M::TransitionControl& control, Context::History& history) {
+resume(FSM::TransitionControl& control, Context::History& history) {
 	control.template resume<T>();
-	history.push_back(Status{ M::TypeInfo::get<T>(), Event::RESUME });
+	history.push_back(Status{ typeid(T), Event::RESUME });
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 void
-schedule(M::TransitionControl& control, Context::History& history) {
+schedule(FSM::TransitionControl& control, Context::History& history) {
 	control.template schedule<T>();
-	history.push_back(Status{ M::TypeInfo::get<T>(), Event::SCHEDULE });
+	history.push_back(Status{ typeid(T), Event::SCHEDULE });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -177,8 +203,8 @@ template <typename T>
 struct Reacting
 	: Base<T>
 {
-	void react(const Action&, M::TransitionControl& control) {
-		control._().history.push_back(Status{ M::TypeInfo::get<T>(), Event::REACT });
+	void react(const Action&, FSM::TransitionControl& control) {
+		control._().history.push_back(Status{ typeid(T), Event::REACT });
 	}
 };
 
@@ -280,25 +306,7 @@ void deprecated() {
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		M::PeerRoot<
-			M::Composite<A,
-				A_1,
-				M::Composite<A_2,
-					A_2_1,
-					A_2_2
-				>
-			>,
-			M::Orthogonal<B,
-				M::Composite<B_1,
-					B_1_1,
-					B_1_2
-				>,
-				M::Composite<B_2,
-					B_2_1,
-					B_2_2
-				>
-			>
-		> machine(_);
+		FSM::Instance machine(_);
 
 		static_assert(machine.DEEP_WIDTH  ==  2, "");
 		static_assert(machine.STATE_COUNT == 13, "");

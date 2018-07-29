@@ -2,7 +2,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Logger::recordMethod(const std::type_index origin,
+void Logger::recordMethod(const hfsm::StateID origin,
 						  const Method method)
 {
 	switch (method) {
@@ -29,17 +29,17 @@ void Logger::recordMethod(const std::type_index origin,
 //------------------------------------------------------------------------------
 
 void Logger::recordTransition(const Transition transition,
-							  const std::type_index target)
+							  const hfsm::StateID target)
 {
 	switch (transition) {
 		case Transition::RESTART:
-			history.emplace_back(typeid(Event), Event::RESTART,  target);
+			history.emplace_back(hfsm::INVALID_STATE_ID, Event::RESTART,  target);
 			break;
 		case Transition::RESUME:
-			history.emplace_back(typeid(Event), Event::RESUME,   target);
+			history.emplace_back(hfsm::INVALID_STATE_ID, Event::RESUME,   target);
 			break;
 		case Transition::SCHEDULE:
-			history.emplace_back(typeid(Event), Event::SCHEDULE, target);
+			history.emplace_back(hfsm::INVALID_STATE_ID, Event::SCHEDULE, target);
 			break;
 		default:
 			assert(false);

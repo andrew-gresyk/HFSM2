@@ -7,11 +7,9 @@ template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 _R<TC, TPL, TMS, TA>::_R(Context& context
 						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
-	, _apex{_stateRegistry, Parent{}, _forkParents, _forkPointers}
+	, _apex{_stateRegistry2, Parent{}, _forkParents, _forkPointers}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
-	_apex.deepRegister(_stateRegistry, Parent{});
-
 	HFSM_IF_STRUCTURE(getStateNames());
 
 	{
@@ -62,13 +60,13 @@ _R<TC, TPL, TMS, TA>::react(const TEvent& event) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
-_R<TC, TPL, TMS, TA>::changeTo(const std::type_index state)	{
-	const Transition transition{Transition::Type::RESTART, state};
+_R<TC, TPL, TMS, TA>::changeTo(const StateID stateId)	{
+	const Transition transition(Transition::Type::RESTART, stateId);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::RESTART, state);
+		_logger->recordTransition(LoggerInterface::Transition::RESTART, stateId);
 #endif
 }
 
@@ -76,13 +74,13 @@ _R<TC, TPL, TMS, TA>::changeTo(const std::type_index state)	{
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
-_R<TC, TPL, TMS, TA>::resume(const std::type_index state) {
-	const Transition transition{Transition::Type::RESUME, state};
+_R<TC, TPL, TMS, TA>::resume(const StateID stateId) {
+	const Transition transition(Transition::Type::RESUME, stateId);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::RESUME, state);
+		_logger->recordTransition(LoggerInterface::Transition::RESUME, stateId);
 #endif
 }
 
@@ -90,13 +88,13 @@ _R<TC, TPL, TMS, TA>::resume(const std::type_index state) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
-_R<TC, TPL, TMS, TA>::schedule(const std::type_index state) {
-	const Transition transition{Transition::Type::SCHEDULE, state};
+_R<TC, TPL, TMS, TA>::schedule(const StateID stateId) {
+	const Transition transition(Transition::Type::SCHEDULE, stateId);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::SCHEDULE, state);
+		_logger->recordTransition(LoggerInterface::Transition::SCHEDULE, stateId);
 #endif
 }
 
@@ -104,16 +102,16 @@ _R<TC, TPL, TMS, TA>::schedule(const std::type_index state) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template contains<TPayload>()>::type
-_R<TC, TPL, TMS, TA>::changeTo(const std::type_index state,
+void
+_R<TC, TPL, TMS, TA>::changeTo(const StateID stateId,
 							   TPayload* const payload)
 {
-	const Transition transition{Transition::Type::RESTART, state, payload};
+	const Transition transition(Transition::Type::RESTART, stateId, payload);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::RESTART, state);
+		_logger->recordTransition(LoggerInterface::Transition::RESTART, stateId);
 #endif
 }
 
@@ -121,11 +119,11 @@ _R<TC, TPL, TMS, TA>::changeTo(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template contains<TPayload>()>::type
-_R<TC, TPL, TMS, TA>::resume(const std::type_index state,
+void
+_R<TC, TPL, TMS, TA>::resume(const StateID stateId,
 							 TPayload* const payload)
 {
-	const Transition transition{Transition::Type::RESUME, state, payload};
+	const Transition transition(Transition::Type::RESUME, stateId, payload);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
@@ -138,11 +136,11 @@ _R<TC, TPL, TMS, TA>::resume(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template contains<TPayload>()>::type
-_R<TC, TPL, TMS, TA>::schedule(const std::type_index state,
+void
+_R<TC, TPL, TMS, TA>::schedule(const StateID stateId,
 							   TPayload* const payload)
 {
-	const Transition transition{Transition::Type::SCHEDULE, state, payload};
+	const Transition transition(Transition::Type::SCHEDULE, stateId, payload);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
@@ -155,8 +153,8 @@ _R<TC, TPL, TMS, TA>::schedule(const std::type_index state,
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
-_R<TC, TPL, TMS, TA>::resetStateData(const std::type_index state) {
-	auto& stateInfo = _stateRegistry[state];
+_R<TC, TPL, TMS, TA>::resetStateData(const StateID stateId) {
+	auto& stateInfo = _stateRegistry2[stateId];
 
 	stateInfo.payload.reset();
 }
@@ -164,9 +162,22 @@ _R<TC, TPL, TMS, TA>::resetStateData(const std::type_index state) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TPayload>
+void
+_R<TC, TPL, TMS, TA>::setStateData(const StateID stateId,
+								   TPayload* const payload)
+{
+	auto& stateInfo = _stateRegistry2[stateId];
+
+	stateInfo.payload = payload;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 bool
-_R<TC, TPL, TMS, TA>::isStateDataSet(const std::type_index state) {
-	auto& stateInfo = _stateRegistry[state];
+_R<TC, TPL, TMS, TA>::isStateDataSet(const StateID stateId) const {
+	const auto& stateInfo = _stateRegistry2[stateId];
 
 	return !!stateInfo.payload;
 }
@@ -175,23 +186,10 @@ _R<TC, TPL, TMS, TA>::isStateDataSet(const std::type_index state) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
-typename std::enable_if<TPL::template contains<TPayload>()>::type
-_R<TC, TPL, TMS, TA>::setStateData(const std::type_index state,
-								   TPayload* const payload)
-{
-	auto& stateInfo = _stateRegistry[state];
-
-	stateInfo.payload = payload;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
-template <typename TPayload>
-typename std::enable_if<TPL::template contains<TPayload>(), TPayload>::type*
-_R<TC, TPL, TMS, TA>::getStateData(const std::type_index state) {
-	auto& stateInfo = _stateRegistry[state];
-	auto& payload = stateInfo.payload;
+TPayload*
+_R<TC, TPL, TMS, TA>::getStateData(const StateID stateId) const {
+	const auto& stateInfo = _stateRegistry2[stateId];
+	const auto& payload = stateInfo.payload;
 
 	return payload.template get<TPayload>();
 }
@@ -200,8 +198,8 @@ _R<TC, TPL, TMS, TA>::getStateData(const std::type_index state) {
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 bool
-_R<TC, TPL, TMS, TA>::isActive(const std::type_index state) {
-	const auto& stateInfo = _stateRegistry[state];
+_R<TC, TPL, TMS, TA>::isActive(const StateID stateId) const {
+	const auto& stateInfo = _stateRegistry2[stateId];
 
 	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
 		const auto& fork = *_forkPointers[parent.fork];
@@ -213,10 +211,24 @@ _R<TC, TPL, TMS, TA>::isActive(const std::type_index state) {
 	return false;
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename T>
+bool
+_R<TC, TPL, TMS, TA>::isActive() const {
+	constexpr auto id = stateId<T>();
+	static_assert(id != INVALID_STATE_ID, "State not in FSM");
+
+	return isActive(id);
+}
+
+//------------------------------------------------------------------------------
+
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 bool
-_R<TC, TPL, TMS, TA>::isResumable(const std::type_index state) {
-	const auto& stateInfo = _stateRegistry[state];
+_R<TC, TPL, TMS, TA>::isResumable(const StateID stateId) const {
+	const auto& stateInfo = _stateRegistry2[stateId];
 
 	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
 		const auto& fork = *_forkPointers[parent.fork];
@@ -226,6 +238,18 @@ _R<TC, TPL, TMS, TA>::isResumable(const std::type_index state) {
 	}
 
 	return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename T>
+bool
+_R<TC, TPL, TMS, TA>::isResumable() const {
+	constexpr auto id = stateId<T>();
+	static_assert(id != INVALID_STATE_ID, "State not in FSM");
+
+	return isResumable(id);
 }
 
 //------------------------------------------------------------------------------
@@ -288,12 +312,11 @@ _R<TC, TPL, TMS, TA>::processTransitions() {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::requestImmediate(const Transition request) {
-	const auto& stateInfo = _stateRegistry[*request.stateType];
+	const auto& stateInfo = _stateRegistry2[request.stateId];
 
 	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
 
-		HSFM_IF_DEBUG(fork.requestedType = parent.prongType);
 		fork.requested = parent.prong;
 	}
 
@@ -305,12 +328,11 @@ _R<TC, TPL, TMS, TA>::requestImmediate(const Transition request) {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::requestScheduled(const Transition request) {
-	const auto& stateInfo = _stateRegistry[*request.stateType];
+	const auto& stateInfo = _stateRegistry2[request.stateId];
 
 	const auto parent = stateInfo.parent;
 	auto& fork = *_forkPointers[parent.fork];
 
-	HSFM_IF_DEBUG(fork.resumableType = parent.prongType);
 	fork.resumable = parent.prong;
 }
 

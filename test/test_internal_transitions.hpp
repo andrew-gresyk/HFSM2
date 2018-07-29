@@ -1,6 +1,6 @@
 #include "test_shared.hpp"
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 using Context = float;
 using M = hfsm::Machine<Context>;
@@ -9,8 +9,34 @@ using Action = bool;
 
 //------------------------------------------------------------------------------
 
+#define S(s) struct s
+
+using FSM = M::PeerRoot<
+				M::Composite<S(A),
+					S(A_1),
+					M::Composite<S(A_2),
+						S(A_2_1),
+						S(A_2_2)
+					>
+				>,
+				M::Orthogonal<S(B),
+					M::Composite<S(B_1),
+						S(B_1_1),
+						S(B_1_2)
+					>,
+					M::Composite<S(B_2),
+						S(B_2_1),
+						S(B_2_2)
+					>
+				>
+			>;
+
+#undef S
+
+//------------------------------------------------------------------------------
+
 class Timed
-	: public M::Bare
+	: public FSM::Bare
 {
 public:
 	void preEnter(Context&)							{ _elapsed = 0.0f;			}
@@ -25,7 +51,7 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class Tracked
-	: public M::Bare
+	: public FSM::Bare
 {
 public:
 	void preEnter(Context&) {
@@ -51,7 +77,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 struct A
-	: M::Base
+	: FSM::Base
 {
 	//void guard(TransitionControl&)				{}
 	void enter(Control&)							{}
@@ -65,7 +91,7 @@ struct A
 struct A_2;
 
 struct A_1
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&)							{}
 
@@ -82,7 +108,7 @@ struct B;
 struct B_2_2;
 
 struct A_2
-	: M::BaseT<Tracked>
+	: FSM::BaseT<Tracked>
 {
 	void enter(Control&)							{}
 
@@ -104,7 +130,7 @@ struct A_2
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct A_2_1
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -113,7 +139,7 @@ struct A_2_1
 };
 
 struct A_2_2
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -124,7 +150,7 @@ struct A_2_2
 //------------------------------------------------------------------------------
 
 struct B
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -135,7 +161,7 @@ struct B
 //------------------------------------------------------------------------------
 
 struct B_1
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -145,7 +171,7 @@ struct B_1
 //------------------------------------------------------------------------------
 
 struct B_1_1
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -155,7 +181,7 @@ struct B_1_1
 //------------------------------------------------------------------------------
 
 struct B_1_2
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -165,7 +191,7 @@ struct B_1_2
 //------------------------------------------------------------------------------
 
 struct B_2
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -175,7 +201,7 @@ struct B_2
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_1
-	: M::Base
+	: FSM::Base
 {
 	void guard(TransitionControl& control) {
 		control.resume<B_2_2>();
@@ -189,7 +215,7 @@ struct B_2_1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_2
-	: M::BaseT<Tracked>
+	: FSM::BaseT<Tracked>
 {
 	void guard(TransitionControl& control) {
 		if (entryCount() == 2)
@@ -220,29 +246,18 @@ struct B_2_2
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using FSM = M::PeerRoot<
-				M::Composite<A,
-					A_1,
-					M::Composite<A_2,
-						A_2_1,
-						A_2_2
-					>
-				>,
-				M::Orthogonal<B,
-					M::Composite<B_1,
-						B_1_1,
-						B_1_2
-					>,
-					M::Composite<B_2,
-						B_2_1,
-						B_2_2
-					>
-				>
-			>;
-
-static_assert(FSM::DEEP_WIDTH  ==  2, "");
-static_assert(FSM::STATE_COUNT == 13, "");
-static_assert(FSM::FORK_COUNT  ==  6, "");
-static_assert(FSM::PRONG_COUNT == 10, "");
+// PeerRoot is 0
+static_assert(FSM::stateId<A>()		==  1, "");
+static_assert(FSM::stateId<A_1>()	==  2, "");
+static_assert(FSM::stateId<A_2>()	==  3, "");
+static_assert(FSM::stateId<A_2_1>()	==  4, "");
+static_assert(FSM::stateId<A_2_2>()	==  5, "");
+static_assert(FSM::stateId<B>()		==  6, "");
+static_assert(FSM::stateId<B_1>()	==  7, "");
+static_assert(FSM::stateId<B_1_1>()	==  8, "");
+static_assert(FSM::stateId<B_1_2>()	==  9, "");
+static_assert(FSM::stateId<B_2>()	== 10, "");
+static_assert(FSM::stateId<B_2_1>()	== 11, "");
+static_assert(FSM::stateId<B_2_2>()	== 12, "");
 
 ////////////////////////////////////////////////////////////////////////////////

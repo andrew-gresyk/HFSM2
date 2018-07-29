@@ -38,6 +38,8 @@
 
 //------------------------------------------------------------------------------
 
+// TODO: define better check macros
+
 #ifdef HFSM_ENABLE_ALIGNMENT_CHEKS
 	#define HFSM_IF_ALIGNMENT_CHEKS(...)	__VA_ARGS__
 #else
@@ -50,9 +52,6 @@
 #include "detail/lib_iterator.hpp"
 #include "detail/lib_array_view.hpp"
 #include "detail/lib_array.hpp"
-#include "detail/lib_wrap.hpp"
-#include "detail/lib_hash_table.hpp"
-#include "detail/lib_type_info.hpp"
 #include "detail/lib_type_list.hpp"
 
 #include "detail/debug_shared.hpp"
@@ -78,9 +77,11 @@
 
 //------------------------------------------------------------------------------
 
+#include "detail/machine_control.hpp"
 #include "detail/machine_utility.hpp"
 #include "detail/debug_structure_report.hpp"
 #include "detail/machine_injections.hpp"
+#include "detail/machine_forward.hpp"
 
 //------------------------------------------------------------------------------
 
@@ -96,51 +97,39 @@ struct _M {
 	using Context = TContext;
 	using Control = ControlT<Context>;
 
-	enum : ShortIndex {
-		MAX_SUBSTITUTIONS = TMaxSubstitutions
-	};
+	static constexpr ShortIndex MAX_SUBSTITUTIONS = TMaxSubstitutions;
 
 	using PayloadList = TPayloadList;
-
-	using TransitionControl = TransitionControlT<Context, PayloadList>;
-
-	using TypeInfo = ::hfsm::detail::TypeInfo;
-
-	using Bare = ::hfsm::detail::Bare<Context, PayloadList>;
-	using Base = ::hfsm::detail::Base<Context, PayloadList>;
-
-	template <typename... TInjections>
-	using BaseT = _B<TInjections...>;
 
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Composite			 = _C<Context, PayloadList, THead, TSubStates...>;
+	using Composite			 = _CF<THead, TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using CompositePeers	 = _C<Context, PayloadList, Base,  TSubStates...>;
+	using CompositePeers	 = _CF<void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Orthogonal		 = _O<Context, PayloadList, THead, TSubStates...>;
+	using Orthogonal		 = _OF<THead, TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeers	 = _O<Context, PayloadList, Base,  TSubStates...>;
+	using OrthogonalPeers	 = _OF<void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Root				 = _R<Context, PayloadList, MAX_SUBSTITUTIONS, Composite< THead, TSubStates...>>;
+	using Root				 = _RF<Context, PayloadList, MAX_SUBSTITUTIONS, Composite <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using PeerRoot			 = _R<Context, PayloadList, MAX_SUBSTITUTIONS, CompositePeers<	 TSubStates...>>;
+	using PeerRoot			 = _RF<Context, PayloadList, MAX_SUBSTITUTIONS, CompositePeers<	  TSubStates...>>;
 
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	 = _R<Context, PayloadList, MAX_SUBSTITUTIONS, Orthogonal<THead, TSubStates...>>;
+	using OrthogonalRoot	 = _RF<Context, PayloadList, MAX_SUBSTITUTIONS, Orthogonal<THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot = _R<Context, PayloadList, MAX_SUBSTITUTIONS, OrthogonalPeers<	 TSubStates...>>;
+	using OrthogonalPeerRoot = _RF<Context, PayloadList, MAX_SUBSTITUTIONS, OrthogonalPeers<  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -148,8 +137,6 @@ struct _M {
 ////////////////////////////////////////////////////////////////////////////////
 
 }
-
-//------------------------------------------------------------------------------
 
 template <ShortIndex TMaxSubstitutions = 4>
 struct Config {
@@ -159,7 +146,7 @@ struct Config {
 //------------------------------------------------------------------------------
 
 template <typename... Ts>
-using PayloadList = detail::TypeListT<Ts...>;
+using TransitionPayloads = detail::TypeListT<Ts...>;
 
 //------------------------------------------------------------------------------
 
@@ -173,17 +160,17 @@ struct Machine<TContext>
 
 template <typename TContext, typename TConfig>
 struct Machine<TContext, TConfig>
-	: detail::_M<TContext, PayloadList<>, TConfig::MAX_SUBSTITUTIONS>
+	: detail::_M<TContext, TransitionPayloads<>, TConfig::MAX_SUBSTITUTIONS>
 {};
 
 template <typename TContext, typename... TPayloads>
-struct Machine<TContext, PayloadList<TPayloads...>>
-	: detail::_M<TContext, PayloadList<TPayloads...>>
+struct Machine<TContext, TransitionPayloads<TPayloads...>>
+	: detail::_M<TContext, TransitionPayloads<TPayloads...>>
 {};
 
 template <typename TContext, typename TConfig, typename... TPayloads>
-struct Machine<TContext, PayloadList<TPayloads...>, TConfig>
-	: detail::_M<TContext, PayloadList<TPayloads...>, TConfig::MAX_SUBSTITUTIONS>
+struct Machine<TContext, TransitionPayloads<TPayloads...>, TConfig>
+	: detail::_M<TContext, TransitionPayloads<TPayloads...>, TConfig::MAX_SUBSTITUTIONS>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////

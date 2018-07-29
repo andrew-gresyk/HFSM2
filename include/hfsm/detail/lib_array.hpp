@@ -8,9 +8,7 @@ namespace detail {
 template <typename T, LongIndex NCapacity>
 class StaticArray {
 public:
-	enum : LongIndex {
-		CAPACITY = NCapacity,
-	};
+	static constexpr LongIndex CAPACITY = NCapacity;
 
 	using Item  = T;
 	using Index = typename UnsignedIndex<CAPACITY>::Type;
@@ -39,11 +37,9 @@ class Array
 	: public ArrayView<T>
 {
 public:
-	enum : LongIndex {
-		CAPACITY = NCapacity,
-		INVALID	 = INVALID_LONG_INDEX,
-		DUMMY	 = INVALID,
-	};
+	static constexpr LongIndex CAPACITY = NCapacity;
+	static constexpr LongIndex INVALID	= INVALID_LONG_INDEX;
+	static constexpr LongIndex DUMMY	= INVALID;
 
 	using View = ArrayView<T>;
 	using Item = typename View::Item;

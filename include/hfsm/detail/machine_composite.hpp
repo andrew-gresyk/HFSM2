@@ -3,41 +3,42 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
+template <StateID THeadID,
+		  typename TContext,
+		  typename TStateList,
 		  typename TPayloadList,
 		  typename THead,
 		  typename... TSubStates>
 struct _C final {
+	static constexpr StateID HEAD_ID = THeadID;
+
 	using Context			= TContext;
 	using Control			= ControlT<Context>;
+	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
+	using StateRegistry2	= StateRegistry2T<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using TransitionControl	= TransitionControlT<Context, PayloadList>;
-	using ControlLock		= ControlLockT<Context, PayloadList>;
+	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
+	using ControlLock		= typename TransitionControl::Lock;
 	using Head				= THead;
 	using Fork				= ForkT<Head>;
-	using State				= _S<Context, PayloadList, Head>;
-	using SubStates			= _CS<Context, PayloadList, 0, TSubStates...>;
-	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
-	HSFM_IF_DEBUG(StateList stateList);
+	using State				= _S <HEAD_ID,	   Context, StateList, PayloadList, Head>;
+	using SubStates			= _CS<HEAD_ID + 1, Context, StateList, PayloadList, 0, TSubStates...>;
+	using Forward			= _CF<Head, TSubStates...>;
+	using DeepStateList		= typename Forward::StateList;
 
-	enum : LongIndex {
-		REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1,
-		DEEP_WIDTH	  = SubStates::DEEP_WIDTH,
-		STATE_COUNT	  = State::STATE_COUNT + SubStates::STATE_COUNT,
-		FORK_COUNT	  = SubStates::FORK_COUNT + 1,
-		PRONG_COUNT	  = SubStates::PRONG_COUNT + sizeof...(TSubStates),
-		WIDTH		  = sizeof...(TSubStates),
-	};
+	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
+	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
+	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT + sizeof...(TSubStates);
+	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
 
-	_C(StateRegistryBase& stateRegistry,
+	_C(StateRegistry2& stateRegistry,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
-
-	inline void deepRegister		 (StateRegistryBase& stateRegistry, const Parent parent);
 
 	inline void deepForwardGuard	 (TransitionControl& control);
 	inline void deepGuard			 (TransitionControl& control);
@@ -59,12 +60,12 @@ struct _C final {
 	inline void deepChangeToRequested(Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	enum : LongIndex {
-		NAME_COUNT	 = State::NAME_COUNT  + SubStates::NAME_COUNT,
-	};
+	using RegionType		= typename StructureStateInfo::RegionType;
+
+	static constexpr LongIndex NAME_COUNT	 = State::NAME_COUNT + SubStates::NAME_COUNT;
 
 	void deepGetNames(const LongIndex parent,
-					  const enum StructureStateInfo::RegionType region,
+					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
 
@@ -77,6 +78,7 @@ struct _C final {
 	SubStates _subStates;
 
 	HSFM_IF_DEBUG(const std::type_index _type = typeid(Head));
+	HSFM_IF_DEBUG(DeepStateList stateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////

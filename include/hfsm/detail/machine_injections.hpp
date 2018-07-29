@@ -5,21 +5,17 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename...>
-struct _B;
-
-//------------------------------------------------------------------------------
-
-template <typename TContext, typename TPayloadList>
+template <typename TContext, typename TStateList, typename TPayloadList>
 class Bare {
 	template <typename...>
 	friend struct _B;
 
 protected:
-	using Context = TContext;
-	using Control = ControlT<Context>;
-	using PayloadList = TPayloadList;
-	using TransitionControl = TransitionControlT<Context, PayloadList>;
+	using Context			= TContext;
+	using Control			= ControlT<Context>;
+	using StateList			= TStateList;
+	using PayloadList		= TPayloadList;
+	using TransitionControl = TransitionControlT<Context, StateList, PayloadList>;
 
 public:
 	inline void preGuard (Context&)									{}
@@ -32,6 +28,11 @@ public:
 };
 
 //------------------------------------------------------------------------------
+
+template <typename...>
+struct _B;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TFirst, typename... TRest>
 struct _B<TFirst, TRest...>
@@ -49,7 +50,7 @@ struct _B<TFirst, TRest...>
 	inline void widePostExit (typename First::Context& context);
 };
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TFirst>
 struct _B<TFirst>
@@ -74,8 +75,8 @@ struct _B<TFirst>
 	inline void widePostExit (typename First::Context& context);
 };
 
-template <typename TContext, typename TPayloadList>
-using Base = _B<Bare<TContext, TPayloadList>>;
+template <typename TContext, typename TStateList, typename TPayloadList>
+using Base = _B<Bare<TContext, TStateList, TPayloadList>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

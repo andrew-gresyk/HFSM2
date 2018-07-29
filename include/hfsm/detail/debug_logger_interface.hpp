@@ -12,13 +12,13 @@ struct LoggerInterface {
 
 	virtual
 	void
-	recordMethod(const std::type_index state,
+	recordMethod(const StateID origin,
 				 const Method method) = 0;
 
 	virtual
 	void
 	recordTransition(const Transition transition,
-					 const std::type_index state) = 0;
+					 const StateID target) = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -8,46 +8,44 @@ template <typename TContext,
 		  ShortIndex TMaxSubstitutions,
 		  typename TApex>
 class _R final {
-	enum : ShortIndex { MAX_SUBSTITUTIONS = TMaxSubstitutions };
+	static constexpr ShortIndex MAX_SUBSTITUTIONS = TMaxSubstitutions;
 
 	using Context			= TContext;
 	using Control			= ControlT<Context>;
 	using PayloadList		= TPayloadList;
-	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
+	using StateRegistry2	= StateRegistry2T<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionControl	= TransitionControlT<Context, PayloadList>;
-	using Apex				= typename WrapState<Context, PayloadList, TApex>::Type;
+
+	using ForwardApex		= typename WrapForward<TApex>::Type;
+
+	using StateList			= typename ForwardApex::StateList;
+	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
+
+	using Apex				= typename WrapMaterial<0, Context, StateList, PayloadList, TApex>::Type;
 
 public:
-	using StateList			= typename Apex::StateList;
-	HSFM_IF_DEBUG(StateList stateList);
+	static constexpr LongIndex REVERSE_DEPTH  = Apex::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH	  = Apex::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	  = Apex::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	  = Apex::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT	  = Apex::PRONG_COUNT;
+	static constexpr LongIndex WIDTH		  = Apex::WIDTH;
 
-public:
-	enum : LongIndex {
-		REVERSE_DEPTH			 = Apex::REVERSE_DEPTH,
-		DEEP_WIDTH				 = Apex::DEEP_WIDTH,
-		STATE_COUNT				 = Apex::STATE_COUNT,
-		FORK_COUNT				 = Apex::FORK_COUNT,
-		PRONG_COUNT				 = Apex::PRONG_COUNT,
-		WIDTH					 = Apex::WIDTH,
-	};
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	enum : LongIndex {
-		STATE_CAPACITY = (LongIndex) 1.3 * Apex::STATE_COUNT,
-	};
+	using StateInfo				 = StateInfoT<PayloadList>;
+	using StateRegistryStorage2	 = Array<StateInfo, STATE_COUNT>;
 
-	using StateRegistryImpl		 = StateRegistryT<PayloadList, STATE_CAPACITY>;
+	static constexpr LongIndex STATE_CAPACITY = (LongIndex) 1.3 * Apex::STATE_COUNT;
+
 	using ForkParentStorage		 = Array<Parent,	 FORK_COUNT>;
 	using ForkPointerStorage	 = Array<Fork*,		 FORK_COUNT>;
 	using TransitionQueueStorage = Array<Transition, FORK_COUNT>;
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	enum : LongIndex {
-		NAME_COUNT	  = Apex::NAME_COUNT,
-	};
+	static constexpr LongIndex NAME_COUNT	  = Apex::NAME_COUNT;
 
 	using Prefix				 = StaticArray<wchar_t,			REVERSE_DEPTH * 2 + 2>;
 	using Prefixes				 = StaticArray<Prefix,			STATE_COUNT>;
@@ -67,6 +65,10 @@ public:
 
 	~_R();
 
+	template <typename T>
+	static constexpr LongIndex
+	stateId()									{ return StateList::template index<T>();	}
+
 	void update();
 
 	template <typename TEvent>
@@ -74,110 +76,89 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline void changeTo(const std::type_index state);
-	inline void resume	(const std::type_index state);
-	inline void schedule(const std::type_index state);
+	inline void changeTo(const StateID stateId);
+	inline void resume	(const StateID stateId);
+	inline void schedule(const StateID stateId);
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template contains<TState>()>::type
-	changeTo()												{ changeTo(typeid(TState));		}
+	inline void changeTo()							{ changeTo(stateId<TState>());			}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template contains<TState>()>::type
-	resume	()												{ resume  (typeid(TState));		}
+	inline void resume	()							{ resume  (stateId<TState>());			}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template contains<TState>()>::type
-	schedule()												{ schedule(typeid(TState));		}
+	inline void schedule()							{ schedule(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template contains<TPayload>()>::type
-	changeTo(const std::type_index state, TPayload* const payload);
+	inline void changeTo(const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template contains<TPayload>()>::type
-	resume(const std::type_index state, TPayload* const payload);
+	inline void resume  (const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template contains<TPayload>()>::type
-	schedule(const std::type_index state, TPayload* const payload);
+	inline void schedule(const StateID stateId, TPayload* const payload);
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template contains<TState>() &&
-								 PayloadList::template contains<TPayload>()>::type
-	changeTo(TPayload* const payload)				{ changeTo(typeid(TState), payload);	}
+	inline void changeTo(TPayload* const payload)	{ changeTo(stateId<TState>(), payload);	}
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template contains<TState>() &&
-								 PayloadList::template contains<TPayload>()>::type
-	resume	(TPayload* const payload)				{ resume  (typeid(TState), payload);	}
+	inline void resume	(TPayload* const payload)	{ resume  (stateId<TState>(), payload);	}
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template contains<TState>() &&
-								 PayloadList::template contains<TPayload>()>::type
-	schedule(TPayload* const payload)				{ schedule(typeid(TState), payload);	}
+	inline void schedule(TPayload* const payload)	{ schedule(stateId<TState>(), payload);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline void resetStateData(const std::type_index state);
-
-	inline bool isStateDataSet(const std::type_index state);
+	inline void resetStateData(const StateID stateId);
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template contains<TPayload>()>::type
-	setStateData(const std::type_index state, TPayload* const payload);
+	inline void setStateData(const StateID stateId, TPayload* const payload);
+
+	inline bool isStateDataSet(const StateID stateId) const;
 
 	template <typename TPayload>
-	inline typename std::enable_if<TPayloadList::template contains<TPayload>(), TPayload>::type*
-	getStateData(const std::type_index state);
+	inline TPayload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template contains<TState>()>::type
-	resetStateData()							{ resetStateData(typeid(TState));			}
+	inline void resetStateData()						{ resetStateData(stateId<TState>());				}
+
+	template <typename TState, typename TPayload>
+	inline void setStateData(TPayload* const payload)	{ setStateData(stateId<TState>(), payload);			}
 
 	template <typename TState>
-	inline typename std::enable_if<StateList::template contains<TState>(), bool>::type
-	isStateDataSet()							{ return isStateDataSet(typeid(TState));	}
+	inline bool isStateDataSet() const					{ return isStateDataSet(stateId<TState>());			}
 
 	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template contains<TState>() &&
-								 PayloadList::template contains<TPayload>()>::type
-	setStateData(TPayload* const payload)		{ setStateData(typeid(TState), payload);	}
-
-	template <typename TState, typename TPayload>
-	inline typename std::enable_if<StateList::template contains<TState>() &&
-								 PayloadList::template contains<TPayload>(), TPayload>::type*
-	getStateData()						{ return getStateData<TPayload>(typeid(TState));	}
+	inline TPayload* getStateData() const				{ return getStateData<TPayload>(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline bool isActive   (const std::type_index state);
-	inline bool isResumable(const std::type_index state);
-	inline bool isScheduled(const std::type_index state)	{ return isResumable(state);	}
+	inline bool isActive(const StateID stateId) const;
 
-	template <typename TState>
-	inline typename std::enable_if<StateList::template contains<TState>(), bool>::type
-	isActive()										{ return isActive	(typeid(TState));	}
+	template <typename T>
+	inline bool isActive() const;
 
-	template <typename TState>
-	inline typename std::enable_if<StateList::template contains<TState>(), bool>::type
-	isResumable()									{ return isResumable(typeid(TState));	}
+	inline bool isResumable(const StateID stateId) const;
 
-	template <typename TState>
-	inline typename std::enable_if<StateList::template contains<TState>(), bool>::type
-	isScheduled()									{ return isScheduled(typeid(TState));	}
+	template <typename T>
+	inline bool isResumable() const;
+
+	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);	}
+
+	template <typename T>
+	inline bool isScheduled() const							{ return isResumable<T>();		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const					{ return _structure;		}
-	const MachineActivity&  activity()  const					{ return _activityHistory;	}
+	const MachineStructure& structure() const						{ return _structure;		}
+	const MachineActivity&  activity()  const						{ return _activityHistory;	}
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
-	void attachLogger(LoggerInterface* const logger)					{ _logger = logger;	}
+	void attachLogger(LoggerInterface* const logger)						{ _logger = logger;	}
 #endif
 
 protected:
@@ -193,7 +174,7 @@ protected:
 private:
 	Context& _context;
 
-	StateRegistryImpl _stateRegistry;
+	StateRegistryStorage2 _stateRegistry2;
 
 	ForkParentStorage  _forkParents;
 	ForkPointerStorage _forkPointers;
@@ -213,6 +194,7 @@ private:
 #endif
 
 	HFSM_IF_LOGGER(LoggerInterface* _logger);
+	HSFM_IF_DEBUG(StateList stateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -31,10 +31,14 @@
 namespace hfsm {
 
 using ShortIndex = uint8_t;
-enum : ShortIndex { INVALID_SHORT_INDEX = UINT8_MAX  };
+static constexpr ShortIndex	INVALID_SHORT_INDEX = UINT8_MAX;
 
+// TEMP
 using LongIndex  = uint16_t;
-enum : LongIndex  { INVALID_LONG_INDEX	= UINT16_MAX };
+static constexpr LongIndex	INVALID_LONG_INDEX	= UINT16_MAX;
+
+using StateID	 = LongIndex;
+static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG_INDEX;
 
 //------------------------------------------------------------------------------
 
@@ -80,25 +84,21 @@ end(const T(& a)[NCapacity]) {
 
 template <int N1, int N2>
 struct Min {
-	enum {
-		VALUE = N1 < N2 ? N1 : N2
-	};
+	static constexpr auto VALUE = N1 < N2 ? N1 : N2;
 };
 
 //------------------------------------------------------------------------------
 
 template <int N1, int N2>
 struct Max {
-	enum {
-		VALUE = N1 > N2 ? N1 : N2
-	};
+	static constexpr auto VALUE = N1 > N2 ? N1 : N2;
 };
 
 //------------------------------------------------------------------------------
 
 template <unsigned NCapacity>
 struct UnsignedIndex {
-	enum : LongIndex { CAPACITY = NCapacity };
+	static constexpr LongIndex CAPACITY = NCapacity;
 
 	using Type = typename std::conditional<CAPACITY <= UINT8_MAX,  uint8_t,
 				 typename std::conditional<CAPACITY <= UINT16_MAX, uint16_t,
@@ -108,6 +108,13 @@ struct UnsignedIndex {
 	static_assert(CAPACITY <= UINT64_MAX, "STATIC ASSERT");
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+template <unsigned V1, unsigned V2>
+constexpr void
+assertEquality() {
+	static_assert(V1 == V2, "assertEquality() failed");
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

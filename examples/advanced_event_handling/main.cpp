@@ -38,13 +38,26 @@ struct SecondaryEvent { int payload; };
 
 using TransitionEvent = char;
 
+//------------------------------------------------------------------------------
+
+#define S(s) struct s
+
+using FSM = M::PeerRoot<
+				M::Orthogonal<S(Reactive),
+					S(NonHandler),
+					S(ConcreteHandler),
+					S(TemplateHandler),
+					S(EnableIfHandler)
+				>,
+				S(Target)
+			>;
+
+#undef S
+
 ////////////////////////////////////////////////////////////////////////////////
 
-// forward declared for Reactive::transition()
-struct Target;
-
 struct Reactive
-	: M::Base
+	: FSM::Base
 {
 	// handle a single event type - TransitionEvent
 	void react(const TransitionEvent&, TransitionControl& control)  {
@@ -54,74 +67,72 @@ struct Reactive
 	}
 
 	// and ignore the other event types
-	using M::Base::react;
+	using FSM::Base::react;
+};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct NonHandler
-		: M::Base
-	{
-		// events are totally opt-in
-	};
+struct NonHandler
+	: FSM::Base
+{
+	// events are totally opt-in
+};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct ConcreteHandler
-		: M::Base
-	{
-		// handle two event types - PrimaryEvent
-		void react(const PrimaryEvent&, TransitionControl&)  {
-			std::cout << "  ConcreteHandler: reacting to PrimaryEvent\n";
-		}
+struct ConcreteHandler
+	: FSM::Base
+{
+	// handle two event types - PrimaryEvent
+	void react(const PrimaryEvent&, TransitionControl&)  {
+		std::cout << "  ConcreteHandler: reacting to PrimaryEvent\n";
+	}
 
-		// and SecondaryEvent
-		void react(const SecondaryEvent&, TransitionControl&)  {
-			std::cout << "  ConcreteHandler: reacting to SecondaryEvent\n";
-		}
+	// and SecondaryEvent
+	void react(const SecondaryEvent&, TransitionControl&)  {
+		std::cout << "  ConcreteHandler: reacting to SecondaryEvent\n";
+	}
 
-		// and ignore the other event types
-		using M::Base::react;
-	};
+	// and ignore the other event types
+	using FSM::Base::react;
+};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct TemplateHandler
-		: M::Base
-	{
-		// handle all possible event types
-		template <typename TEvent>
-		void react(const TEvent&, TransitionControl&)  {
-			std::cout << "  TemplateHandler: reacting to TEvent\n";
-		}
-	};
+struct TemplateHandler
+	: FSM::Base
+{
+	// handle all possible event types
+	template <typename TEvent>
+	void react(const TEvent&, TransitionControl&)  {
+		std::cout << "  TemplateHandler: reacting to TEvent\n";
+	}
+};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct EnableIfHandler
-		: M::Base
-	{
-		// use std::enable_if to build more complex conditional event handling
-		template <typename TEvent>
-		typename std::enable_if<std::is_class<TEvent>::value>::type
-		react(const TEvent&, TransitionControl&)  {
-			std::cout << "  EnableIfHandler: reacting to a <class event>\n";
-		}
+struct EnableIfHandler
+	: FSM::Base
+{
+	// use std::enable_if to build more complex conditional event handling
+	template <typename TEvent>
+	typename std::enable_if<std::is_class<TEvent>::value>::type
+	react(const TEvent&, TransitionControl&)  {
+		std::cout << "  EnableIfHandler: reacting to a <class event>\n";
+	}
 
-		// but remember to cover all the remaining cases
-		template <typename TEvent>
-		typename std::enable_if<!std::is_class<TEvent>::value>::type
-		react(const TEvent&, TransitionControl&)  {
-			std::cout << "  EnableIfHandler: reacting to a <non-class event>\n";
-		}
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// but remember to cover all the remaining cases
+	template <typename TEvent>
+	typename std::enable_if<!std::is_class<TEvent>::value>::type
+	react(const TEvent&, TransitionControl&)  {
+		std::cout << "  EnableIfHandler: reacting to a <non-class event>\n";
+	}
 };
 
 //------------------------------------------------------------------------------
 
 struct Target
-	: M::Base
+	: FSM::Base
 {
 	void enter(Control&) {
 		std::cout << "    changed to Target\n";
@@ -134,15 +145,7 @@ int
 main() {
 	Context context;
 
-	M::PeerRoot<
-		M::Orthogonal<Reactive,
-			Reactive::NonHandler,
-			Reactive::ConcreteHandler,
-			Reactive::TemplateHandler,
-			Reactive::EnableIfHandler
-		>,
-		Target
-	> machine(context);
+	FSM::Instance machine(context);
 
 	std::cout << "sending PrimaryEvent:\n";
 	machine.react(PrimaryEvent{});

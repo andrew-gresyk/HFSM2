@@ -30,17 +30,16 @@
     <ClInclude Include="..\..\include\hfsm\detail\lib_array_view.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\debug_logger_interface.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\debug_structure_report.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\lib_hash_table.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\lib_iterator.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_composite_sub.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\machine_control.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\machine_forward.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_injections.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_orthogonal_sub.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_root.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_utility.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\lib_type_list.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\lib_type_info.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\lib_utility.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\lib_wrap.hpp" />
     <ClInclude Include="..\..\include\hfsm\machine_dev.hpp" />
     <ClInclude Include="..\..\include\hfsm\machine.hpp" />
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
@@ -49,12 +48,12 @@
   <ItemGroup>
     <None Include="..\..\include\hfsm\detail\lib_array.inl" />
     <None Include="..\..\include\hfsm\detail\lib_array_view.inl" />
-    <None Include="..\..\include\hfsm\detail\lib_hash_table.inl" />
     <None Include="..\..\include\hfsm\detail\lib_iterator.inl" />
     <None Include="..\..\include\hfsm\detail\machine_composite.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_composite.inl" />
     <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl" />
     <None Include="..\..\include\hfsm\detail\machine_composite_sub_2.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_control.inl" />
     <None Include="..\..\include\hfsm\detail\machine_injections.inl" />
     <None Include="..\..\include\hfsm\detail\machine_orthogonal.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_orthogonal.inl" />
@@ -63,7 +62,6 @@
     <None Include="..\..\include\hfsm\detail\machine_root.inl" />
     <None Include="..\..\include\hfsm\detail\machine_state.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_state.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_utility.inl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\..\hfsm.natvis" />

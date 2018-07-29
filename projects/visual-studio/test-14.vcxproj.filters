@@ -24,6 +24,9 @@
     <ClCompile Include="..\..\test\test_internal_transitions.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_state_data.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm\detail\machine_utility.hpp">
@@ -47,19 +50,10 @@
     <ClInclude Include="..\..\include\hfsm\detail\lib_array_view.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_hash_table.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\lib_iterator.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_type_info.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\lib_utility.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_wrap.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\lib_type_list.hpp">
@@ -86,6 +80,15 @@
     <ClInclude Include="..\..\include\hfsm\machine.hpp">
       <Filter>hfsm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test\test_state_data.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\machine_forward.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\machine_control.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl">
@@ -109,9 +112,6 @@
     <None Include="..\..\include\hfsm\detail\machine_state.hpp">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_utility.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
     <None Include="..\..\include\hfsm\detail\machine_injections.inl">
       <Filter>hfsm\detail</Filter>
     </None>
@@ -124,9 +124,6 @@
     <None Include="..\..\include\hfsm\detail\lib_array_view.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\lib_hash_table.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
     <None Include="..\..\include\hfsm\detail\lib_iterator.inl">
       <Filter>hfsm\detail</Filter>
     </None>
@@ -137,6 +134,9 @@
       <Filter>hfsm\detail</Filter>
     </None>
     <None Include="..\..\include\hfsm\detail\machine_composite.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_control.inl">
       <Filter>hfsm\detail</Filter>
     </None>
   </ItemGroup>

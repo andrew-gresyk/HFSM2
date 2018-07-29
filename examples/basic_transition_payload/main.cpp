@@ -7,34 +7,34 @@
 //
 //	---------- ctor: ---------
 //
-//	Top::enter()
-//	Top::Origin::enter()
+//	enter()
+//	Origin::enter()
 //
 //	--------- update: --------
 //
-//	Top::update()
-//	Top::Origin::update()
+//	update()
+//	Origin::update()
 //
 //	--------- react: ---------
 //
-//	Top::react()
-//	Top::Origin::react()
-//	changeTo<Top::Destination>()
-//	Top::Destination::guard()
-//	Top::Origin::exit()
-//	Top::Destination::enter()
+//	react()
+//	Origin::react()
+//	changeTo<Destination>()
+//	Destination::guard()
+//	Origin::exit()
+//	Destination::enter()
 //
 //	-- external transition: --
 //
-//	changeTo<Top::Origin>()
+//	changeTo<Origin>()
 //
 //	--------- detach: --------
 //
 //
 //	---------- dtor: ---------
 //
-//	Top::Destination::exit()
-//	Top::exit()
+//	Destination::exit()
+//	exit()
 //
 //	---------- done! ---------
 
@@ -50,88 +50,87 @@ struct Context {
 	char charPayload;
 };
 
-using Payloads = hfsm::PayloadList<char, bool>;
+using Payloads = hfsm::TransitionPayloads<char, bool>;
 
 // convenience typedef
 using M = hfsm::Machine<Context, Payloads>;
+
+//------------------------------------------------------------------------------
+
+#define S(s) struct s
+
+using FSM = M::Root<S(Top),
+				S(Origin),
+				S(Destination)
+			>;
+
+#undef S
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // top-level state in the hierarchy
 struct Top
-	: M::Base
+	: FSM::Base // necessary boilerplate!
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
 	void exit(Control&)								{}
+};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// forward declared for Red::transition()
-	struct Destination;
+// initial state
+struct Origin
+	: FSM::Base
+{
+	void enter(Control&)							{}
+	void update(TransitionControl&)					{}
+	void exit(Control&)								{}
+};
 
-	// initial state
-	struct Origin
-		: M::Base // necessary boilerplate!
-	{
-		void enter(Control&)							{}
-		void update(TransitionControl&)					{}
-		void exit(Control&)								{}
-	};
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	// transition target state
-	struct Destination
-		: M::Base
-	{
-		void enter(Control&)							{}
-		void update(TransitionControl&)					{}
-		void exit(Control&)								{}
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// transition target state
+struct Destination
+	: FSM::Base
+{
+	void enter(Control&)							{}
+	void update(TransitionControl&)					{}
+	void exit(Control&)								{}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 int main() {
-	using FSM = M::Root<Top,
-					Top::Origin,
-					Top::Destination
-				>;
-
 	// shared data storage instance
 	Context context;
 
 	// state machine instance - all initial states are activated
-	FSM machine(context);
-
-	assert(!machine.isStateDataSet<Top::Origin>());
+	FSM::Instance machine(context);
 
 	context.boolPayload = true;
-	machine.setStateData<Top::Origin>(&context.boolPayload);
-	assert( machine.isStateDataSet<Top::Origin>());
+	machine.setStateData<Origin>(&context.boolPayload);
+	assert( machine.isStateDataSet<Origin>());
 
-	bool* const payBool = machine.getStateData<Top::Origin, bool>();
+	HSFM_IF_ASSERT(bool* const payBool = machine.getStateData<Origin, bool>());
 	assert(payBool);
 	assert(*payBool == true);
 
-	machine.resetStateData<Top::Origin>();
-	assert(!machine.isStateDataSet<Top::Origin>());
+	machine.resetStateData<Origin>();
+	assert(!machine.isStateDataSet<Origin>());
 
-	machine.setStateData<Top::Origin>(&context.charPayload);
+	machine.setStateData<Origin>(&context.charPayload);
 
 	// first update
 	machine.update();
 
-	machine.changeTo<Top::Destination>(&context.charPayload);
+	machine.changeTo<Destination>(&context.charPayload);
 	machine.update();
 
-	machine.resume  <Top::Destination>(&context.boolPayload);
+	machine.resume  <Destination>(&context.boolPayload);
 	machine.update();
 
-	machine.schedule<Top::Destination>(&context.boolPayload);
+	machine.schedule<Destination>(&context.boolPayload);
 
 	machine.react(1);
 

@@ -75,23 +75,23 @@ inline get(const typename TransitionT<TPayloadList>::Type type) {
 #pragma pack(push, 2)
 
 template <typename TPayloadList>
-struct alignas(alignof(TypeInfo)) TransitionInfoT {
-	using PayloadList = TPayloadList;
+struct TransitionInfoT {
+	using TransitionPayloads = TPayloadList;
 	using Transition = TransitionT<TPayloadList>;
 
 	inline TransitionInfoT() = default;
 
 	inline TransitionInfoT(const Transition transition_,
 						   const ::hfsm::Method method_)
-		: state{transition_.stateType}
+		: stateId{transition_.stateId}
 		, method(method_)
-		, transition(get<PayloadList>(transition_.type))
+		, transition(get<TransitionPayloads>(transition_.type))
 	{
 		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
 		assert(method_ < ::hfsm::Method::COUNT);
 	}
 
-	TypeInfo state;
+	StateID stateId = INVALID_STATE_ID;
 	::hfsm::Method method;
 	::hfsm::Transition transition;
 };

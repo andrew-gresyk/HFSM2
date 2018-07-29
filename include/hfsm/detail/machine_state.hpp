@@ -3,37 +3,36 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
+template <StateID TStateID,
+		  typename TContext,
+		  typename TStateList,
 		  typename TPayloadList,
 		  typename THead>
 struct _S final {
+	static constexpr StateID STATE_ID = TStateID;
+
 	using Context			= TContext;
 	using Control			= ControlT<Context>;
+	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistryBase	= StateRegistryBaseT<PayloadList>;
+	using StateRegistry2	= StateRegistry2T<PayloadList>;
 	using Transition		= TransitionT<PayloadList>;
-	using TransitionControl	= TransitionControlT<Context, PayloadList>;
+	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Head				= THead;
-	using StateList			= TypeListT<Head>;
-	HSFM_IF_DEBUG(StateList stateList);
 
-	using Base				= ::hfsm::detail::Base<Context, PayloadList>;
+	using Base				= ::hfsm::detail::Base<Context, StateList, PayloadList>;
 
-	enum : LongIndex {
-		REVERSE_DEPTH = 1,
-		DEEP_WIDTH	  = 0,
-		STATE_COUNT	  = 1,
-		FORK_COUNT	  = 0,
-		PRONG_COUNT	  = 0,
-		WIDTH		  = 1,
-	};
+	static constexpr LongIndex REVERSE_DEPTH = 1;
+	static constexpr LongIndex DEEP_WIDTH	 = 0;
+	static constexpr LongIndex STATE_COUNT	 = 1;
+	static constexpr LongIndex FORK_COUNT	 = 0;
+	static constexpr LongIndex PRONG_COUNT	 = 0;
+	static constexpr LongIndex WIDTH		 = 1;
 
-	_S(StateRegistryBase& stateRegistry,
+	_S(StateRegistry2& stateRegistry,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
-
-	inline void deepRegister		 (StateRegistryBase& stateRegistry, const Parent parent);
 
 	inline void deepForwardGuard	 (TransitionControl&)							{}
 	inline bool deepGuard			 (TransitionControl& control);
@@ -57,16 +56,16 @@ struct _S final {
 #if defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 	static constexpr bool isBare()	 { return std::is_same<Head, Base>::value;		 }
 
-	enum : LongIndex {
-		NAME_COUNT	 = isBare() ? 0 : 1,
-	};
+	static constexpr LongIndex NAME_COUNT = isBare() ? 0 : 1;
 #endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using RegionType		= typename StructureStateInfo::RegionType;
+
 	static const char* name();
 
 	void deepGetNames(const LongIndex parent,
-					  const enum StructureStateInfo::RegionType region,
+					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
 
@@ -91,13 +90,11 @@ struct _S final {
 	template <typename TMethodType, LoggerInterface::Method TMethodId>
 	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Base>::value>::type
 	log(LoggerInterface& logger) const {
-		logger.recordMethod(typeid(Head), TMethodId);
+		logger.recordMethod(STATE_ID, TMethodId);
 	}
 #endif
 
 	Head _head;
-
-	HSFM_IF_DEBUG(const std::type_index _type = typeid(Head));
 };
 
 ////////////////////////////////////////////////////////////////////////////////

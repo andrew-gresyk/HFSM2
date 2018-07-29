@@ -1,34 +1,55 @@
 namespace hfsm {
 namespace detail {
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, typename TH>
-_S<TC, TPL, TH>::_S(StateRegistryBase& stateRegistry,
-					const Parent /*parent*/,
-					Parents& /*forkParents*/,
-					ForkPointers& /*forkPointers*/)
-{
-	stateRegistry.insert(TypeInfo::get<Head>());
-}
+namespace {
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+struct Register {
+	using StateRegistry2 = StateRegistry2T<TPL>;
+
+	static inline void
+	execute(StateRegistry2& stateRegistry, const Parent parent) {
+		static constexpr auto TYPE_ID = TSL::template index<TH>();
+		assertEquality<TID, TYPE_ID>();
+
+		auto& stateInfo = stateRegistry[TID];
+		stateInfo.parent = parent;
+		stateInfo.payload.reset();
+	}
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, typename TH>
-void
-_S<TC, TPL, TH>::deepRegister(StateRegistryBase& stateRegistry,
-							  const Parent parent)
+template <StateID TID, typename TC, typename TSL, typename TPL>
+struct Register<TID, TC, TSL, TPL, Base<TC, TSL, TPL>> {
+	using StateRegistry2 = StateRegistry2T<TPL>;
+
+	static inline void
+	execute(StateRegistry2&, const Parent) {}
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+_S<TID, TC, TSL, TPL, TH>::_S(StateRegistry2& stateRegistry,
+							  const Parent parent,
+							  Parents& /*forkParents*/,
+							  ForkPointers& /*forkPointers*/)
 {
-	auto& stateInfo = stateRegistry.get(TypeInfo::get<Head>());
-	stateInfo.parent = parent;
-	stateInfo.payload.reset();
+	Register<TID, TC, TSL, TPL, TH>::execute(stateRegistry, parent);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 bool
-_S<TC, TPL, TH>::deepGuard(TransitionControl& control) {
+_S<TID, TC, TSL, TPL, TH>::deepGuard(TransitionControl& control) {
 	const auto requestCountBefore = control.requestCount();
 
 	_head.widePreGuard(control.context());
@@ -44,17 +65,17 @@ _S<TC, TPL, TH>::deepGuard(TransitionControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 void
-_S<TC, TPL, TH>::deepEnterInitial(Control& control) {
+_S<TID, TC, TSL, TPL, TH>::deepEnterInitial(Control& control) {
 	deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 void
-_S<TC, TPL, TH>::deepEnter(Control& control) {
+_S<TID, TC, TSL, TPL, TH>::deepEnter(Control& control) {
 	_head.widePreEnter(control.context());
 	_head.enter(control);
 
@@ -66,10 +87,9 @@ _S<TC, TPL, TH>::deepEnter(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 bool
-_S<TC, TPL, TH>::deepUpdate(TransitionControl& control)
-{
+_S<TID, TC, TSL, TPL, TH>::deepUpdate(TransitionControl& control) {
 	const auto requestCountBefore = control.requestCount();
 
 	_head.widePreUpdate(control.context());
@@ -86,11 +106,11 @@ _S<TC, TPL, TH>::deepUpdate(TransitionControl& control)
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 template <typename TEvent>
 void
-_S<TC, TPL, TH>::deepReact(const TEvent& event,
-						   TransitionControl& control)
+_S<TID, TC, TSL, TPL, TH>::deepReact(const TEvent& event,
+									 TransitionControl& control)
 {
 	_head.widePreReact(event, control.context());
 
@@ -106,9 +126,9 @@ _S<TC, TPL, TH>::deepReact(const TEvent& event,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 void
-_S<TC, TPL, TH>::deepExit(Control& control) {
+_S<TID, TC, TSL, TPL, TH>::deepExit(Control& control) {
 	_head.exit(control);
 	_head.widePostExit(control.context());
 
@@ -122,13 +142,14 @@ _S<TC, TPL, TH>::deepExit(Control& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 const char*
-_S<TC, TPL, TH>::name() {
+_S<TID, TC, TSL, TPL, TH>::name() {
 	if (isBare())
 		return "";
 	else {
-		const char* const raw = TypeInfo::get<Head>()->name();
+		const std::type_index type = typeid(Head);
+		const char* const raw = type.name();
 
 	#if defined(_MSC_VER)
 
@@ -157,23 +178,23 @@ _S<TC, TPL, TH>::name() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 void
-_S<TC, TPL, TH>::deepGetNames(const LongIndex parent,
-							  const enum StructureStateInfo::RegionType region,
-							  const ShortIndex depth,
-							  StructureStateInfos& _stateInfos) const
+_S<TID, TC, TSL, TPL, TH>::deepGetNames(const LongIndex parent,
+										const RegionType region,
+										const ShortIndex depth,
+										StructureStateInfos& _stateInfos) const
 {
 	_stateInfos << StructureStateInfo { parent, region, depth, name() };
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 void
-_S<TC, TPL, TH>::deepIsActive(const bool isActive,
-							  LongIndex& index,
-							  MachineStructure& structure) const
+_S<TID, TC, TSL, TPL, TH>::deepIsActive(const bool isActive,
+										LongIndex& index,
+										MachineStructure& structure) const
 {
 	if (!isBare())
 		structure[index++].isActive = isActive;

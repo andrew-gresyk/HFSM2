@@ -15,11 +15,9 @@ public:
 	template <typename>
 	friend class Iterator;
 
-	enum {
-		ITEM_ALIGNMENT	= alignof(Item[2]),
-		VIEW_SIZE		= 4,
-		OFFSET			= (VIEW_SIZE + ITEM_ALIGNMENT - 1) / ITEM_ALIGNMENT * ITEM_ALIGNMENT,
-	};
+	static constexpr auto ITEM_ALIGNMENT = alignof(Item[2]);
+	static constexpr auto VIEW_SIZE		 = 4;
+	static constexpr auto OFFSET		 = (VIEW_SIZE + ITEM_ALIGNMENT - 1) / ITEM_ALIGNMENT * ITEM_ALIGNMENT;
 
 protected:
 	ArrayView(const LongIndex capacity);

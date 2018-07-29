@@ -27,23 +27,23 @@ struct Event {
 		COUNT
 	};
 
-	Event(const std::type_index origin_,
+	Event(const hfsm::StateID origin_,
 		  const Enum type_)
 		: origin(origin_)
-		, target(typeid(Event))
+		, target(hfsm::INVALID_STATE_ID)
 		, type(type_)
 	{}
 
-	Event(const std::type_index origin_,
+	Event(const hfsm::StateID origin_,
 		  const Enum type_,
-		  const std::type_index target_)
+		  const hfsm::StateID target_)
 		: origin(origin_)
 		, target(target_)
 		, type(type_)
 	{}
 
-	std::type_index origin;
-	std::type_index target;
+	hfsm::StateID origin;
+	hfsm::StateID target;
 	Enum type;
 };
 using Events = std::vector<Event>;
@@ -54,11 +54,11 @@ struct Logger
 	: hfsm::LoggerInterface
 {
 
-	void recordMethod(const std::type_index origin,
+	void recordMethod(const hfsm::StateID origin,
 					  const Method method) override;
 
 	void recordTransition(const Transition transition,
-						  const std::type_index target) override;
+						  const hfsm::StateID target) override;
 
 	void assertSequence(const Events& reference);
 
@@ -67,7 +67,7 @@ struct Logger
 
 //------------------------------------------------------------------------------
 
-using Types = std::vector<std::type_index>;
+using Types = std::vector<hfsm::StateID>;
 
 template <typename TMachine>
 void assertActive(TMachine& machine,
