@@ -16,26 +16,18 @@ struct _C final {
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using ControlLock		= typename TransitionControl::Lock;
 	using Head				= THead;
-	using Fork				= ForkT<Head>;
 	using State				= _S <HEAD_ID,	   Context, StateList, PayloadList, Head>;
 	using SubStates			= _CS<HEAD_ID + 1, Context, StateList, PayloadList, 0, TSubStates...>;
 	using Forward			= _CF<Head, TSubStates...>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
-	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
-	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
-	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT + sizeof...(TSubStates);
-	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
-
-	_C(StateRegistry2& stateRegistry,
+	_C(StateRegistry& stateRegistry,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
@@ -68,17 +60,13 @@ struct _C final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void deepIsActive(const bool isActive,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 	Fork _fork;
 	State _state;
 	SubStates _subStates;
 
 	HSFM_IF_DEBUG(const std::type_index _type = typeid(Head));
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////

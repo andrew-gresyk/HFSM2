@@ -4,7 +4,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
-_CS<TID, TC, TSL, TPL, NI, TI>::_CS(StateRegistry2& stateRegistry,
+_CS<TID, TC, TSL, TPL, NI, TI>::_CS(StateRegistry& stateRegistry,
 									const ShortIndex fork,
 									Parents& forkParents,
 									ForkPointers& forkPointers)
@@ -157,17 +157,6 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideGetNames(const LongIndex parent,
 											 StructureStateInfos& _stateInfos) const
 {
 	initial.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
-void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideIsActive(const ShortIndex prong,
-											 LongIndex& index,
-											 MachineStructure& structure) const
-{
-	initial.deepIsActive(prong == PRONG_INDEX, index, structure);
 }
 
 #endif

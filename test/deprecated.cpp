@@ -308,10 +308,10 @@ void deprecated() {
 
 		FSM::Instance machine(_);
 
-		static_assert(machine.DEEP_WIDTH  ==  2, "");
-		static_assert(machine.STATE_COUNT == 13, "");
-		static_assert(machine.FORK_COUNT  ==  6, "");
-		static_assert(machine.PRONG_COUNT == 10, "");
+		static_assert(FSM::Instance::DEEP_WIDTH  ==  2, "");
+		static_assert(FSM::Instance::STATE_COUNT == 13, "");
+		static_assert(FSM::Instance::FORK_COUNT  ==  6, "");
+		static_assert(FSM::Instance::PRONG_COUNT == 10, "");
 
 		const Status created[] = {
 			status<A>(Event::ENTER),

@@ -8,16 +8,14 @@ namespace {
 
 template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 struct Register {
-	using StateRegistry2 = StateRegistry2T<TPL>;
+	using StateRegistry = Array<Parent, TSL::SIZE>;
 
 	static inline void
-	execute(StateRegistry2& stateRegistry, const Parent parent) {
+	execute(StateRegistry& stateRegistry, const Parent parent) {
 		static constexpr auto TYPE_ID = TSL::template index<TH>();
 		assertEquality<TID, TYPE_ID>();
 
-		auto& stateInfo = stateRegistry[TID];
-		stateInfo.parent = parent;
-		stateInfo.payload.reset();
+		stateRegistry[TID] = parent;
 	}
 };
 
@@ -25,10 +23,10 @@ struct Register {
 
 template <StateID TID, typename TC, typename TSL, typename TPL>
 struct Register<TID, TC, TSL, TPL, Base<TC, TSL, TPL>> {
-	using StateRegistry2 = StateRegistry2T<TPL>;
+	using StateRegistry = Array<Parent, TSL::SIZE>;
 
 	static inline void
-	execute(StateRegistry2&, const Parent) {}
+	execute(StateRegistry&, const Parent) {}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -37,7 +35,7 @@ struct Register<TID, TC, TSL, TPL, Base<TC, TSL, TPL>> {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
-_S<TID, TC, TSL, TPL, TH>::_S(StateRegistry2& stateRegistry,
+_S<TID, TC, TSL, TPL, TH>::_S(StateRegistry& stateRegistry,
 							  const Parent parent,
 							  Parents& /*forkParents*/,
 							  ForkPointers& /*forkPointers*/)
@@ -186,18 +184,6 @@ _S<TID, TC, TSL, TPL, TH>::deepGetNames(const LongIndex parent,
 										StructureStateInfos& _stateInfos) const
 {
 	_stateInfos << StructureStateInfo { parent, region, depth, name() };
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
-void
-_S<TID, TC, TSL, TPL, TH>::deepIsActive(const bool isActive,
-										LongIndex& index,
-										MachineStructure& structure) const
-{
-	if (!isBare())
-		structure[index++].isActive = isActive;
 }
 
 #endif

@@ -13,7 +13,7 @@ class _R final {
 	using Context			= TContext;
 	using Control			= ControlT<Context>;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using Payload			= typename PayloadList::Container;
 	using Transition		= TransitionT<PayloadList>;
 
 	using ForwardApex		= typename WrapForward<TApex>::Type;
@@ -24,23 +24,21 @@ class _R final {
 	using Apex				= typename WrapMaterial<0, Context, StateList, PayloadList, TApex>::Type;
 
 public:
-	static constexpr LongIndex REVERSE_DEPTH  = Apex::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	  = Apex::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	  = Apex::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	  = Apex::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	  = Apex::PRONG_COUNT;
-	static constexpr LongIndex WIDTH		  = Apex::WIDTH;
+	static constexpr LongIndex REVERSE_DEPTH  = ForwardApex::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH	  = ForwardApex::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	  = ForwardApex::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	  = ForwardApex::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT	  = ForwardApex::PRONG_COUNT;
+	static constexpr LongIndex WIDTH		  = ForwardApex::WIDTH;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using StateInfo				 = StateInfoT<PayloadList>;
-	using StateRegistryStorage2	 = Array<StateInfo, STATE_COUNT>;
+	using StateRegistry			 = Array<Parent,	 STATE_COUNT>;
+	using TransitionPayloads	 = Array<Payload,	 STATE_COUNT>;
 
-	static constexpr LongIndex STATE_CAPACITY = (LongIndex) 1.3 * Apex::STATE_COUNT;
-
-	using ForkParentStorage		 = Array<Parent,	 FORK_COUNT>;
+	using ForkParents			 = Array<Parent,	 FORK_COUNT>;
 	using ForkPointerStorage	 = Array<Fork*,		 FORK_COUNT>;
 	using TransitionQueueStorage = Array<Transition, FORK_COUNT>;
 
@@ -67,7 +65,7 @@ public:
 
 	template <typename T>
 	static constexpr LongIndex
-	stateId()									{ return StateList::template index<T>();	}
+	stateId()												{ return StateList::template index<T>();			}
 
 	void update();
 
@@ -80,17 +78,6 @@ public:
 	inline void resume	(const StateID stateId);
 	inline void schedule(const StateID stateId);
 
-	template <typename TState>
-	inline void changeTo()							{ changeTo(stateId<TState>());			}
-
-	template <typename TState>
-	inline void resume	()							{ resume  (stateId<TState>());			}
-
-	template <typename TState>
-	inline void schedule()							{ schedule(stateId<TState>());			}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	template <typename TPayload>
 	inline void changeTo(const StateID stateId, TPayload* const payload);
 
@@ -100,14 +87,25 @@ public:
 	template <typename TPayload>
 	inline void schedule(const StateID stateId, TPayload* const payload);
 
-	template <typename TState, typename TPayload>
-	inline void changeTo(TPayload* const payload)	{ changeTo(stateId<TState>(), payload);	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	inline void changeTo()									{ changeTo(stateId<TState>());						}
+
+	template <typename TState>
+	inline void resume	()									{ resume  (stateId<TState>());						}
+
+	template <typename TState>
+	inline void schedule()									{ schedule(stateId<TState>());						}
 
 	template <typename TState, typename TPayload>
-	inline void resume	(TPayload* const payload)	{ resume  (stateId<TState>(), payload);	}
+	inline void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
-	inline void schedule(TPayload* const payload)	{ schedule(stateId<TState>(), payload);	}
+	inline void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
+
+	template <typename TState, typename TPayload>
+	inline void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -122,43 +120,43 @@ public:
 	inline TPayload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	inline void resetStateData()						{ resetStateData(stateId<TState>());				}
+	inline void resetStateData()							{ resetStateData(stateId<TState>());				}
 
 	template <typename TState, typename TPayload>
-	inline void setStateData(TPayload* const payload)	{ setStateData(stateId<TState>(), payload);			}
+	inline void setStateData(TPayload* const payload)		{ setStateData(stateId<TState>(), payload);			}
 
 	template <typename TState>
-	inline bool isStateDataSet() const					{ return isStateDataSet(stateId<TState>());			}
+	inline bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
 
 	template <typename TState, typename TPayload>
-	inline TPayload* getStateData() const				{ return getStateData<TPayload>(stateId<TState>());	}
+	inline TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	inline bool isActive(const StateID stateId) const;
 
+	inline bool isResumable(const StateID stateId) const;
+
+	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
+
 	template <typename T>
 	inline bool isActive() const;
-
-	inline bool isResumable(const StateID stateId) const;
 
 	template <typename T>
 	inline bool isResumable() const;
 
-	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);	}
-
 	template <typename T>
-	inline bool isScheduled() const							{ return isResumable<T>();		}
+	inline bool isScheduled() const							{ return isResumable<T>();							}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const						{ return _structure;		}
-	const MachineActivity&  activity()  const						{ return _activityHistory;	}
+	const MachineStructure& structure() const				{ return _structure;								}
+	const MachineActivity&  activity()  const				{ return _activityHistory;							}
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
-	void attachLogger(LoggerInterface* const logger)						{ _logger = logger;	}
+	void attachLogger(LoggerInterface* const logger)		{ _logger = logger;									}
 #endif
 
 protected:
@@ -174,9 +172,10 @@ protected:
 private:
 	Context& _context;
 
-	StateRegistryStorage2 _stateRegistry2;
+	StateRegistry _stateRegistry;
+	TransitionPayloads _transitionPayloads;
 
-	ForkParentStorage  _forkParents;
+	ForkParents  _forkParents;
 	ForkPointerStorage _forkPointers;
 
 	TransitionQueueStorage _requests;

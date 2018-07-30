@@ -7,10 +7,13 @@ template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 _R<TC, TPL, TMS, TA>::_R(Context& context
 						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
-	, _apex{_stateRegistry2, Parent{}, _forkParents, _forkPointers}
+	, _apex{_stateRegistry, Parent{}, _forkParents, _forkPointers}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
 	HFSM_IF_STRUCTURE(getStateNames());
+
+	for (auto& payload : _transitionPayloads)
+		payload.reset();
 
 	{
 		Control control{_context, HFSM_LOGGER_OR(_logger, nullptr)};
@@ -154,9 +157,10 @@ _R<TC, TPL, TMS, TA>::schedule(const StateID stateId,
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::resetStateData(const StateID stateId) {
-	auto& stateInfo = _stateRegistry2[stateId];
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	stateInfo.payload.reset();
+	if (stateId < _transitionPayloads.CAPACITY)
+		_transitionPayloads[stateId].reset();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -167,9 +171,10 @@ void
 _R<TC, TPL, TMS, TA>::setStateData(const StateID stateId,
 								   TPayload* const payload)
 {
-	auto& stateInfo = _stateRegistry2[stateId];
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	stateInfo.payload = payload;
+	if (stateId < _transitionPayloads.CAPACITY)
+		_transitionPayloads[stateId] = payload;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -177,9 +182,12 @@ _R<TC, TPL, TMS, TA>::setStateData(const StateID stateId,
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 bool
 _R<TC, TPL, TMS, TA>::isStateDataSet(const StateID stateId) const {
-	const auto& stateInfo = _stateRegistry2[stateId];
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	return !!stateInfo.payload;
+	if (stateId < _transitionPayloads.CAPACITY)
+		return !!_transitionPayloads[stateId];
+	else
+		return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -188,10 +196,14 @@ template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
 TPayload*
 _R<TC, TPL, TMS, TA>::getStateData(const StateID stateId) const {
-	const auto& stateInfo = _stateRegistry2[stateId];
-	const auto& payload = stateInfo.payload;
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	return payload.template get<TPayload>();
+	if (stateId < _transitionPayloads.CAPACITY) {
+		const auto& payload = _transitionPayloads[stateId];
+
+		return payload.template get<TPayload>();
+	} else
+		return nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -199,19 +211,38 @@ _R<TC, TPL, TMS, TA>::getStateData(const StateID stateId) const {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 bool
 _R<TC, TPL, TMS, TA>::isActive(const StateID stateId) const {
-	const auto& stateInfo = _stateRegistry2[stateId];
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
-		const auto& fork = *_forkPointers[parent.fork];
+	if (stateId < _transitionPayloads.CAPACITY)
+		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
+			const auto& fork = *_forkPointers[parent.fork];
 
-		if (fork.active != INVALID_SHORT_INDEX)
-			return parent.prong == fork.active;
-	}
+			if (fork.active != INVALID_SHORT_INDEX)
+				return parent.prong == fork.active;
+		}
 
 	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+bool
+_R<TC, TPL, TMS, TA>::isResumable(const StateID stateId) const {
+	assert(stateId < _transitionPayloads.CAPACITY);
+
+	if (stateId < _transitionPayloads.CAPACITY)
+		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
+			const auto& fork = *_forkPointers[parent.fork];
+
+			if (fork.active != INVALID_SHORT_INDEX)
+				return parent.prong == fork.resumable;
+		}
+
+	return false;
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename T>
@@ -221,23 +252,6 @@ _R<TC, TPL, TMS, TA>::isActive() const {
 	static_assert(id != INVALID_STATE_ID, "State not in FSM");
 
 	return isActive(id);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
-bool
-_R<TC, TPL, TMS, TA>::isResumable(const StateID stateId) const {
-	const auto& stateInfo = _stateRegistry2[stateId];
-
-	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
-		const auto& fork = *_forkPointers[parent.fork];
-
-		if (fork.active != INVALID_SHORT_INDEX)
-			return parent.prong == fork.resumable;
-	}
-
-	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -312,9 +326,9 @@ _R<TC, TPL, TMS, TA>::processTransitions() {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::requestImmediate(const Transition request) {
-	const auto& stateInfo = _stateRegistry2[request.stateId];
+	assert(request.stateId < _transitionPayloads.CAPACITY);
 
-	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
+	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
 
 		fork.requested = parent.prong;
@@ -328,9 +342,9 @@ _R<TC, TPL, TMS, TA>::requestImmediate(const Transition request) {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::requestScheduled(const Transition request) {
-	const auto& stateInfo = _stateRegistry2[request.stateId];
+	assert(request.stateId < _transitionPayloads.CAPACITY);
 
-	const auto parent = stateInfo.parent;
+	const auto parent = _stateRegistry[request.stateId];
 	auto& fork = *_forkPointers[parent.fork];
 
 	fork.resumable = parent.prong;
@@ -421,13 +435,9 @@ _R<TC, TPL, TMS, TA>::getStateNames() {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::udpateActivity() {
-	for (auto& item : _structure)
-		item.isActive = false;
-
-	LongIndex index = 0;
-	_apex.deepIsActive(true, index, _structure);
-
 	for (LongIndex i = 0; i < _structure.count(); ++i) {
+		_structure[i].isActive = isActive(i);
+
 		auto& activity = _activityHistory[i];
 
 		if (_structure[i].isActive) {

@@ -33,24 +33,6 @@ using Parents = ArrayView<Parent>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma pack(push, 2)
-
-template <typename TPayloadList>
-struct StateInfoT {
-	using PayloadList = TPayloadList;
-	using Payload = typename PayloadList::Container;
-
-	Payload payload;
-	Parent parent;
-};
-
-#pragma pack(pop)
-
-template <typename TPayloadList>
-using StateRegistry2T = ArrayView<StateInfoT<TPayloadList>>;
-
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma pack(push, 1)
 
 struct Fork {
@@ -59,31 +41,20 @@ struct Fork {
 	ShortIndex resumable = INVALID_SHORT_INDEX;
 	ShortIndex requested = INVALID_SHORT_INDEX;
 
-	inline Fork(const ShortIndex self_)
+	inline Fork(const ShortIndex self_,
+				const Parent parent,
+				Parents& forkParents)
 		: self(self_)
 	{
 		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x3) == 0));
+
+		forkParents[self_] = parent;
 	}
 };
 
 #pragma pack(pop)
 
 using ForkPointers = ArrayView<Fork*>;
-
-//------------------------------------------------------------------------------
-
-template <typename T>
-struct ForkT
-	: Fork
-{
-	ForkT(const ShortIndex index,
-		  const Parent parent,
-		  Parents& forkParents)
-		: Fork(index)
-	{
-		forkParents[index] = parent;
-	}
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 

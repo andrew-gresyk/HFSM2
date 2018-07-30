@@ -4,7 +4,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-_C<TID, TC, TSL, TPL, TH, TS...>::_C(StateRegistry2& stateRegistry,
+_C<TID, TC, TSL, TPL, TH, TS...>::_C(StateRegistry& stateRegistry,
 									 const Parent parent,
 									 Parents& forkParents,
 									 ForkPointers& forkPointers)
@@ -211,18 +211,6 @@ _C<TID, TC, TSL, TPL, TH, TS...>::deepGetNames(const LongIndex parent,
 {
 	_state	  .deepGetNames(parent, region,			 depth,		_stateInfos);
 	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-void
-_C<TID, TC, TSL, TPL, TH, TS...>::deepIsActive(const bool isActive,
-											   LongIndex& index,
-											   MachineStructure& structure) const
-{
-	_state	  .deepIsActive(isActive,									   index, structure);
-	_subStates.wideIsActive(isActive ? _fork.active : INVALID_SHORT_INDEX, index, structure);
 }
 
 #endif

@@ -4,7 +4,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
-_OS<TID, TC, TSL, TPL, NI, TI, TR...>::_OS(StateRegistry2& stateRegistry,
+_OS<TID, TC, TSL, TPL, NI, TI, TR...>::_OS(StateRegistry& stateRegistry,
 										   const ShortIndex fork,
 										   Parents& forkParents,
 										   ForkPointers& forkPointers)
@@ -162,18 +162,6 @@ _OS<TID, TC, TSL, TPL, NI, TI, TR...>::wideGetNames(const LongIndex parent,
 {
 	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
 	remaining.wideGetNames(parent,								   depth, _stateInfos);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
-void
-_OS<TID, TC, TSL, TPL, NI, TI, TR...>::wideIsActive(const bool isActive,
-													LongIndex& index,
-													MachineStructure& structure) const
-{
-	initial	 .deepIsActive(isActive, index, structure);
-	remaining.wideIsActive(isActive, index, structure);
 }
 
 #endif

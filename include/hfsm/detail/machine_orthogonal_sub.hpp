@@ -22,23 +22,19 @@ struct _OS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial, TRe
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Initial			= typename WrapMaterial<INITIAL_ID, Context, StateList, PayloadList, TInitial>::Type;
-	using Remaining			= _OS<INITIAL_ID + Initial::STATE_COUNT, Context, StateList, PayloadList, NIndex + 1, TRemaining...>;
+	using InitialForward	= typename WrapForward<TInitial>::Type;
+	using Remaining			= _OS<INITIAL_ID + InitialForward::STATE_COUNT, Context, StateList, PayloadList, NIndex + 1, TRemaining...>;
 	using Forward			= _OSF<TInitial, TRemaining...>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
 	static constexpr LongIndex PRONG_INDEX	 = NIndex;
-	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH  + Remaining::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
 
-	_OS(StateRegistry2& stateRegistry,
+	_OS(StateRegistry& stateRegistry,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -70,15 +66,11 @@ struct _OS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial, TRe
 	void wideGetNames(const LongIndex parent,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void wideIsActive(const bool active,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 	Initial initial;
 	Remaining remaining;
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 //------------------------------------------------------------------------------
@@ -96,22 +88,17 @@ struct _OS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial> {
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Initial			= typename WrapMaterial<INITIAL_ID, Context, StateList, PayloadList, TInitial>::Type;
 	using Forward			= _OSF<TInitial>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
 	static constexpr LongIndex PRONG_INDEX	 = NIndex;
-	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
 
-	_OS(StateRegistry2& stateRegistry,
+	_OS(StateRegistry& stateRegistry,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -143,14 +130,10 @@ struct _OS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial> {
 	void wideGetNames(const LongIndex parent,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void wideIsActive(const bool active,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 	Initial initial;
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////

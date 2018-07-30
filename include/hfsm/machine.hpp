@@ -1094,24 +1094,6 @@ using Parents = ArrayView<Parent>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma pack(push, 2)
-
-template <typename TPayloadList>
-struct StateInfoT {
-	using PayloadList = TPayloadList;
-	using Payload = typename PayloadList::Container;
-
-	Payload payload;
-	Parent parent;
-};
-
-#pragma pack(pop)
-
-template <typename TPayloadList>
-using StateRegistry2T = ArrayView<StateInfoT<TPayloadList>>;
-
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma pack(push, 1)
 
 struct Fork {
@@ -1120,31 +1102,20 @@ struct Fork {
 	ShortIndex resumable = INVALID_SHORT_INDEX;
 	ShortIndex requested = INVALID_SHORT_INDEX;
 
-	inline Fork(const ShortIndex self_)
+	inline Fork(const ShortIndex self_,
+				const Parent parent,
+				Parents& forkParents)
 		: self(self_)
 	{
 		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x3) == 0));
+
+		forkParents[self_] = parent;
 	}
 };
 
 #pragma pack(pop)
 
 using ForkPointers = ArrayView<Fork*>;
-
-//------------------------------------------------------------------------------
-
-template <typename T>
-struct ForkT
-	: Fork
-{
-	ForkT(const ShortIndex index,
-		  const Parent parent,
-		  Parents& forkParents)
-		: Fork(index)
-	{
-		forkParents[index] = parent;
-	}
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1500,6 +1471,13 @@ template <typename THead>
 struct _SF final {
 	using Head				= THead;
 	using StateList			= TypeListT<Head>;
+
+	static constexpr LongIndex REVERSE_DEPTH = 1;
+	static constexpr LongIndex DEEP_WIDTH	 = 0;
+	static constexpr LongIndex STATE_COUNT	 = 1;
+	static constexpr LongIndex FORK_COUNT	 = 0;
+	static constexpr LongIndex PRONG_COUNT	 = 0;
+	static constexpr LongIndex WIDTH		 = 1;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1509,12 +1487,24 @@ struct _CSF<TInitial, TRemaining...> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using Remaining			= _CSF<TRemaining...>;
 	using StateList			= typename MergeT<typename Initial::StateList, typename Remaining::StateList>::TypeList;
+
+	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr LongIndex DEEP_WIDTH	 = Max<Initial::DEEP_WIDTH, Remaining::DEEP_WIDTH>::VALUE;
+	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
 };
 
 template <typename TInitial>
 struct _CSF<TInitial> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using StateList			= typename Initial::StateList;
+
+	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH	 = Max<1, Initial::DEEP_WIDTH>::VALUE;
+	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
 };
 
 template <typename THead, typename... TSubStates>
@@ -1523,6 +1513,13 @@ struct _CF final {
 	using State				= _SF<Head>;
 	using SubStates			= _CSF<TSubStates...>;
 	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
+
+	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
+	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
+	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT + sizeof...(TSubStates);
+	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1532,12 +1529,24 @@ struct _OSF<TInitial, TRemaining...> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using Remaining			= _OSF<TRemaining...>;
 	using StateList			= typename MergeT<typename Initial::StateList, typename Remaining::StateList>::TypeList;
+
+	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH  + Remaining::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
 };
 
 template <typename TInitial>
 struct _OSF<TInitial> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using StateList			= typename Initial::StateList;
+
+	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
 };
 
 template <typename THead,
@@ -1547,6 +1556,13 @@ struct _OF final {
 	using State				= _SF<Head>;
 	using SubStates			= _OSF<TSubStates...>;
 	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
+
+	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
+	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
+	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT;
+	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1611,8 +1627,8 @@ struct _RF final {
 
 	using Instance			= _R<Context, PayloadList, MAX_SUBSTITUTIONS, Forward>;
 
-	using Bare = ::hfsm::detail::Bare<Context, StateList, PayloadList>;
-	using Base = ::hfsm::detail::Base<Context, StateList, PayloadList>;
+	using Bare				= ::hfsm::detail::Bare<Context, StateList, PayloadList>;
+	using Base				= ::hfsm::detail::Base<Context, StateList, PayloadList>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;
@@ -1744,21 +1760,14 @@ struct _S final {
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Head				= THead;
 
 	using Base				= ::hfsm::detail::Base<Context, StateList, PayloadList>;
 
-	static constexpr LongIndex REVERSE_DEPTH = 1;
-	static constexpr LongIndex DEEP_WIDTH	 = 0;
-	static constexpr LongIndex STATE_COUNT	 = 1;
-	static constexpr LongIndex FORK_COUNT	 = 0;
-	static constexpr LongIndex PRONG_COUNT	 = 0;
-	static constexpr LongIndex WIDTH		 = 1;
-
-	_S(StateRegistry2& stateRegistry,
+	_S(StateRegistry& stateRegistry,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
@@ -1797,10 +1806,6 @@ struct _S final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void deepIsActive(const bool isActive,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
@@ -1841,16 +1846,14 @@ namespace {
 
 template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
 struct Register {
-	using StateRegistry2 = StateRegistry2T<TPL>;
+	using StateRegistry = Array<Parent, TSL::SIZE>;
 
 	static inline void
-	execute(StateRegistry2& stateRegistry, const Parent parent) {
+	execute(StateRegistry& stateRegistry, const Parent parent) {
 		static constexpr auto TYPE_ID = TSL::template index<TH>();
 		assertEquality<TID, TYPE_ID>();
 
-		auto& stateInfo = stateRegistry[TID];
-		stateInfo.parent = parent;
-		stateInfo.payload.reset();
+		stateRegistry[TID] = parent;
 	}
 };
 
@@ -1858,10 +1861,10 @@ struct Register {
 
 template <StateID TID, typename TC, typename TSL, typename TPL>
 struct Register<TID, TC, TSL, TPL, Base<TC, TSL, TPL>> {
-	using StateRegistry2 = StateRegistry2T<TPL>;
+	using StateRegistry = Array<Parent, TSL::SIZE>;
 
 	static inline void
-	execute(StateRegistry2&, const Parent) {}
+	execute(StateRegistry&, const Parent) {}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1870,7 +1873,7 @@ struct Register<TID, TC, TSL, TPL, Base<TC, TSL, TPL>> {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
-_S<TID, TC, TSL, TPL, TH>::_S(StateRegistry2& stateRegistry,
+_S<TID, TC, TSL, TPL, TH>::_S(StateRegistry& stateRegistry,
 							  const Parent parent,
 							  Parents& /*forkParents*/,
 							  ForkPointers& /*forkPointers*/)
@@ -2021,18 +2024,6 @@ _S<TID, TC, TSL, TPL, TH>::deepGetNames(const LongIndex parent,
 	_stateInfos << StructureStateInfo { parent, region, depth, name() };
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
-void
-_S<TID, TC, TSL, TPL, TH>::deepIsActive(const bool isActive,
-										LongIndex& index,
-										MachineStructure& structure) const
-{
-	if (!isBare())
-		structure[index++].isActive = isActive;
-}
-
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2063,23 +2054,19 @@ struct _CS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial, TRe
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Initial			= typename WrapMaterial<INITIAL_ID, Context, StateList, PayloadList, TInitial>::Type;
-	using Remaining			= _CS<INITIAL_ID + Initial::STATE_COUNT, Context, StateList, PayloadList, NIndex + 1, TRemaining...>;
+	using InitialForward	= typename WrapForward<TInitial>::Type;
+	using Remaining			= _CS<INITIAL_ID + InitialForward::STATE_COUNT, Context, StateList, PayloadList, NIndex + 1, TRemaining...>;
 	using Forward			= _CSF<TInitial, TRemaining...>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
 	static constexpr LongIndex PRONG_INDEX	 = NIndex;
-	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr LongIndex DEEP_WIDTH	 = Max<Initial::DEEP_WIDTH, Remaining::DEEP_WIDTH>::VALUE;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
 
-	_CS(StateRegistry2& stateRegistry,
+	_CS(StateRegistry& stateRegistry,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -2109,15 +2096,11 @@ struct _CS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial, TRe
 	void wideGetNames(const LongIndex parent,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void wideIsActive(const ShortIndex prong,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 	Initial initial;
 	Remaining remaining;
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 //------------------------------------------------------------------------------
@@ -2135,22 +2118,17 @@ struct _CS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial> {
 	using StateList			= TStateList;
 	using Control			= ControlT<Context>;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Initial			= typename WrapMaterial<INITIAL_ID, Context, StateList, PayloadList, TInitial>::Type;
 	using Forward			= _CSF<TInitial>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
 	static constexpr LongIndex PRONG_INDEX	 = NIndex;
-	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = Max<1, Initial::DEEP_WIDTH>::VALUE;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
 
-	_CS(StateRegistry2& stateRegistry,
+	_CS(StateRegistry& stateRegistry,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -2180,14 +2158,10 @@ struct _CS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial> {
 	void wideGetNames(const LongIndex parent,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void wideIsActive(const ShortIndex prong,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 	Initial initial;
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2201,7 +2175,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::_CS(StateRegistry2& stateRegistry,
+_CS<TID, TC, TSL, TPL, NI, TI, TR...>::_CS(StateRegistry& stateRegistry,
 										   const ShortIndex fork,
 										   Parents& forkParents,
 										   ForkPointers& forkPointers)
@@ -2369,18 +2343,6 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideGetNames(const LongIndex parent,
 	remaining.wideGetNames(parent,								  depth, _stateInfos);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
-void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideIsActive(const ShortIndex prong,
-													LongIndex& index,
-													MachineStructure& structure) const
-{
-	initial	 .deepIsActive(prong == PRONG_INDEX, index, structure);
-	remaining.wideIsActive(prong,				 index, structure);
-}
-
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2393,7 +2355,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
-_CS<TID, TC, TSL, TPL, NI, TI>::_CS(StateRegistry2& stateRegistry,
+_CS<TID, TC, TSL, TPL, NI, TI>::_CS(StateRegistry& stateRegistry,
 									const ShortIndex fork,
 									Parents& forkParents,
 									ForkPointers& forkPointers)
@@ -2548,17 +2510,6 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideGetNames(const LongIndex parent,
 	initial.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
-void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideIsActive(const ShortIndex prong,
-											 LongIndex& index,
-											 MachineStructure& structure) const
-{
-	initial.deepIsActive(prong == PRONG_INDEX, index, structure);
-}
-
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2583,26 +2534,18 @@ struct _C final {
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using ControlLock		= typename TransitionControl::Lock;
 	using Head				= THead;
-	using Fork				= ForkT<Head>;
 	using State				= _S <HEAD_ID,	   Context, StateList, PayloadList, Head>;
 	using SubStates			= _CS<HEAD_ID + 1, Context, StateList, PayloadList, 0, TSubStates...>;
 	using Forward			= _CF<Head, TSubStates...>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
-	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
-	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
-	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT + sizeof...(TSubStates);
-	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
-
-	_C(StateRegistry2& stateRegistry,
+	_C(StateRegistry& stateRegistry,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
@@ -2635,17 +2578,13 @@ struct _C final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void deepIsActive(const bool isActive,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 	Fork _fork;
 	State _state;
 	SubStates _subStates;
 
 	HSFM_IF_DEBUG(const std::type_index _type = typeid(Head));
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2659,7 +2598,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-_C<TID, TC, TSL, TPL, TH, TS...>::_C(StateRegistry2& stateRegistry,
+_C<TID, TC, TSL, TPL, TH, TS...>::_C(StateRegistry& stateRegistry,
 									 const Parent parent,
 									 Parents& forkParents,
 									 ForkPointers& forkPointers)
@@ -2868,18 +2807,6 @@ _C<TID, TC, TSL, TPL, TH, TS...>::deepGetNames(const LongIndex parent,
 	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-void
-_C<TID, TC, TSL, TPL, TH, TS...>::deepIsActive(const bool isActive,
-											   LongIndex& index,
-											   MachineStructure& structure) const
-{
-	_state	  .deepIsActive(isActive,									   index, structure);
-	_subStates.wideIsActive(isActive ? _fork.active : INVALID_SHORT_INDEX, index, structure);
-}
-
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2910,23 +2837,19 @@ struct _OS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial, TRe
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Initial			= typename WrapMaterial<INITIAL_ID, Context, StateList, PayloadList, TInitial>::Type;
-	using Remaining			= _OS<INITIAL_ID + Initial::STATE_COUNT, Context, StateList, PayloadList, NIndex + 1, TRemaining...>;
+	using InitialForward	= typename WrapForward<TInitial>::Type;
+	using Remaining			= _OS<INITIAL_ID + InitialForward::STATE_COUNT, Context, StateList, PayloadList, NIndex + 1, TRemaining...>;
 	using Forward			= _OSF<TInitial, TRemaining...>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
 	static constexpr LongIndex PRONG_INDEX	 = NIndex;
-	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH  + Remaining::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
 
-	_OS(StateRegistry2& stateRegistry,
+	_OS(StateRegistry& stateRegistry,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -2958,15 +2881,11 @@ struct _OS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial, TRe
 	void wideGetNames(const LongIndex parent,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void wideIsActive(const bool active,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 	Initial initial;
 	Remaining remaining;
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 //------------------------------------------------------------------------------
@@ -2984,22 +2903,17 @@ struct _OS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial> {
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Initial			= typename WrapMaterial<INITIAL_ID, Context, StateList, PayloadList, TInitial>::Type;
 	using Forward			= _OSF<TInitial>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
 	static constexpr LongIndex PRONG_INDEX	 = NIndex;
-	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
 
-	_OS(StateRegistry2& stateRegistry,
+	_OS(StateRegistry& stateRegistry,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -3031,14 +2945,10 @@ struct _OS<TInitialID, TContext, TStateList, TPayloadList, NIndex, TInitial> {
 	void wideGetNames(const LongIndex parent,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void wideIsActive(const bool active,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 	Initial initial;
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3052,7 +2962,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
-_OS<TID, TC, TSL, TPL, NI, TI, TR...>::_OS(StateRegistry2& stateRegistry,
+_OS<TID, TC, TSL, TPL, NI, TI, TR...>::_OS(StateRegistry& stateRegistry,
 										   const ShortIndex fork,
 										   Parents& forkParents,
 										   ForkPointers& forkPointers)
@@ -3212,18 +3122,6 @@ _OS<TID, TC, TSL, TPL, NI, TI, TR...>::wideGetNames(const LongIndex parent,
 	remaining.wideGetNames(parent,								   depth, _stateInfos);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
-void
-_OS<TID, TC, TSL, TPL, NI, TI, TR...>::wideIsActive(const bool isActive,
-													LongIndex& index,
-													MachineStructure& structure) const
-{
-	initial	 .deepIsActive(isActive, index, structure);
-	remaining.wideIsActive(isActive, index, structure);
-}
-
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3236,7 +3134,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
-_OS<TID, TC, TSL, TPL, NI, TI>::_OS(StateRegistry2& stateRegistry,
+_OS<TID, TC, TSL, TPL, NI, TI>::_OS(StateRegistry& stateRegistry,
 									const ShortIndex fork,
 									Parents& forkParents,
 									ForkPointers& forkPointers)
@@ -3377,17 +3275,6 @@ _OS<TID, TC, TSL, TPL, NI, TI>::wideGetNames(const LongIndex parent,
 	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
-void
-_OS<TID, TC, TSL, TPL, NI, TI>::wideIsActive(const bool isActive,
-											 LongIndex& index,
-											 MachineStructure& structure) const
-{
-	initial.deepIsActive(isActive, index, structure);
-}
-
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3412,26 +3299,18 @@ struct _O final {
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using ControlLock		= typename TransitionControl::Lock;
 	using Head				= THead;
-	using Fork				= ForkT<Head>;
 	using State				= _S <HEAD_ID,	   Context, StateList, PayloadList, Head>;
 	using SubStates			= _OS<HEAD_ID + 1, Context, StateList, PayloadList, 0, TSubStates...>;
 	using Forward			= _OF<Head, TSubStates...>;
-	using DeepStateList		= typename Forward::StateList;
+	using OwnStateList		= typename Forward::StateList;
 
-	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
-	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
-	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT;
-	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
-
-	_O(StateRegistry2& stateRegistry,
+	_O(StateRegistry& stateRegistry,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
@@ -3464,17 +3343,13 @@ struct _O final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void deepIsActive(const bool isActive,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 	Fork _fork;
 	State _state;
 	SubStates _subStates;
 
-	HSFM_IF_DEBUG(DeepStateList stateList);
+	HSFM_IF_DEBUG(OwnStateList ownStateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3488,7 +3363,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-_O<TID, TC, TSL, TPL, TH, TS...>::_O(StateRegistry2& stateRegistry,
+_O<TID, TC, TSL, TPL, TH, TS...>::_O(StateRegistry& stateRegistry,
 									 const Parent parent,
 									 Parents& forkParents,
 									 ForkPointers& forkPointers)
@@ -3688,18 +3563,6 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepGetNames(const LongIndex parent,
 	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepIsActive(const bool isActive,
-											   LongIndex& index,
-											   MachineStructure& structure) const
-{
-	_state	  .deepIsActive(isActive, index, structure);
-	_subStates.wideIsActive(isActive, index, structure);
-}
-
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3721,7 +3584,7 @@ class _R final {
 	using Context			= TContext;
 	using Control			= ControlT<Context>;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using Payload			= typename PayloadList::Container;
 	using Transition		= TransitionT<PayloadList>;
 
 	using ForwardApex		= typename WrapForward<TApex>::Type;
@@ -3732,23 +3595,21 @@ class _R final {
 	using Apex				= typename WrapMaterial<0, Context, StateList, PayloadList, TApex>::Type;
 
 public:
-	static constexpr LongIndex REVERSE_DEPTH  = Apex::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	  = Apex::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	  = Apex::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	  = Apex::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	  = Apex::PRONG_COUNT;
-	static constexpr LongIndex WIDTH		  = Apex::WIDTH;
+	static constexpr LongIndex REVERSE_DEPTH  = ForwardApex::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH	  = ForwardApex::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	  = ForwardApex::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	  = ForwardApex::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT	  = ForwardApex::PRONG_COUNT;
+	static constexpr LongIndex WIDTH		  = ForwardApex::WIDTH;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using StateInfo				 = StateInfoT<PayloadList>;
-	using StateRegistryStorage2	 = Array<StateInfo, STATE_COUNT>;
+	using StateRegistry			 = Array<Parent,	 STATE_COUNT>;
+	using TransitionPayloads	 = Array<Payload,	 STATE_COUNT>;
 
-	static constexpr LongIndex STATE_CAPACITY = (LongIndex) 1.3 * Apex::STATE_COUNT;
-
-	using ForkParentStorage		 = Array<Parent,	 FORK_COUNT>;
+	using ForkParents			 = Array<Parent,	 FORK_COUNT>;
 	using ForkPointerStorage	 = Array<Fork*,		 FORK_COUNT>;
 	using TransitionQueueStorage = Array<Transition, FORK_COUNT>;
 
@@ -3775,7 +3636,7 @@ public:
 
 	template <typename T>
 	static constexpr LongIndex
-	stateId()									{ return StateList::template index<T>();	}
+	stateId()												{ return StateList::template index<T>();			}
 
 	void update();
 
@@ -3788,17 +3649,6 @@ public:
 	inline void resume	(const StateID stateId);
 	inline void schedule(const StateID stateId);
 
-	template <typename TState>
-	inline void changeTo()							{ changeTo(stateId<TState>());			}
-
-	template <typename TState>
-	inline void resume	()							{ resume  (stateId<TState>());			}
-
-	template <typename TState>
-	inline void schedule()							{ schedule(stateId<TState>());			}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	template <typename TPayload>
 	inline void changeTo(const StateID stateId, TPayload* const payload);
 
@@ -3808,14 +3658,25 @@ public:
 	template <typename TPayload>
 	inline void schedule(const StateID stateId, TPayload* const payload);
 
-	template <typename TState, typename TPayload>
-	inline void changeTo(TPayload* const payload)	{ changeTo(stateId<TState>(), payload);	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	inline void changeTo()									{ changeTo(stateId<TState>());						}
+
+	template <typename TState>
+	inline void resume	()									{ resume  (stateId<TState>());						}
+
+	template <typename TState>
+	inline void schedule()									{ schedule(stateId<TState>());						}
 
 	template <typename TState, typename TPayload>
-	inline void resume	(TPayload* const payload)	{ resume  (stateId<TState>(), payload);	}
+	inline void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
-	inline void schedule(TPayload* const payload)	{ schedule(stateId<TState>(), payload);	}
+	inline void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
+
+	template <typename TState, typename TPayload>
+	inline void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3830,43 +3691,43 @@ public:
 	inline TPayload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	inline void resetStateData()						{ resetStateData(stateId<TState>());				}
+	inline void resetStateData()							{ resetStateData(stateId<TState>());				}
 
 	template <typename TState, typename TPayload>
-	inline void setStateData(TPayload* const payload)	{ setStateData(stateId<TState>(), payload);			}
+	inline void setStateData(TPayload* const payload)		{ setStateData(stateId<TState>(), payload);			}
 
 	template <typename TState>
-	inline bool isStateDataSet() const					{ return isStateDataSet(stateId<TState>());			}
+	inline bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
 
 	template <typename TState, typename TPayload>
-	inline TPayload* getStateData() const				{ return getStateData<TPayload>(stateId<TState>());	}
+	inline TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	inline bool isActive(const StateID stateId) const;
 
+	inline bool isResumable(const StateID stateId) const;
+
+	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
+
 	template <typename T>
 	inline bool isActive() const;
-
-	inline bool isResumable(const StateID stateId) const;
 
 	template <typename T>
 	inline bool isResumable() const;
 
-	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);	}
-
 	template <typename T>
-	inline bool isScheduled() const							{ return isResumable<T>();		}
+	inline bool isScheduled() const							{ return isResumable<T>();							}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const						{ return _structure;		}
-	const MachineActivity&  activity()  const						{ return _activityHistory;	}
+	const MachineStructure& structure() const				{ return _structure;								}
+	const MachineActivity&  activity()  const				{ return _activityHistory;							}
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
-	void attachLogger(LoggerInterface* const logger)						{ _logger = logger;	}
+	void attachLogger(LoggerInterface* const logger)		{ _logger = logger;									}
 #endif
 
 protected:
@@ -3882,9 +3743,10 @@ protected:
 private:
 	Context& _context;
 
-	StateRegistryStorage2 _stateRegistry2;
+	StateRegistry _stateRegistry;
+	TransitionPayloads _transitionPayloads;
 
-	ForkParentStorage  _forkParents;
+	ForkParents  _forkParents;
 	ForkPointerStorage _forkPointers;
 
 	TransitionQueueStorage _requests;
@@ -3919,10 +3781,13 @@ template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 _R<TC, TPL, TMS, TA>::_R(Context& context
 						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
-	, _apex{_stateRegistry2, Parent{}, _forkParents, _forkPointers}
+	, _apex{_stateRegistry, Parent{}, _forkParents, _forkPointers}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
 	HFSM_IF_STRUCTURE(getStateNames());
+
+	for (auto& payload : _transitionPayloads)
+		payload.reset();
 
 	{
 		Control control{_context, HFSM_LOGGER_OR(_logger, nullptr)};
@@ -4066,9 +3931,10 @@ _R<TC, TPL, TMS, TA>::schedule(const StateID stateId,
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::resetStateData(const StateID stateId) {
-	auto& stateInfo = _stateRegistry2[stateId];
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	stateInfo.payload.reset();
+	if (stateId < _transitionPayloads.CAPACITY)
+		_transitionPayloads[stateId].reset();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4079,9 +3945,10 @@ void
 _R<TC, TPL, TMS, TA>::setStateData(const StateID stateId,
 								   TPayload* const payload)
 {
-	auto& stateInfo = _stateRegistry2[stateId];
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	stateInfo.payload = payload;
+	if (stateId < _transitionPayloads.CAPACITY)
+		_transitionPayloads[stateId] = payload;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4089,9 +3956,12 @@ _R<TC, TPL, TMS, TA>::setStateData(const StateID stateId,
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 bool
 _R<TC, TPL, TMS, TA>::isStateDataSet(const StateID stateId) const {
-	const auto& stateInfo = _stateRegistry2[stateId];
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	return !!stateInfo.payload;
+	if (stateId < _transitionPayloads.CAPACITY)
+		return !!_transitionPayloads[stateId];
+	else
+		return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4100,10 +3970,14 @@ template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename TPayload>
 TPayload*
 _R<TC, TPL, TMS, TA>::getStateData(const StateID stateId) const {
-	const auto& stateInfo = _stateRegistry2[stateId];
-	const auto& payload = stateInfo.payload;
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	return payload.template get<TPayload>();
+	if (stateId < _transitionPayloads.CAPACITY) {
+		const auto& payload = _transitionPayloads[stateId];
+
+		return payload.template get<TPayload>();
+	} else
+		return nullptr;
 }
 
 //------------------------------------------------------------------------------
@@ -4111,19 +3985,38 @@ _R<TC, TPL, TMS, TA>::getStateData(const StateID stateId) const {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 bool
 _R<TC, TPL, TMS, TA>::isActive(const StateID stateId) const {
-	const auto& stateInfo = _stateRegistry2[stateId];
+	assert(stateId < _transitionPayloads.CAPACITY);
 
-	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
-		const auto& fork = *_forkPointers[parent.fork];
+	if (stateId < _transitionPayloads.CAPACITY)
+		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
+			const auto& fork = *_forkPointers[parent.fork];
 
-		if (fork.active != INVALID_SHORT_INDEX)
-			return parent.prong == fork.active;
-	}
+			if (fork.active != INVALID_SHORT_INDEX)
+				return parent.prong == fork.active;
+		}
 
 	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+bool
+_R<TC, TPL, TMS, TA>::isResumable(const StateID stateId) const {
+	assert(stateId < _transitionPayloads.CAPACITY);
+
+	if (stateId < _transitionPayloads.CAPACITY)
+		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
+			const auto& fork = *_forkPointers[parent.fork];
+
+			if (fork.active != INVALID_SHORT_INDEX)
+				return parent.prong == fork.resumable;
+		}
+
+	return false;
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 template <typename T>
@@ -4133,23 +4026,6 @@ _R<TC, TPL, TMS, TA>::isActive() const {
 	static_assert(id != INVALID_STATE_ID, "State not in FSM");
 
 	return isActive(id);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
-bool
-_R<TC, TPL, TMS, TA>::isResumable(const StateID stateId) const {
-	const auto& stateInfo = _stateRegistry2[stateId];
-
-	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
-		const auto& fork = *_forkPointers[parent.fork];
-
-		if (fork.active != INVALID_SHORT_INDEX)
-			return parent.prong == fork.resumable;
-	}
-
-	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4224,9 +4100,9 @@ _R<TC, TPL, TMS, TA>::processTransitions() {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::requestImmediate(const Transition request) {
-	const auto& stateInfo = _stateRegistry2[request.stateId];
+	assert(request.stateId < _transitionPayloads.CAPACITY);
 
-	for (auto parent = stateInfo.parent; parent; parent = _forkParents[parent.fork]) {
+	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
 
 		fork.requested = parent.prong;
@@ -4240,9 +4116,9 @@ _R<TC, TPL, TMS, TA>::requestImmediate(const Transition request) {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::requestScheduled(const Transition request) {
-	const auto& stateInfo = _stateRegistry2[request.stateId];
+	assert(request.stateId < _transitionPayloads.CAPACITY);
 
-	const auto parent = stateInfo.parent;
+	const auto parent = _stateRegistry[request.stateId];
 	auto& fork = *_forkPointers[parent.fork];
 
 	fork.resumable = parent.prong;
@@ -4333,13 +4209,9 @@ _R<TC, TPL, TMS, TA>::getStateNames() {
 template <typename TC, typename TPL, ShortIndex TMS, typename TA>
 void
 _R<TC, TPL, TMS, TA>::udpateActivity() {
-	for (auto& item : _structure)
-		item.isActive = false;
-
-	LongIndex index = 0;
-	_apex.deepIsActive(true, index, _structure);
-
 	for (LongIndex i = 0; i < _structure.count(); ++i) {
+		_structure[i].isActive = isActive(i);
+
 		auto& activity = _activityHistory[i];
 
 		if (_structure[i].isActive) {

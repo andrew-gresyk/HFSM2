@@ -15,21 +15,14 @@ struct _S final {
 	using Control			= ControlT<Context>;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using StateRegistry2	= StateRegistry2T<PayloadList>;
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
 	using Head				= THead;
 
 	using Base				= ::hfsm::detail::Base<Context, StateList, PayloadList>;
 
-	static constexpr LongIndex REVERSE_DEPTH = 1;
-	static constexpr LongIndex DEEP_WIDTH	 = 0;
-	static constexpr LongIndex STATE_COUNT	 = 1;
-	static constexpr LongIndex FORK_COUNT	 = 0;
-	static constexpr LongIndex PRONG_COUNT	 = 0;
-	static constexpr LongIndex WIDTH		 = 1;
-
-	_S(StateRegistry2& stateRegistry,
+	_S(StateRegistry& stateRegistry,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
@@ -68,10 +61,6 @@ struct _S final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-
-	void deepIsActive(const bool isActive,
-					  LongIndex& index,
-					  MachineStructure& structure) const;
 #endif
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
