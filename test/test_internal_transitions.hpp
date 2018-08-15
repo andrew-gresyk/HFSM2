@@ -77,7 +77,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 struct A
-	: FSM::Base
+	: FSM::State
 {
 	//void guard(TransitionControl&)				{}
 	void enter(Control&)							{}
@@ -91,7 +91,7 @@ struct A
 struct A_2;
 
 struct A_1
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 
@@ -130,7 +130,7 @@ struct A_2
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct A_2_1
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -139,7 +139,7 @@ struct A_2_1
 };
 
 struct A_2_2
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -150,7 +150,7 @@ struct A_2_2
 //------------------------------------------------------------------------------
 
 struct B
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -161,7 +161,7 @@ struct B
 //------------------------------------------------------------------------------
 
 struct B_1
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -171,7 +171,7 @@ struct B_1
 //------------------------------------------------------------------------------
 
 struct B_1_1
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -181,7 +181,7 @@ struct B_1_1
 //------------------------------------------------------------------------------
 
 struct B_1_2
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -191,7 +191,7 @@ struct B_1_2
 //------------------------------------------------------------------------------
 
 struct B_2
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -201,7 +201,7 @@ struct B_2
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_1
-	: FSM::Base
+	: FSM::State
 {
 	void guard(TransitionControl& control) {
 		control.resume<B_2_2>();

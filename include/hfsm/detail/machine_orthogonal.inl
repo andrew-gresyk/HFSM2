@@ -3,11 +3,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-_O<TID, TC, TSL, TPL, TH, TS...>::_O(StateRegistry& stateRegistry,
-									 const Parent parent,
-									 Parents& forkParents,
-									 ForkPointers& forkPointers)
+template <StateID TID, typename TA, typename TH, typename... TS>
+_O<TID, TA, TH, TS...>::_O(StateRegistry& stateRegistry,
+						   const Parent parent,
+						   Parents& forkParents,
+						   ForkPointers& forkPointers)
 	: _fork(static_cast<ShortIndex>(forkPointers << &_fork),
 			parent,
 			forkParents)
@@ -23,9 +23,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::_O(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepForwardGuard(TransitionControl& control) {
+_O<TID, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -37,9 +37,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepForwardGuard(TransitionControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepGuard(TransitionControl& control) {
+_O<TID, TA, TH, TS...>::deepGuard(FullControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -49,9 +49,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepGuard(TransitionControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepEnterInitial(Control& control) {
+_O<TID, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX &&
 		   _fork.requested == INVALID_SHORT_INDEX);
@@ -62,9 +62,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepEnterInitial(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepEnter(Control& control) {
+_O<TID, TA, TH, TS...>::deepEnter(PlanControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -74,28 +74,30 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepEnter(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-bool
-_O<TID, TC, TSL, TPL, TH, TS...>::deepUpdate(TransitionControl& control) {
+template <StateID TID, typename TA, typename TH, typename... TS>
+Status
+_O<TID, TA, TH, TS...>::deepUpdate(FullControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
-	if (_state	  .deepUpdate(control)) {
-		ControlLock lock(control);
+	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
+
+	if (const auto status = _state.deepUpdate(control)) {
+		ControlLock lock{control};
 		_subStates.wideUpdate(control);
 
-		return true;
+		return status;
 	} else
 		return _subStates.wideUpdate(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepReact(const TEvent& event,
-											TransitionControl& control)
+_O<TID, TA, TH, TS...>::deepReact(const TEvent& event,
+								  FullControl& control)
 {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
@@ -106,9 +108,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepReact(const TEvent& event,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepExit(Control& control) {
+_O<TID, TA, TH, TS...>::deepExit(PlanControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -118,9 +120,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepExit(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepForwardRequest(const TransitionType transition) {
+_O<TID, TA, TH, TS...>::deepForwardRequest(const TransitionType transition) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -147,9 +149,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepForwardRequest(const TransitionType transi
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepRequestRemain() {
+_O<TID, TA, TH, TS...>::deepRequestRemain() {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -158,9 +160,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepRequestRemain() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepRequestRestart() {
+_O<TID, TA, TH, TS...>::deepRequestRestart() {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -169,9 +171,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepRequestRestart() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepRequestResume() {
+_O<TID, TA, TH, TS...>::deepRequestResume() {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -180,9 +182,9 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepRequestResume() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepChangeToRequested(Control& control) {
+_O<TID, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX);
 
@@ -193,12 +195,12 @@ _O<TID, TC, TSL, TPL, TH, TS...>::deepChangeToRequested(Control& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
+template <StateID TID, typename TA, typename TH, typename... TS>
 void
-_O<TID, TC, TSL, TPL, TH, TS...>::deepGetNames(const LongIndex parent,
-											   const RegionType region,
-											   const ShortIndex depth,
-											   StructureStateInfos& _stateInfos) const
+_O<TID, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+									 const RegionType region,
+									 const ShortIndex depth,
+									 StructureStateInfos& _stateInfos) const
 {
 	_state	  .deepGetNames(parent, region,			 depth,		_stateInfos);
 	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);

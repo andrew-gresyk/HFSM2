@@ -52,6 +52,7 @@
 #include "detail/lib_iterator.hpp"
 #include "detail/lib_array_view.hpp"
 #include "detail/lib_array.hpp"
+#include "detail/lib_list.hpp"
 #include "detail/lib_type_list.hpp"
 
 #include "detail/debug_shared.hpp"
@@ -77,13 +78,12 @@
 
 //------------------------------------------------------------------------------
 
+#include "detail/machine_plan.hpp"
 #include "detail/machine_control.hpp"
 #include "detail/machine_utility.hpp"
 #include "detail/debug_structure_report.hpp"
 #include "detail/machine_injections.hpp"
 #include "detail/machine_forward.hpp"
-
-//------------------------------------------------------------------------------
 
 namespace hfsm {
 namespace detail {
@@ -91,13 +91,12 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext,
-		  typename TPayloadList = TypeListT<>,
-		  ShortIndex TMaxSubstitutions = 4>
+		  typename TConfig = Config<>,
+		  typename TPayloadList = TypeListT<>>
 struct _M {
 	using Context = TContext;
-	using Control = ControlT<Context>;
-
-	static constexpr ShortIndex MAX_SUBSTITUTIONS = TMaxSubstitutions;
+	using Config  = TConfig;
+	//using Control = ControlT<Context>;
 
 	using PayloadList = TPayloadList;
 
@@ -120,16 +119,16 @@ struct _M {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Root				 = _RF<Context, PayloadList, MAX_SUBSTITUTIONS, Composite <THead, TSubStates...>>;
+	using Root				 = _RF<Context, Config, PayloadList, Composite <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using PeerRoot			 = _RF<Context, PayloadList, MAX_SUBSTITUTIONS, CompositePeers<	  TSubStates...>>;
+	using PeerRoot			 = _RF<Context, Config, PayloadList, CompositePeers	<  TSubStates...>>;
 
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	 = _RF<Context, PayloadList, MAX_SUBSTITUTIONS, Orthogonal<THead, TSubStates...>>;
+	using OrthogonalRoot	 = _RF<Context, Config, PayloadList, Orthogonal<THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot = _RF<Context, PayloadList, MAX_SUBSTITUTIONS, OrthogonalPeers<  TSubStates...>>;
+	using OrthogonalPeerRoot = _RF<Context, Config, PayloadList, OrthogonalPeers<  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -137,13 +136,6 @@ struct _M {
 ////////////////////////////////////////////////////////////////////////////////
 
 }
-
-template <ShortIndex TMaxSubstitutions = 4>
-struct Config {
-	enum : ShortIndex { MAX_SUBSTITUTIONS = TMaxSubstitutions };
-};
-
-//------------------------------------------------------------------------------
 
 template <typename... Ts>
 using TransitionPayloads = detail::TypeListT<Ts...>;
@@ -158,19 +150,19 @@ struct Machine<TContext>
 	: detail::_M<TContext>
 {};
 
-template <typename TContext, typename TConfig>
-struct Machine<TContext, TConfig>
-	: detail::_M<TContext, TransitionPayloads<>, TConfig::MAX_SUBSTITUTIONS>
+template <typename TContext, LongIndex... NConstants>
+struct Machine<TContext, Config<NConstants...>>
+	: detail::_M<TContext, Config<NConstants...>, TransitionPayloads<>>
 {};
 
 template <typename TContext, typename... TPayloads>
 struct Machine<TContext, TransitionPayloads<TPayloads...>>
-	: detail::_M<TContext, TransitionPayloads<TPayloads...>>
+	: detail::_M<TContext, Config<>, TransitionPayloads<TPayloads...>>
 {};
 
-template <typename TContext, typename TConfig, typename... TPayloads>
-struct Machine<TContext, TransitionPayloads<TPayloads...>, TConfig>
-	: detail::_M<TContext, TransitionPayloads<TPayloads...>, TConfig::MAX_SUBSTITUTIONS>
+template <typename TContext, LongIndex... NConstants, typename... TPayloads>
+struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>>
+	: detail::_M<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -178,8 +170,10 @@ struct Machine<TContext, TransitionPayloads<TPayloads...>, TConfig>
 }
 
 #include "detail/machine_state.hpp"
+#include "detail/machine_planner.hpp"
 #include "detail/machine_composite_sub.hpp"
 #include "detail/machine_composite.hpp"
+#include "detail/machine_sequence.hpp"
 #include "detail/machine_orthogonal_sub.hpp"
 #include "detail/machine_orthogonal.hpp"
 #include "detail/machine_root.hpp"

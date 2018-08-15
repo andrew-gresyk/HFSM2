@@ -44,6 +44,8 @@ static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG_INDEX;
 
 namespace detail {
 
+HSFM_IF_DEBUG(struct None {});
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -57,6 +59,7 @@ fill(T& a, const char value) {
 
 template <typename T, unsigned NCount>
 inline
+constexpr
 unsigned
 count(const T(&)[NCount]) {
 	return NCount;

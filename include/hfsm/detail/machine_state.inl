@@ -4,9 +4,8 @@ namespace detail {
 //------------------------------------------------------------------------------
 
 namespace {
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+template <StateID TID, typename TC, typename TSL, typename TPL, LongIndex NPC, typename TH>
 struct Register {
 	using StateRegistry = Array<Parent, TSL::SIZE>;
 
@@ -21,128 +20,136 @@ struct Register {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL>
-struct Register<TID, TC, TSL, TPL, Base<TC, TSL, TPL>> {
+template <StateID TID, typename TC, typename TSL, typename TPL, LongIndex NPC>
+struct Register<TID, TC, TSL, TPL, NPC, State<TC, TSL, TPL, NPC>> {
 	using StateRegistry = Array<Parent, TSL::SIZE>;
 
 	static inline void
 	execute(StateRegistry&, const Parent) {}
 };
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
-_S<TID, TC, TSL, TPL, TH>::_S(StateRegistry& stateRegistry,
-							  const Parent parent,
-							  Parents& /*forkParents*/,
-							  ForkPointers& /*forkPointers*/)
+template <StateID TID, typename TA, typename TH>
+_S<TID, TA, TH>::_S(StateRegistry& stateRegistry,
+					const Parent parent,
+					Parents& /*forkParents*/,
+					ForkPointers& /*forkPointers*/)
 {
-	Register<TID, TC, TSL, TPL, TH>::execute(stateRegistry, parent);
+	Register<STATE_ID, Context, StateList, PayloadList, Args::PLAN_CAPACITY, Head>::execute(stateRegistry, parent);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+template <StateID TID, typename TA, typename TH>
 bool
-_S<TID, TC, TSL, TPL, TH>::deepGuard(TransitionControl& control) {
-	const auto requestCountBefore = control.requestCount();
-
-	_head.widePreGuard(control.context());
-	_head.guard(control);
+_S<TID, TA, TH>::deepGuard(FullControl& control) {
+	const auto requestCountBefore = control._requests.count();
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (auto* const logger = control.logger())
 		log<decltype(&Head::guard), LoggerInterface::Method::GUARD>(*logger);
 #endif
 
-	return requestCountBefore < control.requestCount();
+	ControlOrigin origin{control, STATE_ID};
+
+	_head.widePreGuard(control.context());
+	_head.guard((TransitionControl&) control);
+
+	return requestCountBefore < control._requests.count();
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+template <StateID TID, typename TA, typename TH>
 void
-_S<TID, TC, TSL, TPL, TH>::deepEnterInitial(Control& control) {
+_S<TID, TA, TH>::deepEnterInitial(PlanControl& control) {
 	deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+template <StateID TID, typename TA, typename TH>
 void
-_S<TID, TC, TSL, TPL, TH>::deepEnter(Control& control) {
-	_head.widePreEnter(control.context());
-	_head.enter(control);
-
+_S<TID, TA, TH>::deepEnter(PlanControl& control) {
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (auto* const logger = control.logger())
 		log<decltype(&Head::enter), LoggerInterface::Method::ENTER>(*logger);
 #endif
+
+	ControlOrigin origin{control, STATE_ID};
+
+	_head.widePreEnter(control.context());
+	_head.enter((Control&) control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
-bool
-_S<TID, TC, TSL, TPL, TH>::deepUpdate(TransitionControl& control) {
-	const auto requestCountBefore = control.requestCount();
-
-	_head.widePreUpdate(control.context());
-	_head.update(control);
-	// TODO: _head.widePostUpdate(control.context());
-
+template <StateID TID, typename TA, typename TH>
+Status
+_S<TID, TA, TH>::deepUpdate(FullControl& control) {
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (auto* const logger = control.logger())
 		log<decltype(&Head::update), LoggerInterface::Method::UPDATE>(*logger);
 #endif
 
-	return requestCountBefore < control.requestCount();
+	ControlOrigin origin{control, STATE_ID};
+
+	_head.widePreUpdate(control.context());
+	_head.update((TransitionControl&) control);
+	// TODO: _head.widePostUpdate(control.context());
+
+	return control._status;
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+template <StateID TID, typename TA, typename TH>
 template <typename TEvent>
 void
-_S<TID, TC, TSL, TPL, TH>::deepReact(const TEvent& event,
-									 TransitionControl& control)
+_S<TID, TA, TH>::deepReact(const TEvent& event,
+						   FullControl& control)
 {
-	_head.widePreReact(event, control.context());
-
-	//_head.react(event, control);
 	auto reaction = static_cast<void(Head::*)(const TEvent&, TransitionControl&)>(&Head::react);
-	(_head.*reaction)(event, control);
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (auto* const logger = control.logger())
 		log<decltype(reaction), LoggerInterface::Method::REACT>(*logger);
 #endif
+
+	ControlOrigin origin{control, STATE_ID};
+
+	_head.widePreReact(event, control.context());
+
+	//_head.react(event, control);
+	(_head.*reaction)(event, (TransitionControl&) control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+template <StateID TID, typename TA, typename TH>
 void
-_S<TID, TC, TSL, TPL, TH>::deepExit(Control& control) {
-	_head.exit(control);
-	_head.widePostExit(control.context());
-
+_S<TID, TA, TH>::deepExit(PlanControl& control) {
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (auto* const logger = control.logger())
 		log<decltype(&Head::exit), LoggerInterface::Method::EXIT>(*logger);
 #endif
+
+	ControlOrigin origin{control, STATE_ID};
+
+	_head.exit((Control&) control);
+	_head.widePostExit(control.context());
 }
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+template <StateID TID, typename TA, typename TH>
 const char*
-_S<TID, TC, TSL, TPL, TH>::name() {
+_S<TID, TA, TH>::name() {
 	if (isBare())
 		return "";
 	else {
@@ -176,19 +183,19 @@ _S<TID, TC, TSL, TPL, TH>::name() {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
+template <StateID TID, typename TA, typename TH>
 void
-_S<TID, TC, TSL, TPL, TH>::deepGetNames(const LongIndex parent,
-										const RegionType region,
-										const ShortIndex depth,
-										StructureStateInfos& _stateInfos) const
+_S<TID, TA, TH>::deepGetNames(const LongIndex parent,
+							  const RegionType region,
+							  const ShortIndex depth,
+							  StructureStateInfos& _stateInfos) const
 {
 	_stateInfos << StructureStateInfo { parent, region, depth, name() };
 }
 
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }
 }

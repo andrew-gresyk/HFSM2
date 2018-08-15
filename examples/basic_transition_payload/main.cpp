@@ -70,7 +70,7 @@ using FSM = M::Root<S(Top),
 
 // top-level state in the hierarchy
 struct Top
-	: FSM::Base // necessary boilerplate!
+	: FSM::State // necessary boilerplate!
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -81,7 +81,7 @@ struct Top
 
 // initial state
 struct Origin
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}
@@ -92,7 +92,7 @@ struct Origin
 
 // transition target state
 struct Destination
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&)							{}
 	void update(TransitionControl&)					{}

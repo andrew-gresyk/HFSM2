@@ -3,11 +3,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
-_CS<TID, TC, TSL, TPL, NI, TI>::_CS(StateRegistry& stateRegistry,
-									const ShortIndex fork,
-									Parents& forkParents,
-									ForkPointers& forkPointers)
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
+_CS<TID, TA, NI, TI>::_CS(StateRegistry& stateRegistry,
+						  const ShortIndex fork,
+						  Parents& forkParents,
+						  ForkPointers& forkPointers)
 	: initial(stateRegistry,
 			  Parent(fork, PRONG_INDEX),
 			  forkParents,
@@ -16,10 +16,10 @@ _CS<TID, TC, TSL, TPL, NI, TI>::_CS(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
-												 TransitionControl& control)
+_CS<TID, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
+									   FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -28,10 +28,10 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
-										  TransitionControl& control)
+_CS<TID, TA, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
+								FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -40,18 +40,18 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong)
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideEnterInitial(Control& control) {
+_CS<TID, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
 	initial.deepEnterInitial(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
-										  Control& control)
+_CS<TID, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
+								PlanControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -60,10 +60,10 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong)
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
-bool
-_CS<TID, TC, TSL, TPL, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
-										   TransitionControl& control)
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
+Status
+_CS<TID, TA, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
+								 FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -72,12 +72,12 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
-										  const TEvent& event,
-										  TransitionControl& control)
+_CS<TID, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
+								const TEvent& event,
+								FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -86,10 +86,10 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong)
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
-										 Control& control)
+_CS<TID, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
+							   PlanControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -98,10 +98,10 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideForwardRequest(const ShortIndex HSFM_IF_ASSERT(prong),
-												   const TransitionType transition)
+_CS<TID, TA, NI, TI>::wideForwardRequest(const ShortIndex HSFM_IF_ASSERT(prong),
+										 const TransitionType transition)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -110,25 +110,25 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideForwardRequest(const ShortIndex HSFM_IF_ASSE
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideRequestRemain() {
+_CS<TID, TA, NI, TI>::wideRequestRemain() {
 	initial.deepRequestRemain();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideRequestRestart() {
+_CS<TID, TA, NI, TI>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideRequestResume(const ShortIndex HSFM_IF_ASSERT(prong)) {
+_CS<TID, TA, NI, TI>::wideRequestResume(const ShortIndex HSFM_IF_ASSERT(prong)) {
 	assert(prong == PRONG_INDEX);
 
 	initial.deepRequestResume();
@@ -136,10 +136,10 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideRequestResume(const ShortIndex HSFM_IF_ASSER
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideChangeToRequested(const ShortIndex HSFM_IF_ASSERT(prong),
-													  Control& control)
+_CS<TID, TA, NI, TI>::wideChangeToRequested(const ShortIndex HSFM_IF_ASSERT(prong),
+											PlanControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -150,11 +150,11 @@ _CS<TID, TC, TSL, TPL, NI, TI>::wideChangeToRequested(const ShortIndex HSFM_IF_A
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI>
+template <StateID TID, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TC, TSL, TPL, NI, TI>::wideGetNames(const LongIndex parent,
-											 const ShortIndex depth,
-											 StructureStateInfos& _stateInfos) const
+_CS<TID, TA, NI, TI>::wideGetNames(const LongIndex parent,
+								   const ShortIndex depth,
+								   StructureStateInfos& _stateInfos) const
 {
 	initial.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }

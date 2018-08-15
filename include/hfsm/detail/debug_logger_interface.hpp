@@ -17,7 +17,8 @@ struct LoggerInterface {
 
 	virtual
 	void
-	recordTransition(const Transition transition,
+	recordTransition(const StateID origin,
+					 const Transition transition,
 					 const StateID target) = 0;
 };
 

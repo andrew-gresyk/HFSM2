@@ -57,7 +57,8 @@ struct Logger
 	void recordMethod(const hfsm::StateID origin,
 					  const Method method) override;
 
-	void recordTransition(const Transition transition,
+	void recordTransition(const hfsm::StateID origin,
+						  const Transition transition,
 						  const hfsm::StateID target) override;
 
 	void assertSequence(const Events& reference);

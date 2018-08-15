@@ -69,7 +69,7 @@ using FSM = M::PeerRoot<
 
 // top-level region in the hierarchy
 struct On
-	: FSM::Base // necessary boilerplate!
+	: FSM::State // necessary boilerplate!
 {
 	// called on state entry
 	void enter(Control& control) {
@@ -82,7 +82,7 @@ struct On
 
 // sub-states
 struct Red
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control& control) {
 		++control.context().cycleCount;
@@ -102,7 +102,7 @@ struct Red
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct YellowDownwards
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&) {
 		std::cout << "    Yellow v" << std::endl;
@@ -116,7 +116,7 @@ struct YellowDownwards
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct YellowUpwards
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&) {
 		std::cout << "    Yellow ^" << std::endl;
@@ -130,7 +130,7 @@ struct YellowUpwards
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Green
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&) {
 		std::cout << "      Green" << std::endl;
@@ -145,7 +145,7 @@ struct Green
 
 // another top-level state
 struct Off
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&) {
 		std::cout << "Off" << std::endl;

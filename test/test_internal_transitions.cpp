@@ -2,7 +2,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Internal transition test", "[historical]") {
+TEST_CASE("Internal transition test", "[machine]") {
 	Context _;
 	Logger logger;
 	FSM::Instance machine(_, &logger);

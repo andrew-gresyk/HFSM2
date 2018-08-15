@@ -4,46 +4,56 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext,
+		  typename TConfig,
 		  typename TPayloadList,
-		  ShortIndex TMaxSubstitutions,
 		  typename TApex>
 class _R final {
-	static constexpr ShortIndex MAX_SUBSTITUTIONS = TMaxSubstitutions;
-
 	using Context			= TContext;
-	using Control			= ControlT<Context>;
+	using Config			= TConfig;
 	using PayloadList		= TPayloadList;
+	using Apex				= TApex;
+
+	using ForwardApex		= typename WrapForward<Apex>::Type;
+	using StateList			= typename ForwardApex::StateList;
+	using Forward			= _RF<Context, Config, PayloadList, Apex>;
+
+	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
+	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
+
+	static constexpr LongIndex PLAN_CAPACITY	 = Forward::PLAN_CAPACITY;
+
+	using Args				= Args<Context, Config, StateList, PayloadList, PLAN_CAPACITY>;
+	using PlanControl		= typename Forward::PlanControl;
 	using Payload			= typename PayloadList::Container;
 	using Transition		= TransitionT<PayloadList>;
-
-	using ForwardApex		= typename WrapForward<TApex>::Type;
-
-	using StateList			= typename ForwardApex::StateList;
-	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
-
-	using Apex				= typename WrapMaterial<0, Context, StateList, PayloadList, TApex>::Type;
+	using TransitionControl	= typename Forward::TransitionControl;
+	using FullControl		= typename Forward::FullControl;
 
 public:
-	static constexpr LongIndex REVERSE_DEPTH  = ForwardApex::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	  = ForwardApex::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	  = ForwardApex::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	  = ForwardApex::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	  = ForwardApex::PRONG_COUNT;
-	static constexpr LongIndex WIDTH		  = ForwardApex::WIDTH;
+	static constexpr LongIndex REVERSE_DEPTH = ForwardApex::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH	 = ForwardApex::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT	 = ForwardApex::STATE_COUNT;
+	static constexpr LongIndex FORK_COUNT	 = ForwardApex::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT	 = ForwardApex::PRONG_COUNT;
+	static constexpr LongIndex WIDTH		 = ForwardApex::WIDTH;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using StateRegistry			 = Array<Parent,	 STATE_COUNT>;
-	using TransitionPayloads	 = Array<Payload,	 STATE_COUNT>;
+	using StateRegistry			 = Array<Parent,		STATE_COUNT>;
+	using TransitionPayloads	 = Array<Payload,		STATE_COUNT>;
 
-	using ForkParents			 = Array<Parent,	 FORK_COUNT>;
-	using ForkPointerStorage	 = Array<Fork*,		 FORK_COUNT>;
-	using TransitionQueueStorage = Array<Transition, FORK_COUNT>;
+	using ForkParents			 = Array<Parent,		FORK_COUNT>;
+	using ForkPointerStorage	 = Array<Fork*,			FORK_COUNT>;
+	using TransitionQueueStorage = Array<Transition,	FORK_COUNT>;
+
+	using MaterialApex			 = typename WrapMaterial<0, Args, Apex>::Type;
+	using Tasks					 = typename FullControl::Tasks;
+	using StateTasks			 = Array<TaskIndices,	STATE_COUNT>;			// TODO: change to ForkTasks
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	static constexpr LongIndex NAME_COUNT	  = Apex::NAME_COUNT;
+	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;		// TODO: move to ForwardApex
 
 	using Prefix				 = StaticArray<wchar_t,			REVERSE_DEPTH * 2 + 2>;
 	using Prefixes				 = StaticArray<Prefix,			STATE_COUNT>;
@@ -164,6 +174,11 @@ protected:
 	void requestImmediate(const Transition request);
 	void requestScheduled(const Transition request);
 
+#ifdef _DEBUG
+	void verifyPlans() const;
+	LongIndex verifyPlan(const StateID stateId) const;
+#endif
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	void getStateNames();
 	void udpateActivity();
@@ -180,7 +195,9 @@ private:
 
 	TransitionQueueStorage _requests;
 
-	Apex _apex;
+	MaterialApex _apex;
+	Tasks _tasks;
+	StateTasks _stateTasks;
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	Prefixes _prefixes;

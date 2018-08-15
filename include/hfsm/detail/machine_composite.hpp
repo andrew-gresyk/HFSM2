@@ -4,52 +4,57 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID THeadID,
-		  typename TContext,
-		  typename TStateList,
-		  typename TPayloadList,
+		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
-struct _C final {
+struct _C {
 	static constexpr StateID HEAD_ID = THeadID;
 
-	using Context			= TContext;
-	using Control			= ControlT<Context>;
-	using StateList			= TStateList;
-	using PayloadList		= TPayloadList;
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using Transition		= TransitionT<PayloadList>;
-	using TransitionType	= typename Transition::Type;
-	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
-	using ControlLock		= typename TransitionControl::Lock;
+	using Args				= TArgs;
 	using Head				= THead;
-	using State				= _S <HEAD_ID,	   Context, StateList, PayloadList, Head>;
-	using SubStates			= _CS<HEAD_ID + 1, Context, StateList, PayloadList, 0, TSubStates...>;
+
+	using Context			= typename Args::Context;
+	using Config			= typename Args::Config;
+	using StateList			= typename Args::StateList;
+	using PayloadList		= typename Args::PayloadList;
+
+	using StateRegistry		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT	<Context, StateList, Args::PLAN_CAPACITY>;
+	using Transition		= TransitionT	<PayloadList>;
+	using TransitionType	= typename Transition::Type;
+	using ControlLock		= ControlLockT	<Context, StateList, PayloadList>;
+	using ControlRegion		= ControlRegionT<Context, StateList, PayloadList>;
+	using FullControl		= FullControlT	<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+
+	using State				= _P <HEAD_ID,	   Args, Head>;
+	using SubStates			= _CS<HEAD_ID + 1, Args, 0, TSubStates...>;
 	using Forward			= _CF<Head, TSubStates...>;
-	using OwnStateList		= typename Forward::StateList;
+	using SubStateList		= typename Forward::StateList;
 
 	_C(StateRegistry& stateRegistry,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
 
-	inline void deepForwardGuard	 (TransitionControl& control);
-	inline void deepGuard			 (TransitionControl& control);
+	inline void   deepForwardGuard		(FullControl& control);
+	inline void   deepGuard				(FullControl& control);
 
-	inline void deepEnterInitial	 (Control& control);
-	inline void deepEnter			 (Control& control);
+	inline void   deepEnterInitial		(PlanControl& control);
+	inline void   deepEnter				(PlanControl& control);
 
-	inline bool deepUpdate			 (TransitionControl& control);
+	inline Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	inline void deepReact			 (const TEvent& event, TransitionControl& control);
+	inline void   deepReact				(const TEvent& event,
+										 FullControl& control);
 
-	inline void deepExit			 (Control& control);
+	inline void   deepExit				(PlanControl& control);
 
-	inline void deepForwardRequest	 (const TransitionType transition);
-	inline void deepRequestRemain	 ();
-	inline void deepRequestRestart	 ();
-	inline void deepRequestResume	 ();
-	inline void deepChangeToRequested(Control& control);
+	inline void   deepForwardRequest	(const TransitionType transition);
+	inline void   deepRequestRemain		();
+	inline void   deepRequestRestart	();
+	inline void   deepRequestResume		();
+	inline void   deepChangeToRequested	(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;
@@ -65,8 +70,7 @@ struct _C final {
 	State _state;
 	SubStates _subStates;
 
-	HSFM_IF_DEBUG(const std::type_index _type = typeid(Head));
-	HSFM_IF_DEBUG(OwnStateList ownStateList);
+	HSFM_IF_DEBUG(const SubStateList SUB_STATE_LIST);
 };
 
 ////////////////////////////////////////////////////////////////////////////////

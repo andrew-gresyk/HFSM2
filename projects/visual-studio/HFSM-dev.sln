@@ -16,6 +16,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{EDEB0687-3B3E-429D-9213-0A3EED99821D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\test\CMakeLists.txt = ..\..\test\CMakeLists.txt
+		..\..\hfsm.natvis = ..\..\hfsm.natvis
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-14", "test-14.vcxproj", "{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}"
 EndProject

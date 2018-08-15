@@ -42,35 +42,6 @@
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::detail::HashTable&lt;*,*,*,*&gt;">
-		<DisplayString>{_count}</DisplayString>
-		<Expand>
-			<IndexListItems>
-				<Size>$T3</Size>
-				<ValueNode Condition="_items[$i]._hash &gt;&gt; USED_SHIFT != 0">_items[$i],na</ValueNode>
-			</IndexListItems>
-		</Expand>
-	</Type>
-
-	<Type Name="hfsm::detail::HashTable&lt;*,*,*,*&gt;::Item">
-		<DisplayString>{_keyWrap} : {_value}</DisplayString>
-		<Expand>
-			<Item Name="key">_keyWrap</Item>
-			<Item Name="value">_value</Item>
-		</Expand>
-	</Type>
-
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
-
-	<Type Name="hfsm::detail::Wrap&lt;*&gt;">
-		<DisplayString>{*($T1*) &amp;_storage}</DisplayString>
-    <Expand HideRawView="true">
-			<ExpandedItem>*($T1*) &amp;_storage</ExpandedItem>
-		</Expand>
-	</Type>
-
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
-
 	<Type Name="hfsm::StructureEntry">
 		<DisplayString Condition=" isActive">█ {prefix,sub}{name,sb}</DisplayString>
 		<DisplayString Condition="!isActive">░ {prefix,sub}{name,sb}</DisplayString>
@@ -79,83 +50,64 @@
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<Type Name="hfsm::M&lt;*&gt;::Parent">
+	<Type Name="hfsm::detail::Parent">
 		<DisplayString>{forkType} ► {prongType}</DisplayString>
     <Expand HideRawView="true" />
   </Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::M&lt;*&gt;::StateRegistryT&lt;*&gt;">
-		<DisplayString>{_typeToIndex,na}</DisplayString>
-		<Expand HideRawView="true">
-			<ExpandedItem>_typeToIndex,na</ExpandedItem>
-		</Expand>
-	</Type>
-
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
-
-  <Type Name="hfsm::M&lt;*&gt;::Transition">
+  <Type Name="hfsm::detail::Transition">
 		<DisplayString>{type}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::M&lt;*&gt;::Fork">
-		<DisplayString>[{type}] &lt;{resumableType,na}&gt; ◄ &lt;{activeType,na}&gt; ► &lt;{requestedType,na}&gt;</DisplayString>
-    <Expand HideRawView="true">
-			<Item Name="type">type</Item>
-			<Item Name="active">activeType</Item>
-			<Item Name="resumable">resumableType</Item>
-			<Item Name="requested">requestedType</Item>
-		</Expand>
-	</Type>
+	<Type Name="hfsm::detail::Fork">
+		<DisplayString>[{(unsigned)self&amp;0xF}] &lt;{(unsigned)resumable&amp;0xF}&gt; ◄ &lt;{(unsigned)active&amp;0xF}&gt; ► &lt;{(unsigned)requested&amp;0xF}&gt;</DisplayString>
+    <Expand HideRawView="true" />
+  </Type>
 
   <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::M&lt;*&gt;::_S&lt;*&gt;">
-		<DisplayString>{_type}</DisplayString>
-    <Expand HideRawView="true">
-			<Item Name="client">_client</Item>
-		</Expand>
+	<Type Name="hfsm::detail::_S&lt;*&gt;">
+		<DisplayString>{TYPE}</DisplayString>
+    <Expand HideRawView="true" />
   </Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
-
-	<Type Name="hfsm::Machine&lt;*&gt;::_C&lt;*&gt;">
-		<DisplayString>{_fork}</DisplayString>
-		<Expand>
-			<Item Name="head">_state</Item>
-			<Item Name="sub-states">_subStates</Item>
-		</Expand>
-	</Type>
-
-	<Type Name="hfsm::Machine&lt;*&gt;::_C&lt;*&gt;::Sub&lt;*&gt;" Priority="Low">
-    <DisplayString>{initial} {remaining}</DisplayString>
+  <Type Name="hfsm::detail::_P&lt;*&gt;">
+		<DisplayString>{TYPE}</DisplayString>
+    <Expand HideRawView="true" />
   </Type>
 
-	<Type Name="hfsm::Machine&lt;*&gt;::_C&lt;*&gt;::Sub&lt;*&gt;">
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::detail::_C&lt;*&gt;">
+    <DisplayString>({_state})</DisplayString>
+  </Type>
+
+  <Type Name="hfsm::detail::_CS&lt;*&gt;">
+    <DisplayString Optional="true">{initial} {remaining}</DisplayString>
     <DisplayString>{initial}</DisplayString>
+    <Expand HideRawView="true" />
   </Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::Machine&lt;*&gt;::_O&lt;*&gt;">
-		<DisplayString>{_type}</DisplayString>
-		<Expand>
-			<Item Name="client">_state</Item>
-			<Item Name="states">_subStates</Item>
-		</Expand>
-	</Type>
+	<Type Name="hfsm::detail::_O&lt;*&gt;">
+    <DisplayString>[{_state}]</DisplayString>
+  </Type>
 
-	<Type Name="hfsm::Machine&lt;*&gt;::_O&lt;*&gt;::Sub&lt;*&gt;">
-		<DisplayString>{initial} {remaining}</DisplayString>
-	</Type>
+  <Type Name="hfsm::detail::_OS&lt;*&gt;">
+    <DisplayString Optional="true">{initial} {remaining}</DisplayString>
+    <DisplayString>{initial}</DisplayString>
+    <Expand HideRawView="true" />
+  </Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::Machine&lt;*&gt;::_R&lt;*&gt;">
+	<Type Name="hfsm::detail::_R&lt;*&gt;">
 		<DisplayString>{_structure}</DisplayString>
 		<Expand>
 			<ExpandedItem>{_structure}</ExpandedItem>

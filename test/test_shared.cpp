@@ -28,18 +28,19 @@ void Logger::recordMethod(const hfsm::StateID origin,
 
 //------------------------------------------------------------------------------
 
-void Logger::recordTransition(const Transition transition,
+void Logger::recordTransition(const hfsm::StateID origin,
+							  const Transition transition,
 							  const hfsm::StateID target)
 {
 	switch (transition) {
 		case Transition::RESTART:
-			history.emplace_back(hfsm::INVALID_STATE_ID, Event::RESTART,  target);
+			history.emplace_back(origin, Event::RESTART,  target);
 			break;
 		case Transition::RESUME:
-			history.emplace_back(hfsm::INVALID_STATE_ID, Event::RESUME,   target);
+			history.emplace_back(origin, Event::RESUME,   target);
 			break;
 		case Transition::SCHEDULE:
-			history.emplace_back(hfsm::INVALID_STATE_ID, Event::SCHEDULE, target);
+			history.emplace_back(origin, Event::SCHEDULE, target);
 			break;
 		default:
 			assert(false);

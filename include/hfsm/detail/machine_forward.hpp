@@ -1,6 +1,16 @@
 #pragma once
 
 namespace hfsm {
+
+//------------------------------------------------------------------------------
+
+template <LongIndex NMaxPlanTasks = INVALID_LONG_INDEX,
+		  LongIndex NMaxSubstitutions = 4>
+struct Config {
+	static constexpr LongIndex MAX_PLAN_TASKS	 = NMaxPlanTasks;
+	static constexpr LongIndex MAX_SUBSTITUTIONS = NMaxSubstitutions;
+};
+
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,16 +168,38 @@ struct _OF final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID, typename, typename, typename, typename>
+template <typename TContext,
+		  typename TConfig,
+		  typename TStateList,
+		  typename TPayloadList,
+		  LongIndex NPlanCapacity>
+struct Args final
+{
+	using Context			= TContext;
+	using Config			= TConfig;
+	using StateList			= TStateList;
+	using PayloadList		= TPayloadList;
+
+	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
+
+	using State = _B<Bare<Context, StateList, PayloadList, PLAN_CAPACITY>>;
+};
+
+//------------------------------------------------------------------------------
+
+template <StateID, typename, typename>
 struct _S;
 
-template <StateID, typename, typename, typename, typename, typename...>
+template <StateID, typename, typename, typename...>
 struct _C;
 
-template <StateID, typename, typename, typename, typename, typename...>
+template <StateID, typename, typename, typename...>
+struct _Q;
+
+template <StateID, typename, typename, typename...>
 struct _O;
 
-template <typename, typename, ShortIndex, typename>
+template <typename, typename, typename, typename>
 class _R;
 
 //------------------------------------------------------------------------------
@@ -175,51 +207,58 @@ class _R;
 template <StateID, typename...>
 struct WrapMaterial;
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH>
-struct WrapMaterial<TID, TC, TSL, TPL, TH> {
-	using Type = _S<TID, TC, TSL, TPL, TH>;
+template <StateID TID, typename TA, typename TH>
+struct WrapMaterial<TID, TA, TH> {
+	using Type = _S<TID, TA, TH>;
 };
 
-template <StateID TID, typename TC, typename TSL, typename TPL,				 typename... TS>
-struct WrapMaterial<TID, TC, TSL, TPL, _CF<void, TS...>> {
-	using Type = _C<TID, TC, TSL, TPL, Base<TC, TSL, TPL>, TS...>;
+template <StateID TID, typename TA,				 typename... TS>
+struct WrapMaterial<TID, TA, _CF<void, TS...>> {
+	using Type = _C<TID, TA, typename TA::State, TS...>;
 };
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-struct WrapMaterial<TID, TC, TSL, TPL, _CF<TH, TS...>> {
-	using Type = _C<TID, TC, TSL, TPL, TH, TS...>;
+template <StateID TID, typename TA, typename TH, typename... TS>
+struct WrapMaterial<TID, TA, _CF<TH, TS...>> {
+	using Type = _Q<TID, TA, TH,				 TS...>;
 };
 
-template <StateID TID, typename TC, typename TSL, typename TPL,				 typename... TS>
-struct WrapMaterial<TID, TC, TSL, TPL, _OF<void, TS...>> {
-	using Type = _O<TID, TC, TSL, TPL, Base<TC, TSL, TPL>, TS...>;
+template <StateID TID, typename TA,				 typename... TS>
+struct WrapMaterial<TID, TA, _OF<void, TS...>> {
+	using Type = _O<TID, TA, typename TA::State, TS...>;
 };
 
-template <StateID TID, typename TC, typename TSL, typename TPL, typename TH, typename... TS>
-struct WrapMaterial<TID, TC, TSL, TPL, _OF<TH, TS...>> {
-	using Type = _O<TID, TC, TSL, TPL, TH, TS...>;
+template <StateID TID, typename TA, typename TH, typename... TS>
+struct WrapMaterial<TID, TA, _OF<TH, TS...>> {
+	using Type = _O<TID, TA, TH,				 TS...>;
 };
 
 //------------------------------------------------------------------------------
 
 template <typename TContext,
+		  typename TConfig,
 		  typename TPayloadList,
-		  ShortIndex TMaxSubstitutions,
 		  typename TApex>
 struct _RF final {
-	static constexpr ShortIndex MAX_SUBSTITUTIONS = TMaxSubstitutions;
-
 	using Context			= TContext;
+	using Config			= TConfig;
 	using PayloadList		= TPayloadList;
-
 	using Forward			= TApex;
+
+	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
+	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
+
+	static constexpr LongIndex PLAN_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
+													   Config::MAX_PLAN_TASKS : Forward::PRONG_COUNT * 2;
+
 	using StateList			= typename Forward::StateList;
+	using PlanControl		= PlanControlT<Context, StateList, PLAN_CAPACITY>;
 	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
+	using FullControl		= FullControlT<Context, StateList, PayloadList, PLAN_CAPACITY>;
 
-	using Instance			= _R<Context, PayloadList, MAX_SUBSTITUTIONS, Forward>;
+	using Instance			= _R<Context, Config, PayloadList, Forward>;
 
-	using Bare				= ::hfsm::detail::Bare<Context, StateList, PayloadList>;
-	using Base				= ::hfsm::detail::Base<Context, StateList, PayloadList>;
+	using Bare				= ::hfsm::detail::Bare <Context, StateList, PayloadList, PLAN_CAPACITY>;
+	using State				= ::hfsm::detail::State<Context, StateList, PayloadList, PLAN_CAPACITY>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;

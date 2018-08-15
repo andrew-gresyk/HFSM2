@@ -3,8 +3,8 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
-_R<TC, TPL, TMS, TA>::_R(Context& context
+template <typename TC, typename TG, typename TPL, typename TA>
+_R<TC, TG, TPL, TA>::_R(Context& context
 						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
 	, _apex{_stateRegistry, Parent{}, _forkParents, _forkPointers}
@@ -16,8 +16,10 @@ _R<TC, TPL, TMS, TA>::_R(Context& context
 		payload.reset();
 
 	{
-		Control control{_context, HFSM_LOGGER_OR(_logger, nullptr)};
+		PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepEnterInitial(control);
+
+		HSFM_IF_DEBUG(verifyPlans());
 	}
 
 	HFSM_IF_STRUCTURE(udpateActivity());
@@ -25,33 +27,23 @@ _R<TC, TPL, TMS, TA>::_R(Context& context
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
-_R<TC, TPL, TMS, TA>::~_R() {
-	Control control{_context, HFSM_LOGGER_OR(_logger, nullptr)};
+template <typename TC, typename TG, typename TPL, typename TA>
+_R<TC, TG, TPL, TA>::~_R() {
+	PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepExit(control);
+
+	HSFM_IF_DEBUG(verifyPlans());
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::update() {
-	TransitionControl control(_context, _requests, HFSM_LOGGER_OR(_logger, nullptr));
+_R<TC, TG, TPL, TA>::update() {
+	FullControl transitionControl(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
+	_apex.deepUpdate(transitionControl);
 
-	if (_apex.deepUpdate(control))
-		processTransitions();
-
-	_requests.clear();
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
-template <typename TEvent>
-void
-_R<TC, TPL, TMS, TA>::react(const TEvent& event) {
-	TransitionControl control(_context, _requests, HFSM_LOGGER_OR(_logger, nullptr));
-	_apex.deepReact(event, control);
+	HSFM_IF_DEBUG(verifyPlans());
 
 	if (_requests.count())
 		processTransitions();
@@ -61,102 +53,119 @@ _R<TC, TPL, TMS, TA>::react(const TEvent& event) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TEvent>
 void
-_R<TC, TPL, TMS, TA>::changeTo(const StateID stateId)	{
+_R<TC, TG, TPL, TA>::react(const TEvent& event) {
+	FullControl control(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
+	_apex.deepReact(event, control);
+
+	HSFM_IF_DEBUG(verifyPlans());
+
+	if (_requests.count())
+		processTransitions();
+
+	_requests.clear();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
+_R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
 	const Transition transition(Transition::Type::RESTART, stateId);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::RESTART, stateId);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESTART, stateId);
 #endif
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::resume(const StateID stateId) {
+_R<TC, TG, TPL, TA>::resume(const StateID stateId) {
 	const Transition transition(Transition::Type::RESUME, stateId);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::RESUME, stateId);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, stateId);
 #endif
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::schedule(const StateID stateId) {
+_R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 	const Transition transition(Transition::Type::SCHEDULE, stateId);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::SCHEDULE, stateId);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, stateId);
 #endif
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 void
-_R<TC, TPL, TMS, TA>::changeTo(const StateID stateId,
-							   TPayload* const payload)
+_R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
+							  TPayload* const payload)
 {
 	const Transition transition(Transition::Type::RESTART, stateId, payload);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::RESTART, stateId);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESTART, stateId);
 #endif
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 void
-_R<TC, TPL, TMS, TA>::resume(const StateID stateId,
-							 TPayload* const payload)
+_R<TC, TG, TPL, TA>::resume(const StateID stateId,
+							TPayload* const payload)
 {
 	const Transition transition(Transition::Type::RESUME, stateId, payload);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::RESUME, state);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, state);
 #endif
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 void
-_R<TC, TPL, TMS, TA>::schedule(const StateID stateId,
-							   TPayload* const payload)
+_R<TC, TG, TPL, TA>::schedule(const StateID stateId,
+							  TPayload* const payload)
 {
 	const Transition transition(Transition::Type::SCHEDULE, stateId, payload);
 	_requests << transition;
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(LoggerInterface::Transition::SCHEDULE, state);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, state);
 #endif
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::resetStateData(const StateID stateId) {
+_R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
 	assert(stateId < _transitionPayloads.CAPACITY);
 
 	if (stateId < _transitionPayloads.CAPACITY)
@@ -165,11 +174,11 @@ _R<TC, TPL, TMS, TA>::resetStateData(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 void
-_R<TC, TPL, TMS, TA>::setStateData(const StateID stateId,
-								   TPayload* const payload)
+_R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
+								  TPayload* const payload)
 {
 	assert(stateId < _transitionPayloads.CAPACITY);
 
@@ -179,9 +188,9 @@ _R<TC, TPL, TMS, TA>::setStateData(const StateID stateId,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 bool
-_R<TC, TPL, TMS, TA>::isStateDataSet(const StateID stateId) const {
+_R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 	assert(stateId < _transitionPayloads.CAPACITY);
 
 	if (stateId < _transitionPayloads.CAPACITY)
@@ -192,10 +201,10 @@ _R<TC, TPL, TMS, TA>::isStateDataSet(const StateID stateId) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 TPayload*
-_R<TC, TPL, TMS, TA>::getStateData(const StateID stateId) const {
+_R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 	assert(stateId < _transitionPayloads.CAPACITY);
 
 	if (stateId < _transitionPayloads.CAPACITY) {
@@ -208,9 +217,9 @@ _R<TC, TPL, TMS, TA>::getStateData(const StateID stateId) const {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 bool
-_R<TC, TPL, TMS, TA>::isActive(const StateID stateId) const {
+_R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
 	assert(stateId < _transitionPayloads.CAPACITY);
 
 	if (stateId < _transitionPayloads.CAPACITY)
@@ -226,9 +235,9 @@ _R<TC, TPL, TMS, TA>::isActive(const StateID stateId) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 bool
-_R<TC, TPL, TMS, TA>::isResumable(const StateID stateId) const {
+_R<TC, TG, TPL, TA>::isResumable(const StateID stateId) const {
 	assert(stateId < _transitionPayloads.CAPACITY);
 
 	if (stateId < _transitionPayloads.CAPACITY)
@@ -244,10 +253,10 @@ _R<TC, TPL, TMS, TA>::isResumable(const StateID stateId) const {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 template <typename T>
 bool
-_R<TC, TPL, TMS, TA>::isActive() const {
+_R<TC, TG, TPL, TA>::isActive() const {
 	constexpr auto id = stateId<T>();
 	static_assert(id != INVALID_STATE_ID, "State not in FSM");
 
@@ -256,10 +265,10 @@ _R<TC, TPL, TMS, TA>::isActive() const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 template <typename T>
 bool
-_R<TC, TPL, TMS, TA>::isResumable() const {
+_R<TC, TG, TPL, TA>::isResumable() const {
 	constexpr auto id = stateId<T>();
 	static_assert(id != INVALID_STATE_ID, "State not in FSM");
 
@@ -268,14 +277,14 @@ _R<TC, TPL, TMS, TA>::isResumable() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::processTransitions() {
+_R<TC, TG, TPL, TA>::processTransitions() {
 	assert(_requests.count());
 
 	HFSM_IF_STRUCTURE(_lastTransitions.clear());
 
-	for (unsigned i = 0;
+	for (LongIndex i = 0;
 		i < MAX_SUBSTITUTIONS && _requests.count();
 		++i)
 	{
@@ -303,8 +312,10 @@ _R<TC, TPL, TMS, TA>::processTransitions() {
 		_requests.clear();
 
 		if (changeCount > 0) {
-			TransitionControl substitutionControl(_context, _requests, HFSM_LOGGER_OR(_logger, nullptr));
+			FullControl substitutionControl(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
 			_apex.deepForwardGuard(substitutionControl);
+
+			HSFM_IF_DEBUG(verifyPlans());
 
 		#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 			for (const auto& request : _requests)
@@ -314,8 +325,10 @@ _R<TC, TPL, TMS, TA>::processTransitions() {
 	}
 
 	{
-		Control control{_context, HFSM_LOGGER_OR(_logger, nullptr)};
+		PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepChangeToRequested(control);
+
+		HSFM_IF_DEBUG(verifyPlans());
 	}
 
 	HFSM_IF_STRUCTURE(udpateActivity());
@@ -323,9 +336,9 @@ _R<TC, TPL, TMS, TA>::processTransitions() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::requestImmediate(const Transition request) {
+_R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 	assert(request.stateId < _transitionPayloads.CAPACITY);
 
 	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
@@ -339,9 +352,9 @@ _R<TC, TPL, TMS, TA>::requestImmediate(const Transition request) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::requestScheduled(const Transition request) {
+_R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
 	assert(request.stateId < _transitionPayloads.CAPACITY);
 
 	const auto parent = _stateRegistry[request.stateId];
@@ -352,11 +365,69 @@ _R<TC, TPL, TMS, TA>::requestScheduled(const Transition request) {
 
 //------------------------------------------------------------------------------
 
+#ifdef _DEBUG
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
+_R<TC, TG, TPL, TA>::verifyPlans() const {
+	LongIndex planCount = 0;
+	for (StateID id = 0; id < STATE_COUNT; ++id)
+		planCount += verifyPlan(id);
+
+	assert(_tasks.count() == planCount);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TPL, typename TA>
+LongIndex
+_R<TC, TG, TPL, TA>::verifyPlan(const StateID stateId) const {
+	LongIndex length = 0;
+	const TaskIndices& indices = _stateTasks[stateId];
+
+	if (indices.first != INVALID_LONG_INDEX) {
+		assert(indices.last != INVALID_LONG_INDEX);
+
+		for (auto c = indices.first, d = c; ; ) {
+			++length;
+			const TaskTransition& task = _tasks[c];
+
+			if (c != indices.last) {
+				assert(task.next != INVALID_LONG_INDEX);
+				c = task.next;
+
+				// loop check
+				if (d != INVALID_LONG_INDEX) {
+					d = _tasks[d].next;
+
+					if (d != INVALID_LONG_INDEX) {
+						d = _tasks[d].next;
+					}
+
+					if (d != INVALID_LONG_INDEX)
+						assert(c != d);
+				}
+			} else {
+				assert(task.next == INVALID_LONG_INDEX);
+
+				break;
+			}
+		};
+	} else
+		assert(indices.last == INVALID_LONG_INDEX);
+
+	return length;
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::getStateNames() {
+_R<TC, TG, TPL, TA>::getStateNames() {
 	_stateInfos.clear();
 	_apex.deepGetNames((LongIndex) -1, StructureStateInfo::COMPOSITE, 0, _stateInfos);
 
@@ -432,9 +503,9 @@ _R<TC, TPL, TMS, TA>::getStateNames() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TPL, ShortIndex TMS, typename TA>
+template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TPL, TMS, TA>::udpateActivity() {
+_R<TC, TG, TPL, TA>::udpateActivity() {
 	for (LongIndex i = 0; i < _structure.count(); ++i) {
 		_structure[i].isActive = isActive(i);
 

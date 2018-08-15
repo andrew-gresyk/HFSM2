@@ -50,15 +50,17 @@ struct Context {
 
 	template <unsigned NCapacity>
 	void assertHistory(const Status (&reference)[NCapacity]) {
-		const unsigned historySize = (unsigned)history.size();
-		const unsigned referenceSize = hfsm::detail::count(reference);
-		assert(historySize == referenceSize);
+		const auto historySize = (unsigned) history.size();
+		const auto referenceSize = hfsm::detail::count(reference);
 
-		for (unsigned i = 0; i < std::min(historySize, referenceSize); ++i) {
+		const auto size = std::min(historySize, referenceSize);
+
+		for (unsigned i = 0; i < size; ++i) {
 			HSFM_IF_ASSERT(const auto h = history[i]);
 			HSFM_IF_ASSERT(const auto r = reference[i]);
 			assert(h == r);
 		}
+		assert(historySize == referenceSize);
 
 		history.clear();
 	}
@@ -168,7 +170,7 @@ struct HistoryBase
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-using Base = FSM::BaseT<Tracked, Timed, HistoryBase<T>>;
+using State = FSM::BaseT<Tracked, Timed, HistoryBase<T>>;
 
 //------------------------------------------------------------------------------
 
@@ -201,7 +203,7 @@ schedule(FSM::TransitionControl& control, Context::History& history) {
 
 template <typename T>
 struct Reacting
-	: Base<T>
+	: State<T>
 {
 	void react(const Action&, FSM::TransitionControl& control) {
 		control._().history.push_back(Status{ typeid(T), Event::REACT });
@@ -214,10 +216,8 @@ struct A : Reacting<A> {};
 
 //------------------------------------------------------------------------------
 
-struct A_2;
-
 struct A_1
-	: Base<A_1>
+	: State<A_1>
 {
 	void update(TransitionControl& control) {
 		changeTo<A_2>(control, control._().history);
@@ -226,11 +226,8 @@ struct A_1
 
 //------------------------------------------------------------------------------
 
-struct B;
-struct B_2_2;
-
 struct A_2
-	: Base<A_2>
+	: State<A_2>
 {
 	void update(TransitionControl& control) {
 		switch (entryCount()) {
@@ -252,18 +249,18 @@ struct A_2_2 : Reacting<A_2_2> {};
 
 //------------------------------------------------------------------------------
 
-struct B : Reacting<B> {};
+struct B	 : Reacting<B> {};
 
-struct B_1 : Base<B_1> {};
-struct B_1_1 : Base<B_1_1> {};
-struct B_1_2 : Base<B_1_2> {};
+struct B_1	 : State<B_1> {};
+struct B_1_1 : State<B_1_1> {};
+struct B_1_2 : State<B_1_2> {};
 
-struct B_2 : Base<B_2> {};
+struct B_2	 : State<B_2> {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_1
-	: Base<B_2_1>
+	: State<B_2_1>
 {
 	void guard(TransitionControl& control) {
 		resume<B_2_2>(control, control._().history);
@@ -273,7 +270,7 @@ struct B_2_1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_2
-	: Base<B_2_2>
+	: State<B_2_2>
 {
 	void guard(TransitionControl& control) {
 		if (entryCount() == 2)

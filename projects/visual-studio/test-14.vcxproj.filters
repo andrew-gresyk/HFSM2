@@ -27,6 +27,12 @@
     <ClCompile Include="..\..\test\test_state_data.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_lib_list.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_planner.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm\detail\machine_utility.hpp">
@@ -80,13 +86,22 @@
     <ClInclude Include="..\..\include\hfsm\machine.hpp">
       <Filter>hfsm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\test_state_data.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\machine_forward.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\machine_control.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\lib_list.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\machine_planner.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\machine_plan.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\machine_sequence.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
   </ItemGroup>
@@ -139,11 +154,17 @@
     <None Include="..\..\include\hfsm\detail\machine_control.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Natvis Include="..\..\hfsm.natvis" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\test\CMakeLists.txt" />
+    <None Include="..\..\include\hfsm\detail\lib_list.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_planner.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_plan.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_sequence.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
   </ItemGroup>
 </Project>

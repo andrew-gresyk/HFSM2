@@ -3,11 +3,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::_CS(StateRegistry& stateRegistry,
-										   const ShortIndex fork,
-										   Parents& forkParents,
-										   ForkPointers& forkPointers)
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+_CS<TID, TA, NI, TI, TR...>::_CS(StateRegistry& stateRegistry,
+								 const ShortIndex fork,
+								 Parents& forkParents,
+								 ForkPointers& forkPointers)
 	: initial(stateRegistry,
 			  Parent(fork, PRONG_INDEX),
 			  forkParents,
@@ -20,10 +20,10 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::_CS(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
-														TransitionControl& control)
+_CS<TID, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
+											  FullControl& control)
 {
 	if (prong == PRONG_INDEX)
 		initial  .deepForwardGuard(control);
@@ -33,10 +33,10 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideGuard(const ShortIndex prong,
-												 TransitionControl& control)
+_CS<TID, TA, NI, TI, TR...>::wideGuard(const ShortIndex prong,
+									   FullControl& control)
 {
 	if (prong == PRONG_INDEX)
 		initial  .deepGuard(control);
@@ -46,18 +46,18 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideGuard(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideEnterInitial(Control& control) {
+_CS<TID, TA, NI, TI, TR...>::wideEnterInitial(PlanControl& control) {
 	initial.deepEnterInitial(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideEnter(const ShortIndex prong,
-												 Control& control)
+_CS<TID, TA, NI, TI, TR...>::wideEnter(const ShortIndex prong,
+									   PlanControl& control)
 {
 	if (prong == PRONG_INDEX)
 		initial  .deepEnter(control);
@@ -67,10 +67,10 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideEnter(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
-bool
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideUpdate(const ShortIndex prong,
-												  TransitionControl& control)
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+Status
+_CS<TID, TA, NI, TI, TR...>::wideUpdate(const ShortIndex prong,
+										FullControl& control)
 {
 	return prong == PRONG_INDEX ?
 		initial  .deepUpdate(control) :
@@ -79,12 +79,12 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideUpdate(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename TEvent>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideReact(const ShortIndex prong,
-												 const TEvent& event,
-												 TransitionControl& control)
+_CS<TID, TA, NI, TI, TR...>::wideReact(const ShortIndex prong,
+									   const TEvent& event,
+									   FullControl& control)
 {
 	if (prong == PRONG_INDEX)
 		initial  .deepReact(	   event, control);
@@ -94,10 +94,10 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideReact(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideExit(const ShortIndex prong,
-												Control& control)
+_CS<TID, TA, NI, TI, TR...>::wideExit(const ShortIndex prong,
+									  PlanControl& control)
 {
 	if (prong == PRONG_INDEX)
 		initial  .deepExit(control);
@@ -107,10 +107,10 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideExit(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong,
-														  const TransitionType transition)
+_CS<TID, TA, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong,
+												const TransitionType transition)
 {
 	if (prong == PRONG_INDEX)
 		initial	 .deepForwardRequest(		transition);
@@ -120,25 +120,25 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideRequestRemain() {
+_CS<TID, TA, NI, TI, TR...>::wideRequestRemain() {
 	initial.deepRequestRemain();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideRequestRestart() {
+_CS<TID, TA, NI, TI, TR...>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideRequestResume(const ShortIndex prong) {
+_CS<TID, TA, NI, TI, TR...>::wideRequestResume(const ShortIndex prong) {
 	if (prong == PRONG_INDEX)
 		initial	 .deepRequestResume();
 	else
@@ -147,10 +147,10 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideRequestResume(const ShortIndex prong)
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideChangeToRequested(const ShortIndex prong,
-															 Control& control)
+_CS<TID, TA, NI, TI, TR...>::wideChangeToRequested(const ShortIndex prong,
+												   PlanControl& control)
 {
 	if (prong == PRONG_INDEX)
 		initial	 .deepChangeToRequested(control);
@@ -162,11 +162,11 @@ _CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideChangeToRequested(const ShortIndex pr
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TC, typename TSL, typename TPL, ShortIndex NI, typename TI, typename... TR>
+template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TC, TSL, TPL, NI, TI, TR...>::wideGetNames(const LongIndex parent,
-													const ShortIndex depth,
-													StructureStateInfos& _stateInfos) const
+_CS<TID, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
+										  const ShortIndex depth,
+										  StructureStateInfos& _stateInfos) const
 {
 	initial	 .deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 	remaining.wideGetNames(parent,								  depth, _stateInfos);

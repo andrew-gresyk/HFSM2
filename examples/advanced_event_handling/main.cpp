@@ -57,7 +57,7 @@ using FSM = M::PeerRoot<
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Reactive
-	: FSM::Base
+	: FSM::State
 {
 	// handle a single event type - TransitionEvent
 	void react(const TransitionEvent&, TransitionControl& control)  {
@@ -67,13 +67,13 @@ struct Reactive
 	}
 
 	// and ignore the other event types
-	using FSM::Base::react;
+	using FSM::State::react;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct NonHandler
-	: FSM::Base
+	: FSM::State
 {
 	// events are totally opt-in
 };
@@ -81,7 +81,7 @@ struct NonHandler
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct ConcreteHandler
-	: FSM::Base
+	: FSM::State
 {
 	// handle two event types - PrimaryEvent
 	void react(const PrimaryEvent&, TransitionControl&)  {
@@ -94,13 +94,13 @@ struct ConcreteHandler
 	}
 
 	// and ignore the other event types
-	using FSM::Base::react;
+	using FSM::State::react;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct TemplateHandler
-	: FSM::Base
+	: FSM::State
 {
 	// handle all possible event types
 	template <typename TEvent>
@@ -112,7 +112,7 @@ struct TemplateHandler
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct EnableIfHandler
-	: FSM::Base
+	: FSM::State
 {
 	// use std::enable_if to build more complex conditional event handling
 	template <typename TEvent>
@@ -132,7 +132,7 @@ struct EnableIfHandler
 //------------------------------------------------------------------------------
 
 struct Target
-	: FSM::Base
+	: FSM::State
 {
 	void enter(Control&) {
 		std::cout << "    changed to Target\n";

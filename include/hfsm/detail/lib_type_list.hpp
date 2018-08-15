@@ -99,12 +99,23 @@ class VariantT {
 	using Types = TypeListT<Ts...>;
 
 public:
+	template <typename T>
+	static constexpr LongIndex index() {
+		return Types::template index<T>();
+	}
+
+	template <typename T>
+	static constexpr bool contains() {
+		return Types::template contains<T>();
+	}
+
 	inline VariantT() = default;
 
-	template <typename T, typename = typename std::enable_if<Types::template contains<T>()>::type>
+	template <typename T,
+			  typename = typename std::enable_if<contains<T>()>::type>
 	inline VariantT(T* const p)
 		: _pointer(p)
-		, _index(Types::template index<T>())
+		, _index(index<T>())
 	{
 		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
 		assert(_index != INVALID_LONG_INDEX);
@@ -118,11 +129,9 @@ public:
 	}
 
 	template <typename T>
-	inline typename std::enable_if<Types::template contains<T>(), T>::type*
+	inline typename std::enable_if<contains<T>(), T>::type*
 	get() const {
-		const auto INDEX = Types::template index<T>();
-
-		assert(INDEX == _index);
+		const auto INDEX = index<T>();
 
 		return INDEX == _index ?
 			reinterpret_cast<T*>(_pointer) : nullptr;

@@ -79,13 +79,18 @@ struct Logger
 	void recordMethod(const hfsm::StateID /*origin*/,
 					  const Method method) override
 	{
-		std::cout << /*hfsm::stateName(origin) << "::" <<*/ hfsm::methodName(method) << "()\n";
+		std::cout //<< hfsm::stateName(origin) << "::"
+				  << hfsm::methodName(method) << "()\n";
 	}
 
-	void recordTransition(const Transition transition,
+	void recordTransition(const hfsm::StateID /*origin*/,
+						  const Transition transition,
 						  const hfsm::StateID /*target*/) override
 	{
-		std::cout << hfsm::transitionName(transition) << "<" << /*hfsm::stateName(target) << ">()"*/ "\n";
+		std::cout //<< hfsm::stateName(origin) << ": "
+				  << hfsm::transitionName(transition) << "<"
+				  //<< hfsm::stateName(target) << ">()"
+				  "\n";
 	}
 };
 
@@ -93,7 +98,7 @@ struct Logger
 
 // top-level state in the hierarchy
 struct Top
-	: FSM::Base // necessary boilerplate!
+	: FSM::State // necessary boilerplate!
 {
 	// all state methods:
 	void guard(TransitionControl&)					{}	// not going to be called in this example
@@ -108,7 +113,7 @@ struct Top
 
 // initial state
 struct From
-	: FSM::Base
+	: FSM::State
 {
 	// all state methods:
 	void guard(TransitionControl&)					{}	// not going to be called in this example
@@ -123,7 +128,7 @@ struct From
 
 // transition target state
 struct To
-	: FSM::Base
+	: FSM::State
 {
 	// all state methods:
 	void guard(TransitionControl&)					{}
