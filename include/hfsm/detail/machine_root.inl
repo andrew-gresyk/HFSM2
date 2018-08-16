@@ -140,7 +140,7 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, state);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, stateId);
 #endif
 }
 
@@ -157,7 +157,7 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, state);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, stateId);
 #endif
 }
 

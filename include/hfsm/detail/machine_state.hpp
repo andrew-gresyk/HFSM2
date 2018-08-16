@@ -73,8 +73,8 @@ struct _S {
 	template <typename>
 	struct MemberTraits;
 
-	template <typename TReturn, typename TState, typename... TArgs>
-	struct MemberTraits<TReturn(TState::*)(TArgs...)> {
+	template <typename TReturn, typename TState, typename... Ts>
+	struct MemberTraits<TReturn(TState::*)(Ts...)> {
 		using State = TState;
 	};
 

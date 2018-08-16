@@ -87,7 +87,7 @@ struct TransitionInfoT {
 		, method(method_)
 		, transition(get<TransitionPayloads>(transition_.type))
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 		assert(method_ < ::hfsm::Method::COUNT);
 	}
 

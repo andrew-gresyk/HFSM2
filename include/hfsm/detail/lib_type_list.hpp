@@ -117,7 +117,7 @@ public:
 		: _pointer(p)
 		, _index(index<T>())
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 		assert(_index != INVALID_LONG_INDEX);
 	}
 

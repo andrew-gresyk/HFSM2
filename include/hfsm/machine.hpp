@@ -882,7 +882,7 @@ public:
 		: _pointer(p)
 		, _index(index<T>())
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 		assert(_index != INVALID_LONG_INDEX);
 	}
 
@@ -1970,7 +1970,7 @@ struct TransitionInfoT {
 		, method(method_)
 		, transition(get<TransitionPayloads>(transition_.type))
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x7) == 0));
+		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 		assert(method_ < ::hfsm::Method::COUNT);
 	}
 
@@ -2618,8 +2618,8 @@ struct _S {
 	template <typename>
 	struct MemberTraits;
 
-	template <typename TReturn, typename TState, typename... TArgs>
-	struct MemberTraits<TReturn(TState::*)(TArgs...)> {
+	template <typename TReturn, typename TState, typename... Ts>
+	struct MemberTraits<TReturn(TState::*)(Ts...)> {
 		using State = TState;
 	};
 
@@ -4998,7 +4998,7 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, state);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, stateId);
 #endif
 }
 
@@ -5015,7 +5015,7 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, state);
+		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, stateId);
 #endif
 }
 
