@@ -166,9 +166,9 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		_transitionPayloads[stateId].reset();
 }
 
@@ -180,9 +180,9 @@ void
 _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 								  TPayload* const payload)
 {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		_transitionPayloads[stateId] = payload;
 }
 
@@ -191,9 +191,9 @@ _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		return !!_transitionPayloads[stateId];
 	else
 		return false;
@@ -205,9 +205,9 @@ template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 TPayload*
 _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY) {
+	if (stateId < TransitionPayloads::CAPACITY) {
 		const auto& payload = _transitionPayloads[stateId];
 
 		return payload.template get<TPayload>();
@@ -220,9 +220,9 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
 			const auto& fork = *_forkPointers[parent.fork];
 
@@ -238,9 +238,9 @@ _R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isResumable(const StateID stateId) const {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
 			const auto& fork = *_forkPointers[parent.fork];
 
@@ -339,7 +339,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
-	assert(request.stateId < _transitionPayloads.CAPACITY);
+	assert(request.stateId < TransitionPayloads::CAPACITY);
 
 	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
@@ -355,7 +355,7 @@ _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
-	assert(request.stateId < _transitionPayloads.CAPACITY);
+	assert(request.stateId < TransitionPayloads::CAPACITY);
 
 	const auto parent = _stateRegistry[request.stateId];
 	auto& fork = *_forkPointers[parent.fork];

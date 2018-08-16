@@ -816,7 +816,7 @@ class VariantT;
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename... Ts>
-struct TypeListT
+struct _TL
 	: TypeListBuilder<0, Ts...>
 {
 	using Base = TypeListBuilder<0, Ts...>;
@@ -838,8 +838,8 @@ struct TypeListT
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <>
-struct TypeListT<>
-	: TypeListT<void>
+struct _TL<>
+	: _TL<void>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -849,8 +849,8 @@ template <typename...>
 struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
-struct MergeT<TypeListT<Ts1...>, TypeListT<Ts2...>> {
-	using TypeList = TypeListT<Ts1..., Ts2...>;
+struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
+	using TypeList = _TL<Ts1..., Ts2...>;
 };
 
 //------------------------------------------------------------------------------
@@ -861,7 +861,7 @@ struct MergeT<TypeListT<Ts1...>, TypeListT<Ts2...>> {
 
 template <typename... Ts>
 class VariantT {
-	using Types = TypeListT<Ts...>;
+	using Types = _TL<Ts...>;
 
 public:
 	template <typename T>
@@ -2251,7 +2251,7 @@ struct WrapForward<_OF<TH, TS...>> {
 template <typename THead>
 struct _SF final {
 	using Head				= THead;
-	using StateList			= TypeListT<Head>;
+	using StateList			= _TL<Head>;
 
 	static constexpr LongIndex REVERSE_DEPTH = 1;
 	static constexpr LongIndex DEEP_WIDTH	 = 0;
@@ -2353,8 +2353,7 @@ template <typename TContext,
 		  typename TStateList,
 		  typename TPayloadList,
 		  LongIndex NPlanCapacity>
-struct Args final
-{
+struct ArgsT final {
 	using Context			= TContext;
 	using Config			= TConfig;
 	using StateList			= TStateList;
@@ -2466,7 +2465,7 @@ namespace detail {
 
 template <typename TContext,
 		  typename TConfig = Config<>,
-		  typename TPayloadList = TypeListT<>>
+		  typename TPayloadList = _TL<>>
 struct _M {
 	using Context = TContext;
 	using Config  = TConfig;
@@ -2512,7 +2511,7 @@ struct _M {
 }
 
 template <typename... Ts>
-using TransitionPayloads = detail::TypeListT<Ts...>;
+using TransitionPayloads = detail::_TL<Ts...>;
 
 //------------------------------------------------------------------------------
 
@@ -4660,7 +4659,7 @@ class _R final {
 
 	static constexpr LongIndex PLAN_CAPACITY	 = Forward::PLAN_CAPACITY;
 
-	using Args				= Args<Context, Config, StateList, PayloadList, PLAN_CAPACITY>;
+	using Args				= ArgsT<Context, Config, StateList, PayloadList, PLAN_CAPACITY>;
 	using PlanControl		= typename Forward::PlanControl;
 	using Payload			= typename PayloadList::Container;
 	using Transition		= TransitionT<PayloadList>;
@@ -5024,9 +5023,9 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		_transitionPayloads[stateId].reset();
 }
 
@@ -5038,9 +5037,9 @@ void
 _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 								  TPayload* const payload)
 {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		_transitionPayloads[stateId] = payload;
 }
 
@@ -5049,9 +5048,9 @@ _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		return !!_transitionPayloads[stateId];
 	else
 		return false;
@@ -5063,9 +5062,9 @@ template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 TPayload*
 _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY) {
+	if (stateId < TransitionPayloads::CAPACITY) {
 		const auto& payload = _transitionPayloads[stateId];
 
 		return payload.template get<TPayload>();
@@ -5078,9 +5077,9 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
 			const auto& fork = *_forkPointers[parent.fork];
 
@@ -5096,9 +5095,9 @@ _R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isResumable(const StateID stateId) const {
-	assert(stateId < _transitionPayloads.CAPACITY);
+	assert(stateId < TransitionPayloads::CAPACITY);
 
-	if (stateId < _transitionPayloads.CAPACITY)
+	if (stateId < TransitionPayloads::CAPACITY)
 		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
 			const auto& fork = *_forkPointers[parent.fork];
 
@@ -5197,7 +5196,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
-	assert(request.stateId < _transitionPayloads.CAPACITY);
+	assert(request.stateId < TransitionPayloads::CAPACITY);
 
 	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
@@ -5213,7 +5212,7 @@ _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
-	assert(request.stateId < _transitionPayloads.CAPACITY);
+	assert(request.stateId < TransitionPayloads::CAPACITY);
 
 	const auto parent = _stateRegistry[request.stateId];
 	auto& fork = *_forkPointers[parent.fork];

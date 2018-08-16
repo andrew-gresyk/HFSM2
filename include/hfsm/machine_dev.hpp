@@ -92,7 +92,7 @@ namespace detail {
 
 template <typename TContext,
 		  typename TConfig = Config<>,
-		  typename TPayloadList = TypeListT<>>
+		  typename TPayloadList = _TL<>>
 struct _M {
 	using Context = TContext;
 	using Config  = TConfig;
@@ -138,7 +138,7 @@ struct _M {
 }
 
 template <typename... Ts>
-using TransitionPayloads = detail::TypeListT<Ts...>;
+using TransitionPayloads = detail::_TL<Ts...>;
 
 //------------------------------------------------------------------------------
 

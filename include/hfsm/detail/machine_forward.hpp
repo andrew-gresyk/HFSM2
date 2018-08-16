@@ -71,7 +71,7 @@ struct WrapForward<_OF<TH, TS...>> {
 template <typename THead>
 struct _SF final {
 	using Head				= THead;
-	using StateList			= TypeListT<Head>;
+	using StateList			= _TL<Head>;
 
 	static constexpr LongIndex REVERSE_DEPTH = 1;
 	static constexpr LongIndex DEEP_WIDTH	 = 0;
@@ -173,8 +173,7 @@ template <typename TContext,
 		  typename TStateList,
 		  typename TPayloadList,
 		  LongIndex NPlanCapacity>
-struct Args final
-{
+struct ArgsT final {
 	using Context			= TContext;
 	using Config			= TConfig;
 	using StateList			= TStateList;

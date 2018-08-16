@@ -51,7 +51,7 @@ class VariantT;
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename... Ts>
-struct TypeListT
+struct _TL
 	: TypeListBuilder<0, Ts...>
 {
 	using Base = TypeListBuilder<0, Ts...>;
@@ -73,8 +73,8 @@ struct TypeListT
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <>
-struct TypeListT<>
-	: TypeListT<void>
+struct _TL<>
+	: _TL<void>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -84,8 +84,8 @@ template <typename...>
 struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
-struct MergeT<TypeListT<Ts1...>, TypeListT<Ts2...>> {
-	using TypeList = TypeListT<Ts1..., Ts2...>;
+struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
+	using TypeList = _TL<Ts1..., Ts2...>;
 };
 
 //------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ struct MergeT<TypeListT<Ts1...>, TypeListT<Ts2...>> {
 
 template <typename... Ts>
 class VariantT {
-	using Types = TypeListT<Ts...>;
+	using Types = _TL<Ts...>;
 
 public:
 	template <typename T>

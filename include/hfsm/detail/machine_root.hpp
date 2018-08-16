@@ -22,7 +22,7 @@ class _R final {
 
 	static constexpr LongIndex PLAN_CAPACITY	 = Forward::PLAN_CAPACITY;
 
-	using Args				= Args<Context, Config, StateList, PayloadList, PLAN_CAPACITY>;
+	using Args				= ArgsT<Context, Config, StateList, PayloadList, PLAN_CAPACITY>;
 	using PlanControl		= typename Forward::PlanControl;
 	using Payload			= typename PayloadList::Container;
 	using Transition		= TransitionT<PayloadList>;
