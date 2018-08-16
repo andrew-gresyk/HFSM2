@@ -29,22 +29,15 @@
 
 #pragma once
 
+#pragma warning(push)
+#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
 #include <typeindex>
 #include <utility>
-
-//------------------------------------------------------------------------------
-
-// TODO: define better check macros
-
-#ifdef HFSM_ENABLE_ALIGNMENT_CHEKS
-	#define HFSM_IF_ALIGNMENT_CHEKS(...)	__VA_ARGS__
-#else
-	#define HFSM_IF_ALIGNMENT_CHEKS(...)
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -860,7 +853,7 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 // TODO: add assignment op and templated type conversion op
 
 template <typename... Ts>
-class VariantT {
+class alignas(alignof(void*)) VariantT {
 	using Types = _TL<Ts...>;
 
 public:
@@ -882,7 +875,6 @@ public:
 		: _pointer(p)
 		, _index(index<T>())
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 		assert(_index != INVALID_LONG_INDEX);
 	}
 
@@ -903,7 +895,7 @@ public:
 	}
 
 private:
-	alignas(alignof(void*)) void* _pointer = nullptr;
+	void* _pointer = nullptr;
 	LongIndex _index = INVALID_LONG_INDEX;
 };
 
@@ -1829,7 +1821,7 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct Parent {
+struct alignas(2 * sizeof(ShortIndex)) Parent {
 	ShortIndex fork  = INVALID_SHORT_INDEX;
 	ShortIndex prong = INVALID_SHORT_INDEX;
 
@@ -1839,9 +1831,7 @@ struct Parent {
 				  const ShortIndex prong_)
 		: fork(fork_)
 		, prong(prong_)
-	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x1) == 0));
-	}
+	{}
 
 	inline explicit operator bool() const {
 		return fork  != INVALID_SHORT_INDEX &&
@@ -1857,7 +1847,7 @@ using Parents = ArrayView<Parent>;
 
 #pragma pack(push, 1)
 
-struct Fork {
+struct alignas(4 * sizeof(ShortIndex)) Fork {
 	ShortIndex self		 = INVALID_SHORT_INDEX;
 	ShortIndex active	 = INVALID_SHORT_INDEX;
 	ShortIndex resumable = INVALID_SHORT_INDEX;
@@ -1868,8 +1858,6 @@ struct Fork {
 				Parents& forkParents)
 		: self(self_)
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x3) == 0));
-
 		forkParents[self_] = parent;
 	}
 };
@@ -1905,7 +1893,7 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct StructureStateInfo {
+struct alignas(alignof(void*)) StructureStateInfo {
 	enum RegionType : ShortIndex {
 		COMPOSITE,
 		ORTHOGONAL,
@@ -1921,11 +1909,9 @@ struct StructureStateInfo {
 		, parent(parent_)
 		, region(region_)
 		, depth(depth_)
-	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
-	}
+	{}
 
-	alignas(alignof(char*)) const char* name;
+	const char* name;
 	LongIndex parent;
 	RegionType region;
 	ShortIndex depth;
@@ -1955,10 +1941,10 @@ inline get(const typename TransitionT<TPayloadList>::Type type) {
 	}
 }
 
-#pragma pack(push, 2)
+#pragma pack(push, 1)
 
 template <typename TPayloadList>
-struct TransitionInfoT {
+struct alignas(4) TransitionInfoT {
 	using TransitionPayloads = TPayloadList;
 	using Transition = TransitionT<TPayloadList>;
 
@@ -1970,7 +1956,6 @@ struct TransitionInfoT {
 		, method(method_)
 		, transition(get<TransitionPayloads>(transition_.type))
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 		assert(method_ < ::hfsm::Method::COUNT);
 	}
 
@@ -5392,3 +5377,5 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
 #undef HFSM_IF_STRUCTURE
+
+#pragma warning(pop)

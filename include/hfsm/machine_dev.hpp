@@ -29,22 +29,15 @@
 
 #pragma once
 
+#pragma warning(push)
+#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
 #include <typeindex>
 #include <utility>
-
-//------------------------------------------------------------------------------
-
-// TODO: define better check macros
-
-#ifdef HFSM_ENABLE_ALIGNMENT_CHEKS
-	#define HFSM_IF_ALIGNMENT_CHEKS(...)	__VA_ARGS__
-#else
-	#define HFSM_IF_ALIGNMENT_CHEKS(...)
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -181,3 +174,5 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
 #undef HFSM_IF_STRUCTURE
+
+#pragma warning(pop)

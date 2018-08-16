@@ -22,7 +22,7 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct StructureStateInfo {
+struct alignas(alignof(void*)) StructureStateInfo {
 	enum RegionType : ShortIndex {
 		COMPOSITE,
 		ORTHOGONAL,
@@ -38,11 +38,9 @@ struct StructureStateInfo {
 		, parent(parent_)
 		, region(region_)
 		, depth(depth_)
-	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
-	}
+	{}
 
-	alignas(alignof(char*)) const char* name;
+	const char* name;
 	LongIndex parent;
 	RegionType region;
 	ShortIndex depth;
@@ -72,10 +70,10 @@ inline get(const typename TransitionT<TPayloadList>::Type type) {
 	}
 }
 
-#pragma pack(push, 2)
+#pragma pack(push, 1)
 
 template <typename TPayloadList>
-struct TransitionInfoT {
+struct alignas(4) TransitionInfoT {
 	using TransitionPayloads = TPayloadList;
 	using Transition = TransitionT<TPayloadList>;
 
@@ -87,7 +85,6 @@ struct TransitionInfoT {
 		, method(method_)
 		, transition(get<TransitionPayloads>(transition_.type))
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 		assert(method_ < ::hfsm::Method::COUNT);
 	}
 

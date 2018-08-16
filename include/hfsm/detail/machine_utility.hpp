@@ -7,7 +7,7 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct Parent {
+struct alignas(2 * sizeof(ShortIndex)) Parent {
 	ShortIndex fork  = INVALID_SHORT_INDEX;
 	ShortIndex prong = INVALID_SHORT_INDEX;
 
@@ -17,9 +17,7 @@ struct Parent {
 				  const ShortIndex prong_)
 		: fork(fork_)
 		, prong(prong_)
-	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x1) == 0));
-	}
+	{}
 
 	inline explicit operator bool() const {
 		return fork  != INVALID_SHORT_INDEX &&
@@ -35,7 +33,7 @@ using Parents = ArrayView<Parent>;
 
 #pragma pack(push, 1)
 
-struct Fork {
+struct alignas(4 * sizeof(ShortIndex)) Fork {
 	ShortIndex self		 = INVALID_SHORT_INDEX;
 	ShortIndex active	 = INVALID_SHORT_INDEX;
 	ShortIndex resumable = INVALID_SHORT_INDEX;
@@ -46,8 +44,6 @@ struct Fork {
 				Parents& forkParents)
 		: self(self_)
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & 0x3) == 0));
-
 		forkParents[self_] = parent;
 	}
 };

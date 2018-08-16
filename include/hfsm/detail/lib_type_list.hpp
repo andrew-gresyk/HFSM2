@@ -95,7 +95,7 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 // TODO: add assignment op and templated type conversion op
 
 template <typename... Ts>
-class VariantT {
+class alignas(alignof(void*)) VariantT {
 	using Types = _TL<Ts...>;
 
 public:
@@ -117,7 +117,6 @@ public:
 		: _pointer(p)
 		, _index(index<T>())
 	{
-		HFSM_IF_ALIGNMENT_CHEKS(assert((((uintptr_t) this) & (sizeof(void*) - 1)) == 0));
 		assert(_index != INVALID_LONG_INDEX);
 	}
 
@@ -138,7 +137,7 @@ public:
 	}
 
 private:
-	alignas(alignof(void*)) void* _pointer = nullptr;
+	void* _pointer = nullptr;
 	LongIndex _index = INVALID_LONG_INDEX;
 };
 
