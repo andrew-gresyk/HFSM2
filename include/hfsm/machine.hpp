@@ -4679,7 +4679,7 @@ public:
 
 private:
 	using StateRegistry			 = Array<Parent,		STATE_COUNT>;
-	using TransitionPayloads	 = Array<Payload,		STATE_COUNT>;
+	using Payloads				 = Array<Payload,		STATE_COUNT>;
 
 	using ForkParents			 = Array<Parent,		FORK_COUNT>;
 	using ForkPointerStorage	 = Array<Fork*,			FORK_COUNT>;
@@ -4825,7 +4825,7 @@ private:
 	Context& _context;
 
 	StateRegistry _stateRegistry;
-	TransitionPayloads _transitionPayloads;
+	Payloads _transitionPayloads;
 
 	ForkParents  _forkParents;
 	ForkPointerStorage _forkPointers;
@@ -5023,9 +5023,9 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
-	assert(stateId < TransitionPayloads::CAPACITY);
+	assert(stateId < Payloads::CAPACITY);
 
-	if (stateId < TransitionPayloads::CAPACITY)
+	if (stateId < Payloads::CAPACITY)
 		_transitionPayloads[stateId].reset();
 }
 
@@ -5037,9 +5037,9 @@ void
 _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 								  TPayload* const payload)
 {
-	assert(stateId < TransitionPayloads::CAPACITY);
+	assert(stateId < Payloads::CAPACITY);
 
-	if (stateId < TransitionPayloads::CAPACITY)
+	if (stateId < Payloads::CAPACITY)
 		_transitionPayloads[stateId] = payload;
 }
 
@@ -5048,9 +5048,9 @@ _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
-	assert(stateId < TransitionPayloads::CAPACITY);
+	assert(stateId < Payloads::CAPACITY);
 
-	if (stateId < TransitionPayloads::CAPACITY)
+	if (stateId < Payloads::CAPACITY)
 		return !!_transitionPayloads[stateId];
 	else
 		return false;
@@ -5062,9 +5062,9 @@ template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 TPayload*
 _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
-	assert(stateId < TransitionPayloads::CAPACITY);
+	assert(stateId < Payloads::CAPACITY);
 
-	if (stateId < TransitionPayloads::CAPACITY) {
+	if (stateId < Payloads::CAPACITY) {
 		const auto& payload = _transitionPayloads[stateId];
 
 		return payload.template get<TPayload>();
@@ -5077,9 +5077,9 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
-	assert(stateId < TransitionPayloads::CAPACITY);
+	assert(stateId < Payloads::CAPACITY);
 
-	if (stateId < TransitionPayloads::CAPACITY)
+	if (stateId < Payloads::CAPACITY)
 		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
 			const auto& fork = *_forkPointers[parent.fork];
 
@@ -5095,9 +5095,9 @@ _R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
 template <typename TC, typename TG, typename TPL, typename TA>
 bool
 _R<TC, TG, TPL, TA>::isResumable(const StateID stateId) const {
-	assert(stateId < TransitionPayloads::CAPACITY);
+	assert(stateId < Payloads::CAPACITY);
 
-	if (stateId < TransitionPayloads::CAPACITY)
+	if (stateId < Payloads::CAPACITY)
 		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
 			const auto& fork = *_forkPointers[parent.fork];
 
@@ -5196,7 +5196,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
-	assert(request.stateId < TransitionPayloads::CAPACITY);
+	assert(request.stateId < Payloads::CAPACITY);
 
 	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
@@ -5212,7 +5212,7 @@ _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
-	assert(request.stateId < TransitionPayloads::CAPACITY);
+	assert(request.stateId < Payloads::CAPACITY);
 
 	const auto parent = _stateRegistry[request.stateId];
 	auto& fork = *_forkPointers[parent.fork];

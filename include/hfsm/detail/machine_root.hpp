@@ -42,7 +42,7 @@ public:
 
 private:
 	using StateRegistry			 = Array<Parent,		STATE_COUNT>;
-	using TransitionPayloads	 = Array<Payload,		STATE_COUNT>;
+	using Payloads				 = Array<Payload,		STATE_COUNT>;
 
 	using ForkParents			 = Array<Parent,		FORK_COUNT>;
 	using ForkPointerStorage	 = Array<Fork*,			FORK_COUNT>;
@@ -188,7 +188,7 @@ private:
 	Context& _context;
 
 	StateRegistry _stateRegistry;
-	TransitionPayloads _transitionPayloads;
+	Payloads _transitionPayloads;
 
 	ForkParents  _forkParents;
 	ForkPointerStorage _forkPointers;
