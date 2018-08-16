@@ -31,8 +31,8 @@ public:
 	template <typename TValue>
 	inline LongIndex operator << (TValue&& value);
 
-	inline		 auto& operator[] (const LongIndex i)				{ return get(i);		}
-	inline const auto& operator[] (const LongIndex i) const			{ return get(i);		}
+	inline		 Item& operator[] (const LongIndex i)				{ return get(i);		}
+	inline const Item& operator[] (const LongIndex i) const			{ return get(i);		}
 
 	inline LongIndex count() const									{ return _count;		}
 	inline LongIndex capacity() const								{ return _capacity;		}
@@ -49,8 +49,8 @@ protected:
 
 private:
 	// hacks
-	inline		 auto* data()		{ return reinterpret_cast<		Item*>(((uintptr_t)this) + OFFSET);	}
-	inline const auto* data() const	{ return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET);	}
+	inline		 Item* data()		{ return reinterpret_cast<		Item*>(((uintptr_t)this) + OFFSET);	}
+	inline const Item* data() const	{ return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET);	}
 
 protected:
 	LongIndex _count = 0;

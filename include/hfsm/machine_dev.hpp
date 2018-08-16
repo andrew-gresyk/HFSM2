@@ -29,8 +29,10 @@
 
 #pragma once
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
 
 #include <assert.h>
 #include <stdint.h>
@@ -175,4 +177,6 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 #undef HFSM_LOGGER_OR
 #undef HFSM_IF_STRUCTURE
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif

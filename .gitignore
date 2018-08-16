@@ -1,7 +1,8 @@
-﻿/binaries-*
-/build
-/hfsm_test.dir/Debug
+﻿.codelite
 .idea
 .vs
+build
 cmake-*
+/binaries-*
+/hfsm_test.dir
 *.user

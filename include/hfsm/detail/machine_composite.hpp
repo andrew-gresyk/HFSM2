@@ -69,8 +69,6 @@ struct _C {
 	Fork _fork;
 	State _state;
 	SubStates _subStates;
-
-	HSFM_IF_DEBUG(const SubStateList SUB_STATE_LIST);
 };
 
 ////////////////////////////////////////////////////////////////////////////////

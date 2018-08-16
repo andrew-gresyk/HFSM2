@@ -339,7 +339,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
-	assert(request.stateId < Payloads::CAPACITY);
+	assert(STATE_COUNT > request.stateId);
 
 	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
@@ -355,7 +355,7 @@ _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
-	assert(request.stateId < Payloads::CAPACITY);
+	assert(STATE_COUNT > request.stateId);
 
 	const auto parent = _stateRegistry[request.stateId];
 	auto& fork = *_forkPointers[parent.fork];

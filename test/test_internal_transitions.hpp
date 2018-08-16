@@ -42,7 +42,7 @@ public:
 	void preEnter(Context&)							{ _elapsed = 0.0f;			}
 	void preUpdate(Context& _)						{ _elapsed += _;			}
 
-	auto elapsed() const							{ return _elapsed;			}
+	float elapsed() const							{ return _elapsed;			}
 
 private:
 	float _elapsed;

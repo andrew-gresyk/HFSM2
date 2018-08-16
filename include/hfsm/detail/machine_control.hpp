@@ -44,12 +44,12 @@ protected:
 	inline void resetOrigin(const StateID id);
 
 public:
-	inline auto& _()									{ return _context;		}
-	inline auto& context()								{ return _context;		}
+	inline Context& _()									{ return _context;		}
+	inline Context& context()							{ return _context;		}
 
 private:
 #ifdef HFSM_ENABLE_LOG_INTERFACE
-	inline auto& logger()								{ return _logger;		}
+	inline LoggerInterface* logger()					{ return _logger;		}
 #endif
 
 protected:
@@ -109,17 +109,17 @@ private:
 	stateId()										{ return StateList::template index<T>();					}
 
 public:
-	inline auto plan()								{ return Plan(_tasks, _stateTasks, Control::_originId);		}
-	inline auto plan() const						{ return Plan(_tasks, _stateTasks, Control::_originId);		}
+	inline Plan plan()								{ return Plan(_tasks, _stateTasks, Control::_originId);		}
+	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, Control::_originId);		}
 
-	inline auto plan(const StateID stateId)			{ return Plan(_tasks, _stateTasks, stateId);				}
-	inline auto plan(const StateID stateId) const	{ return Plan(_tasks, _stateTasks, stateId);				}
-
-	template <typename TPlanner>
-	inline auto plan()								{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan(const StateID stateId)			{ return Plan(_tasks, _stateTasks, stateId);				}
+	inline Plan plan(const StateID stateId) const	{ return Plan(_tasks, _stateTasks, stateId);				}
 
 	template <typename TPlanner>
-	inline auto plan()						const	{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan()								{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+
+	template <typename TPlanner>
+	inline Plan plan()						const	{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
 
 private:
 	Tasks& _tasks;
@@ -328,15 +328,15 @@ private:
 	stateId()									  { return StateList::template index<T>();					}
 
 public:
-	inline auto plan(const StateID stateId)		  { return Plan(_tasks, _stateTasks, stateId);				}
+	inline Plan plan(const StateID stateId)		  { return Plan(_tasks, _stateTasks, stateId);				}
 
-	inline auto plan(const StateID stateId) const { return Plan(_tasks, _stateTasks, stateId);				}
-
-	template <typename TPlanner>
-	inline auto plan()							  { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan(const StateID stateId) const { return Plan(_tasks, _stateTasks, stateId);				}
 
 	template <typename TPlanner>
-	inline auto plan()						const { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan()							  { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+
+	template <typename TPlanner>
+	inline Plan plan()						const { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
 
 private:
 	Tasks& _tasks;

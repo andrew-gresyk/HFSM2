@@ -29,8 +29,10 @@
 
 #pragma once
 
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
 
 #include <assert.h>
 #include <stdint.h>
@@ -319,8 +321,8 @@ public:
 	template <typename TValue>
 	inline LongIndex operator << (TValue&& value);
 
-	inline		 auto& operator[] (const LongIndex i)				{ return get(i);		}
-	inline const auto& operator[] (const LongIndex i) const			{ return get(i);		}
+	inline		 Item& operator[] (const LongIndex i)				{ return get(i);		}
+	inline const Item& operator[] (const LongIndex i) const			{ return get(i);		}
 
 	inline LongIndex count() const									{ return _count;		}
 	inline LongIndex capacity() const								{ return _capacity;		}
@@ -337,8 +339,8 @@ protected:
 
 private:
 	// hacks
-	inline		 auto* data()		{ return reinterpret_cast<		Item*>(((uintptr_t)this) + OFFSET);	}
-	inline const auto* data() const	{ return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET);	}
+	inline		 Item* data()		{ return reinterpret_cast<		Item*>(((uintptr_t)this) + OFFSET);	}
+	inline const Item* data() const	{ return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET);	}
 
 protected:
 	LongIndex _count = 0;
@@ -1323,12 +1325,12 @@ protected:
 	inline void resetOrigin(const StateID id);
 
 public:
-	inline auto& _()									{ return _context;		}
-	inline auto& context()								{ return _context;		}
+	inline Context& _()									{ return _context;		}
+	inline Context& context()							{ return _context;		}
 
 private:
 #ifdef HFSM_ENABLE_LOG_INTERFACE
-	inline auto& logger()								{ return _logger;		}
+	inline LoggerInterface* logger()					{ return _logger;		}
 #endif
 
 protected:
@@ -1388,17 +1390,17 @@ private:
 	stateId()										{ return StateList::template index<T>();					}
 
 public:
-	inline auto plan()								{ return Plan(_tasks, _stateTasks, Control::_originId);		}
-	inline auto plan() const						{ return Plan(_tasks, _stateTasks, Control::_originId);		}
+	inline Plan plan()								{ return Plan(_tasks, _stateTasks, Control::_originId);		}
+	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, Control::_originId);		}
 
-	inline auto plan(const StateID stateId)			{ return Plan(_tasks, _stateTasks, stateId);				}
-	inline auto plan(const StateID stateId) const	{ return Plan(_tasks, _stateTasks, stateId);				}
-
-	template <typename TPlanner>
-	inline auto plan()								{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan(const StateID stateId)			{ return Plan(_tasks, _stateTasks, stateId);				}
+	inline Plan plan(const StateID stateId) const	{ return Plan(_tasks, _stateTasks, stateId);				}
 
 	template <typename TPlanner>
-	inline auto plan()						const	{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan()								{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+
+	template <typename TPlanner>
+	inline Plan plan()						const	{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
 
 private:
 	Tasks& _tasks;
@@ -1607,15 +1609,15 @@ private:
 	stateId()									  { return StateList::template index<T>();					}
 
 public:
-	inline auto plan(const StateID stateId)		  { return Plan(_tasks, _stateTasks, stateId);				}
+	inline Plan plan(const StateID stateId)		  { return Plan(_tasks, _stateTasks, stateId);				}
 
-	inline auto plan(const StateID stateId) const { return Plan(_tasks, _stateTasks, stateId);				}
-
-	template <typename TPlanner>
-	inline auto plan()							  { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan(const StateID stateId) const { return Plan(_tasks, _stateTasks, stateId);				}
 
 	template <typename TPlanner>
-	inline auto plan()						const { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan()							  { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+
+	template <typename TPlanner>
+	inline Plan plan()						const { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
 
 private:
 	Tasks& _tasks;
@@ -3021,7 +3023,6 @@ struct _CS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 
 	Initial initial;
 	Remaining remaining;
-	HSFM_IF_DEBUG(const StateList STATE_LIST);
 };
 
 //------------------------------------------------------------------------------
@@ -3084,7 +3085,6 @@ struct _CS<TInitialID, TArgs, NIndex, TInitial> {
 #endif
 
 	Initial initial;
-	HSFM_IF_DEBUG(const StateList STATE_LIST);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3510,8 +3510,6 @@ struct _C {
 	Fork _fork;
 	State _state;
 	SubStates _subStates;
-
-	HSFM_IF_DEBUG(const SubStateList SUB_STATE_LIST);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3927,7 +3925,6 @@ struct _OS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 
 	Initial initial;
 	Remaining remaining;
-	HSFM_IF_DEBUG(const StateList STATE_LIST);
 };
 
 //------------------------------------------------------------------------------
@@ -3993,7 +3990,6 @@ struct _OS<TInitialID, TArgs, NIndex, TInitial> {
 #endif
 
 	Initial initial;
-	HSFM_IF_DEBUG(const StateList STATE_LIST);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4397,8 +4393,6 @@ struct _O final {
 	Fork _fork;
 	State _state;
 	SubStates _subStates;
-
-	HSFM_IF_DEBUG(const SubStateList SUB_STATE_LIST);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -5181,7 +5175,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
-	assert(request.stateId < Payloads::CAPACITY);
+	assert(STATE_COUNT > request.stateId);
 
 	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
 		auto& fork = *_forkPointers[parent.fork];
@@ -5197,7 +5191,7 @@ _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
-	assert(request.stateId < Payloads::CAPACITY);
+	assert(STATE_COUNT > request.stateId);
 
 	const auto parent = _stateRegistry[request.stateId];
 	auto& fork = *_forkPointers[parent.fork];
@@ -5378,4 +5372,6 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 #undef HFSM_LOGGER_OR
 #undef HFSM_IF_STRUCTURE
 
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif

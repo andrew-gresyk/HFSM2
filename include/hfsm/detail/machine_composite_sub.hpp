@@ -70,7 +70,6 @@ struct _CS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 
 	Initial initial;
 	Remaining remaining;
-	HSFM_IF_DEBUG(const StateList STATE_LIST);
 };
 
 //------------------------------------------------------------------------------
@@ -133,7 +132,6 @@ struct _CS<TInitialID, TArgs, NIndex, TInitial> {
 #endif
 
 	Initial initial;
-	HSFM_IF_DEBUG(const StateList STATE_LIST);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
