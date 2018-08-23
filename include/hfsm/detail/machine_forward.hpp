@@ -73,12 +73,14 @@ struct _SF final {
 	using Head				= THead;
 	using StateList			= _TL<Head>;
 
-	static constexpr LongIndex REVERSE_DEPTH = 1;
-	static constexpr LongIndex DEEP_WIDTH	 = 0;
-	static constexpr LongIndex STATE_COUNT	 = 1;
-	static constexpr LongIndex FORK_COUNT	 = 0;
-	static constexpr LongIndex PRONG_COUNT	 = 0;
-	static constexpr LongIndex WIDTH		 = 1;
+	static constexpr LongIndex REVERSE_DEPTH	= 1;
+	static constexpr LongIndex DEEP_WIDTH		= 0;
+	static constexpr LongIndex STATE_COUNT		= 1;
+	static constexpr LongIndex COMPOSITE_COUNT	= 0;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= 0;
+	static constexpr LongIndex FORK_COUNT		= 0;
+	static constexpr LongIndex PRONG_COUNT		= 0;
+	static constexpr LongIndex WIDTH			= 1;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -89,11 +91,13 @@ struct _CSF<TInitial, TRemaining...> {
 	using Remaining			= _CSF<TRemaining...>;
 	using StateList			= typename MergeT<typename Initial::StateList, typename Remaining::StateList>::TypeList;
 
-	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr LongIndex DEEP_WIDTH	 = Max<Initial::DEEP_WIDTH, Remaining::DEEP_WIDTH>::VALUE;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
+	static constexpr LongIndex REVERSE_DEPTH	= Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr LongIndex DEEP_WIDTH		= Max<Initial::DEEP_WIDTH,	  Remaining::DEEP_WIDTH>::VALUE;
+	static constexpr LongIndex STATE_COUNT		= Initial::STATE_COUNT		+ Remaining::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= Initial::COMPOSITE_COUNT	+ Remaining::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= Initial::ORTHOGONAL_COUNT + Remaining::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		= Initial::FORK_COUNT		+ Remaining::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		= Initial::PRONG_COUNT		+ Remaining::PRONG_COUNT;
 };
 
 template <typename TInitial>
@@ -101,11 +105,13 @@ struct _CSF<TInitial> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using StateList			= typename Initial::StateList;
 
-	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = Max<1, Initial::DEEP_WIDTH>::VALUE;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
+	static constexpr LongIndex REVERSE_DEPTH	= Initial::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH		= Max<1, Initial::DEEP_WIDTH>::VALUE;
+	static constexpr LongIndex STATE_COUNT		= Initial::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= Initial::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= Initial::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		= Initial::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		= Initial::PRONG_COUNT;
 };
 
 template <typename THead, typename... TSubStates>
@@ -115,12 +121,14 @@ struct _CF final {
 	using SubStates			= _CSF<TSubStates...>;
 	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
 
-	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
-	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
-	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT + sizeof...(TSubStates);
-	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
+	static constexpr LongIndex REVERSE_DEPTH	= SubStates::REVERSE_DEPTH + 1;
+	static constexpr LongIndex DEEP_WIDTH		= SubStates::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		= State::STATE_COUNT + SubStates::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= SubStates::COMPOSITE_COUNT + 1;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= SubStates::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		= SubStates::FORK_COUNT + 1;
+	static constexpr LongIndex PRONG_COUNT		= SubStates::PRONG_COUNT + sizeof...(TSubStates);
+	static constexpr LongIndex WIDTH			= sizeof...(TSubStates);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -131,11 +139,13 @@ struct _OSF<TInitial, TRemaining...> {
 	using Remaining			= _OSF<TRemaining...>;
 	using StateList			= typename MergeT<typename Initial::StateList, typename Remaining::StateList>::TypeList;
 
-	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH  + Remaining::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
+	static constexpr LongIndex REVERSE_DEPTH	= Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr LongIndex DEEP_WIDTH		= Initial::DEEP_WIDTH		+ Remaining::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		= Initial::STATE_COUNT		+ Remaining::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= Initial::COMPOSITE_COUNT	+ Remaining::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= Initial::ORTHOGONAL_COUNT + Remaining::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		= Initial::FORK_COUNT		+ Remaining::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		= Initial::PRONG_COUNT		+ Remaining::PRONG_COUNT;
 };
 
 template <typename TInitial>
@@ -143,27 +153,30 @@ struct _OSF<TInitial> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using StateList			= typename Initial::StateList;
 
-	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
+	static constexpr LongIndex REVERSE_DEPTH	= Initial::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH		= Initial::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		= Initial::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= Initial::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= Initial::ORTHOGONAL_COUNT;
+ 	static constexpr LongIndex FORK_COUNT		= Initial::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		= Initial::PRONG_COUNT;
 };
 
-template <typename THead,
-		  typename... TSubStates>
+template <typename THead, typename... TSubStates>
 struct _OF final {
 	using Head				= THead;
 	using State				= _SF<Head>;
 	using SubStates			= _OSF<TSubStates...>;
 	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
 
-	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
-	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
-	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT;
-	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
+	static constexpr LongIndex REVERSE_DEPTH	= SubStates::REVERSE_DEPTH + 1;
+	static constexpr LongIndex DEEP_WIDTH		= SubStates::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		= State::STATE_COUNT + SubStates::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= SubStates::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= SubStates::ORTHOGONAL_COUNT + 1;
+	static constexpr LongIndex FORK_COUNT		= SubStates::FORK_COUNT + 1;
+	static constexpr LongIndex PRONG_COUNT		= SubStates::PRONG_COUNT;
+	static constexpr LongIndex WIDTH			= sizeof...(TSubStates);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,6 +184,7 @@ struct _OF final {
 template <typename TContext,
 		  typename TConfig,
 		  typename TStateList,
+		  LongIndex NForkCount,
 		  typename TPayloadList,
 		  LongIndex NPlanCapacity>
 struct ArgsT final {
@@ -179,9 +193,10 @@ struct ArgsT final {
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
 
+	static constexpr LongIndex FORK_COUNT	 = NForkCount;
 	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
 
-	using State = _B<Bare<Context, StateList, PayloadList, PLAN_CAPACITY>>;
+	using Empty = _B<Bare<Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>>;
 };
 
 //------------------------------------------------------------------------------
@@ -189,13 +204,13 @@ struct ArgsT final {
 template <StateID, typename, typename>
 struct _S;
 
-template <StateID, typename, typename, typename...>
+template <StateID, ForkID, ForkID, typename, typename, typename...>
 struct _C;
 
-template <StateID, typename, typename, typename...>
+template <StateID, ForkID, ForkID, typename, typename, typename...>
 struct _Q;
 
-template <StateID, typename, typename, typename...>
+template <StateID, ForkID, ForkID, typename, typename, typename...>
 struct _O;
 
 template <typename, typename, typename, typename>
@@ -203,32 +218,32 @@ class _R;
 
 //------------------------------------------------------------------------------
 
-template <StateID, typename...>
+template <StateID, ForkID, ForkID, typename...>
 struct WrapMaterial;
 
-template <StateID TID, typename TA, typename TH>
-struct WrapMaterial<TID, TA, TH> {
-	using Type = _S<TID, TA, TH>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH>
+struct WrapMaterial<NS, NC, NO, TA, TH> {
+	using Type = _S<NS,			TA, TH>;
 };
 
-template <StateID TID, typename TA,				 typename... TS>
-struct WrapMaterial<TID, TA, _CF<void, TS...>> {
-	using Type = _C<TID, TA, typename TA::State, TS...>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA,			  typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _CF<void, TS...>> {
+	using Type = _C<NS, NC, NO, TA, typename TA::Empty, TS...>;
 };
 
-template <StateID TID, typename TA, typename TH, typename... TS>
-struct WrapMaterial<TID, TA, _CF<TH, TS...>> {
-	using Type = _Q<TID, TA, TH,				 TS...>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _CF<TH, TS...>> {
+	using Type = _Q<NS, NC, NO, TA, TH,					TS...>;
 };
 
-template <StateID TID, typename TA,				 typename... TS>
-struct WrapMaterial<TID, TA, _OF<void, TS...>> {
-	using Type = _O<TID, TA, typename TA::State, TS...>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA,			  typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _OF<void, TS...>> {
+	using Type = _O<NS, NC, NO, TA, typename TA::Empty, TS...>;
 };
 
-template <StateID TID, typename TA, typename TH, typename... TS>
-struct WrapMaterial<TID, TA, _OF<TH, TS...>> {
-	using Type = _O<TID, TA, TH,				 TS...>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _OF<TH, TS...>> {
+	using Type = _O<NS, NC, NO, TA, TH,					TS...>;
 };
 
 //------------------------------------------------------------------------------
@@ -249,15 +264,17 @@ struct _RF final {
 	static constexpr LongIndex PLAN_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
 													   Config::MAX_PLAN_TASKS : Forward::PRONG_COUNT * 2;
 
-	using StateList			= typename Forward::StateList;
-	using PlanControl		= PlanControlT<Context, StateList, PLAN_CAPACITY>;
-	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT<Context, StateList, PayloadList, PLAN_CAPACITY>;
-
 	using Instance			= _R<Context, Config, PayloadList, Forward>;
 
-	using Bare				= ::hfsm::detail::Bare <Context, StateList, PayloadList, PLAN_CAPACITY>;
-	using State				= ::hfsm::detail::State<Context, StateList, PayloadList, PLAN_CAPACITY>;
+	static constexpr LongIndex FORK_COUNT		 = Forward::FORK_COUNT;
+
+	using StateList			= typename Forward::StateList;
+	using PlanControl		= PlanControlT		   <Context, StateList, FORK_COUNT, PLAN_CAPACITY>;
+	using TransitionControl	= TransitionControlT   <Context, StateList, FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT		   <Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
+
+	using Bare				= ::hfsm::detail::Bare <Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
+	using State				= ::hfsm::detail::State<Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;

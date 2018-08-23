@@ -60,8 +60,12 @@
 
 #ifdef _DEBUG
 	#define HSFM_IF_DEBUG(...)		__VA_ARGS__
+	#define HSFM_UNLESS_DEBUG(...)
+	#define HFSM_DEBUG_OR(y, n)		x
 #else
 	#define HSFM_IF_DEBUG(...)
+	#define HSFM_UNLESS_DEBUG(...)	__VA_ARGS__
+	#define HFSM_DEBUG_OR(y, n)		y
 #endif
 
 #ifndef NDEBUG
@@ -70,14 +74,18 @@
 	#define HSFM_IF_ASSERT(...)
 #endif
 
-//------------------------------------------------------------------------------
-
 namespace hfsm {
+
+//------------------------------------------------------------------------------
 
 using ShortIndex = uint8_t;
 static constexpr ShortIndex	INVALID_SHORT_INDEX = UINT8_MAX;
 
-// TEMP
+using ForkID	 = ShortIndex;
+static constexpr ForkID		INVALID_FORK_ID	= INVALID_SHORT_INDEX;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 using LongIndex  = uint16_t;
 static constexpr LongIndex	INVALID_LONG_INDEX	= UINT16_MAX;
 
@@ -193,11 +201,11 @@ public:
 
 	inline Iterator& operator ++();
 
-	inline		 Item& operator *()		  { return _container[_cursor]; }
-	inline const Item& operator *() const { return _container[_cursor]; }
+	inline		 Item& operator *()		  { return  _container[_cursor]; }
+	inline const Item& operator *() const { return  _container[_cursor]; }
 
-	inline		 Item* operator->()		  { return &operator *();		}
-	inline const Item* operator->() const { return &operator *();		}
+	inline		 Item* operator->()		  { return &_container[_cursor]; }
+	inline const Item* operator->() const { return &_container[_cursor]; }
 
 private:
 	Container& _container;
@@ -295,7 +303,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma pack(push, 2)
+#pragma pack(push, 4)
 
 template <typename T>
 class ArrayView {
@@ -521,6 +529,208 @@ StaticArray<T, NCapacity>::operator[] (const LongIndex i) const {
 	assert(0 <= i && i < CAPACITY);
 
 	return _items[i];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}
+
+namespace hfsm {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+class BitArray;
+
+class Bit {
+	friend class BitArray;
+
+private:
+	inline Bit(BitArray& array,
+			   const ShortIndex index)
+		: _array(array)
+		, _index(index)
+	{}
+
+public:
+	inline explicit operator bool() const;
+	inline void operator = (const bool value);
+
+private:
+	BitArray& _array;
+	const ShortIndex _index;
+};
+
+//------------------------------------------------------------------------------
+
+class ConstBit {
+	friend class BitArray;
+
+private:
+	inline ConstBit(const BitArray& array,
+					const ShortIndex index)
+		: _array(array)
+		, _index(index)
+	{}
+
+public:
+	inline explicit operator bool() const;
+
+private:
+	const BitArray& _array;
+	const ShortIndex _index;
+};
+
+//------------------------------------------------------------------------------
+
+#pragma pack(push, 1)
+
+class BitArray {
+	friend class Bit;
+	friend class ConstBit;
+
+protected:
+	using StorageUnit	= uint8_t;
+	using Storage		= StorageUnit*;
+
+	static constexpr ShortIndex STORAGE_UNIT_SIZE	= sizeof(StorageUnit) * 8;
+
+	static constexpr ShortIndex ITEM_ALIGNMENT		= alignof(StorageUnit[2]);
+	static constexpr ShortIndex VIEW_SIZE			= 1;
+	static constexpr ShortIndex OFFSET				= (VIEW_SIZE + ITEM_ALIGNMENT - 1) / ITEM_ALIGNMENT * ITEM_ALIGNMENT;
+
+protected:
+	inline BitArray(const ShortIndex capacity_)
+		: capacity{capacity_}
+	{
+		clear();
+	}
+
+public:
+	inline void clear();
+
+	inline explicit operator bool() const;
+
+	inline		Bit operator[] (const ShortIndex i)			{ return	  Bit{*this, i}; }
+	inline ConstBit operator[] (const ShortIndex i) const	{ return ConstBit{*this, i}; }
+
+private:
+	inline bool get(const ShortIndex i) const;
+	inline void set(const ShortIndex i, const bool value);
+
+	inline		 StorageUnit* storage()			{ return reinterpret_cast<		StorageUnit*>(((uintptr_t)this) + OFFSET);	}
+	inline const StorageUnit* storage() const	{ return reinterpret_cast<const StorageUnit*>(((uintptr_t)this) + OFFSET);	}
+
+	inline ShortIndex storageUnitCount() const	{ return (capacity + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;			}
+
+public:
+	const ShortIndex capacity;
+};
+
+#pragma pack(pop)
+
+//------------------------------------------------------------------------------
+
+template <ShortIndex NCapacity>
+class BitArrayT final
+	: public BitArray
+{
+	static constexpr ShortIndex CAPACITY			= NCapacity;
+	static constexpr ShortIndex STORAGE_UNIT_COUNT	= (CAPACITY + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;
+
+public:
+	inline BitArrayT()
+		: BitArray{CAPACITY}
+	{}
+
+private:
+	StorageUnit _storage[STORAGE_UNIT_COUNT];
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}
+
+namespace hfsm {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+Bit::operator bool() const {
+	return _array.get(_index);
+}
+
+//------------------------------------------------------------------------------
+
+void
+Bit::operator = (const bool value) {
+	_array.set(_index, value);
+}
+
+//------------------------------------------------------------------------------
+
+ConstBit::operator bool() const {
+	return _array.get(_index);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void
+BitArray::clear() {
+	StorageUnit* const s = storage();
+
+	const ShortIndex count = storageUnitCount();
+	for (ShortIndex i = 0; i < count; ++i)
+		s[i] = 0;
+}
+
+//------------------------------------------------------------------------------
+
+BitArray::operator bool() const {
+	StorageUnit result = 0;
+
+	const StorageUnit* const s = storage();
+
+	const ShortIndex count = storageUnitCount();
+	for (ShortIndex i = 0; i < count; ++i)
+		result |= s[i];
+
+	return result != 0;
+}
+
+//------------------------------------------------------------------------------
+
+bool
+BitArray::get(const ShortIndex i) const {
+	assert(i < capacity);
+
+	const auto d = std::div(i, sizeof(StorageUnit) * 8);
+
+	const StorageUnit& unit = storage()[d.quot];
+	const ShortIndex mask = 1 << d.rem;
+
+	return (unit & mask) != 0;
+}
+
+//------------------------------------------------------------------------------
+
+void
+BitArray::set(const ShortIndex i, const bool value) {
+	assert(i < capacity);
+
+	const auto d = std::div(i, sizeof(StorageUnit) * 8);
+
+	StorageUnit& unit = storage()[d.quot];
+
+	if (value) {
+		const ShortIndex mask = 1 << d.rem;
+		unit |= mask;
+	} else {
+		const ShortIndex mask = ~(1 << d.rem);
+		unit &= mask;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -765,80 +975,105 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex, typename...>
-struct TypeListBuilder;
+template<LongIndex N>
+struct IndexConstant {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <LongIndex NIndex, typename TFirst, typename... TRest>
-struct TypeListBuilder<NIndex, TFirst, TRest...>
-	: TypeListBuilder<NIndex + 1, TRest...>
-{
-	static constexpr LongIndex INDEX = NIndex;
-
-	static_assert(INDEX < (1 << 8 * sizeof(LongIndex)), "Too many types");
-
-	using Type = TFirst;
-	using Base = TypeListBuilder<INDEX + 1, TRest...>;
-
-	template <typename T>
-	static constexpr LongIndex index() {
-		return std::is_same<T, Type>::value ? INDEX : Base::template index<T>();
-	}
+template<LongIndex... Ns>
+struct IndexSequence {
+	typedef IndexSequence<Ns...> Type;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <LongIndex NIndex, typename TFirst>
-struct TypeListBuilder<NIndex, TFirst> {
-	static constexpr LongIndex INDEX = NIndex;
+template<typename, typename>
+struct MakeIndexSequence_Impl {};
 
-	static_assert(NIndex < (1 << 8 * sizeof(LongIndex)), "Too many types");
+template<LongIndex N, LongIndex... Ns>
+struct MakeIndexSequence_Impl<IndexConstant<N>,
+							  IndexSequence<Ns...>>
+	: MakeIndexSequence_Impl<IndexConstant<N - 1>,
+							 IndexSequence<N - 1, Ns...>>
+{};
 
-	using Type = TFirst;
+template<LongIndex... Ns>
+struct MakeIndexSequence_Impl<IndexConstant<0>,
+							  IndexSequence<Ns...>>
+	: IndexSequence<Ns...>
+{};
 
-	template <typename T>
-	static constexpr LongIndex index() {
-		return std::is_same<T, Type>::value ? INDEX : INVALID_LONG_INDEX;
-	}
-};
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template<LongIndex N>
+using MakeIndexSequence = typename MakeIndexSequence_Impl<IndexConstant<N>,
+														  IndexSequence<>>::Type;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template<class... Ts>
+using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+struct TypeList_EntryT {};
+
+template <typename T, std::size_t N>
+struct TypeList_EntryN {};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename...>
+struct TypeList_Impl;
+
+template <LongIndex... Ns, typename... Ts>
+struct TypeList_Impl<IndexSequence<Ns...>, Ts...>
+	: TypeList_EntryT<Ts>...
+	, TypeList_EntryN<Ts, Ns>...
+{
+	template <typename T, std::size_t N>
+	static constexpr LongIndex select(TypeList_EntryN<T, N>) { return (LongIndex) N; }
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename...>
 class VariantT;
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 template <typename... Ts>
 struct _TL
-	: TypeListBuilder<0, Ts...>
+	: private TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
-	using Base = TypeListBuilder<0, Ts...>;
+	using Base = TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
 	using Container = VariantT<Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr LongIndex index() {
-		return Base::template index<T>();
+	static constexpr bool contains() { return std::is_base_of<TypeList_EntryT<T>, _TL>::value; }
+
+	template <typename T>
+	static constexpr
+	typename std::enable_if< std::is_base_of<TypeList_EntryT<T>, _TL>::value, LongIndex>::type
+	index() {
+		return Base::template select<T>(_TL{});
 	}
 
 	template <typename T>
-	static constexpr bool contains() {
-		return Base::template index<T>() != INVALID_LONG_INDEX;
+	static constexpr
+	typename std::enable_if<!std::is_base_of<TypeList_EntryT<T>, _TL>::value, LongIndex>::type
+	index() {
+		return INVALID_LONG_INDEX;
 	}
 };
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <>
 struct _TL<>
 	: _TL<void>
 {};
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+//------------------------------------------------------------------------------
 
 template <typename...>
 struct MergeT;
@@ -848,7 +1083,7 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 	using TypeList = _TL<Ts1..., Ts2...>;
 };
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 1)
 
@@ -908,8 +1143,6 @@ private:
 }
 }
 
-
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_STRUCTURE_REPORT
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -997,10 +1230,7 @@ transitionName(const ::hfsm::Transition transition) {
 
 }
 
-#endif
-
-
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 
 namespace hfsm {
 
@@ -1038,12 +1268,31 @@ using LoggerInterface = void;
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	#define HFSM_IF_LOGGER(...)		__VA_ARGS__
 	#define HFSM_LOGGER_OR(y, n)	y
 #else
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(y, n)	n
+#endif
+
+#if defined HFSM_FORCE_DEBUG_LOG
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			logger->recordMethod(STATE_ID, ID);
+	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			logger->recordMethod(STATE_ID, ID);
+#elif defined HFSM_ENABLE_LOG_INTERFACE
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			log<decltype(METHOD), ID>(*logger);
+	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			State::template log<decltype(METHOD), ID>(*logger);
+#else
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)
+	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1072,14 +1321,11 @@ struct Status {
 	inline Status(const bool success_ = false,
 				  const bool failure_ = false,
 				  const bool innerTransition_ = false,
-				  const bool outerTransition_ = false)
-		: success(success_)
-		, failure(failure_)
-		, innerTransition(innerTransition_)
-		, outerTransition(outerTransition_)
-	{}
+				  const bool outerTransition_ = false);
 
 	inline explicit operator bool() const { return success || failure || innerTransition || outerTransition; }
+
+	inline void clear();
 };
 
 inline Status
@@ -1114,10 +1360,11 @@ struct TaskTransition {
 		, next(INVALID_LONG_INDEX)
 	{}
 
+	// TODO: add payload
 	StateID origin		= INVALID_STATE_ID;
 	StateID destination	= INVALID_STATE_ID;
-	// TODO: add payload
 
+	LongIndex prev		= INVALID_LONG_INDEX;
 	LongIndex next		= INVALID_LONG_INDEX;
 };
 
@@ -1125,41 +1372,67 @@ struct TaskTransition {
 
 //------------------------------------------------------------------------------
 
-template <typename, typename, LongIndex>
+template <typename, typename, LongIndex, LongIndex>
 class PlanControlT;
 
-template <typename, typename, typename, LongIndex>
+template <typename, typename, LongIndex, typename, LongIndex>
 class FullControlT;
 
 template <typename TStateList, LongIndex NPlanCapacity>
 class PlanT {
-	template <typename, typename, LongIndex>
+	template <typename, typename, LongIndex, LongIndex>
 	friend class PlanControlT;
 
-	template <typename, typename, typename, LongIndex>
+	template <typename, typename, LongIndex, typename, LongIndex>
 	friend class FullControlT;
 
 	using StateList			= TStateList;
 
-	static constexpr LongIndex STATE_COUNT	 = StateList::SIZE;
-	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
+	static constexpr LongIndex CAPACITY		= NPlanCapacity;
+	static constexpr LongIndex STATE_COUNT	= StateList::SIZE;
 
-	using Tasks				= List<TaskTransition, PLAN_CAPACITY>;
+	using Tasks				= List<TaskTransition, CAPACITY>;
 	using StateTasks		= Array<TaskIndices,   STATE_COUNT>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+public:
+	struct Iterator {
+		inline Iterator(PlanT& plan);
+
+		inline explicit operator bool() const;
+
+		inline void operator ++();
+
+		inline		 TaskTransition& operator  *()		 { return  _plan._tasks[_curr]; }
+		inline const TaskTransition& operator  *() const { return  _plan._tasks[_curr]; }
+
+		inline		 TaskTransition* operator ->()		 { return &_plan._tasks[_curr]; }
+		inline const TaskTransition* operator ->() const { return &_plan._tasks[_curr]; }
+
+		inline void remove();
+
+		inline LongIndex next() const;
+
+		PlanT& _plan;
+		LongIndex _curr;
+		LongIndex _next;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
 	inline PlanT(Tasks& tasks,
 				 StateTasks& stateTasks,
-				 const StateID plannerId)
-		: _tasks(tasks)
-		, _taskIndices(stateTasks[plannerId])
-	{}
+				 const StateID plannerId);
 
 	template <typename T>
 	static constexpr LongIndex
 	stateId()	{ return StateList::template index<T>();	}
 
 public:
+	inline explicit operator bool() const;
+
 	inline void clear();
 
 	void add(const StateID origin, const StateID destination);
@@ -1167,9 +1440,9 @@ public:
 	template <typename TOrigin, typename TDestination>
 	inline void add();
 
-	const TaskTransition* next() const;
+	void remove(const LongIndex task);
 
-	void advance();
+	inline Iterator begin()	{ return Iterator{*this}; }
 
 private:
 	Tasks& _tasks;
@@ -1186,19 +1459,120 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+Status::Status(const bool success_,
+			   const bool failure_,
+			   const bool innerTransition_,
+			   const bool outerTransition_)
+		: success{success_}
+		, failure{failure_}
+		, innerTransition{innerTransition_}
+		, outerTransition{outerTransition_}
+	{}
+
+//------------------------------------------------------------------------------
+
+void
+Status::clear() {
+	success = false;
+	failure = false;
+	innerTransition = false;
+	outerTransition = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TStateList, LongIndex NPlanCapacity>
+PlanT<TStateList, NPlanCapacity>::Iterator::Iterator(PlanT& plan)
+	: _plan{plan}
+	, _curr{plan._taskIndices.first}
+{
+	_next = next();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TStateList, LongIndex NPlanCapacity>
+PlanT<TStateList, NPlanCapacity>::Iterator::operator bool() const {
+	assert(_curr < PlanT::CAPACITY || _curr == INVALID_LONG_INDEX);
+
+	return _curr < PlanT::CAPACITY;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TStateList, LongIndex NPlanCapacity>
+void
+PlanT<TStateList, NPlanCapacity>::Iterator::operator ++() {
+	_curr = _next;
+	_next = next();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TStateList, LongIndex NPlanCapacity>
+void
+PlanT<TStateList, NPlanCapacity>::Iterator::remove() {
+	_plan.remove(_curr);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TStateList, LongIndex NPlanCapacity>
+LongIndex
+PlanT<TStateList, NPlanCapacity>::Iterator::next() const {
+	if (_curr < PlanT::CAPACITY) {
+		const TaskTransition& task = _plan._tasks[_curr];
+
+		return task.next;
+	} else {
+		assert(_curr == INVALID_LONG_INDEX);
+
+		return INVALID_LONG_INDEX;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TStateList, LongIndex NPlanCapacity>
+PlanT<TStateList, NPlanCapacity>::PlanT(Tasks& tasks,
+										StateTasks& stateTasks,
+										const StateID plannerId)
+	: _tasks{tasks}
+	, _taskIndices{stateTasks[plannerId]}
+{}
+
+//------------------------------------------------------------------------------
+
+template <typename TStateList, LongIndex NPlanCapacity>
+PlanT<TStateList, NPlanCapacity>::operator bool() const {
+	if (_taskIndices.first < PlanT::CAPACITY) {
+		assert(_taskIndices.last < PlanT::CAPACITY);
+		return true;
+	} else {
+		assert(_taskIndices.last == INVALID_LONG_INDEX);
+		return false;
+	}
+}
+
+//------------------------------------------------------------------------------
+
 template <typename TStateList, LongIndex NPlanCapacity>
 void
 PlanT<TStateList, NPlanCapacity>::clear() {
-	if (_taskIndices.first < _tasks.CAPACITY) {
-		assert(_taskIndices.last < _tasks.CAPACITY);
+	if (_taskIndices.first < Tasks::CAPACITY) {
+		assert(_taskIndices.last < Tasks::CAPACITY);
 
 		for (LongIndex index = _taskIndices.first;
 			 index != INVALID_LONG_INDEX;
 			 )
 		{
-			assert(index < _tasks.CAPACITY);
+			assert(index < Tasks::CAPACITY);
 
 			const auto& task = _tasks[index];
+			assert(index == _taskIndices.first ?
+				   task.prev == INVALID_LONG_INDEX :
+				   task.prev <  Tasks::CAPACITY);
+
 			const LongIndex next = task.next;
 
 			_tasks.remove(index);
@@ -1222,11 +1596,14 @@ PlanT<TStateList, NPlanCapacity>::add(const StateID origin,
 {
 	const auto index = _tasks.emplace(origin, destination);
 
-	if (_taskIndices.first < _tasks.CAPACITY) {
-		assert(_taskIndices.last < _tasks.CAPACITY);
+	if (_taskIndices.first < Tasks::CAPACITY) {
+		assert(_taskIndices.last < Tasks::CAPACITY);
 
-		auto& last = _tasks[_taskIndices.last];
+		auto& last  = _tasks[_taskIndices.last];
 		last.next = index;
+
+		auto& next = _tasks[index];
+		next.prev  = _taskIndices.last;
 
 		_taskIndices.last = index;
 	} else {
@@ -1236,11 +1613,9 @@ PlanT<TStateList, NPlanCapacity>::add(const StateID origin,
 		_taskIndices.first = index;
 		_taskIndices.last  = index;
 	}
-
-	_taskIndices.last = index;
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TStateList, LongIndex NPlanCapacity>
 template <typename TOrigin, typename TDestination>
@@ -1255,25 +1630,32 @@ PlanT<TStateList, NPlanCapacity>::add() {
 //------------------------------------------------------------------------------
 
 template <typename TStateList, LongIndex NPlanCapacity>
-const TaskTransition*
-PlanT<TStateList, NPlanCapacity>::next() const {
-	if (_taskIndices.first < _tasks.CAPACITY) {
-		assert(_taskIndices.last < _tasks.CAPACITY);
-
-		return &_tasks[_taskIndices.first];
-	} else {
-		assert(_taskIndices.first == INVALID_LONG_INDEX &&
-			   _taskIndices.last  == INVALID_LONG_INDEX);
-
-		return nullptr;
-	}
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TStateList, LongIndex NPlanCapacity>
 void
-PlanT<TStateList, NPlanCapacity>::advance() {
+PlanT<TStateList, NPlanCapacity>::remove(const LongIndex task) {
+	assert(_taskIndices.first < Tasks::CAPACITY &&
+		   _taskIndices.last  < Tasks::CAPACITY);
+
+	assert(task < Tasks::CAPACITY);
+
+	const TaskTransition& curr = _tasks[task];
+
+	if (curr.prev < Tasks::CAPACITY) {
+		TaskTransition& prev = _tasks[curr.prev];
+		prev.next = curr.next;
+	} else {
+		assert(_taskIndices.first == task);
+		_taskIndices.first = curr.next;
+	}
+
+	if (curr.next < Tasks::CAPACITY) {
+		TaskTransition& next = _tasks[curr.next];
+		next.prev = curr.prev;
+	} else {
+		assert(_taskIndices.last == task);
+		_taskIndices.last = curr.prev;
+	}
+
+	_tasks.remove(task);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1286,65 +1668,255 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+#pragma pack(push, 1)
+
+struct alignas(2 * sizeof(ShortIndex)) Parent {
+	inline Parent() = default;
+
+	inline Parent(const ShortIndex fork_,
+				  const ShortIndex prong_)
+		: fork(fork_)
+		, prong(prong_)
+	{}
+
+	inline explicit operator bool() const {
+		return fork  != INVALID_SHORT_INDEX &&
+			   prong != INVALID_SHORT_INDEX;
+	}
+
+	ShortIndex fork  = INVALID_SHORT_INDEX;
+	ShortIndex prong = INVALID_SHORT_INDEX;
+};
+
+#pragma pack(pop)
+
+using Parents = ArrayView<Parent>;
+
+////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _DEBUG
+#pragma pack(push, 1)
+#endif
+
+struct HSFM_UNLESS_DEBUG(alignas(4 * sizeof(ShortIndex))) Fork {
+	inline Fork(const ShortIndex self_,
+				const Parent parent,
+				Parents& forkParents,
+				const ShortIndex default_
+				HSFM_IF_DEBUG(, std::type_index type))
+		: self(self_)
+		, active(default_)
+		, resumable(default_)
+		HSFM_IF_DEBUG(, TYPE{type})
+	{
+		forkParents[self_] = parent;
+	}
+
+	ShortIndex self;
+	ShortIndex active;
+	ShortIndex resumable;
+	ShortIndex requested = INVALID_SHORT_INDEX;
+	HSFM_IF_DEBUG(const std::type_index TYPE);
+};
+
+#ifndef _DEBUG
+#pragma pack(pop)
+#endif
+
+using ForkPointers = ArrayView<Fork*>;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <LongIndex NStateCount>
+using ParentsT = Array<Parent, NStateCount>;
+
+template <LongIndex NForkCount>
+using ForkPointersT = Array<Fork*, NForkCount>;
+
+template <LongIndex NStateCount, LongIndex NForkCount>
+struct RegistryT {
+	static constexpr LongIndex STATE_COUNT = NStateCount;
+	static constexpr LongIndex FORK_COUNT  = NForkCount;
+
+	using StateParents = ParentsT<STATE_COUNT>;
+	using ForkParents  = ParentsT<FORK_COUNT>;
+	using ForkPointers = ForkPointersT<FORK_COUNT>;
+
+	StateParents stateParents;
+	ForkParents  forkParents;
+	ForkPointers forkPointers;
+};
+
+//------------------------------------------------------------------------------
+
+template <LongIndex NStateCount, LongIndex NForkCount>
+bool isActive(const RegistryT<NStateCount, NForkCount>& registry,
+			  const StateID stateId);
+
+template <LongIndex NStateCount, LongIndex NForkCount>
+bool isResumable(const RegistryT<NStateCount, NForkCount>& registry,
+				 const StateID stateId);
+
+template <LongIndex NStateCount, LongIndex NForkCount>
+inline
+bool isScheduled(const RegistryT<NStateCount, NForkCount>& registry,
+				 const StateID stateId)
+{
+	return isResumable(registry, stateId);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}
+
+
+namespace hfsm {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <LongIndex NStateCount, LongIndex NForkCount>
+bool
+isActive(const RegistryT<NStateCount, NForkCount>& registry,
+		 const StateID stateId)
+{
+	constexpr LongIndex STATE_COUNT = NStateCount;
+	assert(stateId < STATE_COUNT);
+
+	if (stateId < STATE_COUNT)
+		for (auto parent = registry.stateParents[stateId];
+			 parent;
+			 parent = registry.forkParents[parent.fork])
+		{
+			const auto& fork = *registry.forkPointers[parent.fork];
+
+			if (fork.active != STATE_COUNT)
+				return parent.prong == fork.active;
+		}
+
+	return false;
+}
+
+//------------------------------------------------------------------------------
+
+template <LongIndex NStateCount, LongIndex NForkCount>
+bool
+isResumable(const RegistryT<NStateCount, NForkCount>& registry,
+			const StateID stateId)
+{
+	constexpr LongIndex STATE_COUNT = NStateCount;
+	assert(stateId < STATE_COUNT);
+
+	if (stateId < STATE_COUNT)
+		for (auto parent = registry.stateParents[stateId];
+			 parent;
+			 parent = registry.forkParents[parent.fork])
+		{
+			const auto& fork = *registry.forkPointers[parent.fork];
+
+			if (fork.active != STATE_COUNT)
+				return parent.prong == fork.resumable;
+		}
+
+	return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}
+
+namespace hfsm {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename, typename, LongIndex>
 struct ControlOriginT;
 
-template <typename TContext>
+template <typename TContext, typename TStateList, LongIndex NForkCount>
 class ControlT {
 	template <StateID, typename, typename>
 	friend struct _S;
 
-	template <StateID, typename, typename>
-	friend struct _P;
-
-	template <StateID, typename, typename, typename...>
+	template <StateID, ForkID, ForkID, typename, typename, typename...>
 	friend struct _C;
 
-	template <StateID, typename, typename, typename...>
+	template <StateID, ForkID, ForkID, typename, typename, typename...>
 	friend struct _Q;
 
-	template <StateID, typename, typename, typename...>
+	template <StateID, ForkID, ForkID, typename, typename, typename...>
 	friend struct _O;
 
 	template <typename, typename, typename, typename>
 	friend class _R;
 
-	template <typename>
+	template <typename, typename, LongIndex>
 	friend struct ControlOriginT;
 
+	using Context		= TContext;
+	using StateList		= TStateList;
+
 protected:
-	using Context = TContext;
+	static constexpr LongIndex STATE_COUNT	= StateList::SIZE;
+	static constexpr LongIndex FORK_COUNT	= NForkCount;
+
+	using Registry		= RegistryT<STATE_COUNT, FORK_COUNT>;
 
 	inline ControlT(Context& context,
+					const Registry& registry,
 					LoggerInterface* const HFSM_IF_LOGGER(logger))
 		: _context(context)
+		, _registry(registry)
 		HFSM_IF_LOGGER(, _logger(logger))
 	{}
 
 	inline void setOrigin  (const StateID id);
 	inline void resetOrigin(const StateID id);
 
+	template <typename T>
+	static constexpr LongIndex
+	stateId()												{ return StateList::template index<T>();			}
+
 public:
-	inline Context& _()									{ return _context;		}
-	inline Context& context()							{ return _context;		}
+	inline Context& _()										{ return _context;									}
+	inline Context& context()								{ return _context;									}
+
+	inline bool isActive   (const StateID stateId) const	{ return ::hfsm::detail::isActive	(_registry, stateId);	}
+	inline bool isResumable(const StateID stateId) const	{ return ::hfsm::detail::isResumable(_registry, stateId);	}
+
+	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
+
+	template <typename TState>
+	inline bool isActive() const							{ return isActive	(stateId<TState>());			}
+
+	template <typename TState>
+	inline bool isResumable() const							{ return isResumable(stateId<TState>());			}
+
+	template <typename TState>
+	inline bool isScheduled() const							{ return isResumable(stateId<TState>());			}
 
 private:
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	inline LoggerInterface* logger()					{ return _logger;		}
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+	inline LoggerInterface* logger()						{ return _logger;									}
 #endif
 
 protected:
 	Context& _context;
+	const Registry& _registry;
 	StateID _originId = INVALID_STATE_ID;
 	HFSM_IF_LOGGER(LoggerInterface* _logger);
 };
 
 //------------------------------------------------------------------------------
 
-template <typename TContext>
+template <typename TContext, typename TStateList, LongIndex NForkCount>
 struct ControlOriginT {
-	using Context = TContext;
-	using Control = ControlT<Context>;
+	using Context		= TContext;
+	using StateList		= TStateList;
+
+	using Control		= ControlT<Context, StateList, NForkCount>;
 
 	inline ControlOriginT(Control& control,
 						  const StateID id);
@@ -1357,17 +1929,20 @@ struct ControlOriginT {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext, typename TStateList, LongIndex NPlanCapacity>
+template <typename TContext, typename TStateList, LongIndex NForkCount, LongIndex NPlanCapacity>
 class PlanControlT final
-	: public ControlT<TContext>
+	: public ControlT<TContext, TStateList, NForkCount>
 {
 	using Context			= TContext;
 	using StateList			= TStateList;
 
-	static constexpr LongIndex STATE_COUNT = StateList::SIZE;
-	static constexpr LongIndex PLAN_CAPACITY  = NPlanCapacity;
+	static constexpr LongIndex FORK_COUNT	 = NForkCount;
+	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
 
-	using Control			= ControlT<Context>;
+public:
+	using Control			= ControlT<Context, StateList, FORK_COUNT>;
+	using Registry			= typename Control::Registry;
+
 	using Plan				= PlanT<StateList, PLAN_CAPACITY>;
 	using Tasks				= typename Plan::Tasks;
 	using StateTasks		= typename Plan::StateTasks;
@@ -1377,10 +1952,11 @@ class PlanControlT final
 
 private:
 	inline PlanControlT(Context& context,
+						const Registry& registry,
 						Tasks& tasks,
 						StateTasks& stateTasks,
 						LoggerInterface* const logger)
-		: Control(context, logger)
+		: Control(context, registry, logger)
 		, _tasks(tasks)
 		, _stateTasks(stateTasks)
 	{}
@@ -1390,8 +1966,12 @@ private:
 	stateId()										{ return StateList::template index<T>();					}
 
 public:
-	inline Plan plan()								{ return Plan(_tasks, _stateTasks, Control::_originId);		}
-	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, Control::_originId);		}
+	using Control::isActive;
+	using Control::isResumable;
+	using Control::isScheduled;
+
+	inline Plan plan()								{ return Plan(_tasks, _stateTasks, _originId);				}
+	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, _originId);				}
 
 	inline Plan plan(const StateID stateId)			{ return Plan(_tasks, _stateTasks, stateId);				}
 	inline Plan plan(const StateID stateId) const	{ return Plan(_tasks, _stateTasks, stateId);				}
@@ -1400,9 +1980,11 @@ public:
 	inline Plan plan()								{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
 
 	template <typename TPlanner>
-	inline Plan plan()						const	{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
 
 private:
+	using Control::_originId;
+
 	Tasks& _tasks;
 	StateTasks& _stateTasks;
 };
@@ -1460,22 +2042,26 @@ using TransitionQueueT = ArrayView<TransitionT<TPayloadList>>;
 
 //------------------------------------------------------------------------------
 
-template <typename, typename, typename>
+template <typename, typename, LongIndex, typename>
 struct ControlLockT;
 
-template <typename, typename, typename>
+template <typename, typename, LongIndex, typename>
 struct ControlRegionT;
 
-template <typename TContext, typename TStateList, typename TPayloadList>
+template <typename TContext, typename TStateList, LongIndex NForkCount, typename TPayloadList>
 class TransitionControlT
-	: public ControlT<TContext>
+	: public ControlT<TContext, TStateList, NForkCount>
 {
 protected:
 	using Context			= TContext;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
 
-	using Control			= ControlT<Context>;
+	static constexpr LongIndex FORK_COUNT	 = NForkCount;
+
+	using Control			= ControlT<Context, StateList, FORK_COUNT>;
+	using Registry			= typename Control::Registry;
+
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
 	using TransitionQueue	= TransitionQueueT<TPayloadList>;
@@ -1483,27 +2069,29 @@ protected:
 	template <StateID, typename, typename>
 	friend struct _S;
 
-	template <StateID, typename, typename>
-	friend struct _P;
-
 	template <typename, typename, typename, typename>
 	friend class _R;
 
-	template <typename, typename, typename>
+	template <typename, typename, LongIndex, typename>
 	friend struct ControlLockT;
 
-	template <typename, typename, typename>
+	template <typename, typename, LongIndex, typename>
 	friend struct ControlRegionT;
 
 protected:
 	inline TransitionControlT(Context& context,
+							  const Registry& registry,
 							  TransitionQueue& requests,
 							  LoggerInterface* const logger)
-		: Control(context, logger)
+		: Control(context, registry, logger)
 		, _requests(requests)
 	{}
 
 public:
+	using Control::isActive;
+	using Control::isResumable;
+	using Control::isScheduled;
+
 	template <typename T>
 	static constexpr LongIndex
 	stateId()						{ return StateList::template index<T>();	}
@@ -1528,7 +2116,9 @@ private:
 	inline void setRegion  (const StateID id, const LongIndex size);
 	inline void resetRegion(const StateID id, const LongIndex size);
 
-private:
+protected:
+	using Control::_originId;
+
 	TransitionQueue& _requests;
 	Status _status;
 	bool _locked = false;
@@ -1538,12 +2128,15 @@ private:
 
 //------------------------------------------------------------------------------
 
-template <typename TContext, typename TStateList, typename TPayloadList>
+template <typename TContext, typename TStateList, LongIndex NForkCount, typename TPayloadList>
 struct ControlLockT {
 	using Context			= TContext;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using TransitionControl = TransitionControlT<Context, StateList, PayloadList>;
+
+	static constexpr LongIndex FORK_COUNT	 = NForkCount;
+
+	using TransitionControl = TransitionControlT<Context, StateList, FORK_COUNT, PayloadList>;
 
 	inline ControlLockT(TransitionControl& control);
 	inline ~ControlLockT();
@@ -1553,12 +2146,15 @@ struct ControlLockT {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TContext, typename TStateList, typename TPayloadList>
+template <typename TContext, typename TStateList, LongIndex NForkCount, typename TPayloadList>
 struct ControlRegionT {
 	using Context			= TContext;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
-	using TransitionControl = TransitionControlT<Context, StateList, PayloadList>;
+
+	static constexpr LongIndex FORK_COUNT	 = NForkCount;
+
+	using TransitionControl = TransitionControlT<Context, StateList, FORK_COUNT, PayloadList>;
 
 	inline ControlRegionT(TransitionControl& control,
 						  const StateID id,
@@ -1573,18 +2169,25 @@ struct ControlRegionT {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext, typename TStateList, typename TPayloadList, LongIndex NPlanCapacity>
+template <typename TContext,
+		  typename TStateList,
+		  LongIndex NForkCount,
+		  typename TPayloadList,
+		  LongIndex NPlanCapacity>
 class FullControlT final
-	: public TransitionControlT<TContext, TStateList, TPayloadList>
+	: public TransitionControlT<TContext, TStateList, NForkCount, TPayloadList>
 {
 	using Context			= TContext;
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
 
-	static constexpr LongIndex STATE_COUNT = StateList::SIZE;
-	static constexpr LongIndex PLAN_CAPACITY  = NPlanCapacity;
+	static constexpr LongIndex FORK_COUNT		= NForkCount;
+	static constexpr LongIndex PLAN_CAPACITY	= NPlanCapacity;
 
-	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
+	using Control			= ControlT<Context, StateList, FORK_COUNT>;
+	using Registry			= typename Control::Registry;
+
+	using TransitionControl	= TransitionControlT<Context, StateList, FORK_COUNT, PayloadList>;
 	using TransitionQueue	= typename TransitionControl::TransitionQueue;
 	using Plan				= PlanT<StateList, PLAN_CAPACITY>;
 	using Tasks				= typename Plan::Tasks;
@@ -1595,31 +2198,40 @@ class FullControlT final
 
 private:
 	inline FullControlT(Context& context,
+						const Registry& registry,
 						TransitionQueue& requests,
 						Tasks& tasks,
 						StateTasks& firstTasks,
 						LoggerInterface* const logger)
-		: TransitionControl(context, requests, logger)
-		, _tasks(tasks)
-		, _stateTasks(firstTasks)
+		: TransitionControl{context, registry, requests, logger}
+		, _tasks{tasks}
+		, _stateTasks{firstTasks}
 	{}
 
 	template <typename T>
 	static constexpr LongIndex
-	stateId()									  { return StateList::template index<T>();					}
+	stateId()										{ return StateList::template index<T>();					}
 
 public:
-	inline Plan plan(const StateID stateId)		  { return Plan(_tasks, _stateTasks, stateId);				}
+	using Control::isActive;
+	using Control::isResumable;
+	using Control::isScheduled;
 
-	inline Plan plan(const StateID stateId) const { return Plan(_tasks, _stateTasks, stateId);				}
+	inline Plan plan()								{ return Plan(_tasks, _stateTasks, _originId);				}
+	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, _originId);				}
+
+	inline Plan plan(const StateID stateId)			{ return Plan(_tasks, _stateTasks, stateId);				}
+	inline Plan plan(const StateID stateId) const	{ return Plan(_tasks, _stateTasks, stateId);				}
 
 	template <typename TPlanner>
-	inline Plan plan()							  { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan()								{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
 
 	template <typename TPlanner>
-	inline Plan plan()						const { return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
 
 private:
+	using Control::_originId;
+
 	Tasks& _tasks;
 	StateTasks& _stateTasks;
 };
@@ -1634,9 +2246,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC>
+template <typename TC, typename TSL, LongIndex NFC>
 void
-ControlT<TC>::setOrigin(const StateID id) {
+ControlT<TC, TSL, NFC>::setOrigin(const StateID id) {
 	//assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//assert(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
 
@@ -1647,9 +2259,9 @@ ControlT<TC>::setOrigin(const StateID id) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC>
+template <typename TC, typename TSL, LongIndex NFC>
 void
-ControlT<TC>::resetOrigin(const StateID id) {
+ControlT<TC, TSL, NFC>::resetOrigin(const StateID id) {
 	//assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//assert(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
 
@@ -1660,9 +2272,9 @@ ControlT<TC>::resetOrigin(const StateID id) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC>
-ControlOriginT<TC>::ControlOriginT(Control& control_,
-								   const StateID id)
+template <typename TC, typename TSL, LongIndex NFC>
+ControlOriginT<TC, TSL, NFC>::ControlOriginT(Control& control_,
+											 const StateID id)
 	: control{control_}
 	, prevId(control._originId)
 {
@@ -1671,16 +2283,16 @@ ControlOriginT<TC>::ControlOriginT(Control& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TC>
-ControlOriginT<TC>::~ControlOriginT() {
+template <typename TC, typename TSL, LongIndex NFC>
+ControlOriginT<TC, TSL, NFC>::~ControlOriginT() {
 	control.resetOrigin(prevId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::changeTo(const StateID stateId) {
+TransitionControlT<TC, TSL, NFC, TPL>::changeTo(const StateID stateId) {
 	if (!_locked) {
 		const Transition transition{TransitionType::RESTART, stateId};
 		_requests << transition;
@@ -1690,7 +2302,7 @@ TransitionControlT<TC, TSL, TPL>::changeTo(const StateID stateId) {
 		else
 			_status.outerTransition = true;
 
-	#ifdef HFSM_ENABLE_LOG_INTERFACE
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 		if (Control::_logger)
 			Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::RESTART, stateId);
 	#endif
@@ -1699,9 +2311,9 @@ TransitionControlT<TC, TSL, TPL>::changeTo(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::resume(const StateID stateId) {
+TransitionControlT<TC, TSL, NFC, TPL>::resume(const StateID stateId) {
 	if (!_locked) {
 		const Transition transition{TransitionType::RESUME, stateId};
 		_requests << transition;
@@ -1711,7 +2323,7 @@ TransitionControlT<TC, TSL, TPL>::resume(const StateID stateId) {
 		else
 			_status.outerTransition = true;
 
-	#ifdef HFSM_ENABLE_LOG_INTERFACE
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 		if (Control::_logger)
 			Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::RESUME, stateId);
 	#endif
@@ -1720,13 +2332,13 @@ TransitionControlT<TC, TSL, TPL>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::schedule(const StateID stateId) {
+TransitionControlT<TC, TSL, NFC, TPL>::schedule(const StateID stateId) {
 	const Transition transition{TransitionType::SCHEDULE, stateId};
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (Control::_logger)
 		Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::SCHEDULE, stateId);
 #endif
@@ -1734,10 +2346,10 @@ TransitionControlT<TC, TSL, TPL>::schedule(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::setRegion(const StateID id,
-											const LongIndex size)
+TransitionControlT<TC, TSL, NFC, TPL>::setRegion(const StateID id,
+												 const LongIndex size)
 {
 	if (_regionId == INVALID_STATE_ID) {
 		assert(_regionSize == INVALID_LONG_INDEX);
@@ -1757,10 +2369,10 @@ TransitionControlT<TC, TSL, TPL>::setRegion(const StateID id,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::resetRegion(const StateID id,
-											  const LongIndex size)
+TransitionControlT<TC, TSL, NFC, TPL>::resetRegion(const StateID id,
+												   const LongIndex size)
 {
 	assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 
@@ -1775,8 +2387,8 @@ TransitionControlT<TC, TSL, TPL>::resetRegion(const StateID id,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, typename TPL>
-ControlLockT<TC, TSL, TPL>::ControlLockT(TransitionControl& control_)
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+ControlLockT<TC, TSL, NFC, TPL>::ControlLockT(TransitionControl& control_)
 	: control(!control_._locked ? &control_ : nullptr)
 {
 	if (control)
@@ -1785,18 +2397,18 @@ ControlLockT<TC, TSL, TPL>::ControlLockT(TransitionControl& control_)
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, typename TPL>
-ControlLockT<TC, TSL, TPL>::~ControlLockT() {
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+ControlLockT<TC, TSL, NFC, TPL>::~ControlLockT() {
 	if (control)
 		control->_locked = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, typename TPL>
-ControlRegionT<TC, TSL, TPL>::ControlRegionT(TransitionControl& control_,
-											 const StateID id,
-											 const LongIndex size)
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+ControlRegionT<TC, TSL, NFC, TPL>::ControlRegionT(TransitionControl& control_,
+												  const StateID id,
+												  const LongIndex size)
 	: control{control_}
 	, prevId(control._regionId)
 	, prevSize(control._regionSize)
@@ -1806,67 +2418,12 @@ ControlRegionT<TC, TSL, TPL>::ControlRegionT(TransitionControl& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, typename TPL>
-ControlRegionT<TC, TSL, TPL>::~ControlRegionT() {
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+ControlRegionT<TC, TSL, NFC, TPL>::~ControlRegionT() {
 	control.resetRegion(prevId, prevSize);
+
+	control._status.clear();
 }
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-
-namespace hfsm {
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-#pragma pack(push, 1)
-
-struct alignas(2 * sizeof(ShortIndex)) Parent {
-	ShortIndex fork  = INVALID_SHORT_INDEX;
-	ShortIndex prong = INVALID_SHORT_INDEX;
-
-	inline Parent() = default;
-
-	inline Parent(const ShortIndex fork_,
-				  const ShortIndex prong_)
-		: fork(fork_)
-		, prong(prong_)
-	{}
-
-	inline explicit operator bool() const {
-		return fork  != INVALID_SHORT_INDEX &&
-			   prong != INVALID_SHORT_INDEX;
-	}
-};
-
-#pragma pack(pop)
-
-using Parents = ArrayView<Parent>;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#pragma pack(push, 1)
-
-struct alignas(4 * sizeof(ShortIndex)) Fork {
-	ShortIndex self		 = INVALID_SHORT_INDEX;
-	ShortIndex active	 = INVALID_SHORT_INDEX;
-	ShortIndex resumable = INVALID_SHORT_INDEX;
-	ShortIndex requested = INVALID_SHORT_INDEX;
-
-	inline Fork(const ShortIndex self_,
-				const Parent parent,
-				Parents& forkParents)
-		: self(self_)
-	{
-		forkParents[self_] = parent;
-	}
-};
-
-#pragma pack(pop)
-
-using ForkPointers = ArrayView<Fork*>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1980,21 +2537,29 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext, typename TStateList, typename TPayloadList, LongIndex NPlanCapacity>
+template <typename TContext,
+		  typename TStateList,
+		  LongIndex NForkCount,
+		  typename TPayloadList,
+		  LongIndex NPlanCapacity>
 class Bare {
 	template <typename...>
 	friend struct _B;
 
 protected:
+	using Context			= TContext;
+	using StateList			= TStateList;
+
+	static constexpr LongIndex STATE_COUNT	 = StateList::SIZE;
+	static constexpr LongIndex FORK_COUNT	 = NForkCount;
 	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
 
-	using Context			= TContext;
-	using Control			= ControlT	  <Context>;
-	using StateList			= TStateList;
-	using PlanControl		= PlanControlT<Context, StateList, PLAN_CAPACITY>;
+	using Control			= ControlT			<Context, StateList, FORK_COUNT>;
+	using PlanControl		= PlanControlT		<Context, StateList, FORK_COUNT, PLAN_CAPACITY>;
+	using Plan				= typename PlanControl::Plan;
 	using PayloadList		= TPayloadList;
-	using TransitionControl = TransitionControlT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT		<Context, StateList, PayloadList, PLAN_CAPACITY>;
+	using TransitionControl = TransitionControlT<Context, StateList, FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT		<Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
 
 public:
 	inline void preGuard (Context&)												{}
@@ -2060,8 +2625,8 @@ struct _B<TFirst>
 	stateId()						{ return StateList::template index<T>();	}
 };
 
-template <typename TContext, typename TStateList, typename TPayloadList, LongIndex NPlanCapacity>
-using State = _B<Bare<TContext, TStateList, TPayloadList, NPlanCapacity>>;
+template <typename TContext, typename TStateList, LongIndex NForkCount, typename TPayloadList, LongIndex NPlanCapacity>
+using State = _B<Bare<TContext, TStateList, NForkCount, TPayloadList, NPlanCapacity>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2240,12 +2805,14 @@ struct _SF final {
 	using Head				= THead;
 	using StateList			= _TL<Head>;
 
-	static constexpr LongIndex REVERSE_DEPTH = 1;
-	static constexpr LongIndex DEEP_WIDTH	 = 0;
-	static constexpr LongIndex STATE_COUNT	 = 1;
-	static constexpr LongIndex FORK_COUNT	 = 0;
-	static constexpr LongIndex PRONG_COUNT	 = 0;
-	static constexpr LongIndex WIDTH		 = 1;
+	static constexpr LongIndex REVERSE_DEPTH	= 1;
+	static constexpr LongIndex DEEP_WIDTH		= 0;
+	static constexpr LongIndex STATE_COUNT		= 1;
+	static constexpr LongIndex COMPOSITE_COUNT	= 0;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= 0;
+	static constexpr LongIndex FORK_COUNT		= 0;
+	static constexpr LongIndex PRONG_COUNT		= 0;
+	static constexpr LongIndex WIDTH			= 1;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2256,11 +2823,13 @@ struct _CSF<TInitial, TRemaining...> {
 	using Remaining			= _CSF<TRemaining...>;
 	using StateList			= typename MergeT<typename Initial::StateList, typename Remaining::StateList>::TypeList;
 
-	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr LongIndex DEEP_WIDTH	 = Max<Initial::DEEP_WIDTH, Remaining::DEEP_WIDTH>::VALUE;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
+	static constexpr LongIndex REVERSE_DEPTH	= Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr LongIndex DEEP_WIDTH		= Max<Initial::DEEP_WIDTH,	  Remaining::DEEP_WIDTH>::VALUE;
+	static constexpr LongIndex STATE_COUNT		= Initial::STATE_COUNT		+ Remaining::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= Initial::COMPOSITE_COUNT	+ Remaining::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= Initial::ORTHOGONAL_COUNT + Remaining::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		= Initial::FORK_COUNT		+ Remaining::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		= Initial::PRONG_COUNT		+ Remaining::PRONG_COUNT;
 };
 
 template <typename TInitial>
@@ -2268,11 +2837,13 @@ struct _CSF<TInitial> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using StateList			= typename Initial::StateList;
 
-	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = Max<1, Initial::DEEP_WIDTH>::VALUE;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
+	static constexpr LongIndex REVERSE_DEPTH	= Initial::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH		= Max<1, Initial::DEEP_WIDTH>::VALUE;
+	static constexpr LongIndex STATE_COUNT		= Initial::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= Initial::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= Initial::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		= Initial::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		= Initial::PRONG_COUNT;
 };
 
 template <typename THead, typename... TSubStates>
@@ -2282,12 +2853,14 @@ struct _CF final {
 	using SubStates			= _CSF<TSubStates...>;
 	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
 
-	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
-	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
-	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT + sizeof...(TSubStates);
-	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
+	static constexpr LongIndex REVERSE_DEPTH	= SubStates::REVERSE_DEPTH + 1;
+	static constexpr LongIndex DEEP_WIDTH		= SubStates::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		= State::STATE_COUNT + SubStates::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= SubStates::COMPOSITE_COUNT + 1;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= SubStates::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		= SubStates::FORK_COUNT + 1;
+	static constexpr LongIndex PRONG_COUNT		= SubStates::PRONG_COUNT + sizeof...(TSubStates);
+	static constexpr LongIndex WIDTH			= sizeof...(TSubStates);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2298,11 +2871,13 @@ struct _OSF<TInitial, TRemaining...> {
 	using Remaining			= _OSF<TRemaining...>;
 	using StateList			= typename MergeT<typename Initial::StateList, typename Remaining::StateList>::TypeList;
 
-	static constexpr LongIndex REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH  + Remaining::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT + Remaining::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT  + Remaining::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT + Remaining::PRONG_COUNT;
+	static constexpr LongIndex REVERSE_DEPTH	= Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr LongIndex DEEP_WIDTH		= Initial::DEEP_WIDTH		+ Remaining::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		= Initial::STATE_COUNT		+ Remaining::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= Initial::COMPOSITE_COUNT	+ Remaining::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= Initial::ORTHOGONAL_COUNT + Remaining::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		= Initial::FORK_COUNT		+ Remaining::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		= Initial::PRONG_COUNT		+ Remaining::PRONG_COUNT;
 };
 
 template <typename TInitial>
@@ -2310,27 +2885,30 @@ struct _OSF<TInitial> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using StateList			= typename Initial::StateList;
 
-	static constexpr LongIndex REVERSE_DEPTH = Initial::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = Initial::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = Initial::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = Initial::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = Initial::PRONG_COUNT;
+	static constexpr LongIndex REVERSE_DEPTH	= Initial::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH		= Initial::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		= Initial::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= Initial::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= Initial::ORTHOGONAL_COUNT;
+ 	static constexpr LongIndex FORK_COUNT		= Initial::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		= Initial::PRONG_COUNT;
 };
 
-template <typename THead,
-		  typename... TSubStates>
+template <typename THead, typename... TSubStates>
 struct _OF final {
 	using Head				= THead;
 	using State				= _SF<Head>;
 	using SubStates			= _OSF<TSubStates...>;
 	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
 
-	static constexpr LongIndex REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
-	static constexpr LongIndex DEEP_WIDTH	 = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = State::STATE_COUNT + SubStates::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = SubStates::FORK_COUNT + 1;
-	static constexpr LongIndex PRONG_COUNT	 = SubStates::PRONG_COUNT;
-	static constexpr LongIndex WIDTH		 = sizeof...(TSubStates);
+	static constexpr LongIndex REVERSE_DEPTH	= SubStates::REVERSE_DEPTH + 1;
+	static constexpr LongIndex DEEP_WIDTH		= SubStates::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		= State::STATE_COUNT + SubStates::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	= SubStates::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= SubStates::ORTHOGONAL_COUNT + 1;
+	static constexpr LongIndex FORK_COUNT		= SubStates::FORK_COUNT + 1;
+	static constexpr LongIndex PRONG_COUNT		= SubStates::PRONG_COUNT;
+	static constexpr LongIndex WIDTH			= sizeof...(TSubStates);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2338,6 +2916,7 @@ struct _OF final {
 template <typename TContext,
 		  typename TConfig,
 		  typename TStateList,
+		  LongIndex NForkCount,
 		  typename TPayloadList,
 		  LongIndex NPlanCapacity>
 struct ArgsT final {
@@ -2346,9 +2925,10 @@ struct ArgsT final {
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
 
+	static constexpr LongIndex FORK_COUNT	 = NForkCount;
 	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
 
-	using State = _B<Bare<Context, StateList, PayloadList, PLAN_CAPACITY>>;
+	using Empty = _B<Bare<Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>>;
 };
 
 //------------------------------------------------------------------------------
@@ -2356,13 +2936,13 @@ struct ArgsT final {
 template <StateID, typename, typename>
 struct _S;
 
-template <StateID, typename, typename, typename...>
+template <StateID, ForkID, ForkID, typename, typename, typename...>
 struct _C;
 
-template <StateID, typename, typename, typename...>
+template <StateID, ForkID, ForkID, typename, typename, typename...>
 struct _Q;
 
-template <StateID, typename, typename, typename...>
+template <StateID, ForkID, ForkID, typename, typename, typename...>
 struct _O;
 
 template <typename, typename, typename, typename>
@@ -2370,32 +2950,32 @@ class _R;
 
 //------------------------------------------------------------------------------
 
-template <StateID, typename...>
+template <StateID, ForkID, ForkID, typename...>
 struct WrapMaterial;
 
-template <StateID TID, typename TA, typename TH>
-struct WrapMaterial<TID, TA, TH> {
-	using Type = _S<TID, TA, TH>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH>
+struct WrapMaterial<NS, NC, NO, TA, TH> {
+	using Type = _S<NS,			TA, TH>;
 };
 
-template <StateID TID, typename TA,				 typename... TS>
-struct WrapMaterial<TID, TA, _CF<void, TS...>> {
-	using Type = _C<TID, TA, typename TA::State, TS...>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA,			  typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _CF<void, TS...>> {
+	using Type = _C<NS, NC, NO, TA, typename TA::Empty, TS...>;
 };
 
-template <StateID TID, typename TA, typename TH, typename... TS>
-struct WrapMaterial<TID, TA, _CF<TH, TS...>> {
-	using Type = _Q<TID, TA, TH,				 TS...>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _CF<TH, TS...>> {
+	using Type = _Q<NS, NC, NO, TA, TH,					TS...>;
 };
 
-template <StateID TID, typename TA,				 typename... TS>
-struct WrapMaterial<TID, TA, _OF<void, TS...>> {
-	using Type = _O<TID, TA, typename TA::State, TS...>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA,			  typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _OF<void, TS...>> {
+	using Type = _O<NS, NC, NO, TA, typename TA::Empty, TS...>;
 };
 
-template <StateID TID, typename TA, typename TH, typename... TS>
-struct WrapMaterial<TID, TA, _OF<TH, TS...>> {
-	using Type = _O<TID, TA, TH,				 TS...>;
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _OF<TH, TS...>> {
+	using Type = _O<NS, NC, NO, TA, TH,					TS...>;
 };
 
 //------------------------------------------------------------------------------
@@ -2416,15 +2996,17 @@ struct _RF final {
 	static constexpr LongIndex PLAN_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
 													   Config::MAX_PLAN_TASKS : Forward::PRONG_COUNT * 2;
 
-	using StateList			= typename Forward::StateList;
-	using PlanControl		= PlanControlT<Context, StateList, PLAN_CAPACITY>;
-	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT<Context, StateList, PayloadList, PLAN_CAPACITY>;
-
 	using Instance			= _R<Context, Config, PayloadList, Forward>;
 
-	using Bare				= ::hfsm::detail::Bare <Context, StateList, PayloadList, PLAN_CAPACITY>;
-	using State				= ::hfsm::detail::State<Context, StateList, PayloadList, PLAN_CAPACITY>;
+	static constexpr LongIndex FORK_COUNT		 = Forward::FORK_COUNT;
+
+	using StateList			= typename Forward::StateList;
+	using PlanControl		= PlanControlT		   <Context, StateList, FORK_COUNT, PLAN_CAPACITY>;
+	using TransitionControl	= TransitionControlT   <Context, StateList, FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT		   <Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
+
+	using Bare				= ::hfsm::detail::Bare <Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
+	using State				= ::hfsm::detail::State<Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;
@@ -2548,17 +3130,17 @@ struct _S {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using Control			= ControlT			<Context>;
-	using ControlOrigin		= ControlOriginT	<Context>;
-	using PlanControl		= PlanControlT		<Context, StateList, Args::PLAN_CAPACITY>;
-	using Transition		= TransitionT		<PayloadList>;
-	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT		<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using Control			= ControlT			   <Context, StateList, Args::FORK_COUNT>;
+	using ControlOrigin		= ControlOriginT	   <Context, StateList, Args::FORK_COUNT>;
+	using PlanControl		= PlanControlT		   <Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
+	using Transition		= TransitionT		   <PayloadList>;
+	using TransitionControl	= TransitionControlT   <Context, StateList, Args::FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT		   <Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using StateBase			= ::hfsm::detail::State<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using StateBase			= ::hfsm::detail::State<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	_S(StateRegistry& stateRegistry,
+	_S(StateParents& stateParents,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
@@ -2636,100 +3218,98 @@ namespace detail {
 
 namespace {
 
-template <StateID TID, typename TC, typename TSL, typename TPL, LongIndex NPC, typename TH>
-struct Register {
-	using StateRegistry = Array<Parent, TSL::SIZE>;
+template <StateID NS, typename TC, typename TSL, LongIndex NFC, typename TPL, LongIndex NPC, typename TH>
+struct RegisterT {
+	using StateParents = Array<Parent, TSL::SIZE>;
 
 	static inline void
-	execute(StateRegistry& stateRegistry, const Parent parent) {
+	execute(StateParents& stateParents, const Parent parent) {
 		static constexpr auto TYPE_ID = TSL::template index<TH>();
-		assertEquality<TID, TYPE_ID>();
+		assertEquality<NS, TYPE_ID>();
 
-		stateRegistry[TID] = parent;
+		stateParents[NS] = parent;
 	}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, LongIndex NPC>
-struct Register<TID, TC, TSL, TPL, NPC, State<TC, TSL, TPL, NPC>> {
-	using StateRegistry = Array<Parent, TSL::SIZE>;
+template <StateID NS, typename TC, typename TSL, LongIndex NFC, typename TPL, LongIndex NPC>
+struct RegisterT<NS, TC, TSL, NFC, TPL, NPC, State<TC, TSL, NFC, TPL, NPC>> {
+	using StateParents = Array<Parent, TSL::SIZE>;
 
 	static inline void
-	execute(StateRegistry&, const Parent) {}
+	execute(StateParents&, const Parent) {}
 };
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, typename TH>
-_S<TID, TA, TH>::_S(StateRegistry& stateRegistry,
+template <StateID NS, typename TA, typename TH>
+_S<NS, TA, TH>::_S(StateParents& stateParents,
 					const Parent parent,
 					Parents& /*forkParents*/,
 					ForkPointers& /*forkPointers*/)
 {
-	Register<STATE_ID, Context, StateList, PayloadList, Args::PLAN_CAPACITY, Head>::execute(stateRegistry, parent);
+	using Register = RegisterT<STATE_ID,
+							   Context,
+							   StateList,
+							   Args::FORK_COUNT,
+							   PayloadList,
+							   Args::PLAN_CAPACITY,
+							   Head>;
+	Register::execute(stateParents, parent);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 bool
-_S<TID, TA, TH>::deepGuard(FullControl& control) {
-	const auto requestCountBefore = control._requests.count();
-
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(&Head::guard), LoggerInterface::Method::GUARD>(*logger);
-#endif
+_S<NS, TA, TH>::deepGuard(FullControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::guard, ::hfsm::Method::GUARD);
 
 	ControlOrigin origin{control, STATE_ID};
 
+	const auto requestCountBefore = control._requests.count();
+
 	_head.widePreGuard(control.context());
-	_head.guard((TransitionControl&) control);
+	_head.guard(control);
 
 	return requestCountBefore < control._requests.count();
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 void
-_S<TID, TA, TH>::deepEnterInitial(PlanControl& control) {
+_S<NS, TA, TH>::deepEnterInitial(PlanControl& control) {
 	deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 void
-_S<TID, TA, TH>::deepEnter(PlanControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(&Head::enter), LoggerInterface::Method::ENTER>(*logger);
-#endif
+_S<NS, TA, TH>::deepEnter(PlanControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::enter, ::hfsm::Method::ENTER);
 
 	ControlOrigin origin{control, STATE_ID};
 
 	_head.widePreEnter(control.context());
-	_head.enter((Control&) control);
+	_head.enter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 Status
-_S<TID, TA, TH>::deepUpdate(FullControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(&Head::update), LoggerInterface::Method::UPDATE>(*logger);
-#endif
+_S<NS, TA, TH>::deepUpdate(FullControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::update, ::hfsm::Method::UPDATE);
 
 	ControlOrigin origin{control, STATE_ID};
 
 	_head.widePreUpdate(control.context());
-	_head.update((TransitionControl&) control);
+	_head.update(control);
 	// TODO: _head.widePostUpdate(control.context());
 
 	return control._status;
@@ -2737,40 +3317,33 @@ _S<TID, TA, TH>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 template <typename TEvent>
 void
-_S<TID, TA, TH>::deepReact(const TEvent& event,
+_S<NS, TA, TH>::deepReact(const TEvent& event,
 						   FullControl& control)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, TransitionControl&)>(&Head::react);
-
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(reaction), LoggerInterface::Method::REACT>(*logger);
-#endif
+	HFSM_LOG_STATE_METHOD(reaction, ::hfsm::Method::REACT);
 
 	ControlOrigin origin{control, STATE_ID};
 
 	_head.widePreReact(event, control.context());
 
 	//_head.react(event, control);
-	(_head.*reaction)(event, (TransitionControl&) control);
+	(_head.*reaction)(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 void
-_S<TID, TA, TH>::deepExit(PlanControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(&Head::exit), LoggerInterface::Method::EXIT>(*logger);
-#endif
+_S<NS, TA, TH>::deepExit(PlanControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::exit, ::hfsm::Method::EXIT);
 
 	ControlOrigin origin{control, STATE_ID};
 
-	_head.exit((Control&) control);
+	_head.exit(control);
 	_head.widePostExit(control.context());
 }
 
@@ -2778,9 +3351,9 @@ _S<TID, TA, TH>::deepExit(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 const char*
-_S<TID, TA, TH>::name() {
+_S<NS, TA, TH>::name() {
 	if (isBare())
 		return "";
 	else {
@@ -2814,9 +3387,9 @@ _S<TID, TA, TH>::name() {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 void
-_S<TID, TA, TH>::deepGetNames(const LongIndex parent,
+_S<NS, TA, TH>::deepGetNames(const LongIndex parent,
 							  const RegionType region,
 							  const ShortIndex depth,
 							  StructureStateInfos& _stateInfos) const
@@ -2835,140 +3408,23 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TStateID,
-		  typename TArgs,
-		  typename THead>
-struct _P final
-	: _S<TStateID, TArgs, THead>
-{
-	static constexpr auto STATE_ID = TStateID;
-
-	using Args				= TArgs;
-	using Head				= THead;
-	using State				= _S<STATE_ID, Args, Head>;
-
-	using Context			= typename Args::Context;
-	using Config			= typename Args::Config;
-	using StateList			= typename Args::StateList;
-	using PayloadList		= typename Args::PayloadList;
-
-	using StateRegistry		= typename State::StateRegistry;
-	using ControlOrigin		= typename State::ControlOrigin;
-	using PlanControl		= typename State::PlanControl;
-	using Transition		= typename State::Transition;
-	using FullControl		= typename State::FullControl;
-
-	using StateBase			= typename State::StateBase;
-
-	using State::State;
-
-	inline bool	  deepGuard (FullControl& control);
-	inline void	  deepEnter (PlanControl& control);
-	inline Status deepUpdate(FullControl& control);
-	inline void	  deepExit  (PlanControl& control);
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-
-namespace hfsm {
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <StateID TID, typename TA, typename TH>
-bool
-_P<TID, TA, TH>::deepGuard(FullControl& control) {
-	const auto requestCountBefore = control._requests.count();
-
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		State::template log<decltype(&Head::guard), LoggerInterface::Method::GUARD>(*logger);
-#endif
-
-	ControlOrigin origin{control, STATE_ID};
-
-	State::_head.widePreGuard(control.context());
-	State::_head.guard(control);
-
-	return requestCountBefore < control._requests.count();
-}
-
-//------------------------------------------------------------------------------
-
-template <StateID TID, typename TA, typename TH>
-void
-_P<TID, TA, TH>::deepEnter(PlanControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		State::template log<decltype(&Head::enter), LoggerInterface::Method::ENTER>(*logger);
-#endif
-
-	ControlOrigin origin{control, STATE_ID};
-
-	State::_head.widePreEnter(control.context());
-	State::_head.enter(control);
-}
-
-//------------------------------------------------------------------------------
-
-template <StateID TID, typename TA, typename TH>
-Status
-_P<TID, TA, TH>::deepUpdate(FullControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		State::template log<decltype(&Head::update), LoggerInterface::Method::UPDATE>(*logger);
-#endif
-
-	ControlOrigin origin{control, STATE_ID};
-
-	State::_head.widePreUpdate(control.context());
-	State::_head.update(control);
-	// TODO: _head.widePostUpdate(control.context());
-
-	return control._status;
-}
-
-//------------------------------------------------------------------------------
-
-template <StateID TID, typename TA, typename TH>
-void
-_P<TID, TA, TH>::deepExit(PlanControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		State::template log<decltype(&Head::exit), LoggerInterface::Method::EXIT>(*logger);
-#endif
-
-	ControlOrigin origin{control, STATE_ID};
-
-	State::_head.exit(control);
-	State::_head.widePostExit(control.context());
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-namespace hfsm {
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <StateID, typename, ShortIndex, typename...>
+template <StateID, ForkID, ForkID, typename, ShortIndex, typename...>
 struct _CS;
 
 //------------------------------------------------------------------------------
 
-template <StateID TInitialID,
+template <StateID NInitialID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
-struct _CS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
-	static constexpr StateID INITIAL_ID		 = TInitialID;
-	static constexpr LongIndex PRONG_INDEX	 = NIndex;
+struct _CS<NInitialID, NCompoID, NOrthoID, TArgs, NIndex, TInitial, TRemaining...> {
+	static constexpr StateID   INITIAL_ID	= NInitialID;
+	static constexpr StateID   COMPO_ID		= NCompoID;
+	static constexpr StateID   ORTHO_ID		= NOrthoID;
+	static constexpr LongIndex PRONG_INDEX	= NIndex;
 
 	using Args				= TArgs;
 
@@ -2977,18 +3433,21 @@ struct _CS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT<Context, StateList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using FullControl		= FullControlT<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using FullControl		= FullControlT<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using Initial			= typename WrapMaterial<INITIAL_ID, Args, TInitial>::Type;
+	using Initial			= typename WrapMaterial<INITIAL_ID, COMPO_ID, ORTHO_ID, Args, TInitial>::Type;
 	using InitialForward	= typename WrapForward<TInitial>::Type;
-	using Remaining			= _CS<INITIAL_ID + InitialForward::STATE_COUNT, Args, NIndex + 1, TRemaining...>;
+	using Remaining			= _CS<INITIAL_ID + InitialForward::STATE_COUNT,
+								  COMPO_ID + InitialForward::COMPOSITE_COUNT,
+								  ORTHO_ID + InitialForward::ORTHOGONAL_COUNT,
+								  Args, NIndex + 1, TRemaining...>;
 	using Forward			= _CSF<TInitial, TRemaining...>;
 
-	_CS(StateRegistry& stateRegistry,
+	_CS(StateParents& stateParents,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -3027,13 +3486,17 @@ struct _CS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 
 //------------------------------------------------------------------------------
 
-template <StateID TInitialID,
+template <StateID NInitialID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial>
-struct _CS<TInitialID, TArgs, NIndex, TInitial> {
-	static constexpr StateID INITIAL_ID		 = TInitialID;
-	static constexpr LongIndex PRONG_INDEX	 = NIndex;
+struct _CS<NInitialID, NCompoID, NOrthoID, TArgs, NIndex, TInitial> {
+	static constexpr StateID   INITIAL_ID	= NInitialID;
+	static constexpr StateID   COMPO_ID		= NCompoID;
+	static constexpr StateID   ORTHO_ID		= NOrthoID;
+	static constexpr LongIndex PRONG_INDEX	= NIndex;
 
 	using Args				= TArgs;
 
@@ -3042,16 +3505,16 @@ struct _CS<TInitialID, TArgs, NIndex, TInitial> {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT<Context, StateList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using FullControl		= FullControlT<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using FullControl		= FullControlT<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using Initial			= typename WrapMaterial<INITIAL_ID, Args, TInitial>::Type;
+	using Initial			= typename WrapMaterial<INITIAL_ID, COMPO_ID, ORTHO_ID, Args, TInitial>::Type;
 	using Forward			= _CSF<TInitial>;
 
-	_CS(StateRegistry& stateRegistry,
+	_CS(StateParents& stateParents,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -3097,16 +3560,16 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
-_CS<TID, TA, NI, TI, TR...>::_CS(StateRegistry& stateRegistry,
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+_CS<NS, NC, NO, TA, NI, TI, TR...>::_CS(StateParents& stateParents,
 								 const ShortIndex fork,
 								 Parents& forkParents,
 								 ForkPointers& forkPointers)
-	: initial(stateRegistry,
+	: initial(stateParents,
 			  Parent(fork, PRONG_INDEX),
 			  forkParents,
 			  forkPointers)
-	, remaining(stateRegistry,
+	, remaining(stateParents,
 				fork,
 				forkParents,
 				forkPointers)
@@ -3114,9 +3577,9 @@ _CS<TID, TA, NI, TI, TR...>::_CS(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
 											  FullControl& control)
 {
 	if (prong == PRONG_INDEX)
@@ -3127,9 +3590,9 @@ _CS<TID, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideGuard(const ShortIndex prong,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideGuard(const ShortIndex prong,
 									   FullControl& control)
 {
 	if (prong == PRONG_INDEX)
@@ -3140,17 +3603,17 @@ _CS<TID, TA, NI, TI, TR...>::wideGuard(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideEnterInitial(PlanControl& control) {
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideEnterInitial(PlanControl& control) {
 	initial.deepEnterInitial(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideEnter(const ShortIndex prong,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideEnter(const ShortIndex prong,
 									   PlanControl& control)
 {
 	if (prong == PRONG_INDEX)
@@ -3161,9 +3624,9 @@ _CS<TID, TA, NI, TI, TR...>::wideEnter(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 Status
-_CS<TID, TA, NI, TI, TR...>::wideUpdate(const ShortIndex prong,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideUpdate(const ShortIndex prong,
 										FullControl& control)
 {
 	return prong == PRONG_INDEX ?
@@ -3173,10 +3636,10 @@ _CS<TID, TA, NI, TI, TR...>::wideUpdate(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename TEvent>
 void
-_CS<TID, TA, NI, TI, TR...>::wideReact(const ShortIndex prong,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(const ShortIndex prong,
 									   const TEvent& event,
 									   FullControl& control)
 {
@@ -3188,9 +3651,9 @@ _CS<TID, TA, NI, TI, TR...>::wideReact(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideExit(const ShortIndex prong,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(const ShortIndex prong,
 									  PlanControl& control)
 {
 	if (prong == PRONG_INDEX)
@@ -3201,9 +3664,9 @@ _CS<TID, TA, NI, TI, TR...>::wideExit(const ShortIndex prong,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong,
 												const TransitionType transition)
 {
 	if (prong == PRONG_INDEX)
@@ -3214,25 +3677,25 @@ _CS<TID, TA, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideRequestRemain() {
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRemain() {
 	initial.deepRequestRemain();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideRequestRestart() {
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideRequestResume(const ShortIndex prong) {
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestResume(const ShortIndex prong) {
 	if (prong == PRONG_INDEX)
 		initial	 .deepRequestResume();
 	else
@@ -3241,9 +3704,9 @@ _CS<TID, TA, NI, TI, TR...>::wideRequestResume(const ShortIndex prong) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideChangeToRequested(const ShortIndex prong,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideChangeToRequested(const ShortIndex prong,
 												   PlanControl& control)
 {
 	if (prong == PRONG_INDEX)
@@ -3256,9 +3719,9 @@ _CS<TID, TA, NI, TI, TR...>::wideChangeToRequested(const ShortIndex prong,
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<TID, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
 										  const ShortIndex depth,
 										  StructureStateInfos& _stateInfos) const
 {
@@ -3277,12 +3740,12 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
-_CS<TID, TA, NI, TI>::_CS(StateRegistry& stateRegistry,
-						  const ShortIndex fork,
-						  Parents& forkParents,
-						  ForkPointers& forkPointers)
-	: initial(stateRegistry,
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+_CS<NS, NC, NO, TA, NI, TI>::_CS(StateParents& stateParents,
+								 const ShortIndex fork,
+								 Parents& forkParents,
+								 ForkPointers& forkPointers)
+	: initial(stateParents,
 			  Parent(fork, PRONG_INDEX),
 			  forkParents,
 			  forkPointers)
@@ -3290,10 +3753,10 @@ _CS<TID, TA, NI, TI>::_CS(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
-									   FullControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
+											  FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -3302,10 +3765,10 @@ _CS<TID, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
-								FullControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
+									   FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -3314,18 +3777,18 @@ _CS<TID, TA, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
+_CS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
 	initial.deepEnterInitial(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
-								PlanControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
+									   PlanControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -3334,10 +3797,10 @@ _CS<TID, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 Status
-_CS<TID, TA, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
-								 FullControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
+										FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -3346,12 +3809,12 @@ _CS<TID, TA, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 void
-_CS<TID, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
-								const TEvent& event,
-								FullControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
+									   const TEvent& event,
+									   FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -3360,10 +3823,10 @@ _CS<TID, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
-							   PlanControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
+									  PlanControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -3372,10 +3835,10 @@ _CS<TID, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideForwardRequest(const ShortIndex HSFM_IF_ASSERT(prong),
-										 const TransitionType transition)
+_CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(const ShortIndex HSFM_IF_ASSERT(prong),
+												const TransitionType transition)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -3384,25 +3847,25 @@ _CS<TID, TA, NI, TI>::wideForwardRequest(const ShortIndex HSFM_IF_ASSERT(prong),
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideRequestRemain() {
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestRemain() {
 	initial.deepRequestRemain();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideRequestRestart() {
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideRequestResume(const ShortIndex HSFM_IF_ASSERT(prong)) {
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(const ShortIndex HSFM_IF_ASSERT(prong)) {
 	assert(prong == PRONG_INDEX);
 
 	initial.deepRequestResume();
@@ -3410,10 +3873,10 @@ _CS<TID, TA, NI, TI>::wideRequestResume(const ShortIndex HSFM_IF_ASSERT(prong)) 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideChangeToRequested(const ShortIndex HSFM_IF_ASSERT(prong),
-											PlanControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(const ShortIndex HSFM_IF_ASSERT(prong),
+												   PlanControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -3424,11 +3887,11 @@ _CS<TID, TA, NI, TI>::wideChangeToRequested(const ShortIndex HSFM_IF_ASSERT(pron
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<TID, TA, NI, TI>::wideGetNames(const LongIndex parent,
-								   const ShortIndex depth,
-								   StructureStateInfos& _stateInfos) const
+_CS<NS, NC, NO, TA, NI, TI>::wideGetNames(const LongIndex parent,
+										  const ShortIndex depth,
+										  StructureStateInfos& _stateInfos) const
 {
 	initial.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
@@ -3444,12 +3907,16 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID THeadID,
+template <StateID NHeadID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
 struct _C {
-	static constexpr StateID HEAD_ID = THeadID;
+	static constexpr StateID HEAD_ID  = NHeadID;
+	static constexpr StateID COMPO_ID = NCompoID;
+	static constexpr StateID ORTHO_ID = NOrthoID;
 
 	using Args				= TArgs;
 	using Head				= THead;
@@ -3459,20 +3926,20 @@ struct _C {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT	<Context, StateList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT	<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT	<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using ControlLock		= ControlLockT	<Context, StateList, PayloadList>;
-	using ControlRegion		= ControlRegionT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT	<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using ControlLock		= ControlLockT	<Context, StateList, Args::FORK_COUNT, PayloadList>;
+	using ControlRegion		= ControlRegionT<Context, StateList, Args::FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT	<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using State				= _P <HEAD_ID,	   Args, Head>;
-	using SubStates			= _CS<HEAD_ID + 1, Args, 0, TSubStates...>;
+	using State				= _S <HEAD_ID, Args, Head>;
+	using SubStates			= _CS<HEAD_ID + 1, COMPO_ID + 1, ORTHO_ID, Args, 0, TSubStates...>;
 	using Forward			= _CF<Head, TSubStates...>;
 	using SubStateList		= typename Forward::StateList;
 
-	_C(StateRegistry& stateRegistry,
+	_C(StateParents& stateParents,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
@@ -3522,19 +3989,21 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, typename TH, typename... TS>
-_C<TID, TA, TH, TS...>::_C(StateRegistry& stateRegistry,
-						   const Parent parent,
-						   Parents& forkParents,
-						   ForkPointers& forkPointers)
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+_C<NS, NC, NO, TA, TH, TS...>::_C(StateParents& stateParents,
+								  const Parent parent,
+								  Parents& forkParents,
+								  ForkPointers& forkPointers)
 	: _fork(static_cast<ShortIndex>(forkPointers << &_fork),
 			parent,
-			forkParents)
-	, _state(stateRegistry,
+			forkParents,
+			INVALID_SHORT_INDEX
+			HSFM_IF_DEBUG(, _state.isBare() ? typeid(void) : typeid(Head)))
+	, _state(stateParents,
 			 parent,
 			 forkParents,
 			 forkPointers)
-	, _subStates(stateRegistry,
+	, _subStates(stateParents,
 				 _fork.self,
 				 forkParents,
 				 forkPointers)
@@ -3542,9 +4011,9 @@ _C<TID, TA, TH, TS...>::_C(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
 	assert(_fork.requested != INVALID_SHORT_INDEX);
 
 	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
@@ -3557,9 +4026,9 @@ _C<TID, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepGuard(FullControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.requested != INVALID_SHORT_INDEX);
 
@@ -3569,9 +4038,9 @@ _C<TID, TA, TH, TS...>::deepGuard(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
 	assert(_fork.active    == INVALID_SHORT_INDEX &&
 		   _fork.resumable == INVALID_SHORT_INDEX &&
 		   _fork.requested == INVALID_SHORT_INDEX);
@@ -3584,9 +4053,9 @@ _C<TID, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepEnter(PlanControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control) {
 	assert(_fork.active	   == INVALID_SHORT_INDEX &&
 		   _fork.requested != INVALID_SHORT_INDEX);
 
@@ -3599,9 +4068,9 @@ _C<TID, TA, TH, TS...>::deepEnter(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 Status
-_C<TID, TA, TH, TS...>::deepUpdate(FullControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
 	assert(_fork.active != INVALID_SHORT_INDEX);
 
 	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
@@ -3617,11 +4086,11 @@ _C<TID, TA, TH, TS...>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 void
-_C<TID, TA, TH, TS...>::deepReact(const TEvent& event,
-								  FullControl& control)
+_C<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
+										 FullControl& control)
 {
 	assert(_fork.active != INVALID_SHORT_INDEX);
 
@@ -3633,9 +4102,9 @@ _C<TID, TA, TH, TS...>::deepReact(const TEvent& event,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepExit(PlanControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
 	assert(_fork.active != INVALID_SHORT_INDEX);
 
 	_subStates.wideExit(_fork.active, control);
@@ -3647,9 +4116,9 @@ _C<TID, TA, TH, TS...>::deepExit(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepForwardRequest(const TransitionType transition) {
+_C<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(const TransitionType transition) {
 	if (_fork.requested != INVALID_SHORT_INDEX)
 		_subStates.wideForwardRequest(_fork.requested, transition);
 	else
@@ -3673,9 +4142,9 @@ _C<TID, TA, TH, TS...>::deepForwardRequest(const TransitionType transition) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepRequestRemain() {
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestRemain() {
 	if (_fork.active == INVALID_SHORT_INDEX)
 		_fork.requested = 0;
 
@@ -3684,9 +4153,9 @@ _C<TID, TA, TH, TS...>::deepRequestRemain() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepRequestRestart() {
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestRestart() {
 	_fork.requested = 0;
 
 	_subStates.wideRequestRestart();
@@ -3694,9 +4163,9 @@ _C<TID, TA, TH, TS...>::deepRequestRestart() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepRequestResume() {
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestResume() {
 	_fork.requested = _fork.resumable != INVALID_SHORT_INDEX ?
 		_fork.resumable : 0;
 
@@ -3705,9 +4174,9 @@ _C<TID, TA, TH, TS...>::deepRequestResume() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	assert(_fork.active != INVALID_SHORT_INDEX);
 
 	if (_fork.requested == _fork.active)
@@ -3727,12 +4196,12 @@ _C<TID, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_C<TID, TA, TH, TS...>::deepGetNames(const LongIndex parent,
-									 const RegionType region,
-									 const ShortIndex depth,
-									 StructureStateInfos& _stateInfos) const
+_C<NS, NC, NO, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+											const RegionType region,
+											const ShortIndex depth,
+											StructureStateInfos& _stateInfos) const
 {
 	_state	  .deepGetNames(parent, region,			 depth,		_stateInfos);
 	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
@@ -3749,18 +4218,22 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID THeadID,
+template <StateID NHeadID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
 struct _Q
-	: _C<THeadID, TArgs, THead, TSubStates...>
+	: _C<NHeadID, NCompoID, NOrthoID, TArgs, THead, TSubStates...>
 {
-	static constexpr StateID HEAD_ID = THeadID;
+	static constexpr StateID HEAD_ID  = NHeadID;
+	static constexpr StateID COMPO_ID = NCompoID;
+	static constexpr StateID ORTHO_ID = NOrthoID;
 
 	using Args				= TArgs;
 	using Head				= THead;
-	using Composite			= _C<HEAD_ID, Args, Head, TSubStates...>;
+	using Composite			= _C<HEAD_ID, COMPO_ID, ORTHO_ID, Args, Head, TSubStates...>;
 
 	using Context			= typename Args::Context;
 	using Config			= typename Args::Config;
@@ -3768,8 +4241,15 @@ struct _Q
 	using PayloadList		= typename Args::PayloadList;
 
 	using PlanControl		= typename Composite::PlanControl;
+	using Plan				= typename PlanControl::Plan;
+	using ControlLock		= typename Composite::ControlLock;
+	using ControlRegion		= typename Composite::ControlRegion;
 	using FullControl		= typename Composite::FullControl;
 	using HeadState			= typename Composite::State;
+
+	using SubStateList		= typename Composite::SubStateList;
+
+	using ControlOrigin		= ControlOriginT<Context, StateList, Args::FORK_COUNT>;
 
 	using Composite::Composite;
 
@@ -3782,6 +4262,12 @@ struct _Q
 							 FullControl& control);
 
 	inline void	  deepExit  (PlanControl& control);
+
+	using Composite::_fork;
+	using Composite::_state;
+	using Composite::_subStates;
+
+	bool _success = false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3794,56 +4280,77 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_Q<TID, TA, TH, TS...>::deepGuard(FullControl& control) {
+_Q<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 	Composite::deepGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 Status
-_Q<TID, TA, TH, TS...>::deepUpdate(FullControl& control) {
-	Status status = Composite::deepUpdate(control);
-	if (status.success) {
-		auto plan = control.plan(HEAD_ID);
+_Q<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
+	assert(_fork.active != INVALID_SHORT_INDEX);
 
-		while (const TaskTransition* const step = plan.next())
-			if (step->origin)
-			{
-				control.changeTo(step->destination);
-				plan.advance();
-			}
+	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
 
-		return {false,
+	if (const Status stateStatus = _state.deepUpdate(control)) {
+		ControlLock lock{control};
+		_subStates.wideUpdate(_fork.active, control);
+
+		return stateStatus;
+	} else {
+		const Status status = _subStates.wideUpdate(_fork.active, control);
+
+		if (status.failure || status.outerTransition)
+			return status;
+		else if (status.success)
+			_success = true;
+
+		if (_success) {
+			ControlOrigin origin{control, HEAD_ID};
+
+			Plan plan = control.plan(HEAD_ID);
+
+			for (auto it = plan.begin(); it; ++it)
+				if (control.isActive(it->origin)) {
+					control.changeTo(it->destination);
+					it.remove();
+
+					_success = false;
+				}
+		}
+
+		return {_success,
 				status.failure,
 				status.innerTransition,
 				status.outerTransition};
-	} else
-		return status;
+	}
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 void
-_Q<TID, TA, TH, TS...>::deepReact(const TEvent& event,
-								  FullControl& control)
+_Q<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
+										 FullControl& control)
 {
 	Composite::template deepReact<TEvent>(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_Q<TID, TA, TH, TS...>::deepExit(PlanControl& control) {
+_Q<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
 	Composite::deepExit(control);
 
 	auto plan = control.plan(HEAD_ID);
 	plan.clear();
+
+	_success = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3855,18 +4362,22 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID, typename, ShortIndex, typename...>
+template <StateID, ForkID, ForkID, typename, ShortIndex, typename...>
 struct _OS;
 
 //------------------------------------------------------------------------------
 
-template <StateID TInitialID,
+template <StateID NInitialID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
-struct _OS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
-	static constexpr StateID INITIAL_ID		= TInitialID;
+struct _OS<NInitialID, NCompoID, NOrthoID, TArgs, NIndex, TInitial, TRemaining...> {
+	static constexpr StateID   INITIAL_ID	= NInitialID;
+	static constexpr StateID   COMPO_ID		= NCompoID;
+	static constexpr StateID   ORTHO_ID		= NOrthoID;
 	static constexpr LongIndex PRONG_INDEX	= NIndex;
 
 	using Args				= TArgs;
@@ -3876,18 +4387,21 @@ struct _OS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT<Context, StateList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using FullControl		= FullControlT<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using FullControl		= FullControlT<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using Initial			= typename WrapMaterial<INITIAL_ID, Args, TInitial>::Type;
+	using Initial			= typename WrapMaterial<INITIAL_ID, COMPO_ID, ORTHO_ID, Args, TInitial>::Type;
 	using InitialForward	= typename WrapForward<TInitial>::Type;
-	using Remaining			= _OS<INITIAL_ID + InitialForward::STATE_COUNT, Args, PRONG_INDEX + 1, TRemaining...>;
+	using Remaining			= _OS<INITIAL_ID + InitialForward::STATE_COUNT,
+								  COMPO_ID + InitialForward::COMPOSITE_COUNT,
+								  ORTHO_ID + InitialForward::ORTHOGONAL_COUNT,
+								  Args, PRONG_INDEX + 1, TRemaining...>;
 	using Forward			= _OSF<TInitial, TRemaining...>;
 
-	_OS(StateRegistry& stateRegistry,
+	_OS(StateParents& stateParents,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -3929,12 +4443,16 @@ struct _OS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 
 //------------------------------------------------------------------------------
 
-template <StateID TInitialID,
+template <StateID NInitialID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial>
-struct _OS<TInitialID, TArgs, NIndex, TInitial> {
-	static constexpr StateID INITIAL_ID		= TInitialID;
+struct _OS<NInitialID, NCompoID, NOrthoID, TArgs, NIndex, TInitial> {
+	static constexpr StateID   INITIAL_ID	= NInitialID;
+	static constexpr StateID   COMPO_ID		= NCompoID;
+	static constexpr StateID   ORTHO_ID		= NOrthoID;
 	static constexpr LongIndex PRONG_INDEX	= NIndex;
 
 	using Args				= TArgs;
@@ -3944,16 +4462,16 @@ struct _OS<TInitialID, TArgs, NIndex, TInitial> {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT<Context, StateList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using FullControl		= FullControlT<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using FullControl		= FullControlT<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using Initial			= typename WrapMaterial<INITIAL_ID, Args, TInitial>::Type;
+	using Initial			= typename WrapMaterial<INITIAL_ID, COMPO_ID, ORTHO_ID, Args, TInitial>::Type;
 	using Forward			= _OSF<TInitial>;
 
-	_OS(StateRegistry& stateRegistry,
+	_OS(StateParents& stateParents,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -4002,16 +4520,16 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
-_OS<TID, TA, NI, TI, TR...>::_OS(StateRegistry& stateRegistry,
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+_OS<NS, NC, NO, TA, NI, TI, TR...>::_OS(StateParents& stateParents,
 								 const ShortIndex fork,
 								 Parents& forkParents,
 								 ForkPointers& forkPointers)
-	: initial(stateRegistry,
+	: initial(stateParents,
 			  Parent(fork, PRONG_INDEX),
 			  forkParents,
 			  forkPointers)
-	, remaining(stateRegistry,
+	, remaining(stateParents,
 				fork,
 				forkParents,
 				forkPointers)
@@ -4019,9 +4537,9 @@ _OS<TID, TA, NI, TI, TR...>::_OS(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
 											  FullControl& control)
 {
 	if (prong == PRONG_INDEX)
@@ -4032,55 +4550,55 @@ _OS<TID, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideForwardGuard(FullControl& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(FullControl& control) {
 	initial	 .deepForwardGuard(control);
 	remaining.wideForwardGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideGuard(FullControl& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideGuard(FullControl& control) {
 	initial	 .deepGuard(control);
 	remaining.wideGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideEnterInitial(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideEnterInitial(PlanControl& control) {
 	initial  .deepEnterInitial(control);
 	remaining.wideEnterInitial(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
 	initial  .deepEnter(control);
 	remaining.wideEnter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 Status
-_OS<TID, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
 	const auto status =	   initial	.deepUpdate(control);
 	return combine(status, remaining.wideUpdate(control));
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename TEvent>
 void
-_OS<TID, TA, NI, TI, TR...>::wideReact(const TEvent& event,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(const TEvent& event,
 									   FullControl& control)
 {
 	initial  .deepReact(event, control);
@@ -4089,18 +4607,18 @@ _OS<TID, TA, NI, TI, TR...>::wideReact(const TEvent& event,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
 	initial	 .deepExit(control);
 	remaining.wideExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong,
 												const TransitionType transition)
 {
 	if (prong == PRONG_INDEX) {
@@ -4114,36 +4632,36 @@ _OS<TID, TA, NI, TI, TR...>::wideForwardRequest(const ShortIndex prong,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideRequestRemain() {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRemain() {
 	initial	 .deepRequestRemain();
 	remaining.wideRequestRemain();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideRequestRestart() {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRestart() {
 	initial	 .deepRequestRestart();
 	remaining.wideRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideRequestResume() {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestResume() {
 	initial	 .deepRequestResume();
 	remaining.wideRequestResume();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
 	initial	 .deepChangeToRequested(control);
 	remaining.wideChangeToRequested(control);
 }
@@ -4152,9 +4670,9 @@ _OS<TID, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI, typename... TR>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TID, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
 										  const ShortIndex depth,
 										  StructureStateInfos& _stateInfos) const
 {
@@ -4173,12 +4691,12 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
-_OS<TID, TA, NI, TI>::_OS(StateRegistry& stateRegistry,
-						  const ShortIndex fork,
-						  Parents& forkParents,
-						  ForkPointers& forkPointers)
-	: initial(stateRegistry,
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+_OS<NS, NC, NO, TA, NI, TI>::_OS(StateParents& stateParents,
+								 const ShortIndex fork,
+								 Parents& forkParents,
+								 ForkPointers& forkPointers)
+	: initial(stateParents,
 			  Parent(fork, PRONG_INDEX),
 			  forkParents,
 			  forkPointers)
@@ -4186,10 +4704,10 @@ _OS<TID, TA, NI, TI>::_OS(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
-									   FullControl& control)
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
+											  FullControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -4198,69 +4716,69 @@ _OS<TID, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideForwardGuard(FullControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(FullControl& control) {
 	initial.deepForwardGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideGuard(FullControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideGuard(FullControl& control) {
 	initial.deepGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
 	initial.deepEnterInitial(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideEnter(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 Status
-_OS<TID, TA, NI, TI>::wideUpdate(FullControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideUpdate(FullControl& control) {
 	return initial.deepUpdate(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 void
-_OS<TID, TA, NI, TI>::wideReact(const TEvent& event,
-								FullControl& control)
+_OS<NS, NC, NO, TA, NI, TI>::wideReact(const TEvent& event,
+									   FullControl& control)
 {
 	initial.deepReact(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideExit(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideForwardRequest(const ShortIndex prong,
-										 const TransitionType transition)
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(const ShortIndex prong,
+												const TransitionType transition)
 {
 	assert(prong <= PRONG_INDEX);
 
@@ -4272,33 +4790,33 @@ _OS<TID, TA, NI, TI>::wideForwardRequest(const ShortIndex prong,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideRequestRemain() {
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestRemain() {
 	initial.deepRequestRemain();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideRequestRestart() {
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestRestart() {
 	initial.deepRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideRequestResume() {
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestResume() {
 	initial.deepRequestResume();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 	initial.deepChangeToRequested(control);
 }
 
@@ -4306,11 +4824,11 @@ _OS<TID, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TID, TA, NI, TI>::wideGetNames(const LongIndex parent,
-								   const ShortIndex depth,
-								   StructureStateInfos& _stateInfos) const
+_OS<NS, NC, NO, TA, NI, TI>::wideGetNames(const LongIndex parent,
+										  const ShortIndex depth,
+										  StructureStateInfos& _stateInfos) const
 {
 	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
 }
@@ -4326,12 +4844,16 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID THeadID,
+template <StateID NHeadID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
 struct _O final {
-	static constexpr StateID HEAD_ID = THeadID;
+	static constexpr StateID HEAD_ID  = NHeadID;
+	static constexpr StateID COMPO_ID = NCompoID;
+	static constexpr StateID ORTHO_ID = NOrthoID;
 
 	using Args				= TArgs;
 	using Head				= THead;
@@ -4341,20 +4863,22 @@ struct _O final {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT	<Context, StateList, Args::PLAN_CAPACITY>;
+	static constexpr LongIndex STATE_COUNT = StateList::SIZE;
+
+	using StateParents		= Array<Parent, STATE_COUNT>;
+	using PlanControl		= PlanControlT	<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT	<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using ControlLock		= ControlLockT	<Context, StateList, PayloadList>;
-	using ControlRegion		= ControlRegionT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT	<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using ControlLock		= ControlLockT	<Context, StateList, Args::FORK_COUNT, PayloadList>;
+	using ControlRegion		= ControlRegionT<Context, StateList, Args::FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT	<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using State				= _S <HEAD_ID,	   Args, Head>;
-	using SubStates			= _OS<HEAD_ID + 1, Args, 0, TSubStates...>;
+	using State				= _S <HEAD_ID, Args, Head>;
+	using SubStates			= _OS<HEAD_ID + 1, COMPO_ID, ORTHO_ID + 1, Args, 0, TSubStates...>;
 	using Forward			= _OF<Head, TSubStates...>;
 	using SubStateList		= typename Forward::StateList;
 
-	_O(StateRegistry& stateRegistry,
+	_O(StateParents& stateParents,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);
@@ -4405,19 +4929,21 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, typename TH, typename... TS>
-_O<TID, TA, TH, TS...>::_O(StateRegistry& stateRegistry,
-						   const Parent parent,
-						   Parents& forkParents,
-						   ForkPointers& forkPointers)
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+_O<NS, NC, NO, TA, TH, TS...>::_O(StateParents& stateParents,
+								  const Parent parent,
+								  Parents& forkParents,
+								  ForkPointers& forkPointers)
 	: _fork(static_cast<ShortIndex>(forkPointers << &_fork),
 			parent,
-			forkParents)
-	, _state(stateRegistry,
+			forkParents,
+			STATE_COUNT
+			HSFM_IF_DEBUG(, _state.isBare() ? typeid(void) : typeid(Head)))
+	, _state(stateParents,
 			 parent,
 			 forkParents,
 			 forkPointers)
-	, _subStates(stateRegistry,
+	, _subStates(stateParents,
 				 _fork.self,
 				 forkParents,
 				 forkPointers)
@@ -4425,11 +4951,11 @@ _O<TID, TA, TH, TS...>::_O(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	if (_fork.requested != INVALID_SHORT_INDEX)
 		_subStates.wideForwardGuard(_fork.requested, control);
@@ -4439,11 +4965,11 @@ _O<TID, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepGuard(FullControl& control) {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	if (!_state	  .deepGuard(control))
 		_subStates.wideGuard(control);
@@ -4451,11 +4977,11 @@ _O<TID, TA, TH, TS...>::deepGuard(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX &&
+_O<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT &&
 		   _fork.requested == INVALID_SHORT_INDEX);
 
 	_state	  .deepEnter	   (control);
@@ -4464,11 +4990,11 @@ _O<TID, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepEnter(PlanControl& control) {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control) {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	_state	  .deepEnter(control);
 	_subStates.wideEnter(control);
@@ -4476,11 +5002,11 @@ _O<TID, TA, TH, TS...>::deepEnter(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 Status
-_O<TID, TA, TH, TS...>::deepUpdate(FullControl& control) {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
 
@@ -4495,14 +5021,14 @@ _O<TID, TA, TH, TS...>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 void
-_O<TID, TA, TH, TS...>::deepReact(const TEvent& event,
-								  FullControl& control)
+_O<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
+										 FullControl& control)
 {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	_state	  .deepReact(event, control);
 	_subStates.wideReact(event, control);
@@ -4510,11 +5036,11 @@ _O<TID, TA, TH, TS...>::deepReact(const TEvent& event,
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepExit(PlanControl& control) {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	_subStates.wideExit(control);
 	_state	  .deepExit(control);
@@ -4522,11 +5048,11 @@ _O<TID, TA, TH, TS...>::deepExit(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepForwardRequest(const TransitionType transition) {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(const TransitionType transition) {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	if (_fork.requested != INVALID_SHORT_INDEX)
 		_subStates.wideForwardRequest(_fork.requested, transition);
@@ -4551,44 +5077,44 @@ _O<TID, TA, TH, TS...>::deepForwardRequest(const TransitionType transition) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepRequestRemain() {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestRemain() {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	_subStates.wideRequestRemain();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepRequestRestart() {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestRestart() {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	_subStates.wideRequestRestart();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepRequestResume() {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestResume() {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	_subStates.wideRequestResume();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
-	assert(_fork.active    == INVALID_SHORT_INDEX &&
-		   _fork.resumable == INVALID_SHORT_INDEX);
+_O<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
+	assert(_fork.active    == STATE_COUNT &&
+		   _fork.resumable == STATE_COUNT);
 
 	_subStates.wideChangeToRequested(control);
 }
@@ -4597,12 +5123,12 @@ _O<TID, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_O<TID, TA, TH, TS...>::deepGetNames(const LongIndex parent,
-									 const RegionType region,
-									 const ShortIndex depth,
-									 StructureStateInfos& _stateInfos) const
+_O<NS, NC, NO, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+											const RegionType region,
+											const ShortIndex depth,
+											StructureStateInfos& _stateInfos) const
 {
 	_state	  .deepGetNames(parent, region,			 depth,		_stateInfos);
 	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
@@ -4638,33 +5164,34 @@ class _R final {
 
 	static constexpr LongIndex PLAN_CAPACITY	 = Forward::PLAN_CAPACITY;
 
-	using Args				= ArgsT<Context, Config, StateList, PayloadList, PLAN_CAPACITY>;
+public:
+	static constexpr LongIndex REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH		 = ForwardApex::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		 = ForwardApex::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	 = ForwardApex::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	 = ForwardApex::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		 = ForwardApex::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		 = ForwardApex::PRONG_COUNT;
+	static constexpr LongIndex WIDTH			 = ForwardApex::WIDTH;
+
+private:
+	using Args				= ArgsT<Context, Config, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
 	using PlanControl		= typename Forward::PlanControl;
 	using Payload			= typename PayloadList::Container;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionControl	= typename Forward::TransitionControl;
 	using FullControl		= typename Forward::FullControl;
 
-public:
-	static constexpr LongIndex REVERSE_DEPTH = ForwardApex::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = ForwardApex::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = ForwardApex::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = ForwardApex::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = ForwardApex::PRONG_COUNT;
-	static constexpr LongIndex WIDTH		 = ForwardApex::WIDTH;
-
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using StateRegistry			 = Array<Parent,		STATE_COUNT>;
-	using Payloads				 = Array<Payload,		STATE_COUNT>;
+	using Registry				 = RegistryT<STATE_COUNT, FORK_COUNT>;
 
-	using ForkParents			 = Array<Parent,		FORK_COUNT>;
-	using ForkPointerStorage	 = Array<Fork*,			FORK_COUNT>;
+	using Payloads				 = Array<Payload,		STATE_COUNT>;
 	using TransitionQueueStorage = Array<Transition,	FORK_COUNT>;
 
-	using MaterialApex			 = typename WrapMaterial<0, Args, Apex>::Type;
+	using MaterialApex			 = typename WrapMaterial<0, 0, 0, Args, Apex>::Type;
 	using Tasks					 = typename FullControl::Tasks;
 	using StateTasks			 = Array<TaskIndices,	STATE_COUNT>;			// TODO: change to ForkTasks
 
@@ -4759,20 +5286,19 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline bool isActive(const StateID stateId) const;
-
-	inline bool isResumable(const StateID stateId) const;
+	inline bool isActive   (const StateID stateId) const	{ return ::hfsm::detail::isActive	(_registry, stateId);	}
+	inline bool isResumable(const StateID stateId) const	{ return ::hfsm::detail::isResumable(_registry, stateId);	}
 
 	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
-	template <typename T>
-	inline bool isActive() const;
+	template <typename TState>
+	inline bool isActive   () const							{ return isActive	(stateId<TState>());			}
 
-	template <typename T>
-	inline bool isResumable() const;
+	template <typename TState>
+	inline bool isResumable() const							{ return isResumable(stateId<TState>());			}
 
-	template <typename T>
-	inline bool isScheduled() const							{ return isResumable<T>();							}
+	template <typename TState>
+	inline bool isScheduled() const							{ return isResumable<TState>();						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4781,7 +5307,7 @@ public:
 	const MachineActivity&  activity()  const				{ return _activityHistory;							}
 #endif
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	void attachLogger(LoggerInterface* const logger)		{ _logger = logger;									}
 #endif
 
@@ -4803,17 +5329,14 @@ protected:
 private:
 	Context& _context;
 
-	StateRegistry _stateRegistry;
+	Registry _registry;
+	Tasks _tasks;
+	StateTasks _stateTasks;
+
 	Payloads _transitionPayloads;
-
-	ForkParents  _forkParents;
-	ForkPointerStorage _forkPointers;
-
 	TransitionQueueStorage _requests;
 
 	MaterialApex _apex;
-	Tasks _tasks;
-	StateTasks _stateTasks;
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	Prefixes _prefixes;
@@ -4843,7 +5366,7 @@ template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::_R(Context& context
 						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
-	, _apex{_stateRegistry, Parent{}, _forkParents, _forkPointers}
+	, _apex{_registry.stateParents, Parent{}, _registry.forkParents, _registry.forkPointers}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
 	HFSM_IF_STRUCTURE(getStateNames());
@@ -4852,7 +5375,11 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 		payload.reset();
 
 	{
-		PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
+		PlanControl control{_context,
+							_registry,
+							_tasks,
+							_stateTasks,
+							HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepEnterInitial(control);
 
 		HSFM_IF_DEBUG(verifyPlans());
@@ -4865,7 +5392,11 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::~_R() {
-	PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context,
+						_registry,
+						_tasks,
+						_stateTasks,
+						HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepExit(control);
 
 	HSFM_IF_DEBUG(verifyPlans());
@@ -4876,8 +5407,13 @@ _R<TC, TG, TPL, TA>::~_R() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::update() {
-	FullControl transitionControl(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
-	_apex.deepUpdate(transitionControl);
+	FullControl control(_context,
+						_registry,
+						_requests,
+						_tasks,
+						_stateTasks,
+						HFSM_LOGGER_OR(_logger, nullptr));
+	_apex.deepUpdate(control);
 
 	HSFM_IF_DEBUG(verifyPlans());
 
@@ -4893,7 +5429,12 @@ template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TEvent>
 void
 _R<TC, TG, TPL, TA>::react(const TEvent& event) {
-	FullControl control(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
+	FullControl control(_context,
+						_registry,
+						_requests,
+						_tasks,
+						_stateTasks,
+						HFSM_LOGGER_OR(_logger, nullptr));
 	_apex.deepReact(event, control);
 
 	HSFM_IF_DEBUG(verifyPlans());
@@ -4912,7 +5453,7 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
 	const Transition transition(Transition::Type::RESTART, stateId);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESTART, stateId);
 #endif
@@ -4926,7 +5467,7 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId) {
 	const Transition transition(Transition::Type::RESUME, stateId);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, stateId);
 #endif
@@ -4940,7 +5481,7 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 	const Transition transition(Transition::Type::SCHEDULE, stateId);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, stateId);
 #endif
@@ -4957,7 +5498,7 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 	const Transition transition(Transition::Type::RESTART, stateId, payload);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESTART, stateId);
 #endif
@@ -4974,7 +5515,7 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 	const Transition transition(Transition::Type::RESUME, stateId, payload);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, stateId);
 #endif
@@ -4991,7 +5532,7 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 	const Transition transition(Transition::Type::SCHEDULE, stateId, payload);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, stateId);
 #endif
@@ -5054,66 +5595,6 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TPL, typename TA>
-bool
-_R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
-	assert(stateId < Payloads::CAPACITY);
-
-	if (stateId < Payloads::CAPACITY)
-		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
-			const auto& fork = *_forkPointers[parent.fork];
-
-			if (fork.active != INVALID_SHORT_INDEX)
-				return parent.prong == fork.active;
-		}
-
-	return false;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-bool
-_R<TC, TG, TPL, TA>::isResumable(const StateID stateId) const {
-	assert(stateId < Payloads::CAPACITY);
-
-	if (stateId < Payloads::CAPACITY)
-		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
-			const auto& fork = *_forkPointers[parent.fork];
-
-			if (fork.active != INVALID_SHORT_INDEX)
-				return parent.prong == fork.resumable;
-		}
-
-	return false;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, typename TG, typename TPL, typename TA>
-template <typename T>
-bool
-_R<TC, TG, TPL, TA>::isActive() const {
-	constexpr auto id = stateId<T>();
-	static_assert(id != INVALID_STATE_ID, "State not in FSM");
-
-	return isActive(id);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-template <typename T>
-bool
-_R<TC, TG, TPL, TA>::isResumable() const {
-	constexpr auto id = stateId<T>();
-	static_assert(id != INVALID_STATE_ID, "State not in FSM");
-
-	return isResumable(id);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::processTransitions() {
 	assert(_requests.count());
@@ -5148,7 +5629,12 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 		_requests.clear();
 
 		if (changeCount > 0) {
-			FullControl substitutionControl(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
+			FullControl substitutionControl(_context,
+											_registry,
+											_requests,
+											_tasks,
+											_stateTasks,
+											HFSM_LOGGER_OR(_logger, nullptr));
 			_apex.deepForwardGuard(substitutionControl);
 
 			HSFM_IF_DEBUG(verifyPlans());
@@ -5161,7 +5647,11 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 	}
 
 	{
-		PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
+		PlanControl control{_context,
+							_registry,
+							_tasks,
+							_stateTasks,
+							HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepChangeToRequested(control);
 
 		HSFM_IF_DEBUG(verifyPlans());
@@ -5177,8 +5667,8 @@ void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 	assert(STATE_COUNT > request.stateId);
 
-	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
-		auto& fork = *_forkPointers[parent.fork];
+	for (auto parent = _registry.stateParents[request.stateId]; parent; parent = _registry.forkParents[parent.fork]) {
+		auto& fork = *_registry.forkPointers[parent.fork];
 
 		fork.requested = parent.prong;
 	}
@@ -5193,8 +5683,8 @@ void
 _R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
 	assert(STATE_COUNT > request.stateId);
 
-	const auto parent = _stateRegistry[request.stateId];
-	auto& fork = *_forkPointers[parent.fork];
+	const auto parent = _registry.stateParents[request.stateId];
+	auto& fork = *_registry.forkPointers[parent.fork];
 
 	fork.resumable = parent.prong;
 }
@@ -5370,6 +5860,8 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
+#undef HFSM_LOG_STATE_METHOD
+#undef HFSM_LOG_PLANNER_METHOD
 #undef HFSM_IF_STRUCTURE
 
 #ifdef _MSC_VER

@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\test\deprecated.cpp" />
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
+    <ClCompile Include="..\..\test\test_lib_lib_bit_array.cpp" />
     <ClCompile Include="..\..\test\test_lib_list.cpp" />
     <ClCompile Include="..\..\test\test_planner.cpp" />
     <ClCompile Include="..\..\test\test_shared.cpp" />
@@ -33,6 +34,7 @@
     <ClInclude Include="..\..\include\hfsm\detail\lib_array_view.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\debug_logger_interface.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\debug_structure_report.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\lib_bit_array.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\lib_iterator.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\lib_list.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_composite_sub.hpp" />
@@ -41,7 +43,6 @@
     <ClInclude Include="..\..\include\hfsm\detail\machine_injections.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_orthogonal_sub.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_plan.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\machine_planner.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_root.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_sequence.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_utility.hpp" />
@@ -50,11 +51,13 @@
     <ClInclude Include="..\..\include\hfsm\machine_dev.hpp" />
     <ClInclude Include="..\..\include\hfsm\machine.hpp" />
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
+    <ClInclude Include="..\..\test\test_planner.hpp" />
     <ClInclude Include="..\..\test\test_shared.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm\detail\lib_array.inl" />
     <None Include="..\..\include\hfsm\detail\lib_array_view.inl" />
+    <None Include="..\..\include\hfsm\detail\lib_bit_array.inl" />
     <None Include="..\..\include\hfsm\detail\lib_iterator.inl" />
     <None Include="..\..\include\hfsm\detail\lib_list.inl" />
     <None Include="..\..\include\hfsm\detail\machine_composite.hpp" />
@@ -68,11 +71,11 @@
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_1.inl" />
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm\detail\machine_plan.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_planner.inl" />
     <None Include="..\..\include\hfsm\detail\machine_root.inl" />
     <None Include="..\..\include\hfsm\detail\machine_sequence.inl" />
     <None Include="..\..\include\hfsm\detail\machine_state.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_state.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_utility.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -25,11 +25,11 @@ public:
 
 	inline Iterator& operator ++();
 
-	inline		 Item& operator *()		  { return _container[_cursor]; }
-	inline const Item& operator *() const { return _container[_cursor]; }
+	inline		 Item& operator *()		  { return  _container[_cursor]; }
+	inline const Item& operator *() const { return  _container[_cursor]; }
 
-	inline		 Item* operator->()		  { return &operator *();		}
-	inline const Item* operator->() const { return &operator *();		}
+	inline		 Item* operator->()		  { return &_container[_cursor]; }
+	inline const Item* operator->() const { return &_container[_cursor]; }
 
 private:
 	Container& _container;

@@ -5,80 +5,105 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex, typename...>
-struct TypeListBuilder;
+template<LongIndex N>
+struct IndexConstant {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <LongIndex NIndex, typename TFirst, typename... TRest>
-struct TypeListBuilder<NIndex, TFirst, TRest...>
-	: TypeListBuilder<NIndex + 1, TRest...>
-{
-	static constexpr LongIndex INDEX = NIndex;
-
-	static_assert(INDEX < (1 << 8 * sizeof(LongIndex)), "Too many types");
-
-	using Type = TFirst;
-	using Base = TypeListBuilder<INDEX + 1, TRest...>;
-
-	template <typename T>
-	static constexpr LongIndex index() {
-		return std::is_same<T, Type>::value ? INDEX : Base::template index<T>();
-	}
+template<LongIndex... Ns>
+struct IndexSequence {
+	typedef IndexSequence<Ns...> Type;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <LongIndex NIndex, typename TFirst>
-struct TypeListBuilder<NIndex, TFirst> {
-	static constexpr LongIndex INDEX = NIndex;
+template<typename, typename>
+struct MakeIndexSequence_Impl {};
 
-	static_assert(NIndex < (1 << 8 * sizeof(LongIndex)), "Too many types");
+template<LongIndex N, LongIndex... Ns>
+struct MakeIndexSequence_Impl<IndexConstant<N>,
+							  IndexSequence<Ns...>>
+	: MakeIndexSequence_Impl<IndexConstant<N - 1>,
+							 IndexSequence<N - 1, Ns...>>
+{};
 
-	using Type = TFirst;
+template<LongIndex... Ns>
+struct MakeIndexSequence_Impl<IndexConstant<0>,
+							  IndexSequence<Ns...>>
+	: IndexSequence<Ns...>
+{};
 
-	template <typename T>
-	static constexpr LongIndex index() {
-		return std::is_same<T, Type>::value ? INDEX : INVALID_LONG_INDEX;
-	}
-};
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template<LongIndex N>
+using MakeIndexSequence = typename MakeIndexSequence_Impl<IndexConstant<N>,
+														  IndexSequence<>>::Type;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template<class... Ts>
+using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+struct TypeList_EntryT {};
+
+template <typename T, std::size_t N>
+struct TypeList_EntryN {};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename...>
+struct TypeList_Impl;
+
+template <LongIndex... Ns, typename... Ts>
+struct TypeList_Impl<IndexSequence<Ns...>, Ts...>
+	: TypeList_EntryT<Ts>...
+	, TypeList_EntryN<Ts, Ns>...
+{
+	template <typename T, std::size_t N>
+	static constexpr LongIndex select(TypeList_EntryN<T, N>) { return (LongIndex) N; }
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename...>
 class VariantT;
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 template <typename... Ts>
 struct _TL
-	: TypeListBuilder<0, Ts...>
+	: private TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
-	using Base = TypeListBuilder<0, Ts...>;
+	using Base = TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
 	using Container = VariantT<Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr LongIndex index() {
-		return Base::template index<T>();
+	static constexpr bool contains() { return std::is_base_of<TypeList_EntryT<T>, _TL>::value; }
+
+	template <typename T>
+	static constexpr
+	typename std::enable_if< std::is_base_of<TypeList_EntryT<T>, _TL>::value, LongIndex>::type
+	index() {
+		return Base::template select<T>(_TL{});
 	}
 
 	template <typename T>
-	static constexpr bool contains() {
-		return Base::template index<T>() != INVALID_LONG_INDEX;
+	static constexpr
+	typename std::enable_if<!std::is_base_of<TypeList_EntryT<T>, _TL>::value, LongIndex>::type
+	index() {
+		return INVALID_LONG_INDEX;
 	}
 };
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <>
 struct _TL<>
 	: _TL<void>
 {};
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+//------------------------------------------------------------------------------
 
 template <typename...>
 struct MergeT;
@@ -88,7 +113,7 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 	using TypeList = _TL<Ts1..., Ts2...>;
 };
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 1)
 

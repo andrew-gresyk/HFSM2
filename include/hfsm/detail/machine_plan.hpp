@@ -14,14 +14,11 @@ struct Status {
 	inline Status(const bool success_ = false,
 				  const bool failure_ = false,
 				  const bool innerTransition_ = false,
-				  const bool outerTransition_ = false)
-		: success(success_)
-		, failure(failure_)
-		, innerTransition(innerTransition_)
-		, outerTransition(outerTransition_)
-	{}
+				  const bool outerTransition_ = false);
 
 	inline explicit operator bool() const { return success || failure || innerTransition || outerTransition; }
+
+	inline void clear();
 };
 
 inline Status
@@ -56,10 +53,11 @@ struct TaskTransition {
 		, next(INVALID_LONG_INDEX)
 	{}
 
+	// TODO: add payload
 	StateID origin		= INVALID_STATE_ID;
 	StateID destination	= INVALID_STATE_ID;
-	// TODO: add payload
 
+	LongIndex prev		= INVALID_LONG_INDEX;
 	LongIndex next		= INVALID_LONG_INDEX;
 };
 
@@ -67,41 +65,67 @@ struct TaskTransition {
 
 //------------------------------------------------------------------------------
 
-template <typename, typename, LongIndex>
+template <typename, typename, LongIndex, LongIndex>
 class PlanControlT;
 
-template <typename, typename, typename, LongIndex>
+template <typename, typename, LongIndex, typename, LongIndex>
 class FullControlT;
 
 template <typename TStateList, LongIndex NPlanCapacity>
 class PlanT {
-	template <typename, typename, LongIndex>
+	template <typename, typename, LongIndex, LongIndex>
 	friend class PlanControlT;
 
-	template <typename, typename, typename, LongIndex>
+	template <typename, typename, LongIndex, typename, LongIndex>
 	friend class FullControlT;
 
 	using StateList			= TStateList;
 
-	static constexpr LongIndex STATE_COUNT	 = StateList::SIZE;
-	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
+	static constexpr LongIndex CAPACITY		= NPlanCapacity;
+	static constexpr LongIndex STATE_COUNT	= StateList::SIZE;
 
-	using Tasks				= List<TaskTransition, PLAN_CAPACITY>;
+	using Tasks				= List<TaskTransition, CAPACITY>;
 	using StateTasks		= Array<TaskIndices,   STATE_COUNT>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+public:
+	struct Iterator {
+		inline Iterator(PlanT& plan);
+
+		inline explicit operator bool() const;
+
+		inline void operator ++();
+
+		inline		 TaskTransition& operator  *()		 { return  _plan._tasks[_curr]; }
+		inline const TaskTransition& operator  *() const { return  _plan._tasks[_curr]; }
+
+		inline		 TaskTransition* operator ->()		 { return &_plan._tasks[_curr]; }
+		inline const TaskTransition* operator ->() const { return &_plan._tasks[_curr]; }
+
+		inline void remove();
+
+		inline LongIndex next() const;
+
+		PlanT& _plan;
+		LongIndex _curr;
+		LongIndex _next;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
 	inline PlanT(Tasks& tasks,
 				 StateTasks& stateTasks,
-				 const StateID plannerId)
-		: _tasks(tasks)
-		, _taskIndices(stateTasks[plannerId])
-	{}
+				 const StateID plannerId);
 
 	template <typename T>
 	static constexpr LongIndex
 	stateId()	{ return StateList::template index<T>();	}
 
 public:
+	inline explicit operator bool() const;
+
 	inline void clear();
 
 	void add(const StateID origin, const StateID destination);
@@ -109,9 +133,9 @@ public:
 	template <typename TOrigin, typename TDestination>
 	inline void add();
 
-	const TaskTransition* next() const;
+	void remove(const LongIndex task);
 
-	void advance();
+	inline Iterator begin()	{ return Iterator{*this}; }
 
 private:
 	Tasks& _tasks;

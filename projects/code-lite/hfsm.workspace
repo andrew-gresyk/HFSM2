@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="hfsm" Database="" Version="10.0.0">
+  <VirtualDirectory Name="examples"/>
+  <VirtualDirectory Name="tests">
+    <Project Name="test-gcc5" Path="test-clang/test-clang.project" Active="No"/>
+    <Project Name="test-gcc-msys" Path="test-gcc-msys/test-gcc-msys.project" Active="No"/>
+    <Project Name="test-gcc-tdm" Path="test-gcc-tdm/test-gcc-tdm.project" Active="Yes"/>
+  </VirtualDirectory>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Environment/>
+      <Project Name="test-gcc5" ConfigName="Debug"/>
+      <Project Name="test-gcc5" ConfigName="Debug"/>
+      <Project Name="test-gcc5" ConfigName="Debug"/>
+      <Project Name="test-gcc-msys" ConfigName="Debug"/>
+      <Project Name="test-gcc-tdm" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Environment/>
+      <Project Name="test-gcc5" ConfigName="Release"/>
+      <Project Name="test-gcc5" ConfigName="Release"/>
+      <Project Name="test-gcc5" ConfigName="Release"/>
+      <Project Name="test-gcc-msys" ConfigName="Release"/>
+      <Project Name="test-gcc-tdm" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

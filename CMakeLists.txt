@@ -5,10 +5,10 @@ include(GNUInstallDirs)
 
 option(HFSM_BUILD_TESTS "Enable/disable building test executable" ON)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(extra_cxx_flags "-Wall -Wno-unknown-pragmas -Werror")
+set(extra_cxx_flags "-Wall -Werror")
 set(CMAKE_CXX_FLAGS "${extra_cxx_flags} ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS "${extra_cxx_flags} ${CMAKE_C_FLAGS}")
 

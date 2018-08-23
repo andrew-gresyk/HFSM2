@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="test-gcc-tdm" Version="10.0.0" InternalType="Console">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+  </Plugins>
+  <VirtualDirectory Name="hfsm">
+    <File Name="../../../include/hfsm/machine_dev.hpp"/>
+    <File Name="../../../include/hfsm/machine.hpp"/>
+    <VirtualDirectory Name="detail">
+      <File Name="../../../include/hfsm/detail/machine_utility.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_state.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_state.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_sequence.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_sequence.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_root.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_root.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_planner.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_planner.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_plan.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_plan.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_orthogonal_sub_2.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_orthogonal_sub_1.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_orthogonal_sub.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_orthogonal.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_orthogonal.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_injections.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_injections.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_forward.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_control.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_control.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_composite_sub_2.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_composite_sub_1.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_composite_sub.hpp"/>
+      <File Name="../../../include/hfsm/detail/machine_composite.inl"/>
+      <File Name="../../../include/hfsm/detail/machine_composite.hpp"/>
+      <File Name="../../../include/hfsm/detail/lib_utility.hpp"/>
+      <File Name="../../../include/hfsm/detail/lib_type_list.hpp"/>
+      <File Name="../../../include/hfsm/detail/lib_list.inl"/>
+      <File Name="../../../include/hfsm/detail/lib_list.hpp"/>
+      <File Name="../../../include/hfsm/detail/lib_iterator.inl"/>
+      <File Name="../../../include/hfsm/detail/lib_iterator.hpp"/>
+      <File Name="../../../include/hfsm/detail/lib_array_view.inl"/>
+      <File Name="../../../include/hfsm/detail/lib_array_view.hpp"/>
+      <File Name="../../../include/hfsm/detail/lib_array.inl"/>
+      <File Name="../../../include/hfsm/detail/lib_array.hpp"/>
+      <File Name="../../../include/hfsm/detail/debug_structure_report.hpp"/>
+      <File Name="../../../include/hfsm/detail/debug_shared.hpp"/>
+      <File Name="../../../include/hfsm/detail/debug_logger_interface.hpp"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="test">
+    <File Name="../../../test/test_state_data.cpp"/>
+    <File Name="../../../test/test_shared.hpp"/>
+    <File Name="../../../test/test_shared.cpp"/>
+    <File Name="../../../test/test_planner.cpp"/>
+    <File Name="../../../test/test_lib_list.cpp"/>
+    <File Name="../../../test/test_internal_transitions.hpp"/>
+    <File Name="../../../test/test_internal_transitions.cpp"/>
+    <File Name="../../../test/main.cpp"/>
+    <File Name="../../../test/deprecated.cpp"/>
+  </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="MinGW ( gcc.exe (tdm64-1) 5.1.0 )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-O0;-Wall;-std=c++11" C_Options="-g;-O0;-Wall;-std=c++11" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="../../../external"/>
+        <IncludePath Value="../../../include"/>
+        <Preprocessor Value="_DEBUG"/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="" IntermediateDirectory="%BUILD_ROOT%/$(WorkspaceName)/$(ProjectName)-$(WorkspaceConfiguration)" Command="$(WorkspacePath)\cmake-build-$(WorkspaceConfiguration)\output\$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="CMake"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="MinGW ( gcc.exe (tdm64-1) 5.1.0 )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O2;-Wall;-std=c++11" C_Options="-O2;-Wall;-std=c++11" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="../../../external"/>
+        <IncludePath Value="../../../include"/>
+        <Preprocessor Value="NDEBUG"/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="" IntermediateDirectory="%BUILD_ROOT%/$(WorkspaceName)/$(ProjectName)-$(WorkspaceConfiguration)" Command="$(WorkspacePath)\cmake-build-$(WorkspaceConfiguration)\output\$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="CMake"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

@@ -36,10 +36,10 @@
 
 #include <assert.h>
 #include <stdint.h>
-#include <string.h>
+#include <stdlib.h>		// @GCC-7: div()
 
 #include <typeindex>
-#include <utility>
+#include <utility>		// @GCC: std::conditional<>, move(), forward()
 
 //------------------------------------------------------------------------------
 
@@ -47,6 +47,7 @@
 #include "detail/lib_iterator.hpp"
 #include "detail/lib_array_view.hpp"
 #include "detail/lib_array.hpp"
+#include "detail/lib_bit_array.hpp"
 #include "detail/lib_list.hpp"
 #include "detail/lib_type_list.hpp"
 
@@ -55,12 +56,31 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	#define HFSM_IF_LOGGER(...)		__VA_ARGS__
 	#define HFSM_LOGGER_OR(y, n)	y
 #else
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(y, n)	n
+#endif
+
+#if defined HFSM_FORCE_DEBUG_LOG
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			logger->recordMethod(STATE_ID, ID);
+	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			logger->recordMethod(STATE_ID, ID);
+#elif defined HFSM_ENABLE_LOG_INTERFACE
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			log<decltype(METHOD), ID>(*logger);
+	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			State::template log<decltype(METHOD), ID>(*logger);
+#else
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)
+	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -74,8 +94,8 @@
 //------------------------------------------------------------------------------
 
 #include "detail/machine_plan.hpp"
-#include "detail/machine_control.hpp"
 #include "detail/machine_utility.hpp"
+#include "detail/machine_control.hpp"
 #include "detail/debug_structure_report.hpp"
 #include "detail/machine_injections.hpp"
 #include "detail/machine_forward.hpp"
@@ -165,7 +185,6 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 }
 
 #include "detail/machine_state.hpp"
-#include "detail/machine_planner.hpp"
 #include "detail/machine_composite_sub.hpp"
 #include "detail/machine_composite.hpp"
 #include "detail/machine_sequence.hpp"
@@ -175,6 +194,8 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
+#undef HFSM_LOG_STATE_METHOD
+#undef HFSM_LOG_PLANNER_METHOD
 #undef HFSM_IF_STRUCTURE
 
 #ifdef _MSC_VER

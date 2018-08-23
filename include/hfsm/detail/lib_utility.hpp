@@ -16,8 +16,12 @@
 
 #ifdef _DEBUG
 	#define HSFM_IF_DEBUG(...)		__VA_ARGS__
+	#define HSFM_UNLESS_DEBUG(...)
+	#define HFSM_DEBUG_OR(y, n)		x
 #else
 	#define HSFM_IF_DEBUG(...)
+	#define HSFM_UNLESS_DEBUG(...)	__VA_ARGS__
+	#define HFSM_DEBUG_OR(y, n)		y
 #endif
 
 #ifndef NDEBUG
@@ -26,14 +30,18 @@
 	#define HSFM_IF_ASSERT(...)
 #endif
 
-//------------------------------------------------------------------------------
-
 namespace hfsm {
+
+//------------------------------------------------------------------------------
 
 using ShortIndex = uint8_t;
 static constexpr ShortIndex	INVALID_SHORT_INDEX = UINT8_MAX;
 
-// TEMP
+using ForkID	 = ShortIndex;
+static constexpr ForkID		INVALID_FORK_ID	= INVALID_SHORT_INDEX;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 using LongIndex  = uint16_t;
 static constexpr LongIndex	INVALID_LONG_INDEX	= UINT16_MAX;
 

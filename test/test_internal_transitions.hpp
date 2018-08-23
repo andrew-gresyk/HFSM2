@@ -35,6 +35,22 @@ using FSM = M::PeerRoot<
 
 //------------------------------------------------------------------------------
 
+// PeerRoot is 0
+static_assert(FSM::stateId<A>()		==  1, "");
+static_assert(FSM::stateId<A_1>()	==  2, "");
+static_assert(FSM::stateId<A_2>()	==  3, "");
+static_assert(FSM::stateId<A_2_1>()	==  4, "");
+static_assert(FSM::stateId<A_2_2>()	==  5, "");
+static_assert(FSM::stateId<B>()		==  6, "");
+static_assert(FSM::stateId<B_1>()	==  7, "");
+static_assert(FSM::stateId<B_1_1>()	==  8, "");
+static_assert(FSM::stateId<B_1_2>()	==  9, "");
+static_assert(FSM::stateId<B_2>()	== 10, "");
+static_assert(FSM::stateId<B_2_1>()	== 11, "");
+static_assert(FSM::stateId<B_2_2>()	== 12, "");
+
+//------------------------------------------------------------------------------
+
 class Timed
 	: public FSM::Bare
 {
@@ -246,18 +262,12 @@ struct B_2_2
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// PeerRoot is 0
-static_assert(FSM::stateId<A>()		==  1, "");
-static_assert(FSM::stateId<A_1>()	==  2, "");
-static_assert(FSM::stateId<A_2>()	==  3, "");
-static_assert(FSM::stateId<A_2_1>()	==  4, "");
-static_assert(FSM::stateId<A_2_2>()	==  5, "");
-static_assert(FSM::stateId<B>()		==  6, "");
-static_assert(FSM::stateId<B_1>()	==  7, "");
-static_assert(FSM::stateId<B_1_1>()	==  8, "");
-static_assert(FSM::stateId<B_1_2>()	==  9, "");
-static_assert(FSM::stateId<B_2>()	== 10, "");
-static_assert(FSM::stateId<B_2_1>()	== 11, "");
-static_assert(FSM::stateId<B_2_2>()	== 12, "");
+static_assert(FSM::Instance::DEEP_WIDTH		  ==  2, "");
+static_assert(FSM::Instance::STATE_COUNT	  == 13, "");
+static_assert(FSM::Instance::COMPOSITE_COUNT  ==  5, "");
+static_assert(FSM::Instance::ORTHOGONAL_COUNT ==  1, "");
+static_assert(FSM::Instance::FORK_COUNT		  ==  6, "");
+static_assert(FSM::Instance::PRONG_COUNT	  == 10, "");
+static_assert(FSM::Instance::WIDTH			  ==  2, "");
 
 ////////////////////////////////////////////////////////////////////////////////

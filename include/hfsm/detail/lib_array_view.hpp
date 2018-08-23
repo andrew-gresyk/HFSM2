@@ -5,7 +5,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma pack(push, 2)
+#pragma pack(push, 4)
 
 template <typename T>
 class ArrayView {

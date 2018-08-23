@@ -1,181 +1,206 @@
-#include "test_shared.hpp"
-
-//------------------------------------------------------------------------------
-
-struct Context {};
-
-using M = hfsm::Machine<Context>;
+﻿#include "test_planner.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define S(s) struct s
+namespace {
 
-using FSM = M::PeerRoot<
-				M::Composite<S(Planned),
-					M::Composite<S(Step1_BT),
-						S(Step1_1),
-						S(Step1_2),
-						S(Step1_3)
-					>,
-					M::Orthogonal<S(Forked2),
-						M::Composite<S(Step2L_Planner),
-							S(Step2L_1),
-							S(Step2L_2)
-						>,
-						M::Composite<S(Step2R_Planner),
-							S(Step2R_1),
-							S(Step2R_2)
-						>
-					>
-				>,
-				M::Composite<S(Unplanned),
-					S(Work_1),
-					S(Work_2)
-				>
-			>;
+	const Types all = {
+		FSM::stateId<Planned>(),
+		FSM::stateId<Step1_BT>(),
+		FSM::stateId<Step1_1>(),
+		FSM::stateId<Step1_2>(),
+		FSM::stateId<Step1_3>(),
+		FSM::stateId<Hybrid>(),
+		FSM::stateId<Step2L_P>(),
+		FSM::stateId<Step2L_1>(),
+		FSM::stateId<Step2L_2>(),
+		FSM::stateId<Step2R_P>(),
+		FSM::stateId<Step2R_1>(),
+		FSM::stateId<Step2R_2>(),
+		FSM::stateId<Unplanned>(),
+		FSM::stateId<Terminal>(),
+		FSM::stateId<Work_1>(),
+		FSM::stateId<Work_2>(),
+	};
 
-#undef S
-
-//------------------------------------------------------------------------------
-
-static_assert(FSM::stateId<Planned>()		 ==  1, "");
-static_assert(FSM::stateId<Step1_BT>()		 ==  2, "");
-static_assert(FSM::stateId<Step1_1>()		 ==  3, "");
-static_assert(FSM::stateId<Step1_2>()		 ==  4, "");
-static_assert(FSM::stateId<Step1_3>()		 ==  5, "");
-static_assert(FSM::stateId<Forked2>()		 ==  6, "");
-static_assert(FSM::stateId<Step2L_Planner>() ==  7, "");
-static_assert(FSM::stateId<Step2L_1>()		 ==  8, "");
-static_assert(FSM::stateId<Step2L_2>()		 ==  9, "");
-static_assert(FSM::stateId<Step2R_Planner>() == 10, "");
-static_assert(FSM::stateId<Step2R_1>()		 == 11, "");
-static_assert(FSM::stateId<Step2R_2>()		 == 12, "");
-static_assert(FSM::stateId<Unplanned>()		 == 13, "");
-static_assert(FSM::stateId<Work_1>()		 == 14, "");
-static_assert(FSM::stateId<Work_2>()		 == 15, "");
-
-////////////////////////////////////////////////////////////////////////////////
-
-struct Planned
-	: FSM::State
-{
-	void guard(FullControl& control) {
-		control._();
-	}
-
-	void enter(PlanControl& control) {
-		auto plan = control.plan();
-
-		plan.clear();
-		plan.add<Step1_BT, Forked2>();
-	}
-
-	void update(FullControl& control) {
-		control._();
-	}
-
-	void exit(PlanControl& control) {
-		control._();
-	}
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-struct Step1_BT
-	: FSM::State
-{
-	void enter(PlanControl& control) {
-		auto plan = control.plan<Step1_BT>();
-
-		plan.clear();
-
-		plan.add<Step1_1, Step1_2>();
-		plan.add<Step1_2, Step1_3>();
-	}
-};
-
-struct Step1_1
-	: FSM::State
-{};
-
-struct Step1_2
-	: FSM::State
-{};
-
-struct Step1_3
-	: FSM::State
-{};
-
-//------------------------------------------------------------------------------
-
-struct Forked2
-	: FSM::State
-{};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-struct Step2L_Planner
-	: FSM::State
-{};
-
-struct Step2L_1
-	: FSM::State
-{};
-
-struct Step2L_2
-	: FSM::State
-{};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-struct Step2R_Planner
-	: FSM::State
-{};
-
-struct Step2R_1
-	: FSM::State
-{};
-
-struct Step2R_2
-	: FSM::State
-{};
-
-//------------------------------------------------------------------------------
-
-struct Unplanned
-	: FSM::State
-{};
-
-struct Work_1
-	: FSM::State
-{};
-
-struct Work_2
-	: FSM::State
-{};
-
-////////////////////////////////////////////////////////////////////////////////
-
-static_assert(FSM::Instance::DEEP_WIDTH		 ==  2, "");
-static_assert(FSM::Instance::STATE_COUNT	 == 16, "");
-static_assert(FSM::Instance::FORK_COUNT		 ==  7, "");
-static_assert(FSM::Instance::PRONG_COUNT	 == 13, "");
+}
 
 //------------------------------------------------------------------------------
 
 TEST_CASE("Planner test", "[machine]") {
 	Context _;
-	FSM::Instance machine(_);
+	Logger logger;
 
-	WHEN("FSM is activated initially") {
+	FSM::Instance machine(_, &logger);
+	{
+		const Events reference = {
+			{ FSM::stateId<Apex>(),		Event::ENTER },
+			{ FSM::stateId<Planned>(),	Event::ENTER },
+			{ FSM::stateId<Step1_BT>(),	Event::ENTER },
+			{ FSM::stateId<Step1_1>(),	Event::ENTER },
+		};
+		logger.assertSequence(reference);
 
-		THEN("state data is not set on any states") {
-			//REQUIRE(!machine.isStateDataSet<Top>());
-		}
+		const Types active = {
+			FSM::stateId<Apex>(),
+			FSM::stateId<Planned>(),
+			FSM::stateId<Step1_BT>(),
+			FSM::stateId<Step1_1>(),
+		};
+		assertActive(machine, all, active);
 
-		AND_THEN("correctly read") {
-			//REQUIRE(machine.getStateData<Origin, bool>() == nullptr);
-		}
+		assertResumable(machine, all, {});
+	}
+
+	machine.update();
+	{
+		const Events reference = {
+			{ FSM::stateId<Apex>(),		Event::UPDATE },
+			{ FSM::stateId<Planned>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_BT>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_1>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_BT>(),	Event::RESTART, FSM::stateId<Step1_2>() },
+
+			{ FSM::stateId<Step1_2>(),	Event::GUARD  },
+
+			{ FSM::stateId<Step1_1>(),	Event::EXIT   },
+
+			{ FSM::stateId<Step1_2>(),	Event::ENTER  },
+		};
+		logger.assertSequence(reference);
+
+		const Types active = {
+			FSM::stateId<Apex>(),
+			FSM::stateId<Planned>(),
+			FSM::stateId<Step1_BT>(),
+			FSM::stateId<Step1_2>(),
+		};
+		assertActive(machine, all, active);
+
+		const Types resumable = {
+			FSM::stateId<Step1_1>(),
+		};
+		assertResumable(machine, all, resumable);
+	}
+
+	machine.update();
+	{
+		const Events reference = {
+			{ FSM::stateId<Apex>(),		Event::UPDATE },
+			{ FSM::stateId<Planned>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_BT>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_2>(),	Event::UPDATE },
+
+			{ FSM::stateId<Step1_BT>(),	Event::RESTART, FSM::stateId<Step1_3>() },
+
+			{ FSM::stateId<Step1_3>(),	Event::GUARD  },
+
+			{ FSM::stateId<Step1_2>(),	Event::EXIT   },
+
+			{ FSM::stateId<Step1_3>(),	Event::ENTER  },
+		};
+		logger.assertSequence(reference);
+
+		const Types active = {
+			FSM::stateId<Apex>(),
+			FSM::stateId<Planned>(),
+			FSM::stateId<Step1_BT>(),
+			FSM::stateId<Step1_3>(),
+		};
+		assertActive(machine, all, active);
+
+		const Types resumable = {
+			FSM::stateId<Step1_2>(),
+		};
+		assertResumable(machine, all, resumable);
+	}
+
+	machine.update();
+	{
+		const Events reference = {
+			{ FSM::stateId<Apex>(),		Event::UPDATE },
+			{ FSM::stateId<Planned>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_BT>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_3>(),	Event::UPDATE },
+			{ FSM::stateId<Planned>(),	Event::RESTART, FSM::stateId<Hybrid>() },
+
+			{ FSM::stateId<Hybrid>(),	Event::GUARD  },
+			{ FSM::stateId<Step2L_P>(),	Event::GUARD  },
+			{ FSM::stateId<Step2L_1>(),	Event::GUARD  },
+			{ FSM::stateId<Step2R_P>(),	Event::GUARD  },
+			{ FSM::stateId<Step2R_1>(),	Event::GUARD  },
+
+			{ FSM::stateId<Step1_3>(),	Event::EXIT   },
+			{ FSM::stateId<Step1_BT>(),	Event::EXIT   },
+
+			{ FSM::stateId<Hybrid>(),	Event::ENTER  },
+			{ FSM::stateId<Step2L_P>(),	Event::ENTER  },
+			{ FSM::stateId<Step2L_1>(),	Event::ENTER  },
+			{ FSM::stateId<Step2R_P>(),	Event::ENTER  },
+			{ FSM::stateId<Step2R_1>(),	Event::ENTER  },
+		};
+		logger.assertSequence(reference);
+
+		const Types active = {
+			FSM::stateId<Apex>(),
+			FSM::stateId<Planned>(),
+			FSM::stateId<Hybrid>(),
+			FSM::stateId<Step2L_P>(),
+			FSM::stateId<Step2L_1>(),
+			FSM::stateId<Step2R_P>(),
+			FSM::stateId<Step2R_1>(),
+		};
+		assertActive(machine, all, active);
+
+		const Types resumable = {
+			FSM::stateId<Step1_BT>(),
+			FSM::stateId<Step1_3>(),
+		};
+		assertResumable(machine, all, resumable);
+	}
+
+	machine.update();
+	{
+		const Events reference = {
+			{ FSM::stateId<Apex>(),		Event::UPDATE },
+			{ FSM::stateId<Planned>(),	Event::UPDATE },
+			{ FSM::stateId<Hybrid>(),	Event::UPDATE },
+			{ FSM::stateId<Step2L_P>(),	Event::UPDATE },
+			{ FSM::stateId<Step2L_1>(),	Event::UPDATE },
+			{ FSM::stateId<Step2L_1>(),	Event::RESTART, FSM::stateId<Step2L_2>() },
+
+			{ FSM::stateId<Step2R_P>(),	Event::UPDATE },
+			{ FSM::stateId<Step2R_1>(),	Event::UPDATE },
+			{ FSM::stateId<Step2R_1>(),	Event::RESTART, FSM::stateId<Step2R_2>() },
+
+			//{ FSM::stateId<Step2L_2>(),	Event::GUARD  },	// bug
+			{ FSM::stateId<Step2R_2>(),	Event::GUARD  },
+
+			{ FSM::stateId<Step2L_1>(),	Event::EXIT   },
+			{ FSM::stateId<Step2L_2>(),	Event::ENTER  },
+			{ FSM::stateId<Step2R_1>(),	Event::EXIT   },
+			{ FSM::stateId<Step2R_2>(),	Event::ENTER  },
+		};
+		logger.assertSequence(reference);
+
+		const Types active = {
+			FSM::stateId<Apex>(),
+			FSM::stateId<Planned>(),
+			FSM::stateId<Hybrid>(),
+			FSM::stateId<Step2L_P>(),
+			FSM::stateId<Step2L_2>(),
+			FSM::stateId<Step2R_P>(),
+			FSM::stateId<Step2R_2>(),
+		};
+		assertActive(machine, all, active);
+
+		const Types resumable = {
+			FSM::stateId<Step1_BT>(),
+			FSM::stateId<Step1_3>(),
+			FSM::stateId<Step2L_1>(),
+			FSM::stateId<Step2R_1>(),
+		};
+		assertResumable(machine, all, resumable);
 	}
 }
 

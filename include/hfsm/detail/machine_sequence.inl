@@ -3,56 +3,77 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_Q<TID, TA, TH, TS...>::deepGuard(FullControl& control) {
+_Q<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 	Composite::deepGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 Status
-_Q<TID, TA, TH, TS...>::deepUpdate(FullControl& control) {
-	Status status = Composite::deepUpdate(control);
-	if (status.success) {
-		auto plan = control.plan(HEAD_ID);
+_Q<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
+	assert(_fork.active != INVALID_SHORT_INDEX);
 
-		while (const TaskTransition* const step = plan.next())
-			if (step->origin)
-			{
-				control.changeTo(step->destination);
-				plan.advance();
-			}
+	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
 
-		return {false,
+	if (const Status stateStatus = _state.deepUpdate(control)) {
+		ControlLock lock{control};
+		_subStates.wideUpdate(_fork.active, control);
+
+		return stateStatus;
+	} else {
+		const Status status = _subStates.wideUpdate(_fork.active, control);
+
+		if (status.failure || status.outerTransition)
+			return status;
+		else if (status.success)
+			_success = true;
+
+		if (_success) {
+			ControlOrigin origin{control, HEAD_ID};
+
+			Plan plan = control.plan(HEAD_ID);
+
+			for (auto it = plan.begin(); it; ++it)
+				if (control.isActive(it->origin)) {
+					control.changeTo(it->destination);
+					it.remove();
+
+					_success = false;
+				}
+		}
+
+		return {_success,
 				status.failure,
 				status.innerTransition,
 				status.outerTransition};
-	} else
-		return status;
+	}
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 void
-_Q<TID, TA, TH, TS...>::deepReact(const TEvent& event,
-								  FullControl& control)
+_Q<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
+										 FullControl& control)
 {
 	Composite::template deepReact<TEvent>(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH, typename... TS>
+template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
 void
-_Q<TID, TA, TH, TS...>::deepExit(PlanControl& control) {
+_Q<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
 	Composite::deepExit(control);
 
 	auto plan = control.plan(HEAD_ID);
 	plan.clear();
+
+	_success = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

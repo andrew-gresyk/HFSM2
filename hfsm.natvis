@@ -42,11 +42,21 @@
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::StructureEntry">
-		<DisplayString Condition=" isActive">█ {prefix,sub}{name,sb}</DisplayString>
-		<DisplayString Condition="!isActive">░ {prefix,sub}{name,sb}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+	<Type Name="hfsm::detail::List&lt;*,*&gt;">
+		<DisplayString>{_count} / {CAPACITY}</DisplayString>
+		<Expand HideRawView="true">
+			<IndexListItems Condition="_count > 0">
+				<Size>CAPACITY</Size>
+				<ValueNode>_cells[$i]</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::detail::List&lt;*,*&gt;::Cell">
+		<DisplayString>{item}</DisplayString>
+	</Type>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
@@ -55,17 +65,76 @@
     <Expand HideRawView="true" />
   </Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+  <Type Name="hfsm::detail::Fork">
+    <DisplayString>{TYPE}[{(unsigned)self&amp;0xFF}]: &lt;{(unsigned)resumable&amp;0xFF}&gt; ◄ ({(unsigned)active&amp;0xFF}) ► &lt;{(unsigned)requested&amp;0xFF}&gt;</DisplayString>
+    <Expand HideRawView="true" />
+  </Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
   <Type Name="hfsm::detail::Transition">
-		<DisplayString>{type}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
-		<Expand HideRawView="true" />
-	</Type>
+    <DisplayString>{type}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
+    <Expand HideRawView="true" />
+  </Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+  <Type Name="hfsm::detail::TaskTransition">
+    <DisplayString>({origin} ► {destination})</DisplayString>
+    <Expand HideRawView="true" />
+  </Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+  <Type Name="hfsm::detail::ControlT&lt;*,*&gt;">
+    <DisplayString>{_context}</DisplayString>
+  </Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+  <Type Name="hfsm::detail::PlanControlT&lt;*,*&gt;">
+    <DisplayString>({_tasks})</DisplayString>
+  </Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+  <Type Name="hfsm::detail::TransitionControlT&lt;*,*&gt;">
+    <DisplayString>[{_status}]</DisplayString>
+  </Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+  <Type Name="hfsm::detail::FullControlT&lt;*,*&gt;">
+    <DisplayString>[{_status}] ({_tasks})</DisplayString>
+  </Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+  <Type Name="hfsm::detail::Status">
+    <DisplayString>{success} {failure} {innerTransition} {outerTransition}</DisplayString>
+    <Expand HideRawView="true" />
+  </Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm::detail::PlanT&lt;*,*&gt;">
+    <DisplayString Condition="_taskIndices.first == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
+    <DisplayString Condition="_taskIndices.first != INVALID_LONG_INDEX">{_taskIndices.first} .. {_taskIndices.last}</DisplayString>
+    <Expand HideRawView="true">
+      <Item Name="first" Condition="_taskIndices.first != INVALID_LONG_INDEX">_tasks._cells[_taskIndices.first]</Item>
+      <Item Name="last"  Condition="_taskIndices.last  != INVALID_LONG_INDEX">_tasks._cells[_taskIndices.last] </Item>
+    </Expand>
+  </Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm::detail::Fork">
-		<DisplayString>[{(unsigned)self&amp;0xF}] &lt;{(unsigned)resumable&amp;0xF}&gt; ◄ &lt;{(unsigned)active&amp;0xF}&gt; ► &lt;{(unsigned)requested&amp;0xF}&gt;</DisplayString>
+	<Type Name="hfsm::detail::PlanT&lt;*,*&gt;::Iterator">
+    <DisplayString Condition="_curr == INVALID_LONG_INDEX &amp;&amp; _next == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
+    <DisplayString Condition="_curr != INVALID_LONG_INDEX &amp;&amp; _next == INVALID_LONG_INDEX">{_plan._tasks._cells[_curr]}</DisplayString>
+    <DisplayString Condition="_curr == INVALID_LONG_INDEX &amp;&amp; _next != INVALID_LONG_INDEX">&lt;Empty&gt;, {_plan._tasks._cells[_next]}</DisplayString>
+    <DisplayString Condition="_curr != INVALID_LONG_INDEX &amp;&amp; _next != INVALID_LONG_INDEX">{_plan._tasks._cells[_curr]}, {_plan._tasks._cells[_next]}</DisplayString>
     <Expand HideRawView="true" />
   </Type>
 
@@ -122,6 +191,21 @@
 			<ExpandedItem>_container</ExpandedItem>
 		</Expand>
 	</Type>
+
+  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+  <Type Name="hfsm::StructureEntry">
+    <DisplayString Condition=" isActive">█ {prefix,sub}{name,sb}</DisplayString>
+    <DisplayString Condition="!isActive">░ {prefix,sub}{name,sb}</DisplayString>
+    <Expand HideRawView="true" />
+  </Type>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	<Type Name="Event">
+		<DisplayString>{origin} ► {target} {type}}</DisplayString>
+    <Expand HideRawView="true" />
+  </Type>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 

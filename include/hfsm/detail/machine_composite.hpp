@@ -3,12 +3,16 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID THeadID,
+template <StateID NHeadID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
 struct _C {
-	static constexpr StateID HEAD_ID = THeadID;
+	static constexpr StateID HEAD_ID  = NHeadID;
+	static constexpr StateID COMPO_ID = NCompoID;
+	static constexpr StateID ORTHO_ID = NOrthoID;
 
 	using Args				= TArgs;
 	using Head				= THead;
@@ -18,20 +22,20 @@ struct _C {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT	<Context, StateList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT	<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT	<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using ControlLock		= ControlLockT	<Context, StateList, PayloadList>;
-	using ControlRegion		= ControlRegionT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT	<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using ControlLock		= ControlLockT	<Context, StateList, Args::FORK_COUNT, PayloadList>;
+	using ControlRegion		= ControlRegionT<Context, StateList, Args::FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT	<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using State				= _P <HEAD_ID,	   Args, Head>;
-	using SubStates			= _CS<HEAD_ID + 1, Args, 0, TSubStates...>;
+	using State				= _S <HEAD_ID, Args, Head>;
+	using SubStates			= _CS<HEAD_ID + 1, COMPO_ID + 1, ORTHO_ID, Args, 0, TSubStates...>;
 	using Forward			= _CF<Head, TSubStates...>;
 	using SubStateList		= typename Forward::StateList;
 
-	_C(StateRegistry& stateRegistry,
+	_C(StateParents& stateParents,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);

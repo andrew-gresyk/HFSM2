@@ -3,18 +3,22 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID, typename, ShortIndex, typename...>
+template <StateID, ForkID, ForkID, typename, ShortIndex, typename...>
 struct _OS;
 
 //------------------------------------------------------------------------------
 
-template <StateID TInitialID,
+template <StateID NInitialID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
-struct _OS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
-	static constexpr StateID INITIAL_ID		= TInitialID;
+struct _OS<NInitialID, NCompoID, NOrthoID, TArgs, NIndex, TInitial, TRemaining...> {
+	static constexpr StateID   INITIAL_ID	= NInitialID;
+	static constexpr StateID   COMPO_ID		= NCompoID;
+	static constexpr StateID   ORTHO_ID		= NOrthoID;
 	static constexpr LongIndex PRONG_INDEX	= NIndex;
 
 	using Args				= TArgs;
@@ -24,18 +28,21 @@ struct _OS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT<Context, StateList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using FullControl		= FullControlT<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using FullControl		= FullControlT<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using Initial			= typename WrapMaterial<INITIAL_ID, Args, TInitial>::Type;
+	using Initial			= typename WrapMaterial<INITIAL_ID, COMPO_ID, ORTHO_ID, Args, TInitial>::Type;
 	using InitialForward	= typename WrapForward<TInitial>::Type;
-	using Remaining			= _OS<INITIAL_ID + InitialForward::STATE_COUNT, Args, PRONG_INDEX + 1, TRemaining...>;
+	using Remaining			= _OS<INITIAL_ID + InitialForward::STATE_COUNT,
+								  COMPO_ID + InitialForward::COMPOSITE_COUNT,
+								  ORTHO_ID + InitialForward::ORTHOGONAL_COUNT,
+								  Args, PRONG_INDEX + 1, TRemaining...>;
 	using Forward			= _OSF<TInitial, TRemaining...>;
 
-	_OS(StateRegistry& stateRegistry,
+	_OS(StateParents& stateParents,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);
@@ -77,12 +84,16 @@ struct _OS<TInitialID, TArgs, NIndex, TInitial, TRemaining...> {
 
 //------------------------------------------------------------------------------
 
-template <StateID TInitialID,
+template <StateID NInitialID,
+		  ForkID NCompoID,
+		  ForkID NOrthoID,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial>
-struct _OS<TInitialID, TArgs, NIndex, TInitial> {
-	static constexpr StateID INITIAL_ID		= TInitialID;
+struct _OS<NInitialID, NCompoID, NOrthoID, TArgs, NIndex, TInitial> {
+	static constexpr StateID   INITIAL_ID	= NInitialID;
+	static constexpr StateID   COMPO_ID		= NCompoID;
+	static constexpr StateID   ORTHO_ID		= NOrthoID;
 	static constexpr LongIndex PRONG_INDEX	= NIndex;
 
 	using Args				= TArgs;
@@ -92,16 +103,16 @@ struct _OS<TInitialID, TArgs, NIndex, TInitial> {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT<Context, StateList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using PlanControl		= PlanControlT<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using FullControl		= FullControlT<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using FullControl		= FullControlT<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using Initial			= typename WrapMaterial<INITIAL_ID, Args, TInitial>::Type;
+	using Initial			= typename WrapMaterial<INITIAL_ID, COMPO_ID, ORTHO_ID, Args, TInitial>::Type;
 	using Forward			= _OSF<TInitial>;
 
-	_OS(StateRegistry& stateRegistry,
+	_OS(StateParents& stateParents,
 		const ShortIndex fork,
 		Parents& forkParents,
 		ForkPointers& forkPointers);

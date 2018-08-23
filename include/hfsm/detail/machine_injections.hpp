@@ -5,21 +5,29 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext, typename TStateList, typename TPayloadList, LongIndex NPlanCapacity>
+template <typename TContext,
+		  typename TStateList,
+		  LongIndex NForkCount,
+		  typename TPayloadList,
+		  LongIndex NPlanCapacity>
 class Bare {
 	template <typename...>
 	friend struct _B;
 
 protected:
+	using Context			= TContext;
+	using StateList			= TStateList;
+
+	static constexpr LongIndex STATE_COUNT	 = StateList::SIZE;
+	static constexpr LongIndex FORK_COUNT	 = NForkCount;
 	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
 
-	using Context			= TContext;
-	using Control			= ControlT	  <Context>;
-	using StateList			= TStateList;
-	using PlanControl		= PlanControlT<Context, StateList, PLAN_CAPACITY>;
+	using Control			= ControlT			<Context, StateList, FORK_COUNT>;
+	using PlanControl		= PlanControlT		<Context, StateList, FORK_COUNT, PLAN_CAPACITY>;
+	using Plan				= typename PlanControl::Plan;
 	using PayloadList		= TPayloadList;
-	using TransitionControl = TransitionControlT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT		<Context, StateList, PayloadList, PLAN_CAPACITY>;
+	using TransitionControl = TransitionControlT<Context, StateList, FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT		<Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
 
 public:
 	inline void preGuard (Context&)												{}
@@ -85,8 +93,8 @@ struct _B<TFirst>
 	stateId()						{ return StateList::template index<T>();	}
 };
 
-template <typename TContext, typename TStateList, typename TPayloadList, LongIndex NPlanCapacity>
-using State = _B<Bare<TContext, TStateList, TPayloadList, NPlanCapacity>>;
+template <typename TContext, typename TStateList, LongIndex NForkCount, typename TPayloadList, LongIndex NPlanCapacity>
+using State = _B<Bare<TContext, TStateList, NForkCount, TPayloadList, NPlanCapacity>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

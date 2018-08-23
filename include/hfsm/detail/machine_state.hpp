@@ -17,17 +17,17 @@ struct _S {
 	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateRegistry		= Array<Parent, StateList::SIZE>;
-	using Control			= ControlT			<Context>;
-	using ControlOrigin		= ControlOriginT	<Context>;
-	using PlanControl		= PlanControlT		<Context, StateList, Args::PLAN_CAPACITY>;
-	using Transition		= TransitionT		<PayloadList>;
-	using TransitionControl	= TransitionControlT<Context, StateList, PayloadList>;
-	using FullControl		= FullControlT		<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, StateList::SIZE>;
+	using Control			= ControlT			   <Context, StateList, Args::FORK_COUNT>;
+	using ControlOrigin		= ControlOriginT	   <Context, StateList, Args::FORK_COUNT>;
+	using PlanControl		= PlanControlT		   <Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
+	using Transition		= TransitionT		   <PayloadList>;
+	using TransitionControl	= TransitionControlT   <Context, StateList, Args::FORK_COUNT, PayloadList>;
+	using FullControl		= FullControlT		   <Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	using StateBase			= ::hfsm::detail::State<Context, StateList, PayloadList, Args::PLAN_CAPACITY>;
+	using StateBase			= ::hfsm::detail::State<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
 
-	_S(StateRegistry& stateRegistry,
+	_S(StateParents& stateParents,
 	   const Parent parent,
 	   Parents& forkParents,
 	   ForkPointers& forkPointers);

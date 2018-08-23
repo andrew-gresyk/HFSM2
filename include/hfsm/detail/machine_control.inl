@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC>
+template <typename TC, typename TSL, LongIndex NFC>
 void
-ControlT<TC>::setOrigin(const StateID id) {
+ControlT<TC, TSL, NFC>::setOrigin(const StateID id) {
 	//assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//assert(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
 
@@ -16,9 +16,9 @@ ControlT<TC>::setOrigin(const StateID id) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC>
+template <typename TC, typename TSL, LongIndex NFC>
 void
-ControlT<TC>::resetOrigin(const StateID id) {
+ControlT<TC, TSL, NFC>::resetOrigin(const StateID id) {
 	//assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//assert(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
 
@@ -29,9 +29,9 @@ ControlT<TC>::resetOrigin(const StateID id) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC>
-ControlOriginT<TC>::ControlOriginT(Control& control_,
-								   const StateID id)
+template <typename TC, typename TSL, LongIndex NFC>
+ControlOriginT<TC, TSL, NFC>::ControlOriginT(Control& control_,
+											 const StateID id)
 	: control{control_}
 	, prevId(control._originId)
 {
@@ -40,16 +40,16 @@ ControlOriginT<TC>::ControlOriginT(Control& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TC>
-ControlOriginT<TC>::~ControlOriginT() {
+template <typename TC, typename TSL, LongIndex NFC>
+ControlOriginT<TC, TSL, NFC>::~ControlOriginT() {
 	control.resetOrigin(prevId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::changeTo(const StateID stateId) {
+TransitionControlT<TC, TSL, NFC, TPL>::changeTo(const StateID stateId) {
 	if (!_locked) {
 		const Transition transition{TransitionType::RESTART, stateId};
 		_requests << transition;
@@ -59,7 +59,7 @@ TransitionControlT<TC, TSL, TPL>::changeTo(const StateID stateId) {
 		else
 			_status.outerTransition = true;
 
-	#ifdef HFSM_ENABLE_LOG_INTERFACE
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 		if (Control::_logger)
 			Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::RESTART, stateId);
 	#endif
@@ -68,9 +68,9 @@ TransitionControlT<TC, TSL, TPL>::changeTo(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::resume(const StateID stateId) {
+TransitionControlT<TC, TSL, NFC, TPL>::resume(const StateID stateId) {
 	if (!_locked) {
 		const Transition transition{TransitionType::RESUME, stateId};
 		_requests << transition;
@@ -80,7 +80,7 @@ TransitionControlT<TC, TSL, TPL>::resume(const StateID stateId) {
 		else
 			_status.outerTransition = true;
 
-	#ifdef HFSM_ENABLE_LOG_INTERFACE
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 		if (Control::_logger)
 			Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::RESUME, stateId);
 	#endif
@@ -89,13 +89,13 @@ TransitionControlT<TC, TSL, TPL>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::schedule(const StateID stateId) {
+TransitionControlT<TC, TSL, NFC, TPL>::schedule(const StateID stateId) {
 	const Transition transition{TransitionType::SCHEDULE, stateId};
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (Control::_logger)
 		Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::SCHEDULE, stateId);
 #endif
@@ -103,10 +103,10 @@ TransitionControlT<TC, TSL, TPL>::schedule(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::setRegion(const StateID id,
-											const LongIndex size)
+TransitionControlT<TC, TSL, NFC, TPL>::setRegion(const StateID id,
+												 const LongIndex size)
 {
 	if (_regionId == INVALID_STATE_ID) {
 		assert(_regionSize == INVALID_LONG_INDEX);
@@ -126,10 +126,10 @@ TransitionControlT<TC, TSL, TPL>::setRegion(const StateID id,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, typename TPL>
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
 void
-TransitionControlT<TC, TSL, TPL>::resetRegion(const StateID id,
-											  const LongIndex size)
+TransitionControlT<TC, TSL, NFC, TPL>::resetRegion(const StateID id,
+												   const LongIndex size)
 {
 	assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 
@@ -144,8 +144,8 @@ TransitionControlT<TC, TSL, TPL>::resetRegion(const StateID id,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, typename TPL>
-ControlLockT<TC, TSL, TPL>::ControlLockT(TransitionControl& control_)
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+ControlLockT<TC, TSL, NFC, TPL>::ControlLockT(TransitionControl& control_)
 	: control(!control_._locked ? &control_ : nullptr)
 {
 	if (control)
@@ -154,18 +154,18 @@ ControlLockT<TC, TSL, TPL>::ControlLockT(TransitionControl& control_)
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, typename TPL>
-ControlLockT<TC, TSL, TPL>::~ControlLockT() {
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+ControlLockT<TC, TSL, NFC, TPL>::~ControlLockT() {
 	if (control)
 		control->_locked = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, typename TPL>
-ControlRegionT<TC, TSL, TPL>::ControlRegionT(TransitionControl& control_,
-											 const StateID id,
-											 const LongIndex size)
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+ControlRegionT<TC, TSL, NFC, TPL>::ControlRegionT(TransitionControl& control_,
+												  const StateID id,
+												  const LongIndex size)
 	: control{control_}
 	, prevId(control._regionId)
 	, prevSize(control._regionSize)
@@ -175,9 +175,11 @@ ControlRegionT<TC, TSL, TPL>::ControlRegionT(TransitionControl& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, typename TPL>
-ControlRegionT<TC, TSL, TPL>::~ControlRegionT() {
+template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+ControlRegionT<TC, TSL, NFC, TPL>::~ControlRegionT() {
 	control.resetRegion(prevId, prevSize);
+
+	control._status.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

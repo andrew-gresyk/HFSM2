@@ -2,7 +2,6 @@
 
 #define HFSM_ENABLE_STRUCTURE_REPORT
 #define HFSM_ENABLE_LOG_INTERFACE
-#define HFSM_ENABLE_ALIGNMENT_CHEKS
 #include <hfsm/machine.hpp>
 
 #include <catch2/catch.hpp>
@@ -30,21 +29,28 @@ struct Event {
 	Event(const hfsm::StateID origin_,
 		  const Enum type_)
 		: origin(origin_)
-		, target(hfsm::INVALID_STATE_ID)
 		, type(type_)
+		, target(hfsm::INVALID_STATE_ID)
+	{}
+
+	Event(const Enum type_,
+		  const hfsm::StateID target_)
+		: origin(hfsm::INVALID_STATE_ID)
+		, type(type_)
+		, target(target_)
 	{}
 
 	Event(const hfsm::StateID origin_,
 		  const Enum type_,
 		  const hfsm::StateID target_)
 		: origin(origin_)
-		, target(target_)
 		, type(type_)
+		, target(target_)
 	{}
 
 	hfsm::StateID origin;
-	hfsm::StateID target;
 	Enum type;
+	hfsm::StateID target;
 };
 using Events = std::vector<Event>;
 
@@ -95,21 +101,6 @@ void assertResumable(TMachine& machine,
 			REQUIRE( machine.isResumable(type));
 		else
 			REQUIRE(!machine.isResumable(type));
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TMachine>
-void assertScheduled(TMachine& machine,
-					 const Types& all,
-					 const Types& toCheck)
-{
-	for (const auto& type : all) {
-		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.isScheduled(type));
-		else
-			REQUIRE(!machine.isScheduled(type));
 	}
 }
 

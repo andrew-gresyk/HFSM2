@@ -7,7 +7,7 @@ template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::_R(Context& context
 						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
-	, _apex{_stateRegistry, Parent{}, _forkParents, _forkPointers}
+	, _apex{_registry.stateParents, Parent{}, _registry.forkParents, _registry.forkPointers}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
 	HFSM_IF_STRUCTURE(getStateNames());
@@ -16,7 +16,11 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 		payload.reset();
 
 	{
-		PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
+		PlanControl control{_context,
+							_registry,
+							_tasks,
+							_stateTasks,
+							HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepEnterInitial(control);
 
 		HSFM_IF_DEBUG(verifyPlans());
@@ -29,7 +33,11 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::~_R() {
-	PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context,
+						_registry,
+						_tasks,
+						_stateTasks,
+						HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepExit(control);
 
 	HSFM_IF_DEBUG(verifyPlans());
@@ -40,8 +48,13 @@ _R<TC, TG, TPL, TA>::~_R() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::update() {
-	FullControl transitionControl(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
-	_apex.deepUpdate(transitionControl);
+	FullControl control(_context,
+						_registry,
+						_requests,
+						_tasks,
+						_stateTasks,
+						HFSM_LOGGER_OR(_logger, nullptr));
+	_apex.deepUpdate(control);
 
 	HSFM_IF_DEBUG(verifyPlans());
 
@@ -57,7 +70,12 @@ template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TEvent>
 void
 _R<TC, TG, TPL, TA>::react(const TEvent& event) {
-	FullControl control(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
+	FullControl control(_context,
+						_registry,
+						_requests,
+						_tasks,
+						_stateTasks,
+						HFSM_LOGGER_OR(_logger, nullptr));
 	_apex.deepReact(event, control);
 
 	HSFM_IF_DEBUG(verifyPlans());
@@ -76,7 +94,7 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
 	const Transition transition(Transition::Type::RESTART, stateId);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESTART, stateId);
 #endif
@@ -90,7 +108,7 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId) {
 	const Transition transition(Transition::Type::RESUME, stateId);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, stateId);
 #endif
@@ -104,7 +122,7 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 	const Transition transition(Transition::Type::SCHEDULE, stateId);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, stateId);
 #endif
@@ -121,7 +139,7 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 	const Transition transition(Transition::Type::RESTART, stateId, payload);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESTART, stateId);
 #endif
@@ -138,7 +156,7 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 	const Transition transition(Transition::Type::RESUME, stateId, payload);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::RESUME, stateId);
 #endif
@@ -155,7 +173,7 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 	const Transition transition(Transition::Type::SCHEDULE, stateId, payload);
 	_requests << transition;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, LoggerInterface::Transition::SCHEDULE, stateId);
 #endif
@@ -218,66 +236,6 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TPL, typename TA>
-bool
-_R<TC, TG, TPL, TA>::isActive(const StateID stateId) const {
-	assert(stateId < Payloads::CAPACITY);
-
-	if (stateId < Payloads::CAPACITY)
-		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
-			const auto& fork = *_forkPointers[parent.fork];
-
-			if (fork.active != INVALID_SHORT_INDEX)
-				return parent.prong == fork.active;
-		}
-
-	return false;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-bool
-_R<TC, TG, TPL, TA>::isResumable(const StateID stateId) const {
-	assert(stateId < Payloads::CAPACITY);
-
-	if (stateId < Payloads::CAPACITY)
-		for (auto parent = _stateRegistry[stateId]; parent; parent = _forkParents[parent.fork]) {
-			const auto& fork = *_forkPointers[parent.fork];
-
-			if (fork.active != INVALID_SHORT_INDEX)
-				return parent.prong == fork.resumable;
-		}
-
-	return false;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, typename TG, typename TPL, typename TA>
-template <typename T>
-bool
-_R<TC, TG, TPL, TA>::isActive() const {
-	constexpr auto id = stateId<T>();
-	static_assert(id != INVALID_STATE_ID, "State not in FSM");
-
-	return isActive(id);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-template <typename T>
-bool
-_R<TC, TG, TPL, TA>::isResumable() const {
-	constexpr auto id = stateId<T>();
-	static_assert(id != INVALID_STATE_ID, "State not in FSM");
-
-	return isResumable(id);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::processTransitions() {
 	assert(_requests.count());
@@ -312,7 +270,12 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 		_requests.clear();
 
 		if (changeCount > 0) {
-			FullControl substitutionControl(_context, _requests, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr));
+			FullControl substitutionControl(_context,
+											_registry,
+											_requests,
+											_tasks,
+											_stateTasks,
+											HFSM_LOGGER_OR(_logger, nullptr));
 			_apex.deepForwardGuard(substitutionControl);
 
 			HSFM_IF_DEBUG(verifyPlans());
@@ -325,7 +288,11 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 	}
 
 	{
-		PlanControl control{_context, _tasks, _stateTasks, HFSM_LOGGER_OR(_logger, nullptr)};
+		PlanControl control{_context,
+							_registry,
+							_tasks,
+							_stateTasks,
+							HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepChangeToRequested(control);
 
 		HSFM_IF_DEBUG(verifyPlans());
@@ -341,8 +308,8 @@ void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 	assert(STATE_COUNT > request.stateId);
 
-	for (auto parent = _stateRegistry[request.stateId]; parent; parent = _forkParents[parent.fork]) {
-		auto& fork = *_forkPointers[parent.fork];
+	for (auto parent = _registry.stateParents[request.stateId]; parent; parent = _registry.forkParents[parent.fork]) {
+		auto& fork = *_registry.forkPointers[parent.fork];
 
 		fork.requested = parent.prong;
 	}
@@ -357,8 +324,8 @@ void
 _R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
 	assert(STATE_COUNT > request.stateId);
 
-	const auto parent = _stateRegistry[request.stateId];
-	auto& fork = *_forkPointers[parent.fork];
+	const auto parent = _registry.stateParents[request.stateId];
+	auto& fork = *_registry.forkPointers[parent.fork];
 
 	fork.resumable = parent.prong;
 }

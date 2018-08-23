@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 
 namespace hfsm {
 

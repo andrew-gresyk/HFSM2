@@ -6,7 +6,7 @@ using List = hfsm::detail::List<unsigned, 16>;
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("list<> test", "[lib]") {
+TEST_CASE("List<> test", "[lib]") {
 	List list;
 	constexpr auto CAPACITY = List::CAPACITY;
 

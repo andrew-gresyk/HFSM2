@@ -5,100 +5,98 @@ namespace detail {
 
 namespace {
 
-template <StateID TID, typename TC, typename TSL, typename TPL, LongIndex NPC, typename TH>
-struct Register {
-	using StateRegistry = Array<Parent, TSL::SIZE>;
+template <StateID NS, typename TC, typename TSL, LongIndex NFC, typename TPL, LongIndex NPC, typename TH>
+struct RegisterT {
+	using StateParents = Array<Parent, TSL::SIZE>;
 
 	static inline void
-	execute(StateRegistry& stateRegistry, const Parent parent) {
+	execute(StateParents& stateParents, const Parent parent) {
 		static constexpr auto TYPE_ID = TSL::template index<TH>();
-		assertEquality<TID, TYPE_ID>();
+		assertEquality<NS, TYPE_ID>();
 
-		stateRegistry[TID] = parent;
+		stateParents[NS] = parent;
 	}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TC, typename TSL, typename TPL, LongIndex NPC>
-struct Register<TID, TC, TSL, TPL, NPC, State<TC, TSL, TPL, NPC>> {
-	using StateRegistry = Array<Parent, TSL::SIZE>;
+template <StateID NS, typename TC, typename TSL, LongIndex NFC, typename TPL, LongIndex NPC>
+struct RegisterT<NS, TC, TSL, NFC, TPL, NPC, State<TC, TSL, NFC, TPL, NPC>> {
+	using StateParents = Array<Parent, TSL::SIZE>;
 
 	static inline void
-	execute(StateRegistry&, const Parent) {}
+	execute(StateParents&, const Parent) {}
 };
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TID, typename TA, typename TH>
-_S<TID, TA, TH>::_S(StateRegistry& stateRegistry,
+template <StateID NS, typename TA, typename TH>
+_S<NS, TA, TH>::_S(StateParents& stateParents,
 					const Parent parent,
 					Parents& /*forkParents*/,
 					ForkPointers& /*forkPointers*/)
 {
-	Register<STATE_ID, Context, StateList, PayloadList, Args::PLAN_CAPACITY, Head>::execute(stateRegistry, parent);
+	using Register = RegisterT<STATE_ID,
+							   Context,
+							   StateList,
+							   Args::FORK_COUNT,
+							   PayloadList,
+							   Args::PLAN_CAPACITY,
+							   Head>;
+	Register::execute(stateParents, parent);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 bool
-_S<TID, TA, TH>::deepGuard(FullControl& control) {
-	const auto requestCountBefore = control._requests.count();
-
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(&Head::guard), LoggerInterface::Method::GUARD>(*logger);
-#endif
+_S<NS, TA, TH>::deepGuard(FullControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::guard, ::hfsm::Method::GUARD);
 
 	ControlOrigin origin{control, STATE_ID};
 
+	const auto requestCountBefore = control._requests.count();
+
 	_head.widePreGuard(control.context());
-	_head.guard((TransitionControl&) control);
+	_head.guard(control);
 
 	return requestCountBefore < control._requests.count();
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 void
-_S<TID, TA, TH>::deepEnterInitial(PlanControl& control) {
+_S<NS, TA, TH>::deepEnterInitial(PlanControl& control) {
 	deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 void
-_S<TID, TA, TH>::deepEnter(PlanControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(&Head::enter), LoggerInterface::Method::ENTER>(*logger);
-#endif
+_S<NS, TA, TH>::deepEnter(PlanControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::enter, ::hfsm::Method::ENTER);
 
 	ControlOrigin origin{control, STATE_ID};
 
 	_head.widePreEnter(control.context());
-	_head.enter((Control&) control);
+	_head.enter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 Status
-_S<TID, TA, TH>::deepUpdate(FullControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(&Head::update), LoggerInterface::Method::UPDATE>(*logger);
-#endif
+_S<NS, TA, TH>::deepUpdate(FullControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::update, ::hfsm::Method::UPDATE);
 
 	ControlOrigin origin{control, STATE_ID};
 
 	_head.widePreUpdate(control.context());
-	_head.update((TransitionControl&) control);
+	_head.update(control);
 	// TODO: _head.widePostUpdate(control.context());
 
 	return control._status;
@@ -106,40 +104,33 @@ _S<TID, TA, TH>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 template <typename TEvent>
 void
-_S<TID, TA, TH>::deepReact(const TEvent& event,
+_S<NS, TA, TH>::deepReact(const TEvent& event,
 						   FullControl& control)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, TransitionControl&)>(&Head::react);
-
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(reaction), LoggerInterface::Method::REACT>(*logger);
-#endif
+	HFSM_LOG_STATE_METHOD(reaction, ::hfsm::Method::REACT);
 
 	ControlOrigin origin{control, STATE_ID};
 
 	_head.widePreReact(event, control.context());
 
 	//_head.react(event, control);
-	(_head.*reaction)(event, (TransitionControl&) control);
+	(_head.*reaction)(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 void
-_S<TID, TA, TH>::deepExit(PlanControl& control) {
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	if (auto* const logger = control.logger())
-		log<decltype(&Head::exit), LoggerInterface::Method::EXIT>(*logger);
-#endif
+_S<NS, TA, TH>::deepExit(PlanControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::exit, ::hfsm::Method::EXIT);
 
 	ControlOrigin origin{control, STATE_ID};
 
-	_head.exit((Control&) control);
+	_head.exit(control);
 	_head.widePostExit(control.context());
 }
 
@@ -147,9 +138,9 @@ _S<TID, TA, TH>::deepExit(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 const char*
-_S<TID, TA, TH>::name() {
+_S<NS, TA, TH>::name() {
 	if (isBare())
 		return "";
 	else {
@@ -183,9 +174,9 @@ _S<TID, TA, TH>::name() {
 
 //------------------------------------------------------------------------------
 
-template <StateID TID, typename TA, typename TH>
+template <StateID NS, typename TA, typename TH>
 void
-_S<TID, TA, TH>::deepGetNames(const LongIndex parent,
+_S<NS, TA, TH>::deepGetNames(const LongIndex parent,
 							  const RegionType region,
 							  const ShortIndex depth,
 							  StructureStateInfos& _stateInfos) const

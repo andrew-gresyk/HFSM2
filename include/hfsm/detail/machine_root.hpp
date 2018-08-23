@@ -22,33 +22,34 @@ class _R final {
 
 	static constexpr LongIndex PLAN_CAPACITY	 = Forward::PLAN_CAPACITY;
 
-	using Args				= ArgsT<Context, Config, StateList, PayloadList, PLAN_CAPACITY>;
+public:
+	static constexpr LongIndex REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
+	static constexpr LongIndex DEEP_WIDTH		 = ForwardApex::DEEP_WIDTH;
+	static constexpr LongIndex STATE_COUNT		 = ForwardApex::STATE_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	 = ForwardApex::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	 = ForwardApex::ORTHOGONAL_COUNT;
+	static constexpr LongIndex FORK_COUNT		 = ForwardApex::FORK_COUNT;
+	static constexpr LongIndex PRONG_COUNT		 = ForwardApex::PRONG_COUNT;
+	static constexpr LongIndex WIDTH			 = ForwardApex::WIDTH;
+
+private:
+	using Args				= ArgsT<Context, Config, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
 	using PlanControl		= typename Forward::PlanControl;
 	using Payload			= typename PayloadList::Container;
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionControl	= typename Forward::TransitionControl;
 	using FullControl		= typename Forward::FullControl;
 
-public:
-	static constexpr LongIndex REVERSE_DEPTH = ForwardApex::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH	 = ForwardApex::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT	 = ForwardApex::STATE_COUNT;
-	static constexpr LongIndex FORK_COUNT	 = ForwardApex::FORK_COUNT;
-	static constexpr LongIndex PRONG_COUNT	 = ForwardApex::PRONG_COUNT;
-	static constexpr LongIndex WIDTH		 = ForwardApex::WIDTH;
-
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using StateRegistry			 = Array<Parent,		STATE_COUNT>;
-	using Payloads				 = Array<Payload,		STATE_COUNT>;
+	using Registry				 = RegistryT<STATE_COUNT, FORK_COUNT>;
 
-	using ForkParents			 = Array<Parent,		FORK_COUNT>;
-	using ForkPointerStorage	 = Array<Fork*,			FORK_COUNT>;
+	using Payloads				 = Array<Payload,		STATE_COUNT>;
 	using TransitionQueueStorage = Array<Transition,	FORK_COUNT>;
 
-	using MaterialApex			 = typename WrapMaterial<0, Args, Apex>::Type;
+	using MaterialApex			 = typename WrapMaterial<0, 0, 0, Args, Apex>::Type;
 	using Tasks					 = typename FullControl::Tasks;
 	using StateTasks			 = Array<TaskIndices,	STATE_COUNT>;			// TODO: change to ForkTasks
 
@@ -143,20 +144,19 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline bool isActive(const StateID stateId) const;
-
-	inline bool isResumable(const StateID stateId) const;
+	inline bool isActive   (const StateID stateId) const	{ return ::hfsm::detail::isActive	(_registry, stateId);	}
+	inline bool isResumable(const StateID stateId) const	{ return ::hfsm::detail::isResumable(_registry, stateId);	}
 
 	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
-	template <typename T>
-	inline bool isActive() const;
+	template <typename TState>
+	inline bool isActive   () const							{ return isActive	(stateId<TState>());			}
 
-	template <typename T>
-	inline bool isResumable() const;
+	template <typename TState>
+	inline bool isResumable() const							{ return isResumable(stateId<TState>());			}
 
-	template <typename T>
-	inline bool isScheduled() const							{ return isResumable<T>();							}
+	template <typename TState>
+	inline bool isScheduled() const							{ return isResumable<TState>();						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -165,7 +165,7 @@ public:
 	const MachineActivity&  activity()  const				{ return _activityHistory;							}
 #endif
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	void attachLogger(LoggerInterface* const logger)		{ _logger = logger;									}
 #endif
 
@@ -187,17 +187,14 @@ protected:
 private:
 	Context& _context;
 
-	StateRegistry _stateRegistry;
+	Registry _registry;
+	Tasks _tasks;
+	StateTasks _stateTasks;
+
 	Payloads _transitionPayloads;
-
-	ForkParents  _forkParents;
-	ForkPointerStorage _forkPointers;
-
 	TransitionQueueStorage _requests;
 
 	MaterialApex _apex;
-	Tasks _tasks;
-	StateTasks _stateTasks;
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	Prefixes _prefixes;
