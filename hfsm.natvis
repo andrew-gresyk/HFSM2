@@ -153,7 +153,7 @@
   <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm::detail::_C&lt;*&gt;">
-    <DisplayString>({_state})</DisplayString>
+    <DisplayString>({_headState})</DisplayString>
   </Type>
 
   <Type Name="hfsm::detail::_CS&lt;*&gt;">
@@ -165,7 +165,7 @@
   <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm::detail::_O&lt;*&gt;">
-    <DisplayString>[{_state}]</DisplayString>
+    <DisplayString>[{_headState}]</DisplayString>
   </Type>
 
   <Type Name="hfsm::detail::_OS&lt;*&gt;">

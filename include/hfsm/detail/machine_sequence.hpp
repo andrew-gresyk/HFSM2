@@ -3,38 +3,34 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NHeadID,
-		  ForkID NCompoID,
-		  ForkID NOrthoID,
+template <StateID NHeadIndex,
+		  ShortIndex NCompoIndex,
+		  ShortIndex NOrthoIndex,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
 struct _Q
-	: _C<NHeadID, NCompoID, NOrthoID, TArgs, THead, TSubStates...>
+	: _C<NHeadIndex, NCompoIndex, NOrthoIndex, TArgs, THead, TSubStates...>
 {
-	static constexpr StateID HEAD_ID  = NHeadID;
-	static constexpr StateID COMPO_ID = NCompoID;
-	static constexpr StateID ORTHO_ID = NOrthoID;
+	static constexpr StateID	HEAD_ID		= NHeadIndex;
+	static constexpr ShortIndex COMPO_INDEX	= NCompoIndex;
+	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
 
 	using Args				= TArgs;
 	using Head				= THead;
-	using Composite			= _C<HEAD_ID, COMPO_ID, ORTHO_ID, Args, Head, TSubStates...>;
+	using Composite			= _C<HEAD_ID, COMPO_INDEX, ORTHO_INDEX, Args, Head, TSubStates...>;
+	using HeadState			= typename Composite::HeadState;
 
-	using Context			= typename Args::Context;
-	using Config			= typename Args::Config;
-	using StateList			= typename Args::StateList;
-	using PayloadList		= typename Args::PayloadList;
-
-	using PlanControl		= typename Composite::PlanControl;
-	using Plan				= typename PlanControl::Plan;
 	using ControlLock		= typename Composite::ControlLock;
 	using ControlRegion		= typename Composite::ControlRegion;
+	using PlanControl		= typename Composite::PlanControl;
 	using FullControl		= typename Composite::FullControl;
-	using HeadState			= typename Composite::State;
+
+	using Plan				= typename PlanControl::Plan;
 
 	using SubStateList		= typename Composite::SubStateList;
 
-	using ControlOrigin		= ControlOriginT<Context, StateList, Args::FORK_COUNT>;
+	using ControlOrigin		= ControlOriginT<Args>;
 
 	using Composite::Composite;
 
@@ -48,11 +44,10 @@ struct _Q
 
 	inline void	  deepExit  (PlanControl& control);
 
-	using Composite::_fork;
-	using Composite::_state;
+	using Composite::_headState;
 	using Composite::_subStates;
 
-	bool _success = false;
+	bool _success = false;	// TODO: use BitArray for orthogonal
 };
 
 ////////////////////////////////////////////////////////////////////////////////

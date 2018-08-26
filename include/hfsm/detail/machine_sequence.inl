@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _Q<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 	Composite::deepGuard(control);
@@ -11,20 +11,22 @@ _Q<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 Status
 _Q<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
-	assert(_fork.active != INVALID_SHORT_INDEX);
+	Fork& fork = Composite::compoFork(control);
+	
+	assert(fork.active != INVALID_SHORT_INDEX);
 
 	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
 
-	if (const Status stateStatus = _state.deepUpdate(control)) {
+	if (const Status stateStatus = _headState.deepUpdate(control)) {
 		ControlLock lock{control};
-		_subStates.wideUpdate(_fork.active, control);
+		_subStates.wideUpdate(fork.active, control);
 
 		return stateStatus;
 	} else {
-		const Status status = _subStates.wideUpdate(_fork.active, control);
+		const Status status = _subStates.wideUpdate(fork.active, control);
 
 		if (status.failure || status.outerTransition)
 			return status;
@@ -54,7 +56,7 @@ _Q<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 void
 _Q<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
@@ -65,7 +67,7 @@ _Q<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _Q<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
 	Composite::deepExit(control);

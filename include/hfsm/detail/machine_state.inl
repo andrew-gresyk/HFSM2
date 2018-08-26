@@ -5,24 +5,27 @@ namespace detail {
 
 namespace {
 
-template <StateID NS, typename TC, typename TSL, LongIndex NFC, typename TPL, LongIndex NPC, typename TH>
+template <StateID NS, typename TA, typename TH>
 struct RegisterT {
-	using StateParents = Array<Parent, TSL::SIZE>;
+	using StateParents	= Array<Parent, TA::STATE_COUNT>;
+	using StateList		= typename TA::StateList;
+
+	static constexpr StateID STATE_ID = NS;
 
 	static inline void
 	execute(StateParents& stateParents, const Parent parent) {
-		static constexpr auto TYPE_ID = TSL::template index<TH>();
-		assertEquality<NS, TYPE_ID>();
+		static constexpr auto HEAD_ID  = StateList::template index<TH>();
+		assertEquality<STATE_ID, HEAD_ID>();
 
-		stateParents[NS] = parent;
+		stateParents[STATE_ID] = parent;
 	}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, typename TC, typename TSL, LongIndex NFC, typename TPL, LongIndex NPC>
-struct RegisterT<NS, TC, TSL, NFC, TPL, NPC, State<TC, TSL, NFC, TPL, NPC>> {
-	using StateParents = Array<Parent, TSL::SIZE>;
+template <StateID NS, typename TA>
+struct RegisterT<NS, TA, Empty<TA>> {
+	using StateParents	= Array<Parent, TA::STATE_COUNT>;
 
 	static inline void
 	execute(StateParents&, const Parent) {}
@@ -33,19 +36,11 @@ struct RegisterT<NS, TC, TSL, NFC, TPL, NPC, State<TC, TSL, NFC, TPL, NPC>> {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, typename TA, typename TH>
-_S<NS, TA, TH>::_S(StateParents& stateParents,
-					const Parent parent,
-					Parents& /*forkParents*/,
-					ForkPointers& /*forkPointers*/)
+_S<NS, TA, TH>::_S(Registry& registry,
+				   const Parent parent)
 {
-	using Register = RegisterT<STATE_ID,
-							   Context,
-							   StateList,
-							   Args::FORK_COUNT,
-							   PayloadList,
-							   Args::PLAN_CAPACITY,
-							   Head>;
-	Register::execute(stateParents, parent);
+	using Register = RegisterT<STATE_ID, TA, Head>;
+	Register::execute(registry.stateParents, parent);
 }
 
 //------------------------------------------------------------------------------

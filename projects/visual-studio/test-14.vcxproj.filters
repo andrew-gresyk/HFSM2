@@ -86,9 +86,6 @@
     <ClInclude Include="..\..\include\hfsm\machine_dev.hpp">
       <Filter>hfsm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\machine.hpp">
-      <Filter>hfsm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\machine_forward.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>

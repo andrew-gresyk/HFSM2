@@ -3,88 +3,93 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
-_O<NS, NC, NO, TA, TH, TS...>::_O(StateParents& stateParents,
-								  const Parent parent,
-								  Parents& forkParents,
-								  ForkPointers& forkPointers)
-	: _fork(static_cast<ShortIndex>(forkPointers << &_fork),
-			parent,
-			forkParents,
-			STATE_COUNT
-			HSFM_IF_DEBUG(, _state.isBare() ? typeid(void) : typeid(Head)))
-	, _state(stateParents,
-			 parent,
-			 forkParents,
-			 forkPointers)
-	, _subStates(stateParents,
-				 _fork.self,
-				 forkParents,
-				 forkPointers)
-{}
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+_O<NS, NC, NO, TA, TH, TS...>::_O(Registry& registry,
+								  const Parent parent)
+	: _headState{registry, parent}
+	, _subStates{registry, ORTHO_ID}
+{
+	Fork& fork = orthoFork(registry);
+
+	fork.active		= (ShortIndex) STATE_COUNT;
+	fork.resumable	= (ShortIndex) STATE_COUNT;
+	HSFM_IF_DEBUG(fork.TYPE = _headState.isBare() ? typeid(void) : typeid(Head));
+
+	registry.forkParent(ORTHO_ID) = parent;
+}
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+	Fork& fork = orthoFork(control);
 
-	if (_fork.requested != INVALID_SHORT_INDEX)
-		_subStates.wideForwardGuard(_fork.requested, control);
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	if (fork.requested != INVALID_SHORT_INDEX)
+		_subStates.wideForwardGuard(fork.requested, control);
 	else
 		_subStates.wideForwardGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(control));
 
-	if (!_state	  .deepGuard(control))
-		_subStates.wideGuard(control);
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	if (!_headState.deepGuard(control))
+		 _subStates.wideGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT &&
-		   _fork.requested == INVALID_SHORT_INDEX);
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(control));
 
-	_state	  .deepEnter	   (control);
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT &&
+		   fork.requested == INVALID_SHORT_INDEX);
+
+	_headState.deepEnter	   (control);
 	_subStates.wideEnterInitial(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control) {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(control));
 
-	_state	  .deepEnter(control);
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	_headState.deepEnter(control);
 	_subStates.wideEnter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 Status
 _O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(control));
+
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
 
 	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
 
-	if (const auto status = _state.deepUpdate(control)) {
+	if (const auto status = _headState.deepUpdate(control)) {
 		ControlLock lock{control};
 		_subStates.wideUpdate(control);
 
@@ -95,53 +100,61 @@ _O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
 										 FullControl& control)
 {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(control));
 
-	_state	  .deepReact(event, control);
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	_headState.deepReact(event, control);
 	_subStates.wideReact(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(control));
+
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
 
 	_subStates.wideExit(control);
-	_state	  .deepExit(control);
+	_headState.deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(const TransitionType transition) {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(Registry& registry,
+												  const TransitionType transition)
+{
+	Fork& fork = orthoFork(registry);
 
-	if (_fork.requested != INVALID_SHORT_INDEX)
-		_subStates.wideForwardRequest(_fork.requested, transition);
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	if (fork.requested != INVALID_SHORT_INDEX)
+		_subStates.wideForwardRequest(registry, fork.requested, transition);
 	else
 		switch (transition) {
 		case Transition::REMAIN:
-			deepRequestRemain();
+			deepRequestRemain(registry);
 			break;
 
 		case Transition::RESTART:
-			deepRequestRestart();
+			deepRequestRestart(registry);
 			break;
 
 		case Transition::RESUME:
-			deepRequestResume();
+			deepRequestResume(registry);
 			break;
 
 		default:
@@ -151,60 +164,70 @@ _O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(const TransitionType transitio
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestRemain() {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(Registry& registry) {
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(registry));
 
-	_subStates.wideRequestRemain();
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	_subStates.wideRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestRestart() {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestRestart(Registry& registry) {
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(registry));
 
-	_subStates.wideRequestRestart();
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	_subStates.wideRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestResume() {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestResume(Registry& registry) {
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(registry));
 
-	_subStates.wideRequestResume();
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	_subStates.wideRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
-	assert(_fork.active    == STATE_COUNT &&
-		   _fork.resumable == STATE_COUNT);
+_O<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(Registry& registry,
+													 PlanControl& control)
+{
+	HSFM_IF_ASSERT(Fork& fork = orthoFork(registry));
 
-	_subStates.wideChangeToRequested(control);
+	assert(fork.active    == (ShortIndex) STATE_COUNT &&
+		   fork.resumable == (ShortIndex) STATE_COUNT);
+
+	_subStates.wideChangeToRequested(registry, control);
 }
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepGetNames(const LongIndex parent,
 											const RegionType region,
 											const ShortIndex depth,
 											StructureStateInfos& _stateInfos) const
 {
-	_state	  .deepGetNames(parent, region,			 depth,		_stateInfos);
+	_headState.deepGetNames(parent, region,			 depth,		_stateInfos);
 	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
 }
 

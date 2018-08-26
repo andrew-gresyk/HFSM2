@@ -17,17 +17,19 @@
 #ifdef _DEBUG
 	#define HSFM_IF_DEBUG(...)		__VA_ARGS__
 	#define HSFM_UNLESS_DEBUG(...)
-	#define HFSM_DEBUG_OR(y, n)		x
+	#define HFSM_DEBUG_OR(y, n)		y
 #else
 	#define HSFM_IF_DEBUG(...)
 	#define HSFM_UNLESS_DEBUG(...)	__VA_ARGS__
-	#define HFSM_DEBUG_OR(y, n)		y
+	#define HFSM_DEBUG_OR(y, n)		n
 #endif
 
 #ifndef NDEBUG
 	#define HSFM_IF_ASSERT(...)		__VA_ARGS__
+	#define HFSM_ASSERT_OR(y, n)	y
 #else
 	#define HSFM_IF_ASSERT(...)
+	#define HFSM_ASSERT_OR(y, n)	n
 #endif
 
 namespace hfsm {
@@ -37,8 +39,8 @@ namespace hfsm {
 using ShortIndex = uint8_t;
 static constexpr ShortIndex	INVALID_SHORT_INDEX = UINT8_MAX;
 
-using ForkID	 = ShortIndex;
-static constexpr ForkID		INVALID_FORK_ID	= INVALID_SHORT_INDEX;
+using ForkID	 = int8_t;
+static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

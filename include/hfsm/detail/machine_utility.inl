@@ -5,20 +5,22 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NStateCount, LongIndex NForkCount>
+template <typename TArgs>
 bool
-isActive(const RegistryT<NStateCount, NForkCount>& registry,
+isActive(const RegistryT<TArgs>& registry,
 		 const StateID stateId)
 {
-	constexpr LongIndex STATE_COUNT = NStateCount;
+	using Args = TArgs;
+
+	constexpr LongIndex STATE_COUNT = Args::STATE_COUNT;
 	assert(stateId < STATE_COUNT);
 
 	if (stateId < STATE_COUNT)
 		for (auto parent = registry.stateParents[stateId];
 			 parent;
-			 parent = registry.forkParents[parent.fork])
+			 parent = registry.forkParent(parent.fork))
 		{
-			const auto& fork = *registry.forkPointers[parent.fork];
+			const Fork& fork = registry.fork(parent.fork);
 
 			if (fork.active != STATE_COUNT)
 				return parent.prong == fork.active;
@@ -29,20 +31,22 @@ isActive(const RegistryT<NStateCount, NForkCount>& registry,
 
 //------------------------------------------------------------------------------
 
-template <LongIndex NStateCount, LongIndex NForkCount>
+template <typename TArgs>
 bool
-isResumable(const RegistryT<NStateCount, NForkCount>& registry,
+isResumable(const RegistryT<TArgs>& registry,
 			const StateID stateId)
 {
-	constexpr LongIndex STATE_COUNT = NStateCount;
+	using Args = TArgs;
+
+	constexpr LongIndex STATE_COUNT = Args::STATE_COUNT;
 	assert(stateId < STATE_COUNT);
 
 	if (stateId < STATE_COUNT)
 		for (auto parent = registry.stateParents[stateId];
 			 parent;
-			 parent = registry.forkParents[parent.fork])
+			 parent = registry.forkParent(parent.fork))
 		{
-			const auto& fork = *registry.forkPointers[parent.fork];
+			const Fork& fork = registry.fork(parent.fork);
 
 			if (fork.active != STATE_COUNT)
 				return parent.prong == fork.resumable;

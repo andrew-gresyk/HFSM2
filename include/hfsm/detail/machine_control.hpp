@@ -5,40 +5,38 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename, typename, LongIndex>
+template <typename>
 struct ControlOriginT;
 
-template <typename TContext, typename TStateList, LongIndex NForkCount>
+template <typename TArgs>
 class ControlT {
 	template <StateID, typename, typename>
 	friend struct _S;
 
-	template <StateID, ForkID, ForkID, typename, typename, typename...>
+	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
 	friend struct _C;
 
-	template <StateID, ForkID, ForkID, typename, typename, typename...>
+	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
 	friend struct _Q;
 
-	template <StateID, ForkID, ForkID, typename, typename, typename...>
+	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
 	friend struct _O;
 
 	template <typename, typename, typename, typename>
 	friend class _R;
 
-	template <typename, typename, LongIndex>
+	template <typename>
 	friend struct ControlOriginT;
 
-	using Context		= TContext;
-	using StateList		= TStateList;
+	using Args				= TArgs;
+	using Context			= typename Args::Context;
+	using StateList			= typename Args::StateList;
 
 protected:
-	static constexpr LongIndex STATE_COUNT	= StateList::SIZE;
-	static constexpr LongIndex FORK_COUNT	= NForkCount;
-
-	using Registry		= RegistryT<STATE_COUNT, FORK_COUNT>;
+	using Registry			= RegistryT<Args>;
 
 	inline ControlT(Context& context,
-					const Registry& registry,
+					Registry& registry,
 					LoggerInterface* const HFSM_IF_LOGGER(logger))
 		: _context(context)
 		, _registry(registry)
@@ -71,25 +69,25 @@ public:
 	inline bool isScheduled() const							{ return isResumable(stateId<TState>());			}
 
 private:
+	inline Registry& registry()								{ return _registry;									}
+
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	inline LoggerInterface* logger()						{ return _logger;									}
 #endif
 
 protected:
 	Context& _context;
-	const Registry& _registry;
+	Registry& _registry;
 	StateID _originId = INVALID_STATE_ID;
 	HFSM_IF_LOGGER(LoggerInterface* _logger);
 };
 
 //------------------------------------------------------------------------------
 
-template <typename TContext, typename TStateList, LongIndex NForkCount>
+template <typename TArgs>
 struct ControlOriginT {
-	using Context		= TContext;
-	using StateList		= TStateList;
-
-	using Control		= ControlT<Context, StateList, NForkCount>;
+	using Args				= TArgs;
+	using Control			= ControlT<Args>;
 
 	inline ControlOriginT(Control& control,
 						  const StateID id);
@@ -102,21 +100,19 @@ struct ControlOriginT {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext, typename TStateList, LongIndex NForkCount, LongIndex NPlanCapacity>
+template <typename TArgs>
 class PlanControlT final
-	: public ControlT<TContext, TStateList, NForkCount>
+	: public ControlT<TArgs>
 {
-	using Context			= TContext;
-	using StateList			= TStateList;
-
-	static constexpr LongIndex FORK_COUNT	 = NForkCount;
-	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
+	using Args				= TArgs;
+	using Context			= typename Args::Context;
+	using StateList			= typename Args::StateList;
 
 public:
-	using Control			= ControlT<Context, StateList, FORK_COUNT>;
+	using Control			= ControlT<Args>;
 	using Registry			= typename Control::Registry;
 
-	using Plan				= PlanT<StateList, PLAN_CAPACITY>;
+	using Plan				= PlanT<StateList, Args::PLAN_CAPACITY>;
 	using Tasks				= typename Plan::Tasks;
 	using StateTasks		= typename Plan::StateTasks;
 
@@ -125,7 +121,7 @@ public:
 
 private:
 	inline PlanControlT(Context& context,
-						const Registry& registry,
+						Registry& registry,
 						Tasks& tasks,
 						StateTasks& stateTasks,
 						LoggerInterface* const logger)
@@ -215,29 +211,28 @@ using TransitionQueueT = ArrayView<TransitionT<TPayloadList>>;
 
 //------------------------------------------------------------------------------
 
-template <typename, typename, LongIndex, typename>
+template <typename>
 struct ControlLockT;
 
-template <typename, typename, LongIndex, typename>
+template <typename>
 struct ControlRegionT;
 
-template <typename TContext, typename TStateList, LongIndex NForkCount, typename TPayloadList>
+template <typename TArgs>
 class TransitionControlT
-	: public ControlT<TContext, TStateList, NForkCount>
+	: public ControlT<TArgs>
 {
 protected:
-	using Context			= TContext;
-	using StateList			= TStateList;
-	using PayloadList		= TPayloadList;
+	using Args				= TArgs;
+	using Context			= typename Args::Context;
+	using StateList			= typename Args::StateList;
+	using PayloadList		= typename Args::PayloadList;
 
-	static constexpr LongIndex FORK_COUNT	 = NForkCount;
-
-	using Control			= ControlT<Context, StateList, FORK_COUNT>;
-	using Registry			= typename Control::Registry;
+	using Control			= ControlT <Args>;
+	using Registry			= RegistryT<Args>;
 
 	using Transition		= TransitionT<PayloadList>;
 	using TransitionType	= typename Transition::Type;
-	using TransitionQueue	= TransitionQueueT<TPayloadList>;
+	using TransitionQueue	= TransitionQueueT<PayloadList>;
 
 	template <StateID, typename, typename>
 	friend struct _S;
@@ -245,15 +240,15 @@ protected:
 	template <typename, typename, typename, typename>
 	friend class _R;
 
-	template <typename, typename, LongIndex, typename>
+	template <typename>
 	friend struct ControlLockT;
 
-	template <typename, typename, LongIndex, typename>
+	template <typename>
 	friend struct ControlRegionT;
 
 protected:
 	inline TransitionControlT(Context& context,
-							  const Registry& registry,
+							  Registry& registry,
 							  TransitionQueue& requests,
 							  LoggerInterface* const logger)
 		: Control(context, registry, logger)
@@ -301,15 +296,11 @@ protected:
 
 //------------------------------------------------------------------------------
 
-template <typename TContext, typename TStateList, LongIndex NForkCount, typename TPayloadList>
+template <typename TArgs>
 struct ControlLockT {
-	using Context			= TContext;
-	using StateList			= TStateList;
-	using PayloadList		= TPayloadList;
+	using Args				= TArgs;
 
-	static constexpr LongIndex FORK_COUNT	 = NForkCount;
-
-	using TransitionControl = TransitionControlT<Context, StateList, FORK_COUNT, PayloadList>;
+	using TransitionControl = TransitionControlT<Args>;
 
 	inline ControlLockT(TransitionControl& control);
 	inline ~ControlLockT();
@@ -319,15 +310,11 @@ struct ControlLockT {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TContext, typename TStateList, LongIndex NForkCount, typename TPayloadList>
+template <typename TArgs>
 struct ControlRegionT {
-	using Context			= TContext;
-	using StateList			= TStateList;
-	using PayloadList		= TPayloadList;
+	using Args				= TArgs;
 
-	static constexpr LongIndex FORK_COUNT	 = NForkCount;
-
-	using TransitionControl = TransitionControlT<Context, StateList, FORK_COUNT, PayloadList>;
+	using TransitionControl = TransitionControlT<Args>;
 
 	inline ControlRegionT(TransitionControl& control,
 						  const StateID id,
@@ -342,27 +329,20 @@ struct ControlRegionT {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TStateList,
-		  LongIndex NForkCount,
-		  typename TPayloadList,
-		  LongIndex NPlanCapacity>
+template <typename TArgs>
 class FullControlT final
-	: public TransitionControlT<TContext, TStateList, NForkCount, TPayloadList>
+	: public TransitionControlT<TArgs>
 {
-	using Context			= TContext;
-	using StateList			= TStateList;
-	using PayloadList		= TPayloadList;
+	using Args				= TArgs;
+	using Context			= typename Args::Context;
+	using StateList			= typename Args::StateList;
 
-	static constexpr LongIndex FORK_COUNT		= NForkCount;
-	static constexpr LongIndex PLAN_CAPACITY	= NPlanCapacity;
-
-	using Control			= ControlT<Context, StateList, FORK_COUNT>;
+	using Control			= ControlT<Args>;
 	using Registry			= typename Control::Registry;
 
-	using TransitionControl	= TransitionControlT<Context, StateList, FORK_COUNT, PayloadList>;
+	using TransitionControl	= TransitionControlT<Args>;
 	using TransitionQueue	= typename TransitionControl::TransitionQueue;
-	using Plan				= PlanT<StateList, PLAN_CAPACITY>;
+	using Plan				= PlanT<StateList, Args::PLAN_CAPACITY>;
 	using Tasks				= typename Plan::Tasks;
 	using StateTasks		= typename Plan::StateTasks;
 
@@ -371,7 +351,7 @@ class FullControlT final
 
 private:
 	inline FullControlT(Context& context,
-						const Registry& registry,
+						Registry& registry,
 						TransitionQueue& requests,
 						Tasks& tasks,
 						StateTasks& firstTasks,

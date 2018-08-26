@@ -49,7 +49,6 @@
     <ClInclude Include="..\..\include\hfsm\detail\lib_type_list.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\lib_utility.hpp" />
     <ClInclude Include="..\..\include\hfsm\machine_dev.hpp" />
-    <ClInclude Include="..\..\include\hfsm\machine.hpp" />
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
     <ClInclude Include="..\..\test\test_planner.hpp" />
     <ClInclude Include="..\..\test\test_shared.hpp" />

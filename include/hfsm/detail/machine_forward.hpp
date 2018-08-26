@@ -184,7 +184,8 @@ struct _OF final {
 template <typename TContext,
 		  typename TConfig,
 		  typename TStateList,
-		  LongIndex NForkCount,
+		  LongIndex NCompositeCount,
+		  LongIndex NOrthogonalCount,
 		  typename TPayloadList,
 		  LongIndex NPlanCapacity>
 struct ArgsT final {
@@ -193,10 +194,10 @@ struct ArgsT final {
 	using StateList			= TStateList;
 	using PayloadList		= TPayloadList;
 
-	static constexpr LongIndex FORK_COUNT	 = NForkCount;
-	static constexpr LongIndex PLAN_CAPACITY = NPlanCapacity;
-
-	using Empty = _B<Bare<Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>>;
+	static constexpr LongIndex STATE_COUNT		= StateList::SIZE;
+	static constexpr LongIndex COMPOSITE_COUNT	= NCompositeCount;
+	static constexpr LongIndex ORTHOGONAL_COUNT	= NOrthogonalCount;
+	static constexpr LongIndex PLAN_CAPACITY	= NPlanCapacity;
 };
 
 //------------------------------------------------------------------------------
@@ -204,13 +205,13 @@ struct ArgsT final {
 template <StateID, typename, typename>
 struct _S;
 
-template <StateID, ForkID, ForkID, typename, typename, typename...>
+template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
 struct _C;
 
-template <StateID, ForkID, ForkID, typename, typename, typename...>
+template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
 struct _Q;
 
-template <StateID, ForkID, ForkID, typename, typename, typename...>
+template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
 struct _O;
 
 template <typename, typename, typename, typename>
@@ -218,32 +219,32 @@ class _R;
 
 //------------------------------------------------------------------------------
 
-template <StateID, ForkID, ForkID, typename...>
+template <StateID, ShortIndex, ShortIndex, typename...>
 struct WrapMaterial;
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH>
 struct WrapMaterial<NS, NC, NO, TA, TH> {
 	using Type = _S<NS,			TA, TH>;
 };
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA,			  typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA,			  typename... TS>
 struct WrapMaterial<NS, NC, NO, TA, _CF<void, TS...>> {
-	using Type = _C<NS, NC, NO, TA, typename TA::Empty, TS...>;
+	using Type = _C<NS, NC, NO, TA, Empty<TA>, TS...>;
 };
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
-struct WrapMaterial<NS, NC, NO, TA, _CF<TH, TS...>> {
-	using Type = _Q<NS, NC, NO, TA, TH,					TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _CF<TH,	 TS...>> {
+	using Type = _Q<NS, NC, NO, TA, TH,		  TS...>;
 };
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA,			  typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA,			  typename... TS>
 struct WrapMaterial<NS, NC, NO, TA, _OF<void, TS...>> {
-	using Type = _O<NS, NC, NO, TA, typename TA::Empty, TS...>;
+	using Type = _O<NS, NC, NO, TA, Empty<TA>, TS...>;
 };
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, typename TH, typename... TS>
-struct WrapMaterial<NS, NC, NO, TA, _OF<TH, TS...>> {
-	using Type = _O<NS, NC, NO, TA, TH,					TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+struct WrapMaterial<NS, NC, NO, TA, _OF<TH,	 TS...>> {
+	using Type = _O<NS, NC, NO, TA, TH,		  TS...>;
 };
 
 //------------------------------------------------------------------------------
@@ -266,15 +267,18 @@ struct _RF final {
 
 	using Instance			= _R<Context, Config, PayloadList, Forward>;
 
-	static constexpr LongIndex FORK_COUNT		 = Forward::FORK_COUNT;
+	static constexpr LongIndex COMPOSITE_COUNT	 = Forward::COMPOSITE_COUNT;
+	static constexpr LongIndex ORTHOGONAL_COUNT	 = Forward::ORTHOGONAL_COUNT;
 
 	using StateList			= typename Forward::StateList;
-	using PlanControl		= PlanControlT		   <Context, StateList, FORK_COUNT, PLAN_CAPACITY>;
-	using TransitionControl	= TransitionControlT   <Context, StateList, FORK_COUNT, PayloadList>;
-	using FullControl		= FullControlT		   <Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
+	using Args				= ArgsT<Context, Config, StateList, COMPOSITE_COUNT, ORTHOGONAL_COUNT, PayloadList, PLAN_CAPACITY>;
 
-	using Bare				= ::hfsm::detail::Bare <Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
-	using State				= ::hfsm::detail::State<Context, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
+	using PlanControl		= PlanControlT		<Args>;
+	using TransitionControl	= TransitionControlT<Args>;
+	using FullControl		= FullControlT		<Args>;
+
+	using Bare				= ::hfsm::detail::Bare <Args>;
+	using State				= ::hfsm::detail::Empty<Args>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;

@@ -65,18 +65,18 @@ struct TaskTransition {
 
 //------------------------------------------------------------------------------
 
-template <typename, typename, LongIndex, LongIndex>
+template <typename>
 class PlanControlT;
 
-template <typename, typename, LongIndex, typename, LongIndex>
+template <typename>
 class FullControlT;
 
 template <typename TStateList, LongIndex NPlanCapacity>
 class PlanT {
-	template <typename, typename, LongIndex, LongIndex>
+	template <typename>
 	friend class PlanControlT;
 
-	template <typename, typename, LongIndex, typename, LongIndex>
+	template <typename>
 	friend class FullControlT;
 
 	using StateList			= TStateList;

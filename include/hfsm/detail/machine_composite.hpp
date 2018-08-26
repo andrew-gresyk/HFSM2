@@ -3,42 +3,45 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NHeadID,
-		  ForkID NCompoID,
-		  ForkID NOrthoID,
+template <StateID NHeadIndex,
+		  ShortIndex NCompoIndex,
+		  ShortIndex NOrthoIndex,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
 struct _C {
-	static constexpr StateID HEAD_ID  = NHeadID;
-	static constexpr StateID COMPO_ID = NCompoID;
-	static constexpr StateID ORTHO_ID = NOrthoID;
+	static constexpr StateID	HEAD_ID		= NHeadIndex;
+	static constexpr ShortIndex COMPO_INDEX	= NCompoIndex;
+	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
+	static constexpr ForkID		COMPO_ID	= COMPO_INDEX + 1;
 
-	using Args				= TArgs;
-	using Head				= THead;
+	using Args			 = TArgs;
+	using Head			 = THead;
 
-	using Context			= typename Args::Context;
-	using Config			= typename Args::Config;
-	using StateList			= typename Args::StateList;
-	using PayloadList		= typename Args::PayloadList;
+	using Context		 = typename Args::Context;
+	using StateList		 = typename Args::StateList;
+	using PayloadList	 = typename Args::PayloadList;
 
-	using StateParents		= Array<Parent, StateList::SIZE>;
-	using PlanControl		= PlanControlT	<Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
-	using Transition		= TransitionT	<PayloadList>;
-	using TransitionType	= typename Transition::Type;
-	using ControlLock		= ControlLockT	<Context, StateList, Args::FORK_COUNT, PayloadList>;
-	using ControlRegion		= ControlRegionT<Context, StateList, Args::FORK_COUNT, PayloadList>;
-	using FullControl		= FullControlT	<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
+	using StateParents	 = Array<Parent, StateList::SIZE>;
+	using Transition	 = TransitionT<PayloadList>;
+	using TransitionType = typename Transition::Type;
 
-	using State				= _S <HEAD_ID, Args, Head>;
-	using SubStates			= _CS<HEAD_ID + 1, COMPO_ID + 1, ORTHO_ID, Args, 0, TSubStates...>;
-	using Forward			= _CF<Head, TSubStates...>;
-	using SubStateList		= typename Forward::StateList;
+	using Registry		 = RegistryT	 <Args>;
+	using Control		 = ControlT		 <Args>;
+	using PlanControl	 = PlanControlT	 <Args>;
+	using ControlLock	 = ControlLockT	 <Args>;
+	using ControlRegion	 = ControlRegionT<Args>;
+	using FullControl	 = FullControlT	 <Args>;
 
-	_C(StateParents& stateParents,
-	   const Parent parent,
-	   Parents& forkParents,
-	   ForkPointers& forkPointers);
+	using HeadState		 = _S <HEAD_ID, Args, Head>;
+	using SubStates		 = _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, 0, TSubStates...>;
+	using Forward		 = _CF<Head, TSubStates...>;
+	using SubStateList	 = typename Forward::StateList;
+
+	_C(Registry& registry, const Parent parent);
+
+	inline Fork&  compoFork				(Registry& registry)	{ return registry.compoForks[COMPO_INDEX];	}
+	inline Fork&  compoFork				(Control&  control)		{ return compoFork(control.registry());		}
 
 	inline void   deepForwardGuard		(FullControl& control);
 	inline void   deepGuard				(FullControl& control);
@@ -54,24 +57,23 @@ struct _C {
 
 	inline void   deepExit				(PlanControl& control);
 
-	inline void   deepForwardRequest	(const TransitionType transition);
-	inline void   deepRequestRemain		();
-	inline void   deepRequestRestart	();
-	inline void   deepRequestResume		();
-	inline void   deepChangeToRequested	(PlanControl& control);
+	inline void   deepForwardRequest	(Registry& registry, const TransitionType transition);
+	inline void   deepRequestRemain		(Registry& registry);
+	inline void   deepRequestRestart	(Registry& registry);
+	inline void   deepRequestResume		(Registry& registry);
+	inline void   deepChangeToRequested	(Registry& registry, PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;
 
-	static constexpr LongIndex NAME_COUNT	 = State::NAME_COUNT + SubStates::NAME_COUNT;
+	static constexpr LongIndex NAME_COUNT	 = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
 
 	void deepGetNames(const LongIndex parent,
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
-	Fork _fork;
-	State _state;
+	HeadState _headState;
 	SubStates _subStates;
 };
 

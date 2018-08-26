@@ -3,20 +3,15 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
-_CS<NS, NC, NO, TA, NI, TI>::_CS(StateParents& stateParents,
-								 const ShortIndex fork,
-								 Parents& forkParents,
-								 ForkPointers& forkPointers)
-	: initial(stateParents,
-			  Parent(fork, PRONG_INDEX),
-			  forkParents,
-			  forkPointers)
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+_CS<NS, NC, NO, TA, NI, TI>::_CS(Registry& registry,
+								 const ForkID fork)
+	: initial{registry, Parent{fork, PRONG_INDEX}}
 {}
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
 											  FullControl& control)
@@ -28,7 +23,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(pr
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
 									   FullControl& control)
@@ -40,7 +35,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
 	initial.deepEnterInitial(control);
@@ -48,7 +43,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
 									   PlanControl& control)
@@ -60,7 +55,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 Status
 _CS<NS, NC, NO, TA, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
 										FullControl& control)
@@ -72,7 +67,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
@@ -86,7 +81,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
 									  PlanControl& control)
@@ -98,59 +93,63 @@ _CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(const ShortIndex HSFM_IF_ASSERT(prong),
+_CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Registry& registry,
+												const ShortIndex HSFM_IF_ASSERT(prong),
 												const TransitionType transition)
 {
 	assert(prong == PRONG_INDEX);
 
-	initial.deepForwardRequest(transition);
+	initial.deepForwardRequest(registry, transition);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestRemain() {
-	initial.deepRequestRemain();
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(Registry& registry) {
+	initial.deepRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestRestart() {
-	initial.deepRequestRestart();
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(Registry& registry) {
+	initial.deepRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(const ShortIndex HSFM_IF_ASSERT(prong)) {
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(Registry& registry,
+											   const ShortIndex HSFM_IF_ASSERT(prong))
+{
 	assert(prong == PRONG_INDEX);
 
-	initial.deepRequestResume();
+	initial.deepRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(const ShortIndex HSFM_IF_ASSERT(prong),
+_CS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(Registry& registry,
+												   const ShortIndex HSFM_IF_ASSERT(prong),
 												   PlanControl& control)
 {
 	assert(prong == PRONG_INDEX);
 
-	initial.deepChangeToRequested(control);
+	initial.deepChangeToRequested(registry, control);
 }
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID NS, ForkID NC, ForkID NO, typename TA, ShortIndex NI, typename TI>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideGetNames(const LongIndex parent,
 										  const ShortIndex depth,

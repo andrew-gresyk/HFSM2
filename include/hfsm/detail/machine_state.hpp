@@ -12,25 +12,21 @@ struct _S {
 	using Args				= TArgs;
 	using Head				= THead;
 
-	using Context			= typename Args::Context;
-	using Config			= typename Args::Config;
-	using StateList			= typename Args::StateList;
 	using PayloadList		= typename Args::PayloadList;
 
-	using StateParents		= Array<Parent, StateList::SIZE>;
-	using Control			= ControlT			   <Context, StateList, Args::FORK_COUNT>;
-	using ControlOrigin		= ControlOriginT	   <Context, StateList, Args::FORK_COUNT>;
-	using PlanControl		= PlanControlT		   <Context, StateList, Args::FORK_COUNT, Args::PLAN_CAPACITY>;
-	using Transition		= TransitionT		   <PayloadList>;
-	using TransitionControl	= TransitionControlT   <Context, StateList, Args::FORK_COUNT, PayloadList>;
-	using FullControl		= FullControlT		   <Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
+	using StateParents		= Array<Parent, Args::STATE_COUNT>;
+	using Transition		= TransitionT<PayloadList>;
 
-	using StateBase			= ::hfsm::detail::State<Context, StateList, Args::FORK_COUNT, PayloadList, Args::PLAN_CAPACITY>;
+	using Registry			= RegistryT			<Args>;
+	using ControlOrigin		= ControlOriginT	<Args>;
+	using Control			= ControlT			<Args>;
+	using PlanControl		= PlanControlT		<Args>;
+	using TransitionControl	= TransitionControlT<Args>;
+	using FullControl		= FullControlT		<Args>;
 
-	_S(StateParents& stateParents,
-	   const Parent parent,
-	   Parents& forkParents,
-	   ForkPointers& forkPointers);
+	using Empty				= ::hfsm::detail::Empty<Args>;
+
+	_S(Registry& registry, const Parent parent);
 
 	inline void	  deepForwardGuard		(FullControl&)									{}
 	inline bool	  deepGuard				(FullControl& control);
@@ -46,14 +42,14 @@ struct _S {
 
 	inline void	  deepExit				(PlanControl& control);
 
-	inline void   deepForwardRequest	(const typename Transition::Type)				{}
-	inline void   deepRequestRemain		()												{}
-	inline void   deepRequestRestart	()												{}
-	inline void   deepRequestResume		()												{}
-	inline void   deepChangeToRequested	(Control&)										{}
+	inline void   deepForwardRequest	(Registry&, const typename Transition::Type)	{}
+	inline void   deepRequestRemain		(Registry&)										{}
+	inline void   deepRequestRestart	(Registry&)										{}
+	inline void   deepRequestResume		(Registry&)										{}
+	inline void   deepChangeToRequested	(Registry&, Control&)							{}
 
 #if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
-	static constexpr bool isBare()	 { return std::is_same<Head, StateBase>::value;		 }
+	static constexpr bool isBare()	 { return std::is_same<Head, Empty>::value;		 }
 
 	static constexpr LongIndex NAME_COUNT = isBare() ? 0 : 1;
 #endif
@@ -79,11 +75,11 @@ struct _S {
 	};
 
 	template <typename TMethodType, LoggerInterface::Method>
-	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, StateBase>::value>::type
+	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
 	log(LoggerInterface&) const {}
 
 	template <typename TMethodType, LoggerInterface::Method TMethodId>
-	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, StateBase>::value>::type
+	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
 	log(LoggerInterface& logger) const {
 		logger.recordMethod(STATE_ID, TMethodId);
 	}

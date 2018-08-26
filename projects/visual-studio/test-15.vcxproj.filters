@@ -86,9 +86,6 @@
     <ClInclude Include="..\..\include\hfsm\machine_dev.hpp">
       <Filter>hfsm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\machine.hpp">
-      <Filter>hfsm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\machine_forward.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
@@ -104,11 +101,11 @@
     <ClInclude Include="..\..\include\hfsm\detail\machine_sequence.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\test_planner.hpp">
-      <Filter>hfsm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\lib_bit_array.hpp">
       <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_planner.hpp">
+      <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

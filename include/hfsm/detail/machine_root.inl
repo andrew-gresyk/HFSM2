@@ -7,7 +7,7 @@ template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::_R(Context& context
 						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
-	, _apex{_registry.stateParents, Parent{}, _registry.forkParents, _registry.forkPointers}
+	, _apex{_registry, Parent{}}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
 	HFSM_IF_STRUCTURE(getStateNames());
@@ -293,7 +293,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 							_tasks,
 							_stateTasks,
 							HFSM_LOGGER_OR(_logger, nullptr)};
-		_apex.deepChangeToRequested(control);
+		_apex.deepChangeToRequested(_registry, control);
 
 		HSFM_IF_DEBUG(verifyPlans());
 	}
@@ -308,13 +308,16 @@ void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 	assert(STATE_COUNT > request.stateId);
 
-	for (auto parent = _registry.stateParents[request.stateId]; parent; parent = _registry.forkParents[parent.fork]) {
-		auto& fork = *_registry.forkPointers[parent.fork];
+	for (auto parent = _registry.stateParents[request.stateId];
+		 parent;
+		 parent = _registry.forkParent(parent.fork))
+	{
+		Fork& fork = _registry.fork(parent.fork);
 
 		fork.requested = parent.prong;
 	}
 
-	_apex.deepForwardRequest(request.type);
+	_apex.deepForwardRequest(_registry, request.type);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -325,7 +328,7 @@ _R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
 	assert(STATE_COUNT > request.stateId);
 
 	const auto parent = _registry.stateParents[request.stateId];
-	auto& fork = *_registry.forkPointers[parent.fork];
+	Fork& fork = _registry.fork(parent.fork);
 
 	fork.resumable = parent.prong;
 }

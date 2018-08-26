@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, LongIndex NFC>
+template <typename TA>
 void
-ControlT<TC, TSL, NFC>::setOrigin(const StateID id) {
+ControlT<TA>::setOrigin(const StateID id) {
 	//assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//assert(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
 
@@ -16,9 +16,9 @@ ControlT<TC, TSL, NFC>::setOrigin(const StateID id) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, LongIndex NFC>
+template <typename TA>
 void
-ControlT<TC, TSL, NFC>::resetOrigin(const StateID id) {
+ControlT<TA>::resetOrigin(const StateID id) {
 	//assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//assert(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
 
@@ -29,9 +29,9 @@ ControlT<TC, TSL, NFC>::resetOrigin(const StateID id) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, LongIndex NFC>
-ControlOriginT<TC, TSL, NFC>::ControlOriginT(Control& control_,
-											 const StateID id)
+template <typename TA>
+ControlOriginT<TA>::ControlOriginT(Control& control_,
+								   const StateID id)
 	: control{control_}
 	, prevId(control._originId)
 {
@@ -40,16 +40,16 @@ ControlOriginT<TC, TSL, NFC>::ControlOriginT(Control& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, LongIndex NFC>
-ControlOriginT<TC, TSL, NFC>::~ControlOriginT() {
+template <typename TA>
+ControlOriginT<TA>::~ControlOriginT() {
 	control.resetOrigin(prevId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+template <typename TA>
 void
-TransitionControlT<TC, TSL, NFC, TPL>::changeTo(const StateID stateId) {
+TransitionControlT<TA>::changeTo(const StateID stateId) {
 	if (!_locked) {
 		const Transition transition{TransitionType::RESTART, stateId};
 		_requests << transition;
@@ -68,9 +68,9 @@ TransitionControlT<TC, TSL, NFC, TPL>::changeTo(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+template <typename TA>
 void
-TransitionControlT<TC, TSL, NFC, TPL>::resume(const StateID stateId) {
+TransitionControlT<TA>::resume(const StateID stateId) {
 	if (!_locked) {
 		const Transition transition{TransitionType::RESUME, stateId};
 		_requests << transition;
@@ -89,9 +89,9 @@ TransitionControlT<TC, TSL, NFC, TPL>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+template <typename TA>
 void
-TransitionControlT<TC, TSL, NFC, TPL>::schedule(const StateID stateId) {
+TransitionControlT<TA>::schedule(const StateID stateId) {
 	const Transition transition{TransitionType::SCHEDULE, stateId};
 	_requests << transition;
 
@@ -103,10 +103,10 @@ TransitionControlT<TC, TSL, NFC, TPL>::schedule(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+template <typename TA>
 void
-TransitionControlT<TC, TSL, NFC, TPL>::setRegion(const StateID id,
-												 const LongIndex size)
+TransitionControlT<TA>::setRegion(const StateID id,
+								  const LongIndex size)
 {
 	if (_regionId == INVALID_STATE_ID) {
 		assert(_regionSize == INVALID_LONG_INDEX);
@@ -126,10 +126,10 @@ TransitionControlT<TC, TSL, NFC, TPL>::setRegion(const StateID id,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
+template <typename TA>
 void
-TransitionControlT<TC, TSL, NFC, TPL>::resetRegion(const StateID id,
-												   const LongIndex size)
+TransitionControlT<TA>::resetRegion(const StateID id,
+									const LongIndex size)
 {
 	assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 
@@ -144,8 +144,8 @@ TransitionControlT<TC, TSL, NFC, TPL>::resetRegion(const StateID id,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
-ControlLockT<TC, TSL, NFC, TPL>::ControlLockT(TransitionControl& control_)
+template <typename TA>
+ControlLockT<TA>::ControlLockT(TransitionControl& control_)
 	: control(!control_._locked ? &control_ : nullptr)
 {
 	if (control)
@@ -154,18 +154,18 @@ ControlLockT<TC, TSL, NFC, TPL>::ControlLockT(TransitionControl& control_)
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
-ControlLockT<TC, TSL, NFC, TPL>::~ControlLockT() {
+template <typename TA>
+ControlLockT<TA>::~ControlLockT() {
 	if (control)
 		control->_locked = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
-ControlRegionT<TC, TSL, NFC, TPL>::ControlRegionT(TransitionControl& control_,
-												  const StateID id,
-												  const LongIndex size)
+template <typename TA>
+ControlRegionT<TA>::ControlRegionT(TransitionControl& control_,
+								   const StateID id,
+								   const LongIndex size)
 	: control{control_}
 	, prevId(control._regionId)
 	, prevSize(control._regionSize)
@@ -175,8 +175,8 @@ ControlRegionT<TC, TSL, NFC, TPL>::ControlRegionT(TransitionControl& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TSL, LongIndex NFC, typename TPL>
-ControlRegionT<TC, TSL, NFC, TPL>::~ControlRegionT() {
+template <typename TA>
+ControlRegionT<TA>::~ControlRegionT() {
 	control.resetRegion(prevId, prevSize);
 
 	control._status.clear();

@@ -8,14 +8,14 @@ template <typename TContext,
 		  typename TPayloadList,
 		  typename TApex>
 class _R final {
-	using Context			= TContext;
-	using Config			= TConfig;
-	using PayloadList		= TPayloadList;
-	using Apex				= TApex;
+	using Context				 = TContext;
+	using Config				 = TConfig;
+	using PayloadList			 = TPayloadList;
+	using Apex					 = TApex;
 
-	using ForwardApex		= typename WrapForward<Apex>::Type;
-	using StateList			= typename ForwardApex::StateList;
-	using Forward			= _RF<Context, Config, PayloadList, Apex>;
+	using ForwardApex			 = typename WrapForward<Apex>::Type;
+	using StateList				 = typename ForwardApex::StateList;
+	using Forward				 = _RF<Context, Config, PayloadList, Apex>;
 
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
@@ -28,23 +28,24 @@ public:
 	static constexpr LongIndex STATE_COUNT		 = ForwardApex::STATE_COUNT;
 	static constexpr LongIndex COMPOSITE_COUNT	 = ForwardApex::COMPOSITE_COUNT;
 	static constexpr LongIndex ORTHOGONAL_COUNT	 = ForwardApex::ORTHOGONAL_COUNT;
-	static constexpr LongIndex FORK_COUNT		 = ForwardApex::FORK_COUNT;
 	static constexpr LongIndex PRONG_COUNT		 = ForwardApex::PRONG_COUNT;
 	static constexpr LongIndex WIDTH			 = ForwardApex::WIDTH;
 
+	static constexpr LongIndex FORK_COUNT		 = COMPOSITE_COUNT + ORTHOGONAL_COUNT;
+
 private:
-	using Args				= ArgsT<Context, Config, StateList, FORK_COUNT, PayloadList, PLAN_CAPACITY>;
-	using PlanControl		= typename Forward::PlanControl;
-	using Payload			= typename PayloadList::Container;
-	using Transition		= TransitionT<PayloadList>;
-	using TransitionControl	= typename Forward::TransitionControl;
-	using FullControl		= typename Forward::FullControl;
+	using Args					 = ArgsT<Context, Config, StateList, COMPOSITE_COUNT, ORTHOGONAL_COUNT, PayloadList, PLAN_CAPACITY>;
+	using PlanControl			 = typename Forward::PlanControl;
+	using Payload				 = typename PayloadList::Container;
+	using Transition			 = TransitionT<PayloadList>;
+	using TransitionControl		 = typename Forward::TransitionControl;
+	using FullControl			 = typename Forward::FullControl;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using Registry				 = RegistryT<STATE_COUNT, FORK_COUNT>;
+	using Registry				 = RegistryT<Args>;
 
 	using Payloads				 = Array<Payload,		STATE_COUNT>;
 	using TransitionQueueStorage = Array<Transition,	FORK_COUNT>;
