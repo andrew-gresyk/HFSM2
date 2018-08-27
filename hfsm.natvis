@@ -42,6 +42,18 @@
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
+	<Type Name="hfsm::detail::BitArray">
+		<DisplayString>{(unsigned)capacity &amp; 0xFF}</DisplayString>
+		<Expand HideRawView="true">
+      <IndexListItems>
+        <Size>(capacity + 7 / 8)</Size>
+        <ValueNode>(unsigned) (((uint8_t*) this) + OFFSET)[$i] &amp; 0xFF</ValueNode>
+      </IndexListItems>
+    </Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
 	<Type Name="hfsm::detail::List&lt;*,*&gt;">
 		<DisplayString>{_count} / {CAPACITY}</DisplayString>
 		<Expand HideRawView="true">
@@ -61,14 +73,14 @@
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 	<Type Name="hfsm::detail::Parent">
-		<DisplayString>{forkType} ► {prongType}</DisplayString>
+		<DisplayString>{fork} ► {prong}</DisplayString>
     <Expand HideRawView="true" />
   </Type>
 
   <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm::detail::Fork">
-    <DisplayString>{TYPE}[{(unsigned)self&amp;0xFF}]: &lt;{(unsigned)resumable&amp;0xFF}&gt; ◄ ({(unsigned)active&amp;0xFF}) ► &lt;{(unsigned)requested&amp;0xFF}&gt;</DisplayString>
+  <Type Name="hfsm::detail::CompoFork">
+    <DisplayString>[{TYPE}]: &lt;{(unsigned) resumable &amp; 0xFF}&gt; ◄ ({(unsigned) active &amp; 0xFF}) ► &lt;{(unsigned) requested &amp; 0xFF}&gt;</DisplayString>
     <Expand HideRawView="true" />
   </Type>
 

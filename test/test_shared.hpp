@@ -60,12 +60,12 @@ struct Logger
 	: hfsm::LoggerInterface
 {
 
-	void recordMethod(const hfsm::StateID origin,
+	void recordMethod(const StateID origin,
 					  const Method method) override;
 
-	void recordTransition(const hfsm::StateID origin,
+	void recordTransition(const StateID origin,
 						  const Transition transition,
-						  const hfsm::StateID target) override;
+						  const StateID target) override;
 
 	void assertSequence(const Events& reference);
 

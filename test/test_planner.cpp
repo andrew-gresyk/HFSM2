@@ -173,7 +173,7 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::stateId<Step2R_1>(),	Event::UPDATE },
 			{ FSM::stateId<Step2R_1>(),	Event::RESTART, FSM::stateId<Step2R_2>() },
 
-			//{ FSM::stateId<Step2L_2>(),	Event::GUARD  },	// bug
+			{ FSM::stateId<Step2L_2>(),	Event::GUARD  },
 			{ FSM::stateId<Step2R_2>(),	Event::GUARD  },
 
 			{ FSM::stateId<Step2L_1>(),	Event::EXIT   },

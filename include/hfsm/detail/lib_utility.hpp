@@ -68,7 +68,6 @@ fill(T& a, const char value) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, unsigned NCount>
-inline
 constexpr
 unsigned
 count(const T(&)[NCount]) {
@@ -124,9 +123,11 @@ struct UnsignedIndex {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <unsigned V1, unsigned V2>
-constexpr void
+constexpr bool
 assertEquality() {
 	static_assert(V1 == V2, "assertEquality() failed");
+
+	return V1 == V2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

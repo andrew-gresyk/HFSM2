@@ -28,7 +28,10 @@ using FSM = M::Root<S(Apex),
 							S(Step2R_2)
 						>
 					>,
-					S(Terminal)
+					M::Orthogonal<S(Terminal),
+						S(Terminal_L),
+						S(Terminal_R)
+					>
 				>,
 				M::Composite<S(Unplanned),
 					S(Work_1),
@@ -40,29 +43,29 @@ using FSM = M::Root<S(Apex),
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::stateId<Apex>()		==  0, "");
-static_assert(FSM::stateId<Planned>()	==  1, "");
-static_assert(FSM::stateId<Step1_BT>()	==  2, "");
-static_assert(FSM::stateId<Step1_1>()	==  3, "");
-static_assert(FSM::stateId<Step1_2>()	==  4, "");
-static_assert(FSM::stateId<Step1_3>()	==  5, "");
-static_assert(FSM::stateId<Hybrid>()	==  6, "");
-static_assert(FSM::stateId<Step2L_P>()	==  7, "");
-static_assert(FSM::stateId<Step2L_1>()	==  8, "");
-static_assert(FSM::stateId<Step2L_2>()	==  9, "");
-static_assert(FSM::stateId<Step2R_P>()	== 10, "");
-static_assert(FSM::stateId<Step2R_1>()	== 11, "");
-static_assert(FSM::stateId<Step2R_2>()	== 12, "");
-static_assert(FSM::stateId<Terminal>()	== 13, "");
-static_assert(FSM::stateId<Unplanned>()	== 14, "");
-static_assert(FSM::stateId<Work_1>()	== 15, "");
-static_assert(FSM::stateId<Work_2>()	== 16, "");
+static_assert(FSM::stateId<Apex>()		 ==  0, "");
+static_assert(FSM::stateId<Planned>()	 ==  1, "");
+static_assert(FSM::stateId<Step1_BT>()	 ==  2, "");
+static_assert(FSM::stateId<Step1_1>()	 ==  3, "");
+static_assert(FSM::stateId<Step1_2>()	 ==  4, "");
+static_assert(FSM::stateId<Step1_3>()	 ==  5, "");
+static_assert(FSM::stateId<Hybrid>()	 ==  6, "");
+static_assert(FSM::stateId<Step2L_P>()	 ==  7, "");
+static_assert(FSM::stateId<Step2L_1>()	 ==  8, "");
+static_assert(FSM::stateId<Step2L_2>()	 ==  9, "");
+static_assert(FSM::stateId<Step2R_P>()	 == 10, "");
+static_assert(FSM::stateId<Step2R_1>()	 == 11, "");
+static_assert(FSM::stateId<Step2R_2>()	 == 12, "");
+static_assert(FSM::stateId<Terminal>()	 == 13, "");
+static_assert(FSM::stateId<Terminal_L>() == 14, "");
+static_assert(FSM::stateId<Terminal_R>() == 15, "");
+static_assert(FSM::stateId<Unplanned>()  == 16, "");
+static_assert(FSM::stateId<Work_1>()	 == 17, "");
+static_assert(FSM::stateId<Work_2>()	 == 18, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Apex
-	: FSM::State
-{};
+struct Apex	  : FSM::State {};
 
 //------------------------------------------------------------------------------
 
@@ -126,15 +129,11 @@ struct Step1_3
 
 //------------------------------------------------------------------------------
 
-struct Hybrid
-	: FSM::State
-{};
+struct Hybrid	  : FSM::State {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct Step2L_P
-	: FSM::State
-{};
+struct Step2L_P	  : FSM::State {};
 
 struct Step2L_1
 	: FSM::State
@@ -154,9 +153,7 @@ struct Step2L_2
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct Step2R_P
-	: FSM::State
-{};
+struct Step2R_P	  : FSM::State {};
 
 struct Step2R_1
 	: FSM::State
@@ -176,32 +173,23 @@ struct Step2R_2
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct Terminal
-	: FSM::State
-{};
+struct Terminal	  : FSM::State {};
+struct Terminal_L : FSM::State {};
+struct Terminal_R : FSM::State {};
 
 //------------------------------------------------------------------------------
 
-struct Unplanned
-	: FSM::State
-{};
-
-struct Work_1
-	: FSM::State
-{};
-
-struct Work_2
-	: FSM::State
-{};
+struct Unplanned  : FSM::State {};
+struct Work_1	  : FSM::State {};
+struct Work_2	  : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::DEEP_WIDTH		  ==  2, "");
-static_assert(FSM::Instance::STATE_COUNT	  == 17, "");
-static_assert(FSM::Instance::COMPOSITE_COUNT  ==  6, "");
-static_assert(FSM::Instance::ORTHOGONAL_COUNT ==  1, "");
-static_assert(FSM::Instance::FORK_COUNT		  ==  7, "");
-static_assert(FSM::Instance::PRONG_COUNT	  == 14, "");
-static_assert(FSM::Instance::WIDTH			  ==  2, "");
+static_assert(FSM::Instance::DEEP_WIDTH	 ==  2, "");
+static_assert(FSM::Instance::STATE_COUNT == 19, "");
+static_assert(FSM::Instance::COMPO_COUNT ==  6, "");
+static_assert(FSM::Instance::ORTHO_COUNT ==  2, "");
+static_assert(FSM::Instance::ORTHO_UNITS ==  2, "");
+static_assert(FSM::Instance::PRONG_COUNT == 14, "");
 
 ////////////////////////////////////////////////////////////////////////////////

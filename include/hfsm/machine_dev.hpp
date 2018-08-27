@@ -49,6 +49,7 @@
 #include "detail/lib_array.hpp"
 #include "detail/lib_bit_array.hpp"
 #include "detail/lib_list.hpp"
+#include "detail/lib_object_pool.hpp"
 #include "detail/lib_type_list.hpp"
 
 #include "detail/debug_shared.hpp"
@@ -94,7 +95,7 @@
 //------------------------------------------------------------------------------
 
 #include "detail/machine_plan.hpp"
-#include "detail/machine_utility.hpp"
+#include "detail/machine_registry.hpp"
 #include "detail/machine_control.hpp"
 #include "detail/debug_structure_report.hpp"
 #include "detail/machine_injections.hpp"
@@ -111,7 +112,6 @@ template <typename TContext,
 struct _M {
 	using Context = TContext;
 	using Config  = TConfig;
-	//using Control = ControlT<Context>;
 
 	using PayloadList = TPayloadList;
 

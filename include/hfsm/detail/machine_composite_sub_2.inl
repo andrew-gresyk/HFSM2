@@ -97,7 +97,7 @@ template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, 
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Registry& registry,
 												const ShortIndex HSFM_IF_ASSERT(prong),
-												const TransitionType transition)
+												const RequestType transition)
 {
 	assert(prong == PRONG_INDEX);
 

@@ -28,8 +28,8 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using PayloadList	 = typename Args::PayloadList;
 
 	using StateParents	 = Array<Parent, StateList::SIZE>;
-	using Transition	 = TransitionT<PayloadList>;
-	using TransitionType = typename Transition::Type;
+	using Request		 = RequestT<PayloadList>;
+	using RequestType	 = typename Request::Type;
 
 	using Registry		 = RegistryT   <Args>;
 	using PlanControl	 = PlanControlT<Args>;
@@ -39,8 +39,8 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using InitialForward = typename WrapForward<TInitial>::Type;
 
 	using Remaining		 = _CS<INITIAL_ID + InitialForward::STATE_COUNT,
-						 	   COMPO_INDEX + InitialForward::COMPOSITE_COUNT,
-						 	   ORTHO_INDEX + InitialForward::ORTHOGONAL_COUNT,
+						 	   COMPO_INDEX + InitialForward::COMPO_COUNT,
+						 	   ORTHO_INDEX + InitialForward::ORTHO_COUNT,
 						 	   Args, NIndex + 1, TRemaining...>;
 	using Forward		 = _CSF<TInitial, TRemaining...>;
 
@@ -60,7 +60,7 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	inline void   wideExit				(const ShortIndex prong, PlanControl& control);
 
-	inline void   wideForwardRequest	(Registry& registry, const ShortIndex prong, const TransitionType transition);
+	inline void   wideForwardRequest	(Registry& registry, const ShortIndex prong, const RequestType request);
 	inline void   wideRequestRemain		(Registry& registry);
 	inline void   wideRequestRestart	(Registry& registry);
 	inline void   wideRequestResume		(Registry& registry, const ShortIndex prong);
@@ -99,8 +99,8 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	using PayloadList	 = typename Args::PayloadList;
 
 	using StateParents	 = Array<Parent, StateList::SIZE>;
-	using Transition	 = TransitionT<PayloadList>;
-	using TransitionType = typename Transition::Type;
+	using Request		 = RequestT<PayloadList>;
+	using RequestType	 = typename Request::Type;
 
 	using Registry		 = RegistryT   <Args>;
 	using PlanControl	 = PlanControlT<Args>;
@@ -125,7 +125,7 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	inline void   wideExit				(const ShortIndex prong, PlanControl& control);
 
-	inline void   wideForwardRequest	(Registry& registry, const ShortIndex prong, const TransitionType transition);
+	inline void   wideForwardRequest	(Registry& registry, const ShortIndex prong, const RequestType transition);
 	inline void   wideRequestRemain		(Registry& registry);
 	inline void   wideRequestRestart	(Registry& registry);
 	inline void   wideRequestResume		(Registry& registry, const ShortIndex prong);

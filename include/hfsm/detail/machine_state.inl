@@ -48,7 +48,7 @@ _S<NS, TA, TH>::_S(Registry& registry,
 template <StateID NS, typename TA, typename TH>
 bool
 _S<NS, TA, TH>::deepGuard(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::guard, ::hfsm::Method::GUARD);
+	HFSM_LOG_STATE_METHOD(&Head::guard, Method::GUARD);
 
 	ControlOrigin origin{control, STATE_ID};
 
@@ -73,7 +73,7 @@ _S<NS, TA, TH>::deepEnterInitial(PlanControl& control) {
 template <StateID NS, typename TA, typename TH>
 void
 _S<NS, TA, TH>::deepEnter(PlanControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::enter, ::hfsm::Method::ENTER);
+	HFSM_LOG_STATE_METHOD(&Head::enter, Method::ENTER);
 
 	ControlOrigin origin{control, STATE_ID};
 
@@ -86,7 +86,7 @@ _S<NS, TA, TH>::deepEnter(PlanControl& control) {
 template <StateID NS, typename TA, typename TH>
 Status
 _S<NS, TA, TH>::deepUpdate(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::update, ::hfsm::Method::UPDATE);
+	HFSM_LOG_STATE_METHOD(&Head::update, Method::UPDATE);
 
 	ControlOrigin origin{control, STATE_ID};
 
@@ -106,7 +106,7 @@ _S<NS, TA, TH>::deepReact(const TEvent& event,
 						   FullControl& control)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, TransitionControl&)>(&Head::react);
-	HFSM_LOG_STATE_METHOD(reaction, ::hfsm::Method::REACT);
+	HFSM_LOG_STATE_METHOD(reaction, Method::REACT);
 
 	ControlOrigin origin{control, STATE_ID};
 
@@ -121,7 +121,7 @@ _S<NS, TA, TH>::deepReact(const TEvent& event,
 template <StateID NS, typename TA, typename TH>
 void
 _S<NS, TA, TH>::deepExit(PlanControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exit, ::hfsm::Method::EXIT);
+	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
 
 	ControlOrigin origin{control, STATE_ID};
 

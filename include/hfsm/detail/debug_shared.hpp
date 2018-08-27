@@ -52,7 +52,7 @@ stateName(const std::type_index stateType) {
 
 static inline
 const char*
-methodName(const ::hfsm::Method method) {
+methodName(const Method method) {
 	switch (method) {
 		case Method::GUARD:		return "guard";
 		case Method::ENTER:		return "enter";
@@ -70,7 +70,7 @@ methodName(const ::hfsm::Method method) {
 
 static inline
 const char*
-transitionName(const ::hfsm::Transition transition) {
+transitionName(const Transition transition) {
 	switch (transition) {
 		case Transition::RESTART:		return "changeTo";
 		case Transition::RESUME:		return "resume";

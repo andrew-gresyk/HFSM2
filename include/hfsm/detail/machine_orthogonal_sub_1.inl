@@ -14,13 +14,13 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::_OS(Registry& registry,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(const BitArray& prongs,
 													 FullControl& control)
 {
-	if (prong == PRONG_INDEX)
-		initial  .deepForwardGuard(control);
-	else
-		remaining.wideForwardGuard(prong, control);
+	if (prongs[PRONG_INDEX])
+		initial.deepForwardGuard(control);
+
+	remaining.wideForwardGuard(prongs, control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -94,16 +94,11 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(Registry& registry,
-													   const ShortIndex prong,
-													   const TransitionType transition)
+													   const BitArray& prongs,
+													   const RequestType request)
 {
-	if (prong == PRONG_INDEX) {
-		initial	 .deepForwardRequest(registry, 		  transition);
-		remaining.wideForwardRequest(registry, prong, Transition::REMAIN);
-	} else {
-		initial	 .deepForwardRequest(registry, 		  Transition::REMAIN);
-		remaining.wideForwardRequest(registry, prong, transition);
-	}
+	initial	 .deepForwardRequest(registry, prongs[PRONG_INDEX] ? request : Request::REMAIN);
+	remaining.wideForwardRequest(registry, prongs, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

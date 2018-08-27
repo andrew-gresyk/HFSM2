@@ -13,12 +13,11 @@ _OS<NS, NC, NO, TA, NI, TI>::_OS(Registry& registry,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const BitArray& prongs,
 											  FullControl& control)
 {
-	assert(prong == PRONG_INDEX);
-
-	initial.deepForwardGuard(control);
+	if (prongs[PRONG_INDEX])
+		initial.deepForwardGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -85,15 +84,13 @@ _OS<NS, NC, NO, TA, NI, TI>::wideExit(PlanControl& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Registry& registry,
-												const ShortIndex prong,
-												const TransitionType transition)
+												const BitArray& prongs,
+												const RequestType transition)
 {
-	assert(prong <= PRONG_INDEX);
+	const auto initialRequest = prongs[PRONG_INDEX] ?
+		transition : Transition::REMAIN;
 
-	if (prong == PRONG_INDEX)
-		initial.deepForwardRequest(registry, transition);
-	else
-		initial.deepForwardRequest(registry, Transition::REMAIN);
+	initial	 .deepForwardRequest(registry, initialRequest);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

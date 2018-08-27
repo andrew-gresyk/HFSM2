@@ -42,17 +42,18 @@ struct Destination
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static_assert(FSM::Instance::DEEP_WIDTH	 ==  1, "");
+static_assert(FSM::Instance::STATE_COUNT ==  3, "");
+static_assert(FSM::Instance::COMPO_COUNT ==  1, "");
+static_assert(FSM::Instance::ORTHO_COUNT ==  0, "");
+static_assert(FSM::Instance::ORTHO_UNITS ==  0, "");
+static_assert(FSM::Instance::PRONG_COUNT ==  2, "");
+
+////////////////////////////////////////////////////////////////////////////////
+
 TEST_CASE("State data test", "[machine]") {
 	Context _;
 	FSM::Instance machine(_);
-
-	static_assert(FSM::Instance::DEEP_WIDTH		  ==  1, "");
-	static_assert(FSM::Instance::STATE_COUNT	  ==  3, "");
-	static_assert(FSM::Instance::COMPOSITE_COUNT  ==  1, "");
-	static_assert(FSM::Instance::ORTHOGONAL_COUNT ==  0, "");
-	static_assert(FSM::Instance::FORK_COUNT		  ==  1, "");
-	static_assert(FSM::Instance::PRONG_COUNT	  ==  2, "");
-	static_assert(FSM::Instance::WIDTH			  ==  2, "");
 
 	WHEN("FSM is activated initially") {
 

@@ -7,8 +7,9 @@ namespace hfsm {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct LoggerInterface {
-	using Method	 = ::hfsm::Method;
-	using Transition = ::hfsm::Transition;
+	using Method	 = Method;
+	using StateID	 = ::hfsm::StateID;
+	using Transition = Transition;
 
 	virtual
 	void

@@ -53,20 +53,20 @@ using StructureStateInfos = ArrayView<StructureStateInfo>;
 //------------------------------------------------------------------------------
 
 template <typename TPayloadList>
-::hfsm::Transition
-inline get(const typename TransitionT<TPayloadList>::Type type) {
-	using Transition = TransitionT<TPayloadList>;
+Transition
+inline get(const typename RequestT<TPayloadList>::Type type) {
+	using Request = RequestT<TPayloadList>;
 
 	switch (type) {
-		case Transition::RESTART:
-			return ::hfsm::Transition::RESTART;
-		case Transition::RESUME:
-			return ::hfsm::Transition::RESUME;
-		case Transition::SCHEDULE:
-			return ::hfsm::Transition::SCHEDULE;
+		case Request::RESTART:
+			return Transition::RESTART;
+		case Request::RESUME:
+			return Transition::RESUME;
+		case Request::SCHEDULE:
+			return Transition::SCHEDULE;
 		default:
 			assert(false);
-			return ::hfsm::Transition::RESTART;
+			return Transition::RESTART;
 	}
 }
 
@@ -74,23 +74,23 @@ inline get(const typename TransitionT<TPayloadList>::Type type) {
 
 template <typename TPayloadList>
 struct alignas(4) TransitionInfoT {
-	using TransitionPayloads = TPayloadList;
-	using Transition = TransitionT<TPayloadList>;
+	using PayloadList = TPayloadList;
+	using Request	  = RequestT<PayloadList>;
 
 	inline TransitionInfoT() = default;
 
-	inline TransitionInfoT(const Transition transition_,
-						   const ::hfsm::Method method_)
+	inline TransitionInfoT(const Request transition_,
+						   const Method method_)
 		: stateId{transition_.stateId}
 		, method(method_)
-		, transition(get<TransitionPayloads>(transition_.type))
+		, transition(get<PayloadList>(transition_.type))
 	{
-		assert(method_ < ::hfsm::Method::COUNT);
+		assert(method_ < Method::COUNT);
 	}
 
 	StateID stateId = INVALID_STATE_ID;
-	::hfsm::Method method;
-	::hfsm::Transition transition;
+	Method method;
+	Transition transition;
 };
 
 #pragma pack(pop)

@@ -51,7 +51,7 @@ template <typename TA>
 void
 TransitionControlT<TA>::changeTo(const StateID stateId) {
 	if (!_locked) {
-		const Transition transition{TransitionType::RESTART, stateId};
+		const Request transition{Request::Type::RESTART, stateId};
 		_requests << transition;
 
 		if (_regionId <= stateId && stateId < _regionId + _regionSize)
@@ -61,7 +61,7 @@ TransitionControlT<TA>::changeTo(const StateID stateId) {
 
 	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 		if (Control::_logger)
-			Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::RESTART, stateId);
+			Control::_logger->recordTransition(Control::_originId, Transition::RESTART, stateId);
 	#endif
 	}
 }
@@ -72,7 +72,7 @@ template <typename TA>
 void
 TransitionControlT<TA>::resume(const StateID stateId) {
 	if (!_locked) {
-		const Transition transition{TransitionType::RESUME, stateId};
+		const Request transition{Request::Type::RESUME, stateId};
 		_requests << transition;
 
 		if (_regionId <= stateId && stateId < _regionId + _regionSize)
@@ -82,7 +82,7 @@ TransitionControlT<TA>::resume(const StateID stateId) {
 
 	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 		if (Control::_logger)
-			Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::RESUME, stateId);
+			Control::_logger->recordTransition(Control::_originId, Transition::RESUME, stateId);
 	#endif
 	}
 }
@@ -92,12 +92,12 @@ TransitionControlT<TA>::resume(const StateID stateId) {
 template <typename TA>
 void
 TransitionControlT<TA>::schedule(const StateID stateId) {
-	const Transition transition{TransitionType::SCHEDULE, stateId};
+	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (Control::_logger)
-		Control::_logger->recordTransition(Control::_originId, ::hfsm::Transition::SCHEDULE, stateId);
+		Control::_logger->recordTransition(Control::_originId, Transition::SCHEDULE, stateId);
 #endif
 }
 

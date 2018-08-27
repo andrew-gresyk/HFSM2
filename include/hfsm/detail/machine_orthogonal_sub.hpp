@@ -26,8 +26,8 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using PayloadList	 = typename Args::PayloadList;
 
 	using StateParents	 = Array<Parent, Args::STATE_COUNT>;
-	using Transition	 = TransitionT<PayloadList>;
-	using TransitionType = typename Transition::Type;
+	using Request		 = RequestT<PayloadList>;
+	using RequestType	 = typename Request::Type;
 
 	using Registry		 = RegistryT   <Args>;
 	using PlanControl	 = PlanControlT<Args>;
@@ -37,16 +37,15 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using InitialForward = typename WrapForward<TInitial>::Type;
 
 	using Remaining		 = _OS<INITIAL_ID + InitialForward::STATE_COUNT,
-						 	   COMPO_INDEX + InitialForward::COMPOSITE_COUNT,
-						 	   ORTHO_INDEX + InitialForward::ORTHOGONAL_COUNT,
+						 	   COMPO_INDEX + InitialForward::COMPO_COUNT,
+						 	   ORTHO_INDEX + InitialForward::ORTHO_COUNT,
 						 	   Args, PRONG_INDEX + 1, TRemaining...>;
 	using Forward		 = _OSF<TInitial, TRemaining...>;
 
 	_OS(Registry& registry, const ForkID fork);
 
-	inline void	  wideForwardGuard		(const ShortIndex prong,
+	inline void	  wideForwardGuard		(const BitArray& prongs,
 										 FullControl& control);
-
 	inline void	  wideForwardGuard		(FullControl& control);
 	inline void	  wideGuard				(FullControl& control);
 
@@ -61,11 +60,12 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	inline void   wideExit				(PlanControl& control);
 
-	inline void   wideForwardRequest	(Registry& registry, const ShortIndex prong, const TransitionType transition);
+	inline void   wideForwardRequest	(Registry& registry, const BitArray& prongs, const RequestType request);
 	inline void   wideRequestRemain		(Registry& registry);
 	inline void   wideRequestRestart	(Registry& registry);
 	inline void   wideRequestResume		(Registry& registry);
-	inline void   wideChangeToRequested	(Registry& registry, PlanControl& control);
+	inline void   wideChangeToRequested	(Registry& registry,
+										 PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
@@ -98,8 +98,8 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	using PayloadList	 = typename Args::PayloadList;
 
 	using StateParents	 = Array<Parent, Args::STATE_COUNT>;
-	using Transition	 = TransitionT<PayloadList>;
-	using TransitionType = typename Transition::Type;
+	using Transition	 = RequestT<PayloadList>;
+	using RequestType = typename Transition::Type;
 
 	using Registry		 = RegistryT   <Args>;
 	using PlanControl	 = PlanControlT<Args>;
@@ -110,9 +110,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	_OS(Registry& registry, const ForkID fork);
 
-	inline void   wideForwardGuard		(const ShortIndex prong,
-										 FullControl& control);
-
+	inline void   wideForwardGuard		(const BitArray& prongs, FullControl& control);
 	inline void   wideForwardGuard		(FullControl& control);
 	inline void   wideGuard				(FullControl& control);
 
@@ -122,12 +120,11 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	inline Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	inline void   wideReact				(const TEvent& event,
-										 FullControl& control);
+	inline void   wideReact				(const TEvent& event, FullControl& control);
 
 	inline void   wideExit				(PlanControl& control);
 
-	inline void   wideForwardRequest	(Registry& registry, const ShortIndex prong, const TransitionType transition);
+	inline void   wideForwardRequest	(Registry& registry, const BitArray& prongs, const RequestType transition);
 	inline void   wideRequestRemain		(Registry& registry);
 	inline void   wideRequestRestart	(Registry& registry);
 	inline void   wideRequestResume		(Registry& registry);

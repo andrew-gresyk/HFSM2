@@ -33,14 +33,14 @@
     <ClCompile Include="..\..\test\test_planner.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_lib_lib_bit_array.cpp">
+    <ClCompile Include="..\..\test\test_lib_object_pool.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_lib_bit_array.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_utility.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm\detail\debug_structure_report.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
@@ -107,6 +107,15 @@
     <ClInclude Include="..\..\test\test_planner.hpp">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\lib_object_pool.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\machine_registry.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\deprecated.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl">
@@ -166,10 +175,13 @@
     <None Include="..\..\include\hfsm\detail\machine_sequence.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_utility.inl">
+    <None Include="..\..\include\hfsm\detail\lib_bit_array.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\lib_bit_array.inl">
+    <None Include="..\..\include\hfsm\detail\lib_object_pool.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_registry.inl">
       <Filter>hfsm\detail</Filter>
     </None>
   </ItemGroup>

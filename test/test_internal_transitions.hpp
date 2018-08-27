@@ -262,12 +262,11 @@ struct B_2_2
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::DEEP_WIDTH		  ==  2, "");
-static_assert(FSM::Instance::STATE_COUNT	  == 13, "");
-static_assert(FSM::Instance::COMPOSITE_COUNT  ==  5, "");
-static_assert(FSM::Instance::ORTHOGONAL_COUNT ==  1, "");
-static_assert(FSM::Instance::FORK_COUNT		  ==  6, "");
-static_assert(FSM::Instance::PRONG_COUNT	  == 10, "");
-static_assert(FSM::Instance::WIDTH			  ==  2, "");
+static_assert(FSM::Instance::DEEP_WIDTH	 ==  2, "");
+static_assert(FSM::Instance::STATE_COUNT == 13, "");
+static_assert(FSM::Instance::COMPO_COUNT ==  5, "");
+static_assert(FSM::Instance::ORTHO_COUNT ==  1, "");
+static_assert(FSM::Instance::ORTHO_UNITS ==  1, "");
+static_assert(FSM::Instance::PRONG_COUNT == 10, "");
 
 ////////////////////////////////////////////////////////////////////////////////

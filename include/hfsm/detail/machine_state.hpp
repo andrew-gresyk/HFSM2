@@ -15,7 +15,7 @@ struct _S {
 	using PayloadList		= typename Args::PayloadList;
 
 	using StateParents		= Array<Parent, Args::STATE_COUNT>;
-	using Transition		= TransitionT<PayloadList>;
+	using Transition		= RequestT<PayloadList>;
 
 	using Registry			= RegistryT			<Args>;
 	using ControlOrigin		= ControlOriginT	<Args>;
@@ -74,11 +74,11 @@ struct _S {
 		using State = TState;
 	};
 
-	template <typename TMethodType, LoggerInterface::Method>
+	template <typename TMethodType, Method>
 	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
 	log(LoggerInterface&) const {}
 
-	template <typename TMethodType, LoggerInterface::Method TMethodId>
+	template <typename TMethodType, Method TMethodId>
 	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
 	log(LoggerInterface& logger) const {
 		logger.recordMethod(STATE_ID, TMethodId);

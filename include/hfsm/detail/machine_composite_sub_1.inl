@@ -103,7 +103,7 @@ template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, 
 void
 _CS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(Registry& registry,
 													   const ShortIndex prong,
-													   const TransitionType transition)
+													   const RequestType transition)
 {
 	if (prong == PRONG_INDEX)
 		initial	 .deepForwardRequest(registry, 		  transition);

@@ -23,21 +23,28 @@ class _R final {
 	static constexpr LongIndex PLAN_CAPACITY	 = Forward::PLAN_CAPACITY;
 
 public:
-	static constexpr LongIndex REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
-	static constexpr LongIndex DEEP_WIDTH		 = ForwardApex::DEEP_WIDTH;
-	static constexpr LongIndex STATE_COUNT		 = ForwardApex::STATE_COUNT;
-	static constexpr LongIndex COMPOSITE_COUNT	 = ForwardApex::COMPOSITE_COUNT;
-	static constexpr LongIndex ORTHOGONAL_COUNT	 = ForwardApex::ORTHOGONAL_COUNT;
-	static constexpr LongIndex PRONG_COUNT		 = ForwardApex::PRONG_COUNT;
-	static constexpr LongIndex WIDTH			 = ForwardApex::WIDTH;
-
-	static constexpr LongIndex FORK_COUNT		 = COMPOSITE_COUNT + ORTHOGONAL_COUNT;
+	static constexpr LongIndex  REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
+	static constexpr LongIndex  DEEP_WIDTH		 = ForwardApex::DEEP_WIDTH;
+	static constexpr LongIndex  STATE_COUNT		 = ForwardApex::STATE_COUNT;
+	static constexpr ShortIndex COMPO_COUNT		 = ForwardApex::COMPO_COUNT;
+	static constexpr ShortIndex ORTHO_COUNT		 = ForwardApex::ORTHO_COUNT;
+	static constexpr ShortIndex ORTHO_UNITS		 = ForwardApex::ORTHO_UNITS;
+	static constexpr LongIndex  PRONG_COUNT		 = ForwardApex::PRONG_COUNT;
 
 private:
-	using Args					 = ArgsT<Context, Config, StateList, COMPOSITE_COUNT, ORTHOGONAL_COUNT, PayloadList, PLAN_CAPACITY>;
-	using PlanControl			 = typename Forward::PlanControl;
+	using Args					 = ArgsT<Context,
+										 Config,
+										 StateList,
+										 COMPO_COUNT,
+										 ORTHO_COUNT,
+										 ORTHO_UNITS,
+										 PayloadList,
+										 PLAN_CAPACITY>;
+
 	using Payload				 = typename PayloadList::Container;
-	using Transition			 = TransitionT<PayloadList>;
+	using Transition			 = RequestT<PayloadList>;
+
+	using PlanControl			 = typename Forward::PlanControl;
 	using TransitionControl		 = typename Forward::TransitionControl;
 	using FullControl			 = typename Forward::FullControl;
 
@@ -48,7 +55,7 @@ private:
 	using Registry				 = RegistryT<Args>;
 
 	using Payloads				 = Array<Payload,		STATE_COUNT>;
-	using TransitionQueueStorage = Array<Transition,	FORK_COUNT>;
+	using TransitionQueueStorage = Array<Transition,	COMPO_COUNT>;
 
 	using MaterialApex			 = typename WrapMaterial<0, 0, 0, Args, Apex>::Type;
 	using Tasks					 = typename FullControl::Tasks;
@@ -66,7 +73,7 @@ private:
 	using ActivityHistoryStorage = Array<char,					NAME_COUNT>;
 
 	using TransitionInfo		 = TransitionInfoT<PayloadList>;
-	using TransitionInfoStorage	 = Array<TransitionInfo,		FORK_COUNT * 2>;
+	using TransitionInfoStorage	 = Array<TransitionInfo,		COMPO_COUNT * 2>;
 #endif
 
 public:
@@ -145,8 +152,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline bool isActive   (const StateID stateId) const	{ return ::hfsm::detail::isActive	(_registry, stateId);	}
-	inline bool isResumable(const StateID stateId) const	{ return ::hfsm::detail::isResumable(_registry, stateId);	}
+	inline bool isActive   (const StateID stateId) const	{ return _registry.isActive	(stateId);				}
+	inline bool isResumable(const StateID stateId) const	{ return _registry.isResumable(stateId);			}
 
 	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
@@ -173,7 +180,7 @@ public:
 protected:
 	void processTransitions();
 	void requestImmediate(const Transition request);
-	void requestScheduled(const Transition request);
+	void requestScheduled(const Transition request)			{ 	_registry.requestScheduled(request);			}
 
 #ifdef _DEBUG
 	void verifyPlans() const;

@@ -15,33 +15,33 @@ struct _C {
 	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
 	static constexpr ForkID		COMPO_ID	= COMPO_INDEX + 1;
 
-	using Args			 = TArgs;
-	using Head			 = THead;
+	using Args			= TArgs;
+	using Head			= THead;
 
-	using Context		 = typename Args::Context;
-	using StateList		 = typename Args::StateList;
-	using PayloadList	 = typename Args::PayloadList;
+	using Context		= typename Args::Context;
+	using StateList		= typename Args::StateList;
+	using PayloadList	= typename Args::PayloadList;
 
-	using StateParents	 = Array<Parent, StateList::SIZE>;
-	using Transition	 = TransitionT<PayloadList>;
-	using TransitionType = typename Transition::Type;
+	using StateParents	= Array<Parent, StateList::SIZE>;
+	using Request		= RequestT<PayloadList>;
+	using RequestType	= typename Request::Type;
 
-	using Registry		 = RegistryT	 <Args>;
-	using Control		 = ControlT		 <Args>;
-	using PlanControl	 = PlanControlT	 <Args>;
-	using ControlLock	 = ControlLockT	 <Args>;
-	using ControlRegion	 = ControlRegionT<Args>;
-	using FullControl	 = FullControlT	 <Args>;
+	using Registry		= RegistryT		<Args>;
+	using Control		= ControlT		<Args>;
+	using PlanControl	= PlanControlT	<Args>;
+	using ControlLock	= ControlLockT	<Args>;
+	using ControlRegion	= ControlRegionT<Args>;
+	using FullControl	= FullControlT	<Args>;
 
-	using HeadState		 = _S <HEAD_ID, Args, Head>;
-	using SubStates		 = _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, 0, TSubStates...>;
-	using Forward		 = _CF<Head, TSubStates...>;
-	using SubStateList	 = typename Forward::StateList;
+	using HeadState		= _S <HEAD_ID, Args, Head>;
+	using SubStates		= _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, 0, TSubStates...>;
+	using Forward		= _CF<Head, TSubStates...>;
+	using SubStateList	= typename Forward::StateList;
 
 	_C(Registry& registry, const Parent parent);
 
-	inline Fork&  compoFork				(Registry& registry)	{ return registry.compoForks[COMPO_INDEX];	}
-	inline Fork&  compoFork				(Control&  control)		{ return compoFork(control.registry());		}
+	inline CompoFork& compoFork			(Registry& registry)	{ return registry.compoForks[COMPO_INDEX];	}
+	inline CompoFork& compoFork			(Control&  control)		{ return compoFork(control.registry());		}
 
 	inline void   deepForwardGuard		(FullControl& control);
 	inline void   deepGuard				(FullControl& control);
@@ -52,12 +52,11 @@ struct _C {
 	inline Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	inline void   deepReact				(const TEvent& event,
-										 FullControl& control);
+	inline void   deepReact				(const TEvent& event, FullControl& control);
 
 	inline void   deepExit				(PlanControl& control);
 
-	inline void   deepForwardRequest	(Registry& registry, const TransitionType transition);
+	inline void   deepForwardRequest	(Registry& registry, const RequestType request);
 	inline void   deepRequestRemain		(Registry& registry);
 	inline void   deepRequestRestart	(Registry& registry);
 	inline void   deepRequestResume		(Registry& registry);

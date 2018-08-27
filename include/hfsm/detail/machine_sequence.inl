@@ -14,7 +14,7 @@ _Q<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 Status
 _Q<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
-	Fork& fork = Composite::compoFork(control);
+	CompoFork& fork = Composite::compoFork(control);
 	
 	assert(fork.active != INVALID_SHORT_INDEX);
 

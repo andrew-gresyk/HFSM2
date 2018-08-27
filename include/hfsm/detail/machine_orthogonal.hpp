@@ -21,11 +21,9 @@ struct _O final {
 	using StateList		 = typename Args::StateList;
 	using PayloadList	 = typename Args::PayloadList;
 
-	static constexpr LongIndex STATE_COUNT = Args::STATE_COUNT;
-
-	using StateParents	 = Array<Parent, STATE_COUNT>;
-	using Transition	 = TransitionT<PayloadList>;
-	using TransitionType = typename Transition::Type;
+	using StateParents	 = Array<Parent, Args::STATE_COUNT>;
+	using Request		 = RequestT<PayloadList>;
+	using RequestType	 = typename Request::Type;
 
 	using Registry		 = RegistryT	 <Args>;
 	using ControlLock	 = ControlLockT	 <Args>;
@@ -41,8 +39,11 @@ struct _O final {
 
 	_O(Registry& registry, const Parent parent);
 
-	inline Fork&  orthoFork				(Registry& registry)	{ return registry.orthoForks[ORTHO_INDEX];	}
-	inline Fork&  orthoFork				(Control&  control)		{ return orthoFork(control.registry());		}
+	inline		 OrthoFork& orthoRequested(		 Registry& registry)	   { return registry.orthoRequested[ORTHO_INDEX];	}
+	inline const OrthoFork& orthoRequested(const Registry& registry) const { return registry.orthoRequested[ORTHO_INDEX];	}
+
+	inline		 OrthoFork& orthoRequested(		 Control&  control)		   { return orthoRequested(control.registry());		}
+	inline const OrthoFork& orthoRequested(const Control&  control)	 const { return orthoRequested(control.registry());		}
 
 	inline void   deepForwardGuard		(FullControl& control);
 	inline void   deepGuard				(FullControl& control);
@@ -58,7 +59,7 @@ struct _O final {
 
 	inline void   deepExit				(PlanControl& control);
 
-	inline void   deepForwardRequest	(Registry& registry, const TransitionType transition);
+	inline void   deepForwardRequest	(Registry& registry, const RequestType transition);
 	inline void   deepRequestRemain		(Registry& registry);
 	inline void   deepRequestRestart	(Registry& registry);
 	inline void   deepRequestResume		(Registry& registry);

@@ -308,29 +308,8 @@ void
 _R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
 	assert(STATE_COUNT > request.stateId);
 
-	for (auto parent = _registry.stateParents[request.stateId];
-		 parent;
-		 parent = _registry.forkParent(parent.fork))
-	{
-		Fork& fork = _registry.fork(parent.fork);
-
-		fork.requested = parent.prong;
-	}
-
+	_registry.requestImmediate(request);
 	_apex.deepForwardRequest(_registry, request.type);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-void
-_R<TC, TG, TPL, TA>::requestScheduled(const Transition request) {
-	assert(STATE_COUNT > request.stateId);
-
-	const auto parent = _registry.stateParents[request.stateId];
-	Fork& fork = _registry.fork(parent.fork);
-
-	fork.resumable = parent.prong;
 }
 
 //------------------------------------------------------------------------------
