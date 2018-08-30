@@ -46,7 +46,7 @@ struct Context {
 };
 
 // convenience typedef
-using M = hfsm::Machine<Context>;
+using M = hfsm2::Machine<Context>;
 
 #define S(s) struct s
 
@@ -64,6 +64,17 @@ using FSM = M::PeerRoot<
 			>;
 
 #undef S
+
+//------------------------------------------------------------------------------
+
+static_assert(FSM::regionId<On>()			  ==  1, "");
+
+static_assert(FSM::stateId<On>()			  ==  1, "");
+static_assert(FSM::stateId<Red>()			  ==  2, "");
+static_assert(FSM::stateId<YellowDownwards>() ==  3, "");
+static_assert(FSM::stateId<YellowUpwards>()	  ==  4, "");
+static_assert(FSM::stateId<Green>()			  ==  5, "");
+static_assert(FSM::stateId<Off>()			  ==  6, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -90,7 +101,7 @@ struct Red
 	}
 
 	// state can initiate transitions to _any_ other state
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		// multiple transitions can be initiated, can be useful in a hierarchy
 		if (control.context().cycleCount > 3)
 			control.changeTo<Off>();
@@ -108,7 +119,7 @@ struct YellowDownwards
 		std::cout << "    Yellow v" << std::endl;
 	}
 
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		control.changeTo<Green>();
 	}
 };
@@ -122,7 +133,7 @@ struct YellowUpwards
 		std::cout << "    Yellow ^" << std::endl;
 	}
 
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		control.changeTo<Red>();
 	}
 };
@@ -136,7 +147,7 @@ struct Green
 		std::cout << "      Green" << std::endl;
 	}
 
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		control.changeTo<YellowUpwards>();
 	}
 };

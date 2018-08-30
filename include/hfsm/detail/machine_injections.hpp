@@ -1,12 +1,12 @@
 #pragma once
 
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-class Bare {
+class BareT {
 	template <typename...>
 	friend struct _B;
 
@@ -14,13 +14,12 @@ protected:
 	using Args				= TArgs;
 	using Context			= typename Args::Context;
 	using StateList			= typename Args::StateList;
+	using RegionList		= typename Args::RegionList;
 
-	using Control			= ControlT			<Args>;
-	using PlanControl		= PlanControlT		<Args>;
-	using TransitionControl = TransitionControlT<Args>;
-	using FullControl		= FullControlT		<Args>;
+	using Control			= ControlT	  <Args>;
+	using FullControl		= FullControlT<Args>;
 
-	using Plan				= typename PlanControl::Plan;
+	using Plan				= typename Control::Plan;
 
 public:
 	inline void preGuard (Context&)												{}
@@ -64,13 +63,14 @@ struct _B<TFirst>
 	using First				= TFirst;
 
 	using StateList			= typename First::StateList;
+	using RegionList		= typename First::RegionList;
 
-	inline void guard		 (typename First::TransitionControl&)				{}
-	inline void enter		 (typename First::PlanControl&)						{}
-	inline void update		 (typename First::TransitionControl&)				{}
+	inline void guard		 (typename First::FullControl&)						{}
+	inline void enter		 (typename First::Control&)							{}
+	inline void update		 (typename First::FullControl&)						{}
 	template <typename TEvent>
 	inline void react		 (const TEvent&,
-							  typename First::TransitionControl&)				{}
+							  typename First::FullControl&)						{}
 	inline void exit		 (typename First::Control&)							{}
 
 	inline void widePreGuard (typename First::Context& context);
@@ -82,12 +82,14 @@ struct _B<TFirst>
 	inline void widePostExit (typename First::Context& context);
 
 	template <typename T>
-	static constexpr LongIndex
-	stateId()						{ return StateList::template index<T>();	}
+	static constexpr LongIndex stateId()  { return StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr LongIndex regionId() { return RegionList::template index<T>();	}
 };
 
 template <typename TArgs>
-using Empty = _B<Bare<TArgs>>;
+using Empty = _B<BareT<TArgs>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

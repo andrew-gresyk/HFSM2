@@ -110,11 +110,14 @@
     <ClInclude Include="..\..\include\hfsm\detail\lib_object_pool.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_registry.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\deprecated.hpp">
       <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\machine_state_data.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm\detail\machine_plan_data.hpp">
+      <Filter>hfsm\detail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -181,7 +184,10 @@
     <None Include="..\..\include\hfsm\detail\lib_object_pool.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_registry.inl">
+    <None Include="..\..\include\hfsm\detail\machine_state_data.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm\detail\machine_plan_data.inl">
       <Filter>hfsm\detail</Filter>
     </None>
   </ItemGroup>

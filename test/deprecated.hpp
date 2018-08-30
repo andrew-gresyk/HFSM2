@@ -45,7 +45,7 @@ struct Context {
 	template <unsigned NCapacity>
 	void assertHistory(const Status (&reference)[NCapacity]) {
 		const auto historySize = (unsigned) history.size();
-		const auto referenceSize = hfsm::detail::count(reference);
+		const auto referenceSize = hfsm2::detail::count(reference);
 
 		const auto size = std::min(historySize, referenceSize);
 
@@ -63,7 +63,7 @@ struct Context {
 
 	History history;
 };
-using M = hfsm::Machine<Context>;
+using M = hfsm2::Machine<Context>;
 
 //------------------------------------------------------------------------------
 
@@ -92,6 +92,14 @@ using FSM = M::PeerRoot<
 #undef S
 
 //------------------------------------------------------------------------------
+
+static constexpr auto REGION = FSM::regionId<A>();
+
+static_assert(FSM::regionId<A>()	==  1, "");
+static_assert(FSM::regionId<A_2>()	==  2, "");
+static_assert(FSM::regionId<B>()	==  3, "");
+static_assert(FSM::regionId<B_1>()	==  4, "");
+static_assert(FSM::regionId<B_2>()	==  5, "");
 
 static_assert(FSM::stateId<A>()		==  1, "");
 static_assert(FSM::stateId<A_1>()	==  2, "");
@@ -185,7 +193,7 @@ using State = FSM::BaseT<Tracked, Timed, HistoryBase<T>>;
 
 template <typename T>
 void
-changeTo(FSM::TransitionControl& control, Context::History& history) {
+changeTo(FSM::FullControl& control, Context::History& history) {
 	control.template changeTo<T>();
 	history.push_back(Status{ typeid(T), Event::RESTART });
 }
@@ -194,7 +202,7 @@ changeTo(FSM::TransitionControl& control, Context::History& history) {
 
 template <typename T>
 void
-resume(FSM::TransitionControl& control, Context::History& history) {
+resume(FSM::FullControl& control, Context::History& history) {
 	control.template resume<T>();
 	history.push_back(Status{ typeid(T), Event::RESUME });
 }
@@ -203,7 +211,7 @@ resume(FSM::TransitionControl& control, Context::History& history) {
 
 template <typename T>
 void
-schedule(FSM::TransitionControl& control, Context::History& history) {
+schedule(FSM::FullControl& control, Context::History& history) {
 	control.template schedule<T>();
 	history.push_back(Status{ typeid(T), Event::SCHEDULE });
 }
@@ -214,7 +222,7 @@ template <typename T>
 struct Reacting
 	: State<T>
 {
-	void react(const Action&, FSM::TransitionControl& control) {
+	void react(const Action&, FSM::FullControl& control) {
 		control._().history.push_back(Status{ typeid(T), Event::REACT });
 	}
 };
@@ -228,7 +236,7 @@ struct A : Reacting<A> {};
 struct A_1
 	: State<A_1>
 {
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		changeTo<A_2>(control, control._().history);
 	}
 };
@@ -238,7 +246,7 @@ struct A_1
 struct A_2
 	: State<A_2>
 {
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		switch (entryCount()) {
 		case 1:
 			changeTo<B_2_2>(control, control._().history);
@@ -271,7 +279,7 @@ struct B_2	 : State<B_2> {};
 struct B_2_1
 	: State<B_2_1>
 {
-	void guard(TransitionControl& control) {
+	void guard(FullControl& control) {
 		resume<B_2_2>(control, control._().history);
 	}
 };
@@ -281,12 +289,12 @@ struct B_2_1
 struct B_2_2
 	: State<B_2_2>
 {
-	void guard(TransitionControl& control) {
+	void guard(FullControl& control) {
 		if (entryCount() == 2)
 			control.resume<A>();
 	}
 
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		switch (totalUpdateCount()) {
 		case 1:
 			resume<A>(control, control._().history);

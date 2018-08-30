@@ -2,14 +2,14 @@
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 
-namespace hfsm {
+namespace hfsm2 {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 struct LoggerInterface {
-	using Method	 = Method;
-	using StateID	 = ::hfsm::StateID;
-	using Transition = Transition;
+	using Method	 = ::hfsm2::Method;
+	using StateID	 = ::hfsm2::StateID;
+	using Transition = ::hfsm2::Transition;
 
 	virtual
 	void
@@ -29,7 +29,7 @@ struct LoggerInterface {
 
 #else
 
-namespace hfsm {
+namespace hfsm2 {
 
 using LoggerInterface = void;
 

@@ -1,4 +1,4 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -13,43 +13,47 @@ struct _O final {
 	static constexpr StateID	HEAD_ID		= NHeadIndex;
 	static constexpr ShortIndex COMPO_INDEX	= NCompoIndex;
 	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
+	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ForkID		ORTHO_ID	= (ForkID) -ORTHO_INDEX - 1;
 
-	using Args			 = TArgs;
-	using Head			 = THead;
+	using Args			= TArgs;
+	using Head			= THead;
 
-	using StateList		 = typename Args::StateList;
-	using PayloadList	 = typename Args::PayloadList;
+	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
+	using PayloadList	= typename Args::PayloadList;
 
-	using StateParents	 = Array<Parent, Args::STATE_COUNT>;
-	using Request		 = RequestT<PayloadList>;
-	using RequestType	 = typename Request::Type;
+	using StateParents	= Array<Parent, Args::STATE_COUNT>;
+	using Request		= RequestT<PayloadList>;
+	using RequestType	= typename Request::Type;
 
-	using Registry		 = RegistryT	 <Args>;
-	using ControlLock	 = ControlLockT	 <Args>;
-	using ControlRegion	 = ControlRegionT<Args>;
-	using Control		 = ControlT		 <Args>;
-	using PlanControl	 = PlanControlT	 <Args>;
-	using FullControl	 = FullControlT	 <Args>;
+	using StateData		= StateDataT  <Args>;
+	using Control		= ControlT	  <Args>;
+	using ControlRegion	= typename Control::Region;
 
-	using HeadState		 = _S <HEAD_ID, Args, Head>;
-	using SubStates		 = _OS<HEAD_ID + 1, COMPO_INDEX, ORTHO_INDEX + 1, Args, 0, TSubStates...>;
-	using Forward		 = _OF<Head, TSubStates...>;
-	using SubStateList	 = typename Forward::StateList;
+	using FullControl	= FullControlT<Args>;
+	using ControlLock	= typename FullControl::Lock;
 
-	_O(Registry& registry, const Parent parent);
+	using HeadState		= _S <HEAD_ID, Args, Head>;
+	using SubStates		= _OS<HEAD_ID + 1, COMPO_INDEX, ORTHO_INDEX + 1, Args, 0, TSubStates...>;
+	using Forward		= _OF<Head, TSubStates...>;
+	using SubStateList	= typename Forward::StateList;
 
-	inline		 OrthoFork& orthoRequested(		 Registry& registry)	   { return registry.orthoRequested[ORTHO_INDEX];	}
-	inline const OrthoFork& orthoRequested(const Registry& registry) const { return registry.orthoRequested[ORTHO_INDEX];	}
+	static constexpr ShortIndex REGION_SIZE	= SubStateList::SIZE;
 
-	inline		 OrthoFork& orthoRequested(		 Control&  control)		   { return orthoRequested(control.registry());		}
-	inline const OrthoFork& orthoRequested(const Control&  control)	 const { return orthoRequested(control.registry());		}
+	_O(StateData& stateData, const Parent parent);
+
+	inline		 OrthoFork& orthoRequested(		 StateData& stateData)		 { return stateData.orthoRequested[ORTHO_INDEX];	}
+	inline const OrthoFork& orthoRequested(const StateData& stateData) const { return stateData.orthoRequested[ORTHO_INDEX];	}
+
+	inline		 OrthoFork& orthoRequested(		 Control&  control)		   { return orthoRequested(control.stateData());		}
+	inline const OrthoFork& orthoRequested(const Control&  control)	 const { return orthoRequested(control.stateData());		}
 
 	inline void   deepForwardGuard		(FullControl& control);
 	inline void   deepGuard				(FullControl& control);
 
-	inline void   deepEnterInitial		(PlanControl& control);
-	inline void   deepEnter				(PlanControl& control);
+	inline void   deepEnterInitial		(Control& control);
+	inline void   deepEnter				(Control& control);
 
 	inline Status deepUpdate			(FullControl& control);
 
@@ -57,13 +61,13 @@ struct _O final {
 	inline void   deepReact				(const TEvent& event,
 										 FullControl& control);
 
-	inline void   deepExit				(PlanControl& control);
+	inline void   deepExit				(Control& control);
 
-	inline void   deepForwardRequest	(Registry& registry, const RequestType transition);
-	inline void   deepRequestRemain		(Registry& registry);
-	inline void   deepRequestRestart	(Registry& registry);
-	inline void   deepRequestResume		(Registry& registry);
-	inline void   deepChangeToRequested	(Registry& registry, PlanControl& control);
+	inline void   deepForwardRequest	(StateData& stateData, const RequestType transition);
+	inline void   deepRequestRemain		(StateData& stateData);
+	inline void   deepRequestRestart	(StateData& stateData);
+	inline void   deepRequestResume		(StateData& stateData);
+	inline void   deepChangeToRequested	(StateData& stateData, Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;

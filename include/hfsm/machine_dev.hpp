@@ -95,13 +95,14 @@
 //------------------------------------------------------------------------------
 
 #include "detail/machine_plan.hpp"
-#include "detail/machine_registry.hpp"
+#include "detail/machine_plan_data.hpp"
+#include "detail/machine_state_data.hpp"
 #include "detail/machine_control.hpp"
 #include "detail/debug_structure_report.hpp"
 #include "detail/machine_injections.hpp"
 #include "detail/machine_forward.hpp"
 
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////

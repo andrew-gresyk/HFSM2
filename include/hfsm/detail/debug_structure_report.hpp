@@ -2,7 +2,7 @@
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-namespace hfsm {
+namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 

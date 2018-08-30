@@ -1,12 +1,12 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-_CS<NS, NC, NO, TA, NI, TI>::_CS(Registry& registry,
-								 const ForkID fork)
-	: initial{registry, Parent{fork, PRONG_INDEX}}
+_CS<NS, NC, NO, TA, NI, TI>::_CS(StateData& stateData,
+								 const ForkID forkId)
+	: initial{stateData, Parent{forkId, PRONG_INDEX}}
 {}
 
 //------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
+_CS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(Control& control) {
 	initial.deepEnterInitial(control);
 }
 
@@ -46,7 +46,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
-									   PlanControl& control)
+									   Control& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -84,7 +84,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
-									  PlanControl& control)
+									  Control& control)
 {
 	assert(prong == PRONG_INDEX);
 
@@ -95,54 +95,54 @@ _CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Registry& registry,
+_CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateData& stateData,
 												const ShortIndex HSFM_IF_ASSERT(prong),
 												const RequestType transition)
 {
 	assert(prong == PRONG_INDEX);
 
-	initial.deepForwardRequest(registry, transition);
+	initial.deepForwardRequest(stateData, transition);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(Registry& registry) {
-	initial.deepRequestRemain(registry);
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(StateData& stateData) {
+	initial.deepRequestRemain(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(Registry& registry) {
-	initial.deepRequestRestart(registry);
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(StateData& stateData) {
+	initial.deepRequestRestart(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(Registry& registry,
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateData& stateData,
 											   const ShortIndex HSFM_IF_ASSERT(prong))
 {
 	assert(prong == PRONG_INDEX);
 
-	initial.deepRequestResume(registry);
+	initial.deepRequestResume(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(Registry& registry,
+_CS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(StateData& stateData,
 												   const ShortIndex HSFM_IF_ASSERT(prong),
-												   PlanControl& control)
+												   Control& control)
 {
 	assert(prong == PRONG_INDEX);
 
-	initial.deepChangeToRequested(registry, control);
+	initial.deepChangeToRequested(stateData, control);
 }
 
 //------------------------------------------------------------------------------

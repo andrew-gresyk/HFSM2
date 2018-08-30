@@ -1,4 +1,4 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,19 +35,19 @@ combine(const Status lhs, const Status rhs) {
 
 #pragma pack(push, 2)
 
-struct TaskIndices {
+struct Bounds {
 	LongIndex first = INVALID_LONG_INDEX;
 	LongIndex last  = INVALID_LONG_INDEX;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct TaskTransition {
+struct TaskLink {
 	//using PayloadList	= TPayloadList;
 	//using Payload		= typename PayloadList::Container;
 
-	inline TaskTransition(const StateID origin_,
-						  const StateID destination_)
+	inline TaskLink(const StateID origin_,
+					const StateID destination_)
 		: origin(origin_)
 		, destination(destination_)
 		, next(INVALID_LONG_INDEX)
@@ -66,30 +66,30 @@ struct TaskTransition {
 //------------------------------------------------------------------------------
 
 template <typename>
-class PlanControlT;
+class ControlT;
 
 template <typename>
 class FullControlT;
 
-template <typename TStateList, LongIndex NPlanCapacity>
+template <typename TStateList, ShortIndex NRegionCapacity, LongIndex NTaskCapacity>
 class PlanT {
 	template <typename>
-	friend class PlanControlT;
+	friend class ControlT;
 
 	template <typename>
 	friend class FullControlT;
 
 	using StateList			= TStateList;
 
-	static constexpr LongIndex CAPACITY		= NPlanCapacity;
-	static constexpr LongIndex STATE_COUNT	= StateList::SIZE;
+	static constexpr ShortIndex REGION_CAPACITY	= NRegionCapacity;
+	static constexpr LongIndex  TASK_CAPACITY	= NTaskCapacity;
 
-	using Tasks				= List<TaskTransition, CAPACITY>;
-	using StateTasks		= Array<TaskIndices,   STATE_COUNT>;
+public:
+	using TaskLinks			= List<TaskLink, TASK_CAPACITY>;
+	using TasksBounds		= Array<Bounds, REGION_CAPACITY>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-public:
 	struct Iterator {
 		inline Iterator(PlanT& plan);
 
@@ -97,11 +97,11 @@ public:
 
 		inline void operator ++();
 
-		inline		 TaskTransition& operator  *()		 { return  _plan._tasks[_curr]; }
-		inline const TaskTransition& operator  *() const { return  _plan._tasks[_curr]; }
+		inline		 TaskLink& operator  *()	   { return  _plan._taskLinks[_curr]; }
+		inline const TaskLink& operator  *() const { return  _plan._taskLinks[_curr]; }
 
-		inline		 TaskTransition* operator ->()		 { return &_plan._tasks[_curr]; }
-		inline const TaskTransition* operator ->() const { return &_plan._tasks[_curr]; }
+		inline		 TaskLink* operator ->()	   { return &_plan._taskLinks[_curr]; }
+		inline const TaskLink* operator ->() const { return &_plan._taskLinks[_curr]; }
 
 		inline void remove();
 
@@ -115,13 +115,12 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	inline PlanT(Tasks& tasks,
-				 StateTasks& stateTasks,
-				 const StateID plannerId);
+	inline PlanT(TaskLinks& tasks,
+				 TasksBounds& tasksBounds,
+				 const RegionID regionId);
 
 	template <typename T>
-	static constexpr LongIndex
-	stateId()	{ return StateList::template index<T>();	}
+	static constexpr LongIndex stateId()	{ return StateList::template index<T>();	}
 
 public:
 	inline explicit operator bool() const;
@@ -131,15 +130,15 @@ public:
 	void add(const StateID origin, const StateID destination);
 
 	template <typename TOrigin, typename TDestination>
-	inline void add();
+	inline void add()				{ add(stateId<TOrigin>(), stateId<TDestination>());	}
 
 	void remove(const LongIndex task);
 
 	inline Iterator begin()	{ return Iterator{*this}; }
 
 private:
-	Tasks& _tasks;
-	TaskIndices& _taskIndices;
+	TaskLinks& _taskLinks;
+	Bounds& _bounds;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

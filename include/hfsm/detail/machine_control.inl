@@ -1,5 +1,47 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TA>
+ControlT<TA>::Origin::Origin(ControlT& control_,
+							 const StateID id)
+	: control{control_}
+	, prevId(control._originId)
+{
+	control.setOrigin(id);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+ControlT<TA>::Origin::~Origin() {
+	control.resetOrigin(prevId);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TA>
+ControlT<TA>::Region::Region(ControlT& control_,
+							 const RegionID id,
+							 const StateID index,
+							 const LongIndex size)
+	: control{control_}
+	, prevId(control._regionId)
+	, prevIndex(control._regionIndex)
+	, prevSize(control._regionSize)
+{
+	control.setRegion(id, index, size);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+ControlT<TA>::Region::~Region() {
+	control.resetRegion(prevId, prevIndex, prevSize);
+
+	control._status.clear();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,34 +69,83 @@ ControlT<TA>::resetOrigin(const StateID id) {
 	_originId = id;
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
+ControlT<TA>::setRegion(const RegionID id,
+						const StateID index,
+						const LongIndex size)
+{
+	assert(index != INVALID_STATE_ID && size != INVALID_LONG_INDEX);
+
+	if (_regionId == INVALID_REGION_ID) {
+		assert(_regionIndex == INVALID_STATE_ID);
+		assert(_regionSize  == INVALID_LONG_INDEX);
+		assert(index < StateList::SIZE && index + size <= StateList::SIZE);
+	} else {
+		assert(_regionIndex != INVALID_STATE_ID);
+		assert(_regionSize  != INVALID_LONG_INDEX);
+		assert(_regionIndex < index && index + size <= _regionIndex + _regionSize);
+	}
+
+	assert(_originId == INVALID_STATE_ID);
+
+	_regionId	 = id;
+	_regionIndex = index;
+	_regionSize	 = size;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TA>
+void
+ControlT<TA>::resetRegion(const RegionID id,
+						  const StateID index,
+						  const LongIndex size)
+{
+	assert(_regionId	!= INVALID_REGION_ID);
+	assert(_regionIndex != INVALID_STATE_ID);
+	assert(_regionSize  != INVALID_LONG_INDEX);
+
+	if (index == INVALID_STATE_ID)
+		assert(size == INVALID_LONG_INDEX);
+	else
+		assert(size != INVALID_LONG_INDEX);
+
+	_regionId	 = id;
+	_regionIndex = index;
+	_regionSize	 = size;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TA>
-ControlOriginT<TA>::ControlOriginT(Control& control_,
-								   const StateID id)
-	: control{control_}
-	, prevId(control._originId)
+FullControlT<TA>::Lock::Lock(FullControlT& control_)
+	: control(!control_._locked ? &control_ : nullptr)
 {
-	control.setOrigin(id);
+	if (control)
+		control->_locked = true;
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TA>
-ControlOriginT<TA>::~ControlOriginT() {
-	control.resetOrigin(prevId);
+FullControlT<TA>::Lock::~Lock() {
+	if (control)
+		control->_locked = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TA>
 void
-TransitionControlT<TA>::changeTo(const StateID stateId) {
+FullControlT<TA>::changeTo(const StateID stateId) {
 	if (!_locked) {
-		const Request transition{Request::Type::RESTART, stateId};
-		_requests << transition;
+		const Request request{Request::Type::RESTART, stateId};
+		_requests << request;
 
-		if (_regionId <= stateId && stateId < _regionId + _regionSize)
+		if (_regionIndex <= stateId && stateId < _regionIndex + _regionSize)
 			_status.innerTransition = true;
 		else
 			_status.outerTransition = true;
@@ -70,12 +161,12 @@ TransitionControlT<TA>::changeTo(const StateID stateId) {
 
 template <typename TA>
 void
-TransitionControlT<TA>::resume(const StateID stateId) {
+FullControlT<TA>::resume(const StateID stateId) {
 	if (!_locked) {
-		const Request transition{Request::Type::RESUME, stateId};
-		_requests << transition;
+		const Request request{Request::Type::RESUME, stateId};
+		_requests << request;
 
-		if (_regionId <= stateId && stateId < _regionId + _regionSize)
+		if (_regionIndex <= stateId && stateId < _regionIndex + _regionSize)
 			_status.innerTransition = true;
 		else
 			_status.outerTransition = true;
@@ -91,7 +182,7 @@ TransitionControlT<TA>::resume(const StateID stateId) {
 
 template <typename TA>
 void
-TransitionControlT<TA>::schedule(const StateID stateId) {
+FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
 
@@ -99,87 +190,6 @@ TransitionControlT<TA>::schedule(const StateID stateId) {
 	if (Control::_logger)
 		Control::_logger->recordTransition(Control::_originId, Transition::SCHEDULE, stateId);
 #endif
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TA>
-void
-TransitionControlT<TA>::setRegion(const StateID id,
-								  const LongIndex size)
-{
-	if (_regionId == INVALID_STATE_ID) {
-		assert(_regionSize == INVALID_LONG_INDEX);
-		assert(id < StateList::SIZE && id + size <= StateList::SIZE);
-	} else {
-		assert(_regionSize != INVALID_LONG_INDEX);
-		assert(_regionId < id && id + size <= _regionId + _regionSize);
-	}
-
-	assert(id != INVALID_STATE_ID && size != INVALID_LONG_INDEX);
-
-	assert(Control::_originId == INVALID_STATE_ID);
-
-	_regionId	= id;
-	_regionSize	= size;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TA>
-void
-TransitionControlT<TA>::resetRegion(const StateID id,
-									const LongIndex size)
-{
-	assert(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
-
-	if (id == INVALID_STATE_ID)
-		assert(size == INVALID_LONG_INDEX);
-	else
-		assert(size != INVALID_LONG_INDEX);
-
-	_regionId	= id;
-	_regionSize	= size;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename TA>
-ControlLockT<TA>::ControlLockT(TransitionControl& control_)
-	: control(!control_._locked ? &control_ : nullptr)
-{
-	if (control)
-		control->_locked = true;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TA>
-ControlLockT<TA>::~ControlLockT() {
-	if (control)
-		control->_locked = false;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename TA>
-ControlRegionT<TA>::ControlRegionT(TransitionControl& control_,
-								   const StateID id,
-								   const LongIndex size)
-	: control{control_}
-	, prevId(control._regionId)
-	, prevSize(control._regionSize)
-{
-	control.setRegion(id, size);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TA>
-ControlRegionT<TA>::~ControlRegionT() {
-	control.resetRegion(prevId, prevSize);
-
-	control._status.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

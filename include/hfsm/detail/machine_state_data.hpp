@@ -1,6 +1,6 @@
 #pragma once
 
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,24 +10,22 @@ namespace detail {
 struct alignas(2 * sizeof(ShortIndex)) Parent {
 	inline Parent() = default;
 
-	inline Parent(const ForkID fork_,
+	inline Parent(const ForkID forkId_,
 				  const ShortIndex prong_)
-		: fork{fork_}
+		: forkId{forkId_}
 		, prong{prong_}
 	{}
 
 	inline explicit operator bool() const {
-		return fork  != INVALID_FORK_ID &&
-			   prong != INVALID_SHORT_INDEX;
+		return forkId != INVALID_FORK_ID &&
+			   prong  != INVALID_SHORT_INDEX;
 	}
 
-	ForkID	   fork  = INVALID_FORK_ID;
-	ShortIndex prong = INVALID_SHORT_INDEX;
+	ForkID	   forkId = INVALID_FORK_ID;
+	ShortIndex prong  = INVALID_SHORT_INDEX;
 };
 
 #pragma pack(pop)
-
-using Parents = ArrayView<Parent>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,9 +73,8 @@ struct RequestT {
 	Payload payload;
 };
 
-// TODO: replace with Array
-template <typename TPayloadList>
-using RequestQueueT = ArrayView<RequestT<TPayloadList>>;
+template <typename TPayloadList, ShortIndex NCount>
+using RequestsT = Array<RequestT<TPayloadList>, NCount>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -128,6 +125,7 @@ using ParentsT = Array<Parent, NCount>;
 template <typename,
 		  typename,
 		  typename,
+		  typename,
 		  LongIndex,
 		  LongIndex,
 		  LongIndex,
@@ -136,20 +134,31 @@ template <typename,
 struct ArgsT;
 
 template <typename>
-struct RegistryT;
+struct StateDataT;
 
 //------------------------------------------------------------------------------
 
 template <typename TContext,
 		  typename TConfig,
 		  typename TStateList,
+		  typename TRegionList,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
 		  typename TPayloadList,
-		  LongIndex NPlanCapacity>
-struct RegistryT<ArgsT<TContext, TConfig, TStateList, NCompoCount, NOrthoCount, NOrthoUnits, TPayloadList, NPlanCapacity>> {
+		  LongIndex NTaskCapacity>
+struct StateDataT<ArgsT<TContext,
+						TConfig,
+						TStateList,
+						TRegionList,
+						NCompoCount,
+						NOrthoCount,
+						NOrthoUnits,
+						TPayloadList,
+						NTaskCapacity>>
+{
 	using StateList		= TStateList;
+	using RegionList	= TRegionList;
 	using PayloadList	= TPayloadList;
 
 	using Request		= RequestT<PayloadList>;
@@ -168,7 +177,7 @@ struct RegistryT<ArgsT<TContext, TConfig, TStateList, NCompoCount, NOrthoCount, 
 	using CompoForks	= StaticArray<CompoFork,   COMPO_COUNT>;
 	using OrthoForks	= OrthoForksT<ORTHO_COUNT, ORTHO_STORAGE>;
 
-	inline const Parent& forkParent(const ForkID fork) const;
+	inline const Parent& forkParent(const ForkID forkId) const;
 
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
@@ -190,11 +199,13 @@ struct RegistryT<ArgsT<TContext, TConfig, TStateList, NCompoCount, NOrthoCount, 
 template <typename TContext,
 		  typename TConfig,
 		  typename TStateList,
+		  typename TRegionList,
 		  LongIndex NCompoCount,
 		  typename TPayloadList,
-		  LongIndex NPlanCapacity>
-struct RegistryT<ArgsT<TContext, TConfig, TStateList, NCompoCount, 0, 0, TPayloadList, NPlanCapacity>> {
+		  LongIndex NTaskCapacity>
+struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, NCompoCount, 0, 0, TPayloadList, NTaskCapacity>> {
 	using StateList		= TStateList;
+	using RegionList	= TRegionList;
 	using PayloadList	= TPayloadList;
 
 	using Request		= RequestT<PayloadList>;
@@ -206,7 +217,7 @@ struct RegistryT<ArgsT<TContext, TConfig, TStateList, NCompoCount, 0, 0, TPayloa
 	using CompoParents	= StaticArray<Parent, COMPO_COUNT>;
 	using CompoForks	= StaticArray<CompoFork,	  COMPO_COUNT>;
 
-	inline const Parent& forkParent(const ForkID fork) const;
+	inline const Parent& forkParent(const ForkID forkId) const;
 
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
@@ -225,12 +236,14 @@ struct RegistryT<ArgsT<TContext, TConfig, TStateList, NCompoCount, 0, 0, TPayloa
 template <typename TContext,
 		  typename TConfig,
 		  typename TStateList,
+		  typename TRegionList,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
 		  typename TPayloadList,
-		  LongIndex NPlanCapacity>
-struct RegistryT<ArgsT<TContext, TConfig, TStateList, 0, NOrthoCount, NOrthoUnits, TPayloadList, NPlanCapacity>> {
+		  LongIndex NTaskCapacity>
+struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, 0, NOrthoCount, NOrthoUnits, TPayloadList, NTaskCapacity>> {
 	using StateList		= TStateList;
+	using RegionList	= TRegionList;
 	using PayloadList	= TPayloadList;
 
 	using Request		= RequestT<PayloadList>;
@@ -244,7 +257,7 @@ struct RegistryT<ArgsT<TContext, TConfig, TStateList, 0, NOrthoCount, NOrthoUnit
 	using OrthoParents	= StaticArray<Parent,	   ORTHO_COUNT>;
 	using OrthoForks	= OrthoForksT<ORTHO_COUNT, ORTHO_STORAGE>;
 
-	inline const Parent& forkParent(const ForkID fork) const;
+	inline const Parent& forkParent(const ForkID forkId) const;
 
 	inline bool isActive   (const StateID) const		{ return true;			}
 	inline bool isResumable(const StateID) const		{ return false;			}
@@ -264,4 +277,4 @@ struct RegistryT<ArgsT<TContext, TConfig, TStateList, 0, NOrthoCount, NOrthoUnit
 }
 }
 
-#include "machine_registry.inl"
+#include "machine_state_data.inl"

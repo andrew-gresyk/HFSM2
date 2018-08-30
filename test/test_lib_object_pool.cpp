@@ -20,7 +20,7 @@ struct Material
 	const int _value;
 };
 
-using ObjectPool = hfsm::detail::ObjectPool<Base, 4, sizeof(Material) * 4>;
+using ObjectPool = hfsm2::detail::ObjectPool<Base, 4, sizeof(Material) * 4>;
 
 //------------------------------------------------------------------------------
 

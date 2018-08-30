@@ -50,10 +50,10 @@ struct Context {
 	char charPayload;
 };
 
-using Payloads = hfsm::TransitionPayloads<char, bool>;
+using Payloads = hfsm2::TransitionPayloads<char, bool>;
 
 // convenience typedef
-using M = hfsm::Machine<Context, Payloads>;
+using M = hfsm2::Machine<Context, Payloads>;
 
 //------------------------------------------------------------------------------
 
@@ -66,6 +66,14 @@ using FSM = M::Root<S(Top),
 
 #undef S
 
+//------------------------------------------------------------------------------
+
+static_assert(FSM::regionId<Top>()		  ==  0, "");
+
+static_assert(FSM::stateId<Top>()		  ==  0, "");
+static_assert(FSM::stateId<Origin>()	  ==  1, "");
+static_assert(FSM::stateId<Destination>() ==  2, "");
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // top-level state in the hierarchy
@@ -73,7 +81,7 @@ struct Top
 	: FSM::State // necessary boilerplate!
 {
 	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
+	void update(FullControl&)					{}
 	void exit(Control&)								{}
 };
 
@@ -84,7 +92,7 @@ struct Origin
 	: FSM::State
 {
 	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
+	void update(FullControl&)					{}
 	void exit(Control&)								{}
 };
 
@@ -95,7 +103,7 @@ struct Destination
 	: FSM::State
 {
 	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
+	void update(FullControl&)					{}
 	void exit(Control&)								{}
 };
 

@@ -1,0 +1,14 @@
+/d1reportAllClassLayout
+/d1reportSingleClassLayoutNAME
+
+/Bt
+
+/d2cgsummary (compiler)
+/d2:-cgsummary (linker)
+
+/cgthreads#
+
+/d2FuncCache# (compiler)
+/d2:-FuncCache# (linker)
+
+/d2:-notypeopt (linker)

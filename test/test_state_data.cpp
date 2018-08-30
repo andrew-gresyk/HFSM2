@@ -7,9 +7,9 @@ struct Context {
 	char charPayload;
 };
 
-using Payloads = hfsm::TransitionPayloads<char, bool>;
+using Payloads = hfsm2::TransitionPayloads<char, bool>;
 
-using M = hfsm::Machine<Context, Payloads>;
+using M = hfsm2::Machine<Context, Payloads>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -21,6 +21,8 @@ using FSM = M::Root<S(Top),
 			>;
 
 #undef S
+
+static_assert(FSM::regionId<Top>()			==  0, "");
 
 static_assert(FSM::stateId<Top>()			== 0, "");
 static_assert(FSM::stateId<Origin>()		== 1, "");

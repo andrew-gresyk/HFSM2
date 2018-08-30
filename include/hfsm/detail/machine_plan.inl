@@ -1,4 +1,4 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -25,47 +25,47 @@ Status::clear() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TStateList, LongIndex NPlanCapacity>
-PlanT<TStateList, NPlanCapacity>::Iterator::Iterator(PlanT& plan)
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
+PlanT<TSL, NRC, NTC>::Iterator::Iterator(PlanT& plan)
 	: _plan{plan}
-	, _curr{plan._taskIndices.first}
+	, _curr{plan._bounds.first}
 {
 	_next = next();
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TStateList, LongIndex NPlanCapacity>
-PlanT<TStateList, NPlanCapacity>::Iterator::operator bool() const {
-	assert(_curr < PlanT::CAPACITY || _curr == INVALID_LONG_INDEX);
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
+PlanT<TSL, NRC, NTC>::Iterator::operator bool() const {
+	assert(_curr < PlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
 
-	return _curr < PlanT::CAPACITY;
+	return _curr < PlanT::TASK_CAPACITY;
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TStateList, LongIndex NPlanCapacity>
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
 void
-PlanT<TStateList, NPlanCapacity>::Iterator::operator ++() {
+PlanT<TSL, NRC, NTC>::Iterator::operator ++() {
 	_curr = _next;
 	_next = next();
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TStateList, LongIndex NPlanCapacity>
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
 void
-PlanT<TStateList, NPlanCapacity>::Iterator::remove() {
+PlanT<TSL, NRC, NTC>::Iterator::remove() {
 	_plan.remove(_curr);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TStateList, LongIndex NPlanCapacity>
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
 LongIndex
-PlanT<TStateList, NPlanCapacity>::Iterator::next() const {
-	if (_curr < PlanT::CAPACITY) {
-		const TaskTransition& task = _plan._tasks[_curr];
+PlanT<TSL, NRC, NTC>::Iterator::next() const {
+	if (_curr < PlanT::TASK_CAPACITY) {
+		const TaskLink& task = _plan._taskLinks[_curr];
 
 		return task.next;
 	} else {
@@ -77,129 +77,118 @@ PlanT<TStateList, NPlanCapacity>::Iterator::next() const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TStateList, LongIndex NPlanCapacity>
-PlanT<TStateList, NPlanCapacity>::PlanT(Tasks& tasks,
-										StateTasks& stateTasks,
-										const StateID plannerId)
-	: _tasks{tasks}
-	, _taskIndices{stateTasks[plannerId]}
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
+PlanT<TSL, NRC, NTC>::PlanT(TaskLinks& tasks,
+							TasksBounds& tasksBounds,
+							const RegionID regionId)
+
+	: _taskLinks{tasks}
+	, _bounds{tasksBounds[regionId]}
 {}
 
 //------------------------------------------------------------------------------
 
-template <typename TStateList, LongIndex NPlanCapacity>
-PlanT<TStateList, NPlanCapacity>::operator bool() const {
-	if (_taskIndices.first < PlanT::CAPACITY) {
-		assert(_taskIndices.last < PlanT::CAPACITY);
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
+PlanT<TSL, NRC, NTC>::operator bool() const {
+	if (_bounds.first < PlanT::TASK_CAPACITY) {
+		assert(_bounds.last < PlanT::TASK_CAPACITY);
 		return true;
 	} else {
-		assert(_taskIndices.last == INVALID_LONG_INDEX);
+		assert(_bounds.last == INVALID_LONG_INDEX);
 		return false;
 	}
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TStateList, LongIndex NPlanCapacity>
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
 void
-PlanT<TStateList, NPlanCapacity>::clear() {
-	if (_taskIndices.first < Tasks::CAPACITY) {
-		assert(_taskIndices.last < Tasks::CAPACITY);
+PlanT<TSL, NRC, NTC>::clear() {
+	if (_bounds.first < TaskLinks::CAPACITY) {
+		assert(_bounds.last < TaskLinks::CAPACITY);
 
-		for (LongIndex index = _taskIndices.first;
+		for (LongIndex index = _bounds.first;
 			 index != INVALID_LONG_INDEX;
 			 )
 		{
-			assert(index < Tasks::CAPACITY);
+			assert(index < TaskLinks::CAPACITY);
 
-			const auto& task = _tasks[index];
-			assert(index == _taskIndices.first ?
+			const auto& task = _taskLinks[index];
+			assert(index == _bounds.first ?
 				   task.prev == INVALID_LONG_INDEX :
-				   task.prev <  Tasks::CAPACITY);
+				   task.prev <  TaskLinks::CAPACITY);
 
 			const LongIndex next = task.next;
 
-			_tasks.remove(index);
+			_taskLinks.remove(index);
 
 			index = next;
 		}
 
-		_taskIndices.first = INVALID_LONG_INDEX;
-		_taskIndices.last  = INVALID_LONG_INDEX;
+		_bounds.first = INVALID_LONG_INDEX;
+		_bounds.last  = INVALID_LONG_INDEX;
 	} else
-		assert(_taskIndices.first == INVALID_LONG_INDEX &&
-			   _taskIndices.last  == INVALID_LONG_INDEX);
+		assert(_bounds.first == INVALID_LONG_INDEX &&
+			   _bounds.last  == INVALID_LONG_INDEX);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TStateList, LongIndex NPlanCapacity>
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
 void
-PlanT<TStateList, NPlanCapacity>::add(const StateID origin,
-									  const StateID destination)
+PlanT<TSL, NRC, NTC>::add(const StateID origin,
+						  const StateID destination)
 {
-	const auto index = _tasks.emplace(origin, destination);
+	const auto index = _taskLinks.emplace(origin, destination);
 
-	if (_taskIndices.first < Tasks::CAPACITY) {
-		assert(_taskIndices.last < Tasks::CAPACITY);
+	if (_bounds.first < TaskLinks::CAPACITY) {
+		assert(_bounds.last < TaskLinks::CAPACITY);
 
-		auto& last  = _tasks[_taskIndices.last];
+		auto& last  = _taskLinks[_bounds.last];
 		last.next = index;
 
-		auto& next = _tasks[index];
-		next.prev  = _taskIndices.last;
+		auto& next = _taskLinks[index];
+		next.prev  = _bounds.last;
 
-		_taskIndices.last = index;
+		_bounds.last = index;
 	} else {
-		assert(_taskIndices.first == INVALID_LONG_INDEX &&
-			   _taskIndices.last  == INVALID_LONG_INDEX);
+		assert(_bounds.first == INVALID_LONG_INDEX &&
+			   _bounds.last  == INVALID_LONG_INDEX);
 
-		_taskIndices.first = index;
-		_taskIndices.last  = index;
+		_bounds.first = index;
+		_bounds.last  = index;
 	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TStateList, LongIndex NPlanCapacity>
-template <typename TOrigin, typename TDestination>
-void
-PlanT<TStateList, NPlanCapacity>::add() {
-	using Origin = TOrigin;
-	using Destination = TDestination;
-
-	add(stateId<Origin>(), stateId<Destination>());
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TStateList, LongIndex NPlanCapacity>
+template <typename TSL, ShortIndex NRC, LongIndex NTC>
 void
-PlanT<TStateList, NPlanCapacity>::remove(const LongIndex task) {
-	assert(_taskIndices.first < Tasks::CAPACITY &&
-		   _taskIndices.last  < Tasks::CAPACITY);
+PlanT<TSL, NRC, NTC>::remove(const LongIndex task) {
+	assert(_bounds.first < TaskLinks::CAPACITY &&
+		   _bounds.last  < TaskLinks::CAPACITY);
 
-	assert(task < Tasks::CAPACITY);
+	assert(task < TaskLinks::CAPACITY);
 
-	const TaskTransition& curr = _tasks[task];
+	const TaskLink& curr = _taskLinks[task];
 
-	if (curr.prev < Tasks::CAPACITY) {
-		TaskTransition& prev = _tasks[curr.prev];
+	if (curr.prev < TaskLinks::CAPACITY) {
+		TaskLink& prev = _taskLinks[curr.prev];
 		prev.next = curr.next;
 	} else {
-		assert(_taskIndices.first == task);
-		_taskIndices.first = curr.next;
+		assert(_bounds.first == task);
+		_bounds.first = curr.next;
 	}
 
-	if (curr.next < Tasks::CAPACITY) {
-		TaskTransition& next = _tasks[curr.next];
+	if (curr.next < TaskLinks::CAPACITY) {
+		TaskLink& next = _taskLinks[curr.next];
 		next.prev = curr.prev;
 	} else {
-		assert(_taskIndices.last == task);
-		_taskIndices.last = curr.prev;
+		assert(_bounds.last == task);
+		_bounds.last = curr.prev;
 	}
 
-	_tasks.remove(task);
+	_taskLinks.remove(task);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

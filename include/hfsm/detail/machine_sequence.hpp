@@ -1,4 +1,4 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,22 +15,25 @@ struct _Q
 	static constexpr StateID	HEAD_ID		= NHeadIndex;
 	static constexpr ShortIndex COMPO_INDEX	= NCompoIndex;
 	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
+	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 
-	using Args				= TArgs;
-	using Head				= THead;
-	using Composite			= _C<HEAD_ID, COMPO_INDEX, ORTHO_INDEX, Args, Head, TSubStates...>;
-	using HeadState			= typename Composite::HeadState;
+	using Args			= TArgs;
+	using Head			= THead;
+	using Composite		= _C<HEAD_ID, COMPO_INDEX, ORTHO_INDEX, Args, Head, TSubStates...>;
 
-	using ControlLock		= typename Composite::ControlLock;
-	using ControlRegion		= typename Composite::ControlRegion;
-	using PlanControl		= typename Composite::PlanControl;
-	using FullControl		= typename Composite::FullControl;
+	using Control		= ControlT	  <Args>;
+	using ControlOrigin	= typename Control::Origin;
+	using ControlRegion	= typename Control::Region;
 
-	using Plan				= typename PlanControl::Plan;
+	using FullControl	= FullControlT<Args>;
+	using ControlLock	= typename FullControl::Lock;
 
-	using SubStateList		= typename Composite::SubStateList;
+	using Plan			= typename Control::Plan;
 
-	using ControlOrigin		= ControlOriginT<Args>;
+	using HeadState		= typename Composite::HeadState;
+	using SubStateList	= typename Composite::SubStateList;
+
+	static constexpr ShortIndex REGION_SIZE	= SubStateList::SIZE;
 
 	using Composite::Composite;
 
@@ -42,7 +45,7 @@ struct _Q
 	inline void   deepReact	(const TEvent& event,
 							 FullControl& control);
 
-	inline void	  deepExit  (PlanControl& control);
+	inline void	  deepExit  (Control& control);
 
 	using Composite::_headState;
 	using Composite::_subStates;

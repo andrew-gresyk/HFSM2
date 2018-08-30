@@ -1,6 +1,6 @@
 #pragma once
 
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,11 +97,6 @@ struct _TL
 		return INVALID_LONG_INDEX;
 	}
 };
-
-template <>
-struct _TL<>
-	: _TL<void>
-{};
 
 //------------------------------------------------------------------------------
 

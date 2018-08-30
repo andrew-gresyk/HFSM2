@@ -1,17 +1,17 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-_C<NS, NC, NO, TA, TH, TS...>::_C(Registry& registry,
+_C<NS, NC, NO, TA, TH, TS...>::_C(StateData& stateData,
 								  const Parent parent)
-	: _headState{registry, parent}
-	, _subStates{registry, COMPO_ID}
+	: _headState{stateData, parent}
+	, _subStates{stateData, COMPO_ID}
 {
-	registry.compoParents[COMPO_INDEX] = parent;
+	stateData.compoParents[COMPO_INDEX] = parent;
 
-	HSFM_IF_DEBUG(CompoFork& fork = compoFork(registry));
+	HSFM_IF_DEBUG(CompoFork& fork = compoFork(stateData));
 	HSFM_IF_DEBUG(fork.TYPE = _headState.TYPE);
 }
 
@@ -24,7 +24,7 @@ _C<NS, NC, NO, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
 
 	assert( fork.requested != INVALID_SHORT_INDEX);
 
-	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (fork.requested == fork.active)
 		_subStates.wideForwardGuard(fork.requested, control);
@@ -42,6 +42,8 @@ _C<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 	assert(fork.active    == INVALID_SHORT_INDEX &&
 		   fork.requested != INVALID_SHORT_INDEX);
 
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
 	if (!_headState.deepGuard(				  control))
 		 _subStates.wideGuard(fork.requested, control);
 }
@@ -50,7 +52,7 @@ _C<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(Control& control) {
 	CompoFork& fork = compoFork(control);
 
 	assert(fork.active    == INVALID_SHORT_INDEX &&
@@ -58,6 +60,8 @@ _C<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
 		   fork.requested == INVALID_SHORT_INDEX);
 
 	fork.active = 0;
+
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	_headState.deepEnter	   (control);
 	_subStates.wideEnterInitial(control);
@@ -67,7 +71,7 @@ _C<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepEnter(Control& control) {
 	CompoFork& fork = compoFork(control);
 
 	assert(fork.active	  == INVALID_SHORT_INDEX &&
@@ -75,6 +79,8 @@ _C<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control) {
 
 	fork.active	   = fork.requested;
 	fork.requested = INVALID_SHORT_INDEX;
+
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	_headState.deepEnter(			  control);
 	_subStates.wideEnter(fork.active, control);
@@ -89,7 +95,7 @@ _C<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
 
 	assert(fork.active != INVALID_SHORT_INDEX);
 
-	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (const auto status = _headState.deepUpdate(control)) {
 		ControlLock lock{control};
@@ -112,7 +118,7 @@ _C<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
 
 	assert(fork.active != INVALID_SHORT_INDEX);
 
-	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	_headState.deepReact(			  event, control);
 	_subStates.wideReact(fork.active, event, control);
@@ -122,7 +128,7 @@ _C<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control) {
 	CompoFork& fork = compoFork(control);
 
 	assert(fork.active != INVALID_SHORT_INDEX);
@@ -138,25 +144,25 @@ _C<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(Registry& registry,
+_C<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateData& stateData,
 												  const RequestType request)
 {
-	const CompoFork& fork = compoFork(registry);
+	const CompoFork& fork = compoFork(stateData);
 
 	if (fork.requested != INVALID_SHORT_INDEX)
-		_subStates.wideForwardRequest(registry, fork.requested, request);
+		_subStates.wideForwardRequest(stateData, fork.requested, request);
 	else
 		switch (request) {
 		case Request::REMAIN:
-			deepRequestRemain(registry);
+			deepRequestRemain(stateData);
 			break;
 
 		case Request::RESTART:
-			deepRequestRestart(registry);
+			deepRequestRestart(stateData);
 			break;
 
 		case Request::RESUME:
-			deepRequestResume(registry);
+			deepRequestResume(stateData);
 			break;
 
 		default:
@@ -168,53 +174,53 @@ _C<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(Registry& registry,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(Registry& registry) {
-	CompoFork& fork = compoFork(registry);
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(StateData& stateData) {
+	CompoFork& fork = compoFork(stateData);
 
 	if (fork.active == INVALID_SHORT_INDEX)
 		fork.requested = 0;
 
-	_subStates.wideRequestRemain(registry);
+	_subStates.wideRequestRemain(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepRequestRestart(Registry& registry) {
-	CompoFork& fork = compoFork(registry);
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestRestart(StateData& stateData) {
+	CompoFork& fork = compoFork(stateData);
 
 	fork.requested = 0;
 
-	_subStates.wideRequestRestart(registry);
+	_subStates.wideRequestRestart(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepRequestResume(Registry& registry) {
-	CompoFork& fork = compoFork(registry);
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestResume(StateData& stateData) {
+	CompoFork& fork = compoFork(stateData);
 
 	fork.requested = (fork.resumable != INVALID_SHORT_INDEX) ?
 		fork.resumable : 0;
 
-	_subStates.wideRequestResume(registry, fork.requested);
+	_subStates.wideRequestResume(stateData, fork.requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(Registry& registry,
-													 PlanControl& control)
+_C<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(StateData& stateData,
+													 Control& control)
 {
-	CompoFork& fork = compoFork(registry);
+	CompoFork& fork = compoFork(stateData);
 
 	assert(fork.active != INVALID_SHORT_INDEX);
 
 	if (fork.requested == fork.active)
-		_subStates.wideChangeToRequested(registry, fork.requested, control);
+		_subStates.wideChangeToRequested(stateData, fork.requested, control);
 	else if (fork.requested != INVALID_SHORT_INDEX) {
 		_subStates.wideExit(fork.active, control);
 

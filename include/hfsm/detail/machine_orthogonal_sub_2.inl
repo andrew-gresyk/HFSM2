@@ -1,12 +1,12 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-_OS<NS, NC, NO, TA, NI, TI>::_OS(Registry& registry,
-								 const ForkID fork)
-	: initial{registry, Parent{fork, PRONG_INDEX}}
+_OS<NS, NC, NO, TA, NI, TI>::_OS(StateData& stateData,
+								 const ForkID forkId)
+	: initial{stateData, Parent{forkId, PRONG_INDEX}}
 {}
 
 //------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideGuard(FullControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(Control& control) {
 	initial.deepEnterInitial(control);
 }
 
@@ -48,7 +48,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(PlanControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideEnter(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideEnter(Control& control) {
 	initial.deepEnter(control);
 }
 
@@ -75,7 +75,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideReact(const TEvent& event,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideExit(PlanControl& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideExit(Control& control) {
 	initial.deepExit(control);
 }
 
@@ -83,48 +83,48 @@ _OS<NS, NC, NO, TA, NI, TI>::wideExit(PlanControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Registry& registry,
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateData& stateData,
 												const BitArray& prongs,
-												const RequestType transition)
+												const RequestType request)
 {
 	const auto initialRequest = prongs[PRONG_INDEX] ?
-		transition : Transition::REMAIN;
+		request : Request::REMAIN;
 
-	initial	 .deepForwardRequest(registry, initialRequest);
+	initial	 .deepForwardRequest(stateData, initialRequest);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(Registry& registry) {
-	initial.deepRequestRemain(registry);
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(StateData& stateData) {
+	initial.deepRequestRemain(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(Registry& registry) {
-	initial.deepRequestRestart(registry);
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(StateData& stateData) {
+	initial.deepRequestRestart(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestResume(Registry& registry) {
-	initial.deepRequestResume(registry);
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateData& stateData) {
+	initial.deepRequestResume(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(Registry& registry,
-												   PlanControl& control)
+_OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(StateData& stateData,
+												   Control& control)
 {
-	initial.deepChangeToRequested(registry, control);
+	initial.deepChangeToRequested(stateData, control);
 }
 
 //------------------------------------------------------------------------------

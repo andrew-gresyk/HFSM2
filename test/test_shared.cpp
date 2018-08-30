@@ -2,7 +2,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Logger::recordMethod(const hfsm::StateID origin,
+void Logger::recordMethod(const hfsm2::StateID origin,
 						  const Method method)
 {
 	switch (method) {
@@ -28,9 +28,9 @@ void Logger::recordMethod(const hfsm::StateID origin,
 
 //------------------------------------------------------------------------------
 
-void Logger::recordTransition(const hfsm::StateID origin,
+void Logger::recordTransition(const hfsm2::StateID origin,
 							  const Transition transition,
-							  const hfsm::StateID target)
+							  const hfsm2::StateID target)
 {
 	switch (transition) {
 		case Transition::RESTART:

@@ -50,7 +50,7 @@
 struct Context {};
 
 // convenience typedef
-using M = hfsm::Machine<Context>;
+using M = hfsm2::Machine<Context>;
 
 #define S(s) struct s
 
@@ -63,33 +63,31 @@ using FSM = M::Root<S(Top),
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::contains<Top>(),	 "");
-static_assert(FSM::contains<From>(), "");
-static_assert(FSM::contains<To>(),	 "");
+static_assert(FSM::regionId<Top>()	==  0, "");
 
-static_assert(FSM::stateId<Top>()  == 0, "");
-static_assert(FSM::stateId<From>() == 1, "");
-static_assert(FSM::stateId<To>()   == 2, "");
+static_assert(FSM::stateId<Top>()	==  0, "");
+static_assert(FSM::stateId<From>()	==  1, "");
+static_assert(FSM::stateId<To>()	==  2, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Logger
-	: hfsm::LoggerInterface
+	: hfsm2::LoggerInterface
 {
-	void recordMethod(const hfsm::StateID /*origin*/,
+	void recordMethod(const hfsm2::StateID /*origin*/,
 					  const Method method) override
 	{
-		std::cout //<< hfsm::stateName(origin) << "::"
-				  << hfsm::methodName(method) << "()\n";
+		std::cout //<< hfsm2::stateName(origin) << "::"
+				  << hfsm2::methodName(method) << "()\n";
 	}
 
-	void recordTransition(const hfsm::StateID /*origin*/,
+	void recordTransition(const hfsm2::StateID /*origin*/,
 						  const Transition transition,
-						  const hfsm::StateID /*target*/) override
+						  const hfsm2::StateID /*target*/) override
 	{
-		std::cout //<< hfsm::stateName(origin) << ": "
-				  << hfsm::transitionName(transition) << "<"
-				  //<< hfsm::stateName(target) << ">()"
+		std::cout //<< hfsm2::stateName(origin) << ": "
+				  << hfsm2::transitionName(transition) << "<"
+				  //<< hfsm2::stateName(target) << ">()"
 				  "\n";
 	}
 };
@@ -101,11 +99,11 @@ struct Top
 	: FSM::State // necessary boilerplate!
 {
 	// all state methods:
-	void guard(TransitionControl&)					{}	// not going to be called in this example
+	void guard(FullControl&)						{}	// not going to be called in this example
 	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
+	void update(FullControl&)						{}
 	template <typename TEvent>
-	void react(const TEvent&, TransitionControl&)	{}
+	void react(const TEvent&, FullControl&)			{}
 	void exit(Control&)								{}
 };
 
@@ -116,11 +114,11 @@ struct From
 	: FSM::State
 {
 	// all state methods:
-	void guard(TransitionControl&)					{}	// not going to be called in this example
+	void guard(FullControl&)						{}	// not going to be called in this example
 	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
+	void update(FullControl&)						{}
 	template <typename TEvent>
-	void react(const TEvent&, TransitionControl& control)	{ control.changeTo<To>(); }
+	void react(const TEvent&, FullControl& control)	{ control.changeTo<To>(); }
 	void exit(Control&)								{}
 };
 
@@ -131,11 +129,11 @@ struct To
 	: FSM::State
 {
 	// all state methods:
-	void guard(TransitionControl&)					{}
+	void guard(FullControl&)						{}
 	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
+	void update(FullControl&)						{}
 	template <typename TEvent>
-	void react(const TEvent&, TransitionControl&)	{}	// not going to be called in this example
+	void react(const TEvent&, FullControl&)			{}	// not going to be called in this example
 	void exit(Control&)								{}
 };
 

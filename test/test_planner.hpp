@@ -5,7 +5,7 @@
 
 struct Context {};
 
-using M = hfsm::Machine<Context>;
+using M = hfsm2::Machine<Context>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -43,6 +43,15 @@ using FSM = M::Root<S(Apex),
 
 //------------------------------------------------------------------------------
 
+static_assert(FSM::regionId<Apex>()		 ==  0, "");
+static_assert(FSM::regionId<Planned>()	 ==  1, "");
+static_assert(FSM::regionId<Step1_BT>()	 ==  2, "");
+static_assert(FSM::regionId<Hybrid>()	 ==  3, "");
+static_assert(FSM::regionId<Step2L_P>()	 ==  4, "");
+static_assert(FSM::regionId<Step2R_P>()	 ==  5, "");
+static_assert(FSM::regionId<Terminal>()	 ==  6, "");
+static_assert(FSM::regionId<Unplanned>() ==  7, "");
+
 static_assert(FSM::stateId<Apex>()		 ==  0, "");
 static_assert(FSM::stateId<Planned>()	 ==  1, "");
 static_assert(FSM::stateId<Step1_BT>()	 ==  2, "");
@@ -76,7 +85,7 @@ struct Planned
 		control._();
 	}
 
-	void enter(PlanControl& control) {
+	void enter(Control& control) {
 		auto plan = control.plan();
 		REQUIRE(!plan);
 
@@ -84,7 +93,7 @@ struct Planned
 		plan.add<Hybrid, Terminal>();
 	}
 
-	void exit(PlanControl& control) {
+	void exit(Control& control) {
 		control._();
 	}
 };
@@ -94,7 +103,7 @@ struct Planned
 struct Step1_BT
 	: FSM::State
 {
-	void enter(PlanControl& control) {
+	void enter(Control& control) {
 		Plan plan = control.plan();
 		REQUIRE(!plan);
 

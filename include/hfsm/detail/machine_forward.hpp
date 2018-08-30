@@ -1,6 +1,6 @@
 #pragma once
 
-namespace hfsm {
+namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
@@ -72,15 +72,18 @@ template <typename THead>
 struct _SF final {
 	using Head				= THead;
 	using StateList			= _TL<Head>;
+	using RegionList		= _TL<>;
 
 	static constexpr ShortIndex WIDTH		  = 1;
 	static constexpr LongIndex  REVERSE_DEPTH = 1;
 	static constexpr LongIndex  DEEP_WIDTH	  = 0;
-	static constexpr LongIndex  STATE_COUNT	  = 1;
 	static constexpr ShortIndex COMPO_COUNT	  = 0;
 	static constexpr ShortIndex ORTHO_COUNT	  = 0;
 	static constexpr ShortIndex ORTHO_UNITS	  = 0;
 	static constexpr LongIndex  PRONG_COUNT	  = 0;
+
+	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
+	static constexpr ShortIndex REGION_COUNT  = RegionList::SIZE;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -89,11 +92,11 @@ template <typename TInitial, typename... TRemaining>
 struct _CSF<TInitial, TRemaining...> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using Remaining			= _CSF<TRemaining...>;
-	using StateList			= typename MergeT<typename Initial::StateList, typename Remaining::StateList>::TypeList;
+	using StateList			= typename MergeT<typename Initial::StateList,  typename Remaining::StateList >::TypeList;
+	using RegionList		= typename MergeT<typename Initial::RegionList, typename Remaining::RegionList>::TypeList;
 
 	static constexpr LongIndex  REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
 	static constexpr LongIndex  DEEP_WIDTH	  = Max<Initial::DEEP_WIDTH,	Remaining::DEEP_WIDTH	>::VALUE;
-	static constexpr LongIndex  STATE_COUNT	  = Initial::STATE_COUNT + Remaining::STATE_COUNT;
 	static constexpr ShortIndex COMPO_COUNT	  = Initial::COMPO_COUNT + Remaining::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT	  = Initial::ORTHO_COUNT + Remaining::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS	  = Initial::ORTHO_UNITS + Remaining::ORTHO_UNITS;
@@ -104,10 +107,10 @@ template <typename TInitial>
 struct _CSF<TInitial> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using StateList			= typename Initial::StateList;
+	using RegionList		= typename Initial::RegionList;
 
 	static constexpr LongIndex  REVERSE_DEPTH = Initial::REVERSE_DEPTH;
 	static constexpr LongIndex  DEEP_WIDTH	  = Max<1, Initial::DEEP_WIDTH>::VALUE;
-	static constexpr LongIndex  STATE_COUNT	  = Initial::STATE_COUNT;
 	static constexpr ShortIndex COMPO_COUNT	  = Initial::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT	  = Initial::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS	  = Initial::ORTHO_UNITS;
@@ -119,16 +122,19 @@ struct _CF final {
 	using Head				= THead;
 	using State				= _SF<Head>;
 	using SubStates			= _CSF<TSubStates...>;
-	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
+	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList >::TypeList;
+	using RegionList		= typename MergeT<typename State::StateList, typename SubStates::RegionList>::TypeList;
 
 	static constexpr ShortIndex WIDTH		  = sizeof...(TSubStates);
 	static constexpr LongIndex  REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
 	static constexpr LongIndex  DEEP_WIDTH	  = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex  STATE_COUNT	  = State::STATE_COUNT + SubStates::STATE_COUNT;
 	static constexpr ShortIndex COMPO_COUNT	  = SubStates::COMPO_COUNT + 1;
 	static constexpr ShortIndex ORTHO_COUNT	  = SubStates::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS	  = SubStates::ORTHO_UNITS;
 	static constexpr LongIndex  PRONG_COUNT	  = WIDTH + SubStates::PRONG_COUNT;
+
+	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
+	static constexpr ShortIndex REGION_COUNT  = RegionList::SIZE;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -137,11 +143,11 @@ template <typename TInitial, typename... TRemaining>
 struct _OSF<TInitial, TRemaining...> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using Remaining			= _OSF<TRemaining...>;
-	using StateList			= typename MergeT<typename Initial::StateList, typename Remaining::StateList>::TypeList;
+	using StateList			= typename MergeT<typename Initial::StateList,  typename Remaining::StateList >::TypeList;
+	using RegionList		= typename MergeT<typename Initial::RegionList, typename Remaining::RegionList>::TypeList;
 
 	static constexpr LongIndex  REVERSE_DEPTH = Max<Initial::REVERSE_DEPTH, Remaining::REVERSE_DEPTH>::VALUE;
 	static constexpr LongIndex  DEEP_WIDTH	  = Initial::DEEP_WIDTH  + Remaining::DEEP_WIDTH;
-	static constexpr LongIndex  STATE_COUNT	  = Initial::STATE_COUNT + Remaining::STATE_COUNT;
 	static constexpr ShortIndex COMPO_COUNT	  = Initial::COMPO_COUNT + Remaining::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT	  = Initial::ORTHO_COUNT + Remaining::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS	  = Initial::ORTHO_UNITS + Remaining::ORTHO_UNITS;
@@ -152,10 +158,10 @@ template <typename TInitial>
 struct _OSF<TInitial> {
 	using Initial			= typename WrapForward<TInitial>::Type;
 	using StateList			= typename Initial::StateList;
+	using RegionList		= typename Initial::RegionList;
 
 	static constexpr LongIndex  REVERSE_DEPTH = Initial::REVERSE_DEPTH;
 	static constexpr LongIndex  DEEP_WIDTH	  = Initial::DEEP_WIDTH;
-	static constexpr LongIndex  STATE_COUNT	  = Initial::STATE_COUNT;
 	static constexpr ShortIndex COMPO_COUNT	  = Initial::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT	  = Initial::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS	  = Initial::ORTHO_UNITS;
@@ -167,16 +173,19 @@ struct _OF final {
 	using Head				= THead;
 	using State				= _SF<Head>;
 	using SubStates			= _OSF<TSubStates...>;
-	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList>::TypeList;
+	using StateList			= typename MergeT<typename State::StateList, typename SubStates::StateList >::TypeList;
+	using RegionList		= typename MergeT<typename State::StateList, typename SubStates::RegionList>::TypeList;
 
 	static constexpr ShortIndex WIDTH		  = sizeof...(TSubStates);
 	static constexpr LongIndex  REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
 	static constexpr LongIndex  DEEP_WIDTH	  = SubStates::DEEP_WIDTH;
-	static constexpr LongIndex  STATE_COUNT	  = State::STATE_COUNT + SubStates::STATE_COUNT;
 	static constexpr ShortIndex COMPO_COUNT	  = SubStates::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT	  = SubStates::ORTHO_COUNT + 1;
 	static constexpr ShortIndex ORTHO_UNITS	  = SubStates::ORTHO_UNITS + (WIDTH + 7) / 8;
 	static constexpr LongIndex  PRONG_COUNT	  = SubStates::PRONG_COUNT;
+
+	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
+	static constexpr ShortIndex REGION_COUNT  = RegionList::SIZE;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,22 +193,24 @@ struct _OF final {
 template <typename TContext,
 		  typename TConfig,
 		  typename TStateList,
+		  typename TRegionList,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
 		  typename TPayloadList,
-		  LongIndex NPlanCapacity>
+		  LongIndex NTaskCapacity>
 struct ArgsT final {
 	using Context			= TContext;
 	using Config			= TConfig;
 	using StateList			= TStateList;
+	using RegionList		= TRegionList;
 	using PayloadList		= TPayloadList;
 
 	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
 	static constexpr ShortIndex COMPO_COUNT	  = NCompoCount;
 	static constexpr ShortIndex ORTHO_COUNT	  = NOrthoCount;
 	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
-	static constexpr LongIndex  PLAN_CAPACITY = NPlanCapacity;
+	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
 };
 
 //------------------------------------------------------------------------------
@@ -259,36 +270,38 @@ struct _RF final {
 	using Context			= TContext;
 	using Config			= TConfig;
 	using PayloadList		= TPayloadList;
-	using Forward			= TApex;
+	using Apex				= TApex;
 
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
 
-	static constexpr LongIndex PLAN_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
-													   Config::MAX_PLAN_TASKS : Forward::PRONG_COUNT * 2;
+	static constexpr LongIndex TASK_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
+													   Config::MAX_PLAN_TASKS : Apex::PRONG_COUNT * 2;
 
-	using Instance			= _R<Context, Config, PayloadList, Forward>;
+	using Instance			= _R<Context, Config, PayloadList, Apex>;
 
-	static constexpr ShortIndex COMPO_COUNT		 = Forward::COMPO_COUNT;
-	static constexpr ShortIndex ORTHO_COUNT		 = Forward::ORTHO_COUNT;
-	static constexpr ShortIndex ORTHO_UNITS		 = Forward::ORTHO_UNITS;
+	static constexpr ShortIndex COMPO_COUNT		 = Apex::COMPO_COUNT;
+	static constexpr ShortIndex ORTHO_COUNT		 = Apex::ORTHO_COUNT;
+	static constexpr ShortIndex ORTHO_UNITS		 = Apex::ORTHO_UNITS;
 
-	using StateList			= typename Forward::StateList;
+	using StateList			= typename Apex::StateList;
+	using RegionList		= typename Apex::RegionList;
+
 	using Args				= ArgsT<Context,
 									Config,
 									StateList,
+									RegionList,
 									COMPO_COUNT,
 									ORTHO_COUNT,
 									ORTHO_UNITS,
 									PayloadList,
-									PLAN_CAPACITY>;
+									TASK_CAPACITY>;
 
-	using PlanControl		= PlanControlT		<Args>;
-	using TransitionControl	= TransitionControlT<Args>;
-	using FullControl		= FullControlT		<Args>;
+	using Control			= ControlT	  <Args>;
+	using FullControl		= FullControlT<Args>;
 
-	using Bare				= ::hfsm::detail::Bare <Args>;
-	using State				= ::hfsm::detail::Empty<Args>;
+	using Bare				= BareT<Args>;
+	using State				= Empty<Args>;
 
 	template <typename... TInjections>
 	using BaseT = _B<TInjections...>;
@@ -301,6 +314,11 @@ struct _RF final {
 	template <typename T>
 	static constexpr bool contains() {
 		return StateList::template index<T>() != INVALID_LONG_INDEX;
+	}
+
+	template <typename T>
+	static constexpr LongIndex regionId() {
+		return RegionList::template index<T>();
 	}
 };
 

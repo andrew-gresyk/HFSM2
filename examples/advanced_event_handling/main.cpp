@@ -31,7 +31,7 @@
 
 struct Context {};
 
-using M = hfsm::Machine<Context>;
+using M = hfsm2::Machine<Context>;
 
 struct PrimaryEvent {};
 struct SecondaryEvent { int payload; };
@@ -54,13 +54,24 @@ using FSM = M::PeerRoot<
 
 #undef S
 
+//------------------------------------------------------------------------------
+
+static_assert(FSM::regionId<Reactive>()		  ==  1, "");
+
+static_assert(FSM::stateId<Reactive>()		  ==  1, "");
+static_assert(FSM::stateId<NonHandler>()	  ==  2, "");
+static_assert(FSM::stateId<ConcreteHandler>() ==  3, "");
+static_assert(FSM::stateId<TemplateHandler>() ==  4, "");
+static_assert(FSM::stateId<EnableIfHandler>() ==  5, "");
+static_assert(FSM::stateId<Target>()		  ==  6, "");
+
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Reactive
 	: FSM::State
 {
 	// handle a single event type - TransitionEvent
-	void react(const TransitionEvent&, TransitionControl& control)  {
+	void react(const TransitionEvent&, FullControl& control)  {
 		std::cout << "  Reactive: reacting to TransitionEvent\n";
 
 		control.changeTo<Target>();
@@ -84,12 +95,12 @@ struct ConcreteHandler
 	: FSM::State
 {
 	// handle two event types - PrimaryEvent
-	void react(const PrimaryEvent&, TransitionControl&)  {
+	void react(const PrimaryEvent&, FullControl&)  {
 		std::cout << "  ConcreteHandler: reacting to PrimaryEvent\n";
 	}
 
 	// and SecondaryEvent
-	void react(const SecondaryEvent&, TransitionControl&)  {
+	void react(const SecondaryEvent&, FullControl&)  {
 		std::cout << "  ConcreteHandler: reacting to SecondaryEvent\n";
 	}
 
@@ -104,7 +115,7 @@ struct TemplateHandler
 {
 	// handle all possible event types
 	template <typename TEvent>
-	void react(const TEvent&, TransitionControl&)  {
+	void react(const TEvent&, FullControl&)  {
 		std::cout << "  TemplateHandler: reacting to TEvent\n";
 	}
 };
@@ -117,14 +128,14 @@ struct EnableIfHandler
 	// use std::enable_if to build more complex conditional event handling
 	template <typename TEvent>
 	typename std::enable_if<std::is_class<TEvent>::value>::type
-	react(const TEvent&, TransitionControl&)  {
+	react(const TEvent&, FullControl&)  {
 		std::cout << "  EnableIfHandler: reacting to a <class event>\n";
 	}
 
 	// but remember to cover all the remaining cases
 	template <typename TEvent>
 	typename std::enable_if<!std::is_class<TEvent>::value>::type
-	react(const TEvent&, TransitionControl&)  {
+	react(const TEvent&, FullControl&)  {
 		std::cout << "  EnableIfHandler: reacting to a <non-class event>\n";
 	}
 };

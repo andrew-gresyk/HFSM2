@@ -1,12 +1,9 @@
 #pragma once
 
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
-
-template <typename>
-struct ControlOriginT;
 
 template <typename TArgs>
 class ControlT {
@@ -25,37 +22,81 @@ class ControlT {
 	template <typename, typename, typename, typename>
 	friend class _R;
 
-	template <typename>
-	friend struct ControlOriginT;
-
 	using Args			= TArgs;
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
+
+public:
+	using StateData		= StateDataT<Args>;
+
+	using Plan			= PlanT<StateList, RegionList::SIZE, Args::TASK_CAPACITY>;
+	using TaskLinks		= typename Plan::TaskLinks;
+	using TasksBounds	= typename Plan::TasksBounds;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct Origin {
+		inline Origin(ControlT& control_,
+					  const StateID id);
+
+		inline ~Origin();
+
+		ControlT& control;
+		const StateID prevId;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct Region {
+		inline Region(ControlT& control,
+					  const RegionID id,
+					  const StateID index,
+					  const LongIndex size);
+
+		inline ~Region();
+
+		ControlT& control;
+		const RegionID prevId;
+		const LongIndex prevIndex;
+		const LongIndex prevSize;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	using Registry		= RegistryT<Args>;
-
 	inline ControlT(Context& context,
-					Registry& registry,
+					StateData& stateData,
+					TaskLinks& taskLinks,
+					TasksBounds& tasksBounds,
 					LoggerInterface* const HFSM_IF_LOGGER(logger))
 		: _context(context)
-		, _registry(registry)
+		, _stateData(stateData)
+		, _taskLinks(taskLinks)
+		, _tasksBounds(tasksBounds)
 		HFSM_IF_LOGGER(, _logger(logger))
 	{}
 
 	inline void setOrigin  (const StateID id);
 	inline void resetOrigin(const StateID id);
 
+	inline void setRegion  (const RegionID id, const StateID index, const LongIndex size);
+	inline void resetRegion(const RegionID id, const StateID index, const LongIndex size);
+
 	template <typename T>
-	static constexpr LongIndex
-	stateId()												{ return StateList::template index<T>();	}
+	static constexpr LongIndex stateId()					{ return StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()					{ return RegionList::template index<T>();	}
 
 public:
 	inline Context& _()										{ return _context;							}
 	inline Context& context()								{ return _context;							}
 
-	inline bool isActive   (const StateID stateId) const	{ return _registry.isActive	(stateId);		}
-	inline bool isResumable(const StateID stateId) const	{ return _registry.isResumable(stateId);	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	inline bool isActive   (const StateID stateId) const	{ return _stateData.isActive	(stateId);		}
+	inline bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);	}
 
 	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);				}
 
@@ -68,9 +109,25 @@ public:
 	template <typename TState>
 	inline bool isScheduled() const							{ return isResumable(stateId<TState>());	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	inline Plan plan()									{ return Plan{_taskLinks, _tasksBounds, _regionId};	}
+	inline Plan plan() const							{ return Plan{_taskLinks, _tasksBounds, _regionId};	}
+
+	inline Plan plan(const RegionID regionId)			{ return Plan{_taskLinks, _tasksBounds,  regionId};	}
+	inline Plan plan(const RegionID regionId) const		{ return Plan{_taskLinks, _tasksBounds,  regionId};	}
+
+	template <typename TRegion>
+	inline Plan plan()						{ return Plan{_taskLinks, _tasksBounds, regionId<TRegion>()};	}
+
+	template <typename TRegion>
+	inline Plan plan() const				{ return Plan{_taskLinks, _tasksBounds, regionId<TRegion>()};	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 private:
-	inline		 Registry& registry()						{ return _registry;							}
-	inline const Registry& registry() const					{ return _registry;							}
+	inline		 StateData& stateData()						{ return _stateData;							}
+	inline const StateData& stateData() const					{ return _stateData;							}
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	inline LoggerInterface* logger()						{ return _logger;							}
@@ -78,266 +135,104 @@ private:
 
 protected:
 	Context& _context;
-	Registry& _registry;
+	StateData& _stateData;
+	TaskLinks& _taskLinks;
+	TasksBounds& _tasksBounds;
 	StateID _originId = INVALID_STATE_ID;
-	HFSM_IF_LOGGER(LoggerInterface* _logger);
-};
-
-//------------------------------------------------------------------------------
-
-template <typename TArgs>
-struct ControlOriginT {
-	using Args				= TArgs;
-	using Control			= ControlT<Args>;
-
-	inline ControlOriginT(Control& control,
-						  const StateID id);
-
-	inline ~ControlOriginT();
-
-	Control& control;
-	const StateID prevId;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename TArgs>
-class PlanControlT final
-	: public ControlT<TArgs>
-{
-	using Args			= TArgs;
-	using Context		= typename Args::Context;
-	using StateList		= typename Args::StateList;
-
-public:
-	using Control		= ControlT<Args>;
-	using Registry		= typename Control::Registry;
-
-	using Plan			= PlanT<StateList, Args::PLAN_CAPACITY>;
-	using Tasks			= typename Plan::Tasks;
-	using StateTasks	= typename Plan::StateTasks;
-
-	template <typename, typename, typename, typename>
-	friend class _R;
-
-private:
-	inline PlanControlT(Context& context,
-						Registry& registry,
-						Tasks& tasks,
-						StateTasks& stateTasks,
-						LoggerInterface* const logger)
-		: Control(context, registry, logger)
-		, _tasks(tasks)
-		, _stateTasks(stateTasks)
-	{}
-
-	template <typename T>
-	static constexpr LongIndex
-	stateId()											{ return StateList::template index<T>();		}
-
-public:
-	using Control::isActive;
-	using Control::isResumable;
-	using Control::isScheduled;
-
-	inline Plan plan()									{ return Plan(_tasks, _stateTasks, _originId);	}
-	inline Plan plan() const							{ return Plan(_tasks, _stateTasks, _originId);	}
-
-	inline Plan plan(const StateID stateId)				{ return Plan(_tasks, _stateTasks, stateId);	}
-	inline Plan plan(const StateID stateId) const		{ return Plan(_tasks, _stateTasks, stateId);	}
-
-	template <typename TPlanner>
-	inline Plan plan()						{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
-
-	template <typename TPlanner>
-	inline Plan plan() const				{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
-
-private:
-	using Control::_originId;
-
-	Tasks& _tasks;
-	StateTasks& _stateTasks;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename>
-struct ControlLockT;
-
-template <typename>
-struct ControlRegionT;
-
-template <typename TArgs>
-class TransitionControlT
-	: public ControlT<TArgs>
-{
-protected:
-	using Args			= TArgs;
-	using Context		= typename Args::Context;
-	using StateList		= typename Args::StateList;
-	using PayloadList	= typename Args::PayloadList;
-
-	using Control		= ControlT <Args>;
-	using Registry		= RegistryT<Args>;
-
-	using Request		= RequestT<PayloadList>;
-	using RequestType	= typename Request::Type;
-	using RequestQueue	= RequestQueueT<PayloadList>;
-
-	template <StateID, typename, typename>
-	friend struct _S;
-
-	template <typename, typename, typename, typename>
-	friend class _R;
-
-	template <typename>
-	friend struct ControlLockT;
-
-	template <typename>
-	friend struct ControlRegionT;
-
-protected:
-	inline TransitionControlT(Context& context,
-							  Registry& registry,
-							  RequestQueue& requests,
-							  LoggerInterface* const logger)
-		: Control(context, registry, logger)
-		, _requests(requests)
-	{}
-
-public:
-	using Control::isActive;
-	using Control::isResumable;
-	using Control::isScheduled;
-
-	template <typename T>
-	static constexpr LongIndex
-	stateId()						{ return StateList::template index<T>();	}
-
-	inline void changeTo(const StateID stateId);
-	inline void resume	(const StateID stateId);
-	inline void schedule(const StateID stateId);
-
-	template <typename TState>
-	inline void changeTo()						{ changeTo(stateId<TState>());	}
-
-	template <typename TState>
-	inline void resume()						{ resume  (stateId<TState>());	}
-
-	template <typename TState>
-	inline void schedule()						{ schedule(stateId<TState>());	}
-
-	inline void succeed()						{ _status.success = true;		}
-	inline void fail()							{ _status.failure = true;		}
-
-private:
-	inline void setRegion  (const StateID id, const LongIndex size);
-	inline void resetRegion(const StateID id, const LongIndex size);
-
-protected:
-	using Control::_originId;
-
-	RequestQueue& _requests;
-	Status _status;
-	bool _locked = false;
-	StateID _regionId = INVALID_STATE_ID;
+	RegionID _regionId = INVALID_REGION_ID;
+	StateID _regionIndex = INVALID_STATE_ID;
 	LongIndex _regionSize = INVALID_LONG_INDEX;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename TArgs>
-struct ControlLockT {
-	using Args				= TArgs;
-
-	using TransitionControl = TransitionControlT<Args>;
-
-	inline ControlLockT(TransitionControl& control);
-	inline ~ControlLockT();
-
-	TransitionControl* const control;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-struct ControlRegionT {
-	using Args				= TArgs;
-
-	using TransitionControl = TransitionControlT<Args>;
-
-	inline ControlRegionT(TransitionControl& control,
-						  const StateID id,
-						  const LongIndex size);
-
-	inline ~ControlRegionT();
-
-	TransitionControl& control;
-	const StateID prevId;
-	const LongIndex prevSize;
+	Status _status;
+	HFSM_IF_LOGGER(LoggerInterface* _logger);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
 class FullControlT final
-	: public TransitionControlT<TArgs>
+	: public ControlT<TArgs>
 {
-	using Args				= TArgs;
-	using Context			= typename Args::Context;
-	using StateList			= typename Args::StateList;
-	using PayloadList		= typename Args::PayloadList;
-
-	using Control			= ControlT<Args>;
-	using Registry			= typename Control::Registry;
-
-	using TransitionControl	= TransitionControlT<Args>;
-	using RequestQueue		= RequestQueueT<PayloadList>;
-	using Plan				= PlanT<StateList, Args::PLAN_CAPACITY>;
-	using Tasks				= typename Plan::Tasks;
-	using StateTasks		= typename Plan::StateTasks;
+	template <StateID, typename, typename>
+	friend struct _S;
 
 	template <typename, typename, typename, typename>
 	friend class _R;
 
+	using Args			= TArgs;
+	using Context		= typename Args::Context;
+	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
+	using PayloadList	= typename Args::PayloadList;
+
+	using Control		= ControlT  <Args>;
+	using StateData		= StateDataT<Args>;
+
+	using Plan			= typename Control::Plan;
+	using TaskLinks		= typename Plan::TaskLinks;
+	using TasksBounds	= typename Plan::TasksBounds;
+
+public:
+	using Request		= RequestT <PayloadList>;
+	using Requests		= RequestsT<PayloadList, Args::COMPO_COUNT>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct Lock {
+		inline Lock(FullControlT& control_);
+		inline ~Lock();
+
+		FullControlT* const control;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 private:
 	inline FullControlT(Context& context,
-						Registry& registry,
-						RequestQueue& requests,
-						Tasks& tasks,
-						StateTasks& firstTasks,
+						StateData& stateData,
+						TaskLinks& tasks,
+						TasksBounds& firstTasks,
+						Requests& requests,
 						LoggerInterface* const logger)
-		: TransitionControl{context, registry, requests, logger}
-		, _tasks{tasks}
-		, _stateTasks{firstTasks}
+		: Control{context, stateData, tasks, firstTasks, logger}
+		, _requests(requests)
 	{}
 
 	template <typename T>
-	static constexpr LongIndex
-	stateId()										{ return StateList::template index<T>();					}
+	static constexpr LongIndex stateId()					{ return StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr LongIndex regionId()					{ return RegionList::template index<T>();	}
 
 public:
 	using Control::isActive;
 	using Control::isResumable;
 	using Control::isScheduled;
+	using Control::plan;
 
-	inline Plan plan()								{ return Plan(_tasks, _stateTasks, _originId);				}
-	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, _originId);				}
+	inline void changeTo(const StateID stateId);
+	inline void resume	(const StateID stateId);
+	inline void schedule(const StateID stateId);
 
-	inline Plan plan(const StateID stateId)			{ return Plan(_tasks, _stateTasks, stateId);				}
-	inline Plan plan(const StateID stateId) const	{ return Plan(_tasks, _stateTasks, stateId);				}
+	template <typename TState>
+	inline void changeTo()									{ changeTo(stateId<TState>());				}
 
-	template <typename TPlanner>
-	inline Plan plan()								{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	template <typename TState>
+	inline void resume()									{ resume  (stateId<TState>());				}
 
-	template <typename TPlanner>
-	inline Plan plan() const						{ return Plan(_tasks, _stateTasks, stateId<TPlanner>());	}
+	template <typename TState>
+	inline void schedule()									{ schedule(stateId<TState>());				}
+
+	inline void succeed()									{ _status.success = true;					}
+	inline void fail()										{ _status.failure = true;					}
 
 private:
-	using Control::_originId;
+	using Control::_regionId;
+	using Control::_regionIndex;
+	using Control::_regionSize;
+	using Control::_status;
 
-	Tasks& _tasks;
-	StateTasks& _stateTasks;
+	Requests& _requests;
+	bool _locked = false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

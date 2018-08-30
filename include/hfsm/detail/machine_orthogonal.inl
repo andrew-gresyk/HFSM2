@@ -1,23 +1,23 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-_O<NS, NC, NO, TA, TH, TS...>::_O(Registry& registry,
+_O<NS, NC, NO, TA, TH, TS...>::_O(StateData& stateData,
 								  const Parent parent)
-	: _headState{registry, parent}
-	, _subStates{registry, ORTHO_ID}
+	: _headState{stateData, parent}
+	, _subStates{stateData, ORTHO_ID}
 {
-	registry.orthoParents[ORTHO_INDEX] = parent;
+	stateData.orthoParents[ORTHO_INDEX] = parent;
 
-	registry.orthoRequested.template emplace<OrthoForkT<Forward::WIDTH>>();
-	registry.orthoResumable.template emplace<OrthoForkT<Forward::WIDTH>>();
+	stateData.orthoRequested.template emplace<OrthoForkT<Forward::WIDTH>>();
+	stateData.orthoResumable.template emplace<OrthoForkT<Forward::WIDTH>>();
 
-	HSFM_IF_DEBUG(OrthoFork& requested = orthoRequested(registry));
+	HSFM_IF_DEBUG(OrthoFork& requested = orthoRequested(stateData));
 	HSFM_IF_DEBUG(requested.TYPE = _headState.TYPE);
 
-	HSFM_IF_DEBUG(OrthoFork& resumable = registry.orthoResumable[ORTHO_INDEX]);
+	HSFM_IF_DEBUG(OrthoFork& resumable = stateData.orthoResumable[ORTHO_INDEX]);
 	HSFM_IF_DEBUG(resumable.TYPE = _headState.TYPE);
 }
 
@@ -47,7 +47,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(Control& control) {
 	HSFM_IF_ASSERT(const OrthoFork& requested = orthoRequested(control));
 
 	assert(!requested.prongs);
@@ -60,7 +60,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(PlanControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepEnter(Control& control) {
 	OrthoFork& requested = orthoRequested(control);
 	requested.prongs.clear();
 
@@ -73,7 +73,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 Status
 _O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
-	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (const auto status = _headState.deepUpdate(control)) {
 		ControlLock lock{control};
@@ -100,7 +100,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control) {
 	_subStates.wideExit(control);
 	_headState.deepExit(control);
 }
@@ -109,25 +109,25 @@ _O<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(Registry& registry,
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateData& stateData,
 												  const RequestType request)
 {
-	const OrthoFork& requested = orthoRequested(registry);
+	const OrthoFork& requested = orthoRequested(stateData);
 
 	if (requested.prongs)
-		_subStates.wideForwardRequest(registry, requested.prongs, request);
+		_subStates.wideForwardRequest(stateData, requested.prongs, request);
 	else
 		switch (request) {
 		case Request::REMAIN:
-			deepRequestRemain(registry);
+			deepRequestRemain(stateData);
 			break;
 
 		case Request::RESTART:
-			deepRequestRestart(registry);
+			deepRequestRestart(stateData);
 			break;
 
 		case Request::RESUME:
-			deepRequestResume(registry);
+			deepRequestResume(stateData);
 			break;
 
 		default:
@@ -139,34 +139,34 @@ _O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(Registry& registry,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(Registry& registry) {
-	_subStates.wideRequestRemain(registry);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(StateData& stateData) {
+	_subStates.wideRequestRemain(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestRestart(Registry& registry) {
-	_subStates.wideRequestRestart(registry);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestRestart(StateData& stateData) {
+	_subStates.wideRequestRestart(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestResume(Registry& registry) {
-	_subStates.wideRequestResume(registry);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestResume(StateData& stateData) {
+	_subStates.wideRequestResume(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(Registry& registry,
-													 PlanControl& control)
+_O<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(StateData& stateData,
+													 Control& control)
 {
-	_subStates.wideChangeToRequested(registry, control);
+	_subStates.wideChangeToRequested(stateData, control);
 }
 
 //------------------------------------------------------------------------------

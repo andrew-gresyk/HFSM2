@@ -32,12 +32,16 @@
 	#define HFSM_ASSERT_OR(y, n)	n
 #endif
 
-namespace hfsm {
+namespace hfsm2 {
 
 //------------------------------------------------------------------------------
+// TODO: use UniqueT<>
 
 using ShortIndex = uint8_t;
 static constexpr ShortIndex	INVALID_SHORT_INDEX = UINT8_MAX;
+
+using RegionID	 = ShortIndex;
+static constexpr RegionID	INVALID_REGION_ID	= INVALID_SHORT_INDEX;
 
 using ForkID	 = int8_t;
 static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;

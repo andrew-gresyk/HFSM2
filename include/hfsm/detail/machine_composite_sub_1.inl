@@ -1,13 +1,13 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-_CS<NS, NC, NO, TA, NI, TI, TR...>::_CS(Registry& registry,
-										const ForkID fork)
-	: initial  {registry, Parent{fork, PRONG_INDEX}}
-	, remaining{registry, fork}
+_CS<NS, NC, NO, TA, NI, TI, TR...>::_CS(StateData& stateData,
+										const ForkID forkId)
+	: initial  {stateData, Parent{forkId, PRONG_INDEX}}
+	, remaining{stateData, forkId}
 {}
 
 //------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ _CS<NS, NC, NO, TA, NI, TI, TR...>::wideGuard(const ShortIndex prong,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<NS, NC, NO, TA, NI, TI, TR...>::wideEnterInitial(PlanControl& control) {
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideEnterInitial(Control& control) {
 	initial.deepEnterInitial(control);
 }
 
@@ -49,7 +49,7 @@ _CS<NS, NC, NO, TA, NI, TI, TR...>::wideEnterInitial(PlanControl& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 _CS<NS, NC, NO, TA, NI, TI, TR...>::wideEnter(const ShortIndex prong,
-											  PlanControl& control)
+											  Control& control)
 {
 	if (prong == PRONG_INDEX)
 		initial  .deepEnter(	   control);
@@ -89,7 +89,7 @@ _CS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(const ShortIndex prong,
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 _CS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(const ShortIndex prong,
-											 PlanControl& control)
+											 Control& control)
 {
 	if (prong == PRONG_INDEX)
 		initial  .deepExit(		  control);
@@ -101,57 +101,57 @@ _CS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(const ShortIndex prong,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(Registry& registry,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(StateData& stateData,
 													   const ShortIndex prong,
 													   const RequestType transition)
 {
 	if (prong == PRONG_INDEX)
-		initial	 .deepForwardRequest(registry, 		  transition);
+		initial	 .deepForwardRequest(stateData, 		  transition);
 	else
-		remaining.wideForwardRequest(registry, prong, transition);
+		remaining.wideForwardRequest(stateData, prong, transition);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRemain(Registry& registry) {
-	initial.deepRequestRemain(registry);
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRemain(StateData& stateData) {
+	initial.deepRequestRemain(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRestart(Registry& registry) {
-	initial.deepRequestRestart(registry);
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRestart(StateData& stateData) {
+	initial.deepRequestRestart(stateData);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestResume(Registry& registry,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestResume(StateData& stateData,
 													  const ShortIndex prong)
 {
 	if (prong == PRONG_INDEX)
-		initial	 .deepRequestResume(registry);
+		initial	 .deepRequestResume(stateData);
 	else
-		remaining.wideRequestResume(registry, prong);
+		remaining.wideRequestResume(stateData, prong);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_CS<NS, NC, NO, TA, NI, TI, TR...>::wideChangeToRequested(Registry& registry,
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideChangeToRequested(StateData& stateData,
 														  const ShortIndex prong,
-														  PlanControl& control)
+														  Control& control)
 {
 	if (prong == PRONG_INDEX)
-		initial	 .deepChangeToRequested(registry,		 control);
+		initial	 .deepChangeToRequested(stateData,		 control);
 	else
-		remaining.wideChangeToRequested(registry, prong, control);
+		remaining.wideChangeToRequested(stateData, prong, control);
 }
 
 //------------------------------------------------------------------------------

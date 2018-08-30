@@ -1,4 +1,4 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,16 +15,16 @@ template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, ty
 Status
 _Q<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
 	CompoFork& fork = Composite::compoFork(control);
-	
+
 	assert(fork.active != INVALID_SHORT_INDEX);
 
-	ControlRegion region{control, HEAD_ID, SubStateList::SIZE};
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const Status stateStatus = _headState.deepUpdate(control)) {
+	if (const Status headStatus = _headState.deepUpdate(control)) {
 		ControlLock lock{control};
 		_subStates.wideUpdate(fork.active, control);
 
-		return stateStatus;
+		return headStatus;
 	} else {
 		const Status status = _subStates.wideUpdate(fork.active, control);
 
@@ -36,7 +36,7 @@ _Q<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
 		if (_success) {
 			ControlOrigin origin{control, HEAD_ID};
 
-			Plan plan = control.plan(HEAD_ID);
+			Plan plan = control.plan(REGION_ID);
 
 			for (auto it = plan.begin(); it; ++it)
 				if (control.isActive(it->origin)) {
@@ -69,10 +69,10 @@ _Q<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_Q<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control) {
+_Q<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control) {
 	Composite::deepExit(control);
 
-	auto plan = control.plan(HEAD_ID);
+	auto plan = control.plan(REGION_ID);
 	plan.clear();
 
 	_success = false;

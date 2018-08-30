@@ -1,4 +1,4 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 //------------------------------------------------------------------------------
@@ -36,11 +36,11 @@ struct RegisterT<NS, TA, Empty<TA>> {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, typename TA, typename TH>
-_S<NS, TA, TH>::_S(Registry& registry,
+_S<NS, TA, TH>::_S(StateData& stateData,
 				   const Parent parent)
 {
 	using Register = RegisterT<STATE_ID, TA, Head>;
-	Register::execute(registry.stateParents, parent);
+	Register::execute(stateData.stateParents, parent);
 }
 
 //------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ _S<NS, TA, TH>::deepGuard(FullControl& control) {
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepEnterInitial(PlanControl& control) {
+_S<NS, TA, TH>::deepEnterInitial(Control& control) {
 	deepEnter(control);
 }
 
@@ -72,7 +72,7 @@ _S<NS, TA, TH>::deepEnterInitial(PlanControl& control) {
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepEnter(PlanControl& control) {
+_S<NS, TA, TH>::deepEnter(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::enter, Method::ENTER);
 
 	ControlOrigin origin{control, STATE_ID};
@@ -103,9 +103,9 @@ template <StateID NS, typename TA, typename TH>
 template <typename TEvent>
 void
 _S<NS, TA, TH>::deepReact(const TEvent& event,
-						   FullControl& control)
+						  FullControl& control)
 {
-	auto reaction = static_cast<void(Head::*)(const TEvent&, TransitionControl&)>(&Head::react);
+	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
 	HFSM_LOG_STATE_METHOD(reaction, Method::REACT);
 
 	ControlOrigin origin{control, STATE_ID};
@@ -120,7 +120,7 @@ _S<NS, TA, TH>::deepReact(const TEvent& event,
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepExit(PlanControl& control) {
+_S<NS, TA, TH>::deepExit(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
 
 	ControlOrigin origin{control, STATE_ID};

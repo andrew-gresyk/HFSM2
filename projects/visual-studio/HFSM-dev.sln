@@ -9,8 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-41
 		..\..\.travis.yml = ..\..\.travis.yml
 		..\..\appveyor.yml = ..\..\appveyor.yml
 		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
-		flags.txt = flags.txt
 		..\..\README.md = ..\..\README.md
+		vs-flags.txt = vs-flags.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{EDEB0687-3B3E-429D-9213-0A3EED99821D}"

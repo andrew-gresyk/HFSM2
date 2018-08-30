@@ -45,9 +45,10 @@
     <ClInclude Include="..\..\include\hfsm\detail\machine_injections.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_orthogonal_sub.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_plan.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\machine_plan_data.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_root.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\machine_sequence.hpp" />
-    <ClInclude Include="..\..\include\hfsm\detail\machine_registry.hpp" />
+    <ClInclude Include="..\..\include\hfsm\detail\machine_state_data.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\lib_type_list.hpp" />
     <ClInclude Include="..\..\include\hfsm\detail\lib_utility.hpp" />
     <ClInclude Include="..\..\include\hfsm\machine_dev.hpp" />
@@ -74,11 +75,12 @@
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_1.inl" />
     <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm\detail\machine_plan.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_plan_data.inl" />
     <None Include="..\..\include\hfsm\detail\machine_root.inl" />
     <None Include="..\..\include\hfsm\detail\machine_sequence.inl" />
     <None Include="..\..\include\hfsm\detail\machine_state.hpp" />
     <None Include="..\..\include\hfsm\detail\machine_state.inl" />
-    <None Include="..\..\include\hfsm\detail\machine_registry.inl" />
+    <None Include="..\..\include\hfsm\detail\machine_state_data.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

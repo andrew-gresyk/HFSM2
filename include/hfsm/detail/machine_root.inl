@@ -1,4 +1,4 @@
-﻿namespace hfsm {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -7,20 +7,20 @@ template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::_R(Context& context
 						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
-	, _apex{_registry, Parent{}}
+	, _apex{_stateData, Parent{}}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
 	HFSM_IF_STRUCTURE(getStateNames());
 
-	for (auto& payload : _transitionPayloads)
+	for (auto& payload : _requestPayloads)
 		payload.reset();
 
 	{
-		PlanControl control{_context,
-							_registry,
-							_tasks,
-							_stateTasks,
-							HFSM_LOGGER_OR(_logger, nullptr)};
+		Control control{_context,
+						_stateData,
+						_taskLinks,
+						_tasksBounds,
+						HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepEnterInitial(control);
 
 		HSFM_IF_DEBUG(verifyPlans());
@@ -33,11 +33,11 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::~_R() {
-	PlanControl control{_context,
-						_registry,
-						_tasks,
-						_stateTasks,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	Control control{_context,
+					_stateData,
+					_taskLinks,
+					_tasksBounds,
+					HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepExit(control);
 
 	HSFM_IF_DEBUG(verifyPlans());
@@ -49,10 +49,10 @@ template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::update() {
 	FullControl control(_context,
-						_registry,
+						_stateData,
+						_taskLinks,
+						_tasksBounds,
 						_requests,
-						_tasks,
-						_stateTasks,
 						HFSM_LOGGER_OR(_logger, nullptr));
 	_apex.deepUpdate(control);
 
@@ -71,10 +71,10 @@ template <typename TEvent>
 void
 _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 	FullControl control(_context,
-						_registry,
+						_stateData,
+						_taskLinks,
+						_tasksBounds,
 						_requests,
-						_tasks,
-						_stateTasks,
 						HFSM_LOGGER_OR(_logger, nullptr));
 	_apex.deepReact(event, control);
 
@@ -91,8 +91,8 @@ _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
-	const Transition transition(Transition::Type::RESTART, stateId);
-	_requests << transition;
+	const Request request(Request::Type::RESTART, stateId);
+	_requests << request;
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
@@ -105,8 +105,8 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::resume(const StateID stateId) {
-	const Transition transition(Transition::Type::RESUME, stateId);
-	_requests << transition;
+	const Request request(Request::Type::RESUME, stateId);
+	_requests << request;
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
@@ -119,8 +119,8 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
-	const Transition transition(Transition::Type::SCHEDULE, stateId);
-	_requests << transition;
+	const Request request(Request::Type::SCHEDULE, stateId);
+	_requests << request;
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
@@ -136,8 +136,8 @@ void
 _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 							  TPayload* const payload)
 {
-	const Transition transition(Transition::Type::RESTART, stateId, payload);
-	_requests << transition;
+	const Request request(Request::Type::RESTART, stateId, payload);
+	_requests << request;
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
@@ -153,8 +153,8 @@ void
 _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 							TPayload* const payload)
 {
-	const Transition transition(Transition::Type::RESUME, stateId, payload);
-	_requests << transition;
+	const Request request(Request::Type::RESUME, stateId, payload);
+	_requests << request;
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
@@ -170,8 +170,8 @@ void
 _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 							  TPayload* const payload)
 {
-	const Transition transition(Transition::Type::SCHEDULE, stateId, payload);
-	_requests << transition;
+	const Request request(Request::Type::SCHEDULE, stateId, payload);
+	_requests << request;
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
 	if (_logger)
@@ -187,7 +187,7 @@ _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
 	assert(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
-		_transitionPayloads[stateId].reset();
+		_requestPayloads[stateId].reset();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -201,7 +201,7 @@ _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 	assert(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
-		_transitionPayloads[stateId] = payload;
+		_requestPayloads[stateId] = payload;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -212,7 +212,7 @@ _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 	assert(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
-		return !!_transitionPayloads[stateId];
+		return !!_requestPayloads[stateId];
 	else
 		return false;
 }
@@ -226,7 +226,7 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 	assert(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY) {
-		const auto& payload = _transitionPayloads[stateId];
+		const auto& payload = _requestPayloads[stateId];
 
 		return payload.template get<TPayload>();
 	} else
@@ -252,14 +252,14 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 			HFSM_IF_STRUCTURE(_lastTransitions << TransitionInfo(request, Method::UPDATE));
 
 			switch (request.type) {
-			case Transition::RESTART:
-			case Transition::RESUME:
+			case Request::RESTART:
+			case Request::RESUME:
 				requestImmediate(request);
 
 				++changeCount;
 				break;
 
-			case Transition::SCHEDULE:
+			case Request::SCHEDULE:
 				requestScheduled(request);
 				break;
 
@@ -271,10 +271,10 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 
 		if (changeCount > 0) {
 			FullControl substitutionControl(_context,
-											_registry,
+											_stateData,
+											_taskLinks,
+											_tasksBounds,
 											_requests,
-											_tasks,
-											_stateTasks,
 											HFSM_LOGGER_OR(_logger, nullptr));
 			_apex.deepForwardGuard(substitutionControl);
 
@@ -288,12 +288,12 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 	}
 
 	{
-		PlanControl control{_context,
-							_registry,
-							_tasks,
-							_stateTasks,
-							HFSM_LOGGER_OR(_logger, nullptr)};
-		_apex.deepChangeToRequested(_registry, control);
+		Control control{_context,
+						_stateData,
+						_taskLinks,
+						_tasksBounds,
+						HFSM_LOGGER_OR(_logger, nullptr)};
+		_apex.deepChangeToRequested(_stateData, control);
 
 		HSFM_IF_DEBUG(verifyPlans());
 	}
@@ -305,11 +305,11 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 
 template <typename TC, typename TG, typename TPL, typename TA>
 void
-_R<TC, TG, TPL, TA>::requestImmediate(const Transition request) {
+_R<TC, TG, TPL, TA>::requestImmediate(const Request request) {
 	assert(STATE_COUNT > request.stateId);
 
-	_registry.requestImmediate(request);
-	_apex.deepForwardRequest(_registry, request.type);
+	_stateData.requestImmediate(request);
+	_apex.deepForwardRequest(_stateData, request.type);
 }
 
 //------------------------------------------------------------------------------
@@ -320,26 +320,26 @@ template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::verifyPlans() const {
 	LongIndex planCount = 0;
-	for (StateID id = 0; id < STATE_COUNT; ++id)
+	for (RegionID id = 0; id < REGION_COUNT; ++id)
 		planCount += verifyPlan(id);
 
-	assert(_tasks.count() == planCount);
+	assert(_taskLinks.count() == planCount);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
 LongIndex
-_R<TC, TG, TPL, TA>::verifyPlan(const StateID stateId) const {
+_R<TC, TG, TPL, TA>::verifyPlan(const RegionID regionId) const {
 	LongIndex length = 0;
-	const TaskIndices& indices = _stateTasks[stateId];
+	const Bounds& indices = _tasksBounds[regionId];
 
 	if (indices.first != INVALID_LONG_INDEX) {
 		assert(indices.last != INVALID_LONG_INDEX);
 
 		for (auto c = indices.first, d = c; ; ) {
 			++length;
-			const TaskTransition& task = _tasks[c];
+			const TaskLink& task = _taskLinks[c];
 
 			if (c != indices.last) {
 				assert(task.next != INVALID_LONG_INDEX);
@@ -347,10 +347,10 @@ _R<TC, TG, TPL, TA>::verifyPlan(const StateID stateId) const {
 
 				// loop check
 				if (d != INVALID_LONG_INDEX) {
-					d = _tasks[d].next;
+					d = _taskLinks[d].next;
 
 					if (d != INVALID_LONG_INDEX) {
-						d = _tasks[d].next;
+						d = _taskLinks[d].next;
 					}
 
 					if (d != INVALID_LONG_INDEX)

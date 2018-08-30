@@ -1,4 +1,4 @@
-namespace hfsm {
+namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,51 +15,55 @@ class _R final {
 
 	using ForwardApex			 = typename WrapForward<Apex>::Type;
 	using StateList				 = typename ForwardApex::StateList;
+	using RegionList			 = typename ForwardApex::RegionList;
 	using Forward				 = _RF<Context, Config, PayloadList, Apex>;
 
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
 
-	static constexpr LongIndex PLAN_CAPACITY	 = Forward::PLAN_CAPACITY;
+	static constexpr LongIndex TASK_CAPACITY	 = Forward::TASK_CAPACITY;
 
 public:
 	static constexpr LongIndex  REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
 	static constexpr LongIndex  DEEP_WIDTH		 = ForwardApex::DEEP_WIDTH;
-	static constexpr LongIndex  STATE_COUNT		 = ForwardApex::STATE_COUNT;
 	static constexpr ShortIndex COMPO_COUNT		 = ForwardApex::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT		 = ForwardApex::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS		 = ForwardApex::ORTHO_UNITS;
 	static constexpr LongIndex  PRONG_COUNT		 = ForwardApex::PRONG_COUNT;
 
-private:
-	using Args					 = ArgsT<Context,
-										 Config,
-										 StateList,
-										 COMPO_COUNT,
-										 ORTHO_COUNT,
-										 ORTHO_UNITS,
-										 PayloadList,
-										 PLAN_CAPACITY>;
-
-	using Payload				 = typename PayloadList::Container;
-	using Transition			 = RequestT<PayloadList>;
-
-	using PlanControl			 = typename Forward::PlanControl;
-	using TransitionControl		 = typename Forward::TransitionControl;
-	using FullControl			 = typename Forward::FullControl;
+	static constexpr LongIndex  STATE_COUNT		 = ForwardApex::STATE_COUNT;
+	static constexpr LongIndex  REGION_COUNT	 = ForwardApex::REGION_COUNT;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using Registry				 = RegistryT<Args>;
+	using Args					 = ArgsT<Context,
+										 Config,
+										 StateList,
+										 RegionList,
+										 COMPO_COUNT,
+										 ORTHO_COUNT,
+										 ORTHO_UNITS,
+										 PayloadList,
+										 TASK_CAPACITY>;
 
-	using Payloads				 = Array<Payload,		STATE_COUNT>;
-	using TransitionQueueStorage = Array<Transition,	COMPO_COUNT>;
+	using StateData				 = StateDataT  <Args>;
+	using PlanData				 = PlanDataT   <Args>;
+
+	using Control				 = ControlT	   <Args>;
+	using FullControl			 = FullControlT<Args>;
+
+	using Payload				 = typename PayloadList::Container;
+	using Payloads				 = Array<Payload, STATE_COUNT>;
+	using Request				 = typename FullControl::Request;
+	using Requests				 = typename FullControl::Requests;
+
+	using Plan					 = typename PlanData::Plan;
+	using TaskLinks				 = typename Plan::TaskLinks;
+	using TasksBounds			 = typename Plan::TasksBounds;
 
 	using MaterialApex			 = typename WrapMaterial<0, 0, 0, Args, Apex>::Type;
-	using Tasks					 = typename FullControl::Tasks;
-	using StateTasks			 = Array<TaskIndices,	STATE_COUNT>;			// TODO: change to ForkTasks
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;		// TODO: move to ForwardApex
@@ -152,8 +156,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline bool isActive   (const StateID stateId) const	{ return _registry.isActive	(stateId);				}
-	inline bool isResumable(const StateID stateId) const	{ return _registry.isResumable(stateId);			}
+	inline bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);			}
+	inline bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);			}
 
 	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
@@ -179,12 +183,12 @@ public:
 
 protected:
 	void processTransitions();
-	void requestImmediate(const Transition request);
-	void requestScheduled(const Transition request)			{ 	_registry.requestScheduled(request);			}
+	void requestImmediate(const Request request);
+	void requestScheduled(const Request request)			{ 	_stateData.requestScheduled(request);			}
 
 #ifdef _DEBUG
 	void verifyPlans() const;
-	LongIndex verifyPlan(const StateID stateId) const;
+	LongIndex verifyPlan(const RegionID stateId) const;
 #endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -195,12 +199,14 @@ protected:
 private:
 	Context& _context;
 
-	Registry _registry;
-	Tasks _tasks;
-	StateTasks _stateTasks;
+	StateData _stateData;
+	//PlanData _planData;
 
-	Payloads _transitionPayloads;
-	TransitionQueueStorage _requests;
+	TaskLinks _taskLinks;
+	TasksBounds _tasksBounds;
+
+	Payloads _requestPayloads;
+	Requests _requests;
 
 	MaterialApex _apex;
 
@@ -215,7 +221,6 @@ private:
 #endif
 
 	HFSM_IF_LOGGER(LoggerInterface* _logger);
-	HSFM_IF_DEBUG(StateList stateList);
 };
 
 ////////////////////////////////////////////////////////////////////////////////

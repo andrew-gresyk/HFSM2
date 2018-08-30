@@ -26,38 +26,38 @@ struct Event {
 		COUNT
 	};
 
-	Event(const hfsm::StateID origin_,
+	Event(const hfsm2::StateID origin_,
 		  const Enum type_)
 		: origin(origin_)
 		, type(type_)
-		, target(hfsm::INVALID_STATE_ID)
+		, target(hfsm2::INVALID_STATE_ID)
 	{}
 
 	Event(const Enum type_,
-		  const hfsm::StateID target_)
-		: origin(hfsm::INVALID_STATE_ID)
+		  const hfsm2::StateID target_)
+		: origin(hfsm2::INVALID_STATE_ID)
 		, type(type_)
 		, target(target_)
 	{}
 
-	Event(const hfsm::StateID origin_,
+	Event(const hfsm2::StateID origin_,
 		  const Enum type_,
-		  const hfsm::StateID target_)
+		  const hfsm2::StateID target_)
 		: origin(origin_)
 		, type(type_)
 		, target(target_)
 	{}
 
-	hfsm::StateID origin;
+	hfsm2::StateID origin;
 	Enum type;
-	hfsm::StateID target;
+	hfsm2::StateID target;
 };
 using Events = std::vector<Event>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Logger
-	: hfsm::LoggerInterface
+	: hfsm2::LoggerInterface
 {
 
 	void recordMethod(const StateID origin,
@@ -74,7 +74,7 @@ struct Logger
 
 //------------------------------------------------------------------------------
 
-using Types = std::vector<hfsm::StateID>;
+using Types = std::vector<hfsm2::StateID>;
 
 template <typename TMachine>
 void assertActive(TMachine& machine,

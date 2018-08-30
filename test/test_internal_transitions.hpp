@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 using Context = float;
-using M = hfsm::Machine<Context>;
+using M = hfsm2::Machine<Context>;
 
 using Action = bool;
 
@@ -35,7 +35,12 @@ using FSM = M::PeerRoot<
 
 //------------------------------------------------------------------------------
 
-// PeerRoot is 0
+static_assert(FSM::regionId<A>()	==  1, "");
+static_assert(FSM::regionId<A_2>()	==  2, "");
+static_assert(FSM::regionId<B>()	==  3, "");
+static_assert(FSM::regionId<B_1>()	==  4, "");
+static_assert(FSM::regionId<B_2>()	==  5, "");
+
 static_assert(FSM::stateId<A>()		==  1, "");
 static_assert(FSM::stateId<A_1>()	==  2, "");
 static_assert(FSM::stateId<A_2>()	==  3, "");
@@ -95,11 +100,11 @@ private:
 struct A
 	: FSM::State
 {
-	//void guard(TransitionControl&)				{}
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	//void react(const Action&, TransitionControl&)	{}
-	void exit(Control&)								{}
+	//void guard(FullControl&)													{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	//void react(const Action&, FullControl&)									{}
+	void exit(Control&)															{}
 };
 
 //------------------------------------------------------------------------------
@@ -109,13 +114,13 @@ struct A_2;
 struct A_1
 	: FSM::State
 {
-	void enter(Control&)							{}
+	void enter(Control&)														{}
 
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		control.changeTo<A_2>();
 	}
 
-	void exit(Control&)								{}
+	void exit(Control&)															{}
 };
 
 //------------------------------------------------------------------------------
@@ -126,9 +131,9 @@ struct B_2_2;
 struct A_2
 	: FSM::BaseT<Tracked>
 {
-	void enter(Control&)							{}
+	void enter(Control&)														{}
 
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		switch (entryCount()) {
 		case 1:
 			control.changeTo<B_2_2>();
@@ -140,7 +145,7 @@ struct A_2
 		}
 	}
 
-	void exit(Control&)								{}
+	void exit(Control&)															{}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -148,19 +153,19 @@ struct A_2
 struct A_2_1
 	: FSM::State
 {
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	void react(const Action&, TransitionControl&)	{}
-	void exit(Control&)								{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	void react(const Action&, FullControl&)										{}
+	void exit(Control&)															{}
 };
 
 struct A_2_2
 	: FSM::State
 {
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	void react(const Action&, TransitionControl&)	{}
-	void exit(Control&)								{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	void react(const Action&, FullControl&)										{}
+	void exit(Control&)															{}
 };
 
 //------------------------------------------------------------------------------
@@ -168,10 +173,10 @@ struct A_2_2
 struct B
 	: FSM::State
 {
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	void react(const Action&, TransitionControl&)	{}
-	void exit(Control&)								{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	void react(const Action&, FullControl&)										{}
+	void exit(Control&)															{}
 };
 
 //------------------------------------------------------------------------------
@@ -179,9 +184,9 @@ struct B
 struct B_1
 	: FSM::State
 {
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	void exit(Control&)								{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	void exit(Control&)															{}
 };
 
 //------------------------------------------------------------------------------
@@ -189,9 +194,9 @@ struct B_1
 struct B_1_1
 	: FSM::State
 {
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	void exit(Control&)								{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	void exit(Control&)															{}
 };
 
 //------------------------------------------------------------------------------
@@ -199,9 +204,9 @@ struct B_1_1
 struct B_1_2
 	: FSM::State
 {
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	void exit(Control&)								{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	void exit(Control&)															{}
 };
 
 //------------------------------------------------------------------------------
@@ -209,9 +214,9 @@ struct B_1_2
 struct B_2
 	: FSM::State
 {
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	void exit(Control&)								{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	void exit(Control&)															{}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -219,13 +224,13 @@ struct B_2
 struct B_2_1
 	: FSM::State
 {
-	void guard(TransitionControl& control) {
+	void guard(FullControl& control) {
 		control.resume<B_2_2>();
 	}
 
-	void enter(Control&)							{}
-	void update(TransitionControl&)					{}
-	void exit(Control&)								{}
+	void enter(Control&)														{}
+	void update(FullControl&)													{}
+	void exit(Control&)															{}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -233,14 +238,14 @@ struct B_2_1
 struct B_2_2
 	: FSM::BaseT<Tracked>
 {
-	void guard(TransitionControl& control) {
+	void guard(FullControl& control) {
 		if (entryCount() == 2)
 			control.resume<A>();
 	}
 
-	void enter(Control&)							{}
+	void enter(Control&)														{}
 
-	void update(TransitionControl& control) {
+	void update(FullControl& control) {
 		switch (totalUpdateCount()) {
 		case 1:
 			control.resume<A>();
@@ -257,7 +262,7 @@ struct B_2_2
 		}
 	}
 
-	void exit(Control&)								{}
+	void exit(Control&)															{}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
