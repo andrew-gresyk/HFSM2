@@ -22,8 +22,8 @@ matrix:
           packages: g++-4.9
           sources: ubuntu-toolchain-r-test
 
-    - env: COMPILER=g++-4.9 BUILD_TYPE=Release
-      addons: *gcc49
+    #- env: COMPILER=g++-4.9 BUILD_TYPE=Release
+    #  addons: *gcc49
 
     # GCC 5
     - env: COMPILER=g++-5 BUILD_TYPE=Debug
