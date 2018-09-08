@@ -2,8 +2,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Logger::recordMethod(const hfsm2::StateID origin,
-						  const Method method)
+void
+Logger::recordMethod(const hfsm2::StateID origin,
+					 const Method method)
 {
 	switch (method) {
 		case Method::GUARD:
@@ -21,16 +22,23 @@ void Logger::recordMethod(const hfsm2::StateID origin,
 		case Method::EXIT:
 			history.emplace_back(origin, Event::EXIT);
 			break;
+		case Method::PLAN_SUCCEEDED:
+			history.emplace_back(origin, Event::PLAN_SUCCEEDED);
+			break;
+		case Method::PLAN_FAILED:
+			history.emplace_back(origin, Event::PLAN_FAILED);
+			break;
 		default:
-			assert(false);
+			HFSM_ASSERT(false);
 	}
 }
 
 //------------------------------------------------------------------------------
 
-void Logger::recordTransition(const hfsm2::StateID origin,
-							  const Transition transition,
-							  const hfsm2::StateID target)
+void
+Logger::recordTransition(const hfsm2::StateID origin,
+						 const Transition transition,
+						 const hfsm2::StateID target)
 {
 	switch (transition) {
 		case Transition::RESTART:
@@ -43,9 +51,30 @@ void Logger::recordTransition(const hfsm2::StateID origin,
 			history.emplace_back(origin, Event::SCHEDULE, target);
 			break;
 		default:
-			assert(false);
+			HFSM_ASSERT(false);
 	}
 }
+
+//------------------------------------------------------------------------------
+
+void
+Logger::recordTaskStatus(const RegionID region,
+						 const StateID origin,
+						 const StatusEvent event)
+{
+	switch (event) {
+		case StatusEvent::SUCCEEDED:
+			history.emplace_back(region, Event::TASK_SUCCEEDED, origin);
+			break;
+		case StatusEvent::FAILED:
+			history.emplace_back(region, Event::TASK_FAILED,	origin);
+			break;
+		default:
+			HFSM_ASSERT(false);
+	}
+}
+
+//------------------------------------------------------------------------------
 
 void Logger::assertSequence(const Events& reference) {
 	const auto count = std::max(history.size(), reference.size());

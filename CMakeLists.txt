@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(hfsm VERSION 0.1.0 LANGUAGES CXX)
+project(hfsm2 VERSION 0.1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -13,11 +13,11 @@ set(CMAKE_CXX_FLAGS "${extra_cxx_flags} ${CMAKE_CXX_FLAGS}")
 set(CMAKE_C_FLAGS "${extra_cxx_flags} ${CMAKE_C_FLAGS}")
 
 #-------------------------------------------------------------------------------
-# hfsm target
+# hfsm2 target
 #-------------------------------------------------------------------------------
-add_library(hfsm INTERFACE)
+add_library(hfsm2 INTERFACE)
 target_include_directories(
-  hfsm INTERFACE
+  hfsm2 INTERFACE
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
@@ -38,14 +38,14 @@ write_basic_package_version_file(
   "${version_config}" COMPATIBILITY SameMajorVersion
 )
 
-# Export hfsm target.
+# Export hfsm2 target.
 install(
-  TARGETS hfsm
+  TARGETS hfsm2
   EXPORT "${targets_export_name}"
   INCLUDES DESTINATION "${include_install_dir}"
 )
 
-# Install hfsm headers.
+# Install hfsm2 headers.
 install(
   DIRECTORY "include/${PROJECT_NAME}"
   DESTINATION "${include_install_dir}"

@@ -2,7 +2,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using BitArray = hfsm2::detail::BitArrayT<16>;
+using BitArray = hfsm2::detail::BitArrayStorageT<hfsm2::ShortIndex, 16>;
 
 //------------------------------------------------------------------------------
 
@@ -19,9 +19,8 @@ verifySingleEntry(const BitArray& bitArray,
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("BitArray<> test", "[lib]") {
+TEST_CASE("BitArrayT<> test", "[lib]") {
 	BitArray bitArray;
-	const auto capacity = bitArray.capacity;
 
 	for (hfsm2::ShortIndex i = 0; i < bitArray.capacity; ++i)
 		REQUIRE(!bitArray[i]);

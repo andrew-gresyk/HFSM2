@@ -1,3 +1,4 @@
+#define HFSM_ENABLE_ASSERT
 #include <hfsm/machine.hpp>
 
 #include <algorithm>
@@ -21,18 +22,18 @@ void deprecated() {
 		};
 		_.assertHistory(created);
 
-		assert( machine.isActive<A>());
-		assert( machine.isActive<A_1>());
-		assert(!machine.isActive<A_2>());
-		assert(!machine.isActive<A_2_1>());
-		assert(!machine.isActive<A_2_2>());
-		assert(!machine.isActive<B>());
-		assert(!machine.isActive<B_1>());
-		assert(!machine.isActive<B_1_1>());
-		assert(!machine.isActive<B_1_2>());
-		assert(!machine.isActive<B_2>());
-		assert(!machine.isActive<B_2_1>());
-		assert(!machine.isActive<B_2_2>());
+		HFSM_ASSERT( machine.isActive<A>());
+		HFSM_ASSERT( machine.isActive<A_1>());
+		HFSM_ASSERT(!machine.isActive<A_2>());
+		HFSM_ASSERT(!machine.isActive<A_2_1>());
+		HFSM_ASSERT(!machine.isActive<A_2_2>());
+		HFSM_ASSERT(!machine.isActive<B>());
+		HFSM_ASSERT(!machine.isActive<B_1>());
+		HFSM_ASSERT(!machine.isActive<B_1_1>());
+		HFSM_ASSERT(!machine.isActive<B_1_2>());
+		HFSM_ASSERT(!machine.isActive<B_2>());
+		HFSM_ASSERT(!machine.isActive<B_2_1>());
+		HFSM_ASSERT(!machine.isActive<B_2_2>());
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -64,18 +65,18 @@ void deprecated() {
 		};
 		_.assertHistory(update1);
 
-		assert(!machine.isResumable<A>());
-		assert( machine.isResumable<A_1>());
-		assert(!machine.isResumable<A_2>());
-		assert(!machine.isResumable<A_2_1>());
-		assert(!machine.isResumable<A_2_2>());
-		assert(!machine.isResumable<B>());
-		assert(!machine.isResumable<B_1>());
-		assert(!machine.isResumable<B_1_1>());
-		assert(!machine.isResumable<B_1_2>());
-		assert(!machine.isResumable<B_2>());
-		assert(!machine.isResumable<B_2_1>());
-		assert(!machine.isResumable<B_2_2>());
+		HFSM_ASSERT(!machine.isResumable<A>());
+		HFSM_ASSERT( machine.isResumable<A_1>());
+		HFSM_ASSERT(!machine.isResumable<A_2>());
+		HFSM_ASSERT(!machine.isResumable<A_2_1>());
+		HFSM_ASSERT(!machine.isResumable<A_2_2>());
+		HFSM_ASSERT(!machine.isResumable<B>());
+		HFSM_ASSERT(!machine.isResumable<B_1>());
+		HFSM_ASSERT(!machine.isResumable<B_1_1>());
+		HFSM_ASSERT(!machine.isResumable<B_1_2>());
+		HFSM_ASSERT(!machine.isResumable<B_2>());
+		HFSM_ASSERT(!machine.isResumable<B_2_1>());
+		HFSM_ASSERT(!machine.isResumable<B_2_2>());
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -118,18 +119,18 @@ void deprecated() {
 		};
 		_.assertHistory(update2);
 
-		assert(!machine.isActive<A>());
-		assert(!machine.isActive<A_1>());
-		assert(!machine.isActive<A_2>());
-		assert(!machine.isActive<A_2_1>());
-		assert(!machine.isActive<A_2_2>());
-		assert( machine.isActive<B>());
-		assert( machine.isActive<B_1>());
-		assert( machine.isActive<B_1_1>());
-		assert(!machine.isActive<B_1_2>());
-		assert( machine.isActive<B_2>());
-		assert(!machine.isActive<B_2_1>());
-		assert( machine.isActive<B_2_2>());
+		HFSM_ASSERT(!machine.isActive<A>());
+		HFSM_ASSERT(!machine.isActive<A_1>());
+		HFSM_ASSERT(!machine.isActive<A_2>());
+		HFSM_ASSERT(!machine.isActive<A_2_1>());
+		HFSM_ASSERT(!machine.isActive<A_2_2>());
+		HFSM_ASSERT( machine.isActive<B>());
+		HFSM_ASSERT( machine.isActive<B_1>());
+		HFSM_ASSERT( machine.isActive<B_1_1>());
+		HFSM_ASSERT(!machine.isActive<B_1_2>());
+		HFSM_ASSERT( machine.isActive<B_2>());
+		HFSM_ASSERT(!machine.isActive<B_2_1>());
+		HFSM_ASSERT( machine.isActive<B_2_2>());
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -26,7 +26,6 @@ using ObjectPool = hfsm2::detail::ObjectPool<Base, 4, sizeof(Material) * 4>;
 
 TEST_CASE("ObjectPool<> test", "[lib]") {
 	ObjectPool objectPool;
-	static constexpr auto ITEM_COUNT = ObjectPool::ITEM_COUNT;
 
 	REQUIRE(objectPool.emplace<Material>(1) == 0);
 	REQUIRE(objectPool[0].value() == 1);

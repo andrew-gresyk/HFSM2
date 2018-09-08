@@ -5,50 +5,9 @@
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="hfsm">
-    <File Name="../../../include/hfsm/machine_dev.hpp"/>
-    <File Name="../../../include/hfsm/machine.hpp"/>
-    <VirtualDirectory Name="detail">
-      <File Name="../../../include/hfsm/detail/machine_utility.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_state.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_state.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_sequence.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_sequence.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_root.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_root.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_planner.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_planner.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_plan.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_plan.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_orthogonal_sub_2.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_orthogonal_sub_1.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_orthogonal_sub.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_orthogonal.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_orthogonal.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_injections.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_injections.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_forward.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_control.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_control.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_composite_sub_2.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_composite_sub_1.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_composite_sub.hpp"/>
-      <File Name="../../../include/hfsm/detail/machine_composite.inl"/>
-      <File Name="../../../include/hfsm/detail/machine_composite.hpp"/>
-      <File Name="../../../include/hfsm/detail/lib_utility.hpp"/>
-      <File Name="../../../include/hfsm/detail/lib_type_list.hpp"/>
-      <File Name="../../../include/hfsm/detail/lib_list.inl"/>
-      <File Name="../../../include/hfsm/detail/lib_list.hpp"/>
-      <File Name="../../../include/hfsm/detail/lib_iterator.inl"/>
-      <File Name="../../../include/hfsm/detail/lib_iterator.hpp"/>
-      <File Name="../../../include/hfsm/detail/lib_array_view.inl"/>
-      <File Name="../../../include/hfsm/detail/lib_array_view.hpp"/>
-      <File Name="../../../include/hfsm/detail/lib_array.inl"/>
-      <File Name="../../../include/hfsm/detail/lib_array.hpp"/>
-      <File Name="../../../include/hfsm/detail/debug_structure_report.hpp"/>
-      <File Name="../../../include/hfsm/detail/debug_shared.hpp"/>
-      <File Name="../../../include/hfsm/detail/debug_logger_interface.hpp"/>
-    </VirtualDirectory>
+  <VirtualDirectory Name="hfsm2">
+    <File Name="../../../include/hfsm2/machine_dev.hpp"/>
+    <VirtualDirectory Name="detail"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
@@ -56,11 +15,15 @@
     <File Name="../../../test/test_state_data.cpp"/>
     <File Name="../../../test/test_shared.hpp"/>
     <File Name="../../../test/test_shared.cpp"/>
+    <File Name="../../../test/test_planner.hpp"/>
     <File Name="../../../test/test_planner.cpp"/>
+    <File Name="../../../test/test_lib_object_pool.cpp"/>
     <File Name="../../../test/test_lib_list.cpp"/>
+    <File Name="../../../test/test_lib_bit_array.cpp"/>
     <File Name="../../../test/test_internal_transitions.hpp"/>
     <File Name="../../../test/test_internal_transitions.cpp"/>
     <File Name="../../../test/main.cpp"/>
+    <File Name="../../../test/deprecated.hpp"/>
     <File Name="../../../test/deprecated.cpp"/>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>

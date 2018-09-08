@@ -2,6 +2,7 @@
 
 #define HFSM_ENABLE_STRUCTURE_REPORT
 #define HFSM_ENABLE_LOG_INTERFACE
+#define HFSM_ENABLE_ASSERT
 #include <hfsm/machine.hpp>
 
 #include <catch2/catch.hpp>
@@ -18,6 +19,10 @@ struct Event {
 		REACT_REQUEST,
 		REACT,
 		EXIT,
+		TASK_SUCCEEDED,
+		TASK_FAILED,
+		PLAN_SUCCEEDED,
+		PLAN_FAILED,
 
 		RESTART,
 		RESUME,
@@ -66,6 +71,10 @@ struct Logger
 	void recordTransition(const StateID origin,
 						  const Transition transition,
 						  const StateID target) override;
+
+	void recordTaskStatus(const RegionID region,
+						  const StateID origin,
+						  const StatusEvent event) override;
 
 	void assertSequence(const Events& reference);
 

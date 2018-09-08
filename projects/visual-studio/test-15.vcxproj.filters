@@ -41,153 +41,147 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\hfsm\detail\debug_structure_report.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\debug_logger_interface.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_injections.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_root.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_array.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_array_view.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_iterator.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_utility.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_type_list.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_orthogonal_sub.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_composite_sub.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\debug_shared.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\test_shared.hpp">
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_internal_transitions.hpp">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\machine_dev.hpp">
-      <Filter>hfsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_forward.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_control.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_list.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_plan.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_sequence.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_bit_array.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\test_planner.hpp">
       <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\lib_object_pool.hpp">
-      <Filter>hfsm\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\deprecated.hpp">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_state_data.hpp">
+    <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
+      <Filter>hfsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\debug_logger_interface.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm\detail\machine_plan_data.hpp">
+    <ClInclude Include="..\..\include\hfsm2\detail\debug_shared.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\debug_structure_report.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\lib_array.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\lib_array_view.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\lib_bit_array.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\lib_iterator.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\lib_list.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\lib_object_pool.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\lib_type_list.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\lib_utility.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_composite.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_composite_sub.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_control.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_forward.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_injections.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_orthogonal.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_orthogonal_sub.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_plan.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_plan_data.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_root.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_state.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_state_data.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\hfsm\detail\machine_composite_sub_1.inl">
+    <None Include="..\..\include\hfsm2\detail\lib_array.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_composite_sub_2.inl">
+    <None Include="..\..\include\hfsm2\detail\lib_array_view.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_1.inl">
+    <None Include="..\..\include\hfsm2\detail\lib_bit_array.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal_sub_2.inl">
+    <None Include="..\..\include\hfsm2\detail\lib_iterator.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_composite.hpp">
+    <None Include="..\..\include\hfsm2\detail\lib_list.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal.hpp">
+    <None Include="..\..\include\hfsm2\detail\lib_object_pool.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_state.hpp">
+    <None Include="..\..\include\hfsm2\detail\machine_composite.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_injections.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_composite_sub_1.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_root.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_composite_sub_2.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\lib_array.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_control.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\lib_array_view.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_injections.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\lib_iterator.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_orthogonal.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_state.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_orthogonal_sub_1.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_orthogonal.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_orthogonal_sub_2.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_composite.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_plan.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_control.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_plan_data.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\lib_list.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_root.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_plan.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_state.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm\detail\machine_sequence.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm\detail\lib_bit_array.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm\detail\lib_object_pool.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm\detail\machine_state_data.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm\detail\machine_plan_data.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_state_data.inl">
       <Filter>hfsm\detail</Filter>
     </None>
   </ItemGroup>

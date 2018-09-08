@@ -8,6 +8,8 @@ struct Context {};
 using M = hfsm2::Machine<Context>;
 
 ////////////////////////////////////////////////////////////////////////////////
+// TODO: add head forcing success
+// TODO: add substates' succeeding plan forcing success
 
 #define S(s) struct s
 
@@ -81,10 +83,6 @@ struct Apex	  : FSM::State {};
 struct Planned
 	: FSM::State
 {
-	void guard(FullControl& control) {
-		control._();
-	}
-
 	void enter(Control& control) {
 		auto plan = control.plan();
 		REQUIRE(!plan);
@@ -93,8 +91,8 @@ struct Planned
 		plan.add<Hybrid, Terminal>();
 	}
 
-	void exit(Control& control) {
-		control._();
+	void planFailed(FullControl& control) {
+		control.succeed();
 	}
 };
 
@@ -107,7 +105,6 @@ struct Step1_BT
 		Plan plan = control.plan();
 		REQUIRE(!plan);
 
-		plan.add<Step1_1, Step1_2>();
 		plan.add<Step1_2, Step1_3>();
 	}
 };
@@ -116,7 +113,7 @@ struct Step1_1
 	: FSM::State
 {
 	void update(FullControl& control) {
-		control.succeed();
+		control.changeTo<Step1_2>();
 	}
 };
 
@@ -138,17 +135,31 @@ struct Step1_3
 
 //------------------------------------------------------------------------------
 
-struct Hybrid	  : FSM::State {};
+struct Hybrid
+	: FSM::State
+{
+	void enter(Control& control) {
+		auto plan = control.plan();
+		REQUIRE(!plan);
+
+		plan.add<Step2L_1, Step2L_2>();
+		plan.add<Step2R_1, Step2R_2>();
+	}
+
+	void planFailed(FullControl& control) {
+		control.succeed();
+	}
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct Step2L_P	  : FSM::State {};
+struct Step2L_P : FSM::State {};
 
 struct Step2L_1
 	: FSM::State
 {
 	void update(FullControl& control) {
-		control.changeTo<Step2L_2>();
+		control.succeed();
 	}
 };
 
@@ -156,19 +167,19 @@ struct Step2L_2
 	: FSM::State
 {
 	void update(FullControl& control) {
-		control.succeed();
+		control.fail();
 	}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct Step2R_P	  : FSM::State {};
+struct Step2R_P : FSM::State {};
 
 struct Step2R_1
 	: FSM::State
 {
 	void update(FullControl& control) {
-		control.changeTo<Step2R_2>();
+		control.succeed();
 	}
 };
 
@@ -176,15 +187,35 @@ struct Step2R_2
 	: FSM::State
 {
 	void update(FullControl& control) {
-		control.succeed();
+		control.fail();
 	}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct Terminal	  : FSM::State {};
-struct Terminal_L : FSM::State {};
-struct Terminal_R : FSM::State {};
+struct Terminal
+	: FSM::State
+{
+	void planSucceeded(FullControl& control) {
+		control.fail();
+	}
+};
+
+struct Terminal_L
+	: FSM::State
+{
+	void update(FullControl& control) {
+		control.succeed();
+	}
+};
+
+struct Terminal_R
+	: FSM::State
+{
+	void update(FullControl& control) {
+		control.succeed();
+	}
+};
 
 //------------------------------------------------------------------------------
 

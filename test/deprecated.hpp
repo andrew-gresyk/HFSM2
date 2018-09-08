@@ -52,9 +52,9 @@ struct Context {
 		for (unsigned i = 0; i < size; ++i) {
 			HSFM_IF_ASSERT(const auto h = history[i]);
 			HSFM_IF_ASSERT(const auto r = reference[i]);
-			assert(h == r);
+			HFSM_ASSERT(h == r);
 		}
-		assert(historySize == referenceSize);
+		HFSM_ASSERT(historySize == referenceSize);
 
 		history.clear();
 	}

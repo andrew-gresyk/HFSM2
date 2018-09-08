@@ -38,6 +38,7 @@
 //
 //	---------- done! ---------
 
+#define HFSM_ENABLE_ASSERT
 #include <hfsm/machine.hpp>
 
 #include <iostream>
@@ -118,14 +119,14 @@ int main() {
 
 	context.boolPayload = true;
 	machine.setStateData<Origin>(&context.boolPayload);
-	assert( machine.isStateDataSet<Origin>());
+	HFSM_ASSERT( machine.isStateDataSet<Origin>());
 
 	HSFM_IF_ASSERT(bool* const payBool = machine.getStateData<Origin, bool>());
-	assert(payBool);
-	assert(*payBool == true);
+	HFSM_ASSERT(payBool);
+	HFSM_ASSERT(*payBool == true);
 
 	machine.resetStateData<Origin>();
-	assert(!machine.isStateDataSet<Origin>());
+	HFSM_ASSERT(!machine.isStateDataSet<Origin>());
 
 	machine.setStateData<Origin>(&context.charPayload);
 
