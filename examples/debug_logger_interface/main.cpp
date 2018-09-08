@@ -40,7 +40,7 @@
 
 // enable logger functionality
 #define HFSM_ENABLE_LOG_INTERFACE
-#include <hfsm/machine.hpp>
+#include <hfsm2/machine.hpp>
 
 #include <iostream>
 

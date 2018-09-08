@@ -23,7 +23,7 @@
 
 // optional: enable FSM structure report in debugger
 #define HFSM_ENABLE_STRUCTURE_REPORT
-#include <hfsm/machine.hpp>
+#include <hfsm2/machine.hpp>
 
 #include <iostream>
 

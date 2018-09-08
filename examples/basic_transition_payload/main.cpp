@@ -39,7 +39,7 @@
 //	---------- done! ---------
 
 #define HFSM_ENABLE_ASSERT
-#include <hfsm/machine.hpp>
+#include <hfsm2/machine.hpp>
 
 #include <iostream>
 
