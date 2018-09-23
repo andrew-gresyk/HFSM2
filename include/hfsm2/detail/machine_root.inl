@@ -219,12 +219,14 @@ template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 TPayload*
 _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
+	using Payload = TPayload;
+
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY) {
 		const auto& payload = _requestPayloads[stateId];
 
-		return payload.template get<TPayload>();
+		return payload.template get<Payload>();
 	} else
 		return nullptr;
 }

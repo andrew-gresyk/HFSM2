@@ -76,7 +76,7 @@ struct _TL
 	: private TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
 	using Base = TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
-	using Container = VariantT<Ts...>;
+	using Variant = VariantT<Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
@@ -111,8 +111,6 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 1)
-
-// TODO: add assignment op and templated type conversion op
 
 template <typename... Ts>
 class alignas(alignof(void*)) VariantT {

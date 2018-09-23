@@ -20,5 +20,5 @@ target_include_directories(hfsm2_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../exte
 #-------------------------------------------------------------------------------
 add_test(NAME hfsm2_test COMMAND hfsm2_test)
 add_custom_command(TARGET hfsm2_test
-                   POST_BUILD
-                   COMMAND hfsm2_test)
+				   POST_BUILD
+				   COMMAND hfsm2_test)

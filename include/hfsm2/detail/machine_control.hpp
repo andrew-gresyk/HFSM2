@@ -211,6 +211,9 @@ private:
 	template <typename TState>
 	Status updatePlan(TState& headState, const Status subStatus);
 
+	template <typename TState>
+	Status buildPlanStatus(const bool outerTransition);
+
 public:
 	using Control::isActive;
 	using Control::isResumable;

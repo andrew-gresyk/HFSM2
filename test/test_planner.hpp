@@ -8,8 +8,6 @@ struct Context {};
 using M = hfsm2::Machine<Context>;
 
 ////////////////////////////////////////////////////////////////////////////////
-// TODO: add head forcing success
-// TODO: add substates' succeeding plan forcing success
 
 #define S(s) struct s
 

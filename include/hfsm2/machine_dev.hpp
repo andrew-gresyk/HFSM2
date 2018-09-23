@@ -61,36 +61,37 @@
 //------------------------------------------------------------------------------
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	#define HFSM_IF_LOGGER(...)		__VA_ARGS__
-	#define HFSM_LOGGER_OR(y, n)	y
+	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
+	#define HFSM_LOGGER_OR(Y, N)												Y
+	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)						\
+		if (_logger)															\
+			_logger->recordTaskStatus(REGION, ORIGIN, STATUS);
+	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)								\
+		if (_logger)															\
+			_logger->recordPlanStatus(REGION, STATUS);
 #else
 	#define HFSM_IF_LOGGER(...)
-	#define HFSM_LOGGER_OR(y, n)	n
+	#define HFSM_LOGGER_OR(Y, N)												N
+	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)
+	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)
 #endif
 
 #if defined HFSM_FORCE_DEBUG_LOG
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\
 			logger->recordMethod(STATE_ID, ID);
-	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)									\
-		if (auto* const logger = control.logger())								\
-			logger->recordMethod(STATE_ID, ID);
 #elif defined HFSM_ENABLE_LOG_INTERFACE
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\
 			log<decltype(METHOD), ID>(*logger);
-	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)									\
-		if (auto* const logger = control.logger())								\
-			State::template log<decltype(METHOD), ID>(*logger);
 #else
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)
-	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	#define HFSM_IF_STRUCTURE(...)	__VA_ARGS__
+	#define HFSM_IF_STRUCTURE(...)									  __VA_ARGS__
 #else
 	#define HFSM_IF_STRUCTURE(...)
 #endif
@@ -198,7 +199,6 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
 #undef HFSM_LOG_STATE_METHOD
-#undef HFSM_LOG_PLANNER_METHOD
 #undef HFSM_IF_STRUCTURE
 
 #ifdef _MSC_VER

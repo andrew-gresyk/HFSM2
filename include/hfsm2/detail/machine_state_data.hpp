@@ -32,7 +32,7 @@ struct alignas(2 * sizeof(ShortIndex)) Parent {
 template <typename TPayloadList>
 struct RequestT {
 	using PayloadList = TPayloadList;
-	using Payload = typename PayloadList::Container;
+	using PayloadBox = typename PayloadList::Variant;
 
 	enum Type {
 		REMAIN,
@@ -70,7 +70,7 @@ struct RequestT {
 
 	Type type = RESTART;
 	StateID stateId = INVALID_STATE_ID;
-	Payload payload;
+	PayloadBox payload;
 };
 
 template <typename TPayloadList, ShortIndex NCount>

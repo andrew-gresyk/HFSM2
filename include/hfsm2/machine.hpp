@@ -84,7 +84,6 @@
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
-// TODO: use UniqueT<>
 
 using ShortIndex = uint8_t;
 static constexpr ShortIndex	INVALID_SHORT_INDEX = UINT8_MAX;
@@ -1192,7 +1191,7 @@ struct _TL
 	: private TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
 	using Base = TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
-	using Container = VariantT<Ts...>;
+	using Variant = VariantT<Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
@@ -1227,8 +1226,6 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 1)
-
-// TODO: add assignment op and templated type conversion op
 
 template <typename... Ts>
 class alignas(alignof(void*)) VariantT {
@@ -1407,11 +1404,8 @@ struct LoggerInterface {
 								  const StatusEvent /*event*/)
 	{}
 
-	// TODO: add to FullControl::updatePlan()
 	virtual void recordPlanStatus(const RegionID /*region*/,
-								  const StatusEvent /*event*/,
-								  const StateID /*origin*/,
-								  const StateID /*target*/)
+								  const StatusEvent /*event*/)
 	{}
 };
 
@@ -1432,36 +1426,37 @@ using LoggerInterface = void;
 //------------------------------------------------------------------------------
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	#define HFSM_IF_LOGGER(...)		__VA_ARGS__
-	#define HFSM_LOGGER_OR(y, n)	y
+	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
+	#define HFSM_LOGGER_OR(Y, N)												Y
+	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)						\
+		if (_logger)															\
+			_logger->recordTaskStatus(REGION, ORIGIN, STATUS);
+	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)								\
+		if (_logger)															\
+			_logger->recordPlanStatus(REGION, STATUS);
 #else
 	#define HFSM_IF_LOGGER(...)
-	#define HFSM_LOGGER_OR(y, n)	n
+	#define HFSM_LOGGER_OR(Y, N)												N
+	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)
+	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)
 #endif
 
 #if defined HFSM_FORCE_DEBUG_LOG
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\
 			logger->recordMethod(STATE_ID, ID);
-	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)									\
-		if (auto* const logger = control.logger())								\
-			logger->recordMethod(STATE_ID, ID);
 #elif defined HFSM_ENABLE_LOG_INTERFACE
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\
 			log<decltype(METHOD), ID>(*logger);
-	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)									\
-		if (auto* const logger = control.logger())								\
-			State::template log<decltype(METHOD), ID>(*logger);
 #else
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)
-	#define HFSM_LOG_PLANNER_METHOD(METHOD, ID)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	#define HFSM_IF_STRUCTURE(...)	__VA_ARGS__
+	#define HFSM_IF_STRUCTURE(...)									  __VA_ARGS__
 #else
 	#define HFSM_IF_STRUCTURE(...)
 #endif
@@ -1472,12 +1467,16 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+// TODO: add TaskLink::payload
 
 #pragma pack(push, 2)
 
+//template <typename TPayloadList>
+//struct TaskLinkT {
+
 struct TaskLink {
 	//using PayloadList	= TPayloadList;
-	//using Payload		= typename PayloadList::Container;
+	//using PayloadBox		= typename PayloadList::Variant;
 
 	inline TaskLink(const StateID origin_,
 					const StateID destination_)
@@ -1486,7 +1485,8 @@ struct TaskLink {
 		, next(INVALID_LONG_INDEX)
 	{}
 
-	// TODO: add payload
+	//PayloadBox payload;
+
 	StateID origin		= INVALID_STATE_ID;
 	StateID destination	= INVALID_STATE_ID;
 
@@ -1952,7 +1952,7 @@ struct alignas(2 * sizeof(ShortIndex)) Parent {
 template <typename TPayloadList>
 struct RequestT {
 	using PayloadList = TPayloadList;
-	using Payload = typename PayloadList::Container;
+	using PayloadBox = typename PayloadList::Variant;
 
 	enum Type {
 		REMAIN,
@@ -1990,7 +1990,7 @@ struct RequestT {
 
 	Type type = RESTART;
 	StateID stateId = INVALID_STATE_ID;
-	Payload payload;
+	PayloadBox payload;
 };
 
 template <typename TPayloadList, ShortIndex NCount>
@@ -2636,6 +2636,9 @@ private:
 	template <typename TState>
 	Status updatePlan(TState& headState, const Status subStatus);
 
+	template <typename TState>
+	Status buildPlanStatus(const bool outerTransition);
+
 public:
 	using Control::isActive;
 	using Control::isResumable;
@@ -2830,12 +2833,7 @@ FullControlT<TA>::updatePlan(TState& headState,
 	if (subStatus.failure) {
 		headState.wrapPlanFailed(*this);
 
-		if (_status.failure) {
-			_planData.tasksFailures[STATE_ID] = true;
-
-			return {false, _status.failure, subStatus.outerTransition};
-		} else
-			return {_status.success, false, subStatus.outerTransition};
+		return buildPlanStatus<State>(subStatus.outerTransition);
 	} else if (subStatus.success) {
 		if (Plan p = plan(_regionId)) {
 			for (auto it = p.begin(); it; ++it) {
@@ -2855,13 +2853,33 @@ FullControlT<TA>::updatePlan(TState& headState,
 		} else {
 			headState.wrapPlanSucceeded(*this);
 
-			if (_status.success)
-				_planData.tasksSuccesses[STATE_ID] = true;
-
-			return {_status.success, false, subStatus.outerTransition};
+			return buildPlanStatus<State>(subStatus.outerTransition);
 		}
 	} else
 		return {false, false, subStatus.outerTransition};
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+template <typename TState>
+Status
+FullControlT<TA>::buildPlanStatus(const bool outerTransition) {
+	using State = TState;
+	static constexpr StateID STATE_ID = State::STATE_ID;
+
+	if (_status.failure) {
+		_planData.tasksFailures[STATE_ID] = true;
+
+		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::FAILED);
+		return {false, true,  outerTransition};
+	} else if (_status.success) {
+		_planData.tasksSuccesses[STATE_ID] = true;
+
+		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::SUCCEEDED);
+		return {true,  false, outerTransition};
+	} else
+		return {false, false, outerTransition};
 }
 
 //------------------------------------------------------------------------------
@@ -2925,10 +2943,7 @@ FullControlT<TA>::succeed() {
 
 	_planData.tasksSuccesses[_originId] = true;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTaskStatus(_regionId, _originId, StatusEvent::SUCCEEDED);
-#endif
+	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::SUCCEEDED);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2940,10 +2955,7 @@ FullControlT<TA>::fail() {
 
 	_planData.tasksFailures [_originId] = true;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTaskStatus(_regionId, _originId, StatusEvent::FAILED);
-#endif
+	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::FAILED);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -5656,8 +5668,8 @@ private:
 	using Control				 = ControlT	   <Args>;
 	using FullControl			 = FullControlT<Args>;
 
-	using Payload				 = typename PayloadList::Container;
-	using Payloads				 = Array<Payload, STATE_COUNT>;
+	using PayloadBox			 = typename PayloadList::Variant;
+	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
 	using Request				 = typename FullControl::Request;
 	using Requests				 = typename FullControl::Requests;
 
@@ -6039,12 +6051,14 @@ template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TPayload>
 TPayload*
 _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
+	using Payload = TPayload;
+
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY) {
 		const auto& payload = _requestPayloads[stateId];
 
-		return payload.template get<TPayload>();
+		return payload.template get<Payload>();
 	} else
 		return nullptr;
 }
@@ -6240,7 +6254,6 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
 #undef HFSM_LOG_STATE_METHOD
-#undef HFSM_LOG_PLANNER_METHOD
 #undef HFSM_IF_STRUCTURE
 
 #ifdef _MSC_VER

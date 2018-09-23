@@ -6481,7 +6481,7 @@ namespace detail {
         template<typename T>
         auto operator|( T const &other ) const -> Parser;
 
-		template<typename T>
+        template<typename T>
         auto operator+( T const &other ) const -> Parser;
     };
 
@@ -7161,9 +7161,9 @@ namespace Catch {
 
 namespace Catch {
 
-	// HACK: always break if debugger is present
-	bool isDebuggerActive();
-	// HACK: always break if debugger is present
+    // HACK: always break if debugger is present
+    bool isDebuggerActive();
+    // HACK: always break if debugger is present
 
     Config::Config( ConfigData const& data )
     :   m_data( data ),
@@ -7180,9 +7180,9 @@ namespace Catch {
         }
         m_testSpec = parser.testSpec();
 
-		// HACK: always break if debugger is present
-		m_data.shouldDebugBreak |= isDebuggerActive();
-		// HACK: always break if debugger is present
+        // HACK: always break if debugger is present
+        m_data.shouldDebugBreak |= isDebuggerActive();
+        // HACK: always break if debugger is present
     }
 
     std::string const& Config::getFilename() const {

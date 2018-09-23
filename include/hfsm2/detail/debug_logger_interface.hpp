@@ -27,11 +27,8 @@ struct LoggerInterface {
 								  const StatusEvent /*event*/)
 	{}
 
-	// TODO: add to FullControl::updatePlan()
 	virtual void recordPlanStatus(const RegionID /*region*/,
-								  const StatusEvent /*event*/,
-								  const StateID /*origin*/,
-								  const StateID /*target*/)
+								  const StatusEvent /*event*/)
 	{}
 };
 

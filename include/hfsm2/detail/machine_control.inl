@@ -152,12 +152,7 @@ FullControlT<TA>::updatePlan(TState& headState,
 	if (subStatus.failure) {
 		headState.wrapPlanFailed(*this);
 
-		if (_status.failure) {
-			_planData.tasksFailures[STATE_ID] = true;
-
-			return {false, _status.failure, subStatus.outerTransition};
-		} else
-			return {_status.success, false, subStatus.outerTransition};
+		return buildPlanStatus<State>(subStatus.outerTransition);
 	} else if (subStatus.success) {
 		if (Plan p = plan(_regionId)) {
 			for (auto it = p.begin(); it; ++it) {
@@ -177,13 +172,33 @@ FullControlT<TA>::updatePlan(TState& headState,
 		} else {
 			headState.wrapPlanSucceeded(*this);
 
-			if (_status.success)
-				_planData.tasksSuccesses[STATE_ID] = true;
-
-			return {_status.success, false, subStatus.outerTransition};
+			return buildPlanStatus<State>(subStatus.outerTransition);
 		}
 	} else
 		return {false, false, subStatus.outerTransition};
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+template <typename TState>
+Status
+FullControlT<TA>::buildPlanStatus(const bool outerTransition) {
+	using State = TState;
+	static constexpr StateID STATE_ID = State::STATE_ID;
+
+	if (_status.failure) {
+		_planData.tasksFailures[STATE_ID] = true;
+
+		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::FAILED);
+		return {false, true,  outerTransition};
+	} else if (_status.success) {
+		_planData.tasksSuccesses[STATE_ID] = true;
+
+		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::SUCCEEDED);
+		return {true,  false, outerTransition};
+	} else
+		return {false, false, outerTransition};
 }
 
 //------------------------------------------------------------------------------
@@ -247,10 +262,7 @@ FullControlT<TA>::succeed() {
 
 	_planData.tasksSuccesses[_originId] = true;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTaskStatus(_regionId, _originId, StatusEvent::SUCCEEDED);
-#endif
+	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::SUCCEEDED);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -262,10 +274,7 @@ FullControlT<TA>::fail() {
 
 	_planData.tasksFailures [_originId] = true;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTaskStatus(_regionId, _originId, StatusEvent::FAILED);
-#endif
+	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::FAILED);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

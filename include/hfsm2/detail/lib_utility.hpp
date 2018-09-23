@@ -37,7 +37,6 @@
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
-// TODO: use UniqueT<>
 
 using ShortIndex = uint8_t;
 static constexpr ShortIndex	INVALID_SHORT_INDEX = UINT8_MAX;

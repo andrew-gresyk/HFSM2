@@ -11,7 +11,7 @@ platform:
 - 64
 
 build:
-  project: projects\visual-studio\HFSM.sln
+  project: projects\visual-studio\hfsm2.sln
   parallel: true
   verbosity: minimal
 

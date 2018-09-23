@@ -54,8 +54,8 @@ private:
 	using Control				 = ControlT	   <Args>;
 	using FullControl			 = FullControlT<Args>;
 
-	using Payload				 = typename PayloadList::Container;
-	using Payloads				 = Array<Payload, STATE_COUNT>;
+	using PayloadBox			 = typename PayloadList::Variant;
+	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
 	using Request				 = typename FullControl::Request;
 	using Requests				 = typename FullControl::Requests;
 

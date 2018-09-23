@@ -64,10 +64,28 @@ Logger::recordTaskStatus(const RegionID region,
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
-			history.emplace_back(region, Event::TASK_SUCCEEDED, origin);
+			history.emplace_back(region, Event::TASK_SUCCESS, origin);
 			break;
 		case StatusEvent::FAILED:
-			history.emplace_back(region, Event::TASK_FAILED,	origin);
+			history.emplace_back(region, Event::TASK_FAILURE, origin);
+			break;
+		default:
+			HFSM_ASSERT(false);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+void
+Logger::recordPlanStatus(const RegionID region,
+						 const StatusEvent event)
+{
+	switch (event) {
+		case StatusEvent::SUCCEEDED:
+			history.emplace_back(region, Event::PLAN_SUCCESS, hfsm2::INVALID_STATE_ID);
+			break;
+		case StatusEvent::FAILED:
+			history.emplace_back(region, Event::PLAN_FAILURE, hfsm2::INVALID_STATE_ID);
 			break;
 		default:
 			HFSM_ASSERT(false);

@@ -2,12 +2,16 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+// TODO: add TaskLink::payload
 
 #pragma pack(push, 2)
 
+//template <typename TPayloadList>
+//struct TaskLinkT {
+
 struct TaskLink {
 	//using PayloadList	= TPayloadList;
-	//using Payload		= typename PayloadList::Container;
+	//using PayloadBox		= typename PayloadList::Variant;
 
 	inline TaskLink(const StateID origin_,
 					const StateID destination_)
@@ -16,7 +20,8 @@ struct TaskLink {
 		, next(INVALID_LONG_INDEX)
 	{}
 
-	// TODO: add payload
+	//PayloadBox payload;
+
 	StateID origin		= INVALID_STATE_ID;
 	StateID destination	= INVALID_STATE_ID;
 

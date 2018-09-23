@@ -19,10 +19,12 @@ struct Event {
 		REACT_REQUEST,
 		REACT,
 		EXIT,
-		TASK_SUCCEEDED,
-		TASK_FAILED,
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
+		TASK_SUCCESS,
+		TASK_FAILURE,
+		PLAN_SUCCESS,
+		PLAN_FAILURE,
 
 		RESTART,
 		RESUME,
@@ -74,6 +76,9 @@ struct Logger
 
 	void recordTaskStatus(const RegionID region,
 						  const StateID origin,
+						  const StatusEvent event) override;
+
+	void recordPlanStatus(const RegionID region,
 						  const StatusEvent event) override;
 
 	void assertSequence(const Events& reference);
