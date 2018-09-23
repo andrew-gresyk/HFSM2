@@ -164,18 +164,18 @@ matrix:
       addons: *clang6
 
     # Clang 7.0
-    - env: COMPILER=clang++-7.0 BUILD_TYPE=Debug
-      addons: &clang7
-        apt:
-          packages:
-            - clang-7.0
-            - g++-7
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-7.0
+    #- env: COMPILER=clang++-7.0 BUILD_TYPE=Debug
+    #  addons: &clang7
+    #    apt:
+    #      packages:
+    #        - clang-7.0
+    #        - g++-7
+    #      sources:
+    #        - ubuntu-toolchain-r-test
+    #        - llvm-toolchain-trusty-7.0
 
-    - env: COMPILER=clang++-7.0 BUILD_TYPE=Release
-      addons: *clang7
+    #- env: COMPILER=clang++-7.0 BUILD_TYPE=Release
+    #  addons: *clang7
 
 script:
   - cd "${TRAVIS_BUILD_DIR}"
