@@ -3,7 +3,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/49gona9jtghvvi6g?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/hfsm)
 [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM)
 
-# HFSM (Hierarchical Finite State Machine) Framework
+# HFSM2: Hierarchical Finite State Machine Framework with Planning Support
 
 Header-only heriarchical FSM framework in C++14, completely static (no dynamic allocations), built with variadic templates.
 
@@ -17,7 +17,7 @@ Header-only heriarchical FSM framework in C++14, completely static (no dynamic a
 
 ## Basic Usage
 
-1. Include HFSM header:
+1. Include HFSM2 header:
 
 ```cpp
 #include <hfsm2/machine.hpp>
@@ -27,16 +27,18 @@ Header-only heriarchical FSM framework in C++14, completely static (no dynamic a
 (also ok to use the host object itself):
 
 ```cpp
-struct Context { /* ... */ };
+struct Context {
+    bool powerOn;
+};
 ```
 
-3. For goodness sake, please don't:
+3. For goodness sake, please don't do:
 
 ```cpp
 // using namesplace hfsm2;
 ```
 
-4. (Optional) Typedef hfsm::Machine for convenience:
+4. (Optional) Typedef hfsm2::Machine for convenience:
 
 ```cpp
 using M = hfsm2::Machine<Context>;
@@ -47,21 +49,22 @@ using M = hfsm2::Machine<Context>;
 Option 1 - with forward declared states:
 
 ```cpp
+struct Off;
 struct On;
 struct Red;
 struct Yellow;
 struct Green;
-struct Off;
 
 using FSM = M::PeerRoot<
-                // sub-machine region with a head state and..
+                // initial state
+                Off,
+                // sub-machine region with a head state (On) and and 3 sub-states
                 M::Composite<On,
-                    // .. with 3 sub-states
+                    // initial state of the region, will be activated with the it
                     Red,
                     Yellow,
                     Green
-				>,
-                Off
+                >
             >;
 ```
 
@@ -71,14 +74,15 @@ Option 2 - with a helper macro (don't forget to `#undef` it afterwards!):
 #define S(s) struct s
 
 using FSM = M::PeerRoot<
-                // sub-machine region with a head state and..
+                // initial state
+                S(Off),
+                // sub-machine region with a head state (On) and and 3 sub-states
                 M::Composite<S(On),
-                    // .. 3 sub-states
+                    // initial state of the region, will be activated with the it
                     S(Red),
                     S(Yellow),
                     S(Green)
-				>,
-                S(Off)
+                >
             >;
 
 #undef S
@@ -87,36 +91,86 @@ using FSM = M::PeerRoot<
 6. (Optional) Define events to have external code interact with your state machine directly:
 
 ```cpp
-struct SomeEvent) { /* ... */ };
+struct SomeEvent { /* ... */ };
 ```
 
 7. Define states and override any or all of the optional state methods:
 
 ```cpp
-struct On
-    : FSM::State // necessary boilerplate!
+struct Off
+    // necessary boilerplate!
+    : FSM::State
 {
     // called before state activation, use to re-route transitions
-    void guard(FullControl& control) { /* ... */ }
+    void guard(FullControl& control) {
+        // access context data
+        if (control.context().powerOn)
+            // initiate an immediate transition into 'On' region
+            control.changeTo<On>();
+    }
+};
 
+// region's head state is active for the entire duration of the region being active
+struct On
+    : FSM::State
+{
     // called on state activation
-    void enter(Control& control) { /* ... */ }
+    void enter(Control& control) {
+        // access the plan for the region
+        auto plan = control.plan();
 
-    // called on periodic state machine updates
-    void update(FullControl& control) { /* ... */ }
-
-    // use this to handle events if needed
-    template <typename TEvent>
-    void react(const TEvent&, FullControl& control) { /* ... */ }
+        // sequence plan steps, executed when the previous state succeeds
+        plan.add<Red, Yellow>();
+        plan.add<Yellow, Green>();
+        plan.add<Green, Yellow>();
+        plan.add<Yellow, Red>();
+    }
 
     // called on state deactivation
     void exit(Control& control) { /* ... */ }
+
+    // called on the successful completion of all plan steps
+    void planSucceeded(FullControl& control) {
+        // we're done here
+        control.changeTo<Off>();
+    }
+
+    // called if any of the plan steps fails
+    void planFailed(FullControl& control) { /* ... */ }
 };
 
-struct Red    : FSM::State { /* ... */ };
-struct Yellow : FSM::State { /* ... */ };
-struct Green  : FSM::State { /* ... */ };
-struct Off    : FSM::State { /* ... */ };
+struct Red
+    : FSM::State
+{
+    // called on periodic state machine updates
+    void update(FullControl& control) {
+        // notify successful completion of the plan step
+        // plan will advance to the 'Yellow' state
+        control.succeed();
+    }
+};
+
+struct Yellow
+    : FSM::State
+{
+    void update(FullControl& control) {
+        // plan will advance to the 'Green' state on the first entry
+        // and 'Red' state on the second one
+        control.succeed();
+    }
+};
+
+struct Green
+    : FSM::State
+{
+    // called on external events
+    // it's possible to have multiple 'react()' methods, covering multiple events
+    template <typename TEvent>
+    void react(const TEvent&, FullControl& control) {
+        // can also notify successful completion on external event too
+        control.succeed();
+    }
+};
 ```
 
 8. Write the client code to use your new state machine:
@@ -129,21 +183,30 @@ int main() {
 
 ```cpp
     Context context;
-    MyFSM fsm(context);
+    FSM fsm(context);
 ```
 
 10. Kick off periodic updates:
 
 ```cpp
-    bool running = true;
-    while (running)
+    // API to check if a state is active
+    while (!fsm.isActive<Green>())
         fsm.update();
 ```
 
 11. (Optional) Handle your special events:
 
 ```cpp
+    // gentle push for 'Green' state to yield to 'Yellow'
     machine.react(SomeEvent{});
+```
+
+12. Keep updating state machine until it's done:
+
+```cpp
+    // more updates
+    while (!fsm.isActive<Off>())
+        fsm.update();
 
     return 0;
 }
