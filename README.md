@@ -1,9 +1,9 @@
 [![Standard](https://img.shields.io/badge/c%2B%2B-14/17/20-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Build status](https://ci.appveyor.com/api/projects/status/49gona9jtghvvi6g?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/hfsm)
-[![Build Status](https://travis-ci.org/andrew-gresyk/HFSM.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM)
+[![Build status](https://ci.appveyor.com/api/projects/status/egs56khk70ud35un?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/hfsm2)
+[![Build Status](https://travis-ci.org/andrew-gresyk/HFSM2.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM2)
 
-# HFSM2: Hierarchical Finite State Machine Framework with Planning Support
+# HFSM2: Hierarchical Finite State Machine Framework with **Planning Support**
 
 Header-only heriarchical FSM framework in C++14, completely static (no dynamic allocations), built with variadic templates.
 
@@ -38,7 +38,7 @@ struct Context {
 // using namesplace hfsm2;
 ```
 
-4. (Optional) Typedef hfsm2::Machine for convenience:
+4. (Optional, recommended) Typedef hfsm2::Machine for convenience:
 
 ```cpp
 using M = hfsm2::Machine<Context>;
@@ -54,6 +54,7 @@ struct On;
 struct Red;
 struct Yellow;
 struct Green;
+struct Done;
 
 using FSM = M::PeerRoot<
                 // initial state
@@ -64,7 +65,8 @@ using FSM = M::PeerRoot<
                     Red,
                     Yellow,
                     Green
-                >
+                >,
+                Done
             >;
 ```
 
@@ -82,7 +84,8 @@ using FSM = M::PeerRoot<
                     S(Red),
                     S(Yellow),
                     S(Green)
-                >
+                >,
+                S(Done)
             >;
 
 #undef S
@@ -132,7 +135,7 @@ struct On
     // called on the successful completion of all plan steps
     void planSucceeded(FullControl& control) {
         // we're done here
-        control.changeTo<Off>();
+        control.changeTo<Done>();
     }
 
     // called if any of the plan steps fails
@@ -171,6 +174,10 @@ struct Green
         control.succeed();
     }
 };
+
+struct Done
+    : FSM::State
+{};
 ```
 
 8. Write the client code to use your new state machine:
@@ -220,14 +227,16 @@ int main() {
 
 - Permissive [MIT License](LICENSE.md)
 - Written in widely-supported modern(ish) C++ 14
-- 100% NoUML-compliant
-- Not hamstrung by restrictive event reaction-based approach, but supports powerful event handling
-- Hierarchical, with composite (sub-machine) and orthogonal regions
 - Header-only
 - Fully static, no dynamic allocations
 - Uses inline-friendly compile-time pylymorphism, no virtual methods were harmed
 - Type-safe transitions: `FSM.changeTo<TargetState>()`
+- 100% NoUML-compliant
+- Hierarchical, with composite (sub-machine) and orthogonal regions
 - Gamedev-friendly, supports explicit `State::update()`
+- Also supports traditional event-based workflow with `State::react()`
+- **New: Supports planning! Schedule state-task execution with scripted transitions.**
+- **New: Can be used to implement your favorite planner algorithms - BT, HTN, GOAP, etc.**
 - Scaleable, supports state re-use via state injections
 - Debug-assisted, includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
 - Convenient, minimal boilerplate
