@@ -109,7 +109,7 @@ struct On
     template <typename TEvent>
     void react(const TEvent&, FullControl& control) { /* ... */ }
 
-	// called on state deactivation
+    // called on state deactivation
     void exit(Control& control) { /* ... */ }
 };
 
