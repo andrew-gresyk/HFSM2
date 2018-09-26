@@ -54,15 +54,15 @@ struct Green;
 struct Off;
 
 using FSM = M::PeerRoot<
-				// sub-machine region with a head state and..
-				M::Composite<On,
-					// .. with 3 sub-states
-					Red,
-					Yellow,
-					Green
+                // sub-machine region with a head state and..
+                M::Composite<On,
+                    // .. with 3 sub-states
+                    Red,
+                    Yellow,
+                    Green
 				>,
-				Off
-			>;
+                Off
+            >;
 ```
 
 Option 2 - with a helper macro (don't forget to `#undef` it afterwards!):
@@ -71,15 +71,15 @@ Option 2 - with a helper macro (don't forget to `#undef` it afterwards!):
 #define S(s) struct s
 
 using FSM = M::PeerRoot<
-				// sub-machine region with a head state and..
-				M::Composite<S(On),
-					// .. 3 sub-states
-					S(Red),
-					S(Yellow),
-					S(Green)
+                // sub-machine region with a head state and..
+                M::Composite<S(On),
+                    // .. 3 sub-states
+                    S(Red),
+                    S(Yellow),
+                    S(Green)
 				>,
-				S(Off)
-			>;
+                S(Off)
+            >;
 
 #undef S
 ```
@@ -94,23 +94,23 @@ struct SomeEvent) { /* ... */ };
 
 ```cpp
 struct On
-	: FSM::State // necessary boilerplate!
+    : FSM::State // necessary boilerplate!
 {
-	// called before state activation, use to re-route transitions
-	void guard(FullControl& control) { /* ... */ }
+    // called before state activation, use to re-route transitions
+    void guard(FullControl& control) { /* ... */ }
 
-	// called on state activation
-	void enter(Control& control) { /* ... */ }
+    // called on state activation
+    void enter(Control& control) { /* ... */ }
 
-	// called on periodic state machine updates
-	void update(FullControl& control) { /* ... */ }
+    // called on periodic state machine updates
+    void update(FullControl& control) { /* ... */ }
 
-	// use this to handle events if needed
-	template <typename TEvent>
-	void react(const TEvent&, FullControl& control) { /* ... */ }
+    // use this to handle events if needed
+    template <typename TEvent>
+    void react(const TEvent&, FullControl& control) { /* ... */ }
 
 	// called on state deactivation
-	void exit(Control& control) { /* ... */ }
+    void exit(Control& control) { /* ... */ }
 };
 
 struct Red    : FSM::State { /* ... */ };
