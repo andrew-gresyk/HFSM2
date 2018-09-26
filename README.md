@@ -17,60 +17,139 @@ Header-only heriarchical FSM framework in C++14, completely static (no dynamic a
 
 ## Basic Usage
 
+1. Include HFSM header:
+
 ```cpp
-// 1. Include HFSM header:
-#include <hfsm/machine_single.hpp>
+#include <hfsm2/machine.hpp>
+```
 
-// 2. Define interface class between the FSM and its owner
-//    (also ok to use the owner object itself):
+2. Define interface class between the state machine and its host
+(also ok to use the host object itself):
+
+```cpp
 struct Context { /* ... */ };
+```
 
-// 3. (Optional) Typedef hfsm::Machine for convenience:
-using M = hfsm::Machine<OwnerClass>;
+3. For goodness sake, please don't:
 
-// 4. Define states:
-struct MyState1 : M::Bare {
-    // 5. Override some of the following state functions:
-    void enter(Context& _);
-    void update(Context& _);
-    void transition(Control& c, Context& _);
-    void leave(Context& _);
+```cpp
+// using namesplace hfsm2;
+```
+
+4. (Optional) Typedef hfsm::Machine for convenience:
+
+```cpp
+using M = hfsm2::Machine<Context>;
+```
+
+5. Declare state machine structure:
+
+Option 1 - with forward declared states:
+
+```cpp
+struct On;
+struct Red;
+struct Yellow;
+struct Green;
+struct Off;
+
+using FSM = M::PeerRoot<
+				// sub-machine region with a head state and..
+				M::Composite<On,
+					// .. with 3 sub-states
+					Red,
+					Yellow,
+					Green
+				>,
+				Off
+			>;
+```
+
+Option 2 - with a helper macro (don't forget to `#undef` it afterwards!):
+
+```cpp
+#define S(s) struct s
+
+using FSM = M::PeerRoot<
+				// sub-machine region with a head state and..
+				M::Composite<S(On),
+					// .. 3 sub-states
+					S(Red),
+					S(Yellow),
+					S(Green)
+				>,
+				S(Off)
+			>;
+
+#undef S
+```
+
+6. (Optional) Define events to have external code interact with your state machine directly:
+
+```cpp
+struct SomeEvent) { /* ... */ };
+```
+
+7. Define states and override any or all of the optional state methods:
+
+```cpp
+struct On
+	: FSM::State // necessary boilerplate!
+{
+	// called before state activation, use to re-route transitions
+	void guard(FullControl& control) { /* ... */ }
+
+	// called on state activation
+	void enter(Control& control) { /* ... */ }
+
+	// called on periodic state machine updates
+	void update(FullControl& control) { /* ... */ }
+
+	// use this to handle events if needed
+	template <typename TEvent>
+	void react(const TEvent&, FullControl& control) { /* ... */ }
+
+	// called on state deactivation
+	void exit(Control& control) { /* ... */ }
 };
 
-struct MyState2 : M::Bare { /* .. */ };
-struct MySubState1 : M::Bare { /* .. */ };
-struct MySubState2 : M::Bare { /* .. */ };
+struct Red    : FSM::State { /* ... */ };
+struct Yellow : FSM::State { /* ... */ };
+struct Green  : FSM::State { /* ... */ };
+struct Off    : FSM::State { /* ... */ };
+```
 
-struct MyState3 : M::Bare { /* .. */ };
-struct MyOrthogonalState1 : M::Bare { /* .. */ };
-struct MyOrthogonalState2 : M::Bare { /* .. */ };
+8. Write the client code to use your new state machine:
 
-// 6. Declare state machine structure:
-using MyFSM = M::PeerRoot<
-    MyState1,
-    M::Composite<MyState2,
-        MySubState1,
-        MySubState2,
-    >,
-    M::Orthogonal<MyState3,
-        MyOrthogonalState1,
-        MyOrthogonalState2,
-    >
->;
-
+```cpp
 int main() {
-    // 7. Create context and state machine instances:
+```
+
+9. Create context and state machine instances:
+
+```cpp
     Context context;
     MyFSM fsm(context);
+```
 
-    // 8. Kick off periodic updates:
+10. Kick off periodic updates:
+
+```cpp
     bool running = true;
     while (running)
         fsm.update();
+```
+
+11. (Optional) Handle your special events:
+
+```cpp
+    machine.react(SomeEvent{});
 
     return 0;
 }
 ```
+
+12. Check [Wiki](../../wiki) for [Tutorial](../../wiki/Tutorial) and docs!
 
 ---
 
@@ -89,12 +168,6 @@ int main() {
 - Scaleable, supports state re-use via state injections
 - Debug-assisted, includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
 - Convenient, minimal boilerplate
-
----
-
-## Documentation
-
-See [Wiki](../../wiki) for [Tutorial](../../wiki/Tutorial) and docs.
 
 ---
 
