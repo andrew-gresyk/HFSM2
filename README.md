@@ -196,6 +196,8 @@ int main() {
 10. Kick off periodic updates:
 
 ```cpp
+    context.powerOn = true;
+
     // API to check if a state is active
     while (!fsm.isActive<Green>())
         fsm.update();
