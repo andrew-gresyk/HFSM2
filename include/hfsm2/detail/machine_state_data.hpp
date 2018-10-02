@@ -180,12 +180,15 @@ struct StateDataT<ArgsT<TContext,
 	using OrthoForks	= OrthoForksT<ORTHO_COUNT, ORTHO_STORAGE>;
 
 	inline const Parent& forkParent(const ForkID forkId) const;
+	inline const CompoFork* compoParent(const ForkID forkId) const;
 
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
 
 	void requestImmediate(const Request request);
 	void requestScheduled(const Request request);
+
+	void clearOrthoRequested();
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -216,8 +219,8 @@ struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, NCompoCount,
 	static constexpr ShortIndex COMPO_COUNT = NCompoCount;
 
 	using StateParents	= ParentsT<STATE_COUNT>;
-	using CompoParents	= StaticArray<Parent, COMPO_COUNT>;
-	using CompoForks	= StaticArray<CompoFork,	  COMPO_COUNT>;
+	using CompoParents	= StaticArray<Parent,	 COMPO_COUNT>;
+	using CompoForks	= StaticArray<CompoFork, COMPO_COUNT>;
 
 	inline const Parent& forkParent(const ForkID forkId) const;
 
@@ -226,6 +229,8 @@ struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, NCompoCount,
 
 	void requestImmediate(const Request request);
 	void requestScheduled(const Request request);
+
+	inline void clearOrthoRequested()					{}
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -266,6 +271,8 @@ struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, 0, NOrthoCou
 
 	inline void requestImmediate(const Request)			{ HFSM_ASSERT(false);		}
 	inline void requestScheduled(const Request)			{ HFSM_ASSERT(false);		}
+
+	inline void clearOrthoRequested()					{}
 
 	StateParents stateParents;
 	OrthoParents orthoParents;

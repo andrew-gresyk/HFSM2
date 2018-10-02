@@ -40,7 +40,7 @@ _C<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 	const CompoFork& fork = compoFork(control);
 
 	HFSM_ASSERT(fork.active    == INVALID_SHORT_INDEX &&
-		   fork.requested != INVALID_SHORT_INDEX);
+				fork.requested != INVALID_SHORT_INDEX);
 
 	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -74,7 +74,7 @@ void
 _C<NS, NC, NO, TA, TH, TS...>::deepEnter(Control& control) {
 	CompoFork& fork = compoFork(control);
 
-	HFSM_ASSERT(fork.active	  == INVALID_SHORT_INDEX &&
+	HFSM_ASSERT(fork.active	   == INVALID_SHORT_INDEX &&
 				fork.requested != INVALID_SHORT_INDEX);
 
 	fork.active	   = fork.requested;
@@ -145,8 +145,8 @@ _C<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control) {
 	_subStates.wideExit(fork.active, control);
 	_headState.deepExit(			 control);
 
-	fork.resumable	= fork.active;
-	fork.active		= INVALID_SHORT_INDEX;
+	fork.resumable = fork.active;
+	fork.active	   = INVALID_SHORT_INDEX;
 
 	auto plan = control.plan(REGION_ID);
 	plan.clear();

@@ -4,6 +4,7 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+// TODO: support range-based for loop
 
 template <typename T, LongIndex NCapacity>
 class StaticArray {

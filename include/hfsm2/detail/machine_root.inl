@@ -290,6 +290,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepChangeToRequested(_stateData, control);
+		_stateData.clearOrthoRequested();
 
 		HSFM_IF_ASSERT(_planData.verifyPlans());
 	}

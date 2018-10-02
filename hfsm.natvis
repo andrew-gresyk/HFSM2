@@ -13,7 +13,7 @@
 			&gt;
 		</DisplayString>
 		<DisplayString>{&amp;_Tptr->_Data._DecoratedName[4],[strchr(_Tptr->_Data._DecoratedName,'@') - _Tptr->_Data._DecoratedName - 4]sb}</DisplayString>
-    <Expand HideRawView="true" />
+		<Expand HideRawView="true" />
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
@@ -42,14 +42,24 @@
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm2::detail::BitArray">
+	<Type Name="hfsm2::detail::BitArrayT&lt;*,*&gt;">
 		<DisplayString>{(unsigned)capacity &amp; 0xFF}</DisplayString>
 		<Expand HideRawView="true">
-      <IndexListItems>
-        <Size>(capacity + 7 / 8)</Size>
-        <ValueNode>(unsigned) (((uint8_t*) this) + OFFSET)[$i] &amp; 0xFF</ValueNode>
-      </IndexListItems>
-    </Expand>
+			<IndexListItems>
+				<Size>(capacity + 7 / 8)</Size>
+				<ValueNode>(unsigned) (((uint8_t*) this) + OFFSET)[$i] &amp; 0xFF</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm2::detail::BitArrayStorageT&lt;*,*&gt;">
+		<DisplayString>{(unsigned)capacity &amp; 0xFF}</DisplayString>
+		<Expand HideRawView="true">
+			<IndexListItems>
+				<Size>(capacity + 7 / 8)</Size>
+				<ValueNode>(unsigned) (((uint8_t*) this) + OFFSET)[$i] &amp; 0xFF</ValueNode>
+			</IndexListItems>
+		</Expand>
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
@@ -73,120 +83,127 @@
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 	<Type Name="hfsm2::detail::Parent">
-		<DisplayString>{fork} ► {prong}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+		<DisplayString>{forkId} ► {prong}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::detail::CompoFork">
-    <DisplayString>[{TYPE}]: &lt;{(unsigned) resumable &amp; 0xFF}&gt; ◄ ({(unsigned) active &amp; 0xFF}) ► &lt;{(unsigned) requested &amp; 0xFF}&gt;</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+	<Type Name="hfsm2::detail::CompoFork">
+		<DisplayString>[{TYPE}]: &lt;{(unsigned) resumable &amp; 0xFF}&gt; ◄ ({(unsigned) active &amp; 0xFF}) ► &lt;{(unsigned) requested &amp; 0xFF}&gt;</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::detail::Transition">
-    <DisplayString>{type}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+	<Type Name="hfsm2::detail::OrthoFork">
+		<DisplayString>[{TYPE}]: {*((uint8_t*) &amp;prongs + prongs.OFFSET) &amp; 0xFF}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::detail::TaskTransition">
-    <DisplayString>({origin} ► {destination})</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+	<Type Name="hfsm2::detail::Transition">
+		<DisplayString>{type}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::detail::ControlT&lt;*,*&gt;">
-    <DisplayString>{_context}</DisplayString>
-  </Type>
+	<Type Name="hfsm2::detail::TaskTransition">
+		<DisplayString>({origin} ► {destination})</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::detail::PlanControlT&lt;*,*&gt;">
-    <DisplayString>({_tasks})</DisplayString>
-  </Type>
+	<Type Name="hfsm2::detail::ControlT&lt;*,*&gt;">
+		<DisplayString>{_context}</DisplayString>
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::detail::TransitionControlT&lt;*,*&gt;">
-    <DisplayString>[{_status}]</DisplayString>
-  </Type>
+	<Type Name="hfsm2::detail::PlanControlT&lt;*,*&gt;">
+		<DisplayString>({_tasks})</DisplayString>
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::detail::FullControlT&lt;*,*&gt;">
-    <DisplayString>[{_status}] ({_tasks})</DisplayString>
-  </Type>
+	<Type Name="hfsm2::detail::TransitionControlT&lt;*,*&gt;">
+		<DisplayString>[{_status}]</DisplayString>
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::detail::Status">
-    <DisplayString>{success} {failure} {outerTransition}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+	<Type Name="hfsm2::detail::FullControlT&lt;*,*&gt;">
+		<DisplayString>[{_status}] ({_tasks})</DisplayString>
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm2::detail::Status">
+		<DisplayString>{success} {failure} {outerTransition}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::PlanT&lt;*,*&gt;">
-    <DisplayString Condition="_taskIndices.first == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
-    <DisplayString Condition="_taskIndices.first != INVALID_LONG_INDEX">{_taskIndices.first} .. {_taskIndices.last}</DisplayString>
-    <Expand HideRawView="true">
-      <Item Name="first" Condition="_taskIndices.first != INVALID_LONG_INDEX">_tasks._cells[_taskIndices.first]</Item>
-      <Item Name="last"  Condition="_taskIndices.last  != INVALID_LONG_INDEX">_tasks._cells[_taskIndices.last] </Item>
-    </Expand>
-  </Type>
+		<DisplayString Condition="_taskIndices.first == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
+		<DisplayString Condition="_taskIndices.first != INVALID_LONG_INDEX">{_taskIndices.first} .. {_taskIndices.last}</DisplayString>
+		<Expand HideRawView="true">
+			<Item Name="first" Condition="_taskIndices.first != INVALID_LONG_INDEX">_tasks._cells[_taskIndices.first]</Item>
+			<Item Name="last"  Condition="_taskIndices.last  != INVALID_LONG_INDEX">_tasks._cells[_taskIndices.last] </Item>
+		</Expand>
+	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::PlanT&lt;*,*&gt;::Iterator">
-    <DisplayString Condition="_curr == INVALID_LONG_INDEX &amp;&amp; _next == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
-    <DisplayString Condition="_curr != INVALID_LONG_INDEX &amp;&amp; _next == INVALID_LONG_INDEX">{_plan._tasks._cells[_curr]}</DisplayString>
-    <DisplayString Condition="_curr == INVALID_LONG_INDEX &amp;&amp; _next != INVALID_LONG_INDEX">&lt;Empty&gt;, {_plan._tasks._cells[_next]}</DisplayString>
-    <DisplayString Condition="_curr != INVALID_LONG_INDEX &amp;&amp; _next != INVALID_LONG_INDEX">{_plan._tasks._cells[_curr]}, {_plan._tasks._cells[_next]}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+		<DisplayString Condition="_curr == INVALID_LONG_INDEX &amp;&amp; _next == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
+		<DisplayString Condition="_curr != INVALID_LONG_INDEX &amp;&amp; _next == INVALID_LONG_INDEX">{_plan._tasks._cells[_curr]}</DisplayString>
+		<DisplayString Condition="_curr == INVALID_LONG_INDEX &amp;&amp; _next != INVALID_LONG_INDEX">&lt;Empty&gt;, {_plan._tasks._cells[_next]}</DisplayString>
+		<DisplayString Condition="_curr != INVALID_LONG_INDEX &amp;&amp; _next != INVALID_LONG_INDEX">{_plan._tasks._cells[_curr]}, {_plan._tasks._cells[_next]}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::_S&lt;*&gt;">
 		<DisplayString>{TYPE}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <Type Name="hfsm2::detail::_P&lt;*&gt;">
+	<Type Name="hfsm2::detail::_P&lt;*&gt;">
 		<DisplayString>{TYPE}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::_C&lt;*&gt;">
-    <DisplayString>({_headState})</DisplayString>
-  </Type>
+		<DisplayString>({_headState})</DisplayString>
+	</Type>
 
-  <Type Name="hfsm2::detail::_CS&lt;*&gt;">
-    <DisplayString Optional="true">{initial} {remaining}</DisplayString>
-    <DisplayString>{initial}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+	<Type Name="hfsm2::detail::_CS&lt;*&gt;">
+		<DisplayString Optional="true">{initial} {remaining}</DisplayString>
+		<DisplayString>{initial}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::_O&lt;*&gt;">
-    <DisplayString>[{_headState}]</DisplayString>
-  </Type>
+		<DisplayString>[{_headState}]</DisplayString>
+	</Type>
 
-  <Type Name="hfsm2::detail::_OS&lt;*&gt;">
-    <DisplayString Optional="true">{initial} {remaining}</DisplayString>
-    <DisplayString>{initial}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+	<Type Name="hfsm2::detail::_OS&lt;*&gt;">
+		<DisplayString Optional="true">{initial} {remaining}</DisplayString>
+		<DisplayString>{initial}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::_R&lt;*&gt;">
 		<DisplayString>{_structure}</DisplayString>
@@ -204,20 +221,20 @@
 		</Expand>
 	</Type>
 
-  <!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-  <Type Name="hfsm2::StructureEntry">
-    <DisplayString Condition=" isActive">█ {prefix,sub}{name,sb}</DisplayString>
-    <DisplayString Condition="!isActive">░ {prefix,sub}{name,sb}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+	<Type Name="hfsm2::StructureEntry">
+		<DisplayString Condition=" isActive">█ {prefix,sub}{name,sb}</DisplayString>
+		<DisplayString Condition="!isActive">░ {prefix,sub}{name,sb}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
 
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 	<Type Name="Event">
 		<DisplayString>{origin} ► {target} {type}}</DisplayString>
-    <Expand HideRawView="true" />
-  </Type>
+		<Expand HideRawView="true" />
+	</Type>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 

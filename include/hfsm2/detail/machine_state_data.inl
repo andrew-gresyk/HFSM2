@@ -15,6 +15,24 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::forkParent(const F
 		orthoParents[-forkId - 1];
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
+const CompoFork*
+StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::compoParent(const ForkID forkId) const {
+	HFSM_ASSERT(forkId != 0);
+
+	for (Parent parent = forkParent(forkId);
+		 parent;
+		 parent = forkParent(parent.forkId))
+	{
+		if (parent.forkId > 0)
+			return &compoForks[parent.forkId - 1];
+	}
+
+	return nullptr;
+}
+
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
@@ -23,16 +41,16 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isActive(const Sta
 	HFSM_ASSERT(stateId < STATE_COUNT);
 
 	if (stateId < STATE_COUNT)
-		for (auto parent = stateParents[stateId];
+		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
 			HFSM_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0) {
-				const CompoFork& forkId = compoForks[ parent.forkId - 1];
+				const CompoFork& fork = compoForks[parent.forkId - 1];
 
-				return parent.prong == forkId.active;
+				return parent.prong == fork.active;
 			}
 		}
 
@@ -47,15 +65,15 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isResumable(const 
 	HFSM_ASSERT(stateId < STATE_COUNT);
 
 	if (stateId < STATE_COUNT)
-		for (auto parent = stateParents[stateId];
+		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
 			HFSM_ASSERT(parent.forkId != 0);
 			if (parent.forkId > 0) {
-				const CompoFork& forkId = compoForks[ parent.forkId - 1];
+				const CompoFork& fork = compoForks[parent.forkId - 1];
 
-				return parent.prong == forkId.resumable;
+				return parent.prong == fork.resumable;
 			}
 		}
 
@@ -70,18 +88,24 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmediate(c
 	HFSM_ASSERT(request.stateId < STATE_COUNT);
 
 	if (request.stateId < STATE_COUNT)
-		for (auto parent = stateParents[request.stateId];
+		for (Parent parent = stateParents[request.stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
 			HFSM_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0) {
-				CompoFork& forkId = compoForks[ parent.forkId - 1];
+				CompoFork& fork = compoForks[parent.forkId - 1];
 
-				forkId.requested = parent.prong;
+				fork.requested = parent.prong;
 			} else if (parent.forkId < 0) {
-				OrthoFork& requested = orthoRequested[-parent.forkId - 1];
+				const ForkID forkId = -parent.forkId - 1;
+
+				OrthoFork& requested = orthoRequested[forkId];
+
+				if (const CompoFork* const compoFork = compoParent(parent.forkId))
+					if (compoFork->requested == INVALID_SHORT_INDEX)
+						requested.prongs.clear();
 
 				requested.prongs[parent.prong] = true;
 			}
@@ -96,18 +120,29 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestScheduled(c
 	HFSM_ASSERT(request.stateId < STATE_COUNT);
 
 	if (request.stateId < STATE_COUNT) {
-		const auto parent = stateParents[request.stateId];
+		const Parent parent = stateParents[request.stateId];
 		HFSM_ASSERT(parent.forkId != 0);
 
 		if (parent.forkId > 0) {
-			CompoFork& forkId = compoForks[ parent.forkId - 1];
+			CompoFork& fork = compoForks[parent.forkId - 1];
 
-			forkId.resumable = parent.prong;
+			fork.resumable = parent.prong;
 		} else if (parent.forkId < 0) {
 			OrthoFork& resumable = orthoResumable[-parent.forkId - 1];
 
 			resumable.prongs[parent.prong] = true;
 		}
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
+void
+StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::clearOrthoRequested() {
+	for (ForkID i = 0; i < orthoRequested.count(); ++i) {
+		OrthoFork& requested = orthoRequested[i];
+		requested.prongs.clear();
 	}
 }
 
@@ -129,16 +164,16 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isActive(const StateID
 	HFSM_ASSERT(stateId < STATE_COUNT);
 
 	if (stateId < STATE_COUNT)
-		for (auto parent = stateParents[stateId];
+		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
 			HFSM_ASSERT(parent.forkId > 0);
 
 			if (parent.forkId > 0) {
-				const CompoFork& forkId = compoForks[ parent.forkId - 1];
+				const CompoFork& fork = compoForks[parent.forkId - 1];
 
-				return parent.prong == forkId.active;
+				return parent.prong == fork.active;
 			}
 		}
 
@@ -153,16 +188,16 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isResumable(const Stat
 	HFSM_ASSERT(stateId < STATE_COUNT);
 
 	if (stateId < STATE_COUNT)
-		for (auto parent = stateParents[stateId];
+		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
 			HFSM_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0) {
-				const CompoFork& forkId = compoForks[ parent.forkId - 1];
+				const CompoFork& fork = compoForks[parent.forkId - 1];
 
-				return parent.prong == forkId.resumable;
+				return parent.prong == fork.resumable;
 			}
 		}
 
@@ -177,14 +212,14 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestImmediate(const
 	HFSM_ASSERT(request.stateId < STATE_COUNT);
 
 	if (request.stateId < STATE_COUNT)
-		for (auto parent = stateParents[request.stateId];
+		for (Parent parent = stateParents[request.stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
 			HFSM_ASSERT(parent.forkId > 0);
 
 			if (parent.forkId > 0) {
-				CompoFork& fork = compoForks[ parent.forkId - 1];
+				CompoFork& fork = compoForks[parent.forkId - 1];
 
 				fork.requested = parent.prong;
 			}
@@ -199,11 +234,11 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestScheduled(const
 	HFSM_ASSERT(request.stateId < STATE_COUNT);
 
 	if (request.stateId < STATE_COUNT) {
-		const auto parent = stateParents[request.stateId];
+		const Parent parent = stateParents[request.stateId];
 		HFSM_ASSERT(parent.forkId > 0);
 
 		if (parent.forkId > 0) {
-			CompoFork& fork = compoForks[ parent.forkId - 1];
+			CompoFork& fork = compoForks[parent.forkId - 1];
 
 			fork.resumable = parent.prong;
 		}
