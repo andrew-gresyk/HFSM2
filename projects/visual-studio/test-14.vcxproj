@@ -58,6 +58,7 @@
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
     <ClInclude Include="..\..\test\test_planner.hpp" />
     <ClInclude Include="..\..\test\test_shared.hpp" />
+    <ClInclude Include="..\..\test\test_state_data.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\lib_array.inl" />

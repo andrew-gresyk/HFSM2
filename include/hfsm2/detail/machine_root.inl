@@ -394,21 +394,27 @@ _R<TC, TG, TPL, TA>::getStateNames() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::udpateActivity() {
-	for (LongIndex i = 0; i < _structure.count(); ++i) {
-		_structure[i].isActive = isActive(i);
+	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s) {
+		const auto& state = _stateInfos[s];
 
-		auto& activity = _activityHistory[i];
+		if (state.name[0] != L'\0') {
+			_structure[i].isActive = isActive(s);
 
-		if (_structure[i].isActive) {
-			if (activity > 0)
-				activity = activity < INT8_MIN ? activity + 1 : activity;
-			else
-				activity = +1;
-		} else {
-			if (activity > 0)
-				activity = -1;
-			else
-				activity = activity > INT8_MIN ? activity - 1 : activity;
+			auto& activity = _activityHistory[i];
+
+			if (_structure[i].isActive) {
+				if (activity > 0)
+					activity = activity < INT8_MIN ? activity + 1 : activity;
+				else
+					activity = +1;
+			} else {
+				if (activity > 0)
+					activity = -1;
+				else
+					activity = activity > INT8_MIN ? activity - 1 : activity;
+			}
+
+			++i;
 		}
 	}
 }

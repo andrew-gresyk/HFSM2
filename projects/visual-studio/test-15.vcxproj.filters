@@ -125,6 +125,9 @@
     <ClInclude Include="..\..\include\hfsm2\detail\machine_state_data.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test\test_state_data.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\lib_array.inl">
