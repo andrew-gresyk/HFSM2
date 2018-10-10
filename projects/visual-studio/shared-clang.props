@@ -6,6 +6,7 @@
     <OutDir>$(SolutionDir)..\..\binaries-$(PlatformArchitecture)\</OutDir>
     <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)-$(Configuration)-$(PlatformArchitecture)</TargetName>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -14,6 +15,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>_UNICODE;UNICODE;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>-m$(PlatformArchitecture) -fmsc-version=1900 -Wno-unused-command-line-argument %(AdditionalOptions)</AdditionalOptions>
+      <SupportJustMyCode>false</SupportJustMyCode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
