@@ -157,7 +157,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateData& stateData,
 			break;
 
 		default:
-			HFSM_ASSERT(false);
+			HSFM_BREAK();
 		}
 }
 

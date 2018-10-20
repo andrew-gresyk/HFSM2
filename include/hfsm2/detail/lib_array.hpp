@@ -15,12 +15,12 @@ public:
 	using Index = typename UnsignedIndex<CAPACITY>::Type;
 
 public:
-	inline StaticArray() = default;
+	HSFM_INLINE StaticArray() = default;
 
-	inline		 Item& operator[] (const LongIndex i);
-	inline const Item& operator[] (const LongIndex i) const;
+	HSFM_INLINE		  Item& operator[] (const LongIndex i);
+	HSFM_INLINE const Item& operator[] (const LongIndex i) const;
 
-	inline LongIndex count() const					{ return CAPACITY; }
+	HSFM_INLINE LongIndex count() const						{ return CAPACITY;	}
 
 private:
 	Item _items[CAPACITY];
@@ -46,15 +46,15 @@ public:
 	using Item = typename View::Item;
 
 public:
-	inline Array();
+	HSFM_INLINE Array();
 
-	inline Iterator<	  Array>  begin()		{ return Iterator<		Array>(*this, View::first()); }
-	inline Iterator<const Array>  begin() const { return Iterator<const Array>(*this, View::first()); }
-	inline Iterator<const Array> cbegin() const { return Iterator<const Array>(*this, View::first()); }
+	HSFM_INLINE Iterator<	   Array>  begin()		 { return Iterator<		 Array>(*this, View::first());	}
+	HSFM_INLINE Iterator<const Array>  begin() const { return Iterator<const Array>(*this, View::first());	}
+	HSFM_INLINE Iterator<const Array> cbegin() const { return Iterator<const Array>(*this, View::first());	}
 
-	inline Iterator<	  Array>	end()		{ return Iterator<		Array>(*this, DUMMY);		  }
-	inline Iterator<const Array>	end() const { return Iterator<const Array>(*this, DUMMY);		  }
-	inline Iterator<const Array>   cend() const { return Iterator<const Array>(*this, DUMMY);		  }
+	HSFM_INLINE Iterator<	   Array>	 end()		 { return Iterator<		 Array>(*this, DUMMY);			}
+	HSFM_INLINE Iterator<const Array>	 end() const { return Iterator<const Array>(*this, DUMMY);			}
+	HSFM_INLINE Iterator<const Array>   cend() const { return Iterator<const Array>(*this, DUMMY);			}
 
 private:
 	Item _storage[CAPACITY];

@@ -1,3 +1,5 @@
+namespace deprecated_test {
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace Event {
@@ -23,7 +25,7 @@ struct Status {
 	std::type_index state;
 	Event::Enum func;
 
-	inline bool operator == (const Status& reference) const {
+	bool operator == (const Status& reference) const {
 		return func == reference.func && state == reference.state;
 	}
 };
@@ -314,11 +316,13 @@ struct B_2_2
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::DEEP_WIDTH	 ==  2, "");
-static_assert(FSM::Instance::STATE_COUNT == 13, "");
-static_assert(FSM::Instance::COMPO_COUNT ==  5, "");
-static_assert(FSM::Instance::ORTHO_COUNT ==  1, "");
-static_assert(FSM::Instance::ORTHO_UNITS ==  1, "");
-static_assert(FSM::Instance::PRONG_COUNT == 10, "");
+static_assert(FSM::Instance::DEEP_WIDTH	 ==  2, "DEEP_WIDTH");
+static_assert(FSM::Instance::STATE_COUNT == 13, "STATE_COUNT");
+static_assert(FSM::Instance::COMPO_COUNT ==  5, "COMPO_COUNT");
+static_assert(FSM::Instance::ORTHO_COUNT ==  1, "ORTHO_COUNT");
+static_assert(FSM::Instance::ORTHO_UNITS ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::PRONG_COUNT == 10, "PRONG_COUNT");
 
 ////////////////////////////////////////////////////////////////////////////////
+
+}

@@ -47,28 +47,28 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	_OS(StateData& stateData, const ForkID forkId);
 
-	inline void	  wideForwardGuard		(const Prongs& prongs,
-										 FullControl& control);
-	inline void	  wideForwardGuard		(FullControl& control);
-	inline void	  wideGuard				(FullControl& control);
+	HSFM_INLINE void   wideForwardGuard		(const Prongs& prongs,
+					 						 FullControl& control);
+	HSFM_INLINE void   wideForwardGuard		(FullControl& control);
+	HSFM_INLINE void   wideGuard			(FullControl& control);
 
-	inline void	  wideEnterInitial		(Control& control);
-	inline void	  wideEnter				(Control& control);
+	HSFM_INLINE void   wideEnterInitial		(Control& control);
+	HSFM_INLINE void   wideEnter			(Control& control);
 
-	inline Status wideUpdate			(FullControl& control);
+	HSFM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	inline void   wideReact				(const TEvent& event,
-										 FullControl& control);
+	HSFM_INLINE void   wideReact			(const TEvent& event,
+											 FullControl& control);
 
-	inline void   wideExit				(Control& control);
+	HSFM_INLINE void   wideExit				(Control& control);
 
-	inline void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType request);
-	inline void   wideRequestRemain		(StateData& stateData);
-	inline void   wideRequestRestart	(StateData& stateData);
-	inline void   wideRequestResume		(StateData& stateData);
-	inline void   wideChangeToRequested	(StateData& stateData,
-										 Control& control);
+	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType request);
+	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HSFM_INLINE void   wideRequestResume	(StateData& stateData);
+	HSFM_INLINE void   wideChangeToRequested(StateData& stateData,
+											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
@@ -116,25 +116,26 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	_OS(StateData& stateData, const ForkID forkId);
 
-	inline void   wideForwardGuard		(const Prongs& prongs, FullControl& control);
-	inline void   wideForwardGuard		(FullControl& control);
-	inline void   wideGuard				(FullControl& control);
+	HSFM_INLINE void   wideForwardGuard		(const Prongs& prongs, FullControl& control);
+	HSFM_INLINE void   wideForwardGuard		(FullControl& control);
+	HSFM_INLINE void   wideGuard			(FullControl& control);
 
-	inline void   wideEnterInitial		(Control& control);
-	inline void   wideEnter				(Control& control);
+	HSFM_INLINE void   wideEnterInitial		(Control& control);
+	HSFM_INLINE void   wideEnter			(Control& control);
 
-	inline Status wideUpdate			(FullControl& control);
+	HSFM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	inline void   wideReact				(const TEvent& event, FullControl& control);
+	HSFM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
 
-	inline void   wideExit				(Control& control);
+	HSFM_INLINE void   wideExit				(Control& control);
 
-	inline void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType transition);
-	inline void   wideRequestRemain		(StateData& stateData);
-	inline void   wideRequestRestart	(StateData& stateData);
-	inline void   wideRequestResume		(StateData& stateData);
-	inline void   wideChangeToRequested	(StateData& stateData, Control& control);
+	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType transition);
+	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HSFM_INLINE void   wideRequestResume	(StateData& stateData);
+	HSFM_INLINE void   wideChangeToRequested(StateData& stateData,
+											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;

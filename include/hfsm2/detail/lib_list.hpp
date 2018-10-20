@@ -30,7 +30,7 @@ private:
 		Item item;
 		Links links;
 
-		inline Cell()
+		HSFM_INLINE Cell()
 			: links{}
 		{}
 	};
@@ -43,10 +43,10 @@ public:
 
 	void remove(const Index i);
 
-	inline		 Item& operator[] (const Index i);
-	inline const Item& operator[] (const Index i) const;
+	HSFM_INLINE		  Item& operator[] (const Index i);
+	HSFM_INLINE const Item& operator[] (const Index i) const;
 
-	inline Index count() const { return _count; }
+	HSFM_INLINE Index count() const { return _count; }
 
 private:
 	HSFM_IF_ASSERT(void verifyStructure(const Index occupied = INVALID) const);

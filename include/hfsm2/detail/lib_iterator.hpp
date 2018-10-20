@@ -15,21 +15,21 @@ public:
 	friend class Array;
 
 private:
-	inline Iterator(Container& container, const LongIndex cursor)
+	HSFM_INLINE Iterator(Container& container, const LongIndex cursor)
 		: _container(container)
 		, _cursor(cursor)
 	{}
 
 public:
-	inline bool operator != (const Iterator<Container>& dummy) const;
+	HSFM_INLINE bool operator != (const Iterator<Container>& dummy) const;
 
-	inline Iterator& operator ++();
+	HSFM_INLINE Iterator& operator ++();
 
-	inline		 Item& operator *()		  { return  _container[_cursor]; }
-	inline const Item& operator *() const { return  _container[_cursor]; }
+	HSFM_INLINE		  Item& operator *()	   { return  _container[_cursor]; }
+	HSFM_INLINE const Item& operator *() const { return  _container[_cursor]; }
 
-	inline		 Item* operator->()		  { return &_container[_cursor]; }
-	inline const Item* operator->() const { return &_container[_cursor]; }
+	HSFM_INLINE		  Item* operator->()	   { return &_container[_cursor]; }
+	HSFM_INLINE const Item* operator->() const { return &_container[_cursor]; }
 
 private:
 	Container& _container;
@@ -49,19 +49,19 @@ public:
 	friend class Array;
 
 private:
-	inline Iterator(const Container& container, const LongIndex cursor)
+	HSFM_INLINE Iterator(const Container& container, const LongIndex cursor)
 		: _container(container)
 		, _cursor(cursor)
 	{}
 
 public:
-	inline bool operator != (const Iterator<const Container>& dummy) const;
+	HSFM_INLINE bool operator != (const Iterator<const Container>& dummy) const;
 
-	inline Iterator& operator ++();
+	HSFM_INLINE Iterator& operator ++();
 
-	inline const Item& operator *() const { return _container[_cursor]; }
+	HSFM_INLINE const Item& operator *() const { return _container[_cursor]; }
 
-	inline const Item* operator->() const { return &operator *();		}
+	HSFM_INLINE const Item* operator->() const { return &operator *();		 }
 
 private:
 	const Container& _container;

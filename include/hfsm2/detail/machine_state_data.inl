@@ -116,11 +116,11 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmediate(c
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 void
-StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestScheduled(const Request request) {
-	HFSM_ASSERT(request.stateId < STATE_COUNT);
+StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestScheduled(const StateID stateId) {
+	HFSM_ASSERT(stateId < STATE_COUNT);
 
-	if (request.stateId < STATE_COUNT) {
-		const Parent parent = stateParents[request.stateId];
+	if (stateId < STATE_COUNT) {
+		const Parent parent = stateParents[stateId];
 		HFSM_ASSERT(parent.forkId != 0);
 
 		if (parent.forkId > 0) {
@@ -230,11 +230,11 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestImmediate(const
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 void
-StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestScheduled(const Request request) {
-	HFSM_ASSERT(request.stateId < STATE_COUNT);
+StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestScheduled(const StateID stateId) {
+	HFSM_ASSERT(stateId < STATE_COUNT);
 
-	if (request.stateId < STATE_COUNT) {
-		const Parent parent = stateParents[request.stateId];
+	if (stateId < STATE_COUNT) {
+		const Parent parent = stateParents[stateId];
 		HFSM_ASSERT(parent.forkId > 0);
 
 		if (parent.forkId > 0) {

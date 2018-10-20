@@ -13,8 +13,8 @@ struct TaskLink {
 	//using PayloadList	= TPayloadList;
 	//using PayloadBox		= typename PayloadList::Variant;
 
-	inline TaskLink(const StateID origin_,
-					const StateID destination_)
+	HSFM_INLINE TaskLink(const StateID origin_,
+						 const StateID destination_)
 		: origin(origin_)
 		, destination(destination_)
 		, next(INVALID_LONG_INDEX)

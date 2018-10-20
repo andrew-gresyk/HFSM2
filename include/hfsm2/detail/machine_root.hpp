@@ -84,103 +84,101 @@ public:
 
 	template <typename T>
 	static constexpr LongIndex
-	stateId()												{ return StateList::template index<T>();			}
+	stateId()													{ return StateList::template index<T>();			}
 
 	void update();
 
 	template <typename TEvent>
-	inline void react(const TEvent& event);
+	HSFM_INLINE void react(const TEvent& event);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline void changeTo(const StateID stateId);
-	inline void resume	(const StateID stateId);
-	inline void schedule(const StateID stateId);
+	HSFM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);			}
+	HSFM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);			}
 
-	template <typename TPayload>
-	inline void changeTo(const StateID stateId, TPayload* const payload);
+	HSFM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
-	template <typename TPayload>
-	inline void resume  (const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HSFM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());			}
 
-	template <typename TPayload>
-	inline void schedule(const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HSFM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
+
+	template <typename TState>
+	HSFM_INLINE bool isScheduled() const						{ return isResumable<TState>();						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	inline void changeTo()									{ changeTo(stateId<TState>());						}
+	HSFM_INLINE void changeTo(const StateID stateId);
+	HSFM_INLINE void resume	 (const StateID stateId);
+	HSFM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	inline void resume	()									{ resume  (stateId<TState>());						}
+	HSFM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
 
 	template <typename TState>
-	inline void schedule()									{ schedule(stateId<TState>());						}
+	HSFM_INLINE void resume	()									{ resume  (stateId<TState>());						}
 
-	template <typename TState, typename TPayload>
-	inline void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	inline void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	inline void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
+	template <typename TState>
+	HSFM_INLINE void schedule()									{ schedule(stateId<TState>());						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline void resetStateData(const StateID stateId);
+	template <typename TPayload>
+	HSFM_INLINE void changeTo(const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
-	inline void setStateData(const StateID stateId, TPayload* const payload);
-
-	inline bool isStateDataSet(const StateID stateId) const;
+	HSFM_INLINE void resume  (const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
-	inline TPayload* getStateData(const StateID stateId) const;
-
-	template <typename TState>
-	inline void resetStateData()							{ resetStateData(stateId<TState>());				}
+	HSFM_INLINE void schedule(const StateID stateId, TPayload* const payload);
 
 	template <typename TState, typename TPayload>
-	inline void setStateData(TPayload* const payload)		{ setStateData(stateId<TState>(), payload);			}
-
-	template <typename TState>
-	inline bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
+	HSFM_INLINE void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
-	inline TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
+	HSFM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
+
+	template <typename TState, typename TPayload>
+	HSFM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	inline bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);			}
-	inline bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);			}
+	HSFM_INLINE void resetStateData(const StateID stateId);
 
-	inline bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
+	template <typename TPayload>
+	HSFM_INLINE void setStateData  (const StateID stateId, TPayload* const payload);
+
+	HSFM_INLINE bool isStateDataSet(const StateID stateId) const;
+
+	template <typename TPayload>
+	HSFM_INLINE TPayload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	inline bool isActive   () const							{ return isActive	(stateId<TState>());			}
+	HSFM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
+
+	template <typename TState, typename TPayload>
+	HSFM_INLINE void setStateData  (TPayload* const payload)	{ setStateData  (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	inline bool isResumable() const							{ return isResumable(stateId<TState>());			}
+	HSFM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
 
-	template <typename TState>
-	inline bool isScheduled() const							{ return isResumable<TState>();						}
+	template <typename TState, typename TPayload>
+	HSFM_INLINE TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const				{ return _structure;								}
-	const MachineActivity&  activity()  const				{ return _activityHistory;							}
+	const MachineStructure& structure() const					{ return _structure;								}
+	const MachineActivity&  activity()  const					{ return _activityHistory;							}
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	void attachLogger(LoggerInterface* const logger)		{ _logger = logger;									}
+	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
 #endif
 
 protected:
 	void processTransitions();
-	void requestImmediate(const Request request);
-	void requestScheduled(const Request request)			{ 	_stateData.requestScheduled(request);			}
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	void getStateNames();

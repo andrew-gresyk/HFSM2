@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\deprecated.cpp" />
+    <ClCompile Include="..\..\test\deprecated_test.cpp" />
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_lib_bit_array.cpp" />
@@ -54,7 +54,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\machine_state.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\machine_state_data.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
-    <ClInclude Include="..\..\test\deprecated.hpp" />
+    <ClInclude Include="..\..\test\deprecated_test.hpp" />
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
     <ClInclude Include="..\..\test\test_planner.hpp" />
     <ClInclude Include="..\..\test\test_shared.hpp" />

@@ -51,7 +51,7 @@ List<TItem, NCapacity>::emplace(TArgs... args) {
 		HFSM_ASSERT(_vacantHead == INVALID);
 		HFSM_ASSERT(_vacantTail == INVALID);
 		HFSM_ASSERT(_count == CAPACITY);
-		HFSM_ASSERT(false);
+		HSFM_BREAK();
 
 		return INVALID;
 	}

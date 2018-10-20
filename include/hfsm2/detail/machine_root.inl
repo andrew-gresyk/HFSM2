@@ -246,23 +246,24 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 	{
 		unsigned changeCount = 0;
 
-		for (const auto& request : _requests) {
+		for (const Request& request : _requests) {
 			HFSM_IF_STRUCTURE(_lastTransitions << TransitionInfo(request, Method::UPDATE));
 
 			switch (request.type) {
 			case Request::RESTART:
 			case Request::RESUME:
-				requestImmediate(request);
+				_stateData.requestImmediate(request);
+				_apex.deepForwardRequest(_stateData, request.type);
 
 				++changeCount;
 				break;
 
 			case Request::SCHEDULE:
-				requestScheduled(request);
+				_stateData.requestScheduled(request.stateId);
 				break;
 
 			default:
-				HFSM_ASSERT(false);
+				HSFM_BREAK();
 			}
 		}
 		_requests.clear();
@@ -296,17 +297,6 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 	}
 
 	HFSM_IF_STRUCTURE(udpateActivity());
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-void
-_R<TC, TG, TPL, TA>::requestImmediate(const Request request) {
-	HFSM_ASSERT(STATE_COUNT > request.stateId);
-
-	_stateData.requestImmediate(request);
-	_apex.deepForwardRequest(_stateData, request.type);
 }
 
 //------------------------------------------------------------------------------

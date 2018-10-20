@@ -48,25 +48,26 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	_CS(StateData& stateData, const ForkID forkId);
 
-	inline void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
-	inline void   wideGuard				(const ShortIndex prong, FullControl& control);
+	HSFM_INLINE void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
+	HSFM_INLINE void   wideGuard			(const ShortIndex prong, FullControl& control);
 
-	inline void   wideEnterInitial		(						 Control& control);
-	inline void   wideEnter				(const ShortIndex prong, Control& control);
+	HSFM_INLINE void   wideEnterInitial		(						 Control& control);
+	HSFM_INLINE void   wideEnter			(const ShortIndex prong, Control& control);
 
-	inline Status wideUpdate			(const ShortIndex prong, FullControl& control);
+	HSFM_INLINE Status wideUpdate			(const ShortIndex prong, FullControl& control);
 
 	template <typename TEvent>
-	inline void   wideReact				(const ShortIndex prong, const TEvent& event,
-																 FullControl& control);
+	HSFM_INLINE void   wideReact			(const ShortIndex prong, const TEvent& event,
+																	 FullControl& control);
 
-	inline void   wideExit				(const ShortIndex prong, Control& control);
+	HSFM_INLINE void   wideExit				(const ShortIndex prong, Control& control);
 
-	inline void   wideForwardRequest	(StateData& stateData, const ShortIndex prong, const RequestType request);
-	inline void   wideRequestRemain		(StateData& stateData);
-	inline void   wideRequestRestart	(StateData& stateData);
-	inline void   wideRequestResume		(StateData& stateData, const ShortIndex prong);
-	inline void   wideChangeToRequested	(StateData& stateData, const ShortIndex prong, Control& control);
+	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const ShortIndex prong, const RequestType request);
+	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HSFM_INLINE void   wideRequestResume	(StateData& stateData, const ShortIndex prong);
+	HSFM_INLINE void   wideChangeToRequested(StateData& stateData, const ShortIndex prong,
+											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
@@ -115,25 +116,26 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	_CS(StateData& stateData, const ForkID forkId);
 
-	inline void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
-	inline void   wideGuard				(const ShortIndex prong, FullControl& control);
+	HSFM_INLINE void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
+	HSFM_INLINE void   wideGuard			(const ShortIndex prong, FullControl& control);
 
-	inline void   wideEnterInitial		(						 Control& control);
-	inline void   wideEnter				(const ShortIndex prong, Control& control);
+	HSFM_INLINE void   wideEnterInitial		(						 Control& control);
+	HSFM_INLINE void   wideEnter			(const ShortIndex prong, Control& control);
 
-	inline Status wideUpdate			(const ShortIndex prong, FullControl& control);
+	HSFM_INLINE Status wideUpdate			(const ShortIndex prong, FullControl& control);
 
 	template <typename TEvent>
-	inline void   wideReact				(const ShortIndex prong, const TEvent& event,
-				  												 FullControl& control);
+	HSFM_INLINE void   wideReact			(const ShortIndex prong, const TEvent& event,
+				  													 FullControl& control);
 
-	inline void   wideExit				(const ShortIndex prong, Control& control);
+	HSFM_INLINE void   wideExit				(const ShortIndex prong, Control& control);
 
-	inline void   wideForwardRequest	(StateData& stateData, const ShortIndex prong, const RequestType transition);
-	inline void   wideRequestRemain		(StateData& stateData);
-	inline void   wideRequestRestart	(StateData& stateData);
-	inline void   wideRequestResume		(StateData& stateData, const ShortIndex prong);
-	inline void   wideChangeToRequested	(StateData& stateData, const ShortIndex prong, Control& control);
+	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const ShortIndex prong, const RequestType transition);
+	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HSFM_INLINE void   wideRequestResume	(StateData& stateData, const ShortIndex prong);
+	HSFM_INLINE void   wideChangeToRequested(StateData& stateData, const ShortIndex prong,
+											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;

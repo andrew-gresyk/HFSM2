@@ -64,7 +64,7 @@ HSFM_IF_DEBUG(struct None {});
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-inline
+HSFM_INLINE
 void
 fill(T& a, const char value) {
 	memset(&a, (int) value, sizeof(a));
@@ -82,7 +82,7 @@ count(const T(&)[NCount]) {
 //------------------------------------------------------------------------------
 
 template <typename T, unsigned NCapacity>
-inline
+HSFM_INLINE
 const T*
 end(const T(& a)[NCapacity]) {
 	return &a[NCapacity];
@@ -91,7 +91,7 @@ end(const T(& a)[NCapacity]) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TReturn, typename T, unsigned NCapacity>
-inline
+HSFM_INLINE
 const TReturn*
 end(const T(& a)[NCapacity]) {
 	return reinterpret_cast<const TReturn*>(&a[NCapacity]);

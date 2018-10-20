@@ -8,15 +8,15 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct alignas(2 * sizeof(ShortIndex)) Parent {
-	inline Parent() = default;
+	HSFM_INLINE Parent() = default;
 
-	inline Parent(const ForkID forkId_,
-				  const ShortIndex prong_)
+	HSFM_INLINE Parent(const ForkID forkId_,
+					   const ShortIndex prong_)
 		: forkId{forkId_}
 		, prong{prong_}
 	{}
 
-	inline explicit operator bool() const {
+	HSFM_INLINE explicit operator bool() const {
 		return forkId != INVALID_FORK_ID &&
 			   prong  != INVALID_SHORT_INDEX;
 	}
@@ -46,10 +46,10 @@ struct RequestT {
 	template <typename T>
 	static constexpr bool contains() { return PayloadList::template contains<T>();	}
 
-	inline RequestT() = default;
+	HSFM_INLINE RequestT() = default;
 
-	inline RequestT(const Type type_,
-					   const StateID stateId_)
+	HSFM_INLINE RequestT(const Type type_,
+						 const StateID stateId_)
 		: type{type_}
 		, stateId{stateId_}
 	{
@@ -58,9 +58,9 @@ struct RequestT {
 
 	template <typename T,
 			  typename = typename std::enable_if<contains<T>(), T>::type>
-	inline RequestT(const Type type_,
-					const StateID stateId_,
-					T* const payload_)
+	HSFM_INLINE RequestT(const Type type_,
+						 const StateID stateId_,
+						 T* const payload_)
 		: type{type_}
 		, stateId{stateId_}
 		, payload{payload_}
@@ -179,14 +179,14 @@ struct StateDataT<ArgsT<TContext,
 	using CompoForks	= StaticArray<CompoFork,   COMPO_COUNT>;
 	using OrthoForks	= OrthoForksT<ORTHO_COUNT, ORTHO_STORAGE>;
 
-	inline const Parent& forkParent(const ForkID forkId) const;
-	inline const CompoFork* compoParent(const ForkID forkId) const;
+	HSFM_INLINE const Parent& forkParent(const ForkID forkId) const;
+	HSFM_INLINE const CompoFork* compoParent(const ForkID forkId) const;
 
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
 
 	void requestImmediate(const Request request);
-	void requestScheduled(const Request request);
+	void requestScheduled(const StateID stateId);
 
 	void clearOrthoRequested();
 
@@ -208,7 +208,16 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  typename TPayloadList,
 		  LongIndex NTaskCapacity>
-struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, NCompoCount, 0, 0, TPayloadList, NTaskCapacity>> {
+struct StateDataT<ArgsT<TContext,
+						TConfig,
+						TStateList,
+						TRegionList,
+						NCompoCount,
+						0,
+						0,
+						TPayloadList,
+						NTaskCapacity>>
+{
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 	using PayloadList	= TPayloadList;
@@ -222,15 +231,15 @@ struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, NCompoCount,
 	using CompoParents	= StaticArray<Parent,	 COMPO_COUNT>;
 	using CompoForks	= StaticArray<CompoFork, COMPO_COUNT>;
 
-	inline const Parent& forkParent(const ForkID forkId) const;
+	HSFM_INLINE const Parent& forkParent(const ForkID forkId) const;
 
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
 
 	void requestImmediate(const Request request);
-	void requestScheduled(const Request request);
+	void requestScheduled(const StateID stateId);
 
-	inline void clearOrthoRequested()					{}
+	HSFM_INLINE void clearOrthoRequested()										{}
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -248,7 +257,16 @@ template <typename TContext,
 		  LongIndex NOrthoUnits,
 		  typename TPayloadList,
 		  LongIndex NTaskCapacity>
-struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, 0, NOrthoCount, NOrthoUnits, TPayloadList, NTaskCapacity>> {
+struct StateDataT<ArgsT<TContext,
+						TConfig,
+						TStateList,
+						TRegionList,
+						0,
+						NOrthoCount,
+						NOrthoUnits,
+						TPayloadList,
+						NTaskCapacity>>
+{
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 	using PayloadList	= TPayloadList;
@@ -264,15 +282,15 @@ struct StateDataT<ArgsT<TContext, TConfig, TStateList, TRegionList, 0, NOrthoCou
 	using OrthoParents	= StaticArray<Parent,	   ORTHO_COUNT>;
 	using OrthoForks	= OrthoForksT<ORTHO_COUNT, ORTHO_STORAGE>;
 
-	inline const Parent& forkParent(const ForkID forkId) const;
+	HSFM_INLINE const Parent& forkParent(const ForkID forkId) const;
 
-	inline bool isActive   (const StateID) const		{ return true;			}
-	inline bool isResumable(const StateID) const		{ return false;			}
+	HSFM_INLINE bool isActive   (const StateID) const	{ return true;			}
+	HSFM_INLINE bool isResumable(const StateID) const	{ return false;			}
 
-	inline void requestImmediate(const Request)			{ HFSM_ASSERT(false);		}
-	inline void requestScheduled(const Request)			{ HFSM_ASSERT(false);		}
+	HSFM_INLINE void requestImmediate(const Request)	{ HSFM_BREAK();			}
+	HSFM_INLINE void requestScheduled(const Request)	{ HSFM_BREAK();			}
 
-	inline void clearOrthoRequested()					{}
+	HSFM_INLINE void clearOrthoRequested()										{}
 
 	StateParents stateParents;
 	OrthoParents orthoParents;

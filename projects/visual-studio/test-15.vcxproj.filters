@@ -15,9 +15,6 @@
     <ClCompile Include="..\..\test\main.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\deprecated.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_shared.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -39,6 +36,9 @@
     <ClCompile Include="..\..\test\test_lib_bit_array.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\deprecated_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\test_shared.hpp">
@@ -48,9 +48,6 @@
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_planner.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\deprecated.hpp">
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
@@ -126,6 +123,9 @@
       <Filter>hfsm\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_state_data.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\deprecated_test.hpp">
       <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>

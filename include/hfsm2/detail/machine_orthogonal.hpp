@@ -45,31 +45,32 @@ struct _O final {
 
 	_O(StateData& stateData, const Parent parent);
 
-	inline		 OrthoFork& orthoRequested(		 StateData& stateData)		 { return stateData.orthoRequested[ORTHO_INDEX];	}
-	inline const OrthoFork& orthoRequested(const StateData& stateData) const { return stateData.orthoRequested[ORTHO_INDEX];	}
+	HSFM_INLINE		  OrthoFork& orthoRequested(	  StateData& stateData)		  { return stateData.orthoRequested[ORTHO_INDEX];	}
+	HSFM_INLINE const OrthoFork& orthoRequested(const StateData& stateData) const { return stateData.orthoRequested[ORTHO_INDEX];	}
 
-	inline		 OrthoFork& orthoRequested(		 Control&   control)		 { return orthoRequested(control.stateData());		}
-	inline const OrthoFork& orthoRequested(const Control&   control)   const { return orthoRequested(control.stateData());		}
+	HSFM_INLINE		  OrthoFork& orthoRequested(	  Control&   control)		  { return orthoRequested(control.stateData());		}
+	HSFM_INLINE const OrthoFork& orthoRequested(const Control&   control)   const { return orthoRequested(control.stateData());		}
 
-	inline void   deepForwardGuard		(FullControl& control);
-	inline void   deepGuard				(FullControl& control);
+	HSFM_INLINE void   deepForwardGuard		(FullControl& control);
+	HSFM_INLINE void   deepGuard			(FullControl& control);
 
-	inline void   deepEnterInitial		(Control& control);
-	inline void   deepEnter				(Control& control);
+	HSFM_INLINE void   deepEnterInitial		(Control& control);
+	HSFM_INLINE void   deepEnter			(Control& control);
 
-	inline Status deepUpdate			(FullControl& control);
+	HSFM_INLINE Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	inline void   deepReact				(const TEvent& event,
-										 FullControl& control);
+	HSFM_INLINE void   deepReact			(const TEvent& event,
+											 FullControl& control);
 
-	inline void   deepExit				(Control& control);
+	HSFM_INLINE void   deepExit				(Control& control);
 
-	inline void   deepForwardRequest	(StateData& stateData, const RequestType transition);
-	inline void   deepRequestRemain		(StateData& stateData);
-	inline void   deepRequestRestart	(StateData& stateData);
-	inline void   deepRequestResume		(StateData& stateData);
-	inline void   deepChangeToRequested	(StateData& stateData, Control& control);
+	HSFM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType transition);
+	HSFM_INLINE void   deepRequestRemain	(StateData& stateData);
+	HSFM_INLINE void   deepRequestRestart	(StateData& stateData);
+	HSFM_INLINE void   deepRequestResume	(StateData& stateData);
+	HSFM_INLINE void   deepChangeToRequested(StateData& stateData,
+											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;

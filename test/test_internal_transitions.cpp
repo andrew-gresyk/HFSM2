@@ -1,5 +1,7 @@
 #include "test_internal_transitions.hpp"
 
+using namespace test_internal_transitions;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {

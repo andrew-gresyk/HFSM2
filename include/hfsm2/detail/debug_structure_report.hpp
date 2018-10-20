@@ -30,10 +30,10 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 	StructureStateInfo() = default;
 
-	inline StructureStateInfo(const LongIndex parent_,
-							  const RegionType region_,
-							  const ShortIndex depth_,
-							  const char* const name_)
+	HSFM_INLINE StructureStateInfo(const LongIndex parent_,
+								   const RegionType region_,
+								   const ShortIndex depth_,
+								   const char* const name_)
 		: name(name_)
 		, parent(parent_)
 		, region(region_)
@@ -54,7 +54,7 @@ using StructureStateInfos = ArrayView<StructureStateInfo>;
 
 template <typename TPayloadList>
 Transition
-inline get(const typename RequestT<TPayloadList>::Type type) {
+HSFM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
 	using Request = RequestT<TPayloadList>;
 
 	switch (type) {
@@ -65,7 +65,7 @@ inline get(const typename RequestT<TPayloadList>::Type type) {
 		case Request::SCHEDULE:
 			return Transition::SCHEDULE;
 		default:
-			HFSM_ASSERT(false);
+			HSFM_BREAK();
 			return Transition::RESTART;
 	}
 }
@@ -77,10 +77,10 @@ struct alignas(4) TransitionInfoT {
 	using PayloadList = TPayloadList;
 	using Request	  = RequestT<PayloadList>;
 
-	inline TransitionInfoT() = default;
+	HSFM_INLINE TransitionInfoT() = default;
 
-	inline TransitionInfoT(const Request transition_,
-						   const Method method_)
+	HSFM_INLINE TransitionInfoT(const Request transition_,
+								const Method method_)
 		: stateId{transition_.stateId}
 		, method(method_)
 		, transition(get<PayloadList>(transition_.type))

@@ -1,10 +1,13 @@
 #define HFSM_ENABLE_ASSERT
-#include <hfsm2/machine.hpp>
+//#include <hfsm2/machine.hpp>
+#include <hfsm2/machine_dev.hpp>
 
 #include <algorithm>
 #include <vector>
 
-#include "deprecated.hpp"
+#include "deprecated_test.hpp"
+
+using namespace deprecated_test;
 
 ////////////////////////////////////////////////////////////////////////////////
 

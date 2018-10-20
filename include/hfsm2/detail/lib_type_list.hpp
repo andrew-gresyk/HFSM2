@@ -127,26 +127,26 @@ public:
 		return Types::template contains<T>();
 	}
 
-	inline VariantT() = default;
+	HSFM_INLINE VariantT() = default;
 
 	template <typename T,
 			  typename = typename std::enable_if<contains<T>()>::type>
-	inline VariantT(T* const p)
+	HSFM_INLINE VariantT(T* const p)
 		: _pointer(p)
 		, _index(index<T>())
 	{
 		HFSM_ASSERT(_index != INVALID_LONG_INDEX);
 	}
 
-	inline explicit operator bool() const { return _index != INVALID_LONG_INDEX; }
+	HSFM_INLINE explicit operator bool() const { return _index != INVALID_LONG_INDEX; }
 
-	inline void reset() {
+	HSFM_INLINE void reset() {
 		_pointer = nullptr;
 		_index = INVALID_LONG_INDEX;
 	}
 
 	template <typename T>
-	inline typename std::enable_if<contains<T>(), T>::type*
+	HSFM_INLINE typename std::enable_if<contains<T>(), T>::type*
 	get() const {
 		const auto INDEX = index<T>();
 
