@@ -50,7 +50,9 @@ template <typename T>
 struct TypeList_EntryT {};
 
 template <typename T, std::size_t N>
-struct TypeList_EntryN {};
+struct TypeList_EntryN
+	: TypeList_EntryT<T>
+{};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -59,8 +61,7 @@ struct TypeList_Impl;
 
 template <LongIndex... Ns, typename... Ts>
 struct TypeList_Impl<IndexSequence<Ns...>, Ts...>
-	: TypeList_EntryT<Ts>...
-	, TypeList_EntryN<Ts, Ns>...
+	: TypeList_EntryN<Ts, Ns>...
 {
 	template <typename T, std::size_t N>
 	static constexpr LongIndex select(TypeList_EntryN<T, N>) { return (LongIndex) N; }

@@ -39,6 +39,9 @@
     <ClCompile Include="..\..\test\deprecated_test.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_headless.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\test_shared.hpp">
@@ -126,6 +129,9 @@
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\deprecated_test.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_headless.hpp">
       <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>

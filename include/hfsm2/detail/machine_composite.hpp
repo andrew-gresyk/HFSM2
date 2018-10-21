@@ -42,9 +42,8 @@ struct _C {
 	using HeadState		= _S <HEAD_ID, Args, Head>;
 	using SubStates		= _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, 0, TSubStates...>;
 	using Forward		= _CF<Head, TSubStates...>;
-	using SubStateList	= typename Forward::StateList;
 
-	static constexpr ShortIndex REGION_SIZE	= SubStateList::SIZE;
+	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
 
 	_C(StateData& stateData, const Parent parent);
 

@@ -39,9 +39,8 @@ struct _O final {
 	using HeadState		= _S <HEAD_ID, Args, Head>;
 	using SubStates		= _OS<HEAD_ID + 1, COMPO_INDEX, ORTHO_INDEX + 1, Args, 0, TSubStates...>;
 	using Forward		= _OF<Head, TSubStates...>;
-	using SubStateList	= typename Forward::StateList;
 
-	static constexpr ShortIndex REGION_SIZE	= SubStateList::SIZE;
+	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
 
 	_O(StateData& stateData, const Parent parent);
 

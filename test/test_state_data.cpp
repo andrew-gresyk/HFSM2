@@ -22,9 +22,7 @@ TEST_CASE("State data test", "[machine]") {
 	Context _;
 	FSM::Instance machine(_);
 
-
 	WHEN("FSM is activated initially") {
-
 		{
 			const Types states = {
 				FSM::stateId<Apex>(),
