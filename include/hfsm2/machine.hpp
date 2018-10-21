@@ -1168,7 +1168,9 @@ template <typename T>
 struct TypeList_EntryT {};
 
 template <typename T, std::size_t N>
-struct TypeList_EntryN {};
+struct TypeList_EntryN
+	: TypeList_EntryT<T>
+{};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1177,8 +1179,7 @@ struct TypeList_Impl;
 
 template <LongIndex... Ns, typename... Ts>
 struct TypeList_Impl<IndexSequence<Ns...>, Ts...>
-	: TypeList_EntryT<Ts>...
-	, TypeList_EntryN<Ts, Ns>...
+	: TypeList_EntryN<Ts, Ns>...
 {
 	template <typename T, std::size_t N>
 	static constexpr LongIndex select(TypeList_EntryN<T, N>) { return (LongIndex) N; }
@@ -4598,9 +4599,8 @@ struct _C {
 	using HeadState		= _S <HEAD_ID, Args, Head>;
 	using SubStates		= _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, 0, TSubStates...>;
 	using Forward		= _CF<Head, TSubStates...>;
-	using SubStateList	= typename Forward::StateList;
 
-	static constexpr ShortIndex REGION_SIZE	= SubStateList::SIZE;
+	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
 
 	_C(StateData& stateData, const Parent parent);
 
@@ -5418,9 +5418,8 @@ struct _O final {
 	using HeadState		= _S <HEAD_ID, Args, Head>;
 	using SubStates		= _OS<HEAD_ID + 1, COMPO_INDEX, ORTHO_INDEX + 1, Args, 0, TSubStates...>;
 	using Forward		= _OF<Head, TSubStates...>;
-	using SubStateList	= typename Forward::StateList;
 
-	static constexpr ShortIndex REGION_SIZE	= SubStateList::SIZE;
+	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
 
 	_O(StateData& stateData, const Parent parent);
 
