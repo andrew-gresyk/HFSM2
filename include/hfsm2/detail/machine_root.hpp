@@ -89,82 +89,82 @@ public:
 	void update();
 
 	template <typename TEvent>
-	HSFM_INLINE void react(const TEvent& event);
+	HFSM_INLINE void react(const TEvent& event);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);			}
-	HSFM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);			}
+	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);			}
+	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);			}
 
-	HSFM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
-
-	template <typename TState>
-	HSFM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());			}
+	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
 	template <typename TState>
-	HSFM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
+	HFSM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());			}
 
 	template <typename TState>
-	HSFM_INLINE bool isScheduled() const						{ return isResumable<TState>();						}
+	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
+
+	template <typename TState>
+	HFSM_INLINE bool isScheduled() const						{ return isResumable<TState>();						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE void changeTo(const StateID stateId);
-	HSFM_INLINE void resume	 (const StateID stateId);
-	HSFM_INLINE void schedule(const StateID stateId);
+	HFSM_INLINE void changeTo(const StateID stateId);
+	HFSM_INLINE void resume	 (const StateID stateId);
+	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HSFM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
 
 	template <typename TState>
-	HSFM_INLINE void resume	()									{ resume  (stateId<TState>());						}
+	HFSM_INLINE void resume	()									{ resume  (stateId<TState>());						}
 
 	template <typename TState>
-	HSFM_INLINE void schedule()									{ schedule(stateId<TState>());						}
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TPayload>
-	HSFM_INLINE void changeTo(const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void changeTo(const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
-	HSFM_INLINE void resume  (const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void resume  (const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
-	HSFM_INLINE void schedule(const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void schedule(const StateID stateId, TPayload* const payload);
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
+	HFSM_INLINE void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
+	HFSM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
+	HFSM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE void resetStateData(const StateID stateId);
+	HFSM_INLINE void resetStateData(const StateID stateId);
 
 	template <typename TPayload>
-	HSFM_INLINE void setStateData  (const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void setStateData  (const StateID stateId, TPayload* const payload);
 
-	HSFM_INLINE bool isStateDataSet(const StateID stateId) const;
+	HFSM_INLINE bool isStateDataSet(const StateID stateId) const;
 
 	template <typename TPayload>
-	HSFM_INLINE TPayload* getStateData(const StateID stateId) const;
+	HFSM_INLINE TPayload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	HSFM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
+	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE void setStateData  (TPayload* const payload)	{ setStateData  (stateId<TState>(), payload);		}
+	HFSM_INLINE void setStateData  (TPayload* const payload)	{ setStateData  (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	HSFM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
+	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
+	HFSM_INLINE TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

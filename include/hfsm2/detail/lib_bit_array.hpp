@@ -18,15 +18,15 @@ class BitT {
 	friend class BitArrayT;
 
 private:
-	HSFM_INLINE BitT(BitArray& array,
+	HFSM_INLINE BitT(BitArray& array,
 				const Index index)
 		: _array(array)
 		, _index(index)
 	{}
 
 public:
-	HSFM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
-	HSFM_INLINE void operator = (const bool value)	{ _array.set(_index, value);	}
+	HFSM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
+	HFSM_INLINE void operator = (const bool value)	{ _array.set(_index, value);	}
 
 private:
 	BitArray& _array;
@@ -45,14 +45,14 @@ class ConstBitT {
 	friend class BitArrayT;
 
 private:
-	HSFM_INLINE ConstBitT(const BitArray& array,
+	HFSM_INLINE ConstBitT(const BitArray& array,
 						  const Index index)
 		: _array(array)
 		, _index(index)
 	{}
 
 public:
-	HSFM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
+	HFSM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
 
 private:
 	const BitArray& _array;
@@ -87,24 +87,24 @@ protected:
 	static constexpr Index OFFSET				= (VIEW_SIZE + ITEM_ALIGNMENT - 1) / ITEM_ALIGNMENT * ITEM_ALIGNMENT;
 
 protected:
-	HSFM_INLINE BitArrayT(const Index capacity_);
+	HFSM_INLINE BitArrayT(const Index capacity_);
 
 public:
-	HSFM_INLINE void clear();
+	HFSM_INLINE void clear();
 
-	HSFM_INLINE explicit operator bool() const;
+	HFSM_INLINE explicit operator bool() const;
 
-	HSFM_INLINE		Bit operator[] (const Index i)			{ return	  Bit{*this, i}; }
-	HSFM_INLINE ConstBit operator[] (const Index i) const	{ return ConstBit{*this, i}; }
+	HFSM_INLINE		Bit operator[] (const Index i)			{ return	  Bit{*this, i}; }
+	HFSM_INLINE ConstBit operator[] (const Index i) const	{ return ConstBit{*this, i}; }
 
 protected:
-	HSFM_INLINE bool get(const Index i) const;
-	HSFM_INLINE void set(const Index i, const bool value);
+	HFSM_INLINE bool get(const Index i) const;
+	HFSM_INLINE void set(const Index i, const bool value);
 
-	HSFM_INLINE		 StorageUnit* storage()			{ return reinterpret_cast<		StorageUnit*>(((uintptr_t)this) + OFFSET);	}
-	HSFM_INLINE const StorageUnit* storage() const	{ return reinterpret_cast<const StorageUnit*>(((uintptr_t)this) + OFFSET);	}
+	HFSM_INLINE		 StorageUnit* storage()			{ return reinterpret_cast<		StorageUnit*>(((uintptr_t)this) + OFFSET);	}
+	HFSM_INLINE const StorageUnit* storage() const	{ return reinterpret_cast<const StorageUnit*>(((uintptr_t)this) + OFFSET);	}
 
-	HSFM_INLINE Index storageUnitCount() const		{ return (capacity + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;			}
+	HFSM_INLINE Index storageUnitCount() const		{ return (capacity + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;			}
 
 public:
 	const Index capacity;
@@ -128,7 +128,7 @@ class BitArrayStorageT final
 	static constexpr Index STORAGE_UNIT_COUNT	= (CAPACITY + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;
 
 public:
-	HSFM_INLINE BitArrayStorageT();
+	HFSM_INLINE BitArrayStorageT();
 
 private:
 	StorageUnit _storage[STORAGE_UNIT_COUNT];

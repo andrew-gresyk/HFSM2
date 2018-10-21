@@ -47,27 +47,27 @@ struct _C {
 
 	_C(StateData& stateData, const Parent parent);
 
-	HSFM_INLINE CompoFork& compoFork		(StateData& stateData)	{ return stateData.compoForks[COMPO_INDEX];	}
-	HSFM_INLINE CompoFork& compoFork		(Control&   control)	{ return compoFork(control.stateData());	}
+	HFSM_INLINE CompoFork& compoFork		(StateData& stateData)	{ return stateData.compoForks[COMPO_INDEX];	}
+	HFSM_INLINE CompoFork& compoFork		(Control&   control)	{ return compoFork(control.stateData());	}
 
-	HSFM_INLINE void   deepForwardGuard		(FullControl& control);
-	HSFM_INLINE void   deepGuard			(FullControl& control);
+	HFSM_INLINE void   deepForwardGuard		(FullControl& control);
+	HFSM_INLINE void   deepGuard			(FullControl& control);
 
-	HSFM_INLINE void   deepEnterInitial		(Control& control);
-	HSFM_INLINE void   deepEnter			(Control& control);
+	HFSM_INLINE void   deepEnterInitial		(Control& control);
+	HFSM_INLINE void   deepEnter			(Control& control);
 
-	HSFM_INLINE Status deepUpdate			(FullControl& control);
+	HFSM_INLINE Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   deepReact			(const TEvent& event,
+	HFSM_INLINE void   deepReact			(const TEvent& event,
 											 FullControl& control);
 
-	HSFM_INLINE void   deepExit				(Control& control);
+	HFSM_INLINE void   deepExit				(Control& control);
 
-	HSFM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType request);
-	HSFM_INLINE void   deepRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   deepRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   deepRequestResume	(StateData& stateData);
+	HFSM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType request);
+	HFSM_INLINE void   deepRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   deepRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   deepRequestResume	(StateData& stateData);
 				void   deepChangeToRequested(StateData& stateData, Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT

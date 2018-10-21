@@ -44,7 +44,7 @@
 #include <utility>		// @GCC: std::conditional<>, move(), forward()
 #endif
 
-#define HSFM_INLINE														  inline
+#define HFSM_INLINE														  inline
 
 //------------------------------------------------------------------------------
 
@@ -113,7 +113,7 @@ HSFM_IF_DEBUG(struct None {});
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-HSFM_INLINE
+HFSM_INLINE
 void
 fill(T& a, const char value) {
 	memset(&a, (int) value, sizeof(a));
@@ -131,7 +131,7 @@ count(const T(&)[NCount]) {
 //------------------------------------------------------------------------------
 
 template <typename T, unsigned NCapacity>
-HSFM_INLINE
+HFSM_INLINE
 const T*
 end(const T(& a)[NCapacity]) {
 	return &a[NCapacity];
@@ -140,7 +140,7 @@ end(const T(& a)[NCapacity]) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TReturn, typename T, unsigned NCapacity>
-HSFM_INLINE
+HFSM_INLINE
 const TReturn*
 end(const T(& a)[NCapacity]) {
 	return reinterpret_cast<const TReturn*>(&a[NCapacity]);
@@ -204,21 +204,21 @@ public:
 	friend class Array;
 
 private:
-	HSFM_INLINE Iterator(Container& container, const LongIndex cursor)
+	HFSM_INLINE Iterator(Container& container, const LongIndex cursor)
 		: _container(container)
 		, _cursor(cursor)
 	{}
 
 public:
-	HSFM_INLINE bool operator != (const Iterator<Container>& dummy) const;
+	HFSM_INLINE bool operator != (const Iterator<Container>& dummy) const;
 
-	HSFM_INLINE Iterator& operator ++();
+	HFSM_INLINE Iterator& operator ++();
 
-	HSFM_INLINE		  Item& operator *()	   { return  _container[_cursor]; }
-	HSFM_INLINE const Item& operator *() const { return  _container[_cursor]; }
+	HFSM_INLINE		  Item& operator *()	   { return  _container[_cursor]; }
+	HFSM_INLINE const Item& operator *() const { return  _container[_cursor]; }
 
-	HSFM_INLINE		  Item* operator->()	   { return &_container[_cursor]; }
-	HSFM_INLINE const Item* operator->() const { return &_container[_cursor]; }
+	HFSM_INLINE		  Item* operator->()	   { return &_container[_cursor]; }
+	HFSM_INLINE const Item* operator->() const { return &_container[_cursor]; }
 
 private:
 	Container& _container;
@@ -238,19 +238,19 @@ public:
 	friend class Array;
 
 private:
-	HSFM_INLINE Iterator(const Container& container, const LongIndex cursor)
+	HFSM_INLINE Iterator(const Container& container, const LongIndex cursor)
 		: _container(container)
 		, _cursor(cursor)
 	{}
 
 public:
-	HSFM_INLINE bool operator != (const Iterator<const Container>& dummy) const;
+	HFSM_INLINE bool operator != (const Iterator<const Container>& dummy) const;
 
-	HSFM_INLINE Iterator& operator ++();
+	HFSM_INLINE Iterator& operator ++();
 
-	HSFM_INLINE const Item& operator *() const { return _container[_cursor]; }
+	HFSM_INLINE const Item& operator *() const { return _container[_cursor]; }
 
-	HSFM_INLINE const Item* operator->() const { return &operator *();		 }
+	HFSM_INLINE const Item* operator->() const { return &operator *();		 }
 
 private:
 	const Container& _container;
@@ -335,32 +335,32 @@ protected:
 	~ArrayView();
 
 public:
-	HSFM_INLINE void clear()										{ _count = 0;		}
+	HFSM_INLINE void clear()										{ _count = 0;		}
 
-	HSFM_INLINE LongIndex resize(const LongIndex count);
+	HFSM_INLINE LongIndex resize(const LongIndex count);
 
 	template <typename TValue>
-	HSFM_INLINE LongIndex operator << (TValue&& value);
+	HFSM_INLINE LongIndex operator << (TValue&& value);
 
-	HSFM_INLINE		  Item& operator[] (const LongIndex i)			{ return get(i);	}
-	HSFM_INLINE const Item& operator[] (const LongIndex i) const	{ return get(i);	}
+	HFSM_INLINE		  Item& operator[] (const LongIndex i)			{ return get(i);	}
+	HFSM_INLINE const Item& operator[] (const LongIndex i) const	{ return get(i);	}
 
-	HSFM_INLINE LongIndex count() const								{ return _count;	}
-	HSFM_INLINE LongIndex capacity() const							{ return _capacity;	}
-
-protected:
-	HSFM_INLINE LongIndex first() const								{ return 0;			}
-	HSFM_INLINE LongIndex limit() const								{ return _count;	}
-
-	HSFM_INLINE LongIndex prev(const LongIndex i) const				{ return i - 1;		}
-	HSFM_INLINE LongIndex next(const LongIndex i) const				{ return i + 1;		}
-
-	HSFM_INLINE		  Item& get(const LongIndex i);
-	HSFM_INLINE const Item& get(const LongIndex i) const;
+	HFSM_INLINE LongIndex count() const								{ return _count;	}
+	HFSM_INLINE LongIndex capacity() const							{ return _capacity;	}
 
 protected:
-	HSFM_INLINE		  Item* data()		 { return reinterpret_cast<		 Item*>(((uintptr_t)this) + OFFSET); }
-	HSFM_INLINE const Item* data() const { return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET); }
+	HFSM_INLINE LongIndex first() const								{ return 0;			}
+	HFSM_INLINE LongIndex limit() const								{ return _count;	}
+
+	HFSM_INLINE LongIndex prev(const LongIndex i) const				{ return i - 1;		}
+	HFSM_INLINE LongIndex next(const LongIndex i) const				{ return i + 1;		}
+
+	HFSM_INLINE		  Item& get(const LongIndex i);
+	HFSM_INLINE const Item& get(const LongIndex i) const;
+
+protected:
+	HFSM_INLINE		  Item* data()		 { return reinterpret_cast<		 Item*>(((uintptr_t)this) + OFFSET); }
+	HFSM_INLINE const Item* data() const { return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET); }
 
 protected:
 	LongIndex _count = 0;
@@ -466,12 +466,12 @@ public:
 	using Index = typename UnsignedIndex<CAPACITY>::Type;
 
 public:
-	HSFM_INLINE StaticArray() = default;
+	HFSM_INLINE StaticArray() = default;
 
-	HSFM_INLINE		  Item& operator[] (const LongIndex i);
-	HSFM_INLINE const Item& operator[] (const LongIndex i) const;
+	HFSM_INLINE		  Item& operator[] (const LongIndex i);
+	HFSM_INLINE const Item& operator[] (const LongIndex i) const;
 
-	HSFM_INLINE LongIndex count() const						{ return CAPACITY;	}
+	HFSM_INLINE LongIndex count() const						{ return CAPACITY;	}
 
 private:
 	Item _items[CAPACITY];
@@ -497,15 +497,15 @@ public:
 	using Item = typename View::Item;
 
 public:
-	HSFM_INLINE Array();
+	HFSM_INLINE Array();
 
-	HSFM_INLINE Iterator<	   Array>  begin()		 { return Iterator<		 Array>(*this, View::first());	}
-	HSFM_INLINE Iterator<const Array>  begin() const { return Iterator<const Array>(*this, View::first());	}
-	HSFM_INLINE Iterator<const Array> cbegin() const { return Iterator<const Array>(*this, View::first());	}
+	HFSM_INLINE Iterator<	   Array>  begin()		 { return Iterator<		 Array>(*this, View::first());	}
+	HFSM_INLINE Iterator<const Array>  begin() const { return Iterator<const Array>(*this, View::first());	}
+	HFSM_INLINE Iterator<const Array> cbegin() const { return Iterator<const Array>(*this, View::first());	}
 
-	HSFM_INLINE Iterator<	   Array>	 end()		 { return Iterator<		 Array>(*this, DUMMY);			}
-	HSFM_INLINE Iterator<const Array>	 end() const { return Iterator<const Array>(*this, DUMMY);			}
-	HSFM_INLINE Iterator<const Array>   cend() const { return Iterator<const Array>(*this, DUMMY);			}
+	HFSM_INLINE Iterator<	   Array>	 end()		 { return Iterator<		 Array>(*this, DUMMY);			}
+	HFSM_INLINE Iterator<const Array>	 end() const { return Iterator<const Array>(*this, DUMMY);			}
+	HFSM_INLINE Iterator<const Array>   cend() const { return Iterator<const Array>(*this, DUMMY);			}
 
 private:
 	Item _storage[CAPACITY];
@@ -571,15 +571,15 @@ class BitT {
 	friend class BitArrayT;
 
 private:
-	HSFM_INLINE BitT(BitArray& array,
+	HFSM_INLINE BitT(BitArray& array,
 				const Index index)
 		: _array(array)
 		, _index(index)
 	{}
 
 public:
-	HSFM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
-	HSFM_INLINE void operator = (const bool value)	{ _array.set(_index, value);	}
+	HFSM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
+	HFSM_INLINE void operator = (const bool value)	{ _array.set(_index, value);	}
 
 private:
 	BitArray& _array;
@@ -598,14 +598,14 @@ class ConstBitT {
 	friend class BitArrayT;
 
 private:
-	HSFM_INLINE ConstBitT(const BitArray& array,
+	HFSM_INLINE ConstBitT(const BitArray& array,
 						  const Index index)
 		: _array(array)
 		, _index(index)
 	{}
 
 public:
-	HSFM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
+	HFSM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
 
 private:
 	const BitArray& _array;
@@ -640,24 +640,24 @@ protected:
 	static constexpr Index OFFSET				= (VIEW_SIZE + ITEM_ALIGNMENT - 1) / ITEM_ALIGNMENT * ITEM_ALIGNMENT;
 
 protected:
-	HSFM_INLINE BitArrayT(const Index capacity_);
+	HFSM_INLINE BitArrayT(const Index capacity_);
 
 public:
-	HSFM_INLINE void clear();
+	HFSM_INLINE void clear();
 
-	HSFM_INLINE explicit operator bool() const;
+	HFSM_INLINE explicit operator bool() const;
 
-	HSFM_INLINE		Bit operator[] (const Index i)			{ return	  Bit{*this, i}; }
-	HSFM_INLINE ConstBit operator[] (const Index i) const	{ return ConstBit{*this, i}; }
+	HFSM_INLINE		Bit operator[] (const Index i)			{ return	  Bit{*this, i}; }
+	HFSM_INLINE ConstBit operator[] (const Index i) const	{ return ConstBit{*this, i}; }
 
 protected:
-	HSFM_INLINE bool get(const Index i) const;
-	HSFM_INLINE void set(const Index i, const bool value);
+	HFSM_INLINE bool get(const Index i) const;
+	HFSM_INLINE void set(const Index i, const bool value);
 
-	HSFM_INLINE		 StorageUnit* storage()			{ return reinterpret_cast<		StorageUnit*>(((uintptr_t)this) + OFFSET);	}
-	HSFM_INLINE const StorageUnit* storage() const	{ return reinterpret_cast<const StorageUnit*>(((uintptr_t)this) + OFFSET);	}
+	HFSM_INLINE		 StorageUnit* storage()			{ return reinterpret_cast<		StorageUnit*>(((uintptr_t)this) + OFFSET);	}
+	HFSM_INLINE const StorageUnit* storage() const	{ return reinterpret_cast<const StorageUnit*>(((uintptr_t)this) + OFFSET);	}
 
-	HSFM_INLINE Index storageUnitCount() const		{ return (capacity + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;			}
+	HFSM_INLINE Index storageUnitCount() const		{ return (capacity + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;			}
 
 public:
 	const Index capacity;
@@ -681,7 +681,7 @@ class BitArrayStorageT final
 	static constexpr Index STORAGE_UNIT_COUNT	= (CAPACITY + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;
 
 public:
-	HSFM_INLINE BitArrayStorageT();
+	HFSM_INLINE BitArrayStorageT();
 
 private:
 	StorageUnit _storage[STORAGE_UNIT_COUNT];
@@ -811,7 +811,7 @@ private:
 		Item item;
 		Links links;
 
-		HSFM_INLINE Cell()
+		HFSM_INLINE Cell()
 			: links{}
 		{}
 	};
@@ -824,10 +824,10 @@ public:
 
 	void remove(const Index i);
 
-	HSFM_INLINE		  Item& operator[] (const Index i);
-	HSFM_INLINE const Item& operator[] (const Index i) const;
+	HFSM_INLINE		  Item& operator[] (const Index i);
+	HFSM_INLINE const Item& operator[] (const Index i) const;
 
-	HSFM_INLINE Index count() const { return _count; }
+	HFSM_INLINE Index count() const { return _count; }
 
 private:
 	HSFM_IF_ASSERT(void verifyStructure(const Index occupied = INVALID) const);
@@ -1031,12 +1031,12 @@ public:
 	static_assert(STORAGE_SIZE > 0, "Storage size must be positive");
 
 public:
-	HSFM_INLINE ObjectPool();
+	HFSM_INLINE ObjectPool();
 
-	HSFM_INLINE ShortIndex count() const					{ return _count;	}
+	HFSM_INLINE ShortIndex count() const					{ return _count;	}
 
-	HSFM_INLINE		  Interface& operator[] (const ShortIndex i);
-	HSFM_INLINE const Interface& operator[] (const ShortIndex i) const;
+	HFSM_INLINE		  Interface& operator[] (const ShortIndex i);
+	HFSM_INLINE const Interface& operator[] (const ShortIndex i) const;
 
 	template <typename TItem, typename... TArgs>
 	ShortIndex emplace(TArgs&&... args);
@@ -1246,26 +1246,26 @@ public:
 		return Types::template contains<T>();
 	}
 
-	HSFM_INLINE VariantT() = default;
+	HFSM_INLINE VariantT() = default;
 
 	template <typename T,
 			  typename = typename std::enable_if<contains<T>()>::type>
-	HSFM_INLINE VariantT(T* const p)
+	HFSM_INLINE VariantT(T* const p)
 		: _pointer(p)
 		, _index(index<T>())
 	{
 		HFSM_ASSERT(_index != INVALID_LONG_INDEX);
 	}
 
-	HSFM_INLINE explicit operator bool() const { return _index != INVALID_LONG_INDEX; }
+	HFSM_INLINE explicit operator bool() const { return _index != INVALID_LONG_INDEX; }
 
-	HSFM_INLINE void reset() {
+	HFSM_INLINE void reset() {
 		_pointer = nullptr;
 		_index = INVALID_LONG_INDEX;
 	}
 
 	template <typename T>
-	HSFM_INLINE typename std::enable_if<contains<T>(), T>::type*
+	HFSM_INLINE typename std::enable_if<contains<T>(), T>::type*
 	get() const {
 		const auto INDEX = index<T>();
 
@@ -1482,7 +1482,7 @@ struct TaskLink {
 	//using PayloadList	= TPayloadList;
 	//using PayloadBox		= typename PayloadList::Variant;
 
-	HSFM_INLINE TaskLink(const StateID origin_,
+	HFSM_INLINE TaskLink(const StateID origin_,
 						 const StateID destination_)
 		: origin(origin_)
 		, destination(destination_)
@@ -1669,21 +1669,21 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Iterator {
-		HSFM_INLINE Iterator(PlanT& plan);
+		HFSM_INLINE Iterator(PlanT& plan);
 
-		HSFM_INLINE explicit operator bool() const;
+		HFSM_INLINE explicit operator bool() const;
 
-		HSFM_INLINE void operator ++();
+		HFSM_INLINE void operator ++();
 
-		HSFM_INLINE		  TaskLink& operator  *()	    { return  _plan._planData.taskLinks[_curr];	}
-		HSFM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE		  TaskLink& operator  *()	    { return  _plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
 
-		HSFM_INLINE		  TaskLink* operator ->()	    { return &_plan._planData.taskLinks[_curr];	}
-		HSFM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE		  TaskLink* operator ->()	    { return &_plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
 
-		HSFM_INLINE void remove();
+		HFSM_INLINE void remove();
 
-		HSFM_INLINE LongIndex next() const;
+		HFSM_INLINE LongIndex next() const;
 
 		PlanT& _plan;
 		LongIndex _curr;
@@ -1693,7 +1693,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HSFM_INLINE PlanT(PlanData& planData,
+	HFSM_INLINE PlanT(PlanData& planData,
 					  const RegionID regionId);
 
 	template <typename T>
@@ -1703,19 +1703,19 @@ private:
 	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
 
 public:
-	HSFM_INLINE explicit operator bool() const;
+	HFSM_INLINE explicit operator bool() const;
 
-	HSFM_INLINE void clear();
+	HFSM_INLINE void clear();
 
 	void add(const StateID origin,
 			 const StateID destination);
 
 	template <typename TOrigin, typename TDestination>
-	HSFM_INLINE void add()			{ add(stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE void add()			{ add(stateId<TOrigin>(), stateId<TDestination>());	}
 
 	void remove(const LongIndex task);
 
-	HSFM_INLINE Iterator begin()			{ return Iterator{*this};					}
+	HFSM_INLINE Iterator begin()			{ return Iterator{*this};					}
 
 private:
 	PlanData& _planData;
@@ -1933,15 +1933,15 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct alignas(2 * sizeof(ShortIndex)) Parent {
-	HSFM_INLINE Parent() = default;
+	HFSM_INLINE Parent() = default;
 
-	HSFM_INLINE Parent(const ForkID forkId_,
+	HFSM_INLINE Parent(const ForkID forkId_,
 					   const ShortIndex prong_)
 		: forkId{forkId_}
 		, prong{prong_}
 	{}
 
-	HSFM_INLINE explicit operator bool() const {
+	HFSM_INLINE explicit operator bool() const {
 		return forkId != INVALID_FORK_ID &&
 			   prong  != INVALID_SHORT_INDEX;
 	}
@@ -1971,9 +1971,9 @@ struct RequestT {
 	template <typename T>
 	static constexpr bool contains() { return PayloadList::template contains<T>();	}
 
-	HSFM_INLINE RequestT() = default;
+	HFSM_INLINE RequestT() = default;
 
-	HSFM_INLINE RequestT(const Type type_,
+	HFSM_INLINE RequestT(const Type type_,
 						 const StateID stateId_)
 		: type{type_}
 		, stateId{stateId_}
@@ -1983,7 +1983,7 @@ struct RequestT {
 
 	template <typename T,
 			  typename = typename std::enable_if<contains<T>(), T>::type>
-	HSFM_INLINE RequestT(const Type type_,
+	HFSM_INLINE RequestT(const Type type_,
 						 const StateID stateId_,
 						 T* const payload_)
 		: type{type_}
@@ -2104,8 +2104,8 @@ struct StateDataT<ArgsT<TContext,
 	using CompoForks	= StaticArray<CompoFork,   COMPO_COUNT>;
 	using OrthoForks	= OrthoForksT<ORTHO_COUNT, ORTHO_STORAGE>;
 
-	HSFM_INLINE const Parent& forkParent(const ForkID forkId) const;
-	HSFM_INLINE const CompoFork* compoParent(const ForkID forkId) const;
+	HFSM_INLINE const Parent& forkParent(const ForkID forkId) const;
+	HFSM_INLINE const CompoFork* compoParent(const ForkID forkId) const;
 
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
@@ -2156,7 +2156,7 @@ struct StateDataT<ArgsT<TContext,
 	using CompoParents	= StaticArray<Parent,	 COMPO_COUNT>;
 	using CompoForks	= StaticArray<CompoFork, COMPO_COUNT>;
 
-	HSFM_INLINE const Parent& forkParent(const ForkID forkId) const;
+	HFSM_INLINE const Parent& forkParent(const ForkID forkId) const;
 
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
@@ -2164,7 +2164,7 @@ struct StateDataT<ArgsT<TContext,
 	void requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
 
-	HSFM_INLINE void clearOrthoRequested()										{}
+	HFSM_INLINE void clearOrthoRequested()										{}
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -2207,15 +2207,15 @@ struct StateDataT<ArgsT<TContext,
 	using OrthoParents	= StaticArray<Parent,	   ORTHO_COUNT>;
 	using OrthoForks	= OrthoForksT<ORTHO_COUNT, ORTHO_STORAGE>;
 
-	HSFM_INLINE const Parent& forkParent(const ForkID forkId) const;
+	HFSM_INLINE const Parent& forkParent(const ForkID forkId) const;
 
-	HSFM_INLINE bool isActive   (const StateID) const	{ return true;			}
-	HSFM_INLINE bool isResumable(const StateID) const	{ return false;			}
+	HFSM_INLINE bool isActive   (const StateID) const	{ return true;			}
+	HFSM_INLINE bool isResumable(const StateID) const	{ return false;			}
 
-	HSFM_INLINE void requestImmediate(const Request)	{ HSFM_BREAK();			}
-	HSFM_INLINE void requestScheduled(const Request)	{ HSFM_BREAK();			}
+	HFSM_INLINE void requestImmediate(const Request)	{ HSFM_BREAK();			}
+	HFSM_INLINE void requestScheduled(const Request)	{ HSFM_BREAK();			}
 
-	HSFM_INLINE void clearOrthoRequested()										{}
+	HFSM_INLINE void clearOrthoRequested()										{}
 
 	StateParents stateParents;
 	OrthoParents orthoParents;
@@ -2525,10 +2525,10 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Origin {
-		HSFM_INLINE Origin(ControlT& control_,
+		HFSM_INLINE Origin(ControlT& control_,
 						   const StateID id);
 
-		HSFM_INLINE ~Origin();
+		HFSM_INLINE ~Origin();
 
 		ControlT& control;
 		const StateID prevId;
@@ -2537,12 +2537,12 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Region {
-		HSFM_INLINE Region(ControlT& control,
+		HFSM_INLINE Region(ControlT& control,
 						   const RegionID id,
 						   const StateID index,
 						   const LongIndex size);
 
-		HSFM_INLINE ~Region();
+		HFSM_INLINE ~Region();
 
 		ControlT& control;
 		const RegionID prevId;
@@ -2553,7 +2553,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HSFM_INLINE ControlT(Context& context,
+	HFSM_INLINE ControlT(Context& context,
 						 StateData& stateData,
 						 PlanData& planData,
 						 LoggerInterface* const HFSM_IF_LOGGER(logger))
@@ -2563,11 +2563,11 @@ protected:
 		HFSM_IF_LOGGER(, _logger(logger))
 	{}
 
-	HSFM_INLINE void setOrigin  (const StateID id);
-	HSFM_INLINE void resetOrigin(const StateID id);
+	HFSM_INLINE void setOrigin  (const StateID id);
+	HFSM_INLINE void resetOrigin(const StateID id);
 
-	HSFM_INLINE void setRegion  (const RegionID id, const StateID index, const LongIndex size);
-	HSFM_INLINE void resetRegion(const RegionID id, const StateID index, const LongIndex size);
+	HFSM_INLINE void setRegion  (const RegionID id, const StateID index, const LongIndex size);
+	HFSM_INLINE void resetRegion(const RegionID id, const StateID index, const LongIndex size);
 
 	template <typename T>
 	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();	}
@@ -2576,50 +2576,50 @@ protected:
 	static constexpr RegionID regionId()						{ return RegionList::template index<T>();	}
 
 public:
-	HSFM_INLINE Context& _()									{ return _context;							}
-	HSFM_INLINE Context& context()								{ return _context;							}
+	HFSM_INLINE Context& _()									{ return _context;							}
+	HFSM_INLINE Context& context()								{ return _context;							}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);	}
-	HSFM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);	}
+	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);	}
+	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);	}
 
-	HSFM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);				}
-
-	template <typename TState>
-	HSFM_INLINE bool isActive() const							{ return isActive	(stateId<TState>());	}
+	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);				}
 
 	template <typename TState>
-	HSFM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
+	HFSM_INLINE bool isActive() const							{ return isActive	(stateId<TState>());	}
 
 	template <typename TState>
-	HSFM_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());	}
+	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE Plan plan()										{ return Plan{_planData, _regionId};		}
-	HSFM_INLINE Plan plan() const								{ return Plan{_planData, _regionId};		}
+	HFSM_INLINE Plan plan()										{ return Plan{_planData, _regionId};		}
+	HFSM_INLINE Plan plan() const								{ return Plan{_planData, _regionId};		}
 
-	HSFM_INLINE Plan plan(const RegionID regionId)				{ return Plan{_planData,  regionId};		}
-	HSFM_INLINE Plan plan(const RegionID regionId) const		{ return Plan{_planData,  regionId};		}
-
-	template <typename TRegion>
-	HSFM_INLINE Plan plan()									{ return Plan{_planData, regionId<TRegion>()};	}
+	HFSM_INLINE Plan plan(const RegionID regionId)				{ return Plan{_planData,  regionId};		}
+	HFSM_INLINE Plan plan(const RegionID regionId) const		{ return Plan{_planData,  regionId};		}
 
 	template <typename TRegion>
-	HSFM_INLINE Plan plan() const							{ return Plan{_planData, regionId<TRegion>()};	}
+	HFSM_INLINE Plan plan()									{ return Plan{_planData, regionId<TRegion>()};	}
+
+	template <typename TRegion>
+	HFSM_INLINE Plan plan() const							{ return Plan{_planData, regionId<TRegion>()};	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HSFM_INLINE		 StateData&	stateData()						{ return _stateData;						}
-	HSFM_INLINE const StateData&	stateData() const			{ return _stateData;						}
+	HFSM_INLINE		 StateData&	stateData()						{ return _stateData;						}
+	HFSM_INLINE const StateData&	stateData() const			{ return _stateData;						}
 
-	HSFM_INLINE		 PlanData&	planData()						{ return _planData;							}
-	HSFM_INLINE const PlanData&	planData() const				{ return _planData;							}
+	HFSM_INLINE		 PlanData&	planData()						{ return _planData;							}
+	HFSM_INLINE const PlanData&	planData() const				{ return _planData;							}
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	HSFM_INLINE LoggerInterface* logger()						{ return _logger;							}
+	HFSM_INLINE LoggerInterface* logger()						{ return _logger;							}
 #endif
 
 protected:
@@ -2674,8 +2674,8 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Lock {
-		HSFM_INLINE Lock(FullControlT& control_);
-		HSFM_INLINE ~Lock();
+		HFSM_INLINE Lock(FullControlT& control_);
+		HFSM_INLINE ~Lock();
 
 		FullControlT* const control;
 	};
@@ -2683,7 +2683,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HSFM_INLINE FullControlT(Context& context,
+	HFSM_INLINE FullControlT(Context& context,
 							 StateData& stateData,
 							 PlanData& planData,
 							 Requests& requests,
@@ -2720,23 +2720,23 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE void changeTo(const StateID stateId);
-	HSFM_INLINE void resume	 (const StateID stateId);
-	HSFM_INLINE void schedule(const StateID stateId);
+	HFSM_INLINE void changeTo(const StateID stateId);
+	HFSM_INLINE void resume	 (const StateID stateId);
+	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HSFM_INLINE void changeTo()				{ changeTo(stateId<TState>());				}
+	HFSM_INLINE void changeTo()				{ changeTo(stateId<TState>());				}
 
 	template <typename TState>
-	HSFM_INLINE void resume()				{ resume  (stateId<TState>());				}
+	HFSM_INLINE void resume()				{ resume  (stateId<TState>());				}
 
 	template <typename TState>
-	HSFM_INLINE void schedule()				{ schedule(stateId<TState>());				}
+	HFSM_INLINE void schedule()				{ schedule(stateId<TState>());				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE void succeed();
-	HSFM_INLINE void fail();
+	HFSM_INLINE void succeed();
+	HFSM_INLINE void fail();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3064,7 +3064,7 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 	StructureStateInfo() = default;
 
-	HSFM_INLINE StructureStateInfo(const LongIndex parent_,
+	HFSM_INLINE StructureStateInfo(const LongIndex parent_,
 								   const RegionType region_,
 								   const ShortIndex depth_,
 								   const char* const name_)
@@ -3088,7 +3088,7 @@ using StructureStateInfos = ArrayView<StructureStateInfo>;
 
 template <typename TPayloadList>
 Transition
-HSFM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
+HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
 	using Request = RequestT<TPayloadList>;
 
 	switch (type) {
@@ -3111,9 +3111,9 @@ struct alignas(4) TransitionInfoT {
 	using PayloadList = TPayloadList;
 	using Request	  = RequestT<PayloadList>;
 
-	HSFM_INLINE TransitionInfoT() = default;
+	HFSM_INLINE TransitionInfoT() = default;
 
-	HSFM_INLINE TransitionInfoT(const Request transition_,
+	HFSM_INLINE TransitionInfoT(const Request transition_,
 								const Method method_)
 		: stateId{transition_.stateId}
 		, method(method_)
@@ -3158,13 +3158,13 @@ protected:
 	using Plan				= typename Control::Plan;
 
 public:
-	HSFM_INLINE void preGuard (Context&)										{}
-	HSFM_INLINE void preEnter (Context&)										{}
-	HSFM_INLINE void preUpdate(Context&)										{}
+	HFSM_INLINE void preGuard (Context&)										{}
+	HFSM_INLINE void preEnter (Context&)										{}
+	HFSM_INLINE void preUpdate(Context&)										{}
 	template <typename TEvent>
-	HSFM_INLINE void preReact (const TEvent&,
+	HFSM_INLINE void preReact (const TEvent&,
 							   Context&)										{}
-	HSFM_INLINE void postExit (Context&)										{}
+	HFSM_INLINE void postExit (Context&)										{}
 };
 
 //------------------------------------------------------------------------------
@@ -3181,13 +3181,13 @@ struct _B<TFirst, TRest...>
 {
 	using First	  = TFirst;
 
-	HSFM_INLINE void widePreGuard (typename First::Context& context);
-	HSFM_INLINE void widePreEnter (typename First::Context& context);
-	HSFM_INLINE void widePreUpdate(typename First::Context& context);
+	HFSM_INLINE void widePreGuard (typename First::Context& context);
+	HFSM_INLINE void widePreEnter (typename First::Context& context);
+	HFSM_INLINE void widePreUpdate(typename First::Context& context);
 	template <typename TEvent>
-	HSFM_INLINE void widePreReact (const TEvent& event,
+	HFSM_INLINE void widePreReact (const TEvent& event,
 								   typename First::Context& context);
-	HSFM_INLINE void widePostExit (typename First::Context& context);
+	HFSM_INLINE void widePostExit (typename First::Context& context);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3201,24 +3201,24 @@ struct _B<TFirst>
 	using StateList			= typename First::StateList;
 	using RegionList		= typename First::RegionList;
 
-	HSFM_INLINE void guard		  (typename First::FullControl&)				{}
-	HSFM_INLINE void enter		  (typename First::Control&)					{}
-	HSFM_INLINE void update		  (typename First::FullControl&)				{}
+	HFSM_INLINE void guard		  (typename First::FullControl&)				{}
+	HFSM_INLINE void enter		  (typename First::Control&)					{}
+	HFSM_INLINE void update		  (typename First::FullControl&)				{}
 	template <typename TEvent>
-	HSFM_INLINE void react		  (const TEvent&,
+	HFSM_INLINE void react		  (const TEvent&,
 								   typename First::FullControl&)				{}
-	HSFM_INLINE void exit		  (typename First::Control&)					{}
+	HFSM_INLINE void exit		  (typename First::Control&)					{}
 
-	HSFM_INLINE void planSucceeded(typename First::FullControl& control) { control.succeed(); }
-	HSFM_INLINE void planFailed	  (typename First::FullControl& control) { control.fail();	  }
+	HFSM_INLINE void planSucceeded(typename First::FullControl& control) { control.succeed(); }
+	HFSM_INLINE void planFailed	  (typename First::FullControl& control) { control.fail();	  }
 
-	HSFM_INLINE void widePreGuard (typename First::Context& context);
-	HSFM_INLINE void widePreEnter (typename First::Context& context);
-	HSFM_INLINE void widePreUpdate(typename First::Context& context);
+	HFSM_INLINE void widePreGuard (typename First::Context& context);
+	HFSM_INLINE void widePreEnter (typename First::Context& context);
+	HFSM_INLINE void widePreUpdate(typename First::Context& context);
 	template <typename TEvent>
-	HSFM_INLINE void widePreReact (const TEvent& event,
+	HFSM_INLINE void widePreReact (const TEvent& event,
 								   typename First::Context& context);
-	HSFM_INLINE void widePostExit (typename First::Context& context);
+	HFSM_INLINE void widePostExit (typename First::Context& context);
 
 	template <typename T>
 	static constexpr LongIndex stateId()  { return StateList ::template index<T>();	}
@@ -3771,28 +3771,28 @@ struct _S {
 
 	_S(StateData& stateData, const Parent parent);
 
-	HSFM_INLINE void   deepForwardGuard		(FullControl&)					{}
-	HSFM_INLINE bool   deepGuard			(FullControl& control);
+	HFSM_INLINE void   deepForwardGuard		(FullControl&)					{}
+	HFSM_INLINE bool   deepGuard			(FullControl& control);
 
-	HSFM_INLINE void   deepEnterInitial		(Control& control);
-	HSFM_INLINE void   deepEnter			(Control& control);
+	HFSM_INLINE void   deepEnterInitial		(Control& control);
+	HFSM_INLINE void   deepEnter			(Control& control);
 
-	HSFM_INLINE Status deepUpdate			(FullControl& control);
+	HFSM_INLINE Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   deepReact			(const TEvent& event,
+	HFSM_INLINE void   deepReact			(const TEvent& event,
 											 FullControl& control);
 
-	HSFM_INLINE void   deepExit				(Control& control);
+	HFSM_INLINE void   deepExit				(Control& control);
 
-	HSFM_INLINE void   wrapPlanSucceeded	(FullControl& control);
-	HSFM_INLINE void   wrapPlanFailed		(FullControl& control);
+	HFSM_INLINE void   wrapPlanSucceeded	(FullControl& control);
+	HFSM_INLINE void   wrapPlanFailed		(FullControl& control);
 
-	HSFM_INLINE void   deepForwardRequest	(StateData&, const RequestType)	{}
-	HSFM_INLINE void   deepRequestRemain	(StateData&)					{}
-	HSFM_INLINE void   deepRequestRestart	(StateData&)					{}
-	HSFM_INLINE void   deepRequestResume	(StateData&)					{}
-	HSFM_INLINE void   deepChangeToRequested(StateData&, Control&)			{}
+	HFSM_INLINE void   deepForwardRequest	(StateData&, const RequestType)	{}
+	HFSM_INLINE void   deepRequestRemain	(StateData&)					{}
+	HFSM_INLINE void   deepRequestRestart	(StateData&)					{}
+	HFSM_INLINE void   deepRequestResume	(StateData&)					{}
+	HFSM_INLINE void   deepChangeToRequested(StateData&, Control&)			{}
 
 #if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 	static constexpr bool isBare()	 { return std::is_same<Head, Empty>::value;	 }
@@ -3854,7 +3854,7 @@ struct RegisterT {
 
 	static constexpr StateID STATE_ID = NS;
 
-	static HSFM_INLINE
+	static HFSM_INLINE
 	void
 	execute(StateParents& stateParents, const Parent parent) {
 		static constexpr auto HEAD_ID  = StateList::template index<TH>();
@@ -3870,7 +3870,7 @@ template <StateID NS, typename TA>
 struct RegisterT<NS, TA, Empty<TA>> {
 	using StateParents	= Array<Parent, TA::STATE_COUNT>;
 
-	static HSFM_INLINE
+	static HFSM_INLINE
 	void
 	execute(StateParents&, const Parent) {}
 };
@@ -4108,25 +4108,25 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	_CS(StateData& stateData, const ForkID forkId);
 
-	HSFM_INLINE void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
-	HSFM_INLINE void   wideGuard			(const ShortIndex prong, FullControl& control);
+	HFSM_INLINE void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
+	HFSM_INLINE void   wideGuard			(const ShortIndex prong, FullControl& control);
 
-	HSFM_INLINE void   wideEnterInitial		(						 Control& control);
-	HSFM_INLINE void   wideEnter			(const ShortIndex prong, Control& control);
+	HFSM_INLINE void   wideEnterInitial		(						 Control& control);
+	HFSM_INLINE void   wideEnter			(const ShortIndex prong, Control& control);
 
-	HSFM_INLINE Status wideUpdate			(const ShortIndex prong, FullControl& control);
+	HFSM_INLINE Status wideUpdate			(const ShortIndex prong, FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   wideReact			(const ShortIndex prong, const TEvent& event,
+	HFSM_INLINE void   wideReact			(const ShortIndex prong, const TEvent& event,
 																	 FullControl& control);
 
-	HSFM_INLINE void   wideExit				(const ShortIndex prong, Control& control);
+	HFSM_INLINE void   wideExit				(const ShortIndex prong, Control& control);
 
-	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const ShortIndex prong, const RequestType request);
-	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   wideRequestResume	(StateData& stateData, const ShortIndex prong);
-	HSFM_INLINE void   wideChangeToRequested(StateData& stateData, const ShortIndex prong,
+	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const ShortIndex prong, const RequestType request);
+	HFSM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   wideRequestResume	(StateData& stateData, const ShortIndex prong);
+	HFSM_INLINE void   wideChangeToRequested(StateData& stateData, const ShortIndex prong,
 											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -4176,25 +4176,25 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	_CS(StateData& stateData, const ForkID forkId);
 
-	HSFM_INLINE void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
-	HSFM_INLINE void   wideGuard			(const ShortIndex prong, FullControl& control);
+	HFSM_INLINE void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
+	HFSM_INLINE void   wideGuard			(const ShortIndex prong, FullControl& control);
 
-	HSFM_INLINE void   wideEnterInitial		(						 Control& control);
-	HSFM_INLINE void   wideEnter			(const ShortIndex prong, Control& control);
+	HFSM_INLINE void   wideEnterInitial		(						 Control& control);
+	HFSM_INLINE void   wideEnter			(const ShortIndex prong, Control& control);
 
-	HSFM_INLINE Status wideUpdate			(const ShortIndex prong, FullControl& control);
+	HFSM_INLINE Status wideUpdate			(const ShortIndex prong, FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   wideReact			(const ShortIndex prong, const TEvent& event,
+	HFSM_INLINE void   wideReact			(const ShortIndex prong, const TEvent& event,
 				  													 FullControl& control);
 
-	HSFM_INLINE void   wideExit				(const ShortIndex prong, Control& control);
+	HFSM_INLINE void   wideExit				(const ShortIndex prong, Control& control);
 
-	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const ShortIndex prong, const RequestType transition);
-	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   wideRequestResume	(StateData& stateData, const ShortIndex prong);
-	HSFM_INLINE void   wideChangeToRequested(StateData& stateData, const ShortIndex prong,
+	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const ShortIndex prong, const RequestType transition);
+	HFSM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   wideRequestResume	(StateData& stateData, const ShortIndex prong);
+	HFSM_INLINE void   wideChangeToRequested(StateData& stateData, const ShortIndex prong,
 											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -4604,27 +4604,27 @@ struct _C {
 
 	_C(StateData& stateData, const Parent parent);
 
-	HSFM_INLINE CompoFork& compoFork		(StateData& stateData)	{ return stateData.compoForks[COMPO_INDEX];	}
-	HSFM_INLINE CompoFork& compoFork		(Control&   control)	{ return compoFork(control.stateData());	}
+	HFSM_INLINE CompoFork& compoFork		(StateData& stateData)	{ return stateData.compoForks[COMPO_INDEX];	}
+	HFSM_INLINE CompoFork& compoFork		(Control&   control)	{ return compoFork(control.stateData());	}
 
-	HSFM_INLINE void   deepForwardGuard		(FullControl& control);
-	HSFM_INLINE void   deepGuard			(FullControl& control);
+	HFSM_INLINE void   deepForwardGuard		(FullControl& control);
+	HFSM_INLINE void   deepGuard			(FullControl& control);
 
-	HSFM_INLINE void   deepEnterInitial		(Control& control);
-	HSFM_INLINE void   deepEnter			(Control& control);
+	HFSM_INLINE void   deepEnterInitial		(Control& control);
+	HFSM_INLINE void   deepEnter			(Control& control);
 
-	HSFM_INLINE Status deepUpdate			(FullControl& control);
+	HFSM_INLINE Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   deepReact			(const TEvent& event,
+	HFSM_INLINE void   deepReact			(const TEvent& event,
 											 FullControl& control);
 
-	HSFM_INLINE void   deepExit				(Control& control);
+	HFSM_INLINE void   deepExit				(Control& control);
 
-	HSFM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType request);
-	HSFM_INLINE void   deepRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   deepRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   deepRequestResume	(StateData& stateData);
+	HFSM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType request);
+	HFSM_INLINE void   deepRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   deepRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   deepRequestResume	(StateData& stateData);
 				void   deepChangeToRequested(StateData& stateData, Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -4962,27 +4962,27 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	_OS(StateData& stateData, const ForkID forkId);
 
-	HSFM_INLINE void   wideForwardGuard		(const Prongs& prongs,
+	HFSM_INLINE void   wideForwardGuard		(const Prongs& prongs,
 					 						 FullControl& control);
-	HSFM_INLINE void   wideForwardGuard		(FullControl& control);
-	HSFM_INLINE void   wideGuard			(FullControl& control);
+	HFSM_INLINE void   wideForwardGuard		(FullControl& control);
+	HFSM_INLINE void   wideGuard			(FullControl& control);
 
-	HSFM_INLINE void   wideEnterInitial		(Control& control);
-	HSFM_INLINE void   wideEnter			(Control& control);
+	HFSM_INLINE void   wideEnterInitial		(Control& control);
+	HFSM_INLINE void   wideEnter			(Control& control);
 
-	HSFM_INLINE Status wideUpdate			(FullControl& control);
+	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   wideReact			(const TEvent& event,
+	HFSM_INLINE void   wideReact			(const TEvent& event,
 											 FullControl& control);
 
-	HSFM_INLINE void   wideExit				(Control& control);
+	HFSM_INLINE void   wideExit				(Control& control);
 
-	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType request);
-	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   wideRequestResume	(StateData& stateData);
-	HSFM_INLINE void   wideChangeToRequested(StateData& stateData,
+	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType request);
+	HFSM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   wideRequestResume	(StateData& stateData);
+	HFSM_INLINE void   wideChangeToRequested(StateData& stateData,
 											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -5031,25 +5031,25 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	_OS(StateData& stateData, const ForkID forkId);
 
-	HSFM_INLINE void   wideForwardGuard		(const Prongs& prongs, FullControl& control);
-	HSFM_INLINE void   wideForwardGuard		(FullControl& control);
-	HSFM_INLINE void   wideGuard			(FullControl& control);
+	HFSM_INLINE void   wideForwardGuard		(const Prongs& prongs, FullControl& control);
+	HFSM_INLINE void   wideForwardGuard		(FullControl& control);
+	HFSM_INLINE void   wideGuard			(FullControl& control);
 
-	HSFM_INLINE void   wideEnterInitial		(Control& control);
-	HSFM_INLINE void   wideEnter			(Control& control);
+	HFSM_INLINE void   wideEnterInitial		(Control& control);
+	HFSM_INLINE void   wideEnter			(Control& control);
 
-	HSFM_INLINE Status wideUpdate			(FullControl& control);
+	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
+	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
 
-	HSFM_INLINE void   wideExit				(Control& control);
+	HFSM_INLINE void   wideExit				(Control& control);
 
-	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType transition);
-	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   wideRequestResume	(StateData& stateData);
-	HSFM_INLINE void   wideChangeToRequested(StateData& stateData,
+	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType transition);
+	HFSM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   wideRequestResume	(StateData& stateData);
+	HFSM_INLINE void   wideChangeToRequested(StateData& stateData,
 											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -5423,31 +5423,31 @@ struct _O final {
 
 	_O(StateData& stateData, const Parent parent);
 
-	HSFM_INLINE		  OrthoFork& orthoRequested(	  StateData& stateData)		  { return stateData.orthoRequested[ORTHO_INDEX];	}
-	HSFM_INLINE const OrthoFork& orthoRequested(const StateData& stateData) const { return stateData.orthoRequested[ORTHO_INDEX];	}
+	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateData& stateData)		  { return stateData.orthoRequested[ORTHO_INDEX];	}
+	HFSM_INLINE const OrthoFork& orthoRequested(const StateData& stateData) const { return stateData.orthoRequested[ORTHO_INDEX];	}
 
-	HSFM_INLINE		  OrthoFork& orthoRequested(	  Control&   control)		  { return orthoRequested(control.stateData());		}
-	HSFM_INLINE const OrthoFork& orthoRequested(const Control&   control)   const { return orthoRequested(control.stateData());		}
+	HFSM_INLINE		  OrthoFork& orthoRequested(	  Control&   control)		  { return orthoRequested(control.stateData());		}
+	HFSM_INLINE const OrthoFork& orthoRequested(const Control&   control)   const { return orthoRequested(control.stateData());		}
 
-	HSFM_INLINE void   deepForwardGuard		(FullControl& control);
-	HSFM_INLINE void   deepGuard			(FullControl& control);
+	HFSM_INLINE void   deepForwardGuard		(FullControl& control);
+	HFSM_INLINE void   deepGuard			(FullControl& control);
 
-	HSFM_INLINE void   deepEnterInitial		(Control& control);
-	HSFM_INLINE void   deepEnter			(Control& control);
+	HFSM_INLINE void   deepEnterInitial		(Control& control);
+	HFSM_INLINE void   deepEnter			(Control& control);
 
-	HSFM_INLINE Status deepUpdate			(FullControl& control);
+	HFSM_INLINE Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   deepReact			(const TEvent& event,
+	HFSM_INLINE void   deepReact			(const TEvent& event,
 											 FullControl& control);
 
-	HSFM_INLINE void   deepExit				(Control& control);
+	HFSM_INLINE void   deepExit				(Control& control);
 
-	HSFM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType transition);
-	HSFM_INLINE void   deepRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   deepRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   deepRequestResume	(StateData& stateData);
-	HSFM_INLINE void   deepChangeToRequested(StateData& stateData,
+	HFSM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType transition);
+	HFSM_INLINE void   deepRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   deepRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   deepRequestResume	(StateData& stateData);
+	HFSM_INLINE void   deepChangeToRequested(StateData& stateData,
 											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -5779,82 +5779,82 @@ public:
 	void update();
 
 	template <typename TEvent>
-	HSFM_INLINE void react(const TEvent& event);
+	HFSM_INLINE void react(const TEvent& event);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);			}
-	HSFM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);			}
+	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);			}
+	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);			}
 
-	HSFM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
-
-	template <typename TState>
-	HSFM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());			}
+	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
 	template <typename TState>
-	HSFM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
+	HFSM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());			}
 
 	template <typename TState>
-	HSFM_INLINE bool isScheduled() const						{ return isResumable<TState>();						}
+	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
+
+	template <typename TState>
+	HFSM_INLINE bool isScheduled() const						{ return isResumable<TState>();						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE void changeTo(const StateID stateId);
-	HSFM_INLINE void resume	 (const StateID stateId);
-	HSFM_INLINE void schedule(const StateID stateId);
+	HFSM_INLINE void changeTo(const StateID stateId);
+	HFSM_INLINE void resume	 (const StateID stateId);
+	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HSFM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
 
 	template <typename TState>
-	HSFM_INLINE void resume	()									{ resume  (stateId<TState>());						}
+	HFSM_INLINE void resume	()									{ resume  (stateId<TState>());						}
 
 	template <typename TState>
-	HSFM_INLINE void schedule()									{ schedule(stateId<TState>());						}
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TPayload>
-	HSFM_INLINE void changeTo(const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void changeTo(const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
-	HSFM_INLINE void resume  (const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void resume  (const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
-	HSFM_INLINE void schedule(const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void schedule(const StateID stateId, TPayload* const payload);
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
+	HFSM_INLINE void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
+	HFSM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
+	HFSM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE void resetStateData(const StateID stateId);
+	HFSM_INLINE void resetStateData(const StateID stateId);
 
 	template <typename TPayload>
-	HSFM_INLINE void setStateData  (const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void setStateData  (const StateID stateId, TPayload* const payload);
 
-	HSFM_INLINE bool isStateDataSet(const StateID stateId) const;
+	HFSM_INLINE bool isStateDataSet(const StateID stateId) const;
 
 	template <typename TPayload>
-	HSFM_INLINE TPayload* getStateData(const StateID stateId) const;
+	HFSM_INLINE TPayload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	HSFM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
+	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE void setStateData  (TPayload* const payload)	{ setStateData  (stateId<TState>(), payload);		}
+	HFSM_INLINE void setStateData  (TPayload* const payload)	{ setStateData  (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	HSFM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
+	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
 
 	template <typename TState, typename TPayload>
-	HSFM_INLINE TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
+	HFSM_INLINE TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -6322,7 +6322,7 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 }
 }
 
-#undef HSFM_INLINE
+#undef HFSM_INLINE
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
 #undef HFSM_LOG_STATE_METHOD

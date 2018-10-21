@@ -24,32 +24,32 @@ protected:
 	~ArrayView();
 
 public:
-	HSFM_INLINE void clear()										{ _count = 0;		}
+	HFSM_INLINE void clear()										{ _count = 0;		}
 
-	HSFM_INLINE LongIndex resize(const LongIndex count);
+	HFSM_INLINE LongIndex resize(const LongIndex count);
 
 	template <typename TValue>
-	HSFM_INLINE LongIndex operator << (TValue&& value);
+	HFSM_INLINE LongIndex operator << (TValue&& value);
 
-	HSFM_INLINE		  Item& operator[] (const LongIndex i)			{ return get(i);	}
-	HSFM_INLINE const Item& operator[] (const LongIndex i) const	{ return get(i);	}
+	HFSM_INLINE		  Item& operator[] (const LongIndex i)			{ return get(i);	}
+	HFSM_INLINE const Item& operator[] (const LongIndex i) const	{ return get(i);	}
 
-	HSFM_INLINE LongIndex count() const								{ return _count;	}
-	HSFM_INLINE LongIndex capacity() const							{ return _capacity;	}
-
-protected:
-	HSFM_INLINE LongIndex first() const								{ return 0;			}
-	HSFM_INLINE LongIndex limit() const								{ return _count;	}
-
-	HSFM_INLINE LongIndex prev(const LongIndex i) const				{ return i - 1;		}
-	HSFM_INLINE LongIndex next(const LongIndex i) const				{ return i + 1;		}
-
-	HSFM_INLINE		  Item& get(const LongIndex i);
-	HSFM_INLINE const Item& get(const LongIndex i) const;
+	HFSM_INLINE LongIndex count() const								{ return _count;	}
+	HFSM_INLINE LongIndex capacity() const							{ return _capacity;	}
 
 protected:
-	HSFM_INLINE		  Item* data()		 { return reinterpret_cast<		 Item*>(((uintptr_t)this) + OFFSET); }
-	HSFM_INLINE const Item* data() const { return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET); }
+	HFSM_INLINE LongIndex first() const								{ return 0;			}
+	HFSM_INLINE LongIndex limit() const								{ return _count;	}
+
+	HFSM_INLINE LongIndex prev(const LongIndex i) const				{ return i - 1;		}
+	HFSM_INLINE LongIndex next(const LongIndex i) const				{ return i + 1;		}
+
+	HFSM_INLINE		  Item& get(const LongIndex i);
+	HFSM_INLINE const Item& get(const LongIndex i) const;
+
+protected:
+	HFSM_INLINE		  Item* data()		 { return reinterpret_cast<		 Item*>(((uintptr_t)this) + OFFSET); }
+	HFSM_INLINE const Item* data() const { return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET); }
 
 protected:
 	LongIndex _count = 0;

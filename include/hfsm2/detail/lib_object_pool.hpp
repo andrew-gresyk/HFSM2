@@ -18,12 +18,12 @@ public:
 	static_assert(STORAGE_SIZE > 0, "Storage size must be positive");
 
 public:
-	HSFM_INLINE ObjectPool();
+	HFSM_INLINE ObjectPool();
 
-	HSFM_INLINE ShortIndex count() const					{ return _count;	}
+	HFSM_INLINE ShortIndex count() const					{ return _count;	}
 
-	HSFM_INLINE		  Interface& operator[] (const ShortIndex i);
-	HSFM_INLINE const Interface& operator[] (const ShortIndex i) const;
+	HFSM_INLINE		  Interface& operator[] (const ShortIndex i);
+	HFSM_INLINE const Interface& operator[] (const ShortIndex i) const;
 
 	template <typename TItem, typename... TArgs>
 	ShortIndex emplace(TArgs&&... args);

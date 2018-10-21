@@ -62,21 +62,21 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Iterator {
-		HSFM_INLINE Iterator(PlanT& plan);
+		HFSM_INLINE Iterator(PlanT& plan);
 
-		HSFM_INLINE explicit operator bool() const;
+		HFSM_INLINE explicit operator bool() const;
 
-		HSFM_INLINE void operator ++();
+		HFSM_INLINE void operator ++();
 
-		HSFM_INLINE		  TaskLink& operator  *()	    { return  _plan._planData.taskLinks[_curr];	}
-		HSFM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE		  TaskLink& operator  *()	    { return  _plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
 
-		HSFM_INLINE		  TaskLink* operator ->()	    { return &_plan._planData.taskLinks[_curr];	}
-		HSFM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE		  TaskLink* operator ->()	    { return &_plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
 
-		HSFM_INLINE void remove();
+		HFSM_INLINE void remove();
 
-		HSFM_INLINE LongIndex next() const;
+		HFSM_INLINE LongIndex next() const;
 
 		PlanT& _plan;
 		LongIndex _curr;
@@ -86,7 +86,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HSFM_INLINE PlanT(PlanData& planData,
+	HFSM_INLINE PlanT(PlanData& planData,
 					  const RegionID regionId);
 
 	template <typename T>
@@ -96,19 +96,19 @@ private:
 	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
 
 public:
-	HSFM_INLINE explicit operator bool() const;
+	HFSM_INLINE explicit operator bool() const;
 
-	HSFM_INLINE void clear();
+	HFSM_INLINE void clear();
 
 	void add(const StateID origin,
 			 const StateID destination);
 
 	template <typename TOrigin, typename TDestination>
-	HSFM_INLINE void add()			{ add(stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE void add()			{ add(stateId<TOrigin>(), stateId<TDestination>());	}
 
 	void remove(const LongIndex task);
 
-	HSFM_INLINE Iterator begin()			{ return Iterator{*this};					}
+	HFSM_INLINE Iterator begin()			{ return Iterator{*this};					}
 
 private:
 	PlanData& _planData;

@@ -47,27 +47,27 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	_OS(StateData& stateData, const ForkID forkId);
 
-	HSFM_INLINE void   wideForwardGuard		(const Prongs& prongs,
+	HFSM_INLINE void   wideForwardGuard		(const Prongs& prongs,
 					 						 FullControl& control);
-	HSFM_INLINE void   wideForwardGuard		(FullControl& control);
-	HSFM_INLINE void   wideGuard			(FullControl& control);
+	HFSM_INLINE void   wideForwardGuard		(FullControl& control);
+	HFSM_INLINE void   wideGuard			(FullControl& control);
 
-	HSFM_INLINE void   wideEnterInitial		(Control& control);
-	HSFM_INLINE void   wideEnter			(Control& control);
+	HFSM_INLINE void   wideEnterInitial		(Control& control);
+	HFSM_INLINE void   wideEnter			(Control& control);
 
-	HSFM_INLINE Status wideUpdate			(FullControl& control);
+	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   wideReact			(const TEvent& event,
+	HFSM_INLINE void   wideReact			(const TEvent& event,
 											 FullControl& control);
 
-	HSFM_INLINE void   wideExit				(Control& control);
+	HFSM_INLINE void   wideExit				(Control& control);
 
-	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType request);
-	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   wideRequestResume	(StateData& stateData);
-	HSFM_INLINE void   wideChangeToRequested(StateData& stateData,
+	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType request);
+	HFSM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   wideRequestResume	(StateData& stateData);
+	HFSM_INLINE void   wideChangeToRequested(StateData& stateData,
 											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -116,25 +116,25 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	_OS(StateData& stateData, const ForkID forkId);
 
-	HSFM_INLINE void   wideForwardGuard		(const Prongs& prongs, FullControl& control);
-	HSFM_INLINE void   wideForwardGuard		(FullControl& control);
-	HSFM_INLINE void   wideGuard			(FullControl& control);
+	HFSM_INLINE void   wideForwardGuard		(const Prongs& prongs, FullControl& control);
+	HFSM_INLINE void   wideForwardGuard		(FullControl& control);
+	HFSM_INLINE void   wideGuard			(FullControl& control);
 
-	HSFM_INLINE void   wideEnterInitial		(Control& control);
-	HSFM_INLINE void   wideEnter			(Control& control);
+	HFSM_INLINE void   wideEnterInitial		(Control& control);
+	HFSM_INLINE void   wideEnter			(Control& control);
 
-	HSFM_INLINE Status wideUpdate			(FullControl& control);
+	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
+	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
 
-	HSFM_INLINE void   wideExit				(Control& control);
+	HFSM_INLINE void   wideExit				(Control& control);
 
-	HSFM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType transition);
-	HSFM_INLINE void   wideRequestRemain	(StateData& stateData);
-	HSFM_INLINE void   wideRequestRestart	(StateData& stateData);
-	HSFM_INLINE void   wideRequestResume	(StateData& stateData);
-	HSFM_INLINE void   wideChangeToRequested(StateData& stateData,
+	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType transition);
+	HFSM_INLINE void   wideRequestRemain	(StateData& stateData);
+	HFSM_INLINE void   wideRequestRestart	(StateData& stateData);
+	HFSM_INLINE void   wideRequestResume	(StateData& stateData);
+	HFSM_INLINE void   wideChangeToRequested(StateData& stateData,
 											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT

@@ -12,7 +12,7 @@ struct RegisterT {
 
 	static constexpr StateID STATE_ID = NS;
 
-	static HSFM_INLINE
+	static HFSM_INLINE
 	void
 	execute(StateParents& stateParents, const Parent parent) {
 		static constexpr auto HEAD_ID  = StateList::template index<TH>();
@@ -28,7 +28,7 @@ template <StateID NS, typename TA>
 struct RegisterT<NS, TA, Empty<TA>> {
 	using StateParents	= Array<Parent, TA::STATE_COUNT>;
 
-	static HSFM_INLINE
+	static HFSM_INLINE
 	void
 	execute(StateParents&, const Parent) {}
 };

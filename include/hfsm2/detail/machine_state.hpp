@@ -28,28 +28,28 @@ struct _S {
 
 	_S(StateData& stateData, const Parent parent);
 
-	HSFM_INLINE void   deepForwardGuard		(FullControl&)					{}
-	HSFM_INLINE bool   deepGuard			(FullControl& control);
+	HFSM_INLINE void   deepForwardGuard		(FullControl&)					{}
+	HFSM_INLINE bool   deepGuard			(FullControl& control);
 
-	HSFM_INLINE void   deepEnterInitial		(Control& control);
-	HSFM_INLINE void   deepEnter			(Control& control);
+	HFSM_INLINE void   deepEnterInitial		(Control& control);
+	HFSM_INLINE void   deepEnter			(Control& control);
 
-	HSFM_INLINE Status deepUpdate			(FullControl& control);
+	HFSM_INLINE Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HSFM_INLINE void   deepReact			(const TEvent& event,
+	HFSM_INLINE void   deepReact			(const TEvent& event,
 											 FullControl& control);
 
-	HSFM_INLINE void   deepExit				(Control& control);
+	HFSM_INLINE void   deepExit				(Control& control);
 
-	HSFM_INLINE void   wrapPlanSucceeded	(FullControl& control);
-	HSFM_INLINE void   wrapPlanFailed		(FullControl& control);
+	HFSM_INLINE void   wrapPlanSucceeded	(FullControl& control);
+	HFSM_INLINE void   wrapPlanFailed		(FullControl& control);
 
-	HSFM_INLINE void   deepForwardRequest	(StateData&, const RequestType)	{}
-	HSFM_INLINE void   deepRequestRemain	(StateData&)					{}
-	HSFM_INLINE void   deepRequestRestart	(StateData&)					{}
-	HSFM_INLINE void   deepRequestResume	(StateData&)					{}
-	HSFM_INLINE void   deepChangeToRequested(StateData&, Control&)			{}
+	HFSM_INLINE void   deepForwardRequest	(StateData&, const RequestType)	{}
+	HFSM_INLINE void   deepRequestRemain	(StateData&)					{}
+	HFSM_INLINE void   deepRequestRestart	(StateData&)					{}
+	HFSM_INLINE void   deepRequestResume	(StateData&)					{}
+	HFSM_INLINE void   deepChangeToRequested(StateData&, Control&)			{}
 
 #if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 	static constexpr bool isBare()	 { return std::is_same<Head, Empty>::value;	 }

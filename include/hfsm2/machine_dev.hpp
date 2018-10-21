@@ -44,7 +44,7 @@
 #include <utility>		// @GCC: std::conditional<>, move(), forward()
 #endif
 
-#define HSFM_INLINE														  inline
+#define HFSM_INLINE														  inline
 
 //------------------------------------------------------------------------------
 
@@ -198,7 +198,7 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 #include "detail/machine_orthogonal.hpp"
 #include "detail/machine_root.hpp"
 
-#undef HSFM_INLINE
+#undef HFSM_INLINE
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
 #undef HFSM_LOG_STATE_METHOD

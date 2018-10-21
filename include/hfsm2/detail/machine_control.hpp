@@ -35,10 +35,10 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Origin {
-		HSFM_INLINE Origin(ControlT& control_,
+		HFSM_INLINE Origin(ControlT& control_,
 						   const StateID id);
 
-		HSFM_INLINE ~Origin();
+		HFSM_INLINE ~Origin();
 
 		ControlT& control;
 		const StateID prevId;
@@ -47,12 +47,12 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Region {
-		HSFM_INLINE Region(ControlT& control,
+		HFSM_INLINE Region(ControlT& control,
 						   const RegionID id,
 						   const StateID index,
 						   const LongIndex size);
 
-		HSFM_INLINE ~Region();
+		HFSM_INLINE ~Region();
 
 		ControlT& control;
 		const RegionID prevId;
@@ -63,7 +63,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HSFM_INLINE ControlT(Context& context,
+	HFSM_INLINE ControlT(Context& context,
 						 StateData& stateData,
 						 PlanData& planData,
 						 LoggerInterface* const HFSM_IF_LOGGER(logger))
@@ -73,11 +73,11 @@ protected:
 		HFSM_IF_LOGGER(, _logger(logger))
 	{}
 
-	HSFM_INLINE void setOrigin  (const StateID id);
-	HSFM_INLINE void resetOrigin(const StateID id);
+	HFSM_INLINE void setOrigin  (const StateID id);
+	HFSM_INLINE void resetOrigin(const StateID id);
 
-	HSFM_INLINE void setRegion  (const RegionID id, const StateID index, const LongIndex size);
-	HSFM_INLINE void resetRegion(const RegionID id, const StateID index, const LongIndex size);
+	HFSM_INLINE void setRegion  (const RegionID id, const StateID index, const LongIndex size);
+	HFSM_INLINE void resetRegion(const RegionID id, const StateID index, const LongIndex size);
 
 	template <typename T>
 	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();	}
@@ -86,50 +86,50 @@ protected:
 	static constexpr RegionID regionId()						{ return RegionList::template index<T>();	}
 
 public:
-	HSFM_INLINE Context& _()									{ return _context;							}
-	HSFM_INLINE Context& context()								{ return _context;							}
+	HFSM_INLINE Context& _()									{ return _context;							}
+	HFSM_INLINE Context& context()								{ return _context;							}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);	}
-	HSFM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);	}
+	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);	}
+	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);	}
 
-	HSFM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);				}
-
-	template <typename TState>
-	HSFM_INLINE bool isActive() const							{ return isActive	(stateId<TState>());	}
+	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);				}
 
 	template <typename TState>
-	HSFM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
+	HFSM_INLINE bool isActive() const							{ return isActive	(stateId<TState>());	}
 
 	template <typename TState>
-	HSFM_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());	}
+	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE Plan plan()										{ return Plan{_planData, _regionId};		}
-	HSFM_INLINE Plan plan() const								{ return Plan{_planData, _regionId};		}
+	HFSM_INLINE Plan plan()										{ return Plan{_planData, _regionId};		}
+	HFSM_INLINE Plan plan() const								{ return Plan{_planData, _regionId};		}
 
-	HSFM_INLINE Plan plan(const RegionID regionId)				{ return Plan{_planData,  regionId};		}
-	HSFM_INLINE Plan plan(const RegionID regionId) const		{ return Plan{_planData,  regionId};		}
-
-	template <typename TRegion>
-	HSFM_INLINE Plan plan()									{ return Plan{_planData, regionId<TRegion>()};	}
+	HFSM_INLINE Plan plan(const RegionID regionId)				{ return Plan{_planData,  regionId};		}
+	HFSM_INLINE Plan plan(const RegionID regionId) const		{ return Plan{_planData,  regionId};		}
 
 	template <typename TRegion>
-	HSFM_INLINE Plan plan() const							{ return Plan{_planData, regionId<TRegion>()};	}
+	HFSM_INLINE Plan plan()									{ return Plan{_planData, regionId<TRegion>()};	}
+
+	template <typename TRegion>
+	HFSM_INLINE Plan plan() const							{ return Plan{_planData, regionId<TRegion>()};	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HSFM_INLINE		 StateData&	stateData()						{ return _stateData;						}
-	HSFM_INLINE const StateData&	stateData() const			{ return _stateData;						}
+	HFSM_INLINE		 StateData&	stateData()						{ return _stateData;						}
+	HFSM_INLINE const StateData&	stateData() const			{ return _stateData;						}
 
-	HSFM_INLINE		 PlanData&	planData()						{ return _planData;							}
-	HSFM_INLINE const PlanData&	planData() const				{ return _planData;							}
+	HFSM_INLINE		 PlanData&	planData()						{ return _planData;							}
+	HFSM_INLINE const PlanData&	planData() const				{ return _planData;							}
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
-	HSFM_INLINE LoggerInterface* logger()						{ return _logger;							}
+	HFSM_INLINE LoggerInterface* logger()						{ return _logger;							}
 #endif
 
 protected:
@@ -184,8 +184,8 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Lock {
-		HSFM_INLINE Lock(FullControlT& control_);
-		HSFM_INLINE ~Lock();
+		HFSM_INLINE Lock(FullControlT& control_);
+		HFSM_INLINE ~Lock();
 
 		FullControlT* const control;
 	};
@@ -193,7 +193,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HSFM_INLINE FullControlT(Context& context,
+	HFSM_INLINE FullControlT(Context& context,
 							 StateData& stateData,
 							 PlanData& planData,
 							 Requests& requests,
@@ -230,23 +230,23 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE void changeTo(const StateID stateId);
-	HSFM_INLINE void resume	 (const StateID stateId);
-	HSFM_INLINE void schedule(const StateID stateId);
+	HFSM_INLINE void changeTo(const StateID stateId);
+	HFSM_INLINE void resume	 (const StateID stateId);
+	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HSFM_INLINE void changeTo()				{ changeTo(stateId<TState>());				}
+	HFSM_INLINE void changeTo()				{ changeTo(stateId<TState>());				}
 
 	template <typename TState>
-	HSFM_INLINE void resume()				{ resume  (stateId<TState>());				}
+	HFSM_INLINE void resume()				{ resume  (stateId<TState>());				}
 
 	template <typename TState>
-	HSFM_INLINE void schedule()				{ schedule(stateId<TState>());				}
+	HFSM_INLINE void schedule()				{ schedule(stateId<TState>());				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HSFM_INLINE void succeed();
-	HSFM_INLINE void fail();
+	HFSM_INLINE void succeed();
+	HFSM_INLINE void fail();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
