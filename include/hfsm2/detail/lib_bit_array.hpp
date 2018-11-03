@@ -94,14 +94,14 @@ public:
 
 	HFSM_INLINE explicit operator bool() const;
 
-	HFSM_INLINE		Bit operator[] (const Index i)			{ return	  Bit{*this, i}; }
+	HFSM_INLINE		 Bit operator[] (const Index i)			{ return	  Bit{*this, i}; }
 	HFSM_INLINE ConstBit operator[] (const Index i) const	{ return ConstBit{*this, i}; }
 
 protected:
 	HFSM_INLINE bool get(const Index i) const;
 	HFSM_INLINE void set(const Index i, const bool value);
 
-	HFSM_INLINE		 StorageUnit* storage()			{ return reinterpret_cast<		StorageUnit*>(((uintptr_t)this) + OFFSET);	}
+	HFSM_INLINE		  StorageUnit* storage()		{ return reinterpret_cast<		StorageUnit*>(((uintptr_t)this) + OFFSET);	}
 	HFSM_INLINE const StorageUnit* storage() const	{ return reinterpret_cast<const StorageUnit*>(((uintptr_t)this) + OFFSET);	}
 
 	HFSM_INLINE Index storageUnitCount() const		{ return (capacity + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;			}
@@ -112,7 +112,7 @@ public:
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, TIndex NCapacity>
+template <typename TIndex, ShortIndex NCapacity>
 class BitArrayStorageT final
 	: public BitArrayT<TIndex>
 {

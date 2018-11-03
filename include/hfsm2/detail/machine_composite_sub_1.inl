@@ -1,39 +1,41 @@
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-_CS<NS, NC, NO, TA, NI, TI, TR...>::_CS(StateData& stateData,
-										const ForkID forkId)
-	: initial  {stateData, Parent{forkId, PRONG_INDEX}}
-	, remaining{stateData, forkId}
-{}
+void
+_CS<NS, NC, NO, TA, NI, TI, TR...>::wideRegister(StateData& stateData,
+												 const ForkID forkId)
+{
+	initial  .deepRegister(stateData, Parent{forkId, PRONG_INDEX});
+	remaining.wideRegister(stateData, forkId);
+}
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-void
+bool
 _CS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(const ShortIndex prong,
-													 FullControl& control)
+													 GuardControl& control)
 {
 	if (prong == PRONG_INDEX)
-		initial  .deepForwardGuard(		  control);
+		return initial  .deepForwardGuard(		 control);
 	else
-		remaining.wideForwardGuard(prong, control);
+		return remaining.wideForwardGuard(prong, control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-void
+bool
 _CS<NS, NC, NO, TA, NI, TI, TR...>::wideGuard(const ShortIndex prong,
-											  FullControl& control)
+											  GuardControl& control)
 {
 	if (prong == PRONG_INDEX)
-		initial  .deepGuard(	   control);
+		return initial  .deepGuard(		  control);
 	else
-		remaining.wideGuard(prong, control);
+		return remaining.wideGuard(prong, control);
 }
 
 //------------------------------------------------------------------------------

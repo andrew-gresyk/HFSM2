@@ -121,7 +121,7 @@ int main() {
 	machine.setStateData<Origin>(&context.boolPayload);
 	HFSM_ASSERT( machine.isStateDataSet<Origin>());
 
-	HSFM_IF_ASSERT(bool* const payBool = machine.getStateData<Origin, bool>());
+	HFSM_IF_ASSERT(bool* const payBool = machine.getStateData<Origin, bool>());
 	HFSM_ASSERT(payBool);
 	HFSM_ASSERT(*payBool == true);
 

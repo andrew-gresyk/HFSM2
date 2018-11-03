@@ -48,6 +48,7 @@ ControlT<TA>::Region::~Region() {
 template <typename TA>
 void
 ControlT<TA>::setOrigin(const StateID id) {
+	// TODO: see if this still can be used
 	//HFSM_ASSERT(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//HFSM_ASSERT(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
 
@@ -61,6 +62,7 @@ ControlT<TA>::setOrigin(const StateID id) {
 template <typename TA>
 void
 ControlT<TA>::resetOrigin(const StateID id) {
+	// TODO: see if this still can be used
 	//HFSM_ASSERT(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//HFSM_ASSERT(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
 

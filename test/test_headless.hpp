@@ -12,8 +12,8 @@ using M = hfsm2::Machine<Context>;
 
 #define S(s) struct s
 
-using FSM = M::PeerRoot<
-				M::CompositePeers<
+using FSM = M::OrthogonalPeerRoot<
+				M::OrthogonalPeers<
 					S(Composite_1),
 					S(Composite_2)
 				>,
@@ -39,12 +39,12 @@ struct Orthogonal_2	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::DEEP_WIDTH	 == 1, "DEEP_WIDTH");
+static_assert(FSM::Instance::DEEP_WIDTH	 == 0, "DEEP_WIDTH");
 static_assert(FSM::Instance::STATE_COUNT == 7, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_COUNT == 2, "COMPO_COUNT");
-static_assert(FSM::Instance::ORTHO_COUNT == 1, "ORTHO_COUNT");
-static_assert(FSM::Instance::ORTHO_UNITS == 1, "ORTHO_UNITS");
-static_assert(FSM::Instance::PRONG_COUNT == 4, "PRONG_COUNT");
+static_assert(FSM::Instance::COMPO_COUNT == 0, "COMPO_COUNT");
+static_assert(FSM::Instance::ORTHO_COUNT == 3, "ORTHO_COUNT");
+static_assert(FSM::Instance::ORTHO_UNITS == 3, "ORTHO_UNITS");
+static_assert(FSM::Instance::PRONG_COUNT == 0, "PRONG_COUNT");
 
 ////////////////////////////////////////////////////////////////////////////////
 

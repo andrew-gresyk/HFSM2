@@ -29,7 +29,7 @@ Logger::recordMethod(const hfsm2::StateID origin,
 			history.emplace_back(origin, Event::PLAN_FAILED);
 			break;
 		default:
-			HSFM_BREAK();
+			HFSM_BREAK();
 	}
 }
 
@@ -51,7 +51,7 @@ Logger::recordTransition(const hfsm2::StateID origin,
 			history.emplace_back(origin, Event::SCHEDULE, target);
 			break;
 		default:
-			HSFM_BREAK();
+			HFSM_BREAK();
 	}
 }
 
@@ -70,7 +70,7 @@ Logger::recordTaskStatus(const RegionID region,
 			history.emplace_back(region, Event::TASK_FAILURE, origin);
 			break;
 		default:
-			HSFM_BREAK();
+			HFSM_BREAK();
 	}
 }
 
@@ -88,7 +88,7 @@ Logger::recordPlanStatus(const RegionID region,
 			history.emplace_back(region, Event::PLAN_FAILURE, hfsm2::INVALID_STATE_ID);
 			break;
 		default:
-			HSFM_BREAK();
+			HFSM_BREAK();
 	}
 }
 

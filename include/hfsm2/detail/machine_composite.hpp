@@ -1,4 +1,4 @@
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +37,8 @@ struct _C {
 	using FullControl	= FullControlT<Args>;
 	using ControlLock	= typename FullControl::Lock;
 
+	using GuardControl	= GuardControlT<Args>;
+
 	using Plan			= PlanT<Args>;
 
 	using HeadState		= _S <HEAD_ID, Args, Head>;
@@ -45,13 +47,14 @@ struct _C {
 
 	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
 
-	_C(StateData& stateData, const Parent parent);
+	ShortIndex& compoActive   (Control& control)	{ return control.stateData().compoActive	[COMPO_INDEX];	}
+	ShortIndex& compoResumable(Control& control)	{ return control.stateData().resumable.compo[COMPO_INDEX];	}
+	ShortIndex& compoRequested(Control& control)	{ return control.stateData().requested.compo[COMPO_INDEX];	}
 
-	HFSM_INLINE CompoFork& compoFork		(StateData& stateData)	{ return stateData.compoForks[COMPO_INDEX];	}
-	HFSM_INLINE CompoFork& compoFork		(Control&   control)	{ return compoFork(control.stateData());	}
+	HFSM_INLINE void   deepRegister			(StateData& stateData, const Parent parent);
 
-	HFSM_INLINE void   deepForwardGuard		(FullControl& control);
-	HFSM_INLINE void   deepGuard			(FullControl& control);
+	HFSM_INLINE bool   deepForwardGuard		(GuardControl& control);
+	HFSM_INLINE bool   deepGuard			(GuardControl& control);
 
 	HFSM_INLINE void   deepEnterInitial		(Control& control);
 	HFSM_INLINE void   deepEnter			(Control& control);
@@ -59,8 +62,7 @@ struct _C {
 	HFSM_INLINE Status deepUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(const TEvent& event,
-											 FullControl& control);
+	HFSM_INLINE void   deepReact			(const TEvent& event, FullControl& control);
 
 	HFSM_INLINE void   deepExit				(Control& control);
 

@@ -16,11 +16,14 @@ public:
 
 public:
 	HFSM_INLINE StaticArray() = default;
+	HFSM_INLINE StaticArray(const Item filler);
 
 	HFSM_INLINE		  Item& operator[] (const LongIndex i);
 	HFSM_INLINE const Item& operator[] (const LongIndex i) const;
 
 	HFSM_INLINE LongIndex count() const						{ return CAPACITY;	}
+
+	HFSM_INLINE void fill(const Item filler);
 
 private:
 	Item _items[CAPACITY];
@@ -29,7 +32,12 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-struct StaticArray<T, 0> {};
+struct StaticArray<T, 0> {
+	using Item  = T;
+
+	HFSM_INLINE StaticArray() = default;
+	HFSM_INLINE StaticArray(const Item)											{}
+};
 
 //------------------------------------------------------------------------------
 
@@ -59,6 +67,11 @@ public:
 private:
 	Item _storage[CAPACITY];
 };
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+class Array<T, 0> {};
 
 ////////////////////////////////////////////////////////////////////////////////
 

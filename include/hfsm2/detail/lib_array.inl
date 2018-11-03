@@ -3,9 +3,16 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NCapacity>
+template <typename T, LongIndex NC>
+StaticArray<T, NC>::StaticArray(const Item filler) {
+	fill(filler);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename T, LongIndex NC>
 T&
-StaticArray<T, NCapacity>::operator[] (const LongIndex i) {
+StaticArray<T, NC>::operator[] (const LongIndex i) {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[i];
@@ -13,18 +20,27 @@ StaticArray<T, NCapacity>::operator[] (const LongIndex i) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NCapacity>
+template <typename T, LongIndex NC>
 const T&
-StaticArray<T, NCapacity>::operator[] (const LongIndex i) const {
+StaticArray<T, NC>::operator[] (const LongIndex i) const {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[i];
 }
 
+//------------------------------------------------------------------------------
+
+template <typename T, LongIndex NC>
+void
+StaticArray<T, NC>::fill(const Item filler) {
+	for (LongIndex i = 0; i < CAPACITY; ++i)
+		_items[i] = filler;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NCapacity>
-Array<T, NCapacity>::Array()
+template <typename T, LongIndex NC>
+Array<T, NC>::Array()
 	: View(CAPACITY)
 {
 	HFSM_ASSERT(View::data() == _storage);

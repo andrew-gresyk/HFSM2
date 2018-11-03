@@ -70,7 +70,7 @@ methodName(const Method method) {
 		case Method::EXIT:		return "exit";
 
 		default:
-			HSFM_BREAK();
+			HFSM_BREAK();
 			return nullptr;
 	}
 }
@@ -86,7 +86,7 @@ transitionName(const Transition transition) {
 		case Transition::SCHEDULE:		return "schedule";
 
 		default:
-			HSFM_BREAK();
+			HFSM_BREAK();
 			return nullptr;
 	}
 }

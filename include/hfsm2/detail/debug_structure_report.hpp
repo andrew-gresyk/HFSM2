@@ -65,7 +65,7 @@ HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
 		case Request::SCHEDULE:
 			return Transition::SCHEDULE;
 		default:
-			HSFM_BREAK();
+			HFSM_BREAK();
 			return Transition::RESTART;
 	}
 }

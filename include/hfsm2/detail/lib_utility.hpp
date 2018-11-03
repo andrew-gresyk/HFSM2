@@ -7,29 +7,29 @@
 //------------------------------------------------------------------------------
 
 #if defined _DEBUG && defined _MSC_VER
-	#define HSFM_BREAK()			__debugbreak()
-	#define HSFM_CHECKED(x)			(!!(x) || (HSFM_BREAK(), 0))
+	#define HFSM_BREAK()			__debugbreak()
+	#define HFSM_CHECKED(x)			(!!(x) || (HFSM_BREAK(), 0))
 #else
-	#define HSFM_BREAK()			((void) 0)
-	#define HSFM_CHECKED(x)			x
+	#define HFSM_BREAK()			((void) 0)
+	#define HFSM_CHECKED(x)			x
 #endif
 
 #ifdef _DEBUG
-	#define HSFM_IF_DEBUG(...)		__VA_ARGS__
-	#define HSFM_UNLESS_DEBUG(...)
+	#define HFSM_IF_DEBUG(...)		__VA_ARGS__
+	#define HFSM_UNLESS_DEBUG(...)
 	#define HFSM_DEBUG_OR(y, n)		y
 #else
-	#define HSFM_IF_DEBUG(...)
-	#define HSFM_UNLESS_DEBUG(...)	__VA_ARGS__
+	#define HFSM_IF_DEBUG(...)
+	#define HFSM_UNLESS_DEBUG(...)	__VA_ARGS__
 	#define HFSM_DEBUG_OR(y, n)		n
 #endif
 
 #ifdef HFSM_ENABLE_ASSERT
-	#define HSFM_IF_ASSERT(...)		__VA_ARGS__
-	#define HFSM_ASSERT(x)			(!!(x) || (HSFM_BREAK(), 0))
+	#define HFSM_IF_ASSERT(...)		__VA_ARGS__
+	#define HFSM_ASSERT(x)			(!!(x) || (HFSM_BREAK(), 0))
 	#define HFSM_ASSERT_OR(y, n)	y
 #else
-	#define HSFM_IF_ASSERT(...)
+	#define HFSM_IF_ASSERT(...)
 	#define HFSM_ASSERT(x)			((void) 0)
 	#define HFSM_ASSERT_OR(y, n)	n
 #endif
@@ -59,7 +59,7 @@ static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG_INDEX;
 
 namespace detail {
 
-HSFM_IF_DEBUG(struct None {});
+HFSM_IF_DEBUG(struct None {});
 
 ////////////////////////////////////////////////////////////////////////////////
 

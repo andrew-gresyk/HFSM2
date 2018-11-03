@@ -1,4 +1,4 @@
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,9 +30,10 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using Request		 = RequestT<PayloadList>;
 	using RequestType	 = typename Request::Type;
 
-	using StateData		 = StateDataT  <Args>;
-	using Control		 = ControlT	   <Args>;
-	using FullControl	 = FullControlT<Args>;
+	using StateData		 = StateDataT	<Args>;
+	using Control		 = ControlT		<Args>;
+	using FullControl	 = FullControlT	<Args>;
+	using GuardControl	 = GuardControlT<Args>;
 
 	using Initial		 = typename WrapMaterial<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>::Type;
 	using InitialForward = typename WrapForward<TInitial>::Type;
@@ -43,14 +44,12 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 						 	   Args, PRONG_INDEX + 1, TRemaining...>;
 	using Forward		 = _OSF<TInitial, TRemaining...>;
 
-	using Prongs		 = typename OrthoFork::Prongs;
+	HFSM_INLINE void   wideRegister			(StateData& stateData, const ForkID forkId);
 
-	_OS(StateData& stateData, const ForkID forkId);
-
-	HFSM_INLINE void   wideForwardGuard		(const Prongs& prongs,
-					 						 FullControl& control);
-	HFSM_INLINE void   wideForwardGuard		(FullControl& control);
-	HFSM_INLINE void   wideGuard			(FullControl& control);
+	HFSM_INLINE bool   wideForwardGuard		(const OrthoFork& prongs,
+					 						 GuardControl& control);
+	HFSM_INLINE bool   wideForwardGuard		(GuardControl& control);
+	HFSM_INLINE bool   wideGuard			(GuardControl& control);
 
 	HFSM_INLINE void   wideEnterInitial		(Control& control);
 	HFSM_INLINE void   wideEnter			(Control& control);
@@ -63,7 +62,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	HFSM_INLINE void   wideExit				(Control& control);
 
-	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType request);
+	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const OrthoFork& prongs, const RequestType request);
 	HFSM_INLINE void   wideRequestRemain	(StateData& stateData);
 	HFSM_INLINE void   wideRequestRestart	(StateData& stateData);
 	HFSM_INLINE void   wideRequestResume	(StateData& stateData);
@@ -105,20 +104,20 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	using Request		 = RequestT<PayloadList>;
 	using RequestType	 = typename Request::Type;
 
-	using StateData		 = StateDataT  <Args>;
-	using Control		 = ControlT	   <Args>;
-	using FullControl	 = FullControlT<Args>;
+	using StateData		 = StateDataT	<Args>;
+	using Control		 = ControlT		<Args>;
+	using FullControl	 = FullControlT	<Args>;
+	using GuardControl	 = GuardControlT<Args>;
 
 	using Initial		 = typename WrapMaterial<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>::Type;
 	using Forward		 = _OSF<TInitial>;
 
-	using Prongs		 = typename OrthoFork::Prongs;
+	HFSM_INLINE void   wideRegister			(StateData& stateData, const ForkID forkId);
 
-	_OS(StateData& stateData, const ForkID forkId);
-
-	HFSM_INLINE void   wideForwardGuard		(const Prongs& prongs, FullControl& control);
-	HFSM_INLINE void   wideForwardGuard		(FullControl& control);
-	HFSM_INLINE void   wideGuard			(FullControl& control);
+	HFSM_INLINE bool   wideForwardGuard		(const OrthoFork& prongs,
+											 GuardControl& control);
+	HFSM_INLINE bool   wideForwardGuard		(GuardControl& control);
+	HFSM_INLINE bool   wideGuard			(GuardControl& control);
 
 	HFSM_INLINE void   wideEnterInitial		(Control& control);
 	HFSM_INLINE void   wideEnter			(Control& control);
@@ -130,7 +129,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	HFSM_INLINE void   wideExit				(Control& control);
 
-	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const Prongs& prongs, const RequestType transition);
+	HFSM_INLINE void   wideForwardRequest	(StateData& stateData, const OrthoFork& prongs, const RequestType transition);
 	HFSM_INLINE void   wideRequestRemain	(StateData& stateData);
 	HFSM_INLINE void   wideRequestRestart	(StateData& stateData);
 	HFSM_INLINE void   wideRequestResume	(StateData& stateData);

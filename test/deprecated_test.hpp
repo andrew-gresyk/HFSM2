@@ -52,8 +52,8 @@ struct Context {
 		const auto size = std::min(historySize, referenceSize);
 
 		for (unsigned i = 0; i < size; ++i) {
-			HSFM_IF_ASSERT(const auto h = history[i]);
-			HSFM_IF_ASSERT(const auto r = reference[i]);
+			HFSM_IF_ASSERT(const auto h = history[i]);
+			HFSM_IF_ASSERT(const auto r = reference[i]);
 			HFSM_ASSERT(h == r);
 		}
 		HFSM_ASSERT(historySize == referenceSize);
@@ -281,7 +281,8 @@ struct B_2	 : State<B_2> {};
 struct B_2_1
 	: State<B_2_1>
 {
-	void guard(FullControl& control) {
+	void guard(GuardControl& control) {
+		control.block();
 		resume<B_2_2>(control, control._().history);
 	}
 };
@@ -291,9 +292,11 @@ struct B_2_1
 struct B_2_2
 	: State<B_2_2>
 {
-	void guard(FullControl& control) {
-		if (entryCount() == 2)
+	void guard(GuardControl& control) {
+		if (entryCount() == 2) {
+			control.block();
 			control.resume<A>();
+		}
 	}
 
 	void update(FullControl& control) {

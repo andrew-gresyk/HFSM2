@@ -41,7 +41,7 @@ List<TItem, NCapacity>::emplace(TArgs... args) {
 			_vacantTail = INVALID;
 		}
 
-		HSFM_IF_ASSERT(verifyStructure());
+		HFSM_IF_ASSERT(verifyStructure());
 
 		new (&cell.item) Item{std::forward<TArgs>(args)...};
 
@@ -51,7 +51,7 @@ List<TItem, NCapacity>::emplace(TArgs... args) {
 		HFSM_ASSERT(_vacantHead == INVALID);
 		HFSM_ASSERT(_vacantTail == INVALID);
 		HFSM_ASSERT(_count == CAPACITY);
-		HSFM_BREAK();
+		HFSM_BREAK();
 
 		return INVALID;
 	}
@@ -92,7 +92,7 @@ List<TItem, NCapacity>::remove(const Index i) {
 
 	--_count;
 
-	HSFM_IF_ASSERT(verifyStructure());
+	HFSM_IF_ASSERT(verifyStructure());
 }
 
 //------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ List<TItem, NCapacity>::remove(const Index i) {
 template <typename TItem, LongIndex NCapacity>
 TItem&
 List<TItem, NCapacity>::operator[] (const Index i) {
-	HSFM_IF_ASSERT(verifyStructure());
+	HFSM_IF_ASSERT(verifyStructure());
 
 	return _cells[i].item;
 }
@@ -110,7 +110,7 @@ List<TItem, NCapacity>::operator[] (const Index i) {
 template <typename TItem, LongIndex NCapacity>
 const TItem&
 List<TItem, NCapacity>::operator[] (const Index i) const {
-	HSFM_IF_ASSERT(verifyStructure());
+	HFSM_IF_ASSERT(verifyStructure());
 
 	return _cells[i].item;
 }

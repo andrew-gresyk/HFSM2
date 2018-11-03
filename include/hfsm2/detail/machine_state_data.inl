@@ -5,6 +5,15 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <LongIndex NCC, LongIndex NOC, LongIndex NOU>
+void
+AllForksT<NCC, NOC, NOU>::clear() {
+	compo.fill(INVALID_SHORT_INDEX);
+	ortho.clear();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 const Parent&
 StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::forkParent(const ForkID forkId) const {
@@ -18,8 +27,8 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::forkParent(const F
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
-const CompoFork*
-StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::compoParent(const ForkID forkId) const {
+ForkID
+StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::parentCompoFork(const ForkID forkId) const {
 	HFSM_ASSERT(forkId != 0);
 
 	for (Parent parent = forkParent(forkId);
@@ -27,10 +36,10 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::compoParent(const 
 		 parent = forkParent(parent.forkId))
 	{
 		if (parent.forkId > 0)
-			return &compoForks[parent.forkId - 1];
+			return parent.forkId;
 	}
 
-	return nullptr;
+	return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -48,9 +57,9 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isActive(const Sta
 			HFSM_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0) {
-				const CompoFork& fork = compoForks[parent.forkId - 1];
+				const ShortIndex& active = compoActive[parent.forkId - 1];
 
-				return parent.prong == fork.active;
+				return parent.prong == active;
 			}
 		}
 
@@ -71,9 +80,9 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isResumable(const 
 		{
 			HFSM_ASSERT(parent.forkId != 0);
 			if (parent.forkId > 0) {
-				const CompoFork& fork = compoForks[parent.forkId - 1];
+				const ShortIndex& compoResumable = resumable.compo[parent.forkId - 1];
 
-				return parent.prong == fork.resumable;
+				return parent.prong == compoResumable;
 			}
 		}
 
@@ -95,19 +104,19 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmediate(c
 			HFSM_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0) {
-				CompoFork& fork = compoForks[parent.forkId - 1];
+				ShortIndex& compoRequested = requested.compo[parent.forkId - 1];
 
-				fork.requested = parent.prong;
+				compoRequested = parent.prong;
 			} else if (parent.forkId < 0) {
 				const ForkID forkId = -parent.forkId - 1;
 
-				OrthoFork& requested = orthoRequested[forkId];
+				OrthoFork& orthoRequested = requested.ortho[forkId];
 
-				if (const CompoFork* const compoFork = compoParent(parent.forkId))
-					if (compoFork->requested == INVALID_SHORT_INDEX)
-						requested.prongs.clear();
+				if (const ForkID compoForkId = parentCompoFork(parent.forkId))
+					if (requested.compo[compoForkId - 1] == INVALID_SHORT_INDEX)
+						orthoRequested.clear();
 
-				requested.prongs[parent.prong] = true;
+				orthoRequested[parent.prong] = true;
 			}
 		}
 }
@@ -124,13 +133,13 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestScheduled(c
 		HFSM_ASSERT(parent.forkId != 0);
 
 		if (parent.forkId > 0) {
-			CompoFork& fork = compoForks[parent.forkId - 1];
+			ShortIndex& compoResumable = resumable.compo[parent.forkId - 1];
 
-			fork.resumable = parent.prong;
+			compoResumable = parent.prong;
 		} else if (parent.forkId < 0) {
-			OrthoFork& resumable = orthoResumable[-parent.forkId - 1];
+			OrthoFork& orthoResumable = resumable.ortho[-parent.forkId - 1];
 
-			resumable.prongs[parent.prong] = true;
+			orthoResumable[parent.prong] = true;
 		}
 	}
 }
@@ -140,9 +149,10 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestScheduled(c
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 void
 StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::clearOrthoRequested() {
-	for (ForkID i = 0; i < orthoRequested.count(); ++i) {
-		OrthoFork& requested = orthoRequested[i];
-		requested.prongs.clear();
+	for (ForkID i = 0; i < requested.ortho.count(); ++i) {
+		OrthoFork& orthoRequested = requested.ortho[i];
+
+		orthoRequested.clear();
 	}
 }
 
@@ -171,9 +181,9 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isActive(const StateID
 			HFSM_ASSERT(parent.forkId > 0);
 
 			if (parent.forkId > 0) {
-				const CompoFork& fork = compoForks[parent.forkId - 1];
+				const ShortIndex& active = compoActive[parent.forkId - 1];
 
-				return parent.prong == fork.active;
+				return parent.prong == active;
 			}
 		}
 
@@ -195,9 +205,9 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isResumable(const Stat
 			HFSM_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0) {
-				const CompoFork& fork = compoForks[parent.forkId - 1];
+				const ShortIndex& compoResumable = resumable.compo[parent.forkId - 1];
 
-				return parent.prong == fork.resumable;
+				return parent.prong == compoResumable;
 			}
 		}
 
@@ -219,9 +229,9 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestImmediate(const
 			HFSM_ASSERT(parent.forkId > 0);
 
 			if (parent.forkId > 0) {
-				CompoFork& fork = compoForks[parent.forkId - 1];
+				ShortIndex& compoRequested = requested.compo[parent.forkId - 1];
 
-				fork.requested = parent.prong;
+				compoRequested = parent.prong;
 			}
 		}
 }
@@ -238,21 +248,11 @@ StateDataT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestScheduled(const
 		HFSM_ASSERT(parent.forkId > 0);
 
 		if (parent.forkId > 0) {
-			CompoFork& fork = compoForks[parent.forkId - 1];
+			ShortIndex& compoResumable = resumable.compo[parent.forkId - 1];
 
-			fork.resumable = parent.prong;
+			compoResumable = parent.prong;
 		}
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
-const Parent&
-StateDataT<ArgsT<TC, TG, TSL, TRL, 0, NOC, NOU, TPL, NTC>>::forkParent(const ForkID forkId) const {
-	HFSM_ASSERT(forkId < 0);
-
-	return orthoParents[-forkId - 1];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,39 +1,41 @@
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-_OS<NS, NC, NO, TA, NI, TI>::_OS(StateData& stateData,
-								 const ForkID forkId)
-	: initial{stateData, Parent{forkId, PRONG_INDEX}}
-{}
+void
+_OS<NS, NC, NO, TA, NI, TI>::wideRegister(StateData& stateData,
+										  const ForkID forkId)
+{
+	initial.deepRegister(stateData, Parent{forkId, PRONG_INDEX});
+}
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const Prongs& prongs,
-											  FullControl& control)
+bool
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const OrthoFork& prongs,
+											  GuardControl& control)
 {
-	if (prongs[PRONG_INDEX])
-		initial.deepForwardGuard(control);
+	return prongs[PRONG_INDEX] ?
+		initial.deepForwardGuard(control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(FullControl& control) {
-	initial.deepForwardGuard(control);
+bool
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(GuardControl& control) {
+	return initial.deepForwardGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_OS<NS, NC, NO, TA, NI, TI>::wideGuard(FullControl& control) {
-	initial.deepGuard(control);
+bool
+_OS<NS, NC, NO, TA, NI, TI>::wideGuard(GuardControl& control) {
+	return initial.deepGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -84,7 +86,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideExit(Control& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateData& stateData,
-												const Prongs& prongs,
+												const OrthoFork& prongs,
 												const RequestType request)
 {
 	const auto initialRequest = prongs[PRONG_INDEX] ?

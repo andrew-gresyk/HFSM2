@@ -1,6 +1,5 @@
 #define HFSM_ENABLE_ASSERT
-//#include <hfsm2/machine.hpp>
-#include <hfsm2/machine_dev.hpp>
+#include <hfsm2/machine.hpp>
 
 #include <algorithm>
 #include <vector>

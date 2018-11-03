@@ -1,4 +1,4 @@
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@ ObjectPool<TI, NIC, NSS>::operator[] (const ShortIndex i) {
 	HFSM_ASSERT(offset + sizeof(Interface) <= STORAGE_SIZE);
 
 	return *reinterpret_cast<Interface*>(_storage + offset);
+	//return *std::launder(reinterpret_cast<Interface*>(_storage + offset));
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -32,6 +33,7 @@ ObjectPool<TI, NIC, NSS>::operator[] (const ShortIndex i) const {
 	HFSM_ASSERT(offset + sizeof(Interface) <= STORAGE_SIZE);
 
 	return *reinterpret_cast<const Interface*>(_storage + offset);
+	//return *std::launder(reinterpret_cast<const Interface*>(_storage + offset));
 }
 
 //------------------------------------------------------------------------------
@@ -57,6 +59,19 @@ ObjectPool<TI, NIC, NSS>::emplace(TArgs&&... args) {
 		_offsets[_count] = offset + SIZE;
 
 	return result;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TI, ShortIndex NIC, LongIndex NSS>
+void
+ObjectPool<TI, NIC, NSS>::clear() {
+	for (const ShortIndex offset : _offsets) {
+		HFSM_ASSERT(offset + sizeof(Interface) <= STORAGE_SIZE);
+
+		Interface& item = *reinterpret_cast<Interface*>(_storage + offset);
+		item.clear();
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

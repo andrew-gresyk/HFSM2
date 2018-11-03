@@ -102,7 +102,7 @@ private:
 struct A
 	: FSM::State
 {
-	//void guard(FullControl&)													{}
+	//void guard(GuardControl&)													{}
 	void enter(Control&)														{}
 	void update(FullControl&)													{}
 	//void react(const Action&, FullControl&)									{}
@@ -226,7 +226,8 @@ struct B_2
 struct B_2_1
 	: FSM::State
 {
-	void guard(FullControl& control) {
+	void guard(GuardControl& control) {
+		control.block();
 		control.resume<B_2_2>();
 	}
 
@@ -240,9 +241,11 @@ struct B_2_1
 struct B_2_2
 	: FSM::BaseT<Tracked>
 {
-	void guard(FullControl& control) {
-		if (entryCount() == 2)
+	void guard(GuardControl& control) {
+		if (entryCount() == 2) {
+			control.block();
 			control.resume<A>();
+		}
 	}
 
 	void enter(Control&)														{}

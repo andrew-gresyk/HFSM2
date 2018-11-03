@@ -73,7 +73,7 @@ BitArrayT<TIndex>::set(const Index i, const bool value) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, TIndex NCapacity>
+template <typename TIndex, ShortIndex NCapacity>
 BitArrayStorageT<TIndex, NCapacity>::BitArrayStorageT()
 	: BitArray{CAPACITY}
 {

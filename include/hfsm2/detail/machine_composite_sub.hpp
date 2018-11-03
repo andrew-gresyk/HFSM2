@@ -1,4 +1,4 @@
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +36,7 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using StateData		 = StateDataT  <Args>;
 	using Control		 = ControlT	   <Args>;
 	using FullControl	 = FullControlT<Args>;
+	using GuardControl	 = GuardControlT<Args>;
 
 	using Initial		 = typename WrapMaterial<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>::Type;
 	using InitialForward = typename WrapForward<TInitial>::Type;
@@ -46,10 +47,10 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 						 	   Args, NIndex + 1, TRemaining...>;
 	using Forward		 = _CSF<TInitial, TRemaining...>;
 
-	_CS(StateData& stateData, const ForkID forkId);
+	HFSM_INLINE void   wideRegister			(StateData& stateData, const ForkID forkId);
 
-	HFSM_INLINE void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
-	HFSM_INLINE void   wideGuard			(const ShortIndex prong, FullControl& control);
+	HFSM_INLINE bool   wideForwardGuard		(const ShortIndex prong, GuardControl& control);
+	HFSM_INLINE bool   wideGuard			(const ShortIndex prong, GuardControl& control);
 
 	HFSM_INLINE void   wideEnterInitial		(						 Control& control);
 	HFSM_INLINE void   wideEnter			(const ShortIndex prong, Control& control);
@@ -110,14 +111,15 @@ struct _CS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	using StateData		 = StateDataT  <Args>;
 	using Control		 = ControlT	   <Args>;
 	using FullControl	 = FullControlT<Args>;
+	using GuardControl	 = GuardControlT<Args>;
 
 	using Initial		 = typename WrapMaterial<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>::Type;
 	using Forward		 = _CSF<TInitial>;
 
-	_CS(StateData& stateData, const ForkID forkId);
+	HFSM_INLINE void   wideRegister			(StateData& stateData, const ForkID forkId);
 
-	HFSM_INLINE void   wideForwardGuard		(const ShortIndex prong, FullControl& control);
-	HFSM_INLINE void   wideGuard			(const ShortIndex prong, FullControl& control);
+	HFSM_INLINE bool   wideForwardGuard		(const ShortIndex prong, GuardControl& control);
+	HFSM_INLINE bool   wideGuard			(const ShortIndex prong, GuardControl& control);
 
 	HFSM_INLINE void   wideEnterInitial		(						 Control& control);
 	HFSM_INLINE void   wideEnter			(const ShortIndex prong, Control& control);

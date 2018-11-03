@@ -38,8 +38,9 @@ struct RegisterT<NS, TA, Empty<TA>> {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, typename TA, typename TH>
-_S<NS, TA, TH>::_S(StateData& stateData,
-				   const Parent parent)
+void
+_S<NS, TA, TH>::deepRegister(StateData& stateData,
+							 const Parent parent)
 {
 	using Register = RegisterT<STATE_ID, TA, Head>;
 	Register::execute(stateData.stateParents, parent);
@@ -49,17 +50,15 @@ _S<NS, TA, TH>::_S(StateData& stateData,
 
 template <StateID NS, typename TA, typename TH>
 bool
-_S<NS, TA, TH>::deepGuard(FullControl& control) {
+_S<NS, TA, TH>::deepGuard(GuardControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::guard, Method::GUARD);
 
 	ControlOrigin origin{control, STATE_ID};
 
-	const auto requestCountBefore = control._requests.count();
-
 	_head.widePreGuard(control.context());
 	_head.guard(control);
 
-	return requestCountBefore < control._requests.count();
+	return control.blocked();
 }
 
 //------------------------------------------------------------------------------
@@ -75,8 +74,8 @@ _S<NS, TA, TH>::deepEnterInitial(Control& control) {
 template <StateID NS, typename TA, typename TH>
 void
 _S<NS, TA, TH>::deepEnter(Control& control) {
-	HFSM_ASSERT(!control.planData().tasksSuccesses[STATE_ID]);
-	HFSM_ASSERT(!control.planData().tasksFailures [STATE_ID]);
+	HFSM_ASSERT(!control.planData().hasSucceeded(STATE_ID));
+	HFSM_ASSERT(!control.planData().hasFailed   (STATE_ID));
 
 	HFSM_LOG_STATE_METHOD(&Head::enter, Method::ENTER);
 
@@ -116,8 +115,7 @@ _S<NS, TA, TH>::deepReact(const TEvent& event,
 
 	_head.widePreReact(event, control.context());
 
-	//_head.react(event, control);
-	(_head.*reaction)(event, control);
+	(_head.*reaction)(event, control);		//_head.react(event, control);
 }
 
 //------------------------------------------------------------------------------
@@ -132,8 +130,8 @@ _S<NS, TA, TH>::deepExit(Control& control) {
 	_head.exit(control);
 	_head.widePostExit(control.context());
 
-	control.planData().tasksSuccesses[STATE_ID] = false;
-	control.planData().tasksFailures [STATE_ID] = false;
+	control.planData().setSuccessful(STATE_ID, false);
+	control.planData().setFailed	(STATE_ID, false);
 }
 
 //------------------------------------------------------------------------------

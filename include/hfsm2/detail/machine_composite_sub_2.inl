@@ -1,36 +1,38 @@
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-_CS<NS, NC, NO, TA, NI, TI>::_CS(StateData& stateData,
-								 const ForkID forkId)
-	: initial{stateData, Parent{forkId, PRONG_INDEX}}
-{}
+void
+_CS<NS, NC, NO, TA, NI, TI>::wideRegister(StateData& stateData,
+										  const ForkID forkId)
+{
+	initial.deepRegister(stateData, Parent{forkId, PRONG_INDEX});
+}
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_CS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const ShortIndex HSFM_IF_ASSERT(prong),
-											  FullControl& control)
+bool
+_CS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const ShortIndex HFSM_IF_ASSERT(prong),
+											  GuardControl& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
-	initial.deepForwardGuard(control);
+	return initial.deepForwardGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_CS<NS, NC, NO, TA, NI, TI>::wideGuard(const ShortIndex HSFM_IF_ASSERT(prong),
-									   FullControl& control)
+bool
+_CS<NS, NC, NO, TA, NI, TI>::wideGuard(const ShortIndex HFSM_IF_ASSERT(prong),
+									   GuardControl& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
-	initial.deepGuard(control);
+	return initial.deepGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -45,7 +47,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(Control& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
+_CS<NS, NC, NO, TA, NI, TI>::wideEnter(const ShortIndex HFSM_IF_ASSERT(prong),
 									   Control& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
@@ -57,7 +59,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideEnter(const ShortIndex HSFM_IF_ASSERT(prong),
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 Status
-_CS<NS, NC, NO, TA, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
+_CS<NS, NC, NO, TA, NI, TI>::wideUpdate(const ShortIndex HFSM_IF_ASSERT(prong),
 										FullControl& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
@@ -70,7 +72,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideUpdate(const ShortIndex HSFM_IF_ASSERT(prong),
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
+_CS<NS, NC, NO, TA, NI, TI>::wideReact(const ShortIndex HFSM_IF_ASSERT(prong),
 									   const TEvent& event,
 									   FullControl& control)
 {
@@ -83,7 +85,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideReact(const ShortIndex HSFM_IF_ASSERT(prong),
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
+_CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HFSM_IF_ASSERT(prong),
 									  Control& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
@@ -96,7 +98,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HSFM_IF_ASSERT(prong),
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateData& stateData,
-												const ShortIndex HSFM_IF_ASSERT(prong),
+												const ShortIndex HFSM_IF_ASSERT(prong),
 												const RequestType transition)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
@@ -125,7 +127,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(StateData& stateData) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateData& stateData,
-											   const ShortIndex HSFM_IF_ASSERT(prong))
+											   const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -137,7 +139,7 @@ _CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateData& stateData,
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(StateData& stateData,
-												   const ShortIndex HSFM_IF_ASSERT(prong),
+												   const ShortIndex HFSM_IF_ASSERT(prong),
 												   Control& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);

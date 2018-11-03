@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace hfsm2 {
 
@@ -294,8 +294,9 @@ struct _RF final {
 									PayloadList,
 									TASK_CAPACITY>;
 
-	using Control			= ControlT	  <Args>;
-	using FullControl		= FullControlT<Args>;
+	using Control			= ControlT	   <Args>;
+	using FullControl		= FullControlT <Args>;
+	using GuardControl		= GuardControlT<Args>;
 
 	using Bare				= BareT<Args>;
 	using State				= Empty<Args>;

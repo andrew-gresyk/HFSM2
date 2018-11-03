@@ -1,4 +1,4 @@
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,12 +29,14 @@ struct _O final {
 
 	using StateData		= StateDataT<Args>;
 
-	using Control		= ControlT	<Args>;
+	using Control		= ControlT<Args>;
 	using ControlOrigin	= typename Control::Origin;
 	using ControlRegion	= typename Control::Region;
 
 	using FullControl	= FullControlT<Args>;
 	using ControlLock	= typename FullControl::Lock;
+
+	using GuardControl	= GuardControlT<Args>;
 
 	using HeadState		= _S <HEAD_ID, Args, Head>;
 	using SubStates		= _OS<HEAD_ID + 1, COMPO_INDEX, ORTHO_INDEX + 1, Args, 0, TSubStates...>;
@@ -42,16 +44,16 @@ struct _O final {
 
 	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
 
-	_O(StateData& stateData, const Parent parent);
-
-	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateData& stateData)		  { return stateData.orthoRequested[ORTHO_INDEX];	}
-	HFSM_INLINE const OrthoFork& orthoRequested(const StateData& stateData) const { return stateData.orthoRequested[ORTHO_INDEX];	}
+	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateData& stateData)		  { return stateData.requested.ortho[ORTHO_INDEX];	}
+	HFSM_INLINE const OrthoFork& orthoRequested(const StateData& stateData) const { return stateData.requested.ortho[ORTHO_INDEX];	}
 
 	HFSM_INLINE		  OrthoFork& orthoRequested(	  Control&   control)		  { return orthoRequested(control.stateData());		}
 	HFSM_INLINE const OrthoFork& orthoRequested(const Control&   control)   const { return orthoRequested(control.stateData());		}
 
-	HFSM_INLINE void   deepForwardGuard		(FullControl& control);
-	HFSM_INLINE void   deepGuard			(FullControl& control);
+	HFSM_INLINE void   deepRegister			(StateData& stateData, const Parent parent);
+
+	HFSM_INLINE bool   deepForwardGuard		(GuardControl& control);
+	HFSM_INLINE bool   deepGuard			(GuardControl& control);
 
 	HFSM_INLINE void   deepEnterInitial		(Control& control);
 	HFSM_INLINE void   deepEnter			(Control& control);

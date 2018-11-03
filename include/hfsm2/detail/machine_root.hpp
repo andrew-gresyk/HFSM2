@@ -48,11 +48,13 @@ private:
 										 PayloadList,
 										 TASK_CAPACITY>;
 
-	using StateData				 = StateDataT  <Args>;
-	using PlanData				 = PlanDataT   <Args>;
+	using StateData				 = StateDataT	<Args>;
+	using AllForks				 = typename StateData::AllForks;
+	using PlanData				 = PlanDataT	<Args>;
 
-	using Control				 = ControlT	   <Args>;
-	using FullControl			 = FullControlT<Args>;
+	using Control				 = ControlT		<Args>;
+	using FullControl			 = FullControlT	<Args>;
+	using GuardControl			 = GuardControlT<Args>;
 
 	using PayloadBox			 = typename PayloadList::Variant;
 	using Payloads				 = Array<PayloadBox, STATE_COUNT>;

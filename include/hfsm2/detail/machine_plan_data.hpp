@@ -40,19 +40,58 @@ struct Bounds {
 
 //------------------------------------------------------------------------------
 
-template <typename TArgs>
-struct PlanDataT {
-	using Args			 = TArgs;
-	using StateList		 = typename Args::StateList;
-	using RegionList	 = typename Args::RegionList;
+template <typename,
+		  typename,
+		  typename,
+		  typename,
+		  LongIndex,
+		  LongIndex,
+		  LongIndex,
+		  typename,
+		  LongIndex>
+struct ArgsT;
 
-	static constexpr ShortIndex REGION_COUNT = RegionList::SIZE;
+template <typename>
+struct PlanDataT;
 
-	using TaskLinks		 = List<TaskLink, Args::TASK_CAPACITY>;
-	using TasksBounds	 = Array<Bounds, RegionList::SIZE>;
-	using TasksBits		 = BitArrayStorageT<StateID, StateList::SIZE>;
-	using RegionBit		 = BitT<RegionID>;
-	using RegionBits	 = BitArrayStorageT<RegionID, RegionList::SIZE>;
+//------------------------------------------------------------------------------
+
+template <typename TContext,
+		  typename TConfig,
+		  typename TStateList,
+		  typename TRegionList,
+		  LongIndex NCompoCount,
+		  LongIndex NOrthoCount,
+		  LongIndex NOrthoUnits,
+		  typename TPayloadList,
+		  LongIndex NTaskCapacity>
+struct PlanDataT<ArgsT<TContext,
+					   TConfig,
+					   TStateList,
+					   TRegionList,
+					   NCompoCount,
+					   NOrthoCount,
+					   NOrthoUnits,
+					   TPayloadList,
+					   NTaskCapacity>>
+{
+	using StateList		= TStateList;
+	using RegionList	= TRegionList;
+
+	static constexpr ShortIndex REGION_COUNT  = RegionList::SIZE;
+	static constexpr ShortIndex TASK_CAPACITY = NTaskCapacity;
+
+	using TaskLinks		= List<TaskLink, TASK_CAPACITY>;
+	using TasksBounds	= Array<Bounds, RegionList::SIZE>;
+	using TasksBits		= BitArrayStorageT<StateID, StateList::SIZE>;
+	using RegionBit		= BitT<RegionID>;
+	using RegionBits	= BitArrayStorageT<RegionID, RegionList::SIZE>;
+
+	HFSM_INLINE void setSuccessful(const StateID stateId, const bool state) { tasksSuccesses[stateId]  = state;	}
+	HFSM_INLINE void setFailed	  (const StateID stateId, const bool state) { tasksFailures [stateId]  = state;	}
+
+	HFSM_INLINE bool hasSucceeded (const StateID stateId) const	   { return !!tasksSuccesses[stateId];			}
+	HFSM_INLINE bool hasFailed	  (const StateID stateId) const	   { return !!tasksFailures [stateId];			}
 
 	TaskLinks taskLinks;
 	TasksBounds tasksBounds;
@@ -63,6 +102,38 @@ struct PlanDataT {
 #ifdef HFSM_ENABLE_ASSERT
 	void verifyPlans() const;
 	LongIndex verifyPlan(const RegionID stateId) const;
+#endif
+};
+
+//------------------------------------------------------------------------------
+
+template <typename TContext,
+		  typename TConfig,
+		  typename TStateList,
+		  typename TRegionList,
+		  LongIndex NOrthoCount,
+		  LongIndex NOrthoUnits,
+		  typename TPayloadList,
+		  LongIndex NTaskCapacity>
+struct PlanDataT<ArgsT<TContext,
+					   TConfig,
+					   TStateList,
+					   TRegionList,
+					   0,
+					   NOrthoCount,
+					   NOrthoUnits,
+					   TPayloadList,
+					   NTaskCapacity>>
+{
+	static constexpr void setSuccessful(const StateID, const bool)				{}
+	static constexpr void setFailed	   (const StateID, const bool)				{}
+
+	static constexpr bool hasSucceeded (const StateID)			{ return false;	}
+	static constexpr bool hasFailed	   (const StateID)			{ return false;	}
+
+#ifdef HFSM_ENABLE_ASSERT
+	void verifyPlans() const													{}
+	LongIndex verifyPlan(const RegionID) const									{}
 #endif
 };
 

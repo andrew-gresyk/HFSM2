@@ -46,10 +46,10 @@ public:
 	HFSM_INLINE		  Item& operator[] (const Index i);
 	HFSM_INLINE const Item& operator[] (const Index i) const;
 
-	HFSM_INLINE Index count() const { return _count; }
+	HFSM_INLINE Index count() const							{ return _count;	}
 
 private:
-	HSFM_IF_ASSERT(void verifyStructure(const Index occupied = INVALID) const);
+	HFSM_IF_ASSERT(void verifyStructure(const Index occupied = INVALID) const);
 
 private:
 	Cell _cells[CAPACITY];
@@ -58,6 +58,11 @@ private:
 	Index _last = 0;
 	Index _count = 0;
 };
+
+//------------------------------------------------------------------------------
+
+template <typename TItem>
+class List<TItem, 0> {};
 
 ////////////////////////////////////////////////////////////////////////////////
 

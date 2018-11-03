@@ -5,11 +5,12 @@ namespace detail {
 
 template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::_R(Context& context
-						 HFSM_IF_LOGGER(, LoggerInterface* const logger))
+						HFSM_IF_LOGGER(, LoggerInterface* const logger))
 	: _context{context}
-	, _apex{_stateData, Parent{}}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
+	_apex.deepRegister(_stateData, Parent{});
+
 	HFSM_IF_STRUCTURE(getStateNames());
 
 	for (auto& payload : _requestPayloads)
@@ -22,7 +23,7 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 						HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepEnterInitial(control);
 
-		HSFM_IF_ASSERT(_planData.verifyPlans());
+		HFSM_IF_ASSERT(_planData.verifyPlans());
 	}
 
 	HFSM_IF_STRUCTURE(udpateActivity());
@@ -38,7 +39,7 @@ _R<TC, TG, TPL, TA>::~_R() {
 					HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepExit(control);
 
-	HSFM_IF_ASSERT(_planData.verifyPlans());
+	HFSM_IF_ASSERT(_planData.verifyPlans());
 }
 
 //------------------------------------------------------------------------------
@@ -53,7 +54,7 @@ _R<TC, TG, TPL, TA>::update() {
 						HFSM_LOGGER_OR(_logger, nullptr));
 	_apex.deepUpdate(control);
 
-	HSFM_IF_ASSERT(_planData.verifyPlans());
+	HFSM_IF_ASSERT(_planData.verifyPlans());
 
 	if (_requests.count())
 		processTransitions();
@@ -74,7 +75,7 @@ _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 						HFSM_LOGGER_OR(_logger, nullptr));
 	_apex.deepReact(event, control);
 
-	HSFM_IF_ASSERT(_planData.verifyPlans());
+	HFSM_IF_ASSERT(_planData.verifyPlans());
 
 	if (_requests.count())
 		processTransitions();
@@ -240,11 +241,15 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 
 	HFSM_IF_STRUCTURE(_lastTransitions.clear());
 
+	AllForks undoRequested;
+	_stateData.requested.clear();
+
 	for (LongIndex i = 0;
 		i < MAX_SUBSTITUTIONS && _requests.count();
 		++i)
 	{
 		unsigned changeCount = 0;
+		undoRequested = _stateData.requested;
 
 		for (const Request& request : _requests) {
 			HFSM_IF_STRUCTURE(_lastTransitions << TransitionInfo(request, Method::UPDATE));
@@ -263,20 +268,22 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 				break;
 
 			default:
-				HSFM_BREAK();
+				HFSM_BREAK();
 			}
 		}
 		_requests.clear();
 
 		if (changeCount > 0) {
-			FullControl substitutionControl(_context,
-											_stateData,
-											_planData,
-											_requests,
-											HFSM_LOGGER_OR(_logger, nullptr));
-			_apex.deepForwardGuard(substitutionControl);
+			GuardControl guardControl(_context,
+									  _stateData,
+									  _planData,
+									  _requests,
+									  HFSM_LOGGER_OR(_logger, nullptr));
 
-			HSFM_IF_ASSERT(_planData.verifyPlans());
+			if (_apex.deepForwardGuard(guardControl))
+				_stateData.requested = undoRequested;
+
+			HFSM_IF_ASSERT(_planData.verifyPlans());
 
 		#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 			for (const auto& request : _requests)
@@ -293,7 +300,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 		_apex.deepChangeToRequested(_stateData, control);
 		_stateData.clearOrthoRequested();
 
-		HSFM_IF_ASSERT(_planData.verifyPlans());
+		HFSM_IF_ASSERT(_planData.verifyPlans());
 	}
 
 	HFSM_IF_STRUCTURE(udpateActivity());

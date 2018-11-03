@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace hfsm2 {
 namespace detail {
@@ -27,10 +27,7 @@ class ControlT {
 public:
 	using StateData		= StateDataT<Args>;
 	using PlanData		= PlanDataT <Args>;
-
 	using Plan			= PlanT		<Args>;
-	using TaskLinks		= typename PlanData::TaskLinks;
-	using TasksBounds	= typename PlanData::TasksBounds;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -122,10 +119,10 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HFSM_INLINE		 StateData&	stateData()						{ return _stateData;						}
+	HFSM_INLINE		  StateData&	stateData()					{ return _stateData;						}
 	HFSM_INLINE const StateData&	stateData() const			{ return _stateData;						}
 
-	HFSM_INLINE		 PlanData&	planData()						{ return _planData;							}
+	HFSM_INLINE		  PlanData&	planData()						{ return _planData;							}
 	HFSM_INLINE const PlanData&	planData() const				{ return _planData;							}
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
@@ -144,10 +141,10 @@ protected:
 	HFSM_IF_LOGGER(LoggerInterface* _logger);
 };
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 template <typename TArgs>
-class FullControlT final
+class FullControlT
 	: public ControlT<TArgs>
 {
 	template <StateID, typename, typename>
@@ -172,10 +169,8 @@ class FullControlT final
 	using Origin		= typename Control::Origin;
 
 	using StateData		= StateDataT<Args>;
-	using Plan			= PlanT		<Args>;
 	using PlanData		= PlanDataT <Args>;
-	using TaskLinks		= typename PlanData::TaskLinks;
-	using TasksBounds	= typename PlanData::TasksBounds;
+	using Plan			= PlanT		<Args>;
 
 public:
 	using Request		= RequestT <PayloadList>;
@@ -192,7 +187,7 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-private:
+protected:
 	HFSM_INLINE FullControlT(Context& context,
 							 StateData& stateData,
 							 PlanData& planData,
@@ -235,13 +230,13 @@ public:
 	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()				{ changeTo(stateId<TState>());				}
+	HFSM_INLINE void changeTo()				{ changeTo(stateId<TState>());	}
 
 	template <typename TState>
-	HFSM_INLINE void resume()				{ resume  (stateId<TState>());				}
+	HFSM_INLINE void resume()				{ resume  (stateId<TState>());	}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()				{ schedule(stateId<TState>());				}
+	HFSM_INLINE void schedule()				{ schedule(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -253,6 +248,30 @@ public:
 private:
 	Requests& _requests;
 	bool _locked = false;
+};
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+class GuardControlT
+	: public FullControlT<TArgs>
+{
+	template <typename, typename, typename, typename>
+	friend class _R;
+
+	using Args			= TArgs;
+
+	using FullControl	= FullControlT<Args>;
+
+private:
+	using FullControl::FullControlT;
+
+public:
+	HFSM_INLINE void block()								{ _blocked = true;	}
+	HFSM_INLINE bool blocked() const						{ return _blocked;	}
+
+private:
+	bool _blocked = false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

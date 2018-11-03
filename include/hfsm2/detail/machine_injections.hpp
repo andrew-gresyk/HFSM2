@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace hfsm2 {
 namespace detail {
@@ -16,8 +16,9 @@ protected:
 	using StateList			= typename Args::StateList;
 	using RegionList		= typename Args::RegionList;
 
-	using Control			= ControlT	  <Args>;
-	using FullControl		= FullControlT<Args>;
+	using Control			= ControlT	   <Args>;
+	using FullControl		= FullControlT <Args>;
+	using GuardControl		= GuardControlT<Args>;
 
 	using Plan				= typename Control::Plan;
 

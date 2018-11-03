@@ -4,54 +4,48 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-_O<NS, NC, NO, TA, TH, TS...>::_O(StateData& stateData,
-								  const Parent parent)
-	: _headState{stateData, parent}
-	, _subStates{stateData, ORTHO_ID}
+void
+_O<NS, NC, NO, TA, TH, TS...>::deepRegister(StateData& stateData,
+											const Parent parent)
 {
 	stateData.orthoParents[ORTHO_INDEX] = parent;
 
-	HSFM_IF_ASSERT(const ShortIndex requestedIndex =)
-	stateData.orthoRequested.template emplace<OrthoForkT<Forward::WIDTH>>();
+	HFSM_IF_ASSERT(const ShortIndex requestedIndex =)
+	stateData.requested.ortho.template emplace<OrthoForkT<Forward::WIDTH>>();
 	HFSM_ASSERT(requestedIndex == ORTHO_INDEX);
 
-	HSFM_IF_ASSERT(const ShortIndex resumableIndex =)
-	stateData.orthoResumable.template emplace<OrthoForkT<Forward::WIDTH>>();
+	HFSM_IF_ASSERT(const ShortIndex resumableIndex =)
+	stateData.resumable.ortho.template emplace<OrthoForkT<Forward::WIDTH>>();
 	HFSM_ASSERT(resumableIndex == ORTHO_INDEX);
 
-#ifdef _DEBUG
-	OrthoFork& requested = orthoRequested(stateData);
-	requested.TYPE = _headState.TYPE;
-
-	OrthoFork& resumable = stateData.orthoResumable[ORTHO_INDEX];
-	resumable.TYPE = _headState.TYPE;
-#endif
+	_headState.deepRegister(stateData, parent);
+	_subStates.wideRegister(stateData, ORTHO_ID);
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-void
-_O<NS, NC, NO, TA, TH, TS...>::deepForwardGuard(FullControl& control) {
+bool
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardGuard(GuardControl& control) {
 	const OrthoFork& requested = orthoRequested(control);
 
 	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (requested.prongs)
-		_subStates.wideForwardGuard(requested.prongs, control);
+	if (requested)
+		return _subStates.wideForwardGuard(requested, control);
 	else
-		_subStates.wideForwardGuard(				  control);
+		return _subStates.wideForwardGuard(			  control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-void
-_O<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
+bool
+_O<NS, NC, NO, TA, TH, TS...>::deepGuard(GuardControl& control) {
 	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (!_headState.deepGuard(control))
-		 _subStates.wideGuard(control);
+	return _headState.deepGuard(control)
+		|| _subStates.wideGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -59,9 +53,9 @@ _O<NS, NC, NO, TA, TH, TS...>::deepGuard(FullControl& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(Control& control) {
-	HSFM_IF_ASSERT(const OrthoFork& requested = orthoRequested(control));
+	HFSM_IF_ASSERT(const OrthoFork& requested = orthoRequested(control));
 
-	HFSM_ASSERT(!requested.prongs);
+	HFSM_ASSERT(!requested);
 
 	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -75,7 +69,7 @@ template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, ty
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepEnter(Control& control) {
 	OrthoFork& requested = orthoRequested(control);
-	requested.prongs.clear();
+	requested.clear();
 
 	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -140,8 +134,8 @@ _O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateData& stateData,
 {
 	const OrthoFork& requested = orthoRequested(stateData);
 
-	if (requested.prongs)
-		_subStates.wideForwardRequest(stateData, requested.prongs, request);
+	if (requested)
+		_subStates.wideForwardRequest(stateData, requested, request);
 	else
 		switch (request) {
 		case Request::REMAIN:
@@ -157,7 +151,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateData& stateData,
 			break;
 
 		default:
-			HSFM_BREAK();
+			HFSM_BREAK();
 		}
 }
 
