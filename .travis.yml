@@ -180,8 +180,8 @@ matrix:
 script:
   - cd "${TRAVIS_BUILD_DIR}"
   - mkdir build && cd build
-  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$TMPDIR/hfsm
-  - make install
+  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+  - make
 
   - cd "${TRAVIS_BUILD_DIR}/examples/advanced_event_handling"
   - mkdir build && cd build
