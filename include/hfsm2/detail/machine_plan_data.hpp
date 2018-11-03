@@ -125,8 +125,8 @@ struct PlanDataT<ArgsT<TContext,
 					   TPayloadList,
 					   NTaskCapacity>>
 {
-	static constexpr void setSuccessful(const StateID, const bool)				{}
-	static constexpr void setFailed	   (const StateID, const bool)				{}
+	static /*constexpr*/ void setSuccessful(const StateID, const bool)			{}
+	static /*constexpr*/ void setFailed	   (const StateID, const bool)			{}
 
 	static constexpr bool hasSucceeded (const StateID)			{ return false;	}
 	static constexpr bool hasFailed	   (const StateID)			{ return false;	}
