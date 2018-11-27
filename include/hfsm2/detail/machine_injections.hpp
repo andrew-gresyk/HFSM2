@@ -23,13 +23,14 @@ protected:
 	using Plan				= typename Control::Plan;
 
 public:
-	HFSM_INLINE void preGuard (Context&)										{}
-	HFSM_INLINE void preEnter (Context&)										{}
-	HFSM_INLINE void preUpdate(Context&)										{}
+	HFSM_INLINE void preEntryGuard(Context&)									{}
+	HFSM_INLINE void preEnter	  (Context&)									{}
+	HFSM_INLINE void preUpdate	  (Context&)									{}
 	template <typename TEvent>
-	HFSM_INLINE void preReact (const TEvent&,
-							   Context&)										{}
-	HFSM_INLINE void postExit (Context&)										{}
+	HFSM_INLINE void preReact	  (const TEvent&,
+								   Context&)									{}
+	HFSM_INLINE void preExitGuard (Context&)									{}
+	HFSM_INLINE void postExit	  (Context&)									{}
 };
 
 //------------------------------------------------------------------------------
@@ -46,13 +47,14 @@ struct _B<TFirst, TRest...>
 {
 	using First	  = TFirst;
 
-	HFSM_INLINE void widePreGuard (typename First::Context& context);
-	HFSM_INLINE void widePreEnter (typename First::Context& context);
-	HFSM_INLINE void widePreUpdate(typename First::Context& context);
+	HFSM_INLINE void widePreEntryGuard(typename First::Context& context);
+	HFSM_INLINE void widePreEnter	  (typename First::Context& context);
+	HFSM_INLINE void widePreUpdate	  (typename First::Context& context);
 	template <typename TEvent>
-	HFSM_INLINE void widePreReact (const TEvent& event,
-								   typename First::Context& context);
-	HFSM_INLINE void widePostExit (typename First::Context& context);
+	HFSM_INLINE void widePreReact	  (const TEvent& event,
+									   typename First::Context& context);
+	HFSM_INLINE void widePreExitGuard (typename First::Context& context);
+	HFSM_INLINE void widePostExit	  (typename First::Context& context);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -66,24 +68,26 @@ struct _B<TFirst>
 	using StateList			= typename First::StateList;
 	using RegionList		= typename First::RegionList;
 
-	HFSM_INLINE void guard		  (typename First::FullControl&)				{}
-	HFSM_INLINE void enter		  (typename First::Control&)					{}
-	HFSM_INLINE void update		  (typename First::FullControl&)				{}
+	HFSM_INLINE void entryGuard		  (typename First::GuardControl&)			{}
+	HFSM_INLINE void enter			  (typename First::Control&)				{}
+	HFSM_INLINE void update			  (typename First::FullControl&)			{}
 	template <typename TEvent>
-	HFSM_INLINE void react		  (const TEvent&,
-								   typename First::FullControl&)				{}
-	HFSM_INLINE void exit		  (typename First::Control&)					{}
+	HFSM_INLINE void react			  (const TEvent&,
+									   typename First::FullControl&)			{}
+	HFSM_INLINE void exitGuard		  (typename First::GuardControl&)			{}
+	HFSM_INLINE void exit			  (typename First::Control&)				{}
 
-	HFSM_INLINE void planSucceeded(typename First::FullControl& control) { control.succeed(); }
-	HFSM_INLINE void planFailed	  (typename First::FullControl& control) { control.fail();	  }
+	HFSM_INLINE void planSucceeded	  (typename First::FullControl& control) { control.succeed(); }
+	HFSM_INLINE void planFailed		  (typename First::FullControl& control) { control.fail();	  }
 
-	HFSM_INLINE void widePreGuard (typename First::Context& context);
-	HFSM_INLINE void widePreEnter (typename First::Context& context);
-	HFSM_INLINE void widePreUpdate(typename First::Context& context);
+	HFSM_INLINE void widePreEntryGuard(typename First::Context& context);
+	HFSM_INLINE void widePreEnter	  (typename First::Context& context);
+	HFSM_INLINE void widePreUpdate	  (typename First::Context& context);
 	template <typename TEvent>
-	HFSM_INLINE void widePreReact (const TEvent& event,
-								   typename First::Context& context);
-	HFSM_INLINE void widePostExit (typename First::Context& context);
+	HFSM_INLINE void widePreReact	  (const TEvent& event,
+									   typename First::Context& context);
+	HFSM_INLINE void widePreExitGuard (typename First::Context& context);
+	HFSM_INLINE void widePostExit	  (typename First::Context& context);
 
 	template <typename T>
 	static constexpr LongIndex stateId()  { return StateList ::template index<T>();	}

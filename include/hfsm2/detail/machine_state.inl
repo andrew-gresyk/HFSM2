@@ -39,26 +39,28 @@ struct RegisterT<NS, TA, Empty<TA>> {
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepRegister(StateData& stateData,
+_S<NS, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 							 const Parent parent)
 {
 	using Register = RegisterT<STATE_ID, TA, Head>;
-	Register::execute(stateData.stateParents, parent);
+	Register::execute(stateRegistry.stateParents, parent);
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, typename TA, typename TH>
 bool
-_S<NS, TA, TH>::deepGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::guard, Method::GUARD);
+_S<NS, TA, TH>::deepEntryGuard(GuardControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::entryGuard, Method::ENTRY_GUARD);
 
 	ControlOrigin origin{control, STATE_ID};
 
-	_head.widePreGuard(control.context());
-	_head.guard(control);
+	const bool cancelledBefore = control.cancelled();
 
-	return control.blocked();
+	_head.widePreEntryGuard(control.context());
+	_head.entryGuard(control);
+
+	return !cancelledBefore && control.cancelled();
 }
 
 //------------------------------------------------------------------------------
@@ -116,6 +118,23 @@ _S<NS, TA, TH>::deepReact(const TEvent& event,
 	_head.widePreReact(event, control.context());
 
 	(_head.*reaction)(event, control);		//_head.react(event, control);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, typename TA, typename TH>
+bool
+_S<NS, TA, TH>::deepExitGuard(GuardControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::exitGuard, Method::EXIT_GUARD);
+
+	ControlOrigin origin{control, STATE_ID};
+
+	const bool cancelledBefore = control.cancelled();
+
+	_head.widePreExitGuard(control.context());
+	_head.exitGuard(control);
+
+	return !cancelledBefore && control.cancelled();
 }
 
 //------------------------------------------------------------------------------

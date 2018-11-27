@@ -5,10 +5,11 @@
 namespace hfsm2 {
 
 enum class Method : ShortIndex {
-	GUARD,
+	ENTRY_GUARD,
 	ENTER,
 	UPDATE,
 	REACT,
+	EXIT_GUARD,
 	EXIT,
 	PLAN_SUCCEEDED,
 	PLAN_FAILED,
@@ -63,11 +64,14 @@ static inline
 const char*
 methodName(const Method method) {
 	switch (method) {
-		case Method::GUARD:		return "guard";
-		case Method::ENTER:		return "enter";
-		case Method::UPDATE:	return "update";
-		case Method::REACT:		return "react";
-		case Method::EXIT:		return "exit";
+		case Method::ENTRY_GUARD:		return "entryGuard";
+		case Method::ENTER:				return "enter";
+		case Method::UPDATE:			return "update";
+		case Method::REACT:				return "react";
+		case Method::EXIT_GUARD:		return "exitGuard";
+		case Method::EXIT:				return "exit";
+		case Method::PLAN_SUCCEEDED:	return "planSucceeded";
+		case Method::PLAN_FAILED:		return "planFailed";
 
 		default:
 			HFSM_BREAK();

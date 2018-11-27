@@ -20,7 +20,7 @@
 //	react()
 //	Origin::react()
 //	changeTo<Destination>()
-//	Destination::guard()
+//	Destination::entryGuard()
 //	Origin::exit()
 //	Destination::enter()
 //

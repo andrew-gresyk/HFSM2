@@ -48,13 +48,13 @@ private:
 										 PayloadList,
 										 TASK_CAPACITY>;
 
-	using StateData				 = StateDataT	<Args>;
-	using AllForks				 = typename StateData::AllForks;
-	using PlanData				 = PlanDataT	<Args>;
+	using StateRegistry			 = StateRegistryT<Args>;
+	using AllForks				 = typename StateRegistry::AllForks;
+	using PlanData				 = PlanDataT	 <Args>;
 
-	using Control				 = ControlT		<Args>;
-	using FullControl			 = FullControlT	<Args>;
-	using GuardControl			 = GuardControlT<Args>;
+	using Control				 = ControlT		 <Args>;
+	using FullControl			 = FullControlT	 <Args>;
+	using GuardControl			 = GuardControlT <Args>;
 
 	using PayloadBox			 = typename PayloadList::Variant;
 	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
@@ -75,7 +75,7 @@ private:
 	using ActivityHistoryStorage = Array<char,					NAME_COUNT>;
 
 	using TransitionInfo		 = TransitionInfoT<PayloadList>;
-	using TransitionInfoStorage	 = Array<TransitionInfo,		COMPO_COUNT * 2>;
+	using TransitionInfoStorage	 = Array<TransitionInfo,		COMPO_COUNT * 4>;
 #endif
 
 public:
@@ -95,8 +95,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateData.isActive   (stateId);			}
-	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateData.isResumable(stateId);			}
+	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateRegistry.isActive   (stateId);			}
+	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateRegistry.isResumable(stateId);			}
 
 	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
@@ -175,12 +175,13 @@ public:
 	const MachineActivity&  activity()  const					{ return _activityHistory;							}
 #endif
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
 #endif
 
 protected:
 	void processTransitions();
+	bool cancelledByGuards(const Requests& pendingChanges);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	void getStateNames();
@@ -190,7 +191,7 @@ protected:
 private:
 	Context& _context;
 
-	StateData _stateData;
+	StateRegistry _stateRegistry;
 	PlanData _planData;
 
 	Payloads _requestPayloads;

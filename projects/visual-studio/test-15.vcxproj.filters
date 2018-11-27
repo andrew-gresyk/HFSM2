@@ -42,6 +42,12 @@
     <ClCompile Include="..\..\test\test_headless.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_guard.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_delayed_teardown.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\test_shared.hpp">
@@ -122,7 +128,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\machine_state.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\machine_state_data.hpp">
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_state_registry.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_state_data.hpp">
@@ -132,6 +138,12 @@
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_headless.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_guard.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_delayed_teardown.hpp">
       <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
@@ -190,7 +202,7 @@
     <None Include="..\..\include\hfsm2\detail\machine_state.inl">
       <Filter>hfsm\detail</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\machine_state_data.inl">
+    <None Include="..\..\include\hfsm2\detail\machine_state_registry.inl">
       <Filter>hfsm\detail</Filter>
     </None>
   </ItemGroup>

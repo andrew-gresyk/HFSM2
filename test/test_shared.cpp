@@ -7,8 +7,8 @@ Logger::recordMethod(const hfsm2::StateID origin,
 					 const Method method)
 {
 	switch (method) {
-		case Method::GUARD:
-			history.emplace_back(origin, Event::GUARD);
+		case Method::ENTRY_GUARD:
+			history.emplace_back(origin, Event::ENTRY_GUARD);
 			break;
 		case Method::ENTER:
 			history.emplace_back(origin, Event::ENTER);
@@ -18,6 +18,9 @@ Logger::recordMethod(const hfsm2::StateID origin,
 			break;
 		case Method::REACT:
 			history.emplace_back(origin, Event::REACT);
+			break;
+		case Method::EXIT_GUARD:
+			history.emplace_back(origin, Event::EXIT_GUARD);
 			break;
 		case Method::EXIT:
 			history.emplace_back(origin, Event::EXIT);
@@ -94,6 +97,13 @@ Logger::recordPlanStatus(const RegionID region,
 
 //------------------------------------------------------------------------------
 
+void
+Logger::recordCancelledPending(const StateID origin) {
+	history.emplace_back(origin, Event::CANCELLED_PENDING);
+}
+
+//------------------------------------------------------------------------------
+
 void Logger::assertSequence(const Events& reference) {
 	const auto count = std::max(history.size(), reference.size());
 
@@ -101,8 +111,11 @@ void Logger::assertSequence(const Events& reference) {
 		REQUIRE(i < history.size());
 		REQUIRE(i < reference.size());
 
-		if (i < history.size() && i < reference.size())
+		if (i < history.size() && i < reference.size()) {
+			REQUIRE(history[i].type	  == reference[i].type);
 			REQUIRE(history[i].origin == reference[i].origin);
+			REQUIRE(history[i].target == reference[i].target);
+		}
 	}
 
 	history.clear();

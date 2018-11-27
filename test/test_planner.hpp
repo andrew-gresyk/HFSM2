@@ -1,4 +1,4 @@
-#define HFSM_FORCE_DEBUG_LOG
+#define HFSM_VERBOSE_DEBUG_LOG
 #include "test_shared.hpp"
 
 namespace test_planner {

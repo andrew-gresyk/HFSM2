@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\test\deprecated_test.cpp" />
     <ClCompile Include="..\..\test\main.cpp" />
+    <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
+    <ClCompile Include="..\..\test\test_guard.cpp" />
     <ClCompile Include="..\..\test\test_headless.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_lib_bit_array.cpp" />
@@ -53,9 +55,11 @@
     <ClInclude Include="..\..\include\hfsm2\detail\machine_plan_data.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\machine_root.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\machine_state.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\machine_state_data.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\machine_state_registry.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
     <ClInclude Include="..\..\test\deprecated_test.hpp" />
+    <ClInclude Include="..\..\test\test_delayed_teardown.hpp" />
+    <ClInclude Include="..\..\test\test_guard.hpp" />
     <ClInclude Include="..\..\test\test_headless.hpp" />
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
     <ClInclude Include="..\..\test\test_planner.hpp" />
@@ -81,7 +85,7 @@
     <None Include="..\..\include\hfsm2\detail\machine_plan_data.inl" />
     <None Include="..\..\include\hfsm2\detail\machine_root.inl" />
     <None Include="..\..\include\hfsm2\detail\machine_state.inl" />
-    <None Include="..\..\include\hfsm2\detail\machine_state_data.inl" />
+    <None Include="..\..\include\hfsm2\detail\machine_state_registry.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

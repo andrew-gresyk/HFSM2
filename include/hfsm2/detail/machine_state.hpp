@@ -18,19 +18,19 @@ struct _S {
 	using Request			= RequestT<PayloadList>;
 	using RequestType		= typename Request::Type;
 
-	using StateData			= StateDataT   <Args>;
-	using Control			= ControlT	   <Args>;
+	using StateRegistry		= StateRegistryT<Args>;
+	using Control			= ControlT		<Args>;
 	using ControlOrigin		= typename Control::Origin;
 
-	using FullControl		= FullControlT <Args>;
-	using GuardControl		= GuardControlT<Args>;
+	using FullControl		= FullControlT	<Args>;
+	using GuardControl		= GuardControlT	<Args>;
 
 	using Empty				= ::hfsm2::detail::Empty<Args>;
 
-	HFSM_INLINE void   deepRegister			(StateData& stateData, const Parent parent);
+	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
-	HFSM_INLINE bool   deepForwardGuard		(GuardControl&)		{ return false; }
-	HFSM_INLINE bool   deepGuard			(GuardControl& control);
+	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl&)		{ return false; }
+	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control);
 
 	HFSM_INLINE void   deepEnterInitial		(Control& control);
 	HFSM_INLINE void   deepEnter			(Control& control);
@@ -41,16 +41,19 @@ struct _S {
 	HFSM_INLINE void   deepReact			(const TEvent& event,
 											 FullControl& control);
 
+	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl&)		{ return false; }
+	HFSM_INLINE bool   deepExitGuard		(GuardControl& control);
+
 	HFSM_INLINE void   deepExit				(Control& control);
 
 	HFSM_INLINE void   wrapPlanSucceeded	(FullControl& control);
 	HFSM_INLINE void   wrapPlanFailed		(FullControl& control);
 
-	HFSM_INLINE void   deepForwardRequest	(StateData&, const RequestType)		{}
-	HFSM_INLINE void   deepRequestRemain	(StateData&)						{}
-	HFSM_INLINE void   deepRequestRestart	(StateData&)						{}
-	HFSM_INLINE void   deepRequestResume	(StateData&)						{}
-	HFSM_INLINE void   deepChangeToRequested(StateData&, Control&)				{}
+	HFSM_INLINE void   deepForwardRequest	(StateRegistry&, const RequestType)	{}
+	HFSM_INLINE void   deepRequestRemain	(StateRegistry&)					{}
+	HFSM_INLINE void   deepRequestRestart	(StateRegistry&)					{}
+	HFSM_INLINE void   deepRequestResume	(StateRegistry&)					{}
+	HFSM_INLINE void   deepChangeToRequested(StateRegistry&, Control&)			{}
 
 #if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 	static constexpr bool isBare()	 { return std::is_same<Head, Empty>::value;	 }
@@ -89,6 +92,10 @@ struct _S {
 	}
 #endif
 
+	// VS	 - error C2079: 'hfsm2::detail::_S<BLAH>::_head' uses undefined struct 'Blah'
+	// Clang - error : field has incomplete type 'hfsm2::detail::_S<BLAH>::Head' (aka 'Blah')
+	//
+	// State 'Blah' hasn't been defined
 	Head _head;
 	HFSM_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(Head));
 };

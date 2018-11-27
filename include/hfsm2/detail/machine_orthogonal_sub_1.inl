@@ -5,33 +5,24 @@ namespace detail {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRegister(StateData& stateData,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRegister(StateRegistry& stateRegistry,
 												 const ForkID forkId)
 {
-	initial  .deepRegister(stateData, Parent{forkId, PRONG_INDEX});
-	remaining.wideRegister(stateData, forkId);
+	initial  .deepRegister(stateRegistry, Parent{forkId, PRONG_INDEX});
+	remaining.wideRegister(stateRegistry, forkId);
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(const OrthoFork& prongs,
-													 GuardControl& control)
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardEntryGuard(const OrthoFork& prongs,
+														  GuardControl& control)
 {
-	const bool result = prongs[PRONG_INDEX] ?
-		initial.deepForwardGuard(control) : false;
+	const bool resultI = prongs[PRONG_INDEX] ?
+						 initial  .deepForwardEntryGuard(control) : false;
 
-	return remaining.wideForwardGuard(prongs, control) || result;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-bool
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(GuardControl& control) {
-	const bool resultI = initial  .deepForwardGuard(control);
-	const bool resultR = remaining.wideForwardGuard(control);
+	const bool resultR = remaining.wideForwardEntryGuard(prongs, control);
 
 	return resultI || resultR;
 }
@@ -40,9 +31,20 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardGuard(GuardControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideGuard(GuardControl& control) {
-	const bool resultI = initial  .deepGuard(control);
-	const bool resultR = remaining.wideGuard(control);
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) {
+	const bool resultI = initial  .deepForwardEntryGuard(control);
+	const bool resultR = remaining.wideForwardEntryGuard(control);
+
+	return resultI || resultR;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+bool
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) {
+	const bool resultI = initial  .deepEntryGuard(control);
+	const bool resultR = remaining.wideEntryGuard(control);
 
 	return resultI || resultR;
 }
@@ -80,10 +82,47 @@ template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, 
 template <typename TEvent>
 void
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(const TEvent& event,
-									   FullControl& control)
+											  FullControl& control)
 {
 	initial  .deepReact(event, control);
 	remaining.wideReact(event, control);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+bool
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardExitGuard(const OrthoFork& prongs,
+														 GuardControl& control)
+{
+	const bool resultI = prongs[PRONG_INDEX] ?
+						 initial  .deepForwardExitGuard(control) : false;
+
+	const bool resultR = remaining.wideForwardExitGuard(prongs, control);
+
+	return resultI || resultR;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+bool
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) {
+	const bool resultI = initial  .deepForwardExitGuard(control);
+	const bool resultR = remaining.wideForwardExitGuard(control);
+
+	return resultI || resultR;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+bool
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) {
+	const bool resultI = initial  .deepExitGuard(control);
+	const bool resultR = remaining.wideExitGuard(control);
+
+	return resultI || resultR;
 }
 
 //------------------------------------------------------------------------------
@@ -99,50 +138,50 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(Control& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(StateData& stateData,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(StateRegistry& stateRegistry,
 													   const OrthoFork& prongs,
 													   const RequestType request)
 {
-	initial	 .deepForwardRequest(stateData, prongs[PRONG_INDEX] ? request : Request::REMAIN);
-	remaining.wideForwardRequest(stateData, prongs, request);
+	initial	 .deepForwardRequest(stateRegistry, prongs[PRONG_INDEX] ? request : Request::REMAIN);
+	remaining.wideForwardRequest(stateRegistry, prongs, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRemain(StateData& stateData) {
-	initial	 .deepRequestRemain(stateData);
-	remaining.wideRequestRemain(stateData);
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRemain(StateRegistry& stateRegistry) {
+	initial	 .deepRequestRemain(stateRegistry);
+	remaining.wideRequestRemain(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRestart(StateData& stateData) {
-	initial	 .deepRequestRestart(stateData);
-	remaining.wideRequestRestart(stateData);
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRestart(StateRegistry& stateRegistry) {
+	initial	 .deepRequestRestart(stateRegistry);
+	remaining.wideRequestRestart(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestResume(StateData& stateData) {
-	initial	 .deepRequestResume(stateData);
-	remaining.wideRequestResume(stateData);
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestResume(StateRegistry& stateRegistry) {
+	initial	 .deepRequestResume(stateRegistry);
+	remaining.wideRequestResume(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideChangeToRequested(StateData& stateData,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideChangeToRequested(StateRegistry& stateRegistry,
 														  Control& control)
 {
-	initial	 .deepChangeToRequested(stateData, control);
-	remaining.wideChangeToRequested(stateData, control);
+	initial	 .deepChangeToRequested(stateRegistry, control);
+	remaining.wideChangeToRequested(stateRegistry, control);
 }
 
 //------------------------------------------------------------------------------

@@ -5,34 +5,34 @@ namespace detail {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRegister(StateData& stateData,
+_CS<NS, NC, NO, TA, NI, TI>::wideRegister(StateRegistry& stateRegistry,
 										  const ForkID forkId)
 {
-	initial.deepRegister(stateData, Parent{forkId, PRONG_INDEX});
+	initial.deepRegister(stateRegistry, Parent{forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 bool
-_CS<NS, NC, NO, TA, NI, TI>::wideForwardGuard(const ShortIndex HFSM_IF_ASSERT(prong),
-											  GuardControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideForwardEntryGuard(const ShortIndex HFSM_IF_ASSERT(prong),
+												   GuardControl& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
-	return initial.deepForwardGuard(control);
+	return initial.deepForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 bool
-_CS<NS, NC, NO, TA, NI, TI>::wideGuard(const ShortIndex HFSM_IF_ASSERT(prong),
-									   GuardControl& control)
+_CS<NS, NC, NO, TA, NI, TI>::wideEntryGuard(const ShortIndex HFSM_IF_ASSERT(prong),
+											GuardControl& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
-	return initial.deepGuard(control);
+	return initial.deepEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -84,6 +84,30 @@ _CS<NS, NC, NO, TA, NI, TI>::wideReact(const ShortIndex HFSM_IF_ASSERT(prong),
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+bool
+_CS<NS, NC, NO, TA, NI, TI>::wideForwardExitGuard(const ShortIndex HFSM_IF_ASSERT(prong),
+												  GuardControl& control)
+{
+	HFSM_ASSERT(prong == PRONG_INDEX);
+
+	return initial.deepForwardExitGuard(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+bool
+_CS<NS, NC, NO, TA, NI, TI>::wideExitGuard(const ShortIndex HFSM_IF_ASSERT(prong),
+										   GuardControl& control)
+{
+	HFSM_ASSERT(prong == PRONG_INDEX);
+
+	return initial.deepExitGuard(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HFSM_IF_ASSERT(prong),
 									  Control& control)
@@ -97,54 +121,54 @@ _CS<NS, NC, NO, TA, NI, TI>::wideExit(const ShortIndex HFSM_IF_ASSERT(prong),
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateData& stateData,
+_CS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateRegistry& stateRegistry,
 												const ShortIndex HFSM_IF_ASSERT(prong),
 												const RequestType transition)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
-	initial.deepForwardRequest(stateData, transition);
+	initial.deepForwardRequest(stateRegistry, transition);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(StateData& stateData) {
-	initial.deepRequestRemain(stateData);
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
+	initial.deepRequestRemain(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(StateData& stateData) {
-	initial.deepRequestRestart(stateData);
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(StateRegistry& stateRegistry) {
+	initial.deepRequestRestart(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateData& stateData,
+_CS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateRegistry& stateRegistry,
 											   const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
-	initial.deepRequestResume(stateData);
+	initial.deepRequestResume(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_CS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(StateData& stateData,
+_CS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(StateRegistry& stateRegistry,
 												   const ShortIndex HFSM_IF_ASSERT(prong),
 												   Control& control)
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
-	initial.deepChangeToRequested(stateData, control);
+	initial.deepChangeToRequested(stateRegistry, control);
 }
 
 //------------------------------------------------------------------------------

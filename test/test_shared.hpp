@@ -13,14 +13,17 @@
 
 struct Event {
 	enum Enum {
-		GUARD,
+		ENTRY_GUARD,
 		ENTER,
 		UPDATE,
 		REACT_REQUEST,
 		REACT,
+		EXIT_GUARD,
 		EXIT,
+
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
+
 		TASK_SUCCESS,
 		TASK_FAILURE,
 		PLAN_SUCCESS,
@@ -29,6 +32,7 @@ struct Event {
 		RESTART,
 		RESUME,
 		SCHEDULE,
+		CANCELLED_PENDING,
 
 		COUNT
 	};
@@ -80,6 +84,8 @@ struct Logger
 
 	void recordPlanStatus(const RegionID region,
 						  const StatusEvent event) override;
+
+	void recordCancelledPending(const StateID origin) override;
 
 	void assertSequence(const Events& reference);
 

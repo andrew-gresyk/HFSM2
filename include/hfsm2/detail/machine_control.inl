@@ -215,7 +215,7 @@ FullControlT<TA>::changeTo(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 		if (_logger)
 			_logger->recordTransition(_originId, Transition::RESTART, stateId);
 	#endif
@@ -234,7 +234,7 @@ FullControlT<TA>::resume(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 		if (_logger)
 			_logger->recordTransition(_originId, Transition::RESUME, stateId);
 	#endif
@@ -249,7 +249,7 @@ FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(_originId, Transition::SCHEDULE, stateId);
 #endif
@@ -277,6 +277,16 @@ FullControlT<TA>::fail() {
 	_planData.tasksFailures [_originId] = true;
 
 	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::FAILED);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TA>
+void
+GuardControlT<TA>::cancelPendingChanges() {
+	_cancelled = true;
+
+	HFSM_LOG_CANCELLED_PENDING(_originId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

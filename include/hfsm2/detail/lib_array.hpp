@@ -56,6 +56,8 @@ public:
 public:
 	HFSM_INLINE Array();
 
+	HFSM_INLINE void operator = (const Array& other);
+
 	HFSM_INLINE Iterator<	   Array>  begin()		 { return Iterator<		 Array>(*this, View::first());	}
 	HFSM_INLINE Iterator<const Array>  begin() const { return Iterator<const Array>(*this, View::first());	}
 	HFSM_INLINE Iterator<const Array> cbegin() const { return Iterator<const Array>(*this, View::first());	}

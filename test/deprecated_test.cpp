@@ -57,8 +57,10 @@ void deprecated() {
 
 			status<A_2>(Event::RESTART),
 
-			status<A_2>(Event::GUARD),
-			status<A_2_1>(Event::GUARD),
+			status<A_1>(Event::EXIT_GUARD),
+
+			status<A_2>(Event::ENTRY_GUARD),
+			status<A_2_1>(Event::ENTRY_GUARD),
 
 			status<A_1>(Event::EXIT),
 
@@ -103,11 +105,15 @@ void deprecated() {
 
 			status<A_2_1>(Event::UPDATE),
 
-			status<B>(Event::GUARD),
-			status<B_1>(Event::GUARD),
-			status<B_1_1>(Event::GUARD),
-			status<B_2>(Event::GUARD),
-			status<B_2_2>(Event::GUARD),
+			status<A>(Event::EXIT_GUARD),
+			status<A_2>(Event::EXIT_GUARD),
+			status<A_2_1>(Event::EXIT_GUARD),
+
+			status<B>(Event::ENTRY_GUARD),
+			status<B_1>(Event::ENTRY_GUARD),
+			status<B_1_1>(Event::ENTRY_GUARD),
+			status<B_2>(Event::ENTRY_GUARD),
+			status<B_2_2>(Event::ENTRY_GUARD),
 
 			status<A_2_1>(Event::EXIT),
 			status<A_2>(Event::EXIT),
@@ -141,6 +147,7 @@ void deprecated() {
 		const Status reacted3[] = {
 			status<B>(Event::REACT_REQUEST),
 			status<B>(Event::REACT),
+
 			status<B_1>(Event::REACT_REQUEST),
 			status<B_1_1>(Event::REACT_REQUEST),
 			status<B_2>(Event::REACT_REQUEST),
@@ -160,9 +167,15 @@ void deprecated() {
 
 			status<A>(Event::RESUME),
 
-			status<A>(Event::GUARD),
-			status<A_2>(Event::GUARD),
-			status<A_2_1>(Event::GUARD),
+			status<B>(Event::EXIT_GUARD),
+			status<B_1>(Event::EXIT_GUARD),
+			status<B_1_1>(Event::EXIT_GUARD),
+			status<B_2>(Event::EXIT_GUARD),
+			status<B_2_2>(Event::EXIT_GUARD),
+
+			status<A>(Event::ENTRY_GUARD),
+			status<A_2>(Event::ENTRY_GUARD),
+			status<A_2_1>(Event::ENTRY_GUARD),
 
 			status<B_1_1>(Event::EXIT),
 			status<B_1>(Event::EXIT),
@@ -185,11 +198,15 @@ void deprecated() {
 			status<B>(Event::RESUME),
 			status<A_2_1>(Event::UPDATE),
 
-			status<B>(Event::GUARD),
-			status<B_1>(Event::GUARD),
-			status<B_1_1>(Event::GUARD),
-			status<B_2>(Event::GUARD),
-			status<B_2_2>(Event::GUARD),
+			status<A>(Event::EXIT_GUARD),
+			status<A_2>(Event::EXIT_GUARD),
+			status<A_2_1>(Event::EXIT_GUARD),
+
+			status<B>(Event::ENTRY_GUARD),
+			status<B_1>(Event::ENTRY_GUARD),
+			status<B_1_1>(Event::ENTRY_GUARD),
+			status<B_2>(Event::ENTRY_GUARD),
+			status<B_2_2>(Event::ENTRY_GUARD),
 
 			status<A_2_1>(Event::EXIT),
 			status<A_2>(Event::EXIT),
@@ -215,7 +232,9 @@ void deprecated() {
 
 			status<B>(Event::RESTART),
 
-			status<B_2_1>(Event::GUARD),
+			status<B_2_2>(Event::EXIT_GUARD),
+			status<B_2_1>(Event::ENTRY_GUARD),
+
 			status<B_2_2>(Event::RESUME),
 		};
 		_.assertHistory(update5);
@@ -233,9 +252,15 @@ void deprecated() {
 			status<A_2_2>(Event::SCHEDULE),
 			status<A>(Event::RESUME),
 
-			status<A>(Event::GUARD),
-			status<A_2>(Event::GUARD),
-			status<A_2_2>(Event::GUARD),
+			status<B>(Event::EXIT_GUARD),
+			status<B_1>(Event::EXIT_GUARD),
+			status<B_1_1>(Event::EXIT_GUARD),
+			status<B_2>(Event::EXIT_GUARD),
+			status<B_2_2>(Event::EXIT_GUARD),
+
+			status<A>(Event::ENTRY_GUARD),
+			status<A_2>(Event::ENTRY_GUARD),
+			status<A_2_2>(Event::ENTRY_GUARD),
 
 			status<B_1_1>(Event::EXIT),
 			status<B_1>(Event::EXIT),

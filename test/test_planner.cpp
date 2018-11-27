@@ -63,7 +63,9 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::stateId<Step1_1>(),	Event::UPDATE },
 			{ FSM::stateId<Step1_1>(),	Event::RESTART, FSM::stateId<Step1_2>() },
 
-			{ FSM::stateId<Step1_2>(),	Event::GUARD  },
+			{ FSM::stateId<Step1_1>(),	Event::EXIT_GUARD  },
+
+			{ FSM::stateId<Step1_2>(),	Event::ENTRY_GUARD },
 
 			{ FSM::stateId<Step1_1>(),	Event::EXIT   },
 
@@ -96,7 +98,9 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::regionId<Step1_BT>(), Event::TASK_SUCCESS, FSM::stateId<Step1_2>() },
 			{ FSM::stateId <Step1_BT>(), Event::RESTART,	  FSM::stateId<Step1_3>() },
 
-			{ FSM::stateId <Step1_3>(),	 Event::GUARD  },
+			{ FSM::stateId <Step1_2>(),	 Event::EXIT_GUARD  },
+
+			{ FSM::stateId <Step1_3>(),	 Event::ENTRY_GUARD },
 
 			{ FSM::stateId <Step1_2>(),	 Event::EXIT   },
 
@@ -132,11 +136,14 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::regionId<Step1_BT>(), Event::PLAN_SUCCESS },
 			{ FSM::stateId <Planned>(),	 Event::RESTART,		FSM::stateId<Hybrid>()	 },
 
-			{ FSM::stateId <Hybrid>(),	 Event::GUARD  },
-			{ FSM::stateId <Step2L_P>(), Event::GUARD  },
-			{ FSM::stateId <Step2L_1>(), Event::GUARD  },
-			{ FSM::stateId <Step2R_P>(), Event::GUARD  },
-			{ FSM::stateId <Step2R_1>(), Event::GUARD  },
+			{ FSM::stateId <Step1_BT>(), Event::EXIT_GUARD  },
+			{ FSM::stateId <Step1_3>(),	 Event::EXIT_GUARD  },
+
+			{ FSM::stateId <Hybrid>(),	 Event::ENTRY_GUARD },
+			{ FSM::stateId <Step2L_P>(), Event::ENTRY_GUARD },
+			{ FSM::stateId <Step2L_1>(), Event::ENTRY_GUARD },
+			{ FSM::stateId <Step2R_P>(), Event::ENTRY_GUARD },
+			{ FSM::stateId <Step2R_1>(), Event::ENTRY_GUARD },
 
 			{ FSM::stateId <Step1_3>(),	 Event::EXIT   },
 			{ FSM::stateId <Step1_BT>(), Event::EXIT   },
@@ -186,8 +193,11 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::stateId <Hybrid>(),	 Event::RESTART,	  FSM::stateId<Step2L_2>() },
 			{ FSM::stateId <Hybrid>(),	 Event::RESTART,	  FSM::stateId<Step2R_2>() },
 
-			{ FSM::stateId <Step2L_2>(), Event::GUARD  },
-			{ FSM::stateId <Step2R_2>(), Event::GUARD  },
+			{ FSM::stateId <Step2L_1>(), Event::EXIT_GUARD  },
+			{ FSM::stateId <Step2R_1>(), Event::EXIT_GUARD  },
+
+			{ FSM::stateId <Step2L_2>(), Event::ENTRY_GUARD },
+			{ FSM::stateId <Step2R_2>(), Event::ENTRY_GUARD },
 
 			{ FSM::stateId <Step2L_1>(), Event::EXIT   },
 			{ FSM::stateId <Step2L_2>(), Event::ENTER  },
@@ -238,9 +248,15 @@ TEST_CASE("Planner test", "[machine]") {
 
 			{ FSM::stateId <Planned>(),	   Event::RESTART,		  FSM::stateId<Terminal>() },
 
-			{ FSM::stateId <Terminal>(),   Event::GUARD	},
-			{ FSM::stateId <Terminal_L>(), Event::GUARD	},
-			{ FSM::stateId <Terminal_R>(), Event::GUARD	},
+			{ FSM::stateId <Hybrid>(),	   Event::EXIT_GUARD  },
+			{ FSM::stateId <Step2L_P>(),   Event::EXIT_GUARD  },
+			{ FSM::stateId <Step2L_2>(),   Event::EXIT_GUARD  },
+			{ FSM::stateId <Step2R_P>(),   Event::EXIT_GUARD  },
+			{ FSM::stateId <Step2R_2>(),   Event::EXIT_GUARD  },
+
+			{ FSM::stateId <Terminal>(),   Event::ENTRY_GUARD },
+			{ FSM::stateId <Terminal_L>(), Event::ENTRY_GUARD },
+			{ FSM::stateId <Terminal_R>(), Event::ENTRY_GUARD },
 
 			{ FSM::stateId <Step2L_2>(),   Event::EXIT	},
 			{ FSM::stateId <Step2L_P>(),   Event::EXIT	},

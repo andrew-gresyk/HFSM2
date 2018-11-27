@@ -20,7 +20,7 @@
 //	react()
 //	From::react()
 //	changeTo<To>()
-//	To::guard()
+//	To::entryGuard()
 //	From::exit()
 //	To::enter()
 //
@@ -99,7 +99,7 @@ struct Top
 	: FSM::State // necessary boilerplate!
 {
 	// all state methods:
-	void guard(GuardControl&)						{}	// not going to be called in this example
+	void entryGuard(GuardControl&)					{}	// not going to be called in this example
 	void enter(Control&)							{}
 	void update(FullControl&)						{}
 	template <typename TEvent>
@@ -114,7 +114,7 @@ struct From
 	: FSM::State
 {
 	// all state methods:
-	void guard(GuardControl&)						{}	// not going to be called in this example
+	void entryGuard(GuardControl&)					{}	// not going to be called in this example
 	void enter(Control&)							{}
 	void update(FullControl&)						{}
 	template <typename TEvent>
@@ -129,7 +129,7 @@ struct To
 	: FSM::State
 {
 	// all state methods:
-	void guard(GuardControl&)						{}
+	void entryGuard(GuardControl&)					{}
 	void enter(Control&)							{}
 	void update(FullControl&)						{}
 	template <typename TEvent>
@@ -173,7 +173,7 @@ int main() {
 		//	react()
 		//	From::react()
 		//	changeTo<To>()
-		//	To::guard()
+		//	To::entryGuard()
 		//	From::exit()
 		//	To::enter()
 

@@ -5,24 +5,24 @@ namespace detail {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepRegister(StateData& stateData,
+_C<NS, NC, NO, TA, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 											const Parent parent)
 {
 	// TODO: add parent/forks type arrays to StateRegistry
-	//HFSM_IF_DEBUG(CompoFork0& fork = compoFork(stateData));
+	//HFSM_IF_DEBUG(CompoFork0& fork = compoFork(stateRegistry));
 	//HFSM_IF_DEBUG(fork.TYPE = _headState.TYPE);
 
-	stateData.compoParents[COMPO_INDEX] = parent;
+	stateRegistry.compoParents[COMPO_INDEX] = parent;
 
-	_headState.deepRegister(stateData, parent);
-	_subStates.wideRegister(stateData, COMPO_ID);
+	_headState.deepRegister(stateRegistry, parent);
+	_subStates.wideRegister(stateRegistry, COMPO_ID);
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 bool
-_C<NS, NC, NO, TA, TH, TS...>::deepForwardGuard(GuardControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
 	const ShortIndex active	   = compoActive   (control);
 	const ShortIndex requested = compoRequested(control);
 
@@ -31,16 +31,16 @@ _C<NS, NC, NO, TA, TH, TS...>::deepForwardGuard(GuardControl& control) {
 	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (requested == active)
-		return _subStates.wideForwardGuard(requested, control);
+		return _subStates.wideForwardEntryGuard(requested, control);
 	else
-		return _subStates.wideGuard		  (requested, control);
+		return _subStates.wideEntryGuard	   (requested, control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 bool
-_C<NS, NC, NO, TA, TH, TS...>::deepGuard(GuardControl& control) {
+_C<NS, NC, NO, TA, TH, TS...>::deepEntryGuard(GuardControl& control) {
 	HFSM_IF_ASSERT(const ShortIndex active = compoActive(control));
 	const ShortIndex requested = compoRequested(control);
 
@@ -49,8 +49,8 @@ _C<NS, NC, NO, TA, TH, TS...>::deepGuard(GuardControl& control) {
 
 	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return _headState.deepGuard(		   control)
-		|| _subStates.wideGuard(requested, control);
+	return _headState.deepEntryGuard(			control)
+		|| _subStates.wideEntryGuard(requested, control);
 }
 
 //------------------------------------------------------------------------------
@@ -144,6 +144,40 @@ _C<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+bool
+_C<NS, NC, NO, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
+	const ShortIndex active	   = compoActive   (control);
+	const ShortIndex requested = compoRequested(control);
+
+	HFSM_ASSERT(active    != INVALID_SHORT_INDEX &&
+				requested != INVALID_SHORT_INDEX);
+
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	if (requested == active)
+		return _subStates.wideForwardExitGuard(active, control);
+	else
+		return _subStates.wideExitGuard		  (active, control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+bool
+_C<NS, NC, NO, TA, TH, TS...>::deepExitGuard(GuardControl& control) {
+	const ShortIndex active = compoActive(control);
+
+	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+
+	ControlRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	return _headState.deepExitGuard(		control)
+		|| _subStates.wideExitGuard(active, control);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _C<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control) {
 	ShortIndex& active	  = compoActive   (control);
@@ -165,25 +199,25 @@ _C<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateData& stateData,
+_C<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateRegistry& stateRegistry,
 												  const RequestType request)
 {
-	const ShortIndex compoRequested = stateData.requested.compo[COMPO_INDEX];
+	const ShortIndex compoRequested = stateRegistry.requested.compo[COMPO_INDEX];
 
 	if (compoRequested != INVALID_SHORT_INDEX)
-		_subStates.wideForwardRequest(stateData, compoRequested, request);
+		_subStates.wideForwardRequest(stateRegistry, compoRequested, request);
 	else
 		switch (request) {
 		case Request::REMAIN:
-			deepRequestRemain(stateData);
+			deepRequestRemain(stateRegistry);
 			break;
 
 		case Request::RESTART:
-			deepRequestRestart(stateData);
+			deepRequestRestart(stateRegistry);
 			break;
 
 		case Request::RESUME:
-			deepRequestResume(stateData);
+			deepRequestResume(stateRegistry);
 			break;
 
 		default:
@@ -195,57 +229,57 @@ _C<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateData& stateData,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(StateData& stateData) {
-	const ShortIndex  active	= stateData.compoActive	   [COMPO_INDEX];
-		  ShortIndex& requested = stateData.requested.compo[COMPO_INDEX];
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+	const ShortIndex  active	= stateRegistry.compoActive	   [COMPO_INDEX];
+		  ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
 
 	if (active == INVALID_SHORT_INDEX)
 		requested = 0;
 
-	_subStates.wideRequestRemain(stateData);
+	_subStates.wideRequestRemain(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepRequestRestart(StateData& stateData) {
-	ShortIndex& requested = stateData.requested.compo[COMPO_INDEX];
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
+	ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
 
 	requested = 0;
 
-	_subStates.wideRequestRestart(stateData);
+	_subStates.wideRequestRestart(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepRequestResume(StateData& stateData) {
-	const ShortIndex  resumable = stateData.resumable.compo[COMPO_INDEX];
-		  ShortIndex& requested = stateData.requested.compo[COMPO_INDEX];
+_C<NS, NC, NO, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry) {
+	const ShortIndex  resumable = stateRegistry.resumable.compo[COMPO_INDEX];
+		  ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
 
 	requested = (resumable != INVALID_SHORT_INDEX) ?
 		resumable : 0;
 
-	_subStates.wideRequestResume(stateData, requested);
+	_subStates.wideRequestResume(stateRegistry, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(StateData& stateData,
+_C<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(StateRegistry& stateRegistry,
 													 Control& control)
 {
-	ShortIndex& active	  = stateData.compoActive	 [COMPO_INDEX];
-	ShortIndex& resumable = stateData.resumable.compo[COMPO_INDEX];
-	ShortIndex& requested = stateData.requested.compo[COMPO_INDEX];
+	ShortIndex& active	  = stateRegistry.compoActive	 [COMPO_INDEX];
+	ShortIndex& resumable = stateRegistry.resumable.compo[COMPO_INDEX];
+	ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
 
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
 	if (requested == active)
-		_subStates.wideChangeToRequested(stateData, requested, control);
+		_subStates.wideChangeToRequested(stateRegistry, requested, control);
 	else if (requested != INVALID_SHORT_INDEX) {
 		_subStates.wideExit(active, control);
 

@@ -62,7 +62,7 @@
 
 //------------------------------------------------------------------------------
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
 	#define HFSM_LOGGER_OR(Y, N)												Y
 	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)						\
@@ -71,14 +71,18 @@
 	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)								\
 		if (_logger)															\
 			_logger->recordPlanStatus(REGION, STATUS);
+	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)									\
+		if (_logger)															\
+			_logger->recordCancelledPending(ORIGIN);
 #else
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(Y, N)												N
 	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)
 	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)
+	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)
 #endif
 
-#if defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_VERBOSE_DEBUG_LOG
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\
 			logger->recordMethod(STATE_ID, ID);
@@ -102,7 +106,7 @@
 
 #include "detail/machine_plan_data.hpp"
 #include "detail/machine_plan.hpp"
-#include "detail/machine_state_data.hpp"
+#include "detail/machine_state_registry.hpp"
 #include "detail/machine_control.hpp"
 #include "detail/debug_structure_report.hpp"
 #include "detail/machine_injections.hpp"

@@ -28,7 +28,7 @@ struct _C {
 	using Request		= RequestT<PayloadList>;
 	using RequestType	= typename Request::Type;
 
-	using StateData		= StateDataT<Args>;
+	using StateRegistry	= StateRegistryT<Args>;
 
 	using Control		= ControlT<Args>;
 	using ControlOrigin	= typename Control::Origin;
@@ -47,14 +47,14 @@ struct _C {
 
 	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
 
-	ShortIndex& compoActive   (Control& control)	{ return control.stateData().compoActive	[COMPO_INDEX];	}
-	ShortIndex& compoResumable(Control& control)	{ return control.stateData().resumable.compo[COMPO_INDEX];	}
-	ShortIndex& compoRequested(Control& control)	{ return control.stateData().requested.compo[COMPO_INDEX];	}
+	HFSM_INLINE ShortIndex& compoActive   (Control& control)	{ return control.stateRegistry().compoActive	[COMPO_INDEX];	}
+	HFSM_INLINE ShortIndex& compoResumable(Control& control)	{ return control.stateRegistry().resumable.compo[COMPO_INDEX];	}
+	HFSM_INLINE ShortIndex& compoRequested(Control& control)	{ return control.stateRegistry().requested.compo[COMPO_INDEX];	}
 
-	HFSM_INLINE void   deepRegister			(StateData& stateData, const Parent parent);
+	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
-	HFSM_INLINE bool   deepForwardGuard		(GuardControl& control);
-	HFSM_INLINE bool   deepGuard			(GuardControl& control);
+	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control);
+	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control);
 
 	HFSM_INLINE void   deepEnterInitial		(Control& control);
 	HFSM_INLINE void   deepEnter			(Control& control);
@@ -64,13 +64,16 @@ struct _C {
 	template <typename TEvent>
 	HFSM_INLINE void   deepReact			(const TEvent& event, FullControl& control);
 
+	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control);
+	HFSM_INLINE bool   deepExitGuard		(GuardControl& control);
+
 	HFSM_INLINE void   deepExit				(Control& control);
 
-	HFSM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType request);
-	HFSM_INLINE void   deepRequestRemain	(StateData& stateData);
-	HFSM_INLINE void   deepRequestRestart	(StateData& stateData);
-	HFSM_INLINE void   deepRequestResume	(StateData& stateData);
-				void   deepChangeToRequested(StateData& stateData, Control& control);
+	HFSM_INLINE void   deepForwardRequest	(StateRegistry& stateRegistry, const RequestType request);
+	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry);
+				void   deepChangeToRequested(StateRegistry& stateRegistry, Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;

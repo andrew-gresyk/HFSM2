@@ -123,7 +123,7 @@ template <typename,
 struct ArgsT;
 
 template <typename>
-struct StateDataT;
+struct StateRegistryT;
 
 //------------------------------------------------------------------------------
 
@@ -136,15 +136,15 @@ template <typename TContext,
 		  LongIndex NOrthoUnits,
 		  typename TPayloadList,
 		  LongIndex NTaskCapacity>
-struct StateDataT<ArgsT<TContext,
-						TConfig,
-						TStateList,
-						TRegionList,
-						NCompoCount,
-						NOrthoCount,
-						NOrthoUnits,
-						TPayloadList,
-						NTaskCapacity>>
+struct StateRegistryT<ArgsT<TContext,
+							TConfig,
+							TStateList,
+							TRegionList,
+							NCompoCount,
+							NOrthoCount,
+							NOrthoUnits,
+							TPayloadList,
+							NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -172,6 +172,10 @@ struct StateDataT<ArgsT<TContext,
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
 
+	bool isPendingChange(const StateID stateId) const;
+	bool isPendingEnter	(const StateID stateId) const;
+	bool isPendingExit	(const StateID stateId) const;
+
 	void requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
 
@@ -196,15 +200,15 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  typename TPayloadList,
 		  LongIndex NTaskCapacity>
-struct StateDataT<ArgsT<TContext,
-						TConfig,
-						TStateList,
-						TRegionList,
-						NCompoCount,
-						0,
-						0,
-						TPayloadList,
-						NTaskCapacity>>
+struct StateRegistryT<ArgsT<TContext,
+							TConfig,
+							TStateList,
+							TRegionList,
+							NCompoCount,
+							0,
+							0,
+							TPayloadList,
+							NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -226,6 +230,10 @@ struct StateDataT<ArgsT<TContext,
 
 	bool isActive	(const StateID stateId) const;
 	bool isResumable(const StateID stateId) const;
+
+	bool isPendingChange(const StateID stateId) const;
+	bool isPendingEnter	(const StateID stateId) const;
+	bool isPendingExit	(const StateID stateId) const;
 
 	void requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
@@ -251,15 +259,15 @@ template <typename TContext,
 		  LongIndex NOrthoUnits,
 		  typename TPayloadList,
 		  LongIndex NTaskCapacity>
-struct StateDataT<ArgsT<TContext,
-						TConfig,
-						TStateList,
-						TRegionList,
-						0,
-						NOrthoCount,
-						NOrthoUnits,
-						TPayloadList,
-						NTaskCapacity>>
+struct StateRegistryT<ArgsT<TContext,
+							TConfig,
+							TStateList,
+							TRegionList,
+							0,
+							NOrthoCount,
+							NOrthoUnits,
+							TPayloadList,
+							NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -277,11 +285,15 @@ struct StateDataT<ArgsT<TContext,
 
 	using AllForks		= AllForksT<0, ORTHO_COUNT, ORTHO_UNITS>;
 
-	HFSM_INLINE bool isActive   (const StateID) const	{ return true;			}
-	HFSM_INLINE bool isResumable(const StateID) const	{ return false;			}
+	HFSM_INLINE bool isActive   (const StateID) const		{ return true;		}
+	HFSM_INLINE bool isResumable(const StateID) const		{ return false;		}
 
-	HFSM_INLINE void requestImmediate(const Request)	{ HFSM_BREAK();			}
-	HFSM_INLINE void requestScheduled(const Request)	{ HFSM_BREAK();			}
+	HFSM_INLINE bool isPendingChange(const StateID) const	{ return false;		}
+	HFSM_INLINE bool isPendingEnter	(const StateID) const	{ return false;		}
+	HFSM_INLINE bool isPendingExit	(const StateID) const	{ return false;		}
+
+	HFSM_INLINE void requestImmediate(const Request)		{ HFSM_BREAK();		}
+	HFSM_INLINE void requestScheduled(const Request)		{ HFSM_BREAK();		}
 
 	HFSM_INLINE void clearOrthoRequested()										{}
 
@@ -297,4 +309,4 @@ struct StateDataT<ArgsT<TContext,
 }
 }
 
-#include "machine_state_data.inl"
+#include "machine_state_registry.inl"

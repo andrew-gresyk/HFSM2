@@ -1,4 +1,4 @@
-#include "test_shared.hpp"
+﻿#include "test_shared.hpp"
 
 namespace test_internal_transitions {
 
@@ -102,7 +102,7 @@ private:
 struct A
 	: FSM::State
 {
-	//void guard(GuardControl&)													{}
+	//void entryGuard(GuardControl&)											{}
 	void enter(Control&)														{}
 	void update(FullControl&)													{}
 	//void react(const Action&, FullControl&)									{}
@@ -110,8 +110,6 @@ struct A
 };
 
 //------------------------------------------------------------------------------
-
-struct A_2;
 
 struct A_1
 	: FSM::State
@@ -126,9 +124,6 @@ struct A_1
 };
 
 //------------------------------------------------------------------------------
-
-struct B;
-struct B_2_2;
 
 struct A_2
 	: FSM::BaseT<Tracked>
@@ -226,8 +221,8 @@ struct B_2
 struct B_2_1
 	: FSM::State
 {
-	void guard(GuardControl& control) {
-		control.block();
+	void entryGuard(GuardControl& control) {
+		control.cancelPendingChanges();
 		control.resume<B_2_2>();
 	}
 
@@ -241,9 +236,9 @@ struct B_2_1
 struct B_2_2
 	: FSM::BaseT<Tracked>
 {
-	void guard(GuardControl& control) {
+	void entryGuard(GuardControl& control) {
 		if (entryCount() == 2) {
-			control.block();
+			control.cancelPendingChanges();
 			control.resume<A>();
 		}
 	}

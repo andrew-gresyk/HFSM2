@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 
 namespace hfsm2 {
 
@@ -30,6 +30,8 @@ struct LoggerInterface {
 	virtual void recordPlanStatus(const RegionID /*region*/,
 								  const StatusEvent /*event*/)
 	{}
+
+	virtual void recordCancelledPending(const StateID /*origin*/) {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

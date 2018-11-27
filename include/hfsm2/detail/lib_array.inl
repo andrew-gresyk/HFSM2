@@ -46,6 +46,15 @@ Array<T, NC>::Array()
 	HFSM_ASSERT(View::data() == _storage);
 }
 
+//------------------------------------------------------------------------------
+
+template <typename T, LongIndex NC>
+void
+Array<T, NC>::operator = (const Array& other) {
+	for (unsigned i = 0; i < CAPACITY; ++i)
+		_storage[i] = other._storage[i];
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }

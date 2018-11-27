@@ -9,7 +9,7 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 	: _context{context}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
-	_apex.deepRegister(_stateData, Parent{});
+	_apex.deepRegister(_stateRegistry, Parent{});
 
 	HFSM_IF_STRUCTURE(getStateNames());
 
@@ -18,7 +18,7 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 	{
 		Control control{_context,
-						_stateData,
+						_stateRegistry,
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
 		_apex.deepEnterInitial(control);
@@ -34,7 +34,7 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::~_R() {
 	Control control{_context,
-					_stateData,
+					_stateRegistry,
 					_planData,
 					HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepExit(control);
@@ -48,7 +48,7 @@ template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::update() {
 	FullControl control(_context,
-						_stateData,
+						_stateRegistry,
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr));
@@ -69,7 +69,7 @@ template <typename TEvent>
 void
 _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 	FullControl control(_context,
-						_stateData,
+						_stateRegistry,
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr));
@@ -91,7 +91,7 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
 	const Request request(Request::Type::RESTART, stateId);
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, Transition::RESTART, stateId);
 #endif
@@ -105,7 +105,7 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId) {
 	const Request request(Request::Type::RESUME, stateId);
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, Transition::RESUME, stateId);
 #endif
@@ -119,7 +119,7 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 	const Request request(Request::Type::SCHEDULE, stateId);
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 #endif
@@ -136,7 +136,7 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 	const Request request(Request::Type::RESTART, stateId, payload);
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, Transition::RESTART, stateId);
 #endif
@@ -153,7 +153,7 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 	const Request request(Request::Type::RESUME, stateId, payload);
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, Transition::RESUME, stateId);
 #endif
@@ -170,7 +170,7 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 	const Request request(Request::Type::SCHEDULE, stateId, payload);
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_FORCE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 #endif
@@ -242,14 +242,16 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 	HFSM_IF_STRUCTURE(_lastTransitions.clear());
 
 	AllForks undoRequested;
-	_stateData.requested.clear();
+	_stateRegistry.requested.clear();
+
+	Requests lastRequests;
 
 	for (LongIndex i = 0;
 		i < MAX_SUBSTITUTIONS && _requests.count();
 		++i)
 	{
 		unsigned changeCount = 0;
-		undoRequested = _stateData.requested;
+		undoRequested = _stateRegistry.requested;
 
 		for (const Request& request : _requests) {
 			HFSM_IF_STRUCTURE(_lastTransitions << TransitionInfo(request, Method::UPDATE));
@@ -257,53 +259,74 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 			switch (request.type) {
 			case Request::RESTART:
 			case Request::RESUME:
-				_stateData.requestImmediate(request);
-				_apex.deepForwardRequest(_stateData, request.type);
+				_stateRegistry.requestImmediate(request);
+				_apex.deepForwardRequest(_stateRegistry, request.type);
 
 				++changeCount;
 				break;
 
 			case Request::SCHEDULE:
-				_stateData.requestScheduled(request.stateId);
+				_stateRegistry.requestScheduled(request.stateId);
 				break;
 
 			default:
 				HFSM_BREAK();
 			}
 		}
-		_requests.clear();
 
 		if (changeCount > 0) {
-			GuardControl guardControl(_context,
-									  _stateData,
-									  _planData,
-									  _requests,
-									  HFSM_LOGGER_OR(_logger, nullptr));
+			lastRequests = _requests;
+			_requests.clear();
 
-			if (_apex.deepForwardGuard(guardControl))
-				_stateData.requested = undoRequested;
-
-			HFSM_IF_ASSERT(_planData.verifyPlans());
-
-		#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-			for (const auto& request : _requests)
-				_lastTransitions << TransitionInfo(request, Method::GUARD);
-		#endif
-		}
+			if (cancelledByGuards(lastRequests))
+				_stateRegistry.requested = undoRequested;
+		} else
+			_requests.clear();
 	}
 
 	{
 		Control control{_context,
-						_stateData,
+						_stateRegistry,
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
-		_apex.deepChangeToRequested(_stateData, control);
-		_stateData.clearOrthoRequested();
+
+		_apex.deepChangeToRequested(_stateRegistry, control);
+		_stateRegistry.clearOrthoRequested();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());
 	}
 
 	HFSM_IF_STRUCTURE(udpateActivity());
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TPL, typename TA>
+bool
+_R<TC, TG, TPL, TA>::cancelledByGuards(const Requests& pendingRequests) {
+	GuardControl guardControl(_context,
+							  _stateRegistry,
+							  _planData,
+							  _requests,
+							  pendingRequests,
+							  HFSM_LOGGER_OR(_logger, nullptr));
+
+	if (_apex.deepForwardExitGuard(guardControl)) {
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+		for (const auto& request : _requests)
+			_lastTransitions << TransitionInfo(request, Method::EXIT_GUARD);
+	#endif
+
+		return true;
+	} else if (_apex.deepForwardEntryGuard(guardControl)) {
+	#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+		for (const auto& request : _requests)
+			_lastTransitions << TransitionInfo(request, Method::ENTRY_GUARD);
+	#endif
+
+		return true;
+	} else
+		return false;
 }
 
 //------------------------------------------------------------------------------

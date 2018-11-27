@@ -5,9 +5,9 @@ namespace detail {
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreGuard(typename TF::Context& context) {
-	TF::preGuard(context);
-	_B<TR...>::widePreGuard(context);
+_B<TF, TR...>::widePreEntryGuard(typename TF::Context& context) {
+	TF::preEntryGuard(context);
+	_B<TR...>::widePreEntryGuard(context);
 }
 
 //------------------------------------------------------------------------------
@@ -44,6 +44,15 @@ _B<TF, TR...>::widePreReact(const TEvent& event,
 
 template <typename TF, typename... TR>
 void
+_B<TF, TR...>::widePreExitGuard(typename TF::Context& context) {
+	TF::preExitGuard(context);
+	_B<TR...>::widePreExitGuard(context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TF, typename... TR>
+void
 _B<TF, TR...>::widePostExit(typename TF::Context& context) {
 	TF::postExit(context);
 	_B<TR...>::widePostExit(context);
@@ -53,8 +62,8 @@ _B<TF, TR...>::widePostExit(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePreGuard(typename TF::Context& context) {
-	TF::preGuard(context);
+_B<TF>::widePreEntryGuard(typename TF::Context& context) {
+	TF::preEntryGuard(context);
 }
 
 //------------------------------------------------------------------------------
@@ -82,6 +91,14 @@ _B<TF>::widePreReact(const TEvent& event,
 					 typename TF::Context& context)
 {
 	TF::preReact(event, context);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TF>
+void
+_B<TF>::widePreExitGuard(typename TF::Context& context) {
+	TF::preExitGuard(context);
 }
 
 //------------------------------------------------------------------------------

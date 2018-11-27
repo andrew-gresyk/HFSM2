@@ -27,7 +27,7 @@ struct _O final {
 	using Request		= RequestT<PayloadList>;
 	using RequestType	= typename Request::Type;
 
-	using StateData		= StateDataT<Args>;
+	using StateRegistry	= StateRegistryT<Args>;
 
 	using Control		= ControlT<Args>;
 	using ControlOrigin	= typename Control::Origin;
@@ -44,16 +44,16 @@ struct _O final {
 
 	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
 
-	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateData& stateData)		  { return stateData.requested.ortho[ORTHO_INDEX];	}
-	HFSM_INLINE const OrthoFork& orthoRequested(const StateData& stateData) const { return stateData.requested.ortho[ORTHO_INDEX];	}
+	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateRegistry& stateRegistry)			{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
+	HFSM_INLINE const OrthoFork& orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
 
-	HFSM_INLINE		  OrthoFork& orthoRequested(	  Control&   control)		  { return orthoRequested(control.stateData());		}
-	HFSM_INLINE const OrthoFork& orthoRequested(const Control&   control)   const { return orthoRequested(control.stateData());		}
+	HFSM_INLINE		  OrthoFork& orthoRequested(	  Control&   control)					{ return orthoRequested(control.stateRegistry());		}
+	HFSM_INLINE const OrthoFork& orthoRequested(const Control&   control) const				{ return orthoRequested(control.stateRegistry());		}
 
-	HFSM_INLINE void   deepRegister			(StateData& stateData, const Parent parent);
+	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
-	HFSM_INLINE bool   deepForwardGuard		(GuardControl& control);
-	HFSM_INLINE bool   deepGuard			(GuardControl& control);
+	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control);
+	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control);
 
 	HFSM_INLINE void   deepEnterInitial		(Control& control);
 	HFSM_INLINE void   deepEnter			(Control& control);
@@ -64,13 +64,16 @@ struct _O final {
 	HFSM_INLINE void   deepReact			(const TEvent& event,
 											 FullControl& control);
 
+	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control);
+	HFSM_INLINE bool   deepExitGuard		(GuardControl& control);
+
 	HFSM_INLINE void   deepExit				(Control& control);
 
-	HFSM_INLINE void   deepForwardRequest	(StateData& stateData, const RequestType transition);
-	HFSM_INLINE void   deepRequestRemain	(StateData& stateData);
-	HFSM_INLINE void   deepRequestRestart	(StateData& stateData);
-	HFSM_INLINE void   deepRequestResume	(StateData& stateData);
-	HFSM_INLINE void   deepChangeToRequested(StateData& stateData,
+	HFSM_INLINE void   deepForwardRequest	(StateRegistry& stateRegistry, const RequestType transition);
+	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepChangeToRequested(StateRegistry& stateRegistry,
 											 Control& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT

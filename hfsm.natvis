@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- https://docs.microsoft.com/en-us/visualstudio/debugger/format-specifiers-in-cpp -->
+
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
@@ -104,7 +106,7 @@
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::Transition">
-		<DisplayString>{type}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
+		<DisplayString>{type, en}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 
@@ -206,9 +208,9 @@
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::_R&lt;*&gt;">
-		<DisplayString>{_structure}</DisplayString>
+		<DisplayString Optional="true">{_structure}</DisplayString>
 		<Expand>
-			<ExpandedItem>{_structure}</ExpandedItem>
+			<ExpandedItem Optional="true">{_structure}</ExpandedItem>
 		</Expand>
 	</Type>
 
@@ -232,7 +234,9 @@
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 	<Type Name="Event">
-		<DisplayString>{origin} ► {target} {type}}</DisplayString>
+		<DisplayString Condition="target == 65535">{type, en} [{origin}]</DisplayString>
+		<DisplayString Condition="origin == 65535">(external) {type, en} [{target}]</DisplayString>
+		<DisplayString							  >[{origin}] {type, en} [{target}]</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 

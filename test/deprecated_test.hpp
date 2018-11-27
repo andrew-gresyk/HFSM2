@@ -4,11 +4,12 @@ namespace deprecated_test {
 
 namespace Event {
 	enum Enum : unsigned {
-		GUARD,
+		ENTRY_GUARD,
 		ENTER,
 		UPDATE,
 		REACT_REQUEST,
 		REACT,
+		EXIT_GUARD,
 		EXIT,
 
 		RESTART,
@@ -133,7 +134,7 @@ private:
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-class Tracked
+class EntryGuardTracked
 	: public FSM::Bare
 {
 public:
@@ -165,8 +166,8 @@ template <typename T>
 struct HistoryBase
 	: FSM::Bare
 {
-	void preGuard(Context& _) const {
-		_.history.push_back(Status{ typeid(T), Event::GUARD });
+	void preEntryGuard(Context& _) const {
+		_.history.push_back(Status{ typeid(T), Event::ENTRY_GUARD });
 	}
 
 	void preEnter(Context& _) {
@@ -181,6 +182,10 @@ struct HistoryBase
 		_.history.push_back(Status{ typeid(T), Event::REACT_REQUEST });
 	}
 
+	void preExitGuard(Context& _) {
+		_.history.push_back(Status{ typeid(T), Event::EXIT_GUARD });
+	}
+
 	void postExit(Context& _) {
 		_.history.push_back(Status{ typeid(T), Event::EXIT });
 	}
@@ -189,7 +194,7 @@ struct HistoryBase
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-using State = FSM::BaseT<Tracked, Timed, HistoryBase<T>>;
+using State = FSM::BaseT<EntryGuardTracked, Timed, HistoryBase<T>>;
 
 //------------------------------------------------------------------------------
 
@@ -281,8 +286,8 @@ struct B_2	 : State<B_2> {};
 struct B_2_1
 	: State<B_2_1>
 {
-	void guard(GuardControl& control) {
-		control.block();
+	void entryGuard(GuardControl& control) {
+		control.cancelPendingChanges();
 		resume<B_2_2>(control, control._().history);
 	}
 };
@@ -292,9 +297,9 @@ struct B_2_1
 struct B_2_2
 	: State<B_2_2>
 {
-	void guard(GuardControl& control) {
+	void entryGuard(GuardControl& control) {
 		if (entryCount() == 2) {
-			control.block();
+			control.cancelPendingChanges();
 			control.resume<A>();
 		}
 	}
