@@ -3,6 +3,9 @@
 namespace hfsm2 {
 namespace detail {
 
+template <typename>
+class GuardControlT;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
@@ -18,6 +21,8 @@ class ControlT {
 
 	template <typename, typename, typename, typename>
 	friend class _R;
+
+	friend class GuardControlT<TArgs>;
 
 	using Args			= TArgs;
 	using Context		= typename Args::Context;
@@ -175,6 +180,7 @@ class FullControlT
 	using Request		= RequestT <PayloadList>;
 	using Requests		= RequestsT<PayloadList, Args::COMPO_COUNT>;
 
+protected:
 	using Control::_planData;
 	using Control::_originId;
 	using Control::_regionId;

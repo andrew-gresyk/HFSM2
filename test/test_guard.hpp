@@ -51,7 +51,7 @@ class EntryGuardTracked
 public:
 	void preEntryGuard(Context&)					{ ++_entryGuardCount;		}
 
-	auto entryGuardCount() const					{ return _entryGuardCount;	}
+	unsigned entryGuardCount() const				{ return _entryGuardCount;	}
 
 private:
 	unsigned _entryGuardCount = 0;
@@ -65,7 +65,7 @@ class ExitGuardTracked
 public:
 	void preExitGuard(Context&)						{ ++_exitGuardCount;		}
 
-	auto exitGuardCount() const						{ return _exitGuardCount;	}
+	unsigned exitGuardCount() const					{ return _exitGuardCount;	}
 
 private:
 	unsigned _exitGuardCount = 0;
@@ -79,7 +79,7 @@ class UpdateTracked
 public:
 	void preUpdate(Context&)						{ ++_updateCount;			}
 
-	auto updateCount() const						{ return _updateCount;		}
+	unsigned updateCount() const					{ return _updateCount;		}
 
 private:
 	unsigned _updateCount = 0;
