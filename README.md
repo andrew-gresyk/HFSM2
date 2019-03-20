@@ -2,6 +2,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Build status](https://ci.appveyor.com/api/projects/status/egs56khk70ud35un?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/hfsm2)
 [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM2.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM2)
+[![codecov](https://codecov.io/gh/andrew-gresyk/HFSM2/branch/master/graph/badge.svg)](https://codecov.io/gh/andrew-gresyk/HFSM2)
+[![Coverage Status](https://coveralls.io/repos/github/andrew-gresyk/HFSM2/badge.svg?branch=master)](https://coveralls.io/github/andrew-gresyk/HFSM2?branch=master)
 
 # HFSM2: Hierarchical Finite State Machine Framework with **Planning Support**
 

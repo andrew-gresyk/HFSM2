@@ -33,12 +33,24 @@
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::Array&lt;*,*&gt;">
-		<DisplayString>{_count} / {_capacity}</DisplayString>
+		<DisplayString>&lt;{_count}&gt;</DisplayString>
 		<Expand HideRawView="true">
-			<IndexListItems Condition="_count > 0">
+			<ArrayItems>
 				<Size>_count</Size>
-				<ValueNode>*(($T1*) &amp;_storage[$i])</ValueNode>
-			</IndexListItems>
+				<ValuePointer>_items</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+
+	<Type Name="hfsm2::detail::StaticArray&lt;*,*&gt;">
+		<DisplayString>&lt;{$T2}&gt;</DisplayString>
+		<Expand HideRawView="true">
+			<ArrayItems>
+				<Size>$T2</Size>
+				<ValuePointer>_items</ValuePointer>
+			</ArrayItems>
 		</Expand>
 	</Type>
 
@@ -84,22 +96,27 @@
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
+	<Type Name="hfsm2::detail::ObjectPool&lt;*,*&gt;::Cell">
+		<DisplayString>&lt;{_count}&gt;</DisplayString>
+		<Expand HideRawView="true">
+			<IndexListItems Condition="_count > 0">
+				<Size>_count</Size>
+				<ValueNode>*($T1*) (_storage + _offsets[$i])</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 	<Type Name="hfsm2::detail::Parent">
-		<DisplayString>{forkId} ► {prong}</DisplayString>
-		<Expand HideRawView="true" />
+		<DisplayString Condition="forkId &gt; 0">({(unsigned) ( forkId - 1) &amp; 0xFF}) ► {(unsigned) prong &amp; 0xFF}</DisplayString>
+		<DisplayString Condition="forkId &lt; 0">[{(unsigned) (-forkId - 1) &amp; 0xFF}] ► {(unsigned) prong &amp; 0xFF}</DisplayString>
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::CompoFork">
 		<DisplayString>[{TYPE}]: &lt;{(unsigned) resumable &amp; 0xFF}&gt; ◄ ({(unsigned) active &amp; 0xFF}) ► &lt;{(unsigned) requested &amp; 0xFF}&gt;</DisplayString>
-		<Expand HideRawView="true" />
-	</Type>
-
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
-
-	<Type Name="hfsm2::detail::OrthoFork">
-		<DisplayString>[{TYPE}]: {*((uint8_t*) &amp;prongs + prongs.OFFSET) &amp; 0xFF}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 
@@ -176,11 +193,6 @@
 		<Expand HideRawView="true" />
 	</Type>
 
-	<Type Name="hfsm2::detail::_P&lt;*&gt;">
-		<DisplayString>{TYPE}</DisplayString>
-		<Expand HideRawView="true" />
-	</Type>
-
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
 	<Type Name="hfsm2::detail::_C&lt;*&gt;">
@@ -210,7 +222,7 @@
 	<Type Name="hfsm2::detail::_R&lt;*&gt;">
 		<DisplayString Optional="true">{_structure}</DisplayString>
 		<Expand>
-			<ExpandedItem Optional="true">{_structure}</ExpandedItem>
+			<ExpandedItem Optional="true">_structure</ExpandedItem>
 		</Expand>
 	</Type>
 

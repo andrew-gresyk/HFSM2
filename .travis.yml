@@ -12,6 +12,9 @@ env:
   global:
     - TMPDIR=/tmp
 
+before_install:
+  - pip install --user cpp-coveralls
+
 matrix:
   include:
 
@@ -22,8 +25,8 @@ matrix:
           packages: g++-4.9
           sources: ubuntu-toolchain-r-test
 
-    #- env: COMPILER=g++-4.9 BUILD_TYPE=Release
-    #  addons: *gcc49
+    - env: compiler=g++-4.9 build_type=release
+      addons: *gcc49
 
     # GCC 5
     - env: COMPILER=g++-5 BUILD_TYPE=Debug
@@ -63,6 +66,9 @@ matrix:
           sources: ubuntu-toolchain-r-test
 
     - env: COMPILER=g++-8 BUILD_TYPE=Release
+      addons: *gcc8
+
+    - env: COMPILER=g++-8 BUILD_TYPE=Coverage
       addons: *gcc8
 
     # Clang 3.6
@@ -178,6 +184,8 @@ matrix:
       addons: *clang7
 
 script:
+  - ./configure --enable-gcov
+
   - cd "${TRAVIS_BUILD_DIR}"
   - mkdir build && cd build
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
@@ -202,3 +210,7 @@ script:
   - mkdir build && cd build
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
   - make
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
