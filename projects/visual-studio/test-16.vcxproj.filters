@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="test">
+      <UniqueIdentifier>{25afde4c-8636-489f-9a74-e87f38b09cb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm">
+      <UniqueIdentifier>{25fa5477-2735-467a-a226-594457ffc81b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail">
+      <UniqueIdentifier>{bcadbaf6-c69d-493f-b835-a441b888682d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\debug">
+      <UniqueIdentifier>{873b6cf6-fb7d-4676-8e78-bfbaa088feac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\shared">
+      <UniqueIdentifier>{ed831198-e24c-41fe-8bbc-ec062406b2e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\structure">
+      <UniqueIdentifier>{af0f3753-dd24-4f3f-a727-f87a2f766fd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\structure\fsm">
+      <UniqueIdentifier>{f72763e5-91b8-4e3b-abbd-85305cc95aaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\shared">
+      <UniqueIdentifier>{26865fdc-dcef-498a-b7c1-91f82db3b7af}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\test\main.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_shared.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_internal_transitions.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_state_data.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_planner.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\deprecated_test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_headless.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_guard.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_delayed_teardown.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\shared\test_bit_array.cpp">
+      <Filter>test\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\shared\test_list.cpp">
+      <Filter>test\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\shared\test_object_pool.cpp">
+      <Filter>test\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_self_transitions.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\test\test_shared.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_internal_transitions.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_planner.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
+      <Filter>hfsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_state_data.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\deprecated_test.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_headless.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_guard.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_delayed_teardown.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\debug\logger_interface.hpp">
+      <Filter>hfsm\detail\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\debug\shared.hpp">
+      <Filter>hfsm\detail\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\debug\structure_report.hpp">
+      <Filter>hfsm\detail\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\array.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\array_view.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\object_pool.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\control.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\injections.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\plan.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\plan_data.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\root.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\composite.hpp">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub.hpp">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal.hpp">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub.hpp">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\forward.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_self_transitions.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\hfsm2\detail\shared\array.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\shared\array_view.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\shared\iterator.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\shared\list.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\shared\object_pool.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\control.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\injections.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\plan.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\plan_data.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\state_registry.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\root.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\state.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite.inl">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub_1.inl">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub_2.inl">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal.inl">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_1.inl">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_2.inl">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </None>
+  </ItemGroup>
+</Project>

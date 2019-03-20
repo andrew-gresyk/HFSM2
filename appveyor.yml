@@ -12,7 +12,7 @@ platform:
 - 64
 
 build:
-  project: projects\visual-studio\hfsm2-vs.sln
+  project: projects\visual-studio\hfsm2-15-vs.sln
   parallel: true
   verbosity: minimal
 
