@@ -35,9 +35,9 @@ TEST_CASE("State data test", "[machine]") {
 		}
 
 		THEN("state data is not set on any states") {
-			REQUIRE(!machine.isStateDataSet<Top>());
-			REQUIRE(!machine.isStateDataSet<Origin>());
-			REQUIRE(!machine.isStateDataSet<Destination>());
+			REQUIRE(!machine.isStateDataSet<Top>()); //-V521
+			REQUIRE(!machine.isStateDataSet<Origin>()); //-V521
+			REQUIRE(!machine.isStateDataSet<Destination>()); //-V521
 		}
 	}
 
@@ -46,18 +46,18 @@ TEST_CASE("State data test", "[machine]") {
 		machine.setStateData<Origin>(&_.boolPayload);
 
 		THEN("it is correctly set") {
-			REQUIRE(!machine.isStateDataSet<Top>());
-			REQUIRE( machine.isStateDataSet<Origin>());
-			REQUIRE(!machine.isStateDataSet<Destination>());
+			REQUIRE(!machine.isStateDataSet<Top>()); //-V521
+			REQUIRE( machine.isStateDataSet<Origin>()); //-V521
+			REQUIRE(!machine.isStateDataSet<Destination>()); //-V521
 		}
 
 		AND_THEN("correctly read") {
 			bool* const payBool = machine.getStateData<Origin, bool>();
 
-			REQUIRE(payBool != nullptr);
+			REQUIRE(payBool != nullptr); //-V521
 
 			if (payBool)
-				REQUIRE(*payBool);
+				REQUIRE(*payBool); //-V521
 		}
 	}
 
@@ -65,13 +65,13 @@ TEST_CASE("State data test", "[machine]") {
 		machine.resetStateData<Origin>();
 
 		THEN("it is correctly set") {
-			REQUIRE(!machine.isStateDataSet<Top>());
-			REQUIRE(!machine.isStateDataSet<Origin>());
-			REQUIRE(!machine.isStateDataSet<Destination>());
+			REQUIRE(!machine.isStateDataSet<Top>()); //-V521
+			REQUIRE(!machine.isStateDataSet<Origin>()); //-V521
+			REQUIRE(!machine.isStateDataSet<Destination>()); //-V521
 		}
 
 		AND_THEN("correctly read") {
-			REQUIRE(machine.getStateData<Origin, bool>() == nullptr);
+			REQUIRE(machine.getStateData<Origin, bool>() == nullptr); //-V521
 		}
 	}
 }

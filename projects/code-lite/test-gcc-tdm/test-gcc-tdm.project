@@ -7,24 +7,34 @@
   </Plugins>
   <VirtualDirectory Name="hfsm2">
     <File Name="../../../include/hfsm2/machine_dev.hpp"/>
-    <VirtualDirectory Name="detail"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_state_data.hpp"/>
     <File Name="../../../test/test_state_data.cpp"/>
     <File Name="../../../test/test_shared.hpp"/>
     <File Name="../../../test/test_shared.cpp"/>
+    <File Name="../../../test/test_self_transitions.hpp"/>
+    <File Name="../../../test/test_self_transitions.cpp"/>
     <File Name="../../../test/test_planner.hpp"/>
     <File Name="../../../test/test_planner.cpp"/>
-    <File Name="../../../test/test_lib_object_pool.cpp"/>
-    <File Name="../../../test/test_lib_list.cpp"/>
-    <File Name="../../../test/test_lib_bit_array.cpp"/>
     <File Name="../../../test/test_internal_transitions.hpp"/>
     <File Name="../../../test/test_internal_transitions.cpp"/>
+    <File Name="../../../test/test_headless.hpp"/>
+    <File Name="../../../test/test_headless.cpp"/>
+    <File Name="../../../test/test_guard.hpp"/>
+    <File Name="../../../test/test_guard.cpp"/>
+    <File Name="../../../test/test_delayed_teardown.hpp"/>
+    <File Name="../../../test/test_delayed_teardown.cpp"/>
     <File Name="../../../test/main.cpp"/>
-    <File Name="../../../test/deprecated.hpp"/>
-    <File Name="../../../test/deprecated.cpp"/>
+    <File Name="../../../test/deprecated_test.hpp"/>
+    <File Name="../../../test/deprecated_test.cpp"/>
+    <VirtualDirectory Name="shared">
+      <File Name="../../../test/shared/test_object_pool.cpp"/>
+      <File Name="../../../test/shared/test_list.cpp"/>
+      <File Name="../../../test/shared/test_bit_array.cpp"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>

@@ -3,6 +3,9 @@
 .vs
 build
 cmake-*
+
+*.user
+
 /binaries-*
 /hfsm_test.dir
-*.user
+/projects/code-lite/test-gcc-tdm

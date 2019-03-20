@@ -3,9 +3,6 @@
 def mergeTo(folder, path, included, pragmaOnceCounter, output):
 	pathTokens = path.split("/")
 
-	if len(pathTokens) > 1:
-		folder += "/" + pathTokens[0]
-
 	current = folder + "/" + pathTokens[-1]
 	with open(current, 'r', encoding='utf-8') as input:
 		for line in input:
@@ -22,7 +19,8 @@ def mergeTo(folder, path, included, pragmaOnceCounter, output):
 					if len(nextTokens) == 1:
 						mergeTo(folder, next, included, pragmaOnceCounter, output)
 					else:
-						mergeTo(folder + "/" + nextTokens[0], nextTokens[-1], included, pragmaOnceCounter, output)
+						name = nextTokens.pop()
+						mergeTo(folder + "/" + "/".join(nextTokens), name, included, pragmaOnceCounter, output)
 			else:
 				if line.startswith('\ufeff'):
 					line = line[1:]
@@ -45,7 +43,7 @@ def mergeTo(folder, path, included, pragmaOnceCounter, output):
 output = open("../include/hfsm2/machine.hpp", 'w', encoding='utf-8-sig')
 included = []
 pragmaOnceCounter = 0
-mergeTo("../include", "hfsm2/machine_dev.hpp", included, pragmaOnceCounter, output)
+mergeTo("../include/hfsm2", "machine_dev.hpp", included, pragmaOnceCounter, output)
 
 output.close()
 

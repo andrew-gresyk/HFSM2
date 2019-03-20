@@ -85,7 +85,7 @@ struct Planned
 {
 	void enter(Control& control) {
 		auto plan = control.plan();
-		REQUIRE(!plan);
+		REQUIRE(!plan); //-V521
 
 		plan.add<Step1_BT, Hybrid>();
 		plan.add<Hybrid, Terminal>();
@@ -103,7 +103,7 @@ struct Step1_BT
 {
 	void enter(Control& control) {
 		Plan plan = control.plan();
-		REQUIRE(!plan);
+		REQUIRE(!plan); //-V521
 
 		plan.add<Step1_2, Step1_3>();
 	}
@@ -140,7 +140,7 @@ struct Hybrid
 {
 	void enter(Control& control) {
 		auto plan = control.plan();
-		REQUIRE(!plan);
+		REQUIRE(!plan); //-V521
 
 		plan.add<Step2L_1, Step2L_2>();
 		plan.add<Step2R_1, Step2R_2>();

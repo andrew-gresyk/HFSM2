@@ -8,8 +8,8 @@ project(hfsm2_test)
 
 include_directories("${CMAKE_CURRENT_LIST_DIR}/external"
 					"${CMAKE_CURRENT_LIST_DIR}/include")
-					
-file(GLOB SOURCE_FILES "test/*.cpp")
+
+file(GLOB SOURCE_FILES "test/*.cpp" "test/shared/*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 add_test(NAME hfsm2_test COMMAND hfsm2_test)

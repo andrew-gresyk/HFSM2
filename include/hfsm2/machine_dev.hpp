@@ -48,17 +48,17 @@
 
 //------------------------------------------------------------------------------
 
-#include "detail/lib_utility.hpp"
-#include "detail/lib_iterator.hpp"
-#include "detail/lib_array_view.hpp"
-#include "detail/lib_array.hpp"
-#include "detail/lib_bit_array.hpp"
-#include "detail/lib_list.hpp"
-#include "detail/lib_object_pool.hpp"
-#include "detail/lib_type_list.hpp"
+#include "detail/shared/utility.hpp"
+#include "detail/shared/iterator.hpp"
+#include "detail/shared/array_view.hpp"
+#include "detail/shared/array.hpp"
+#include "detail/shared/bit_array.hpp"
+#include "detail/shared/list.hpp"
+#include "detail/shared/object_pool.hpp"
+#include "detail/shared/type_list.hpp"
 
-#include "detail/debug_shared.hpp"
-#include "detail/debug_logger_interface.hpp"
+#include "detail/debug/shared.hpp"
+#include "detail/debug/logger_interface.hpp"
 
 //------------------------------------------------------------------------------
 
@@ -104,13 +104,13 @@
 
 //------------------------------------------------------------------------------
 
-#include "detail/machine_plan_data.hpp"
-#include "detail/machine_plan.hpp"
-#include "detail/machine_state_registry.hpp"
-#include "detail/machine_control.hpp"
-#include "detail/debug_structure_report.hpp"
-#include "detail/machine_injections.hpp"
-#include "detail/machine_forward.hpp"
+#include "detail/plan_data.hpp"
+#include "detail/plan.hpp"
+#include "detail/state_registry.hpp"
+#include "detail/control.hpp"
+#include "detail/debug/structure_report.hpp"
+#include "detail/injections.hpp"
+#include "detail/structure/forward.hpp"
 
 namespace hfsm2 {
 namespace detail {
@@ -195,12 +195,12 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 
 }
 
-#include "detail/machine_state.hpp"
-#include "detail/machine_composite_sub.hpp"
-#include "detail/machine_composite.hpp"
-#include "detail/machine_orthogonal_sub.hpp"
-#include "detail/machine_orthogonal.hpp"
-#include "detail/machine_root.hpp"
+#include "detail/structure/state.hpp"
+#include "detail/structure/fsm/composite_sub.hpp"
+#include "detail/structure/fsm/composite.hpp"
+#include "detail/structure/fsm/orthogonal_sub.hpp"
+#include "detail/structure/fsm/orthogonal.hpp"
+#include "detail/structure/root.hpp"
 
 #undef HFSM_INLINE
 #undef HFSM_IF_LOGGER

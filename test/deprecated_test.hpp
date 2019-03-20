@@ -1,4 +1,4 @@
-namespace deprecated_test {
+﻿namespace deprecated_test {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -298,9 +298,9 @@ struct B_2_2
 	: State<B_2_2>
 {
 	void entryGuard(GuardControl& control) {
-		if (entryCount() == 2) {
+		if (entryCount() == 3) {
 			control.cancelPendingChanges();
-			control.resume<A>();
+			resume<A>(control, control._().history);
 		}
 	}
 

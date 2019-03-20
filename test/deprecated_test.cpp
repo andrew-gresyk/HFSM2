@@ -232,10 +232,25 @@ void deprecated() {
 
 			status<B>(Event::RESTART),
 
+			status<B>(Event::EXIT_GUARD),
+			status<B_1>(Event::EXIT_GUARD),
+			status<B_1_1>(Event::EXIT_GUARD),
+			status<B_2>(Event::EXIT_GUARD),
 			status<B_2_2>(Event::EXIT_GUARD),
+
+			status<B>(Event::ENTRY_GUARD),
+			status<B_1>(Event::ENTRY_GUARD),
+			status<B_1_1>(Event::ENTRY_GUARD),
+			status<B_2>(Event::ENTRY_GUARD),
 			status<B_2_1>(Event::ENTRY_GUARD),
 
 			status<B_2_2>(Event::RESUME),
+
+			status<B_2_2>(Event::EXIT_GUARD),
+			status<B_2_2>(Event::ENTRY_GUARD),
+
+			status<B_2_2>(Event::EXIT),
+			status<B_2_2>(Event::ENTER),
 		};
 		_.assertHistory(update5);
 

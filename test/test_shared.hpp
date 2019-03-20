@@ -103,9 +103,9 @@ void assertActive(TMachine& machine,
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.isActive(type));
+			REQUIRE( machine.isActive(type)); //-V521
 		else
-			REQUIRE(!machine.isActive(type));
+			REQUIRE(!machine.isActive(type)); //-V521
 	}
 }
 
@@ -118,9 +118,9 @@ void assertResumable(TMachine& machine,
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.isResumable(type));
+			REQUIRE( machine.isResumable(type)); //-V521
 		else
-			REQUIRE(!machine.isResumable(type));
+			REQUIRE(!machine.isResumable(type)); //-V521
 	}
 }
 
