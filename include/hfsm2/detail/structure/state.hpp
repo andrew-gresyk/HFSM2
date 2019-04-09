@@ -30,32 +30,31 @@ struct _S {
 
 	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
-	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl&)		{ return false; }
-	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control);
+	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl&,								const ShortIndex = INVALID_SHORT_INDEX)	{ return false; }
+	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
 	HFSM_INLINE void   deepEnterInitial		(Control& control);
-	HFSM_INLINE void   deepEnter			(Control& control);
+	HFSM_INLINE void   deepEnter			(Control& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE Status deepUpdate			(FullControl& control);
+	HFSM_INLINE Status deepUpdate			(FullControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(const TEvent& event,
-											 FullControl& control);
+	HFSM_INLINE void   deepReact			(FullControl& control, const TEvent& event, const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl&)		{ return false; }
-	HFSM_INLINE bool   deepExitGuard		(GuardControl& control);
+	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl&,								const ShortIndex = INVALID_SHORT_INDEX)	{ return false; }
+	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepExit				(Control& control);
+	HFSM_INLINE void   deepExit				(Control& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 	HFSM_INLINE void   wrapPlanSucceeded	(FullControl& control);
 	HFSM_INLINE void   wrapPlanFailed		(FullControl& control);
 
-	HFSM_INLINE void   deepForwardActive	(StateRegistry&, const RequestType)	{}
-	HFSM_INLINE void   deepForwardRequest	(StateRegistry&, const RequestType)	{}
-	HFSM_INLINE void   deepRequestRemain	(StateRegistry&)					{}
-	HFSM_INLINE void   deepRequestRestart	(StateRegistry&)					{}
-	HFSM_INLINE void   deepRequestResume	(StateRegistry&)					{}
-	HFSM_INLINE void   deepChangeToRequested(StateRegistry&, Control&)			{}
+	HFSM_INLINE void   deepForwardActive	(StateRegistry&,	   const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void   deepForwardRequest	(StateRegistry&,	   const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void   deepRequestRemain	(StateRegistry&)															{}
+	HFSM_INLINE void   deepRequestRestart	(StateRegistry&)															{}
+	HFSM_INLINE void   deepRequestResume	(StateRegistry&,							const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void   deepChangeToRequested(StateRegistry&, Control&,					const ShortIndex = INVALID_SHORT_INDEX)	{}
 
 #if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 	static constexpr bool isBare()	 { return std::is_same<Head, Empty>::value;	 }

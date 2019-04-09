@@ -73,7 +73,7 @@ _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr));
-	_apex.deepReact(event, control);
+	_apex.deepReact(control, event);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
 

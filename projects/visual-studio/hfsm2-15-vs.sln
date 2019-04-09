@@ -8,7 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-41
 		..\..\.gitignore = ..\..\.gitignore
 		..\..\.travis.yml = ..\..\.travis.yml
 		..\..\appveyor.yml = ..\..\appveyor.yml
-		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
 		..\..\README.md = ..\..\README.md
 		vs-flags.txt = vs-flags.txt
 	EndProjectSection
@@ -17,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{ED
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\test\CMakeLists.txt = ..\..\test\CMakeLists.txt
+		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
 		..\..\hfsm.natvis = ..\..\hfsm.natvis
 	EndProjectSection
 EndProject

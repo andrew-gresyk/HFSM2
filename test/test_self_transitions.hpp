@@ -1,5 +1,5 @@
 ﻿#define HFSM_VERBOSE_DEBUG_LOG
-#include "test_shared.hpp"
+#include "shared.hpp"
 
 namespace test_self_transitions {
 
@@ -74,7 +74,6 @@ struct B_2_2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::DEEP_WIDTH	 ==  2, "DEEP_WIDTH");
 static_assert(FSM::Instance::STATE_COUNT == 13, "STATE_COUNT");
 static_assert(FSM::Instance::COMPO_COUNT ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::ORTHO_COUNT ==  1, "ORTHO_COUNT");

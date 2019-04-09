@@ -43,9 +43,9 @@ struct _C {
 
 	using HeadState		= _S <HEAD_ID, Args, Head>;
 	using SubStates		= _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, 0, TSubStates...>;
-	using Forward		= _CF<Head, TSubStates...>;
+	using AllForward	= _CF<Head, TSubStates...>;
 
-	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
+	static constexpr ShortIndex REGION_SIZE	= AllForward::STATE_COUNT;
 
 	ShortIndex& compoActive   (Control& control)	{ return control.stateRegistry().compoActive	[COMPO_INDEX];	}
 	ShortIndex& compoResumable(Control& control)	{ return control.stateRegistry().resumable.compo[COMPO_INDEX];	}
@@ -53,39 +53,41 @@ struct _C {
 
 	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
-	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control);
-	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control);
+	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
 
 	HFSM_INLINE void   deepEnterInitial		(Control& control);
-	HFSM_INLINE void   deepEnter			(Control& control);
+	HFSM_INLINE void   deepEnter			(Control& control,										  const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE Status deepUpdate			(FullControl& control);
+	HFSM_INLINE Status deepUpdate			(FullControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(const TEvent& event, FullControl& control);
+	HFSM_INLINE void   deepReact			(FullControl& control,		   const TEvent& event,		  const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control);
-	HFSM_INLINE bool   deepExitGuard		(GuardControl& control);
+	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepExit				(Control& control);
+	HFSM_INLINE void   deepExit				(Control& control,										  const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepForwardActive	(StateRegistry& stateRegistry, const RequestType request);
-	HFSM_INLINE void   deepForwardRequest	(StateRegistry& stateRegistry, const RequestType request);
+	HFSM_INLINE void   deepForwardActive	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepForwardRequest	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex = INVALID_SHORT_INDEX);
 	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry);
-				void   deepChangeToRequested(StateRegistry& stateRegistry, Control& control);
+	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,							  const ShortIndex = INVALID_SHORT_INDEX);
+
+	HFSM_INLINE void   deepChangeToRequested(StateRegistry& stateRegistry, Control& control,		  const ShortIndex = INVALID_SHORT_INDEX);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;
 
-	static constexpr LongIndex NAME_COUNT	 = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
+	static constexpr LongIndex NAME_COUNT = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
 
 	void deepGetNames(const LongIndex parent,
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
+
 	HeadState _headState;
 	SubStates _subStates;
 };

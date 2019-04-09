@@ -15,8 +15,8 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRegister(StateRegistry& stateRegistry,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardEntryGuard(const OrthoFork& prongs,
-												   GuardControl& control)
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
+												   const OrthoFork& prongs)
 {
 	return prongs[PRONG_INDEX] ?
 		initial.deepForwardEntryGuard(control) : false;
@@ -70,15 +70,15 @@ void
 _OS<NS, NC, NO, TA, NI, TI>::wideReact(const TEvent& event,
 									   FullControl& control)
 {
-	initial.deepReact(event, control);
+	initial.deepReact(control, event);
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardExitGuard(const OrthoFork& prongs,
-												  GuardControl& control)
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
+												  const OrthoFork& prongs)
 {
 	return prongs[PRONG_INDEX] ?
 		initial.deepForwardExitGuard(control) : false;
@@ -113,10 +113,12 @@ _OS<NS, NC, NO, TA, NI, TI>::wideExit(Control& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _OS<NS, NC, NO, TA, NI, TI>::wideForwardActive(StateRegistry& stateRegistry,
-											   const OrthoFork& prongs,
-											   const RequestType request)
+											   const RequestType request,
+											   const OrthoFork& prongs)
 {
-	initial.deepForwardActive(stateRegistry, prongs[PRONG_INDEX] ? request : Request::REMAIN);
+	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+
+	initial.deepForwardActive(stateRegistry, local);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -124,10 +126,12 @@ _OS<NS, NC, NO, TA, NI, TI>::wideForwardActive(StateRegistry& stateRegistry,
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateRegistry& stateRegistry,
-												const OrthoFork& prongs,
-												const RequestType request)
+												const RequestType request,
+												const OrthoFork& prongs)
 {
-	initial.deepForwardRequest(stateRegistry, prongs[PRONG_INDEX] ? request : Request::REMAIN);
+	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+
+	initial.deepForwardRequest(stateRegistry, local);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

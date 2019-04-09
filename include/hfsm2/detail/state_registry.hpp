@@ -10,6 +10,10 @@ namespace detail {
 struct alignas(2 * sizeof(ShortIndex)) Parent {
 	HFSM_INLINE Parent() = default;
 
+	HFSM_INLINE Parent(const ForkID forkId_)
+		: forkId{forkId_}
+	{}
+
 	HFSM_INLINE Parent(const ForkID forkId_,
 					   const ShortIndex prong_)
 		: forkId{forkId_}

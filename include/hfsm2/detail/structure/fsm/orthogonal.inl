@@ -11,11 +11,11 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 	stateRegistry.orthoParents[ORTHO_INDEX] = parent;
 
 	HFSM_IF_ASSERT(const ShortIndex requestedIndex =)
-	stateRegistry.requested.ortho.template emplace<OrthoForkT<Forward::WIDTH>>();
+	stateRegistry.requested.ortho.template emplace<OrthoForkT<AllForward::WIDTH>>();
 	HFSM_ASSERT(requestedIndex == ORTHO_INDEX);
 
 	HFSM_IF_ASSERT(const ShortIndex resumableIndex =)
-	stateRegistry.resumable.ortho.template emplace<OrthoForkT<Forward::WIDTH>>();
+	stateRegistry.resumable.ortho.template emplace<OrthoForkT<AllForward::WIDTH>>();
 	HFSM_ASSERT(resumableIndex == ORTHO_INDEX);
 
 	_headState.deepRegister(stateRegistry, parent);
@@ -26,22 +26,26 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 bool
-_O<NS, NC, NO, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
+													 const ShortIndex /*prong*/)
+{
 	const OrthoFork& requested = orthoRequested(control);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (requested)
-		return _subStates.wideForwardEntryGuard(requested, control);
+		return _subStates.wideForwardEntryGuard(control, requested);
 	else
-		return _subStates.wideForwardEntryGuard(		   control);
+		return _subStates.wideForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 bool
-_O<NS, NC, NO, TA, TH, TS...>::deepEntryGuard(GuardControl& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepEntryGuard(GuardControl& control,
+											  const ShortIndex /*prong*/)
+{
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepEntryGuard(control) ||
@@ -67,7 +71,9 @@ _O<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(Control& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepEnter(Control& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepEnter(Control& control,
+										 const ShortIndex /*prong*/)
+{
 	OrthoFork& requested = orthoRequested(control);
 	requested.clear();
 
@@ -81,7 +87,9 @@ _O<NS, NC, NO, TA, TH, TS...>::deepEnter(Control& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 Status
-_O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control,
+										  const ShortIndex /*prong*/)
+{
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (const auto headStatus = _headState.deepUpdate(control)) {
@@ -107,12 +115,13 @@ _O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
-										 FullControl& control)
+_O<NS, NC, NO, TA, TH, TS...>::deepReact(FullControl& control,
+										 const TEvent& event,
+										 const ShortIndex /*prong*/)
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepReact(event, control);
+	_headState.deepReact(control, event);
 	_subStates.wideReact(event, control);
 }
 
@@ -120,22 +129,26 @@ _O<NS, NC, NO, TA, TH, TS...>::deepReact(const TEvent& event,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 bool
-_O<NS, NC, NO, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control,
+													const ShortIndex /*prong*/)
+{
 	const OrthoFork& requested = orthoRequested(control);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (requested)
-		return _subStates.wideForwardExitGuard(requested, control);
+		return _subStates.wideForwardExitGuard(control, requested);
 	else
-		return _subStates.wideForwardExitGuard(			  control);
+		return _subStates.wideForwardExitGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 bool
-_O<NS, NC, NO, TA, TH, TS...>::deepExitGuard(GuardControl& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepExitGuard(GuardControl& control,
+											 const ShortIndex /*prong*/)
+{
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepExitGuard(control) ||
@@ -146,7 +159,9 @@ _O<NS, NC, NO, TA, TH, TS...>::deepExitGuard(GuardControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control) {
+_O<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control,
+										const ShortIndex /*prong*/)
+{
 	_subStates.wideExit(control);
 	_headState.deepExit(control);
 }
@@ -156,14 +171,15 @@ _O<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepForwardActive(StateRegistry& stateRegistry,
-												 const RequestType request)
+												 const RequestType request,
+												 const ShortIndex /*prong*/)
 {
 	HFSM_ASSERT(stateRegistry.isActive(HEAD_ID));
 
 	const OrthoFork& requested = orthoRequested(stateRegistry);
 	HFSM_ASSERT(requested);
 
-	_subStates.wideForwardActive(stateRegistry, requested, request);
+	_subStates.wideForwardActive(stateRegistry, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -171,12 +187,13 @@ _O<NS, NC, NO, TA, TH, TS...>::deepForwardActive(StateRegistry& stateRegistry,
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateRegistry& stateRegistry,
-												  const RequestType request)
+												  const RequestType request,
+												  const ShortIndex /*prong*/)
 {
 	const OrthoFork& requested = orthoRequested(stateRegistry);
 
 	if (requested)
-		_subStates.wideForwardRequest(stateRegistry, requested, request);
+		_subStates.wideForwardRequest(stateRegistry, request, requested);
 	else
 		switch (request) {
 		case Request::REMAIN:
@@ -188,7 +205,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateRegistry& stateRegistry,
 			break;
 
 		case Request::RESUME:
-			deepRequestResume(stateRegistry);
+			deepRequestResume(stateRegistry, INVALID_SHORT_INDEX);
 			break;
 
 		default:
@@ -216,7 +233,9 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) 
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry) {
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
+												 const ShortIndex /*prong*/)
+{
 	_subStates.wideRequestResume(stateRegistry);
 }
 
@@ -225,7 +244,8 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(StateRegistry& stateRegistry,
-													 Control& control)
+													 Control& control,
+													 const ShortIndex /*prong*/)
 {
 	// TODO: pass requested orthoFork
 	_subStates.wideChangeToRequested(stateRegistry, control);

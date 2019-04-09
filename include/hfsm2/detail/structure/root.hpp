@@ -13,19 +13,18 @@ class _R final {
 	using PayloadList			 = TPayloadList;
 	using Apex					 = TApex;
 
-	using ForwardApex			 = typename WrapForward<Apex>::Type;
-	using StateList				 = typename ForwardApex::StateList;
-	using RegionList			 = typename ForwardApex::RegionList;
-	using Forward				 = _RF<Context, Config, PayloadList, Apex>;
+	using ForwardApex			 = Wrap<Apex>;
+	using AllForward			 = _RF<Context, Config, PayloadList, Apex>;
+	using StateList				 = typename AllForward::StateList;
+	using RegionList			 = typename AllForward::RegionList;
 
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
 
-	static constexpr LongIndex TASK_CAPACITY	 = Forward::TASK_CAPACITY;
+	static constexpr LongIndex TASK_CAPACITY	 = AllForward::TASK_CAPACITY;
 
 public:
 	static constexpr LongIndex  REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
-	static constexpr LongIndex  DEEP_WIDTH		 = ForwardApex::DEEP_WIDTH;
 	static constexpr ShortIndex COMPO_COUNT		 = ForwardApex::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT		 = ForwardApex::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS		 = ForwardApex::ORTHO_UNITS;
@@ -38,15 +37,7 @@ public:
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using Args					 = ArgsT<Context,
-										 Config,
-										 StateList,
-										 RegionList,
-										 COMPO_COUNT,
-										 ORTHO_COUNT,
-										 ORTHO_UNITS,
-										 PayloadList,
-										 TASK_CAPACITY>;
+	using Args					 = typename AllForward::Args;
 
 	using StateRegistry			 = StateRegistryT<Args>;
 	using AllForks				 = typename StateRegistry::AllForks;
@@ -61,7 +52,7 @@ private:
 	using Request				 = typename FullControl::Request;
 	using Requests				 = typename FullControl::Requests;
 
-	using MaterialApex			 = typename WrapMaterial<0, 0, 0, Args, Apex>::Type;
+	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;

@@ -30,9 +30,6 @@
     <ClCompile Include="..\..\test\main.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_shared.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_internal_transitions.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -66,11 +63,14 @@
     <ClCompile Include="..\..\test\test_self_transitions.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\shared.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_composite_bst.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\test\test_shared.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\test_internal_transitions.hpp">
       <Filter>test</Filter>
     </ClInclude>
@@ -167,6 +167,12 @@
     <ClInclude Include="..\..\test\test_self_transitions.hpp">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test\shared.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_composite_bst.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\control.inl">
@@ -211,12 +217,6 @@
     <None Include="..\..\include\hfsm2\detail\structure\fsm\composite.inl">
       <Filter>hfsm\detail\structure\fsm</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub_1.inl">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub_2.inl">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </None>
     <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal.inl">
       <Filter>hfsm\detail\structure\fsm</Filter>
     </None>
@@ -224,6 +224,9 @@
       <Filter>hfsm\detail\structure\fsm</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_2.inl">
+      <Filter>hfsm\detail\structure\fsm</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub.inl">
       <Filter>hfsm\detail\structure\fsm</Filter>
     </None>
   </ItemGroup>

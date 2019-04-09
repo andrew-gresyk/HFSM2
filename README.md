@@ -11,9 +11,9 @@ Header-only heriarchical FSM framework in C++14, completely static (no dynamic a
 
 ## Compiler Support
 
-- Visual Studio 14.u3, 15.9, 16.0 preview
-- GCC 4.9, 5.4, 6.3, 7.4, 8.0
-- Clang 3.6, 3.7, 3.8, 3.9, 4.0, 5.0, 6.0, 7.0
+- Visual Studio 14, 15, 16
+- GCC 5, 6, 7, 8
+- Clang 3.6, 3.7, 3.8, 3.9, 4, 5, 6, 7
 
 ---
 

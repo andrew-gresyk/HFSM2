@@ -17,8 +17,8 @@ struct RegisterT {
 	execute(StateParents& stateParents,
 			const Parent parent)
 	{
-		static constexpr auto HEAD_ID  = StateList::template index<TH>();
-		assertEquality<STATE_ID, HEAD_ID>();
+		static constexpr auto HEAD_ID = StateList::template index<TH>();
+		StaticAssertEquality<STATE_ID, HEAD_ID>();
 
 		stateParents[STATE_ID] = parent;
 	}
@@ -52,7 +52,9 @@ _S<NS, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 
 template <StateID NS, typename TA, typename TH>
 bool
-_S<NS, TA, TH>::deepEntryGuard(GuardControl& control) {
+_S<NS, TA, TH>::deepEntryGuard(GuardControl& control,
+							   const ShortIndex /*prong*/)
+{
 	HFSM_LOG_STATE_METHOD(&Head::entryGuard, Method::ENTRY_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -77,7 +79,9 @@ _S<NS, TA, TH>::deepEnterInitial(Control& control) {
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepEnter(Control& control) {
+_S<NS, TA, TH>::deepEnter(Control& control,
+						  const ShortIndex /*prong*/)
+{
 	HFSM_ASSERT(!control.planData().hasSucceeded(STATE_ID));
 	HFSM_ASSERT(!control.planData().hasFailed   (STATE_ID));
 
@@ -93,7 +97,9 @@ _S<NS, TA, TH>::deepEnter(Control& control) {
 
 template <StateID NS, typename TA, typename TH>
 Status
-_S<NS, TA, TH>::deepUpdate(FullControl& control) {
+_S<NS, TA, TH>::deepUpdate(FullControl& control,
+						   const ShortIndex /*prong*/)
+{
 	HFSM_LOG_STATE_METHOD(&Head::update, Method::UPDATE);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -109,8 +115,9 @@ _S<NS, TA, TH>::deepUpdate(FullControl& control) {
 template <StateID NS, typename TA, typename TH>
 template <typename TEvent>
 void
-_S<NS, TA, TH>::deepReact(const TEvent& event,
-						  FullControl& control)
+_S<NS, TA, TH>::deepReact(FullControl& control,
+						  const TEvent& event,
+						  const ShortIndex /*prong*/)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
 	HFSM_LOG_STATE_METHOD(reaction, Method::REACT);
@@ -126,7 +133,9 @@ _S<NS, TA, TH>::deepReact(const TEvent& event,
 
 template <StateID NS, typename TA, typename TH>
 bool
-_S<NS, TA, TH>::deepExitGuard(GuardControl& control) {
+_S<NS, TA, TH>::deepExitGuard(GuardControl& control,
+							  const ShortIndex /*prong*/)
+{
 	HFSM_LOG_STATE_METHOD(&Head::exitGuard, Method::EXIT_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -143,7 +152,9 @@ _S<NS, TA, TH>::deepExitGuard(GuardControl& control) {
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepExit(Control& control) {
+_S<NS, TA, TH>::deepExit(Control& control,
+						 const ShortIndex /*prong*/)
+{
 	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
 
 	ScopedOrigin origin{control, STATE_ID};
