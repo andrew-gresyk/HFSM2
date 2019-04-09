@@ -324,7 +324,6 @@ struct B_2_2
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::DEEP_WIDTH	 ==  2, "DEEP_WIDTH");
 static_assert(FSM::Instance::STATE_COUNT == 13, "STATE_COUNT");
 static_assert(FSM::Instance::COMPO_COUNT ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::ORTHO_COUNT ==  1, "ORTHO_COUNT");

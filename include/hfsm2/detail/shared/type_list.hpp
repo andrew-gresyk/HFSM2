@@ -5,6 +5,66 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename... Ts>
+struct _TL {
+	static constexpr LongIndex SIZE = sizeof...(Ts);
+};
+
+//------------------------------------------------------------------------------
+
+template <typename...>
+struct PrependT;
+
+template <typename T, typename... Ts>
+struct PrependT<T, _TL<Ts...>> {
+	using Type = _TL<T, Ts...>;
+};
+
+template <typename... Ts>
+using Prepend = typename PrependT<Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+template <size_t, size_t, typename...>
+struct LesserT;
+
+template <size_t H, size_t I, typename TFirst, typename... TRest>
+struct LesserT<H, I, TFirst, TRest...> {
+	using Type = typename std::conditional<(I < H),
+										   Prepend<TFirst, typename LesserT<H, I + 1, TRest...>::Type>,
+										   typename LesserT<H, I + 1, TRest...>::Type>::type;
+};
+
+template <size_t H, size_t I>
+struct LesserT<H, I> {
+	using Type = _TL<>;
+};
+
+template <typename... Ts>
+using SplitL = typename LesserT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+template <size_t, size_t, typename...>
+struct GreaterT;
+
+template <size_t H, size_t I, typename TFirst, typename... TRest>
+struct GreaterT<H, I, TFirst, TRest...> {
+	using Type = typename std::conditional<(I < H),
+										   typename GreaterT<H, I + 1, TRest...>::Type,
+										   _TL<TFirst, TRest...>>::type;
+};
+
+template <size_t H, size_t I>
+struct GreaterT<H, I> {
+	using Type = _TL<>;
+};
+
+template <typename... Ts>
+using SplitR = typename GreaterT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+
+////////////////////////////////////////////////////////////////////////////////
+
 template<LongIndex N>
 struct IndexConstant {};
 
@@ -12,7 +72,7 @@ struct IndexConstant {};
 
 template<LongIndex... Ns>
 struct IndexSequence {
-	typedef IndexSequence<Ns...> Type;
+	using Type = IndexSequence<Ns...>;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -47,24 +107,24 @@ using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct TypeList_EntryT {};
+struct IndexedTypeList_EntryT {};
 
 template <typename T, std::size_t N>
-struct TypeList_EntryN
-	: TypeList_EntryT<T>
+struct IndexedTypeList_EntryN
+	: IndexedTypeList_EntryT<T>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename...>
-struct TypeList_Impl;
+struct IndexedTypeList_Impl;
 
 template <LongIndex... Ns, typename... Ts>
-struct TypeList_Impl<IndexSequence<Ns...>, Ts...>
-	: TypeList_EntryN<Ts, Ns>...
+struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
+	: IndexedTypeList_EntryN<Ts, Ns>...
 {
 	template <typename T, std::size_t N>
-	static constexpr LongIndex select(TypeList_EntryN<T, N>) { return (LongIndex) N; }
+	static constexpr LongIndex select(IndexedTypeList_EntryN<T, N>) { return (LongIndex) N; }
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -73,31 +133,44 @@ template <typename...>
 class VariantT;
 
 template <typename... Ts>
-struct _TL
-	: private TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
+struct _ITL
+	: private IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
-	using Base = TypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
+	using Base = IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
 	using Variant = VariantT<Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr bool contains() { return std::is_base_of<TypeList_EntryT<T>, _TL>::value; }
+	static constexpr bool contains() { return std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value; }
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if< std::is_base_of<TypeList_EntryT<T>, _TL>::value, LongIndex>::type
+	typename std::enable_if< std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value, LongIndex>::type
 	index() {
-		return Base::template select<T>(_TL{});
+		return Base::template select<T>(_ITL{});
 	}
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if<!std::is_base_of<TypeList_EntryT<T>, _TL>::value, LongIndex>::type
+	typename std::enable_if<!std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value, LongIndex>::type
 	index() {
 		return INVALID_LONG_INDEX;
 	}
 };
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename...>
+struct IndexedT;
+
+template <typename... Ts>
+struct IndexedT<_TL<Ts...>> {
+	using Type = _ITL<Ts...>;
+};
+
+template <typename T>
+using Indexed = typename IndexedT<T>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -106,8 +179,11 @@ struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
 struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
-	using TypeList = _TL<Ts1..., Ts2...>;
+	using _TL = _TL<Ts1..., Ts2...>;
 };
+
+template <typename... Ts>
+using Merge = typename MergeT<Ts...>::_TL;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -115,7 +191,7 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 
 template <typename... Ts>
 class alignas(alignof(void*)) VariantT {
-	using Types = _TL<Ts...>;
+	using Types = _ITL<Ts...>;
 
 public:
 	template <typename T>

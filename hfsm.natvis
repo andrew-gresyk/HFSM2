@@ -200,9 +200,7 @@
 	</Type>
 
 	<Type Name="hfsm2::detail::_CS&lt;*&gt;">
-		<DisplayString Optional="true">{initial} {remaining}</DisplayString>
-		<DisplayString>{initial}</DisplayString>
-		<Expand HideRawView="true" />
+		<DisplayString>{{{lHalf} {rHalf}}}</DisplayString>
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->

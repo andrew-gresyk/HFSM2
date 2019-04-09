@@ -315,9 +315,9 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isActive(const Sta
 
 			if (parent.forkId > 0)
 				return parent.prong == activeCompoProng(parent.forkId);
-	}
+		}
 
-	return false;
+	return true;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -336,7 +336,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isResumable(const 
 
 			if (parent.forkId > 0)
 				return parent.prong == resumableCompoProng(parent.forkId);
-	}
+		}
 
 	return false;
 }
@@ -357,9 +357,9 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingChange(co
 
 			if (parent.forkId > 0)
 				return requestedCompoProng(parent.forkId) != activeCompoProng(parent.forkId);
-	}
+		}
 
-	return false;
+	return true;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -381,7 +381,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingEnter(con
 					   parent.prong == requestedCompoProng(parent.forkId);
 		}
 
-	return false;
+	return true;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -403,7 +403,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingExit(cons
 					   parent.prong != requestedCompoProng(parent.forkId);
 		}
 
-	return false;
+	return true;
 }
 
 //------------------------------------------------------------------------------

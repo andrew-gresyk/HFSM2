@@ -44,7 +44,7 @@
 #include <utility>		// @GCC: std::conditional<>, move(), forward()
 #endif
 
-#define HFSM_INLINE														  inline
+#define HFSM_INLINE														  //inline
 
 //------------------------------------------------------------------------------
 
@@ -119,7 +119,7 @@ namespace detail {
 
 template <typename TContext,
 		  typename TConfig = Config<>,
-		  typename TPayloadList = _TL<>>
+		  typename TPayloadList = _ITL<>>
 struct _M {
 	using Context = TContext;
 	using Config  = TConfig;
@@ -164,7 +164,7 @@ struct _M {
 }
 
 template <typename... Ts>
-using TransitionPayloads = detail::_TL<Ts...>;
+using TransitionPayloads = detail::_ITL<Ts...>;
 
 //------------------------------------------------------------------------------
 

@@ -11,10 +11,17 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_composite_bst.hpp"/>
+    <File Name="../../../test/test_composite_bst.cpp"/>
+    <File Name="../../../test/shared.hpp"/>
+    <File Name="../../../test/shared.cpp"/>
+    <VirtualDirectory Name="shared">
+      <File Name="../../../test/shared/test_object_pool.cpp"/>
+      <File Name="../../../test/shared/test_list.cpp"/>
+      <File Name="../../../test/shared/test_bit_array.cpp"/>
+    </VirtualDirectory>
     <File Name="../../../test/test_state_data.hpp"/>
     <File Name="../../../test/test_state_data.cpp"/>
-    <File Name="../../../test/test_shared.hpp"/>
-    <File Name="../../../test/test_shared.cpp"/>
     <File Name="../../../test/test_self_transitions.hpp"/>
     <File Name="../../../test/test_self_transitions.cpp"/>
     <File Name="../../../test/test_planner.hpp"/>
@@ -30,11 +37,6 @@
     <File Name="../../../test/main.cpp"/>
     <File Name="../../../test/deprecated_test.hpp"/>
     <File Name="../../../test/deprecated_test.cpp"/>
-    <VirtualDirectory Name="shared">
-      <File Name="../../../test/shared/test_object_pool.cpp"/>
-      <File Name="../../../test/shared/test_list.cpp"/>
-      <File Name="../../../test/shared/test_bit_array.cpp"/>
-    </VirtualDirectory>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>

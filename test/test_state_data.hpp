@@ -1,4 +1,4 @@
-#include "test_shared.hpp"
+#include "shared.hpp"
 
 namespace test_state_data {
 
@@ -46,7 +46,6 @@ struct Destination	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::DEEP_WIDTH	 == 1, "DEEP_WIDTH");
 static_assert(FSM::Instance::STATE_COUNT == 5, "STATE_COUNT");
 static_assert(FSM::Instance::COMPO_COUNT == 1, "COMPO_COUNT");
 static_assert(FSM::Instance::ORTHO_COUNT == 1, "ORTHO_COUNT");

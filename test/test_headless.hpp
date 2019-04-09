@@ -1,4 +1,4 @@
-#include "test_shared.hpp"
+#include "shared.hpp"
 
 namespace test_headless {
 
@@ -39,7 +39,6 @@ struct Orthogonal_2	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::DEEP_WIDTH	 == 0, "DEEP_WIDTH");
 static_assert(FSM::Instance::STATE_COUNT == 7, "STATE_COUNT");
 static_assert(FSM::Instance::COMPO_COUNT == 0, "COMPO_COUNT");
 static_assert(FSM::Instance::ORTHO_COUNT == 3, "ORTHO_COUNT");

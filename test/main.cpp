@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_RUNNER
 
-#include "test_shared.hpp"
+#include "shared.hpp"
 
 //------------------------------------------------------------------------------
 

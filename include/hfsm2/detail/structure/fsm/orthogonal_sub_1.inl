@@ -16,13 +16,13 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRegister(StateRegistry& stateRegistry,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardEntryGuard(const OrthoFork& prongs,
-														  GuardControl& control)
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
+														  const OrthoFork& prongs)
 {
 	const bool resultI = prongs[PRONG_INDEX] ?
 						 initial  .deepForwardEntryGuard(control) : false;
 
-	const bool resultR = remaining.wideForwardEntryGuard(prongs, control);
+	const bool resultR = remaining.wideForwardEntryGuard(control, prongs);
 
 	return resultI || resultR;
 }
@@ -84,7 +84,7 @@ void
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(const TEvent& event,
 											  FullControl& control)
 {
-	initial  .deepReact(event, control);
+	initial  .deepReact(control, event);
 	remaining.wideReact(event, control);
 }
 
@@ -92,13 +92,13 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(const TEvent& event,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardExitGuard(const OrthoFork& prongs,
-														 GuardControl& control)
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
+														 const OrthoFork& prongs)
 {
 	const bool resultI = prongs[PRONG_INDEX] ?
 						 initial  .deepForwardExitGuard(control) : false;
 
-	const bool resultR = remaining.wideForwardExitGuard(prongs, control);
+	const bool resultR = remaining.wideForwardExitGuard(control, prongs);
 
 	return resultI || resultR;
 }
@@ -139,11 +139,13 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(Control& control) {
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardActive(StateRegistry& stateRegistry,
-													  const OrthoFork& prongs,
-													  const RequestType request)
+													  const RequestType request,
+													  const OrthoFork& prongs)
 {
-	initial	 .deepForwardActive(stateRegistry, prongs[PRONG_INDEX] ? request : Request::REMAIN);
-	remaining.wideForwardActive(stateRegistry, prongs, request);
+	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+
+	initial	 .deepForwardActive(stateRegistry, local);
+	remaining.wideForwardActive(stateRegistry, request, prongs);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -151,11 +153,13 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardActive(StateRegistry& stateRegist
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(StateRegistry& stateRegistry,
-													   const OrthoFork& prongs,
-													   const RequestType request)
+													   const RequestType request,
+													   const OrthoFork& prongs)
 {
-	initial	 .deepForwardRequest(stateRegistry, prongs[PRONG_INDEX] ? request : Request::REMAIN);
-	remaining.wideForwardRequest(stateRegistry, prongs, request);
+	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+
+	initial	 .deepForwardRequest(stateRegistry, local);
+	remaining.wideForwardRequest(stateRegistry, request, prongs);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -181,7 +185,7 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRestart(StateRegistry& stateRegis
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestResume(StateRegistry& stateRegistry) {
-	initial	 .deepRequestResume(stateRegistry);
+	initial	 .deepRequestResume(stateRegistry, INVALID_SHORT_INDEX);
 	remaining.wideRequestResume(stateRegistry);
 }
 

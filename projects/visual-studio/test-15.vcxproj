@@ -21,16 +21,17 @@
   <ItemGroup>
     <ClCompile Include="..\..\test\deprecated_test.cpp" />
     <ClCompile Include="..\..\test\main.cpp" />
+    <ClCompile Include="..\..\test\shared.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_list.cpp" />
     <ClCompile Include="..\..\test\shared\test_object_pool.cpp" />
+    <ClCompile Include="..\..\test\test_composite_bst.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
     <ClCompile Include="..\..\test\test_guard.cpp" />
     <ClCompile Include="..\..\test\test_headless.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_planner.cpp" />
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
-    <ClCompile Include="..\..\test\test_shared.cpp" />
     <ClCompile Include="..\..\test\test_state_data.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -59,13 +60,14 @@
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
     <ClInclude Include="..\..\test\deprecated_test.hpp" />
+    <ClInclude Include="..\..\test\shared.hpp" />
+    <ClInclude Include="..\..\test\test_composite_bst.hpp" />
     <ClInclude Include="..\..\test\test_delayed_teardown.hpp" />
     <ClInclude Include="..\..\test\test_guard.hpp" />
     <ClInclude Include="..\..\test\test_headless.hpp" />
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
     <ClInclude Include="..\..\test\test_planner.hpp" />
     <ClInclude Include="..\..\test\test_self_transitions.hpp" />
-    <ClInclude Include="..\..\test\test_shared.hpp" />
     <ClInclude Include="..\..\test\test_state_data.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -81,8 +83,7 @@
     <None Include="..\..\include\hfsm2\detail\shared\object_pool.inl" />
     <None Include="..\..\include\hfsm2\detail\state_registry.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\fsm\composite.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub_1.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub_2.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_1.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_2.inl" />
@@ -93,7 +94,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{CCE21648-BED6-4180-A305-FF27932B9232}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="Configuration">

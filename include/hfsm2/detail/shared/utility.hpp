@@ -127,13 +127,19 @@ struct UnsignedIndex {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <unsigned V1, unsigned V2>
-constexpr bool
-assertEquality() {
-	static_assert(V1 == V2, "assertEquality() failed");
+template <int>
+struct StaticPrintConst;
 
-	return V1 == V2;
-}
+template <typename>
+struct StaticPrintType;
+
+//------------------------------------------------------------------------------
+
+template <unsigned V1, unsigned V2>
+struct StaticAssertEquality;
+
+template <unsigned V1>
+struct StaticAssertEquality<V1, V1> {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
