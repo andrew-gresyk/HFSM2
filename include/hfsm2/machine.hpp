@@ -1399,11 +1399,11 @@ struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
 struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
-	using _TL = _TL<Ts1..., Ts2...>;
+	using TypeList = _TL<Ts1..., Ts2...>;
 };
 
 template <typename... Ts>
-using Merge = typename MergeT<Ts...>::_TL;
+using Merge = typename MergeT<Ts...>::TypeList;
 
 ////////////////////////////////////////////////////////////////////////////////
 
