@@ -3,6 +3,15 @@
 namespace hfsm2 {
 namespace detail {
 
+//------------------------------------------------------------------------------
+
+enum RegionStrategy {
+	Composite,
+	Resumable,
+	Utilitarian,
+	Selector,
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 1)
@@ -40,6 +49,7 @@ struct RequestT {
 
 	enum Type {
 		REMAIN,
+		CHANGE,
 		RESTART,
 		RESUME,
 		SCHEDULE,
@@ -72,7 +82,7 @@ struct RequestT {
 		HFSM_ASSERT(type_ < Type::COUNT);
 	}
 
-	Type type = RESTART;
+	Type type = CHANGE;
 	StateID stateId = INVALID_STATE_ID;
 	PayloadBox payload;
 };
@@ -151,28 +161,28 @@ struct StateRegistryT<ArgsT<TContext,
 
 	using Request		= RequestT<PayloadList>;
 
-	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
-	static constexpr ShortIndex COMPO_COUNT	  = NCompoCount;
-	static constexpr ShortIndex ORTHO_COUNT	  = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
+	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
+	static constexpr ShortIndex COMPO_COUNT = NCompoCount;
+	static constexpr ShortIndex ORTHO_COUNT = NOrthoCount;
+	static constexpr ShortIndex ORTHO_UNITS = NOrthoUnits;
 
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
 
 	using CompoParents	= StaticArray<Parent, COMPO_COUNT>;
 	using OrthoParents	= StaticArray<Parent, ORTHO_COUNT>;
 
-	using CompoForks	= StaticArray<ShortIndex,  COMPO_COUNT>;
+	using CompoForks	= StaticArray<ShortIndex, COMPO_COUNT>;
 	using AllForks		= AllForksT<COMPO_COUNT, ORTHO_COUNT, ORTHO_UNITS>;
 
-	bool isActive	(const StateID stateId) const;
-	bool isResumable(const StateID stateId) const;
+	bool isActive		(const StateID stateId) const;
+	bool isResumable	(const StateID stateId) const;
 
 	bool isPendingChange(const StateID stateId) const;
 	bool isPendingEnter	(const StateID stateId) const;
 	bool isPendingExit	(const StateID stateId) const;
 
-	HFSM_INLINE const Parent& forkParent(const ForkID forkId) const;
-	HFSM_INLINE ForkID parentCompoForkId(const ForkID forkId) const;
+	HFSM_INLINE const Parent&		forkParent(const ForkID forkId) const;
+	HFSM_INLINE ForkID		 parentCompoForkId(const ForkID forkId) const;
 
 	HFSM_INLINE ShortIndex    activeCompoProng(const ForkID forkId) const;
 	HFSM_INLINE ShortIndex resumableCompoProng(const ForkID forkId) const;
@@ -184,7 +194,7 @@ struct StateRegistryT<ArgsT<TContext,
 	HFSM_INLINE ShortIndex& requestedCompoFork(const ForkID forkId);
 	HFSM_INLINE OrthoFork&  requestedOrthoFork(const ForkID forkId);
 
-	void requestImmediate(const Request request);
+	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
 
 	void clearOrthoRequested();
@@ -234,14 +244,14 @@ struct StateRegistryT<ArgsT<TContext,
 
 	using AllForks		= AllForksT<COMPO_COUNT, 0, 0>;
 
-	bool isActive	(const StateID stateId) const;
-	bool isResumable(const StateID stateId) const;
+	bool isActive		(const StateID stateId) const;
+	bool isResumable	(const StateID stateId) const;
 
 	bool isPendingChange(const StateID stateId) const;
 	bool isPendingEnter	(const StateID stateId) const;
 	bool isPendingExit	(const StateID stateId) const;
 
-	HFSM_INLINE const Parent& forkParent(const ForkID forkId) const;
+	HFSM_INLINE const Parent&		forkParent(const ForkID forkId) const;
 
 	HFSM_INLINE ShortIndex    activeCompoProng(const ForkID forkId) const;
 	HFSM_INLINE ShortIndex resumableCompoProng(const ForkID forkId) const;
@@ -250,7 +260,7 @@ struct StateRegistryT<ArgsT<TContext,
 	HFSM_INLINE ShortIndex& resumableCompoFork(const ForkID forkId);
 	HFSM_INLINE ShortIndex& requestedCompoFork(const ForkID forkId);
 
-	void requestImmediate(const Request request);
+	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
 
 	HFSM_INLINE void clearOrthoRequested()										{}
@@ -290,26 +300,26 @@ struct StateRegistryT<ArgsT<TContext,
 
 	using Request		= RequestT<PayloadList>;
 
-	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
-	static constexpr ShortIndex ORTHO_COUNT	  = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
+	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
+	static constexpr ShortIndex ORTHO_COUNT = NOrthoCount;
+	static constexpr ShortIndex ORTHO_UNITS = NOrthoUnits;
 
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
 	using OrthoParents	= StaticArray<Parent, ORTHO_COUNT>;
 
 	using AllForks		= AllForksT<0, ORTHO_COUNT, ORTHO_UNITS>;
 
-	HFSM_INLINE bool isActive   (const StateID) const		{ return true;		}
-	HFSM_INLINE bool isResumable(const StateID) const		{ return false;		}
+	HFSM_INLINE bool isActive		(const StateID) const			  {	return true;	}
+	HFSM_INLINE bool isResumable	(const StateID) const			  {	return false;	}
 
-	HFSM_INLINE bool isPendingChange(const StateID) const	{ return false;		}
-	HFSM_INLINE bool isPendingEnter	(const StateID) const	{ return false;		}
-	HFSM_INLINE bool isPendingExit	(const StateID) const	{ return false;		}
+	HFSM_INLINE bool isPendingChange(const StateID) const			  {	return false;	}
+	HFSM_INLINE bool isPendingEnter	(const StateID) const			  {	return false;	}
+	HFSM_INLINE bool isPendingExit	(const StateID) const			  {	return false;	}
 
-	HFSM_INLINE void requestImmediate(const Request)		{ HFSM_BREAK();		}
-	HFSM_INLINE void requestScheduled(const Request)		{ HFSM_BREAK();		}
+	HFSM_INLINE bool requestImmediate(const Request)	{ HFSM_BREAK();	return true;	}
+	HFSM_INLINE void requestScheduled(const Request)	{ HFSM_BREAK();					}
 
-	HFSM_INLINE void clearOrthoRequested()										{}
+	HFSM_INLINE void clearOrthoRequested()											   {}
 
 	StateParents stateParents;
 	OrthoParents orthoParents;

@@ -71,6 +71,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	HFSM_INLINE void   wideForwardActive	(StateRegistry& stateRegistry, const RequestType request, const OrthoFork& prongs);
 	HFSM_INLINE void   wideForwardRequest	(StateRegistry& stateRegistry, const RequestType request, const OrthoFork& prongs);
 	HFSM_INLINE void   wideRequestRemain	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   wideRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestRestart	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestResume	(StateRegistry& stateRegistry);
 
@@ -143,6 +144,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	HFSM_INLINE void   wideForwardActive	(StateRegistry& stateRegistry, const RequestType transition, const OrthoFork& prongs);
 	HFSM_INLINE void   wideForwardRequest	(StateRegistry& stateRegistry, const RequestType transition, const OrthoFork& prongs);
 	HFSM_INLINE void   wideRequestRemain	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   wideRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestRestart	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestResume	(StateRegistry& stateRegistry);
 

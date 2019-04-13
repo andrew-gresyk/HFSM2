@@ -1,6 +1,6 @@
-#include "test_composite_bst.hpp"
+#include "test_utility.hpp"
 
-using namespace test_composite_bst;
+using namespace test_utility;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Composite BST test", "[machine]") {
+TEST_CASE("Utility test", "[machine]") {
 	Context _;
 	Logger logger;
 
@@ -44,33 +44,7 @@ TEST_CASE("Composite BST test", "[machine]") {
 		assertResumable(machine, all, {});
 	}
 
-	machine.changeTo<S1>();
-	machine.update();
-	{
-		const Events reference = {
-			{						 Event::CHANGE, FSM::stateId<S1>() },
-
-			{ 0u,					 Event::UPDATE },
-			{ FSM::stateId<S0>(),	 Event::UPDATE },
-
-			{ FSM::stateId<S0>(),	 Event::EXIT_GUARD },
-			{ FSM::stateId<S1>(),	 Event::ENTRY_GUARD },
-
-			{ FSM::stateId<S0>(),	 Event::EXIT },
-			{ FSM::stateId<S1>(),	 Event::ENTER },
-		};
-		logger.assertSequence(reference);
-
-		const Types active = {
-			FSM::stateId<S1>(),
-		};
-		assertActive(machine, all, active);
-
-		const Types resumable = {
-			FSM::stateId<S0>(),
-		};
-		assertResumable(machine, all, resumable);
-	}
+	//machine.utilize<Apex>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -195,22 +195,36 @@ _O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateRegistry& stateRegistry,
 	if (requested)
 		_subStates.wideForwardRequest(stateRegistry, request, requested);
 	else
-		switch (request) {
-		case Request::REMAIN:
-			deepRequestRemain(stateRegistry);
-			break;
+		deepRequest					 (stateRegistry, request);
+}
 
-		case Request::RESTART:
-			deepRequestRestart(stateRegistry);
-			break;
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		case Request::RESUME:
-			deepRequestResume(stateRegistry, INVALID_SHORT_INDEX);
-			break;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+void
+_O<NS, NC, NO, TA, TH, TS...>::deepRequest(StateRegistry& stateRegistry,
+										   const RequestType request)
+{
+	switch (request) {
+	case Request::REMAIN:
+		deepRequestRemain (stateRegistry);
+		break;
 
-		default:
-			HFSM_BREAK();
-		}
+	case Request::CHANGE:
+		deepRequestChange (stateRegistry);
+		break;
+
+	case Request::RESTART:
+		deepRequestRestart(stateRegistry);
+		break;
+
+	case Request::RESUME:
+		deepRequestResume (stateRegistry);
+		break;
+
+	default:
+		HFSM_BREAK();
+	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -219,6 +233,14 @@ template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, ty
 void
 _O<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 	_subStates.wideRequestRemain(stateRegistry);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+void
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestChange(StateRegistry& stateRegistry) {
+	_subStates.wideRequestChange(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

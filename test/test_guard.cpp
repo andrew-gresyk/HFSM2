@@ -51,7 +51,7 @@ TEST_CASE("Guard test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{							Event::RESTART, FSM::stateId<Step2>() },
+			{							Event::CHANGE, FSM::stateId<Step2>() },
 
 			{ FSM::stateId<Apex>(),		Event::UPDATE },
 			{ FSM::stateId<Step1>(),	Event::UPDATE },
@@ -78,7 +78,7 @@ TEST_CASE("Guard test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{							Event::RESTART, FSM::stateId<Step2>() },
+			{							Event::CHANGE, FSM::stateId<Step2>() },
 
 			{ FSM::stateId<Apex>(),		Event::UPDATE },
 			{ FSM::stateId<Step1>(),	Event::UPDATE },
@@ -108,7 +108,7 @@ TEST_CASE("Guard test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{							Event::RESTART, FSM::stateId<Step2>() },
+			{							Event::CHANGE, FSM::stateId<Step2>() },
 
 			{ FSM::stateId<Apex>(),		Event::UPDATE },
 			{ FSM::stateId<Step1>(),	Event::UPDATE },
@@ -139,7 +139,7 @@ TEST_CASE("Guard test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{							Event::RESTART, FSM::stateId<Step2>() },
+			{							Event::CHANGE, FSM::stateId<Step2>() },
 
 			{ FSM::stateId<Apex>(),		Event::UPDATE },
 			{ FSM::stateId<Step1>(),	Event::UPDATE },
@@ -170,7 +170,7 @@ TEST_CASE("Guard test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{							Event::RESTART, FSM::stateId<Step2>() },
+			{							Event::CHANGE, FSM::stateId<Step2>() },
 
 			{ FSM::stateId<Apex>(),		Event::UPDATE },
 			{ FSM::stateId<Step1>(),	Event::UPDATE },
@@ -204,7 +204,7 @@ TEST_CASE("Guard test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{							Event::RESTART, FSM::stateId<Step2>() },
+			{							Event::CHANGE, FSM::stateId<Step2>() },
 
 			{ FSM::stateId<Apex>(),		Event::UPDATE },
 			{ FSM::stateId<Step1>(),	Event::UPDATE },
@@ -239,7 +239,7 @@ TEST_CASE("Guard test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{							Event::RESTART, FSM::stateId<Step3>() },
+			{							Event::CHANGE, FSM::stateId<Step3>() },
 
 			{ FSM::stateId<Apex>(),		Event::UPDATE },
 			{ FSM::stateId<Step1>(),	Event::UPDATE },

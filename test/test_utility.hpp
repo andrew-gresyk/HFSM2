@@ -1,7 +1,7 @@
 #define HFSM_VERBOSE_DEBUG_LOG
 #include "shared.hpp"
 
-namespace test_composite_bst {
+namespace test_utility {
 
 //------------------------------------------------------------------------------
 

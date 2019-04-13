@@ -34,10 +34,10 @@ struct alignas(alignof(void*)) StructureStateInfo {
 								   const RegionType region_,
 								   const ShortIndex depth_,
 								   const char* const name_)
-		: name(name_)
-		, parent(parent_)
-		, region(region_)
-		, depth(depth_)
+		: name{name_}
+		, parent{parent_}
+		, region{region_}
+		, depth{depth_}
 	{}
 
 	const char* name;
@@ -58,15 +58,21 @@ HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
 	using Request = RequestT<TPayloadList>;
 
 	switch (type) {
+		case Request::CHANGE:
+			return Transition::CHANGE;
+
 		case Request::RESTART:
 			return Transition::RESTART;
+
 		case Request::RESUME:
 			return Transition::RESUME;
+
 		case Request::SCHEDULE:
 			return Transition::SCHEDULE;
+
 		default:
 			HFSM_BREAK();
-			return Transition::RESTART;
+			return Transition::CHANGE;
 	}
 }
 
@@ -82,8 +88,8 @@ struct alignas(4) TransitionInfoT {
 	HFSM_INLINE TransitionInfoT(const Request transition_,
 								const Method method_)
 		: stateId{transition_.stateId}
-		, method(method_)
-		, transition(get<PayloadList>(transition_.type))
+		, method{method_}
+		, transition{get<PayloadList>(transition_.type)}
 	{
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}

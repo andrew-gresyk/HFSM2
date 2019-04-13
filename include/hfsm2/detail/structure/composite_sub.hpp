@@ -75,6 +75,7 @@ struct _CS {
 	HFSM_INLINE void   deepForwardActive	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex prong);
 	HFSM_INLINE void   deepForwardRequest	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex prong);
 	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,							  const ShortIndex prong);
 

@@ -146,6 +146,14 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(StateRegistry& stateRegistry) {
+	initial.deepRequestChange(stateRegistry);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+void
 _OS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(StateRegistry& stateRegistry) {
 	initial.deepRequestRestart(stateRegistry);
 }

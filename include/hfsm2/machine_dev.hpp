@@ -121,18 +121,25 @@ template <typename TContext,
 		  typename TConfig = Config<>,
 		  typename TPayloadList = _ITL<>>
 struct _M {
-	using Context = TContext;
-	using Config  = TConfig;
-
+	using Context	  = TContext;
+	using Config	  = TConfig;
 	using PayloadList = TPayloadList;
 
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Composite			 = _CF<THead, TSubStates...>;
+	using Composite			 = _CF<THead, RegionStrategy::Composite, TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using CompositePeers	 = _CF<void,  TSubStates...>;
+	using CompositePeers	 = _CF<void,  RegionStrategy::Composite, TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using Resumable			 = _CF<THead, RegionStrategy::Resumable, TSubStates...>;
+
+	template <				  typename... TSubStates>
+	using ResumablePeers	 = _CF<void,  RegionStrategy::Resumable, TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -142,13 +149,23 @@ struct _M {
 	template <				  typename... TSubStates>
 	using OrthogonalPeers	 = _OF<void,  TSubStates...>;
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
 	using Root				 = _RF<Context, Config, PayloadList, Composite <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
 	using PeerRoot			 = _RF<Context, Config, PayloadList, CompositePeers	<  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using ResumableRoot		 = _RF<Context, Config, PayloadList, Resumable <THead, TSubStates...>>;
+
+	template <				  typename... TSubStates>
+	using ResumablePeerRoot	 = _RF<Context, Config, PayloadList, ResumablePeers	<  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
 	using OrthogonalRoot	 = _RF<Context, Config, PayloadList, Orthogonal<THead, TSubStates...>>;
@@ -196,10 +213,10 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 }
 
 #include "detail/structure/state.hpp"
-#include "detail/structure/fsm/composite_sub.hpp"
-#include "detail/structure/fsm/composite.hpp"
-#include "detail/structure/fsm/orthogonal_sub.hpp"
-#include "detail/structure/fsm/orthogonal.hpp"
+#include "detail/structure/composite_sub.hpp"
+#include "detail/structure/composite.hpp"
+#include "detail/structure/orthogonal_sub.hpp"
+#include "detail/structure/orthogonal.hpp"
 #include "detail/structure/root.hpp"
 
 #undef HFSM_INLINE

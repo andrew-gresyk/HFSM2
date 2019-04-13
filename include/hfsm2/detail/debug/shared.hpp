@@ -18,6 +18,7 @@ enum class Method : ShortIndex {
 };
 
 enum class Transition : ShortIndex {
+	CHANGE,
 	RESTART,
 	RESUME,
 	SCHEDULE,
@@ -85,7 +86,8 @@ static inline
 const char*
 transitionName(const Transition transition) {
 	switch (transition) {
-		case Transition::RESTART:		return "changeTo";
+		case Transition::CHANGE:		return "changeTo";
+		case Transition::RESTART:		return "restart";
 		case Transition::RESUME:		return "resume";
 		case Transition::SCHEDULE:		return "schedule";
 

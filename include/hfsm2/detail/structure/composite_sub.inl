@@ -185,6 +185,14 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) 
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
 void
+_CS<NS, NC, NO, TA, NI, TS...>::deepRequestChange(StateRegistry& stateRegistry) {
+	lHalf.deepRequestChange(stateRegistry);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+void
 _CS<NS, NC, NO, TA, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 	lHalf.deepRequestRestart(stateRegistry);
 }

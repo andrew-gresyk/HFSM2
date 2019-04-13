@@ -12,6 +12,7 @@ namespace Event {
 		EXIT_GUARD,
 		EXIT,
 
+		CHANGE,
 		RESTART,
 		RESUME,
 		SCHEDULE,
@@ -202,6 +203,15 @@ template <typename T>
 void
 changeTo(FSM::FullControl& control, Context::History& history) {
 	control.template changeTo<T>();
+	history.push_back(Status{ typeid(T), Event::CHANGE });
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+void
+restart(FSM::FullControl& control, Context::History& history) {
+	control.template restart<T>();
 	history.push_back(Status{ typeid(T), Event::RESTART });
 }
 

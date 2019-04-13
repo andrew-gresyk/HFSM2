@@ -19,9 +19,6 @@
     <Filter Include="hfsm\detail\structure">
       <UniqueIdentifier>{af0f3753-dd24-4f3f-a727-f87a2f766fd6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="hfsm\detail\structure\fsm">
-      <UniqueIdentifier>{f72763e5-91b8-4e3b-abbd-85305cc95aaa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test\shared">
       <UniqueIdentifier>{26865fdc-dcef-498a-b7c1-91f82db3b7af}</UniqueIdentifier>
     </Filter>
@@ -67,6 +64,15 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test_composite_bst.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_utility.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_resumable_c.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_resumable_o.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,27 +149,6 @@
     <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\root.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\composite.hpp">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub.hpp">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal.hpp">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub.hpp">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\forward.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\test_self_transitions.hpp">
       <Filter>test</Filter>
     </ClInclude>
@@ -171,6 +156,36 @@
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_composite_bst.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_utility.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\root.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\composite.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\composite_sub.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\forward.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_resumable_c.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_resumable_o.hpp">
       <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
@@ -208,26 +223,26 @@
     <None Include="..\..\include\hfsm2\detail\state_registry.inl">
       <Filter>hfsm\detail</Filter>
     </None>
+    <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_1.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
     <None Include="..\..\include\hfsm2\detail\structure\root.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\structure\state.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite.inl">
-      <Filter>hfsm\detail\structure\fsm</Filter>
+    <None Include="..\..\include\hfsm2\detail\structure\composite.inl">
+      <Filter>hfsm\detail\structure</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal.inl">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_1.inl">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_2.inl">
-      <Filter>hfsm\detail\structure\fsm</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub.inl">
-      <Filter>hfsm\detail\structure\fsm</Filter>
+    <None Include="..\..\include\hfsm2\detail\structure\composite_sub.inl">
+      <Filter>hfsm\detail\structure</Filter>
     </None>
   </ItemGroup>
 </Project>

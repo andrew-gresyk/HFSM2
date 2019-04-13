@@ -55,7 +55,7 @@ void deprecated() {
 			status<A>(Event::UPDATE),
 			status<A_1>(Event::UPDATE),
 
-			status<A_2>(Event::RESTART),
+			status<A_2>(Event::CHANGE),
 
 			status<A_1>(Event::EXIT_GUARD),
 
@@ -101,7 +101,7 @@ void deprecated() {
 		const Status update2[] = {
 			status<A>(Event::UPDATE),
 			status<A_2>(Event::UPDATE),
-			status<B_2_2>(Event::RESTART),
+			status<B_2_2>(Event::CHANGE),
 
 			status<A_2_1>(Event::UPDATE),
 
@@ -230,7 +230,7 @@ void deprecated() {
 			status<B_2>(Event::UPDATE),
 			status<B_2_2>(Event::UPDATE),
 
-			status<B>(Event::RESTART),
+			status<B>(Event::CHANGE),
 
 			status<B>(Event::EXIT_GUARD),
 			status<B_1>(Event::EXIT_GUARD),

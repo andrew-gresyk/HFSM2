@@ -88,6 +88,20 @@ _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
+	const Request request(Request::Type::CHANGE, stateId);
+	_requests << request;
+
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+	if (_logger)
+		_logger->recordTransition(INVALID_STATE_ID, Transition::CHANGE, stateId);
+#endif
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
+_R<TC, TG, TPL, TA>::restart(const StateID stateId) {
 	const Request request(Request::Type::RESTART, stateId);
 	_requests << request;
 
@@ -132,6 +146,23 @@ template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 							  TPayload* const payload)
+{
+	const Request request(Request::Type::CHANGE, stateId, payload);
+	_requests << request;
+
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+	if (_logger)
+		_logger->recordTransition(INVALID_STATE_ID, Transition::CHANGE, stateId);
+#endif
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TPayload>
+void
+_R<TC, TG, TPL, TA>::restart(const StateID stateId,
+							 TPayload* const payload)
 {
 	const Request request(Request::Type::RESTART, stateId, payload);
 	_requests << request;
@@ -257,10 +288,13 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 			HFSM_IF_STRUCTURE(_lastTransitions << TransitionInfo(request, Method::UPDATE));
 
 			switch (request.type) {
+			case Request::CHANGE:
 			case Request::RESTART:
 			case Request::RESUME:
-				_stateRegistry.requestImmediate(request);
-				_apex.deepForwardActive(_stateRegistry, request.type);
+				if (_stateRegistry.requestImmediate(request))
+					_apex.deepForwardActive(_stateRegistry, request.type);
+				else
+					_apex.deepRequest	   (_stateRegistry, request.type);
 
 				++changeCount;
 				break;

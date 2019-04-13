@@ -30,6 +30,7 @@ struct Event {
 		PLAN_SUCCESS,
 		PLAN_FAILURE,
 
+		CHANGE,
 		RESTART,
 		RESUME,
 		SCHEDULE,

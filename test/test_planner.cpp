@@ -61,7 +61,7 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::stateId<Planned>(),	Event::UPDATE },
 			{ FSM::stateId<Step1_BT>(),	Event::UPDATE },
 			{ FSM::stateId<Step1_1>(),	Event::UPDATE },
-			{ FSM::stateId<Step1_1>(),	Event::RESTART, FSM::stateId<Step1_2>() },
+			{ FSM::stateId<Step1_1>(),	Event::CHANGE, FSM::stateId<Step1_2>() },
 
 			{ FSM::stateId<Step1_1>(),	Event::EXIT_GUARD  },
 
@@ -96,7 +96,7 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::stateId <Step1_2>(),	 Event::UPDATE },
 
 			{ FSM::regionId<Step1_BT>(), Event::TASK_SUCCESS, FSM::stateId<Step1_2>() },
-			{ FSM::stateId <Step1_BT>(), Event::RESTART,	  FSM::stateId<Step1_3>() },
+			{ FSM::stateId <Step1_BT>(), Event::CHANGE,		  FSM::stateId<Step1_3>() },
 
 			{ FSM::stateId <Step1_2>(),	 Event::EXIT_GUARD  },
 
@@ -134,7 +134,7 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::stateId <Step1_BT>(), Event::PLAN_SUCCEEDED },
 			{ FSM::regionId<Step1_BT>(), Event::TASK_SUCCESS,   FSM::stateId<Step1_BT>() },
 			{ FSM::regionId<Step1_BT>(), Event::PLAN_SUCCESS },
-			{ FSM::stateId <Planned>(),	 Event::RESTART,		FSM::stateId<Hybrid>()	 },
+			{ FSM::stateId <Planned>(),	 Event::CHANGE,			FSM::stateId<Hybrid>()	 },
 
 			{ FSM::stateId <Step1_BT>(), Event::EXIT_GUARD  },
 			{ FSM::stateId <Step1_3>(),	 Event::EXIT_GUARD  },
@@ -190,8 +190,8 @@ TEST_CASE("Planner test", "[machine]") {
 
 			{ FSM::regionId<Step2R_P>(), Event::TASK_SUCCESS, FSM::stateId<Step2R_1>() },
 
-			{ FSM::stateId <Hybrid>(),	 Event::RESTART,	  FSM::stateId<Step2L_2>() },
-			{ FSM::stateId <Hybrid>(),	 Event::RESTART,	  FSM::stateId<Step2R_2>() },
+			{ FSM::stateId <Hybrid>(),	 Event::CHANGE,		  FSM::stateId<Step2L_2>() },
+			{ FSM::stateId <Hybrid>(),	 Event::CHANGE,		  FSM::stateId<Step2R_2>() },
 
 			{ FSM::stateId <Step2L_1>(), Event::EXIT_GUARD  },
 			{ FSM::stateId <Step2R_1>(), Event::EXIT_GUARD  },
@@ -246,7 +246,7 @@ TEST_CASE("Planner test", "[machine]") {
 			{ FSM::regionId<Hybrid>(),	   Event::TASK_SUCCESS,	  FSM::stateId<Hybrid>()   },
 			{ FSM::regionId<Hybrid>(),	   Event::PLAN_SUCCESS },
 
-			{ FSM::stateId <Planned>(),	   Event::RESTART,		  FSM::stateId<Terminal>() },
+			{ FSM::stateId <Planned>(),	   Event::CHANGE,		  FSM::stateId<Terminal>() },
 
 			{ FSM::stateId <Hybrid>(),	   Event::EXIT_GUARD  },
 			{ FSM::stateId <Step2L_P>(),   Event::EXIT_GUARD  },

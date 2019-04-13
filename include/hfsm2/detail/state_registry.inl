@@ -223,9 +223,11 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestedOrtho
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
-void
+bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmediate(const Request request) {
-	if (HFSM_CHECKED(request.stateId < STATE_COUNT)) {
+	if (request.stateId == 0)
+		return false;
+	else if (HFSM_CHECKED(request.stateId < STATE_COUNT)) {
 		Parent parent;
 
 		for (parent = stateParents[request.stateId];
@@ -266,6 +268,8 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmedia
 				requestedOrthoFork(parent.forkId)[parent.prong] = true;
 		}
 	}
+
+	return true;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -469,10 +473,14 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestedCompoFork
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
-void
+bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestImmediate(const Request request) {
-	if (HFSM_CHECKED(request.stateId < STATE_COUNT)) {
-		if (Parent parent = stateParents[request.stateId]) {
+	if (request.stateId == 0)
+		return false;
+	else if (HFSM_CHECKED(request.stateId < STATE_COUNT)) {
+		Parent parent = stateParents[request.stateId];
+
+		if (HFSM_CHECKED(parent)) {
 			HFSM_ASSERT(parent.forkId > 0);
 
 			requestedCompoFork(parent.forkId) = parent.prong;
@@ -490,6 +498,8 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestImmediate(c
 			}
 		}
 	}
+
+	return true;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

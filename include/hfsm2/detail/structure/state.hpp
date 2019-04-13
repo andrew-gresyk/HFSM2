@@ -51,8 +51,9 @@ struct _S {
 
 	HFSM_INLINE void   deepForwardActive	(StateRegistry&,	   const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
 	HFSM_INLINE void   deepForwardRequest	(StateRegistry&,	   const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
-	HFSM_INLINE void   deepRequestRemain	(StateRegistry&)															{}
-	HFSM_INLINE void   deepRequestRestart	(StateRegistry&)															{}
+	HFSM_INLINE void   deepRequestRemain	(StateRegistry&)																	{}
+	HFSM_INLINE void   deepRequestChange	(StateRegistry&)																	{}
+	HFSM_INLINE void   deepRequestRestart	(StateRegistry&)																	{}
 	HFSM_INLINE void   deepRequestResume	(StateRegistry&,							const ShortIndex = INVALID_SHORT_INDEX)	{}
 	HFSM_INLINE void   deepChangeToRequested(StateRegistry&, Control&,					const ShortIndex = INVALID_SHORT_INDEX)	{}
 

@@ -44,6 +44,9 @@ Logger::recordTransition(const hfsm2::StateID origin,
 						 const hfsm2::StateID target)
 {
 	switch (transition) {
+		case Transition::CHANGE:
+			history.emplace_back(origin, Event::CHANGE,   target);
+			break;
 		case Transition::RESTART:
 			history.emplace_back(origin, Event::RESTART,  target);
 			break;

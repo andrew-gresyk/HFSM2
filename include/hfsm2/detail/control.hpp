@@ -10,7 +10,7 @@ class ControlT {
 	template <StateID, typename, typename>
 	friend struct _S;
 
-	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
+	template <StateID, ShortIndex, ShortIndex, typename, typename, RegionStrategy, typename...>
 	friend struct _C;
 
 	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
@@ -64,10 +64,10 @@ protected:
 						 StateRegistry& stateRegistry,
 						 PlanData& planData,
 						 LoggerInterface* const HFSM_IF_LOGGER(logger))
-		: _context(context)
-		, _stateRegistry(stateRegistry)
-		, _planData(planData)
-		HFSM_IF_LOGGER(, _logger(logger))
+		: _context{context}
+		, _stateRegistry{stateRegistry}
+		, _planData{planData}
+		HFSM_IF_LOGGER(, _logger{logger})
 	{}
 
 	HFSM_INLINE void setOrigin  (const StateID id);
@@ -150,7 +150,7 @@ class FullControlT
 	template <StateID, typename, typename>
 	friend struct _S;
 
-	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
+	template <StateID, ShortIndex, ShortIndex, typename, typename, RegionStrategy, typename...>
 	friend struct _C;
 
 	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
@@ -202,7 +202,7 @@ protected:
 							 Requests& requests,
 							 LoggerInterface* const logger)
 		: Control{context, stateRegistry, planData, logger}
-		, _requests(requests)
+		, _requests{requests}
 	{}
 
 	template <typename T>
@@ -226,11 +226,15 @@ public:
 	using Control::plan;
 
 	HFSM_INLINE void changeTo(const StateID stateId);
+	HFSM_INLINE void restart (const StateID stateId);
 	HFSM_INLINE void resume	 (const StateID stateId);
 	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
 	HFSM_INLINE void changeTo()					{ changeTo(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE void restart()					{ restart (stateId<TState>());	}
 
 	template <typename TState>
 	HFSM_INLINE void resume()					{ resume  (stateId<TState>());	}
@@ -289,7 +293,7 @@ private:
 							  const Requests& pendingChanges,
 							  LoggerInterface* const logger)
 		: FullControl{context, stateRegistry, planData, requests, logger}
-		, _pending(pendingChanges)
+		, _pending{pendingChanges}
 	{}
 
 	template <typename T>

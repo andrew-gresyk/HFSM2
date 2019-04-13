@@ -30,9 +30,12 @@
     <ClCompile Include="..\..\test\test_headless.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_planner.cpp" />
+    <ClCompile Include="..\..\test\test_resumable_c.cpp" />
+    <ClCompile Include="..\..\test\test_resumable_o.cpp" />
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
     <ClCompile Include="..\..\test\shared.cpp" />
     <ClCompile Include="..\..\test\test_state_data.cpp" />
+    <ClCompile Include="..\..\test\test_utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm2\detail\control.hpp" />
@@ -51,11 +54,11 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\composite.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\composite_sub.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\forward.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\composite.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\root.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
@@ -66,9 +69,12 @@
     <ClInclude Include="..\..\test\test_headless.hpp" />
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
     <ClInclude Include="..\..\test\test_planner.hpp" />
+    <ClInclude Include="..\..\test\test_resumable_c.hpp" />
+    <ClInclude Include="..\..\test\test_resumable_o.hpp" />
     <ClInclude Include="..\..\test\test_self_transitions.hpp" />
     <ClInclude Include="..\..\test\shared.hpp" />
     <ClInclude Include="..\..\test\test_state_data.hpp" />
+    <ClInclude Include="..\..\test\test_utility.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\control.inl" />
@@ -82,11 +88,11 @@
     <None Include="..\..\include\hfsm2\detail\shared\list.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\object_pool.inl" />
     <None Include="..\..\include\hfsm2\detail\state_registry.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\composite_sub.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_1.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\fsm\orthogonal_sub_2.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\composite.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\composite_sub.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_1.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\root.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state.inl" />
   </ItemGroup>

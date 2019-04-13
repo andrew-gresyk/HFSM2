@@ -54,6 +54,8 @@ private:
 
 	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
 
+	//StaticPrintType<MaterialApex> p;
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
 
@@ -86,8 +88,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateRegistry.isActive   (stateId);			}
-	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateRegistry.isResumable(stateId);			}
+	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateRegistry.isActive   (stateId);		}
+	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateRegistry.isResumable(stateId);		}
 
 	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
 
@@ -103,6 +105,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void changeTo(const StateID stateId);
+	HFSM_INLINE void restart (const StateID stateId);
 	HFSM_INLINE void resume	 (const StateID stateId);
 	HFSM_INLINE void schedule(const StateID stateId);
 
@@ -110,7 +113,10 @@ public:
 	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void resume	()									{ resume  (stateId<TState>());						}
+	HFSM_INLINE void restart ()									{ restart (stateId<TState>());						}
+
+	template <typename TState>
+	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
 
 	template <typename TState>
 	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
@@ -121,6 +127,9 @@ public:
 	HFSM_INLINE void changeTo(const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
+	HFSM_INLINE void restart (const StateID stateId, TPayload* const payload);
+
+	template <typename TPayload>
 	HFSM_INLINE void resume  (const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
@@ -128,6 +137,9 @@ public:
 
 	template <typename TState, typename TPayload>
 	HFSM_INLINE void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
+
+	template <typename TState, typename TPayload>
+	HFSM_INLINE void restart (TPayload* const payload)			{ restart (stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
 	HFSM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}

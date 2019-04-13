@@ -7,7 +7,7 @@ template <typename TA>
 ControlT<TA>::Origin::Origin(ControlT& control_,
 							 const StateID id)
 	: control{control_}
-	, prevId(control._originId)
+	, prevId{control._originId}
 {
 	control.setOrigin(id);
 }
@@ -208,6 +208,25 @@ FullControlT<TA>::buildPlanStatus(const bool outerTransition) {
 template <typename TA>
 void
 FullControlT<TA>::changeTo(const StateID stateId) {
+	if (!_locked) {
+		const Request request{Request::Type::CHANGE, stateId};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+		if (_logger)
+			_logger->recordTransition(_originId, Transition::CHANGE, stateId);
+	#endif
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TA>
+void
+FullControlT<TA>::restart(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::RESTART, stateId};
 		_requests << request;

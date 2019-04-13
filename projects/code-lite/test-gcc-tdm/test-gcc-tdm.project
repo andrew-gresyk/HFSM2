@@ -6,24 +6,70 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="hfsm2">
+    <VirtualDirectory Name="detail">
+      <File Name="../../../include/hfsm2/detail/state_registry.inl"/>
+      <File Name="../../../include/hfsm2/detail/state_registry.hpp"/>
+      <File Name="../../../include/hfsm2/detail/plan_data.inl"/>
+      <File Name="../../../include/hfsm2/detail/plan_data.hpp"/>
+      <File Name="../../../include/hfsm2/detail/plan.inl"/>
+      <File Name="../../../include/hfsm2/detail/plan.hpp"/>
+      <File Name="../../../include/hfsm2/detail/injections.inl"/>
+      <File Name="../../../include/hfsm2/detail/injections.hpp"/>
+      <File Name="../../../include/hfsm2/detail/control.inl"/>
+      <File Name="../../../include/hfsm2/detail/control.hpp"/>
+      <VirtualDirectory Name="structure">
+        <File Name="../../../include/hfsm2/detail/structure/state.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/state.hpp"/>
+        <File Name="../../../include/hfsm2/detail/structure/root.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/root.hpp"/>
+        <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub_2.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub_1.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub.hpp"/>
+        <File Name="../../../include/hfsm2/detail/structure/orthogonal.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/orthogonal.hpp"/>
+        <File Name="../../../include/hfsm2/detail/structure/forward.hpp"/>
+        <File Name="../../../include/hfsm2/detail/structure/composite_sub.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/composite_sub.hpp"/>
+        <File Name="../../../include/hfsm2/detail/structure/composite.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/composite.hpp"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="shared">
+        <File Name="../../../include/hfsm2/detail/shared/utility.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/type_list.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/object_pool.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/object_pool.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/list.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/list.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/iterator.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/iterator.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/bit_array.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/bit_array.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/array_view.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/array_view.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/array.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/array.hpp"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="debug">
+        <File Name="../../../include/hfsm2/detail/debug/structure_report.hpp"/>
+        <File Name="../../../include/hfsm2/detail/debug/shared.hpp"/>
+        <File Name="../../../include/hfsm2/detail/debug/logger_interface.hpp"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
     <File Name="../../../include/hfsm2/machine_dev.hpp"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
-    <File Name="../../../test/test_composite_bst.hpp"/>
-    <File Name="../../../test/test_composite_bst.cpp"/>
-    <File Name="../../../test/shared.hpp"/>
-    <File Name="../../../test/shared.cpp"/>
-    <VirtualDirectory Name="shared">
-      <File Name="../../../test/shared/test_object_pool.cpp"/>
-      <File Name="../../../test/shared/test_list.cpp"/>
-      <File Name="../../../test/shared/test_bit_array.cpp"/>
-    </VirtualDirectory>
+    <File Name="../../../test/test_utility.hpp"/>
+    <File Name="../../../test/test_utility.cpp"/>
     <File Name="../../../test/test_state_data.hpp"/>
     <File Name="../../../test/test_state_data.cpp"/>
     <File Name="../../../test/test_self_transitions.hpp"/>
     <File Name="../../../test/test_self_transitions.cpp"/>
+    <File Name="../../../test/test_resumable_o.hpp"/>
+    <File Name="../../../test/test_resumable_o.cpp"/>
+    <File Name="../../../test/test_resumable_c.hpp"/>
+    <File Name="../../../test/test_resumable_c.cpp"/>
     <File Name="../../../test/test_planner.hpp"/>
     <File Name="../../../test/test_planner.cpp"/>
     <File Name="../../../test/test_internal_transitions.hpp"/>
@@ -34,12 +80,19 @@
     <File Name="../../../test/test_guard.cpp"/>
     <File Name="../../../test/test_delayed_teardown.hpp"/>
     <File Name="../../../test/test_delayed_teardown.cpp"/>
+    <File Name="../../../test/test_composite_bst.hpp"/>
+    <File Name="../../../test/test_composite_bst.cpp"/>
+    <File Name="../../../test/shared.hpp"/>
+    <File Name="../../../test/shared.cpp"/>
+    <VirtualDirectory Name="shared">
+      <File Name="../../../test/shared/test_object_pool.cpp"/>
+      <File Name="../../../test/shared/test_list.cpp"/>
+      <File Name="../../../test/shared/test_bit_array.cpp"/>
+    </VirtualDirectory>
     <File Name="../../../test/main.cpp"/>
     <File Name="../../../test/deprecated_test.hpp"/>
     <File Name="../../../test/deprecated_test.cpp"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -133,4 +186,6 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

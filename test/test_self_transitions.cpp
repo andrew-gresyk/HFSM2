@@ -53,7 +53,7 @@ TEST_CASE("Self transition test", "[machine]") {
 		machine.update();
 		{
 			const Events reference = {
-				{						 Event::RESTART, FSM::stateId<A>() },
+				{						 Event::CHANGE, FSM::stateId<A>() },
 
 				{ 0u,					 Event::UPDATE },
 				{ FSM::stateId<A>(),	 Event::UPDATE },
@@ -86,7 +86,7 @@ TEST_CASE("Self transition test", "[machine]") {
 		machine.update();
 		{
 			const Events reference = {
-				{						 Event::RESTART, FSM::stateId<B>() },
+				{						 Event::CHANGE, FSM::stateId<B>() },
 
 				{ 0u,					 Event::UPDATE },
 				{ FSM::stateId<A>(),	 Event::UPDATE },
@@ -132,7 +132,7 @@ TEST_CASE("Self transition test", "[machine]") {
 		machine.update();
 		{
 			const Events reference = {
-				{						 Event::RESTART, FSM::stateId<B>() },
+				{						 Event::CHANGE, FSM::stateId<B>() },
 
 				{ 0u,					 Event::UPDATE },
 

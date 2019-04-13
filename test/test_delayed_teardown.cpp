@@ -50,13 +50,13 @@ TEST_CASE("Delayed teardown test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{ FSM::stateId<Apex>(),		Event::	UPDATE },
-			{ FSM::stateId<Step1>(),	Event::	UPDATE },
-			{ FSM::stateId<Step1_1>(),	Event::	UPDATE },
-			{ FSM::stateId<Step1_2>(),	Event::	UPDATE },
-			{ FSM::stateId<Setup>(),	Event::	UPDATE },
+			{ FSM::stateId<Apex>(),		Event::UPDATE },
+			{ FSM::stateId<Step1>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_1>(),	Event::UPDATE },
+			{ FSM::stateId<Step1_2>(),	Event::UPDATE },
+			{ FSM::stateId<Setup>(),	Event::UPDATE },
 
-			{ FSM::stateId<Setup>(),	Event::RESTART, FSM::stateId<Work>() },
+			{ FSM::stateId<Setup>(),	Event::CHANGE, FSM::stateId<Work>() },
 
 			{ FSM::stateId<Setup>(),	Event::EXIT_GUARD },
 			{ FSM::stateId<Work>(),		Event::ENTRY_GUARD },
@@ -85,7 +85,7 @@ TEST_CASE("Delayed teardown test", "[machine]") {
 	machine.update();
 	{
 		const Events reference = {
-			{							Event::RESTART, FSM::stateId<Step2>() },
+			{							Event::CHANGE, FSM::stateId<Step2>() },
 
 			{ FSM::stateId<Apex>(),		Event::UPDATE },
 			{ FSM::stateId<Step1>(),	Event::UPDATE },
@@ -100,7 +100,7 @@ TEST_CASE("Delayed teardown test", "[machine]") {
 
 			{ FSM::stateId<Work>(),		Event::CANCELLED_PENDING },
 
-			{ FSM::stateId<Work>(),		Event::RESTART, FSM::stateId<Teardown>() },
+			{ FSM::stateId<Work>(),		Event::CHANGE, FSM::stateId<Teardown>() },
 
 			{ FSM::stateId<Work>(),		Event::EXIT_GUARD  },
 			{ FSM::stateId<Teardown>(),	Event::ENTRY_GUARD },
@@ -135,7 +135,7 @@ TEST_CASE("Delayed teardown test", "[machine]") {
 			{ FSM::stateId<Teardown>(),	Event::UPDATE },
 
 			{ FSM::regionId<Step1_2>(),	Event::TASK_SUCCESS, FSM::stateId<Teardown>() },
-			{ FSM::stateId<Step1_2>(),	Event::RESTART,		 FSM::stateId<Step2>() },
+			{ FSM::stateId<Step1_2>(),	Event::CHANGE,		 FSM::stateId<Step2>() },
 
 			{ FSM::stateId<Step1>(),	Event::EXIT_GUARD },
 			{ FSM::stateId<Step1_1>(),	Event::EXIT_GUARD },
