@@ -19,6 +19,9 @@ void deprecated() {
 		FSM::Instance machine(_);
 
 		const Status created[] = {
+			status<A>(Event::ENTRY_GUARD),
+			status<A_1>(Event::ENTRY_GUARD),
+
 			status<A>(Event::ENTER),
 			status<A_1>(Event::ENTER),
 		};

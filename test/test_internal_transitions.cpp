@@ -25,7 +25,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Internal transition test", "[machine]") {
+TEST_CASE("Internal transition", "[machine]") {
 	Context _;
 	Logger logger;
 	FSM::Instance machine(_, &logger);

@@ -14,6 +14,7 @@
 
 struct Event {
 	enum Enum {
+		UTILITY,
 		ENTRY_GUARD,
 		ENTER,
 		UPDATE,
@@ -33,6 +34,7 @@ struct Event {
 		CHANGE,
 		RESTART,
 		RESUME,
+		UTILIZE,
 		SCHEDULE,
 		CANCELLED_PENDING,
 

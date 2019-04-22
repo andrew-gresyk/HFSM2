@@ -28,11 +28,9 @@
     <ClCompile Include="..\..\test\test_composite_bst.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
     <ClCompile Include="..\..\test\test_guard.cpp" />
-    <ClCompile Include="..\..\test\test_headless.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_planner.cpp" />
-    <ClCompile Include="..\..\test\test_resumable_c.cpp" />
-    <ClCompile Include="..\..\test\test_resumable_o.cpp" />
+    <ClCompile Include="..\..\test\test_resumable.cpp" />
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
     <ClCompile Include="..\..\test\test_state_data.cpp" />
     <ClCompile Include="..\..\test\test_utility.cpp" />
@@ -67,11 +65,9 @@
     <ClInclude Include="..\..\test\test_composite_bst.hpp" />
     <ClInclude Include="..\..\test\test_delayed_teardown.hpp" />
     <ClInclude Include="..\..\test\test_guard.hpp" />
-    <ClInclude Include="..\..\test\test_headless.hpp" />
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
     <ClInclude Include="..\..\test\test_planner.hpp" />
-    <ClInclude Include="..\..\test\test_resumable_c.hpp" />
-    <ClInclude Include="..\..\test\test_resumable_o.hpp" />
+    <ClInclude Include="..\..\test\test_resumable.hpp" />
     <ClInclude Include="..\..\test\test_self_transitions.hpp" />
     <ClInclude Include="..\..\test\test_state_data.hpp" />
     <ClInclude Include="..\..\test\test_utility.hpp" />

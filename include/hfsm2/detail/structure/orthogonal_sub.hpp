@@ -32,9 +32,10 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using StateRegistry	 = StateRegistryT<Args>;
 	using StateParents	 = typename StateRegistry::StateParents;
 
-	using Control		 = ControlT		 <Args>;
-	using FullControl	 = FullControlT  <Args>;
-	using GuardControl	 = GuardControlT <Args>;
+	using Control		 = ControlT		<Args>;
+	using PlanControl	 = PlanControlT	<Args>;
+	using FullControl	 = FullControlT	<Args>;
+	using GuardControl	 = GuardControlT<Args>;
 
 	using Initial		 = Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
 	using InitialForward = Wrap<TInitial>;
@@ -50,32 +51,46 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	HFSM_INLINE void   wideRegister			(StateRegistry& stateRegistry, const ForkID forkId);
 
-	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control,									 const OrthoFork& prongs);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control);
 	HFSM_INLINE bool   wideEntryGuard		(GuardControl& control);
 
-	HFSM_INLINE void   wideEnterInitial		(Control& control);
-	HFSM_INLINE void   wideEnter			(Control& control);
+	HFSM_INLINE void   wideEnter			(PlanControl& control);
 
 	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
 	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
 
-	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,									  const OrthoFork& prongs);
+	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control);
 	HFSM_INLINE bool   wideExitGuard		(GuardControl& control);
 
-	HFSM_INLINE void   wideExit				(Control& control);
+	HFSM_INLINE void   wideExit				(PlanControl& control);
 
-	HFSM_INLINE void   wideForwardActive	(StateRegistry& stateRegistry, const RequestType request, const OrthoFork& prongs);
-	HFSM_INLINE void   wideForwardRequest	(StateRegistry& stateRegistry, const RequestType request, const OrthoFork& prongs);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   wideForwardActive	(Control& control, const RequestType request,	const OrthoFork& prongs);
+	HFSM_INLINE void   wideForwardRequest	(Control& control, const RequestType request,	const OrthoFork& prongs);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE UProng wideRequestChange	(Control& control);
+	HFSM_INLINE UProng wideReportChange	(Control& control);
+
 	HFSM_INLINE void   wideRequestRemain	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   wideRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestRestart	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestResume	(StateRegistry& stateRegistry);
 
-	HFSM_INLINE void   wideChangeToRequested(StateRegistry& stateRegistry, Control& control);
+	HFSM_INLINE void   wideRequestUtilize	(Control& control);
+	HFSM_INLINE UProng wideReportUtilize	(Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   wideEnterRequested	(PlanControl& control);
+	HFSM_INLINE void   wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
@@ -114,41 +129,56 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	using StateRegistry	 = StateRegistryT<Args>;
 	using StateParents	 = typename StateRegistry::StateParents;
 
-	using Control		 = ControlT		 <Args>;
-	using FullControl	 = FullControlT  <Args>;
-	using GuardControl	 = GuardControlT <Args>;
+	using Control		 = ControlT		<Args>;
+	using PlanControl	 = PlanControlT	<Args>;
+	using FullControl	 = FullControlT	<Args>;
+	using GuardControl	 = GuardControlT<Args>;
 
 	using Initial		 = Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
 	using AllForward	 = _OSF<TInitial>;
 
 	HFSM_INLINE void   wideRegister			(StateRegistry& stateRegistry, const ForkID forkId);
 
-	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control,										 const OrthoFork& prongs);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control);
 	HFSM_INLINE bool   wideEntryGuard		(GuardControl& control);
 
-	HFSM_INLINE void   wideEnterInitial		(Control& control);
-	HFSM_INLINE void   wideEnter			(Control& control);
+	HFSM_INLINE void   wideEnter			(PlanControl& control);
 
 	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
 	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
 
-	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,										 const OrthoFork& prongs);
+	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control);
 	HFSM_INLINE bool   wideExitGuard		(GuardControl& control);
 
-	HFSM_INLINE void   wideExit				(Control& control);
+	HFSM_INLINE void   wideExit				(PlanControl& control);
 
-	HFSM_INLINE void   wideForwardActive	(StateRegistry& stateRegistry, const RequestType transition, const OrthoFork& prongs);
-	HFSM_INLINE void   wideForwardRequest	(StateRegistry& stateRegistry, const RequestType transition, const OrthoFork& prongs);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   wideForwardActive	(Control& control, const RequestType request,	const OrthoFork& prongs);
+	HFSM_INLINE void   wideForwardRequest	(Control& control, const RequestType request,	const OrthoFork& prongs);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE UProng wideRequestChange	(Control& control);
+	HFSM_INLINE UProng wideReportChange		(Control& control);
+
 	HFSM_INLINE void   wideRequestRemain	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   wideRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestRestart	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestResume	(StateRegistry& stateRegistry);
 
-	HFSM_INLINE void   wideChangeToRequested(StateRegistry& stateRegistry, Control& control);
+	HFSM_INLINE void   wideRequestUtilize	(Control& control);
+	HFSM_INLINE UProng wideReportUtilize	(Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   wideEnterRequested	(PlanControl& control);
+	HFSM_INLINE void   wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;

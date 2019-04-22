@@ -507,8 +507,8 @@ public:
 	static constexpr LongIndex INVALID	= INVALID_LONG_INDEX;
 	static constexpr LongIndex DUMMY	= INVALID;
 
-	using View = ArrayView<T>;
-	using Item = typename View::Item;
+	using Item = T;
+	using View = ArrayView<Item>;
 
 public:
 	HFSM_INLINE Array();
@@ -1469,6 +1469,7 @@ private:
 namespace hfsm2 {
 
 enum class Method : ShortIndex {
+	UTILITY,
 	ENTRY_GUARD,
 	ENTER,
 	UPDATE,
@@ -1485,6 +1486,7 @@ enum class Transition : ShortIndex {
 	CHANGE,
 	RESTART,
 	RESUME,
+	UTILIZE,
 	SCHEDULE,
 
 	COUNT
@@ -1553,6 +1555,7 @@ transitionName(const Transition transition) {
 		case Transition::CHANGE:		return "changeTo";
 		case Transition::RESTART:		return "restart";
 		case Transition::RESUME:		return "resume";
+		case Transition::UTILIZE:		return "utilize";
 		case Transition::SCHEDULE:		return "schedule";
 
 		default:
@@ -1898,21 +1901,88 @@ combine(const Status lhs, const Status rhs) {
 				  lhs.outerTransition || rhs.outerTransition};
 }
 
-//------------------------------------------------------------------------------
-
-template <typename>
-class ControlT;
-
-template <typename>
-class FullControlT;
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-class PlanT {
+class ConstPlanT {
 	template <typename>
 	friend class ControlT;
 
 	template <typename>
+	friend class PlanControlT;
+
+	template <typename>
 	friend class FullControlT;
+
+	template <typename>
+	friend class GuardControlT;
+
+	using Args			= TArgs;
+	using Context		= typename Args::Context;
+	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
+	using PayloadList	= typename Args::PayloadList;
+
+	static constexpr LongIndex TASK_CAPACITY = Args::TASK_CAPACITY;
+
+public:
+	using PlanData		= PlanDataT<Args>;
+	using TaskLinks		= typename PlanData::TaskLinks;
+	using RegionBit		= typename PlanData::RegionBit;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct Iterator {
+		HFSM_INLINE Iterator(const ConstPlanT& plan);
+
+		HFSM_INLINE explicit operator bool() const;
+
+		HFSM_INLINE void operator ++();
+
+		HFSM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
+
+		HFSM_INLINE LongIndex next() const;
+
+		const ConstPlanT& _plan;
+		LongIndex _curr;
+		LongIndex _next;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+private:
+	HFSM_INLINE ConstPlanT(const PlanData& planData,
+						   const RegionID regionId);
+
+	template <typename T>
+	static constexpr LongIndex stateId()	{ return StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
+
+public:
+	HFSM_INLINE explicit operator bool() const;
+
+	HFSM_INLINE Iterator begin()			{ return Iterator{*this};					}
+
+private:
+	const PlanData& _planData;
+	const Bounds& _bounds;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
+class PlanT {
+	template <typename>
+	friend class PlanControlT;
+
+	template <typename>
+	friend class FullControlT;
+
+	template <typename>
+	friend class GuardControlT;
 
 	using Args			= TArgs;
 	using Context		= typename Args::Context;
@@ -2014,6 +2084,73 @@ Status::clear() {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
+ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
+	: _plan{plan}
+	, _curr{plan._bounds.first}
+{
+	_next = next();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+ConstPlanT<TArgs>::Iterator::operator bool() const {
+	HFSM_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
+
+	return _curr < ConstPlanT::TASK_CAPACITY;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+void
+ConstPlanT<TArgs>::Iterator::operator ++() {
+	_curr = _next;
+	_next = next();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+LongIndex
+ConstPlanT<TArgs>::Iterator::next() const {
+	if (_curr < ConstPlanT::TASK_CAPACITY) {
+		const TaskLink& task = _plan._planData.taskLinks[_curr];
+
+		return task.next;
+	} else {
+		HFSM_ASSERT(_curr == INVALID_LONG_INDEX);
+
+		return INVALID_LONG_INDEX;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
+ConstPlanT<TArgs>::ConstPlanT(const PlanData& planData,
+							  const RegionID regionId)
+
+	: _planData{planData}
+	, _bounds{planData.tasksBounds[regionId]}
+{}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+ConstPlanT<TArgs>::operator bool() const {
+	if (_bounds.first < TASK_CAPACITY) {
+		HFSM_ASSERT(_bounds.last < TASK_CAPACITY);
+		return true;
+	} else {
+		HFSM_ASSERT(_bounds.last == INVALID_LONG_INDEX);
+		return false;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
 PlanT<TArgs>::Iterator::Iterator(PlanT& plan)
 	: _plan{plan}
 	, _curr{plan._bounds.first}
@@ -2078,8 +2215,8 @@ PlanT<TArgs>::PlanT(PlanData& planData,
 
 template <typename TArgs>
 PlanT<TArgs>::operator bool() const {
-	if (_bounds.first < PlanT::TASK_CAPACITY) {
-		HFSM_ASSERT(_bounds.last < PlanT::TASK_CAPACITY);
+	if (_bounds.first < TASK_CAPACITY) {
+		HFSM_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
 	} else {
 		HFSM_ASSERT(_bounds.last == INVALID_LONG_INDEX);
@@ -2238,6 +2375,7 @@ struct RequestT {
 		CHANGE,
 		RESTART,
 		RESUME,
+		UTILIZE,
 		SCHEDULE,
 
 		COUNT
@@ -2455,60 +2593,6 @@ struct StateRegistryT<ArgsT<TContext,
 	CompoParents compoParents;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-
-	AllForks resumable;
-	AllForks requested;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename TContext,
-		  typename TConfig,
-		  typename TStateList,
-		  typename TRegionList,
-		  LongIndex NOrthoCount,
-		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
-		  LongIndex NTaskCapacity>
-struct StateRegistryT<ArgsT<TContext,
-							TConfig,
-							TStateList,
-							TRegionList,
-							0,
-							NOrthoCount,
-							NOrthoUnits,
-							TPayloadList,
-							NTaskCapacity>>
-{
-	using StateList		= TStateList;
-	using RegionList	= TRegionList;
-	using PayloadList	= TPayloadList;
-
-	using Request		= RequestT<PayloadList>;
-
-	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
-	static constexpr ShortIndex ORTHO_COUNT = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS = NOrthoUnits;
-
-	using StateParents	= StaticArray<Parent, STATE_COUNT>;
-	using OrthoParents	= StaticArray<Parent, ORTHO_COUNT>;
-
-	using AllForks		= AllForksT<0, ORTHO_COUNT, ORTHO_UNITS>;
-
-	HFSM_INLINE bool isActive		(const StateID) const			  {	return true;	}
-	HFSM_INLINE bool isResumable	(const StateID) const			  {	return false;	}
-
-	HFSM_INLINE bool isPendingChange(const StateID) const			  {	return false;	}
-	HFSM_INLINE bool isPendingEnter	(const StateID) const			  {	return false;	}
-	HFSM_INLINE bool isPendingExit	(const StateID) const			  {	return false;	}
-
-	HFSM_INLINE bool requestImmediate(const Request)	{ HFSM_BREAK();	return true;	}
-	HFSM_INLINE void requestScheduled(const Request)	{ HFSM_BREAK();					}
-
-	HFSM_INLINE void clearOrthoRequested()											   {}
-
-	StateParents stateParents;
-	OrthoParents orthoParents;
 
 	AllForks resumable;
 	AllForks requested;
@@ -3052,7 +3136,7 @@ class ControlT {
 	template <StateID, typename, typename>
 	friend struct _S;
 
-	template <StateID, ShortIndex, ShortIndex, typename, typename, RegionStrategy, typename...>
+	template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, typename, typename...>
 	friend struct _C;
 
 	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
@@ -3068,35 +3152,20 @@ class ControlT {
 
 public:
 	using StateRegistry	= StateRegistryT<Args>;
-	using PlanData		= PlanDataT <Args>;
-	using Plan			= PlanT		<Args>;
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	struct Origin {
-		HFSM_INLINE Origin(ControlT& control_,
-						   const StateID id);
-
-		HFSM_INLINE ~Origin();
-
-		ControlT& control;
-		const StateID prevId;
-	};
+	using PlanData		= PlanDataT<Args>;
+	using ConstPlan		= ConstPlanT<Args>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Region {
 		HFSM_INLINE Region(ControlT& control,
-						   const RegionID id,
-						   const StateID index,
-						   const LongIndex size);
+						   const RegionID id);
 
 		HFSM_INLINE ~Region();
 
 		ControlT& control;
 		const RegionID prevId;
-		const LongIndex prevIndex;
-		const LongIndex prevSize;
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3112,11 +3181,133 @@ protected:
 		HFSM_IF_LOGGER(, _logger{logger})
 	{}
 
+
+	HFSM_INLINE void setRegion(const RegionID id)				{ _regionId = id;							}
+	HFSM_INLINE void resetRegion(const RegionID id);
+
+public:
+	template <typename T>
+	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()						{ return RegionList::template index<T>();	}
+
+	HFSM_INLINE Context& _()									{ return _context;							}
+	HFSM_INLINE Context& context()								{ return _context;							}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE bool isActive   (const StateID id) const		{ return _stateRegistry.isActive   (id);	}
+	HFSM_INLINE bool isResumable(const StateID id) const		{ return _stateRegistry.isResumable(id);	}
+
+	HFSM_INLINE bool isScheduled(const StateID id) const		{ return isResumable(id);					}
+
+	template <typename TState>
+	HFSM_INLINE bool isActive() const							{ return isActive	(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE const ConstPlan plan() const					{ return ConstPlan{_planData, _regionId};	}
+	HFSM_INLINE const ConstPlan plan(const RegionID id) const	{ return ConstPlan{_planData, id};			}
+
+protected:
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+	HFSM_INLINE LoggerInterface* logger()						{ return _logger;							}
+#endif
+
+protected:
+	Context& _context;
+	StateRegistry& _stateRegistry;
+	PlanData& _planData;
+	RegionID _regionId = INVALID_REGION_ID;
+	HFSM_IF_LOGGER(LoggerInterface* _logger);
+};
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+class PlanControlT
+	: public ControlT<TArgs>
+{
+	template <StateID, typename, typename>
+	friend struct _S;
+
+	template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, typename, typename...>
+	friend struct _C;
+
+	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
+	friend struct _O;
+
+	template <typename, typename, typename, typename>
+	friend class _R;
+
+	using Args			= TArgs;
+	using Context		= typename Args::Context;
+	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
+
+	using Control		= ControlT<Args>;
+	using StateRegistry	= StateRegistryT<Args>;
+
+public:
+	using PlanData		= PlanDataT<Args>;
+	using Plan			= PlanT<Args>;
+	using ConstPlan		= ConstPlanT<Args>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct Origin {
+		HFSM_INLINE Origin(PlanControlT& control_,
+						   const StateID id);
+
+		HFSM_INLINE ~Origin();
+
+		PlanControlT& control;
+		const StateID prevId;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct Region {
+		HFSM_INLINE Region(PlanControlT& control,
+						   const RegionID id,
+						   const StateID index,
+						   const LongIndex size);
+
+		HFSM_INLINE ~Region();
+
+		PlanControlT& control;
+		const RegionID prevId;
+		const LongIndex prevIndex;
+		const LongIndex prevSize;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+protected:
+	using Control::Control;
+
 	HFSM_INLINE void setOrigin  (const StateID id);
 	HFSM_INLINE void resetOrigin(const StateID id);
 
 	HFSM_INLINE void setRegion  (const RegionID id, const StateID index, const LongIndex size);
 	HFSM_INLINE void resetRegion(const RegionID id, const StateID index, const LongIndex size);
+
+public:
+	using Control::isActive;
+	using Control::isResumable;
+	using Control::isScheduled;
+
+	using Control::plan;
+
+	using Control::_;
+	using Control::context;
 
 	template <typename T>
 	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
@@ -3124,33 +3315,10 @@ protected:
 	template <typename T>
 	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
 
-public:
-	HFSM_INLINE Context& _()									{ return _context;								}
-	HFSM_INLINE Context& context()								{ return _context;								}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateRegistry.isActive   (stateId);	}
-	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateRegistry.isResumable(stateId);	}
-
-	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);					}
-
-	template <typename TState>
-	HFSM_INLINE bool isActive() const							{ return isActive	(stateId<TState>());		}
-
-	template <typename TState>
-	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());		}
-
-	template <typename TState>
-	HFSM_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());		}
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE Plan plan()										{ return Plan{_planData, _regionId};			}
-	HFSM_INLINE Plan plan() const								{ return Plan{_planData, _regionId};			}
-
-	HFSM_INLINE Plan plan(const RegionID regionId)				{ return Plan{_planData,  regionId};			}
-	HFSM_INLINE Plan plan(const RegionID regionId) const		{ return Plan{_planData,  regionId};			}
+	HFSM_INLINE Plan plan(const RegionID id)					{ return Plan{_planData, id};					}
 
 	template <typename TRegion>
 	HFSM_INLINE Plan plan()										{ return Plan{_planData, regionId<TRegion>()};	}
@@ -3161,38 +3329,30 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HFSM_INLINE		  StateRegistry&	stateRegistry()			{ return _stateRegistry;						}
-	HFSM_INLINE const StateRegistry&	stateRegistry() const	{ return _stateRegistry;						}
-
 	HFSM_INLINE		  PlanData&	planData()						{ return _planData;								}
 	HFSM_INLINE const PlanData&	planData() const				{ return _planData;								}
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	HFSM_INLINE LoggerInterface* logger()						{ return _logger;								}
-#endif
-
 protected:
-	Context& _context;
-	StateRegistry& _stateRegistry;
-	PlanData& _planData;
-	StateID _originId = INVALID_STATE_ID;
-	RegionID _regionId = INVALID_REGION_ID;
-	StateID _regionIndex = INVALID_STATE_ID;
+	using Control::_planData;
+	using Control::_regionId;
+	HFSM_IF_LOGGER(using Control::_logger);
+
+	StateID  _originId = INVALID_STATE_ID;
+	StateID  _regionIndex = INVALID_STATE_ID;
 	LongIndex _regionSize = INVALID_LONG_INDEX;
 	Status _status;
-	HFSM_IF_LOGGER(LoggerInterface* _logger);
 };
 
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
 class FullControlT
-	: public ControlT<TArgs>
+	: public PlanControlT<TArgs>
 {
 	template <StateID, typename, typename>
 	friend struct _S;
 
-	template <StateID, ShortIndex, ShortIndex, typename, typename, RegionStrategy, typename...>
+	template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, typename, typename...>
 	friend struct _C;
 
 	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
@@ -3208,23 +3368,17 @@ class FullControlT
 	using PayloadList	= typename Args::PayloadList;
 
 	using Control		= ControlT<Args>;
-	using Origin		= typename Control::Origin;
-
 	using StateRegistry	= StateRegistryT<Args>;
-	using PlanData		= PlanDataT		<Args>;
-	using Plan			= PlanT			<Args>;
+
+	using PlanControl	= PlanControlT<Args>;
+	using Origin		= typename PlanControl::Origin;
+	using Plan			= typename PlanControl::Plan;
+	using PlanData		= PlanDataT<Args>;
 
 	using Request		= RequestT <PayloadList>;
 	using Requests		= RequestsT<PayloadList, Args::COMPO_COUNT>;
 
 protected:
-	using Control::_planData;
-	using Control::_originId;
-	using Control::_regionId;
-	using Control::_regionIndex;
-	using Control::_regionSize;
-	using Control::_status;
-	HFSM_IF_LOGGER(using Control::_logger);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3243,15 +3397,9 @@ protected:
 							 PlanData& planData,
 							 Requests& requests,
 							 LoggerInterface* const logger)
-		: Control{context, stateRegistry, planData, logger}
+		: PlanControl{context, stateRegistry, planData, logger}
 		, _requests{requests}
 	{}
-
-	template <typename T>
-	static constexpr LongIndex stateId()	{ return StateList ::template index<T>();	}
-
-	template <typename T>
-	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
 
 	template <typename TState>
 	Status updatePlan(TState& headState, const Status subStatus);
@@ -3259,18 +3407,29 @@ protected:
 	template <typename TState>
 	Status buildPlanStatus(const bool outerTransition);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 public:
 	using Control::isActive;
 	using Control::isResumable;
 	using Control::isScheduled;
-	using Control::plan;
 
-	HFSM_INLINE void changeTo(const StateID stateId);
-	HFSM_INLINE void restart (const StateID stateId);
-	HFSM_INLINE void resume	 (const StateID stateId);
-	HFSM_INLINE void schedule(const StateID stateId);
+	using PlanControl::plan;
+
+	using Control::_;
+	using Control::context;
+
+	template <typename T>
+	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
+
+	template <typename T>
+	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void changeTo(const StateID id);
+	HFSM_INLINE void restart (const StateID id);
+	HFSM_INLINE void resume	 (const StateID id);
+	HFSM_INLINE void utilize (const StateID id);
+	HFSM_INLINE void schedule(const StateID id);
 
 	template <typename TState>
 	HFSM_INLINE void changeTo()					{ changeTo(stateId<TState>());	}
@@ -3282,14 +3441,31 @@ public:
 	HFSM_INLINE void resume()					{ resume  (stateId<TState>());	}
 
 	template <typename TState>
+	HFSM_INLINE void utilize()					{ utilize (stateId<TState>());	}
+
+	template <typename TState>
 	HFSM_INLINE void schedule()					{ schedule(stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	// TODO: add payload variants
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void succeed();
 	HFSM_INLINE void fail();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-private:
+protected:
+	using PlanControl::_planData;
+	using PlanControl::_originId;
+	using PlanControl::_regionId;
+	using PlanControl::_regionIndex;
+	using PlanControl::_regionSize;
+	using PlanControl::_status;
+	HFSM_IF_LOGGER(using Control::_logger);
+
 	Requests& _requests;
 	bool _locked = false;
 };
@@ -3309,21 +3485,19 @@ class GuardControlT
 	using Args			= TArgs;
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
 	using PayloadList	= typename Args::PayloadList;
 
-	using Control		= ControlT	  <Args>;
-	using FullControl	= FullControlT<Args>;
-
+	using Control		= ControlT<Args>;
 	using StateRegistry	= StateRegistryT<Args>;
-	using PlanData		= PlanDataT		<Args>;
+
+	using PlanControl	= PlanControlT<Args>;
+	using PlanData		= PlanDataT<Args>;
+
+	using FullControl	= FullControlT<Args>;
 
 public:
 	using Requests		= RequestsT<PayloadList, Args::COMPO_COUNT>;
-
-private:
-	using FullControl::_stateRegistry;
-	using FullControl::_originId;
-	HFSM_IF_LOGGER(using Control::_logger);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3338,10 +3512,7 @@ private:
 		, _pending{pendingChanges}
 	{}
 
-	template <typename T>
-	static constexpr LongIndex stateId()							{ return StateList::template index<T>();			}
-
-	HFSM_INLINE bool cancelled() const								{ return _cancelled;								}
+	HFSM_INLINE bool cancelled() const							{ return _cancelled;							}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3349,28 +3520,44 @@ public:
 	using Control::isActive;
 	using Control::isResumable;
 	using Control::isScheduled;
-	using Control::plan;
 
-	HFSM_INLINE bool isPendingChange(const StateID stateId) const	{ return _stateRegistry.isPendingChange(stateId);	}
-	HFSM_INLINE bool isPendingEnter	(const StateID stateId) const	{ return _stateRegistry.isPendingEnter (stateId);	}
-	HFSM_INLINE bool isPendingExit	(const StateID stateId) const	{ return _stateRegistry.isPendingExit  (stateId);	}
+	using PlanControl::plan;
 
-	template <typename TState>
-	HFSM_INLINE bool isPendingChange()								{ return isPendingChange(stateId<TState>());		}
+	using Control::_;
+	using Control::context;
 
-	template <typename TState>
-	HFSM_INLINE bool isPendingEnter()								{ return isPendingEnter (stateId<TState>());		}
+	template <typename T>
+	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
 
-	template <typename TState>
-	HFSM_INLINE bool isPendingExit()								{ return isPendingExit  (stateId<TState>());		}
-
-	HFSM_INLINE void cancelPendingChanges();
-
-	HFSM_INLINE const Requests& pendingChanges() const				{ return _pending;									}
+	template <typename T>
+	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	HFSM_INLINE bool isPendingChange(const StateID id) const	{ return _stateRegistry.isPendingChange(id);	}
+	HFSM_INLINE bool isPendingEnter	(const StateID id) const	{ return _stateRegistry.isPendingEnter (id);	}
+	HFSM_INLINE bool isPendingExit	(const StateID id) const	{ return _stateRegistry.isPendingExit  (id);	}
+
+	template <typename TState>
+	HFSM_INLINE bool isPendingChange()							{ return isPendingChange(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isPendingEnter()							{ return isPendingEnter (stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isPendingExit()							{ return isPendingExit  (stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void cancelPendingChanges();
+
+	HFSM_INLINE const Requests& pendingChanges() const			{ return _pending;								}
+
 private:
+	using FullControl::_stateRegistry;
+	using FullControl::_originId;
+	HFSM_IF_LOGGER(using FullControl::_logger);
+
 	bool _cancelled = false;
 	const Requests& _pending;
 };
@@ -3386,8 +3573,36 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TA>
-ControlT<TA>::Origin::Origin(ControlT& control_,
-							 const StateID id)
+ControlT<TA>::Region::Region(ControlT& control_,
+							 const RegionID id)
+	: control{control_}
+	, prevId(control._regionId)
+{
+	control.setRegion(id);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+ControlT<TA>::Region::~Region() {
+	control.resetRegion(prevId);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TA>
+void
+ControlT<TA>::resetRegion(const RegionID id) {
+	HFSM_ASSERT(_regionId != INVALID_REGION_ID);
+
+	_regionId	 = id;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TA>
+PlanControlT<TA>::Origin::Origin(PlanControlT& control_,
+								 const StateID id)
 	: control{control_}
 	, prevId{control._originId}
 {
@@ -3397,17 +3612,17 @@ ControlT<TA>::Origin::Origin(ControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TA>
-ControlT<TA>::Origin::~Origin() {
+PlanControlT<TA>::Origin::~Origin() {
 	control.resetOrigin(prevId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TA>
-ControlT<TA>::Region::Region(ControlT& control_,
-							 const RegionID id,
-							 const StateID index,
-							 const LongIndex size)
+PlanControlT<TA>::Region::Region(PlanControlT& control_,
+								 const RegionID id,
+								 const StateID index,
+								 const LongIndex size)
 	: control{control_}
 	, prevId(control._regionId)
 	, prevIndex(control._regionIndex)
@@ -3419,7 +3634,7 @@ ControlT<TA>::Region::Region(ControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TA>
-ControlT<TA>::Region::~Region() {
+PlanControlT<TA>::Region::~Region() {
 	control.resetRegion(prevId, prevIndex, prevSize);
 
 	control._status.clear();
@@ -3429,7 +3644,7 @@ ControlT<TA>::Region::~Region() {
 
 template <typename TA>
 void
-ControlT<TA>::setOrigin(const StateID id) {
+PlanControlT<TA>::setOrigin(const StateID id) {
 	// TODO: see if this still can be used
 	//HFSM_ASSERT(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//HFSM_ASSERT(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
@@ -3443,7 +3658,7 @@ ControlT<TA>::setOrigin(const StateID id) {
 
 template <typename TA>
 void
-ControlT<TA>::resetOrigin(const StateID id) {
+PlanControlT<TA>::resetOrigin(const StateID id) {
 	// TODO: see if this still can be used
 	//HFSM_ASSERT(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//HFSM_ASSERT(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
@@ -3457,9 +3672,9 @@ ControlT<TA>::resetOrigin(const StateID id) {
 
 template <typename TA>
 void
-ControlT<TA>::setRegion(const RegionID id,
-						const StateID index,
-						const LongIndex size)
+PlanControlT<TA>::setRegion(const RegionID id,
+							const StateID index,
+							const LongIndex size)
 {
 	HFSM_ASSERT(index != INVALID_STATE_ID && size != INVALID_LONG_INDEX);
 
@@ -3484,9 +3699,9 @@ ControlT<TA>::setRegion(const RegionID id,
 
 template <typename TA>
 void
-ControlT<TA>::resetRegion(const RegionID id,
-						  const StateID index,
-						  const LongIndex size)
+PlanControlT<TA>::resetRegion(const RegionID id,
+							  const StateID index,
+							  const LongIndex size)
 {
 	HFSM_ASSERT(_regionId	 != INVALID_REGION_ID);
 	HFSM_ASSERT(_regionIndex != INVALID_STATE_ID);
@@ -3646,6 +3861,25 @@ FullControlT<TA>::resume(const StateID stateId) {
 
 template <typename TA>
 void
+FullControlT<TA>::utilize(const StateID stateId) {
+	if (!_locked) {
+		const Request request{Request::Type::UTILIZE, stateId};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+		if (_logger)
+			_logger->recordTransition(_originId, Transition::UTILIZE, stateId);
+	#endif
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TA>
+void
 FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
@@ -3762,6 +3996,9 @@ HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
 		case Request::RESUME:
 			return Transition::RESUME;
 
+		case Request::UTILIZE:
+			return Transition::UTILIZE;
+
 		case Request::SCHEDULE:
 			return Transition::SCHEDULE;
 
@@ -3819,11 +4056,14 @@ protected:
 	using StateList			= typename Args::StateList;
 	using RegionList		= typename Args::RegionList;
 
-	using Control			= ControlT	   <Args>;
+	using Control			= ControlT<Args>;
+
+	using PlanControl		= PlanControlT<Args>;
+	using Plan				= PlanT<Args>;
+
 	using FullControl		= FullControlT <Args>;
 	using GuardControl		= GuardControlT<Args>;
 
-	using Plan				= typename Control::Plan;
 
 public:
 	HFSM_INLINE void preEntryGuard(Context&)									{}
@@ -3871,26 +4111,28 @@ struct _B<TFirst>
 	using StateList			= typename First::StateList;
 	using RegionList		= typename First::RegionList;
 
-	HFSM_INLINE void entryGuard		  (typename First::GuardControl&)			{}
-	HFSM_INLINE void enter			  (typename First::Control&)				{}
-	HFSM_INLINE void update			  (typename First::FullControl&)			{}
-	template <typename TEvent>
-	HFSM_INLINE void react			  (const TEvent&,
-									   typename First::FullControl&)			{}
-	HFSM_INLINE void exitGuard		  (typename First::GuardControl&)			{}
-	HFSM_INLINE void exit			  (typename First::Control&)				{}
+	HFSM_INLINE float utility		   (const typename First::Control&)			{ return 0.0f;			}
 
-	HFSM_INLINE void planSucceeded	  (typename First::FullControl& control) { control.succeed(); }
-	HFSM_INLINE void planFailed		  (typename First::FullControl& control) { control.fail();	  }
-
-	HFSM_INLINE void widePreEntryGuard(typename First::Context& context);
-	HFSM_INLINE void widePreEnter	  (typename First::Context& context);
-	HFSM_INLINE void widePreUpdate	  (typename First::Context& context);
+	HFSM_INLINE void  entryGuard	   (typename First::GuardControl&)			{}
+	HFSM_INLINE void  enter			   (typename First::PlanControl&)			{}
+	HFSM_INLINE void  update		   (typename First::FullControl&)			{}
 	template <typename TEvent>
-	HFSM_INLINE void widePreReact	  (const TEvent& event,
-									   typename First::Context& context);
-	HFSM_INLINE void widePreExitGuard (typename First::Context& context);
-	HFSM_INLINE void widePostExit	  (typename First::Context& context);
+	HFSM_INLINE void  react			   (const TEvent&,
+					 				    typename First::FullControl&)			{}
+	HFSM_INLINE void  exitGuard		   (typename First::GuardControl&)			{}
+	HFSM_INLINE void  exit			   (typename First::PlanControl&)			{}
+
+	HFSM_INLINE void  planSucceeded	   (typename First::FullControl& control)	{ control.succeed();	}
+	HFSM_INLINE void  planFailed	   (typename First::FullControl& control)	{ control.fail();		}
+
+	HFSM_INLINE void  widePreEntryGuard(typename First::Context& context);
+	HFSM_INLINE void  widePreEnter	   (typename First::Context& context);
+	HFSM_INLINE void  widePreUpdate	   (typename First::Context& context);
+	template <typename TEvent>
+	HFSM_INLINE void  widePreReact	   (const TEvent& event,
+					 				    typename First::Context& context);
+	HFSM_INLINE void  widePreExitGuard (typename First::Context& context);
+	HFSM_INLINE void  widePostExit	   (typename First::Context& context);
 
 	template <typename T>
 	static constexpr LongIndex stateId()  { return StateList ::template index<T>();	}
@@ -4043,6 +4285,9 @@ struct _SF;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+template <RegionStrategy, typename, typename...>
+struct _CF;
+
 template <typename...>
 struct _CSF;
 
@@ -4052,10 +4297,10 @@ struct _CSF<TInitial, TRemaining...>;
 template <typename TInitial>
 struct _CSF<TInitial>;
 
-template <typename, RegionStrategy, typename...>
-struct _CF;
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename, typename...>
+struct _OF;
 
 template <typename...>
 struct _OSF;
@@ -4065,9 +4310,6 @@ struct _OSF<TInitial, TRemaining...>;
 
 template <typename TInitial>
 struct _OSF<TInitial>;
-
-template <typename, typename...>
-struct _OF;
 
 //------------------------------------------------------------------------------
 
@@ -4079,9 +4321,9 @@ struct WrapT<TH> {
 	using Type = _SF<TH>;
 };
 
-template <typename TH, RegionStrategy TG, typename... TS>
-struct WrapT<	 _CF<TH, TG, TS...>> {
-	using Type = _CF<TH, TG, TS...>;
+template <RegionStrategy TG, typename TH, typename... TS>
+struct WrapT<	 _CF<TG, TH, TS...>> {
+	using Type = _CF<TG, TH, TS...>;
 };
 
 template <typename... TS>
@@ -4146,7 +4388,7 @@ struct _CSF<TInitial> {
 	static constexpr ShortIndex REGION_COUNT  = RegionList::SIZE;
 };
 
-template <typename THead, RegionStrategy TStrategy, typename... TSubStates>
+template <RegionStrategy TStrategy, typename THead, typename... TSubStates>
 struct _CF final {
 	static constexpr RegionStrategy STRATEGY = TStrategy;
 
@@ -4245,10 +4487,10 @@ struct ArgsT final {
 template <StateID, typename, typename>
 struct _S;
 
-template <StateID, ShortIndex, ShortIndex, typename, typename, RegionStrategy, typename...>
+template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, typename, typename...>
 struct _C;
 
-template <StateID, ShortIndex, ShortIndex, typename, ShortIndex, typename...>
+template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, ShortIndex, typename...>
 struct _CS;
 
 template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
@@ -4259,7 +4501,7 @@ class _R;
 
 //------------------------------------------------------------------------------
 
-template <StateID, ShortIndex, ShortIndex, typename...>
+template <StateID,	  ShortIndex,	 ShortIndex,	typename...>
 struct MaterialT;
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH>
@@ -4267,19 +4509,19 @@ struct MaterialT   <NS, NC, NO, TA, TH> {
 	using Type = _S<NS,			TA, TH>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA,			  RegionStrategy TG, typename... TS>
-struct MaterialT   <NS, NC, NO, TA,  _CF<void, TG, TS...>> {
-	using Type = _C<NS, NC, NO, TA, Empty<TA>, TG, TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, 			 typename... TS>
+struct MaterialT   <NS, NC, NO, TA, _CF<TG, void,	   TS...>> {
+	using Type = _C<NS, NC, NO, TA,		TG, Empty<TA>, TS...>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
-struct MaterialT   <NS, NC, NO, TA, _CF<TH,	TG, TS...>> {
-	using Type = _C<NS, NC, NO, TA,		TH,	TG, TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+struct MaterialT   <NS, NC, NO, TA, _CF<TG, TH,	TS...>> {
+	using Type = _C<NS, NC, NO, TA,		TG, TH,	TS...>;
 };
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA,			  typename... TS>
-struct MaterialT   <NS, NC, NO, TA, _OF<void,  TS...>> {
-	using Type = _O<NS, NC, NO, TA, Empty<TA>, TS...>;
+struct MaterialT   <NS, NC, NO, TA, _OF<void,	   TS...>> {
+	using Type = _O<NS, NC, NO, TA,		Empty<TA>, TS...>;
 };
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
@@ -4355,21 +4597,21 @@ struct _RF final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID, ShortIndex, ShortIndex, typename, ShortIndex, typename...>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename T>
 struct CSubMaterialT;
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename T>
-struct CSubMaterialT	 <NS, NC, NO, TA, NI, _TL<T>> {
-	using Type = Material<NS, NC, NO, TA,		  T>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename T>
+struct CSubMaterialT	 <NS, NC, NO, TA, TG, NI, _TL<T>> {
+	using Type = Material<NS, NC, NO, TA,			  T>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
-struct CSubMaterialT<NS, NC, NO, TA, NI, _TL<TS...>> {
-	using Type = _CS<NS, NC, NO, TA, NI,	 TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+struct CSubMaterialT<NS, NC, NO, TA, TG, NI, _TL<TS...>> {
+	using Type = _CS<NS, NC, NO, TA, TG, NI,	 TS...>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
-using CSubMaterial = typename CSubMaterialT<NS, NC, NO, TA, NI, TS...>::Type;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+using CSubMaterial = typename CSubMaterialT<NS, NC, NO, TA, TG, NI, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -4381,9 +4623,9 @@ struct ForwardT<  _S<NS, TA, TH>> {
 	using Type = _SF<		 TH>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
-struct ForwardT<_C<NS, NC, NO, TA, TH, TG, TS...>> {
-	using Type = _CF<			   TH, TG, TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+struct ForwardT<_C<NS, NC, NO, TA, TG, TH, TS...>> {
+	using Type = _CF<			   TG, TH, TS...>;
 };
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
@@ -4391,9 +4633,9 @@ struct ForwardT<_O<NS, NC, NO, TA, TH, TS...>> {
 	using Type = _OF<			   TH, TS...>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
-struct ForwardT<_CS<NS, NC, NO, TA, NI, TS...>> {
-	using Type = _CSF<					TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+struct ForwardT<_CS<NS, NC, NO, TA, TG, NI, TS...>> {
+	using Type = _CSF<						TS...>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4417,50 +4659,66 @@ struct _M {
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Composite			 = _CF<THead, RegionStrategy::Composite, TSubStates...>;
+	using Composite			 = _CF<RegionStrategy::Composite,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using CompositePeers	 = _CF<void,  RegionStrategy::Composite, TSubStates...>;
+	using CompositePeers	 = _CF<RegionStrategy::Composite,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Resumable			 = _CF<THead, RegionStrategy::Resumable, TSubStates...>;
+	using Resumable			  = _CF<RegionStrategy::Resumable,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeers	 = _CF<void,  RegionStrategy::Resumable, TSubStates...>;
+	using ResumablePeers	  = _CF<RegionStrategy::Resumable,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Orthogonal		 = _OF<THead, TSubStates...>;
+	using Utilitarian		  = _CF<RegionStrategy::Utilitarian, THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeers	 = _OF<void,  TSubStates...>;
+	using UtilitarianPeers	  = _CF<RegionStrategy::Utilitarian, void,	TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using Orthogonal		  = _OF<THead, TSubStates...>;
+
+	template <				  typename... TSubStates>
+	using OrthogonalPeers	  = _OF<void,  TSubStates...>;
 
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Root				 = _RF<Context, Config, PayloadList, Composite <THead, TSubStates...>>;
+	using Root				  = _RF<Context, Config, PayloadList, Composite  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using PeerRoot			 = _RF<Context, Config, PayloadList, CompositePeers	<  TSubStates...>>;
+	using PeerRoot			  = _RF<Context, Config, PayloadList, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		 = _RF<Context, Config, PayloadList, Resumable <THead, TSubStates...>>;
+	using ResumableRoot		  = _RF<Context, Config, PayloadList, Resumable  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	 = _RF<Context, Config, PayloadList, ResumablePeers	<  TSubStates...>>;
+	using ResumablePeerRoot	  = _RF<Context, Config, PayloadList, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	 = _RF<Context, Config, PayloadList, Orthogonal<THead, TSubStates...>>;
+	using UtilitarianRoot	  = _RF<Context, Config, PayloadList, Utilitarian<THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot = _RF<Context, Config, PayloadList, OrthogonalPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = _RF<Context, Config, PayloadList, UtilitarianPeers<  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using OrthogonalRoot	  = _RF<Context, Config, PayloadList, Orthogonal <THead, TSubStates...>>;
+
+	template <				  typename... TSubStates>
+	using OrthogonalPeerRoot  = _RF<Context, Config, PayloadList, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -4504,6 +4762,19 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 namespace hfsm2 {
 namespace detail {
 
+//------------------------------------------------------------------------------
+
+struct UProng {
+	HFSM_INLINE UProng(const float utilityCompliment_ = 1.0f,
+					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
+		: utilityCompliment{utilityCompliment_}
+		, prong{prong_}
+	{}
+
+	float utilityCompliment;
+	ShortIndex prong;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TStateID,
@@ -4520,24 +4791,26 @@ struct _S {
 	using Request		= RequestT<PayloadList>;
 	using RequestType	= typename Request::Type;
 
+	using Control		= ControlT<Args>;
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
 
-	using Control		= ControlT		<Args>;
-	using ScopedOrigin	= typename Control::Origin;
+	using PlanControl	= PlanControlT<Args>;
+	using ScopedOrigin	= typename PlanControl::Origin;
 
-	using FullControl	= FullControlT	<Args>;
-	using GuardControl	= GuardControlT	<Args>;
+	using FullControl	= FullControlT <Args>;
+	using GuardControl	= GuardControlT<Args>;
 
 	using Empty			= ::hfsm2::detail::Empty<Args>;
 
 	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl&,								const ShortIndex = INVALID_SHORT_INDEX)	{ return false; }
 	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepEnterInitial		(Control& control);
-	HFSM_INLINE void   deepEnter			(Control& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepEnter			(PlanControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
 	HFSM_INLINE Status deepUpdate			(FullControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
@@ -4547,18 +4820,35 @@ struct _S {
 	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl&,								const ShortIndex = INVALID_SHORT_INDEX)	{ return false; }
 	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepExit				(Control& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepExit				(PlanControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void   wrapPlanSucceeded	(FullControl& control);
 	HFSM_INLINE void   wrapPlanFailed		(FullControl& control);
+	HFSM_INLINE UProng wrapUtility			(Control& control);
 
-	HFSM_INLINE void   deepForwardActive	(StateRegistry&,	   const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
-	HFSM_INLINE void   deepForwardRequest	(StateRegistry&,	   const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   deepForwardActive	(Control&,				const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void   deepForwardRequest	(Control&,				const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE UProng deepRequestChange	(Control&,									const ShortIndex = INVALID_SHORT_INDEX)	{ return {}; }
+	HFSM_INLINE UProng deepReportChange		(Control& control,							const ShortIndex = INVALID_SHORT_INDEX)	{ return wrapUtility(control);	}
+
 	HFSM_INLINE void   deepRequestRemain	(StateRegistry&)																	{}
-	HFSM_INLINE void   deepRequestChange	(StateRegistry&)																	{}
 	HFSM_INLINE void   deepRequestRestart	(StateRegistry&)																	{}
 	HFSM_INLINE void   deepRequestResume	(StateRegistry&,							const ShortIndex = INVALID_SHORT_INDEX)	{}
-	HFSM_INLINE void   deepChangeToRequested(StateRegistry&, Control&,					const ShortIndex = INVALID_SHORT_INDEX)	{}
+
+	HFSM_INLINE void   deepRequestUtilize	(Control&)																			{}
+	HFSM_INLINE UProng deepReportUtilize	(Control& control)																	{ return wrapUtility(control);	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   deepEnterRequested	(Control&,									const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void   deepChangeToRequested(Control&,									const ShortIndex = INVALID_SHORT_INDEX)	{}
 
 #if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 	static constexpr bool isBare()	 { return std::is_same<Head, Empty>::value;	 }
@@ -4683,15 +4973,7 @@ _S<NS, TA, TH>::deepEntryGuard(GuardControl& control,
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepEnterInitial(Control& control) {
-	deepEnter(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, typename TA, typename TH>
-void
-_S<NS, TA, TH>::deepEnter(Control& control,
+_S<NS, TA, TH>::deepEnter(PlanControl& control,
 						  const ShortIndex /*prong*/)
 {
 	HFSM_ASSERT(!control.planData().hasSucceeded(STATE_ID));
@@ -4764,7 +5046,7 @@ _S<NS, TA, TH>::deepExitGuard(GuardControl& control,
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepExit(Control& control,
+_S<NS, TA, TH>::deepExit(PlanControl& control,
 						 const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
@@ -4800,6 +5082,27 @@ _S<NS, TA, TH>::wrapPlanFailed(FullControl& control) {
 	ScopedOrigin origin{control, STATE_ID};
 
 	_head.planFailed(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, typename TA, typename TH>
+UProng
+_S<NS, TA, TH>::wrapUtility(Control& control) {
+	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
+
+	const float utility = _head.utility(static_cast<const Control&>(control));
+	const float compliment = 1.0f - utility;
+
+	const float greater = 0.0f > compliment ?
+		0.0f : compliment;
+
+	const float clamped = greater < 1.0f ?
+		greater : 1.0f;
+
+	const Parent parent = control._stateRegistry.stateParents[STATE_ID];
+
+	return {clamped, parent.prong};
 }
 
 //------------------------------------------------------------------------------
@@ -4867,14 +5170,17 @@ template <StateID NInitialID,
 		  ShortIndex NCompoIndex,
 		  ShortIndex NOrthoIndex,
 		  typename TArgs,
+		  RegionStrategy TStrategy,
 		  ShortIndex NIndex,
 		  typename... TStates>
 struct _CS {
-	static constexpr StateID	INITIAL_ID	= NInitialID;
-	static constexpr ShortIndex COMPO_INDEX	= NCompoIndex;
-	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
-	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
-	static constexpr ShortIndex PRONG_INDEX	= NIndex;
+	static constexpr StateID	INITIAL_ID	 = NInitialID;
+	static constexpr ShortIndex COMPO_INDEX	 = NCompoIndex;
+	static constexpr ShortIndex ORTHO_INDEX	 = NOrthoIndex;
+	static constexpr ShortIndex REGION_ID	 = COMPO_INDEX + ORTHO_INDEX;
+	static constexpr ShortIndex PRONG_INDEX	 = NIndex;
+
+	static constexpr RegionStrategy STRATEGY = TStrategy;
 
 	using Args			= TArgs;
 
@@ -4890,6 +5196,7 @@ struct _CS {
 	using StateParents	= typename StateRegistry::StateParents;
 
 	using Control		= ControlT	   <Args>;
+	using PlanControl	= PlanControlT <Args>;
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
@@ -4900,6 +5207,7 @@ struct _CS {
 									   COMPO_INDEX,
 									   ORTHO_INDEX,
 									   Args,
+									   STRATEGY,
 									   L_PRONG,
 									   LStates>;
 	using LHalfForward	= typename ForwardT<LHalf>::Type;
@@ -4911,35 +5219,98 @@ struct _CS {
 									   COMPO_INDEX + LHalfForward::COMPO_COUNT,
 									   ORTHO_INDEX + LHalfForward::ORTHO_COUNT,
 									   Args,
+									   STRATEGY,
 									   R_PRONG,
 									   RStates>;
 
 	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
-	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control,									  const ShortIndex prong);
-	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,									  const ShortIndex prong);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepEnterInitial		(Control& control);
-	HFSM_INLINE void   deepEnter			(Control& control,										  const ShortIndex prong);
+	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,							const ShortIndex prong);
 
-	HFSM_INLINE Status deepUpdate			(FullControl& control,									  const ShortIndex prong);
+	HFSM_INLINE void   deepEnter			(PlanControl& control,							const ShortIndex prong);
+
+	HFSM_INLINE Status deepUpdate			(FullControl& control,							const ShortIndex prong);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(FullControl& control,		   const TEvent& event,		  const ShortIndex prong);
+	HFSM_INLINE void   deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex prong);
 
-	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,									  const ShortIndex prong);
-	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,									  const ShortIndex prong);
+	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,							const ShortIndex prong);
 
-	HFSM_INLINE void   deepExit				(Control& control,										  const ShortIndex prong);
+	HFSM_INLINE void   deepExit				(PlanControl& control,							const ShortIndex prong);
 
-	HFSM_INLINE void   deepForwardActive	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex prong);
-	HFSM_INLINE void   deepForwardRequest	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex prong);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   deepForwardActive	(Control& control,	const RequestType request,	const ShortIndex prong);
+	HFSM_INLINE void   deepForwardRequest	(Control& control,	const RequestType request,	const ShortIndex prong);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined _MSC_VER || defined __clang__
+
+	template <RegionStrategy TG = STRATEGY>
+	HFSM_INLINE UProng deepRequestChange			 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+
+	template <>
+	HFSM_INLINE UProng deepRequestChange<Composite>	 (Control& control,	const ShortIndex)		{ return deepRequestChangeComposite  (control);			}
+
+	template <>
+	HFSM_INLINE UProng deepRequestChange<Resumable>	 (Control& control,	const ShortIndex prong)	{ return deepRequestChangeResumable  (control, prong);	}
+
+	template <>
+	HFSM_INLINE UProng deepRequestChange<Utilitarian>(Control& control,	const ShortIndex)		{ return deepRequestChangeUtilitarian(control);			}
+
+#else
+
+	HFSM_INLINE UProng deepRequestChange			 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+
+#endif
+
+	HFSM_INLINE UProng deepRequestChangeComposite	 (Control& control);
+	HFSM_INLINE UProng deepRequestChangeResumable	 (Control& control,	const ShortIndex prong);
+	HFSM_INLINE UProng deepRequestChangeUtilitarian	 (Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined _MSC_VER || defined __clang__
+
+	template <RegionStrategy TG = STRATEGY>
+	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+
+	template <>
+	HFSM_INLINE UProng deepReportChange<Composite>   (Control& control,	const ShortIndex)		{ return deepReportChangeComposite  (control);		}
+
+	template <>
+	HFSM_INLINE UProng deepReportChange<Resumable>   (Control& control,	const ShortIndex prong)	{ return deepReportChangeResumable  (control, prong);	}
+
+	template <>
+	HFSM_INLINE UProng deepReportChange<Utilitarian> (Control& control,	const ShortIndex)		{ return deepReportChangeUtilitarian(control);		}
+
+#else
+
+	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+
+#endif
+
+	HFSM_INLINE UProng deepReportChangeComposite	 (Control& control);
+	HFSM_INLINE UProng deepReportChangeResumable	 (Control& control,	const ShortIndex prong);
+	HFSM_INLINE UProng deepReportChangeUtilitarian   (Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   deepRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,							  const ShortIndex prong);
+	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,					const ShortIndex prong);
 
-	HFSM_INLINE void   deepChangeToRequested(StateRegistry& stateRegistry, Control& control,		  const ShortIndex prong);
+	HFSM_INLINE UProng deepReportUtilize	(Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   deepEnterRequested	(PlanControl& control,							const ShortIndex prong);
+	HFSM_INLINE void   deepChangeToRequested(PlanControl& control,							const ShortIndex prong);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;
@@ -4966,10 +5337,10 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
-											 const Parent parent)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
+												 const Parent parent)
 {
 	lHalf.deepRegister(stateRegistry, Parent{parent.forkId, L_PRONG});
 	rHalf.deepRegister(stateRegistry, Parent{parent.forkId, R_PRONG});
@@ -4977,10 +5348,10 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<NS, NC, NO, TA, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
-													  const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
+														  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -4992,10 +5363,10 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<NS, NC, NO, TA, NI, TS...>::deepEntryGuard(GuardControl& control,
-											   const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepEntryGuard(GuardControl& control,
+												   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5007,18 +5378,10 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepEntryGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepEnterInitial(Control& control) {
-	lHalf.deepEnterInitial(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
-void
-_CS<NS, NC, NO, TA, NI, TS...>::deepEnter(Control& control,
-										  const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepEnter(PlanControl& control,
+											  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5030,10 +5393,10 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepEnter(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 Status
-_CS<NS, NC, NO, TA, NI, TS...>::deepUpdate(FullControl& control,
-										   const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
+											   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5044,12 +5407,12 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepUpdate(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 template <typename TEvent>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepReact(FullControl& control,
-										  const TEvent& event,
-										  const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReact(FullControl& control,
+											  const TEvent& event,
+											  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5061,10 +5424,10 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<NS, NC, NO, TA, NI, TS...>::deepForwardExitGuard(GuardControl& control,
-													 const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepForwardExitGuard(GuardControl& control,
+														 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5076,10 +5439,10 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepForwardExitGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<NS, NC, NO, TA, NI, TS...>::deepExitGuard(GuardControl& control,
-											  const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepExitGuard(GuardControl& control,
+												  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5091,10 +5454,10 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepExitGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepExit(Control& control,
-										 const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepExit(PlanControl& control,
+											 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5106,66 +5469,188 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepExit(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepForwardActive(StateRegistry& stateRegistry,
-												  const RequestType request,
-												  const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepForwardActive(Control& control,
+													  const RequestType request,
+													  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
-		lHalf.deepForwardActive(stateRegistry, request, prong);
+		lHalf.deepForwardActive(control, request, prong);
 	else
-		rHalf.deepForwardActive(stateRegistry, request, prong);
+		rHalf.deepForwardActive(control, request, prong);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepForwardRequest(StateRegistry& stateRegistry,
-												   const RequestType request,
-												   const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
+													   const RequestType request,
+													   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
-		lHalf.deepForwardRequest(stateRegistry, request, prong);
+		lHalf.deepForwardRequest(control, request, prong);
 	else
-		rHalf.deepForwardRequest(stateRegistry, request, prong);
+		rHalf.deepForwardRequest(control, request, prong);
+}
+
+//------------------------------------------------------------------------------
+
+#if !defined _MSC_VER && !defined __clang__
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChange(Control& control,
+													  const ShortIndex prong)
+{
+	switch (STRATEGY) {
+	case RegionStrategy::Composite:
+		return deepRequestChangeComposite  (control);
+
+	case RegionStrategy::Resumable:
+		return deepRequestChangeResumable  (control, prong);
+
+	case RegionStrategy::Utilitarian:
+		return deepRequestChangeUtilitarian(control);
+
+	default:
+		HFSM_BREAK();
+		return {};
+	}
+}
+
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
+	lHalf.deepRequestChange(control);
+
+	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
+															   const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		lHalf.deepRequestChange(control, prong);
+	else
+		rHalf.deepRequestChange(control, prong);
+
+	return {};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeUtilitarian(Control& control) {
+	const UProng l = lHalf.deepRequestChange(control);
+	const UProng r = rHalf.deepRequestChange(control);
+
+	const ShortIndex prong = l.utilityCompliment < r.utilityCompliment ?
+		l.prong : r.prong;
+
+	return { 1.0f, prong };
+}
+
+//------------------------------------------------------------------------------
+
+#if !defined _MSC_VER && !defined __clang__
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChange(Control& control,
+													   const ShortIndex prong)
+{
+	switch (STRATEGY) {
+	case RegionStrategy::Composite:
+		return deepReportChangeComposite  (control);
+
+	case RegionStrategy::Resumable:
+		return deepReportChangeResumable  (control, prong);
+
+	case RegionStrategy::Utilitarian:
+		return deepReportChangeUtilitarian(control);
+
+	default:
+		HFSM_BREAK();
+		return {};
+	}
+}
+
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
+	return lHalf.deepReportChange(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
+																const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		return lHalf.deepReportChange(control, prong);
+	else
+		return rHalf.deepReportChange(control, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
+	const UProng l = lHalf.deepReportChange(control);
+	const UProng r = rHalf.deepReportChange(control);
+
+	return l.utilityCompliment < r.utilityCompliment ?
+		l : r;
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 	lHalf.deepRequestRemain(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepRequestChange(StateRegistry& stateRegistry) {
-	lHalf.deepRequestChange(stateRegistry);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
-void
-_CS<NS, NC, NO, TA, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 	lHalf.deepRequestRestart(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
-												  const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
+													  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5177,30 +5662,56 @@ _CS<NS, NC, NO, TA, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+UProng
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
+	const UProng l = lHalf.deepReportUtilize(control);
+	const UProng r = rHalf.deepReportUtilize(control);
+
+	return l.utilityCompliment <= r.utilityCompliment ?
+		l : r;
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepChangeToRequested(StateRegistry& stateRegistry,
-													  Control& control,
-													  const ShortIndex prong)
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepEnterRequested(PlanControl& control,
+													   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
-		lHalf.deepChangeToRequested(stateRegistry, control, prong);
+		lHalf.deepEnterRequested(control, prong);
 	else
-		rHalf.deepChangeToRequested(stateRegistry, control, prong);
+		rHalf.deepEnterRequested(control, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+void
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepChangeToRequested(PlanControl& control,
+														  const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		lHalf.deepChangeToRequested(control, prong);
+	else
+		rHalf.deepChangeToRequested(control, prong);
 }
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 void
-_CS<NS, NC, NO, TA, NI, TS...>::deepGetNames(const LongIndex parent,
-											 const RegionType /*region*/,
-											 const ShortIndex depth,
-											 StructureStateInfos& _stateInfos) const
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepGetNames(const LongIndex parent,
+												 const RegionType /*region*/,
+												 const ShortIndex depth,
+												 StructureStateInfos& _stateInfos) const
 {
 	lHalf.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 	rHalf.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
@@ -5221,8 +5732,8 @@ template <StateID NHeadIndex,
 		  ShortIndex NCompoIndex,
 		  ShortIndex NOrthoIndex,
 		  typename TArgs,
-		  typename THead,
 		  RegionStrategy TStrategy,
+		  typename THead,
 		  typename... TSubStates>
 struct _C {
 	static constexpr StateID	HEAD_ID		 = NHeadIndex;
@@ -5231,10 +5742,10 @@ struct _C {
 	static constexpr ShortIndex REGION_ID	 = COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ForkID		COMPO_ID	 = COMPO_INDEX + 1;
 
+	static constexpr RegionStrategy STRATEGY = TStrategy;
+
 	using Args			= TArgs;
 	using Head			= THead;
-
-	static constexpr RegionStrategy STRATEGY = TStrategy;
 
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
@@ -5248,73 +5759,119 @@ struct _C {
 	using StateParents	= typename StateRegistry::StateParents;
 
 	using Control		= ControlT<Args>;
-	using ScopedOrigin	= typename Control::Origin;
-	using ScopedRegion	= typename Control::Region;
+
+	using PlanControl	= PlanControlT<Args>;
+	using ScopedOrigin	= typename PlanControl::Origin;
+	using ScopedRegion	= typename PlanControl::Region;
+	using Plan			= PlanT<Args>;
 
 	using FullControl	= FullControlT<Args>;
 	using ControlLock	= typename FullControl::Lock;
 
 	using GuardControl	= GuardControlT<Args>;
 
-	using Plan			= PlanT<Args>;
 
 	using HeadState		= _S <HEAD_ID, Args, Head>;
-	using SubStates		= _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, 0, TSubStates...>;
-	using AllForward	= _CF<Head, STRATEGY, TSubStates...>;
+	using SubStates		= _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, STRATEGY, 0, TSubStates...>;
+	using AllForward	= _CF<STRATEGY, Head, TSubStates...>;
 
 	static constexpr ShortIndex REGION_SIZE	= AllForward::STATE_COUNT;
 
-	ShortIndex& compoActive   (Control& control)	{ return control.stateRegistry().compoActive	[COMPO_INDEX];	}
-	ShortIndex& compoResumable(Control& control)	{ return control.stateRegistry().resumable.compo[COMPO_INDEX];	}
-	ShortIndex& compoRequested(Control& control)	{ return control.stateRegistry().requested.compo[COMPO_INDEX];	}
+	ShortIndex& compoActive   (Control& control)					{ return control._stateRegistry.compoActive	   [COMPO_INDEX];	}
+	ShortIndex& compoResumable(Control& control)					{ return control._stateRegistry.resumable.compo[COMPO_INDEX];	}
+	ShortIndex& compoRequested(Control& control)					{ return control._stateRegistry.requested.compo[COMPO_INDEX];	}
 
 	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
-	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepEnterInitial		(Control& control);
-	HFSM_INLINE void   deepEnter			(Control& control,										  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE Status deepUpdate			(FullControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepEnter			(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+
+	HFSM_INLINE Status deepUpdate			(FullControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(FullControl& control,		   const TEvent& event,		  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepExit				(Control& control,										  const ShortIndex = INVALID_SHORT_INDEX);
-
-	HFSM_INLINE void   deepForwardActive	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE void   deepForwardRequest	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex = INVALID_SHORT_INDEX);
-
-	HFSM_INLINE void   deepRequest			(StateRegistry& stateRegistry, const RequestType request);
-	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepExit				(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifndef __GNUC__
-	// NOTE: beautiful local template specialization: Visual Studio || Clang == <3
+	HFSM_INLINE void   deepForwardActive	(Control& control, const RequestType request,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepForwardRequest	(Control& control, const RequestType request,	const ShortIndex = INVALID_SHORT_INDEX);
+
+	HFSM_INLINE void   deepRequest			(Control& control, const RequestType request);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined _MSC_VER || defined __clang__
+
 	template <RegionStrategy TG = STRATEGY>
-	HFSM_INLINE void   deepRequestChange		   (StateRegistry& stateRegistry);
+	HFSM_INLINE UProng deepRequestChange			 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
-	HFSM_INLINE void   deepRequestChange<Composite>(StateRegistry& stateRegistry)					  { deepRequestRestart(stateRegistry);	}
+	HFSM_INLINE UProng deepRequestChange<Composite>	 (Control& control,	const ShortIndex)	{ return deepRequestChangeComposite  (control); }
 
 	template <>
-	HFSM_INLINE void   deepRequestChange<Resumable>(StateRegistry& stateRegistry)					  { deepRequestResume (stateRegistry);	}
+	HFSM_INLINE UProng deepRequestChange<Resumable>	 (Control& control,	const ShortIndex)	{ return deepRequestChangeResumable  (control); }
+
+	template <>
+	HFSM_INLINE UProng deepRequestChange<Utilitarian>(Control& control,	const ShortIndex)	{ return deepRequestChangeUtilitarian(control); }
+
 #else
-	// NOTE: ugly run-time logic: GCC == T_T
-	HFSM_INLINE void   deepRequestChange		   (StateRegistry& stateRegistry);
+
+	HFSM_INLINE UProng deepRequestChange			 (Control& control,						const ShortIndex = INVALID_SHORT_INDEX);
+
 #endif
 
+	HFSM_INLINE UProng deepRequestChangeComposite	 (Control& control);
+	HFSM_INLINE UProng deepRequestChangeResumable	 (Control& control);
+	HFSM_INLINE UProng deepRequestChangeUtilitarian	 (Control& control);
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,							  const ShortIndex = INVALID_SHORT_INDEX);
+#if defined _MSC_VER || defined __clang__
 
-	HFSM_INLINE void   deepChangeToRequested(StateRegistry& stateRegistry, Control& control,		  const ShortIndex = INVALID_SHORT_INDEX);
+	template <RegionStrategy TG = STRATEGY>
+	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+
+	template <>
+	HFSM_INLINE UProng deepReportChange<Composite>   (Control& control,	const ShortIndex)	{ return deepReportChangeComposite  (control); }
+
+	template <>
+	HFSM_INLINE UProng deepReportChange<Resumable>   (Control& control,	const ShortIndex)	{ return deepReportChangeResumable  (control); }
+
+	template <>
+	HFSM_INLINE UProng deepReportChange<Utilitarian> (Control& control,	const ShortIndex)	{ return deepReportChangeUtilitarian(control); }
+
+#else
+
+	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+
+#endif
+
+	HFSM_INLINE UProng deepReportChangeComposite	 (Control& control);
+	HFSM_INLINE UProng deepReportChangeResumable	 (Control& control);
+	HFSM_INLINE UProng deepReportChangeUtilitarian   (Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
+	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,					const ShortIndex = INVALID_SHORT_INDEX);
+
+	HFSM_INLINE void   deepRequestUtilize	(Control& control);
+	HFSM_INLINE UProng deepReportUtilize	(Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   deepEnterRequested	(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepChangeToRequested(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;
@@ -5341,9 +5898,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepRegister(StateRegistry& stateRegistry,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 												const Parent parent)
 {
 	// TODO: add parent/forks type arrays to StateRegistry
@@ -5358,9 +5915,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepRegister(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 bool
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepForwardEntryGuard(GuardControl& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
 														 const ShortIndex /*prong*/)
 {
 	const ShortIndex active	   = compoActive   (control);
@@ -5378,9 +5935,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepForwardEntryGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 bool
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepEntryGuard(GuardControl& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepEntryGuard(GuardControl& control,
 												  const ShortIndex /*prong*/)
 {
 	const ShortIndex requested = compoRequested(control);
@@ -5394,28 +5951,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepEntryGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepEnterInitial(Control& control) {
-	HFSM_ASSERT(compoResumable(control) == INVALID_SHORT_INDEX);
-	HFSM_ASSERT(compoRequested(control) == INVALID_SHORT_INDEX);
-
-	ShortIndex& active = compoActive(control);
-	HFSM_ASSERT(active == INVALID_SHORT_INDEX);
-
-	active = 0;
-
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	_headState.deepEnter	   (control);
-	_subStates.deepEnterInitial(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
-void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepEnter(Control& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepEnter(PlanControl& control,
 											 const ShortIndex /*prong*/)
 {
 	ShortIndex& active	  = compoActive   (control);
@@ -5438,9 +5976,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepEnter(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 Status
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepUpdate(FullControl& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepUpdate(FullControl& control,
 											  const ShortIndex /*prong*/)
 {
 	const ShortIndex active = compoActive(control);
@@ -5468,10 +6006,10 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepUpdate(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 template <typename TEvent>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepReact(FullControl& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepReact(FullControl& control,
 											 const TEvent& event,
 											 const ShortIndex /*prong*/)
 {
@@ -5486,9 +6024,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 bool
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepForwardExitGuard(GuardControl& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepForwardExitGuard(GuardControl& control,
 														const ShortIndex /*prong*/)
 {
 	const ShortIndex active = compoActive(control);
@@ -5504,9 +6042,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepForwardExitGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 bool
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepExitGuard(GuardControl& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepExitGuard(GuardControl& control,
 												 const ShortIndex /*prong*/)
 {
 	const ShortIndex active = compoActive(control);
@@ -5520,9 +6058,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepExitGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepExit(Control& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepExit(PlanControl& control,
 											const ShortIndex /*prong*/)
 {
 	ShortIndex& active	  = compoActive   (control);
@@ -5542,62 +6080,66 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepExit(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepForwardActive(StateRegistry& stateRegistry,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepForwardActive(Control& control,
 													 const RequestType request,
 													 const ShortIndex /*prong*/)
 {
-	HFSM_ASSERT(stateRegistry.isActive(HEAD_ID));
+	HFSM_ASSERT(control._stateRegistry.isActive(HEAD_ID));
 
-	const ShortIndex requested = stateRegistry.requested.compo[COMPO_INDEX];
+	const ShortIndex requested = compoRequested(control);
 
 	if (requested == INVALID_SHORT_INDEX) {
-		const ShortIndex active = stateRegistry.compoActive[COMPO_INDEX];
+		const ShortIndex active = compoActive(control);
 
-		_subStates.deepForwardActive (stateRegistry, request, active);
+		_subStates.deepForwardActive (control, request, active);
 	} else
-		_subStates.deepForwardRequest(stateRegistry, request, requested);
+		_subStates.deepForwardRequest(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepForwardRequest(StateRegistry& stateRegistry,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepForwardRequest(Control& control,
 													  const RequestType request,
 													  const ShortIndex /*prong*/)
 {
-	const ShortIndex requested = stateRegistry.requested.compo[COMPO_INDEX];
+	const ShortIndex requested = compoRequested(control);
 
 	if (requested != INVALID_SHORT_INDEX)
-		_subStates.deepForwardRequest(stateRegistry, request, requested);
+		_subStates.deepForwardRequest(control, request, requested);
 	else
-		deepRequest					 (stateRegistry, request);
+		deepRequest					 (control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepRequest(StateRegistry& stateRegistry,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequest(Control& control,
 											   const RequestType request)
 {
 	switch (request) {
 	case Request::REMAIN:
-		deepRequestRemain (stateRegistry);
+		deepRequestRemain (control._stateRegistry);
 		break;
 
 	case Request::CHANGE:
-		deepRequestChange (stateRegistry);
+		deepRequestChange (control);
 		break;
 
 	case Request::RESTART:
-		deepRequestRestart(stateRegistry);
+		deepRequestRestart(control._stateRegistry);
 		break;
 
 	case Request::RESUME:
-		deepRequestResume (stateRegistry);
+		deepRequestResume (control._stateRegistry);
+		break;
+
+	case Request::UTILIZE:
+		deepRequestUtilize(control);
 		break;
 
 	default:
@@ -5605,11 +6147,154 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepRequest(StateRegistry& stateRegistry,
 	}
 }
 
+//------------------------------------------------------------------------------
+
+#if !defined _MSC_VER && !defined __clang__
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
+													 const ShortIndex /*prong*/)
+{
+	switch (STRATEGY) {
+	case RegionStrategy::Composite:
+		return deepRequestChangeComposite  (control);
+
+	case RegionStrategy::Resumable:
+		return deepRequestChangeResumable  (control);
+
+	case RegionStrategy::Utilitarian:
+		return deepRequestChangeUtilitarian(control);
+
+	default:
+		HFSM_BREAK();
+		return {};
+	}
+}
+
+#endif
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) {
+	ShortIndex& requested = compoRequested(control);
+
+	requested = 0;
+
+	_subStates.deepRequestChange(control);
+
+	return {};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
+	const ShortIndex  resumable = compoResumable(control);
+		  ShortIndex& requested = compoRequested(control);
+
+	requested = (resumable != INVALID_SHORT_INDEX) ?
+		resumable : 0;
+
+	_subStates.deepRequestChange(control, requested);
+
+	return {};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
+	const UProng result = _subStates.deepReportChange(control);
+
+	ShortIndex& requested = compoRequested(control);
+	requested = result.prong;
+
+	return {};
+}
+
+//------------------------------------------------------------------------------
+
+#if !defined _MSC_VER && !defined __clang__
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChange(Control& control,
+													  const ShortIndex /*prong*/)
+{
+	switch (STRATEGY) {
+	case RegionStrategy::Composite:
+		return deepReportChangeComposite  (control);
+
+	case RegionStrategy::Resumable:
+		return deepReportChangeResumable  (control);
+
+	case RegionStrategy::Utilitarian:
+		return deepReportChangeUtilitarian(control);
+
+	default:
+		HFSM_BREAK();
+		return {};
+	}
+}
+
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
+	ShortIndex& requested = compoRequested(control);
+
+	requested = 0;
+
+	const UProng h = _headState.wrapUtility(control);
+	const UProng s = _subStates.deepReportChange(control);
+
+	return { h.utilityCompliment * s.utilityCompliment };
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
+	const ShortIndex  resumable = compoResumable(control);
+		  ShortIndex& requested = compoRequested(control);
+
+	requested = (resumable != INVALID_SHORT_INDEX) ?
+		resumable : 0;
+
+	const UProng h = _headState.wrapUtility(control);
+	const UProng s = _subStates.deepReportChange(control, requested);
+
+	return { h.utilityCompliment * s.utilityCompliment };
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
+	const UProng h = _headState.wrapUtility(control);
+	const UProng s = _subStates.deepReportChange(control);
+
+	ShortIndex& requested = compoRequested(control);
+	requested = s.prong;
+
+	return { h.utilityCompliment * s.utilityCompliment };
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 	const ShortIndex  active	= stateRegistry.compoActive	   [COMPO_INDEX];
 		  ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
 
@@ -5621,32 +6306,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepRequestRemain(StateRegistry& stateRegistr
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef __GNUC__
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepRequestChange(StateRegistry& stateRegistry) {
-	switch (STRATEGY) {
-	case RegionStrategy::Composite:
-		deepRequestRestart(stateRegistry);
-		break;
-
-	case RegionStrategy::Resumable:
-		deepRequestResume (stateRegistry);
-		break;
-
-	default:
-		HFSM_BREAK();
-	}
-}
-
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
-void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 	ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
 
 	requested = 0;
@@ -5656,9 +6318,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepRequestRestart(StateRegistry& stateRegist
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepRequestResume(StateRegistry& stateRegistry,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 													 const ShortIndex /*prong*/)
 {
 	const ShortIndex  resumable = stateRegistry.resumable.compo[COMPO_INDEX];
@@ -5672,22 +6334,82 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepRequestResume(StateRegistry& stateRegistr
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepChangeToRequested(StateRegistry& stateRegistry,
-														 Control& control,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
+	const UProng result = _subStates.deepReportUtilize(control);
+
+	ShortIndex& requested = compoRequested(control);
+	requested = result.prong;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+UProng
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
+	const UProng headResult = _headState.deepReportUtilize(control);
+	const UProng subResults = _subStates.deepReportUtilize(control);
+
+	UProng result{
+		headResult.utilityCompliment * subResults.utilityCompliment,
+		subResults.prong
+	};
+
+	ShortIndex& requested = compoRequested(control);
+	requested = result.prong;
+
+	return result;
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+void
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepEnterRequested(PlanControl& control,
+													  const ShortIndex /*prong*/)
+{
+	ShortIndex& active	  = compoActive	  (control);
+	ShortIndex& requested = compoRequested(control);
+
+	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX);
+	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
+
+	active	  = requested;
+	requested = INVALID_SHORT_INDEX;
+
+	_headState.deepEnter(control);
+	_subStates.deepEnter(control, active);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+void
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepChangeToRequested(PlanControl& control,
 														 const ShortIndex /*prong*/)
 {
-	ShortIndex& active	  = stateRegistry.compoActive	 [COMPO_INDEX];
-	ShortIndex& resumable = stateRegistry.resumable.compo[COMPO_INDEX];
-	ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
+	ShortIndex& active	  = compoActive	  (control);
+	ShortIndex& resumable = compoResumable(control);
+	ShortIndex& requested = compoRequested(control);
 
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
 	if (requested == INVALID_SHORT_INDEX)
-		_subStates.deepChangeToRequested(stateRegistry, control, active);
-	else {
-		_subStates.deepExit(control, active);
+		_subStates.deepChangeToRequested(control, active);
+	else if (requested == active) {
+		// TODO: replace exit() + enter() => reenter()
+		_subStates.deepExit				(control, active);
+
+		if (requested != active) {
+			resumable = active;
+			active	  = requested;
+		}
+		requested = INVALID_SHORT_INDEX;
+
+		_subStates.deepEnter(control, active);
+	} else {
+		_subStates.deepExit				(control, active);
 
 		if (requested != active) {
 			resumable = active;
@@ -5703,9 +6425,9 @@ _C<NS, NC, NO, TA, TH, TG, TS...>::deepChangeToRequested(StateRegistry& stateReg
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
-_C<NS, NC, NO, TA, TH, TG, TS...>::deepGetNames(const LongIndex parent,
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepGetNames(const LongIndex parent,
 												const RegionType region,
 												const ShortIndex depth,
 												StructureStateInfos& _stateInfos) const
@@ -5754,9 +6476,10 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using StateRegistry	 = StateRegistryT<Args>;
 	using StateParents	 = typename StateRegistry::StateParents;
 
-	using Control		 = ControlT		 <Args>;
-	using FullControl	 = FullControlT  <Args>;
-	using GuardControl	 = GuardControlT <Args>;
+	using Control		 = ControlT		<Args>;
+	using PlanControl	 = PlanControlT	<Args>;
+	using FullControl	 = FullControlT	<Args>;
+	using GuardControl	 = GuardControlT<Args>;
 
 	using Initial		 = Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
 	using InitialForward = Wrap<TInitial>;
@@ -5772,32 +6495,46 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	HFSM_INLINE void   wideRegister			(StateRegistry& stateRegistry, const ForkID forkId);
 
-	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control,									 const OrthoFork& prongs);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control);
 	HFSM_INLINE bool   wideEntryGuard		(GuardControl& control);
 
-	HFSM_INLINE void   wideEnterInitial		(Control& control);
-	HFSM_INLINE void   wideEnter			(Control& control);
+	HFSM_INLINE void   wideEnter			(PlanControl& control);
 
 	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
 	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
 
-	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,									  const OrthoFork& prongs);
+	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control);
 	HFSM_INLINE bool   wideExitGuard		(GuardControl& control);
 
-	HFSM_INLINE void   wideExit				(Control& control);
+	HFSM_INLINE void   wideExit				(PlanControl& control);
 
-	HFSM_INLINE void   wideForwardActive	(StateRegistry& stateRegistry, const RequestType request, const OrthoFork& prongs);
-	HFSM_INLINE void   wideForwardRequest	(StateRegistry& stateRegistry, const RequestType request, const OrthoFork& prongs);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   wideForwardActive	(Control& control, const RequestType request,	const OrthoFork& prongs);
+	HFSM_INLINE void   wideForwardRequest	(Control& control, const RequestType request,	const OrthoFork& prongs);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE UProng wideRequestChange	(Control& control);
+	HFSM_INLINE UProng wideReportChange	(Control& control);
+
 	HFSM_INLINE void   wideRequestRemain	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   wideRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestRestart	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestResume	(StateRegistry& stateRegistry);
 
-	HFSM_INLINE void   wideChangeToRequested(StateRegistry& stateRegistry, Control& control);
+	HFSM_INLINE void   wideRequestUtilize	(Control& control);
+	HFSM_INLINE UProng wideReportUtilize	(Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   wideEnterRequested	(PlanControl& control);
+	HFSM_INLINE void   wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
@@ -5836,41 +6573,56 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	using StateRegistry	 = StateRegistryT<Args>;
 	using StateParents	 = typename StateRegistry::StateParents;
 
-	using Control		 = ControlT		 <Args>;
-	using FullControl	 = FullControlT  <Args>;
-	using GuardControl	 = GuardControlT <Args>;
+	using Control		 = ControlT		<Args>;
+	using PlanControl	 = PlanControlT	<Args>;
+	using FullControl	 = FullControlT	<Args>;
+	using GuardControl	 = GuardControlT<Args>;
 
 	using Initial		 = Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
 	using AllForward	 = _OSF<TInitial>;
 
 	HFSM_INLINE void   wideRegister			(StateRegistry& stateRegistry, const ForkID forkId);
 
-	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control,										 const OrthoFork& prongs);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardEntryGuard(GuardControl& control);
 	HFSM_INLINE bool   wideEntryGuard		(GuardControl& control);
 
-	HFSM_INLINE void   wideEnterInitial		(Control& control);
-	HFSM_INLINE void   wideEnter			(Control& control);
+	HFSM_INLINE void   wideEnter			(PlanControl& control);
 
 	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
 	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
 
-	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,										 const OrthoFork& prongs);
+	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control);
 	HFSM_INLINE bool   wideExitGuard		(GuardControl& control);
 
-	HFSM_INLINE void   wideExit				(Control& control);
+	HFSM_INLINE void   wideExit				(PlanControl& control);
 
-	HFSM_INLINE void   wideForwardActive	(StateRegistry& stateRegistry, const RequestType transition, const OrthoFork& prongs);
-	HFSM_INLINE void   wideForwardRequest	(StateRegistry& stateRegistry, const RequestType transition, const OrthoFork& prongs);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   wideForwardActive	(Control& control, const RequestType request,	const OrthoFork& prongs);
+	HFSM_INLINE void   wideForwardRequest	(Control& control, const RequestType request,	const OrthoFork& prongs);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE UProng wideRequestChange	(Control& control);
+	HFSM_INLINE UProng wideReportChange		(Control& control);
+
 	HFSM_INLINE void   wideRequestRemain	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   wideRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestRestart	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   wideRequestResume	(StateRegistry& stateRegistry);
 
-	HFSM_INLINE void   wideChangeToRequested(StateRegistry& stateRegistry, Control& control);
+	HFSM_INLINE void   wideRequestUtilize	(Control& control);
+	HFSM_INLINE UProng wideReportUtilize	(Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   wideEnterRequested	(PlanControl& control);
+	HFSM_INLINE void   wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
@@ -5909,12 +6661,12 @@ bool
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
 														  const OrthoFork& prongs)
 {
-	const bool resultI = prongs[PRONG_INDEX] ?
-						 initial  .deepForwardEntryGuard(control) : false;
+	const bool i = prongs[PRONG_INDEX] ?
+				   initial  .deepForwardEntryGuard(control) : false;
 
-	const bool resultR = remaining.wideForwardEntryGuard(control, prongs);
+	const bool r = remaining.wideForwardEntryGuard(control, prongs);
 
-	return resultI || resultR;
+	return i || r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5922,10 +6674,10 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) {
-	const bool resultI = initial  .deepForwardEntryGuard(control);
-	const bool resultR = remaining.wideForwardEntryGuard(control);
+	const bool i = initial  .deepForwardEntryGuard(control);
+	const bool r = remaining.wideForwardEntryGuard(control);
 
-	return resultI || resultR;
+	return i || r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5933,26 +6685,17 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control)
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) {
-	const bool resultI = initial  .deepEntryGuard(control);
-	const bool resultR = remaining.wideEntryGuard(control);
+	const bool i = initial  .deepEntryGuard(control);
+	const bool r = remaining.wideEntryGuard(control);
 
-	return resultI || resultR;
+	return i || r;
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideEnterInitial(Control& control) {
-	initial  .deepEnterInitial(control);
-	remaining.wideEnterInitial(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideEnter(Control& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
 	initial  .deepEnter(control);
 	remaining.wideEnter(control);
 }
@@ -5985,12 +6728,12 @@ bool
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
 														 const OrthoFork& prongs)
 {
-	const bool resultI = prongs[PRONG_INDEX] ?
-						 initial  .deepForwardExitGuard(control) : false;
+	const bool i = prongs[PRONG_INDEX] ?
+				   initial  .deepForwardExitGuard(control) : false;
 
-	const bool resultR = remaining.wideForwardExitGuard(control, prongs);
+	const bool r = remaining.wideForwardExitGuard(control, prongs);
 
-	return resultI || resultR;
+	return i || r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5998,10 +6741,10 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) {
-	const bool resultI = initial  .deepForwardExitGuard(control);
-	const bool resultR = remaining.wideForwardExitGuard(control);
+	const bool i = initial  .deepForwardExitGuard(control);
+	const bool r = remaining.wideForwardExitGuard(control);
 
-	return resultI || resultR;
+	return i || r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6009,17 +6752,17 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) {
-	const bool resultI = initial  .deepExitGuard(control);
-	const bool resultR = remaining.wideExitGuard(control);
+	const bool i = initial  .deepExitGuard(control);
+	const bool r = remaining.wideExitGuard(control);
 
-	return resultI || resultR;
+	return i || r;
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(Control& control) {
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
 	initial	 .deepExit(control);
 	remaining.wideExit(control);
 }
@@ -6028,46 +6771,61 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideExit(Control& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardActive(StateRegistry& stateRegistry,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardActive(Control& control,
 													  const RequestType request,
 													  const OrthoFork& prongs)
 {
-	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+	const RequestType local = prongs[PRONG_INDEX] ?
+		request : Request::REMAIN;
 
-	initial	 .deepForwardActive(stateRegistry, local);
-	remaining.wideForwardActive(stateRegistry, request, prongs);
+	initial	 .deepForwardActive(control, local);
+	remaining.wideForwardActive(control, request, prongs);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(StateRegistry& stateRegistry,
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
 													   const RequestType request,
 													   const OrthoFork& prongs)
 {
-	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+	const RequestType local = prongs[PRONG_INDEX] ?
+		request : Request::REMAIN;
 
-	initial	 .deepForwardRequest(stateRegistry, local);
-	remaining.wideForwardRequest(stateRegistry, request, prongs);
+	initial	 .deepForwardRequest(control, local);
+	remaining.wideForwardRequest(control, request, prongs);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+UProng
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
+	initial  .deepRequestChange(control);
+	remaining.wideRequestChange(control);
+
+	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+UProng
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideReportChange(Control& control) {
+	const UProng i = initial  .deepReportChange(control);
+	const UProng r = remaining.wideReportChange(control);
+
+	return { i.utilityCompliment * r.utilityCompliment };
+}
+
+//------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestRemain(StateRegistry& stateRegistry) {
 	initial	 .deepRequestRemain(stateRegistry);
 	remaining.wideRequestRemain(stateRegistry);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestChange(StateRegistry& stateRegistry) {
-	initial	 .deepRequestChange(stateRegistry);
-	remaining.wideRequestChange(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6092,11 +6850,38 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestResume(StateRegistry& stateRegist
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideChangeToRequested(StateRegistry& stateRegistry,
-														  Control& control)
-{
-	initial	 .deepChangeToRequested(stateRegistry, control);
-	remaining.wideChangeToRequested(stateRegistry, control);
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
+	initial  .deepRequestUtilize(control);
+	remaining.wideRequestUtilize(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+UProng
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
+	const UProng i = initial  .deepReportUtilize(control);
+	const UProng r = remaining.wideReportUtilize(control);
+
+	return { i.utilityCompliment * r.utilityCompliment };
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+void
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideEnterRequested(PlanControl& control) {
+	initial	 .deepEnterRequested(control);
+	remaining.wideEnterRequested(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
+void
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
+	initial	 .deepChangeToRequested(control);
+	remaining.wideChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
@@ -6163,15 +6948,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(Control& control) {
-	initial.deepEnterInitial(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_OS<NS, NC, NO, TA, NI, TI>::wideEnter(Control& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
 
@@ -6225,7 +7002,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideExitGuard(GuardControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideExit(Control& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
 }
 
@@ -6233,42 +7010,54 @@ _OS<NS, NC, NO, TA, NI, TI>::wideExit(Control& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardActive(StateRegistry& stateRegistry,
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardActive(Control& control,
 											   const RequestType request,
 											   const OrthoFork& prongs)
 {
-	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+	const RequestType local = prongs[PRONG_INDEX] ?
+		request : Request::REMAIN;
 
-	initial.deepForwardActive(stateRegistry, local);
+	initial.deepForwardActive(control, local);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateRegistry& stateRegistry,
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Control& control,
 												const RequestType request,
 												const OrthoFork& prongs)
 {
-	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+	const RequestType local = prongs[PRONG_INDEX] ?
+		request : Request::REMAIN;
 
-	initial.deepForwardRequest(stateRegistry, local);
+	initial.deepForwardRequest(control, local);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+UProng
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(Control& control) {
+	initial.deepRequestChange(control);
+
+	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+UProng
+_OS<NS, NC, NO, TA, NI, TI>::wideReportChange(Control& control) {
+	return initial.deepReportChange(control);
+}
+
+//------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _OS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
 	initial.deepRequestRemain(stateRegistry);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(StateRegistry& stateRegistry) {
-	initial.deepRequestChange(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6291,10 +7080,32 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateRegistry& stateRegistry) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(StateRegistry& stateRegistry,
-												   Control& control)
-{
-	initial.deepChangeToRequested(stateRegistry, control);
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestUtilize(Control& control) {
+	initial.deepRequestUtilize(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+UProng
+_OS<NS, NC, NO, TA, NI, TI>::wideReportUtilize(Control& control) {
+	return initial.deepReportUtilize(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+void
+_OS<NS, NC, NO, TA, NI, TI>::wideEnterRequested(PlanControl& control) {
+	initial.deepEnterRequested(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+void
+_OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
+	initial.deepChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
@@ -6348,8 +7159,10 @@ struct _O final {
 	using StateParents	= typename StateRegistry::StateParents;
 
 	using Control		= ControlT<Args>;
-	using ScopedOrigin	= typename Control::Origin;
-	using ScopedRegion	= typename Control::Region;
+
+	using PlanControl	= PlanControlT<Args>;
+	using ScopedOrigin	= typename PlanControl::Origin;
+	using ScopedRegion	= typename PlanControl::Region;
 
 	using FullControl	= FullControlT<Args>;
 	using ControlLock	= typename FullControl::Lock;
@@ -6365,37 +7178,51 @@ struct _O final {
 	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateRegistry& stateRegistry)			{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
 	HFSM_INLINE const OrthoFork& orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
 
-	HFSM_INLINE		  OrthoFork& orthoRequested(	  Control&   control)					{ return orthoRequested(control.stateRegistry());		}
-	HFSM_INLINE const OrthoFork& orthoRequested(const Control&   control) const				{ return orthoRequested(control.stateRegistry());		}
+	HFSM_INLINE		  OrthoFork& orthoRequested(	  Control& control)						{ return orthoRequested(control._stateRegistry);		}
+	HFSM_INLINE const OrthoFork& orthoRequested(const Control& control) const				{ return orthoRequested(control._stateRegistry);		}
 
 	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
 
-	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepEnterInitial		(Control& control);
-	HFSM_INLINE void   deepEnter			(Control& control,										  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE Status deepUpdate			(FullControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepEnter			(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+
+	HFSM_INLINE Status deepUpdate			(FullControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(FullControl& control,		   const TEvent& event,		  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,									  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepExit				(Control& control,										  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepExit				(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepForwardActive	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE void   deepForwardRequest	(StateRegistry& stateRegistry, const RequestType request, const ShortIndex = INVALID_SHORT_INDEX);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepRequest			(StateRegistry& stateRegistry, const RequestType request);
+	HFSM_INLINE void   deepForwardActive	(Control& control, const RequestType request,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepForwardRequest	(Control& control, const RequestType request,	const ShortIndex = INVALID_SHORT_INDEX);
+
+	HFSM_INLINE void   deepRequest			(Control& control, const RequestType request);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE UProng deepRequestChange	(Control& control,								const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE UProng deepReportChange		(Control& control,								const ShortIndex = INVALID_SHORT_INDEX);
+
 	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   deepRequestChange	(StateRegistry& stateRegistry);
 	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,							  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,					const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepChangeToRequested(StateRegistry& stateRegistry, Control& control,		  const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepRequestUtilize	(Control& control);
+	HFSM_INLINE UProng deepReportUtilize	(Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   deepEnterRequested	(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void   deepChangeToRequested(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using RegionType		= typename StructureStateInfo::RegionType;
@@ -6475,22 +7302,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepEntryGuard(GuardControl& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepEnterInitial(Control& control) {
-	HFSM_IF_ASSERT(const OrthoFork& requested = orthoRequested(control));
-
-	HFSM_ASSERT(!requested);
-
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	_headState.deepEnter	   (control);
-	_subStates.wideEnterInitial(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-void
-_O<NS, NC, NO, TA, TH, TS...>::deepEnter(Control& control,
+_O<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control,
 										 const ShortIndex /*prong*/)
 {
 	OrthoFork& requested = orthoRequested(control);
@@ -6578,7 +7390,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepExitGuard(GuardControl& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control,
+_O<NS, NC, NO, TA, TH, TS...>::deepExit(PlanControl& control,
 										const ShortIndex /*prong*/)
 {
 	_subStates.wideExit(control);
@@ -6589,56 +7401,60 @@ _O<NS, NC, NO, TA, TH, TS...>::deepExit(Control& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepForwardActive(StateRegistry& stateRegistry,
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardActive(Control& control,
 												 const RequestType request,
 												 const ShortIndex /*prong*/)
 {
-	HFSM_ASSERT(stateRegistry.isActive(HEAD_ID));
+	HFSM_ASSERT(control._stateRegistry.isActive(HEAD_ID));
 
-	const OrthoFork& requested = orthoRequested(stateRegistry);
+	const OrthoFork& requested = orthoRequested(control);
 	HFSM_ASSERT(requested);
 
-	_subStates.wideForwardActive(stateRegistry, request, requested);
+	_subStates.wideForwardActive(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(StateRegistry& stateRegistry,
+_O<NS, NC, NO, TA, TH, TS...>::deepForwardRequest(Control& control,
 												  const RequestType request,
 												  const ShortIndex /*prong*/)
 {
-	const OrthoFork& requested = orthoRequested(stateRegistry);
+	const OrthoFork& requested = orthoRequested(control);
 
 	if (requested)
-		_subStates.wideForwardRequest(stateRegistry, request, requested);
+		_subStates.wideForwardRequest(control, request, requested);
 	else
-		deepRequest					 (stateRegistry, request);
+		deepRequest					 (control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequest(StateRegistry& stateRegistry,
+_O<NS, NC, NO, TA, TH, TS...>::deepRequest(Control& control,
 										   const RequestType request)
 {
 	switch (request) {
 	case Request::REMAIN:
-		deepRequestRemain (stateRegistry);
+		deepRequestRemain (control._stateRegistry);
 		break;
 
 	case Request::CHANGE:
-		deepRequestChange (stateRegistry);
+		deepRequestChange (control);
 		break;
 
 	case Request::RESTART:
-		deepRequestRestart(stateRegistry);
+		deepRequestRestart(control._stateRegistry);
 		break;
 
 	case Request::RESUME:
-		deepRequestResume (stateRegistry);
+		deepRequestResume (control._stateRegistry);
+		break;
+
+	case Request::UTILIZE:
+		deepRequestUtilize(control);
 		break;
 
 	default:
@@ -6646,20 +7462,36 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequest(StateRegistry& stateRegistry,
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
-	_subStates.wideRequestRemain(stateRegistry);
+UProng
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestChange(Control& control,
+												 const ShortIndex /*prong*/)
+{
+	_subStates.wideRequestChange(control);
+
+	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+UProng
+_O<NS, NC, NO, TA, TH, TS...>::deepReportChange(Control& control,
+												  const ShortIndex /*prong*/)
+{
+	_subStates.wideReportChange(control);
+
+	return {};
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepRequestChange(StateRegistry& stateRegistry) {
-	_subStates.wideRequestChange(stateRegistry);
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+	_subStates.wideRequestRemain(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6684,12 +7516,45 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
-_O<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(StateRegistry& stateRegistry,
-													 Control& control,
+_O<NS, NC, NO, TA, TH, TS...>::deepRequestUtilize(Control& control) {
+	_subStates.wideRequestUtilize(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+UProng
+_O<NS, NC, NO, TA, TH, TS...>::deepReportUtilize(Control& control) {
+	const UProng headResult = _headState.deepReportUtilize(control);
+	const UProng subResults = _subStates.wideReportUtilize(control);
+
+	return {
+		headResult.utilityCompliment * subResults.utilityCompliment,
+		subResults.prong
+	};
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+void
+_O<NS, NC, NO, TA, TH, TS...>::deepEnterRequested(PlanControl& control,
+												  const ShortIndex /*prong*/)
+{
+	// TODO: pass requested orthoFork
+	_headState.deepEnter		 (control);
+	_subStates.wideEnterRequested(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+void
+_O<NS, NC, NO, TA, TH, TS...>::deepChangeToRequested(PlanControl& control,
 													 const ShortIndex /*prong*/)
 {
 	// TODO: pass requested orthoFork
-	_subStates.wideChangeToRequested(stateRegistry, control);
+	_subStates.wideChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
@@ -6756,20 +7621,22 @@ private:
 
 	using StateRegistry			 = StateRegistryT<Args>;
 	using AllForks				 = typename StateRegistry::AllForks;
-	using PlanData				 = PlanDataT	 <Args>;
 
-	using Control				 = ControlT		 <Args>;
-	using FullControl			 = FullControlT	 <Args>;
-	using GuardControl			 = GuardControlT <Args>;
+	using Control				 = ControlT<Args>;
 
-	using PayloadBox			 = typename PayloadList::Variant;
-	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
+	using PlanControl			 = PlanControlT<Args>;
+	using PlanData				 = PlanDataT   <Args>;
+
+	using FullControl			 = FullControlT<Args>;
 	using Request				 = typename FullControl::Request;
 	using Requests				 = typename FullControl::Requests;
 
-	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
+	using GuardControl			 = GuardControlT<Args>;
 
-	//StaticPrintType<MaterialApex> p;
+	using PayloadBox			 = typename PayloadList::Variant;
+	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
+
+	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
@@ -6822,6 +7689,7 @@ public:
 	HFSM_INLINE void changeTo(const StateID stateId);
 	HFSM_INLINE void restart (const StateID stateId);
 	HFSM_INLINE void resume	 (const StateID stateId);
+	HFSM_INLINE void utilize (const StateID stateId);
 	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
@@ -6832,6 +7700,9 @@ public:
 
 	template <typename TState>
 	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
+
+	template <typename TState>
+	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
 
 	template <typename TState>
 	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
@@ -6848,6 +7719,9 @@ public:
 	HFSM_INLINE void resume  (const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
+	HFSM_INLINE void utilize (const StateID stateId, TPayload* const payload);
+
+	template <typename TPayload>
 	HFSM_INLINE void schedule(const StateID stateId, TPayload* const payload);
 
 	template <typename TState, typename TPayload>
@@ -6858,6 +7732,9 @@ public:
 
 	template <typename TState, typename TPayload>
 	HFSM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
+
+	template <typename TState, typename TPayload>
+	HFSM_INLINE void utilize (TPayload* const payload)			{ utilize (stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
 	HFSM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
@@ -6897,8 +7774,13 @@ public:
 	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
 #endif
 
-protected:
+private:
+	void initialEnter();
 	void processTransitions();
+
+	bool applyRequests(Control& control);
+
+	bool cancelledByEntryGuards(const Requests& pendingChanges);
 	bool cancelledByGuards(const Requests& pendingChanges);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -6954,15 +7836,7 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 	for (auto& payload : _requestPayloads)
 		payload.reset();
 
-	{
-		Control control{_context,
-						_stateRegistry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
-		_apex.deepEnterInitial(control);
-
-		HFSM_IF_ASSERT(_planData.verifyPlans());
-	}
+	initialEnter();
 
 	HFSM_IF_STRUCTURE(udpateActivity());
 }
@@ -6971,10 +7845,10 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::~_R() {
-	Control control{_context,
-					_stateRegistry,
-					_planData,
-					HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context,
+						_stateRegistry,
+						_planData,
+						HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepExit(control);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -7000,7 +7874,7 @@ _R<TC, TG, TPL, TA>::update() {
 	_requests.clear();
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
 template <typename TEvent>
@@ -7067,6 +7941,20 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId) {
 
 template <typename TC, typename TG, typename TPL, typename TA>
 void
+_R<TC, TG, TPL, TA>::utilize(const StateID stateId) {
+	const Request request(Request::Type::UTILIZE, stateId);
+	_requests << request;
+
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+	if (_logger)
+		_logger->recordTransition(INVALID_STATE_ID, Transition::UTILIZE, stateId);
+#endif
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
 _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 	const Request request(Request::Type::SCHEDULE, stateId);
 	_requests << request;
@@ -7125,6 +8013,23 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	if (_logger)
 		_logger->recordTransition(INVALID_STATE_ID, Transition::RESUME, stateId);
+#endif
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TPayload>
+void
+_R<TC, TG, TPL, TA>::utilize(const StateID stateId,
+							 TPayload* const payload)
+{
+	const Request request(Request::Type::UTILIZE, stateId, payload);
+	_requests << request;
+
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+	if (_logger)
+		_logger->recordTransition(INVALID_STATE_ID, Transition::UTILIZE, stateId);
 #endif
 }
 
@@ -7205,6 +8110,59 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 
 template <typename TC, typename TG, typename TPL, typename TA>
 void
+_R<TC, TG, TPL, TA>::initialEnter() {
+	Control control(_context,
+					_stateRegistry,
+					_planData,
+					HFSM_LOGGER_OR(_logger, nullptr));
+
+	AllForks undoRequested = _stateRegistry.requested;
+
+	_apex.deepRequestChange(control);
+
+	Requests lastRequests = _requests;
+	_requests.clear();
+
+	if (cancelledByEntryGuards(lastRequests))
+		_stateRegistry.requested = undoRequested;
+
+	for (LongIndex i = 0;
+		 i < MAX_SUBSTITUTIONS && _requests.count();
+		 ++i)
+	{
+		undoRequested = _stateRegistry.requested;
+
+		if (applyRequests(control)) {
+			lastRequests = _requests;
+			_requests.clear();
+
+			if (cancelledByEntryGuards(lastRequests))
+				_stateRegistry.requested = undoRequested;
+		}
+
+		_requests.clear();
+	}
+	HFSM_ASSERT(_requests.count() == 0);
+
+	{
+		PlanControl planControl{_context,
+								_stateRegistry,
+								_planData,
+								HFSM_LOGGER_OR(_logger, nullptr)};
+
+		_apex.deepEnterRequested(planControl);
+		_stateRegistry.clearOrthoRequested();
+
+		HFSM_IF_ASSERT(_planData.verifyPlans());
+	}
+
+	HFSM_IF_STRUCTURE(udpateActivity());
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
 _R<TC, TG, TPL, TA>::processTransitions() {
 	HFSM_ASSERT(_requests.count());
 
@@ -7215,38 +8173,18 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 
 	Requests lastRequests;
 
+	Control control(_context,
+					_stateRegistry,
+					_planData,
+					HFSM_LOGGER_OR(_logger, nullptr));
+
 	for (LongIndex i = 0;
 		i < MAX_SUBSTITUTIONS && _requests.count();
 		++i)
 	{
-		unsigned changeCount = 0;
 		undoRequested = _stateRegistry.requested;
 
-		for (const Request& request : _requests) {
-			HFSM_IF_STRUCTURE(_lastTransitions << TransitionInfo(request, Method::UPDATE));
-
-			switch (request.type) {
-			case Request::CHANGE:
-			case Request::RESTART:
-			case Request::RESUME:
-				if (_stateRegistry.requestImmediate(request))
-					_apex.deepForwardActive(_stateRegistry, request.type);
-				else
-					_apex.deepRequest	   (_stateRegistry, request.type);
-
-				++changeCount;
-				break;
-
-			case Request::SCHEDULE:
-				_stateRegistry.requestScheduled(request.stateId);
-				break;
-
-			default:
-				HFSM_BREAK();
-			}
-		}
-
-		if (changeCount > 0) {
+		if (applyRequests(control)) {
 			lastRequests = _requests;
 			_requests.clear();
 
@@ -7257,18 +8195,73 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 	}
 
 	{
-		Control control{_context,
-						_stateRegistry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+		PlanControl planControl{_context,
+								_stateRegistry,
+								_planData,
+								HFSM_LOGGER_OR(_logger, nullptr)};
 
-		_apex.deepChangeToRequested(_stateRegistry, control);
+		_apex.deepChangeToRequested(planControl);
 		_stateRegistry.clearOrthoRequested();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());
 	}
 
 	HFSM_IF_STRUCTURE(udpateActivity());
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TPL, typename TA>
+bool
+_R<TC, TG, TPL, TA>::applyRequests(Control& control) {
+	bool changesMade = false;
+
+	for (const Request& request : _requests) {
+		HFSM_IF_STRUCTURE(_lastTransitions << TransitionInfo(request, Method::UPDATE));
+
+		switch (request.type) {
+		case Request::CHANGE:
+		case Request::RESTART:
+		case Request::RESUME:
+		case Request::UTILIZE:
+			if (_stateRegistry.requestImmediate(request))
+				_apex.deepForwardActive(control, request.type);
+			else
+				_apex.deepRequest	   (control, request.type);
+
+			changesMade = true;
+			break;
+
+		case Request::SCHEDULE:
+			_stateRegistry.requestScheduled(request.stateId);
+			break;
+
+		default:
+			HFSM_BREAK();
+		}
+	}
+
+	return changesMade;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TPL, typename TA>
+bool
+_R<TC, TG, TPL, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
+	GuardControl guardControl(_context,
+							  _stateRegistry,
+							  _planData,
+							  _requests,
+							  pendingRequests,
+							  HFSM_LOGGER_OR(_logger, nullptr));
+
+	if (_apex.deepEntryGuard(guardControl)) {
+		HFSM_IF_STRUCTURE(recordRequestsAs(Method::ENTRY_GUARD));
+
+		return true;
+	} else
+		return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

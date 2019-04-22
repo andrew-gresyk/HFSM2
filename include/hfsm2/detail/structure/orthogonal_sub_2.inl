@@ -42,15 +42,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideEnterInitial(Control& control) {
-	initial.deepEnterInitial(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_OS<NS, NC, NO, TA, NI, TI>::wideEnter(Control& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
 
@@ -104,7 +96,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideExitGuard(GuardControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideExit(Control& control) {
+_OS<NS, NC, NO, TA, NI, TI>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
 }
 
@@ -112,42 +104,54 @@ _OS<NS, NC, NO, TA, NI, TI>::wideExit(Control& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardActive(StateRegistry& stateRegistry,
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardActive(Control& control,
 											   const RequestType request,
 											   const OrthoFork& prongs)
 {
-	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+	const RequestType local = prongs[PRONG_INDEX] ?
+		request : Request::REMAIN;
 
-	initial.deepForwardActive(stateRegistry, local);
+	initial.deepForwardActive(control, local);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(StateRegistry& stateRegistry,
+_OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Control& control,
 												const RequestType request,
 												const OrthoFork& prongs)
 {
-	const RequestType local = prongs[PRONG_INDEX] ? request : Request::REMAIN;
+	const RequestType local = prongs[PRONG_INDEX] ?
+		request : Request::REMAIN;
 
-	initial.deepForwardRequest(stateRegistry, local);
+	initial.deepForwardRequest(control, local);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+UProng
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(Control& control) {
+	initial.deepRequestChange(control);
+
+	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+UProng
+_OS<NS, NC, NO, TA, NI, TI>::wideReportChange(Control& control) {
+	return initial.deepReportChange(control);
+}
+
+//------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
 _OS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
 	initial.deepRequestRemain(stateRegistry);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(StateRegistry& stateRegistry) {
-	initial.deepRequestChange(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -170,10 +174,32 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateRegistry& stateRegistry) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(StateRegistry& stateRegistry,
-												   Control& control)
-{
-	initial.deepChangeToRequested(stateRegistry, control);
+_OS<NS, NC, NO, TA, NI, TI>::wideRequestUtilize(Control& control) {
+	initial.deepRequestUtilize(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+UProng
+_OS<NS, NC, NO, TA, NI, TI>::wideReportUtilize(Control& control) {
+	return initial.deepReportUtilize(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+void
+_OS<NS, NC, NO, TA, NI, TI>::wideEnterRequested(PlanControl& control) {
+	initial.deepEnterRequested(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+void
+_OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
+	initial.deepChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------

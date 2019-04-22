@@ -4,8 +4,36 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TA>
-ControlT<TA>::Origin::Origin(ControlT& control_,
-							 const StateID id)
+ControlT<TA>::Region::Region(ControlT& control_,
+							 const RegionID id)
+	: control{control_}
+	, prevId(control._regionId)
+{
+	control.setRegion(id);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+ControlT<TA>::Region::~Region() {
+	control.resetRegion(prevId);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TA>
+void
+ControlT<TA>::resetRegion(const RegionID id) {
+	HFSM_ASSERT(_regionId != INVALID_REGION_ID);
+
+	_regionId	 = id;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TA>
+PlanControlT<TA>::Origin::Origin(PlanControlT& control_,
+								 const StateID id)
 	: control{control_}
 	, prevId{control._originId}
 {
@@ -15,17 +43,17 @@ ControlT<TA>::Origin::Origin(ControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TA>
-ControlT<TA>::Origin::~Origin() {
+PlanControlT<TA>::Origin::~Origin() {
 	control.resetOrigin(prevId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TA>
-ControlT<TA>::Region::Region(ControlT& control_,
-							 const RegionID id,
-							 const StateID index,
-							 const LongIndex size)
+PlanControlT<TA>::Region::Region(PlanControlT& control_,
+								 const RegionID id,
+								 const StateID index,
+								 const LongIndex size)
 	: control{control_}
 	, prevId(control._regionId)
 	, prevIndex(control._regionIndex)
@@ -37,7 +65,7 @@ ControlT<TA>::Region::Region(ControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TA>
-ControlT<TA>::Region::~Region() {
+PlanControlT<TA>::Region::~Region() {
 	control.resetRegion(prevId, prevIndex, prevSize);
 
 	control._status.clear();
@@ -47,7 +75,7 @@ ControlT<TA>::Region::~Region() {
 
 template <typename TA>
 void
-ControlT<TA>::setOrigin(const StateID id) {
+PlanControlT<TA>::setOrigin(const StateID id) {
 	// TODO: see if this still can be used
 	//HFSM_ASSERT(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//HFSM_ASSERT(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
@@ -61,7 +89,7 @@ ControlT<TA>::setOrigin(const StateID id) {
 
 template <typename TA>
 void
-ControlT<TA>::resetOrigin(const StateID id) {
+PlanControlT<TA>::resetOrigin(const StateID id) {
 	// TODO: see if this still can be used
 	//HFSM_ASSERT(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
 	//HFSM_ASSERT(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
@@ -75,9 +103,9 @@ ControlT<TA>::resetOrigin(const StateID id) {
 
 template <typename TA>
 void
-ControlT<TA>::setRegion(const RegionID id,
-						const StateID index,
-						const LongIndex size)
+PlanControlT<TA>::setRegion(const RegionID id,
+							const StateID index,
+							const LongIndex size)
 {
 	HFSM_ASSERT(index != INVALID_STATE_ID && size != INVALID_LONG_INDEX);
 
@@ -102,9 +130,9 @@ ControlT<TA>::setRegion(const RegionID id,
 
 template <typename TA>
 void
-ControlT<TA>::resetRegion(const RegionID id,
-						  const StateID index,
-						  const LongIndex size)
+PlanControlT<TA>::resetRegion(const RegionID id,
+							  const StateID index,
+							  const LongIndex size)
 {
 	HFSM_ASSERT(_regionId	 != INVALID_REGION_ID);
 	HFSM_ASSERT(_regionIndex != INVALID_STATE_ID);
@@ -256,6 +284,25 @@ FullControlT<TA>::resume(const StateID stateId) {
 	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 		if (_logger)
 			_logger->recordTransition(_originId, Transition::RESUME, stateId);
+	#endif
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TA>
+void
+FullControlT<TA>::utilize(const StateID stateId) {
+	if (!_locked) {
+		const Request request{Request::Type::UTILIZE, stateId};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+		if (_logger)
+			_logger->recordTransition(_originId, Transition::UTILIZE, stateId);
 	#endif
 	}
 }

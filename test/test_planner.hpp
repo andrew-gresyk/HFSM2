@@ -83,7 +83,7 @@ struct Apex	  : FSM::State {};
 struct Planned
 	: FSM::State
 {
-	void enter(Control& control) {
+	void enter(PlanControl& control) {
 		auto plan = control.plan();
 		REQUIRE(!plan); //-V521
 
@@ -101,7 +101,7 @@ struct Planned
 struct Step1_BT
 	: FSM::State
 {
-	void enter(Control& control) {
+	void enter(PlanControl& control) {
 		Plan plan = control.plan();
 		REQUIRE(!plan); //-V521
 
@@ -138,7 +138,7 @@ struct Step1_3
 struct Hybrid
 	: FSM::State
 {
-	void enter(Control& control) {
+	void enter(PlanControl& control) {
 		auto plan = control.plan();
 		REQUIRE(!plan); //-V521
 

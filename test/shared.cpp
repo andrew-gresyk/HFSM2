@@ -3,10 +3,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 void
-Logger::recordMethod(const hfsm2::StateID origin,
+Logger::recordMethod(const StateID origin,
 					 const Method method)
 {
 	switch (method) {
+		case Method::UTILITY:
+			history.emplace_back(origin, Event::UTILITY);
+			break;
 		case Method::ENTRY_GUARD:
 			history.emplace_back(origin, Event::ENTRY_GUARD);
 			break;
@@ -39,9 +42,9 @@ Logger::recordMethod(const hfsm2::StateID origin,
 //------------------------------------------------------------------------------
 
 void
-Logger::recordTransition(const hfsm2::StateID origin,
+Logger::recordTransition(const StateID origin,
 						 const Transition transition,
-						 const hfsm2::StateID target)
+						 const StateID target)
 {
 	switch (transition) {
 		case Transition::CHANGE:
@@ -52,6 +55,9 @@ Logger::recordTransition(const hfsm2::StateID origin,
 			break;
 		case Transition::RESUME:
 			history.emplace_back(origin, Event::RESUME,   target);
+			break;
+		case Transition::UTILIZE:
+			history.emplace_back(origin, Event::UTILIZE,  target);
 			break;
 		case Transition::SCHEDULE:
 			history.emplace_back(origin, Event::SCHEDULE, target);

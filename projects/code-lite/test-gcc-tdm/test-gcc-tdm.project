@@ -60,22 +60,18 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_resumable.hpp"/>
+    <File Name="../../../test/test_resumable.cpp"/>
     <File Name="../../../test/test_utility.hpp"/>
     <File Name="../../../test/test_utility.cpp"/>
     <File Name="../../../test/test_state_data.hpp"/>
     <File Name="../../../test/test_state_data.cpp"/>
     <File Name="../../../test/test_self_transitions.hpp"/>
     <File Name="../../../test/test_self_transitions.cpp"/>
-    <File Name="../../../test/test_resumable_o.hpp"/>
-    <File Name="../../../test/test_resumable_o.cpp"/>
-    <File Name="../../../test/test_resumable_c.hpp"/>
-    <File Name="../../../test/test_resumable_c.cpp"/>
     <File Name="../../../test/test_planner.hpp"/>
     <File Name="../../../test/test_planner.cpp"/>
     <File Name="../../../test/test_internal_transitions.hpp"/>
     <File Name="../../../test/test_internal_transitions.cpp"/>
-    <File Name="../../../test/test_headless.hpp"/>
-    <File Name="../../../test/test_headless.cpp"/>
     <File Name="../../../test/test_guard.hpp"/>
     <File Name="../../../test/test_guard.cpp"/>
     <File Name="../../../test/test_delayed_teardown.hpp"/>

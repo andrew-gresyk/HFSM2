@@ -23,7 +23,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Composite BST test", "[machine]") {
+TEST_CASE("Composite BST", "[machine]") {
 	Context _;
 	Logger logger;
 
@@ -31,6 +31,9 @@ TEST_CASE("Composite BST test", "[machine]") {
 
 	{
 		const Events reference = {
+			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
+			{ FSM::stateId<S0>(),	Event::ENTRY_GUARD },
+
 			{ FSM::stateId<Apex>(),	Event::ENTER },
 			{ FSM::stateId<S0>(),	Event::ENTER },
 		};

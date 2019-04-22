@@ -128,50 +128,66 @@ struct _M {
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Composite			 = _CF<THead, RegionStrategy::Composite, TSubStates...>;
+	using Composite			 = _CF<RegionStrategy::Composite,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using CompositePeers	 = _CF<void,  RegionStrategy::Composite, TSubStates...>;
+	using CompositePeers	 = _CF<RegionStrategy::Composite,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Resumable			 = _CF<THead, RegionStrategy::Resumable, TSubStates...>;
+	using Resumable			  = _CF<RegionStrategy::Resumable,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeers	 = _CF<void,  RegionStrategy::Resumable, TSubStates...>;
+	using ResumablePeers	  = _CF<RegionStrategy::Resumable,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Orthogonal		 = _OF<THead, TSubStates...>;
+	using Utilitarian		  = _CF<RegionStrategy::Utilitarian, THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeers	 = _OF<void,  TSubStates...>;
+	using UtilitarianPeers	  = _CF<RegionStrategy::Utilitarian, void,	TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using Orthogonal		  = _OF<THead, TSubStates...>;
+
+	template <				  typename... TSubStates>
+	using OrthogonalPeers	  = _OF<void,  TSubStates...>;
 
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Root				 = _RF<Context, Config, PayloadList, Composite <THead, TSubStates...>>;
+	using Root				  = _RF<Context, Config, PayloadList, Composite  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using PeerRoot			 = _RF<Context, Config, PayloadList, CompositePeers	<  TSubStates...>>;
+	using PeerRoot			  = _RF<Context, Config, PayloadList, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		 = _RF<Context, Config, PayloadList, Resumable <THead, TSubStates...>>;
+	using ResumableRoot		  = _RF<Context, Config, PayloadList, Resumable  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	 = _RF<Context, Config, PayloadList, ResumablePeers	<  TSubStates...>>;
+	using ResumablePeerRoot	  = _RF<Context, Config, PayloadList, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	 = _RF<Context, Config, PayloadList, Orthogonal<THead, TSubStates...>>;
+	using UtilitarianRoot	  = _RF<Context, Config, PayloadList, Utilitarian<THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot = _RF<Context, Config, PayloadList, OrthogonalPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = _RF<Context, Config, PayloadList, UtilitarianPeers<  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using OrthogonalRoot	  = _RF<Context, Config, PayloadList, Orthogonal <THead, TSubStates...>>;
+
+	template <				  typename... TSubStates>
+	using OrthogonalPeerRoot  = _RF<Context, Config, PayloadList, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };

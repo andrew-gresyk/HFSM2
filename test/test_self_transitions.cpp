@@ -25,7 +25,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Self transition test", "[machine]") {
+TEST_CASE("Self transition", "[machine]") {
 	Context _;
 	Logger logger;
 
@@ -34,6 +34,10 @@ TEST_CASE("Self transition test", "[machine]") {
 
 		{
 			const Events reference = {
+				{ 0u,					Event::ENTRY_GUARD },
+				{ FSM::stateId<A>(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<A_1>(),	Event::ENTRY_GUARD },
+
 				{ 0u,					Event::ENTER },
 				{ FSM::stateId<A>(),	Event::ENTER },
 				{ FSM::stateId<A_1>(),	Event::ENTER },

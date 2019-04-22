@@ -23,6 +23,73 @@ Status::clear() {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
+ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
+	: _plan{plan}
+	, _curr{plan._bounds.first}
+{
+	_next = next();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+ConstPlanT<TArgs>::Iterator::operator bool() const {
+	HFSM_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
+
+	return _curr < ConstPlanT::TASK_CAPACITY;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+void
+ConstPlanT<TArgs>::Iterator::operator ++() {
+	_curr = _next;
+	_next = next();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+LongIndex
+ConstPlanT<TArgs>::Iterator::next() const {
+	if (_curr < ConstPlanT::TASK_CAPACITY) {
+		const TaskLink& task = _plan._planData.taskLinks[_curr];
+
+		return task.next;
+	} else {
+		HFSM_ASSERT(_curr == INVALID_LONG_INDEX);
+
+		return INVALID_LONG_INDEX;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
+ConstPlanT<TArgs>::ConstPlanT(const PlanData& planData,
+							  const RegionID regionId)
+
+	: _planData{planData}
+	, _bounds{planData.tasksBounds[regionId]}
+{}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+ConstPlanT<TArgs>::operator bool() const {
+	if (_bounds.first < TASK_CAPACITY) {
+		HFSM_ASSERT(_bounds.last < TASK_CAPACITY);
+		return true;
+	} else {
+		HFSM_ASSERT(_bounds.last == INVALID_LONG_INDEX);
+		return false;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
 PlanT<TArgs>::Iterator::Iterator(PlanT& plan)
 	: _plan{plan}
 	, _curr{plan._bounds.first}
@@ -87,8 +154,8 @@ PlanT<TArgs>::PlanT(PlanData& planData,
 
 template <typename TArgs>
 PlanT<TArgs>::operator bool() const {
-	if (_bounds.first < PlanT::TASK_CAPACITY) {
-		HFSM_ASSERT(_bounds.last < PlanT::TASK_CAPACITY);
+	if (_bounds.first < TASK_CAPACITY) {
+		HFSM_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
 	} else {
 		HFSM_ASSERT(_bounds.last == INVALID_LONG_INDEX);

@@ -41,20 +41,22 @@ private:
 
 	using StateRegistry			 = StateRegistryT<Args>;
 	using AllForks				 = typename StateRegistry::AllForks;
-	using PlanData				 = PlanDataT	 <Args>;
 
-	using Control				 = ControlT		 <Args>;
-	using FullControl			 = FullControlT	 <Args>;
-	using GuardControl			 = GuardControlT <Args>;
+	using Control				 = ControlT<Args>;
 
-	using PayloadBox			 = typename PayloadList::Variant;
-	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
+	using PlanControl			 = PlanControlT<Args>;
+	using PlanData				 = PlanDataT   <Args>;
+
+	using FullControl			 = FullControlT<Args>;
 	using Request				 = typename FullControl::Request;
 	using Requests				 = typename FullControl::Requests;
 
-	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
+	using GuardControl			 = GuardControlT<Args>;
 
-	//StaticPrintType<MaterialApex> p;
+	using PayloadBox			 = typename PayloadList::Variant;
+	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
+
+	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
@@ -107,6 +109,7 @@ public:
 	HFSM_INLINE void changeTo(const StateID stateId);
 	HFSM_INLINE void restart (const StateID stateId);
 	HFSM_INLINE void resume	 (const StateID stateId);
+	HFSM_INLINE void utilize (const StateID stateId);
 	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
@@ -117,6 +120,9 @@ public:
 
 	template <typename TState>
 	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
+
+	template <typename TState>
+	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
 
 	template <typename TState>
 	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
@@ -133,6 +139,9 @@ public:
 	HFSM_INLINE void resume  (const StateID stateId, TPayload* const payload);
 
 	template <typename TPayload>
+	HFSM_INLINE void utilize (const StateID stateId, TPayload* const payload);
+
+	template <typename TPayload>
 	HFSM_INLINE void schedule(const StateID stateId, TPayload* const payload);
 
 	template <typename TState, typename TPayload>
@@ -143,6 +152,9 @@ public:
 
 	template <typename TState, typename TPayload>
 	HFSM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
+
+	template <typename TState, typename TPayload>
+	HFSM_INLINE void utilize (TPayload* const payload)			{ utilize (stateId<TState>(), payload);				}
 
 	template <typename TState, typename TPayload>
 	HFSM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
@@ -182,8 +194,13 @@ public:
 	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
 #endif
 
-protected:
+private:
+	void initialEnter();
 	void processTransitions();
+
+	bool applyRequests(Control& control);
+
+	bool cancelledByEntryGuards(const Requests& pendingChanges);
 	bool cancelledByGuards(const Requests& pendingChanges);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT

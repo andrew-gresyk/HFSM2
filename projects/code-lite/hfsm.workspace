@@ -2,7 +2,6 @@
 <CodeLite_Workspace Name="hfsm" Database="" Version="10.0.0">
   <VirtualDirectory Name="examples"/>
   <VirtualDirectory Name="tests">
-    <Project Name="test-gcc5" Path="test-clang/test-clang.project" Active="No"/>
     <Project Name="test-gcc-tdm" Path="test-gcc-tdm/test-gcc-tdm.project" Active="Yes"/>
   </VirtualDirectory>
   <BuildMatrix>

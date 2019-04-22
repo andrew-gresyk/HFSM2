@@ -71,15 +71,7 @@ _S<NS, TA, TH>::deepEntryGuard(GuardControl& control,
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepEnterInitial(Control& control) {
-	deepEnter(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, typename TA, typename TH>
-void
-_S<NS, TA, TH>::deepEnter(Control& control,
+_S<NS, TA, TH>::deepEnter(PlanControl& control,
 						  const ShortIndex /*prong*/)
 {
 	HFSM_ASSERT(!control.planData().hasSucceeded(STATE_ID));
@@ -152,7 +144,7 @@ _S<NS, TA, TH>::deepExitGuard(GuardControl& control,
 
 template <StateID NS, typename TA, typename TH>
 void
-_S<NS, TA, TH>::deepExit(Control& control,
+_S<NS, TA, TH>::deepExit(PlanControl& control,
 						 const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
@@ -188,6 +180,27 @@ _S<NS, TA, TH>::wrapPlanFailed(FullControl& control) {
 	ScopedOrigin origin{control, STATE_ID};
 
 	_head.planFailed(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, typename TA, typename TH>
+UProng
+_S<NS, TA, TH>::wrapUtility(Control& control) {
+	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
+
+	const float utility = _head.utility(static_cast<const Control&>(control));
+	const float compliment = 1.0f - utility;
+
+	const float greater = 0.0f > compliment ?
+		0.0f : compliment;
+
+	const float clamped = greater < 1.0f ?
+		greater : 1.0f;
+
+	const Parent parent = control._stateRegistry.stateParents[STATE_ID];
+
+	return {clamped, parent.prong};
 }
 
 //------------------------------------------------------------------------------

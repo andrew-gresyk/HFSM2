@@ -103,10 +103,10 @@ struct A
 	: FSM::State
 {
 	//void entryGuard(GuardControl&)											{}
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
 	//void react(const Action&, FullControl&)									{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 //------------------------------------------------------------------------------
@@ -114,13 +114,13 @@ struct A
 struct A_1
 	: FSM::State
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 
 	void update(FullControl& control) {
 		control.changeTo<A_2>();
 	}
 
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 //------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ struct A_1
 struct A_2
 	: FSM::BaseT<Tracked>
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 
 	void update(FullControl& control) {
 		switch (entryCount()) {
@@ -142,7 +142,7 @@ struct A_2
 		}
 	}
 
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -150,19 +150,19 @@ struct A_2
 struct A_2_1
 	: FSM::State
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
 	void react(const Action&, FullControl&)										{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 struct A_2_2
 	: FSM::State
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
 	void react(const Action&, FullControl&)										{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 //------------------------------------------------------------------------------
@@ -170,10 +170,10 @@ struct A_2_2
 struct B
 	: FSM::State
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
 	void react(const Action&, FullControl&)										{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 //------------------------------------------------------------------------------
@@ -181,9 +181,9 @@ struct B
 struct B_1
 	: FSM::State
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 //------------------------------------------------------------------------------
@@ -191,9 +191,9 @@ struct B_1
 struct B_1_1
 	: FSM::State
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 //------------------------------------------------------------------------------
@@ -201,9 +201,9 @@ struct B_1_1
 struct B_1_2
 	: FSM::State
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 //------------------------------------------------------------------------------
@@ -211,9 +211,9 @@ struct B_1_2
 struct B_2
 	: FSM::State
 {
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -226,9 +226,9 @@ struct B_2_1
 		control.resume<B_2_2>();
 	}
 
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -243,7 +243,7 @@ struct B_2_2
 		}
 	}
 
-	void enter(Control&)														{}
+	void enter(PlanControl&)													{}
 
 	void update(FullControl& control) {
 		switch (totalUpdateCount()) {
@@ -262,7 +262,7 @@ struct B_2_2
 		}
 	}
 
-	void exit(Control&)															{}
+	void exit(PlanControl&)														{}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

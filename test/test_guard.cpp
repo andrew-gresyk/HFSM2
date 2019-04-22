@@ -20,13 +20,18 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Guard test", "[machine]") {
+TEST_CASE("Guard", "[machine]") {
 	Context _;
 	Logger logger;
 	FSM::Instance machine(_, &logger);
 
 	{
 		const Events reference = {
+			{ FSM::stateId<Apex>(),		Event::ENTRY_GUARD },
+			{ FSM::stateId<Step1>(),	Event::ENTRY_GUARD },
+			{ FSM::stateId<Step1_1>(),	Event::ENTRY_GUARD },
+			{ FSM::stateId<Step1_2>(),	Event::ENTRY_GUARD },
+
 			{ FSM::stateId<Apex>(),		Event::ENTER },
 			{ FSM::stateId<Step1>(),	Event::ENTER },
 			{ FSM::stateId<Step1_1>(),	Event::ENTER },

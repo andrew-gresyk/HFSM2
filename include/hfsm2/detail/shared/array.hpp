@@ -50,8 +50,8 @@ public:
 	static constexpr LongIndex INVALID	= INVALID_LONG_INDEX;
 	static constexpr LongIndex DUMMY	= INVALID;
 
-	using View = ArrayView<T>;
-	using Item = typename View::Item;
+	using Item = T;
+	using View = ArrayView<Item>;
 
 public:
 	HFSM_INLINE Array();

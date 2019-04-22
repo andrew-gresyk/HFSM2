@@ -16,11 +16,14 @@ protected:
 	using StateList			= typename Args::StateList;
 	using RegionList		= typename Args::RegionList;
 
-	using Control			= ControlT	   <Args>;
+	using Control			= ControlT<Args>;
+
+	using PlanControl		= PlanControlT<Args>;
+	using Plan				= PlanT<Args>;
+
 	using FullControl		= FullControlT <Args>;
 	using GuardControl		= GuardControlT<Args>;
 
-	using Plan				= typename Control::Plan;
 
 public:
 	HFSM_INLINE void preEntryGuard(Context&)									{}
@@ -68,26 +71,28 @@ struct _B<TFirst>
 	using StateList			= typename First::StateList;
 	using RegionList		= typename First::RegionList;
 
-	HFSM_INLINE void entryGuard		  (typename First::GuardControl&)			{}
-	HFSM_INLINE void enter			  (typename First::Control&)				{}
-	HFSM_INLINE void update			  (typename First::FullControl&)			{}
-	template <typename TEvent>
-	HFSM_INLINE void react			  (const TEvent&,
-									   typename First::FullControl&)			{}
-	HFSM_INLINE void exitGuard		  (typename First::GuardControl&)			{}
-	HFSM_INLINE void exit			  (typename First::Control&)				{}
+	HFSM_INLINE float utility		   (const typename First::Control&)			{ return 0.0f;			}
 
-	HFSM_INLINE void planSucceeded	  (typename First::FullControl& control) { control.succeed(); }
-	HFSM_INLINE void planFailed		  (typename First::FullControl& control) { control.fail();	  }
-
-	HFSM_INLINE void widePreEntryGuard(typename First::Context& context);
-	HFSM_INLINE void widePreEnter	  (typename First::Context& context);
-	HFSM_INLINE void widePreUpdate	  (typename First::Context& context);
+	HFSM_INLINE void  entryGuard	   (typename First::GuardControl&)			{}
+	HFSM_INLINE void  enter			   (typename First::PlanControl&)			{}
+	HFSM_INLINE void  update		   (typename First::FullControl&)			{}
 	template <typename TEvent>
-	HFSM_INLINE void widePreReact	  (const TEvent& event,
-									   typename First::Context& context);
-	HFSM_INLINE void widePreExitGuard (typename First::Context& context);
-	HFSM_INLINE void widePostExit	  (typename First::Context& context);
+	HFSM_INLINE void  react			   (const TEvent&,
+					 				    typename First::FullControl&)			{}
+	HFSM_INLINE void  exitGuard		   (typename First::GuardControl&)			{}
+	HFSM_INLINE void  exit			   (typename First::PlanControl&)			{}
+
+	HFSM_INLINE void  planSucceeded	   (typename First::FullControl& control)	{ control.succeed();	}
+	HFSM_INLINE void  planFailed	   (typename First::FullControl& control)	{ control.fail();		}
+
+	HFSM_INLINE void  widePreEntryGuard(typename First::Context& context);
+	HFSM_INLINE void  widePreEnter	   (typename First::Context& context);
+	HFSM_INLINE void  widePreUpdate	   (typename First::Context& context);
+	template <typename TEvent>
+	HFSM_INLINE void  widePreReact	   (const TEvent& event,
+					 				    typename First::Context& context);
+	HFSM_INLINE void  widePreExitGuard (typename First::Context& context);
+	HFSM_INLINE void  widePostExit	   (typename First::Context& context);
 
 	template <typename T>
 	static constexpr LongIndex stateId()  { return StateList ::template index<T>();	}

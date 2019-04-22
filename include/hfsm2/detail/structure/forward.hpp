@@ -20,6 +20,9 @@ struct _SF;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+template <RegionStrategy, typename, typename...>
+struct _CF;
+
 template <typename...>
 struct _CSF;
 
@@ -29,10 +32,10 @@ struct _CSF<TInitial, TRemaining...>;
 template <typename TInitial>
 struct _CSF<TInitial>;
 
-template <typename, RegionStrategy, typename...>
-struct _CF;
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename, typename...>
+struct _OF;
 
 template <typename...>
 struct _OSF;
@@ -42,9 +45,6 @@ struct _OSF<TInitial, TRemaining...>;
 
 template <typename TInitial>
 struct _OSF<TInitial>;
-
-template <typename, typename...>
-struct _OF;
 
 //------------------------------------------------------------------------------
 
@@ -56,9 +56,9 @@ struct WrapT<TH> {
 	using Type = _SF<TH>;
 };
 
-template <typename TH, RegionStrategy TG, typename... TS>
-struct WrapT<	 _CF<TH, TG, TS...>> {
-	using Type = _CF<TH, TG, TS...>;
+template <RegionStrategy TG, typename TH, typename... TS>
+struct WrapT<	 _CF<TG, TH, TS...>> {
+	using Type = _CF<TG, TH, TS...>;
 };
 
 template <typename... TS>
@@ -123,7 +123,7 @@ struct _CSF<TInitial> {
 	static constexpr ShortIndex REGION_COUNT  = RegionList::SIZE;
 };
 
-template <typename THead, RegionStrategy TStrategy, typename... TSubStates>
+template <RegionStrategy TStrategy, typename THead, typename... TSubStates>
 struct _CF final {
 	static constexpr RegionStrategy STRATEGY = TStrategy;
 
@@ -222,10 +222,10 @@ struct ArgsT final {
 template <StateID, typename, typename>
 struct _S;
 
-template <StateID, ShortIndex, ShortIndex, typename, typename, RegionStrategy, typename...>
+template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, typename, typename...>
 struct _C;
 
-template <StateID, ShortIndex, ShortIndex, typename, ShortIndex, typename...>
+template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, ShortIndex, typename...>
 struct _CS;
 
 template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
@@ -236,7 +236,7 @@ class _R;
 
 //------------------------------------------------------------------------------
 
-template <StateID, ShortIndex, ShortIndex, typename...>
+template <StateID,	  ShortIndex,	 ShortIndex,	typename...>
 struct MaterialT;
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH>
@@ -244,19 +244,19 @@ struct MaterialT   <NS, NC, NO, TA, TH> {
 	using Type = _S<NS,			TA, TH>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA,			  RegionStrategy TG, typename... TS>
-struct MaterialT   <NS, NC, NO, TA,  _CF<void, TG, TS...>> {
-	using Type = _C<NS, NC, NO, TA, Empty<TA>, TG, TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, 			 typename... TS>
+struct MaterialT   <NS, NC, NO, TA, _CF<TG, void,	   TS...>> {
+	using Type = _C<NS, NC, NO, TA,		TG, Empty<TA>, TS...>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
-struct MaterialT   <NS, NC, NO, TA, _CF<TH,	TG, TS...>> {
-	using Type = _C<NS, NC, NO, TA,		TH,	TG, TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+struct MaterialT   <NS, NC, NO, TA, _CF<TG, TH,	TS...>> {
+	using Type = _C<NS, NC, NO, TA,		TG, TH,	TS...>;
 };
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA,			  typename... TS>
-struct MaterialT   <NS, NC, NO, TA, _OF<void,  TS...>> {
-	using Type = _O<NS, NC, NO, TA, Empty<TA>, TS...>;
+struct MaterialT   <NS, NC, NO, TA, _OF<void,	   TS...>> {
+	using Type = _O<NS, NC, NO, TA,		Empty<TA>, TS...>;
 };
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
@@ -332,21 +332,21 @@ struct _RF final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID, ShortIndex, ShortIndex, typename, ShortIndex, typename...>
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename T>
 struct CSubMaterialT;
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename T>
-struct CSubMaterialT	 <NS, NC, NO, TA, NI, _TL<T>> {
-	using Type = Material<NS, NC, NO, TA,		  T>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename T>
+struct CSubMaterialT	 <NS, NC, NO, TA, TG, NI, _TL<T>> {
+	using Type = Material<NS, NC, NO, TA,			  T>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
-struct CSubMaterialT<NS, NC, NO, TA, NI, _TL<TS...>> {
-	using Type = _CS<NS, NC, NO, TA, NI,	 TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+struct CSubMaterialT<NS, NC, NO, TA, TG, NI, _TL<TS...>> {
+	using Type = _CS<NS, NC, NO, TA, TG, NI,	 TS...>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
-using CSubMaterial = typename CSubMaterialT<NS, NC, NO, TA, NI, TS...>::Type;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+using CSubMaterial = typename CSubMaterialT<NS, NC, NO, TA, TG, NI, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -358,9 +358,9 @@ struct ForwardT<  _S<NS, TA, TH>> {
 	using Type = _SF<		 TH>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, RegionStrategy TG, typename... TS>
-struct ForwardT<_C<NS, NC, NO, TA, TH, TG, TS...>> {
-	using Type = _CF<			   TH, TG, TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+struct ForwardT<_C<NS, NC, NO, TA, TG, TH, TS...>> {
+	using Type = _CF<			   TG, TH, TS...>;
 };
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
@@ -368,9 +368,9 @@ struct ForwardT<_O<NS, NC, NO, TA, TH, TS...>> {
 	using Type = _OF<			   TH, TS...>;
 };
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename... TS>
-struct ForwardT<_CS<NS, NC, NO, TA, NI, TS...>> {
-	using Type = _CSF<					TS...>;
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+struct ForwardT<_CS<NS, NC, NO, TA, TG, NI, TS...>> {
+	using Type = _CSF<						TS...>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

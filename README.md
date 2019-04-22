@@ -120,7 +120,7 @@ struct On
     : FSM::State
 {
     // called on state activation
-    void enter(Control& control) {
+    void enter(PlanControl& control) {
         // access the plan for the region
         auto plan = control.plan();
 
@@ -132,7 +132,7 @@ struct On
     }
 
     // called on state deactivation
-    void exit(Control& control) { /* ... */ }
+    void exit(PlanControl& control) { /* ... */ }
 
     // called on the successful completion of all plan steps
     void planSucceeded(FullControl& control) {

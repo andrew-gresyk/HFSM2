@@ -67,6 +67,9 @@ HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
 		case Request::RESUME:
 			return Transition::RESUME;
 
+		case Request::UTILIZE:
+			return Transition::UTILIZE;
+
 		case Request::SCHEDULE:
 			return Transition::SCHEDULE;
 

@@ -52,6 +52,7 @@ struct RequestT {
 		CHANGE,
 		RESTART,
 		RESUME,
+		UTILIZE,
 		SCHEDULE,
 
 		COUNT
@@ -269,60 +270,6 @@ struct StateRegistryT<ArgsT<TContext,
 	CompoParents compoParents;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-
-	AllForks resumable;
-	AllForks requested;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename TContext,
-		  typename TConfig,
-		  typename TStateList,
-		  typename TRegionList,
-		  LongIndex NOrthoCount,
-		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
-		  LongIndex NTaskCapacity>
-struct StateRegistryT<ArgsT<TContext,
-							TConfig,
-							TStateList,
-							TRegionList,
-							0,
-							NOrthoCount,
-							NOrthoUnits,
-							TPayloadList,
-							NTaskCapacity>>
-{
-	using StateList		= TStateList;
-	using RegionList	= TRegionList;
-	using PayloadList	= TPayloadList;
-
-	using Request		= RequestT<PayloadList>;
-
-	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
-	static constexpr ShortIndex ORTHO_COUNT = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS = NOrthoUnits;
-
-	using StateParents	= StaticArray<Parent, STATE_COUNT>;
-	using OrthoParents	= StaticArray<Parent, ORTHO_COUNT>;
-
-	using AllForks		= AllForksT<0, ORTHO_COUNT, ORTHO_UNITS>;
-
-	HFSM_INLINE bool isActive		(const StateID) const			  {	return true;	}
-	HFSM_INLINE bool isResumable	(const StateID) const			  {	return false;	}
-
-	HFSM_INLINE bool isPendingChange(const StateID) const			  {	return false;	}
-	HFSM_INLINE bool isPendingEnter	(const StateID) const			  {	return false;	}
-	HFSM_INLINE bool isPendingExit	(const StateID) const			  {	return false;	}
-
-	HFSM_INLINE bool requestImmediate(const Request)	{ HFSM_BREAK();	return true;	}
-	HFSM_INLINE void requestScheduled(const Request)	{ HFSM_BREAK();					}
-
-	HFSM_INLINE void clearOrthoRequested()											   {}
-
-	StateParents stateParents;
-	OrthoParents orthoParents;
 
 	AllForks resumable;
 	AllForks requested;

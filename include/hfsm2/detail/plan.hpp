@@ -30,21 +30,88 @@ combine(const Status lhs, const Status rhs) {
 				  lhs.outerTransition || rhs.outerTransition};
 }
 
-//------------------------------------------------------------------------------
-
-template <typename>
-class ControlT;
-
-template <typename>
-class FullControlT;
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-class PlanT {
+class ConstPlanT {
 	template <typename>
 	friend class ControlT;
 
 	template <typename>
+	friend class PlanControlT;
+
+	template <typename>
 	friend class FullControlT;
+
+	template <typename>
+	friend class GuardControlT;
+
+	using Args			= TArgs;
+	using Context		= typename Args::Context;
+	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
+	using PayloadList	= typename Args::PayloadList;
+
+	static constexpr LongIndex TASK_CAPACITY = Args::TASK_CAPACITY;
+
+public:
+	using PlanData		= PlanDataT<Args>;
+	using TaskLinks		= typename PlanData::TaskLinks;
+	using RegionBit		= typename PlanData::RegionBit;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct Iterator {
+		HFSM_INLINE Iterator(const ConstPlanT& plan);
+
+		HFSM_INLINE explicit operator bool() const;
+
+		HFSM_INLINE void operator ++();
+
+		HFSM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
+
+		HFSM_INLINE LongIndex next() const;
+
+		const ConstPlanT& _plan;
+		LongIndex _curr;
+		LongIndex _next;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+private:
+	HFSM_INLINE ConstPlanT(const PlanData& planData,
+						   const RegionID regionId);
+
+	template <typename T>
+	static constexpr LongIndex stateId()	{ return StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
+
+public:
+	HFSM_INLINE explicit operator bool() const;
+
+	HFSM_INLINE Iterator begin()			{ return Iterator{*this};					}
+
+private:
+	const PlanData& _planData;
+	const Bounds& _bounds;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
+class PlanT {
+	template <typename>
+	friend class PlanControlT;
+
+	template <typename>
+	friend class FullControlT;
+
+	template <typename>
+	friend class GuardControlT;
 
 	using Args			= TArgs;
 	using Context		= typename Args::Context;

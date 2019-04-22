@@ -8,4 +8,4 @@ cmake-*
 
 /binaries-*
 /hfsm_test.dir
-/projects/code-lite/test-gcc-tdm
+/projects/code-lite/test-gcc-tdm/CMakeLists.txt

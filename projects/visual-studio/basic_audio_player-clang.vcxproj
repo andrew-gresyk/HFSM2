@@ -19,82 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\deprecated_test.cpp" />
-    <ClCompile Include="..\..\test\main.cpp" />
-    <ClCompile Include="..\..\test\shared.cpp" />
-    <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
-    <ClCompile Include="..\..\test\shared\test_list.cpp" />
-    <ClCompile Include="..\..\test\shared\test_object_pool.cpp" />
-    <ClCompile Include="..\..\test\test_composite_bst.cpp" />
-    <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
-    <ClCompile Include="..\..\test\test_guard.cpp" />
-    <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
-    <ClCompile Include="..\..\test\test_planner.cpp" />
-    <ClCompile Include="..\..\test\test_resumable.cpp" />
-    <ClCompile Include="..\..\test\test_self_transitions.cpp" />
-    <ClCompile Include="..\..\test\test_state_data.cpp" />
-    <ClCompile Include="..\..\test\test_utility.cpp" />
+    <ClCompile Include="..\..\examples\basic_audio_player\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\hfsm2\detail\control.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\logger_interface.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\shared.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\structure_report.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\injections.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\plan.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\plan_data.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\array.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\array_view.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\object_pool.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\composite.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\composite_sub.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\forward.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\root.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
-    <ClInclude Include="..\..\test\deprecated_test.hpp" />
-    <ClInclude Include="..\..\test\shared.hpp" />
-    <ClInclude Include="..\..\test\test_composite_bst.hpp" />
-    <ClInclude Include="..\..\test\test_delayed_teardown.hpp" />
-    <ClInclude Include="..\..\test\test_guard.hpp" />
-    <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
-    <ClInclude Include="..\..\test\test_planner.hpp" />
-    <ClInclude Include="..\..\test\test_resumable.hpp" />
-    <ClInclude Include="..\..\test\test_self_transitions.hpp" />
-    <ClInclude Include="..\..\test\test_state_data.hpp" />
-    <ClInclude Include="..\..\test\test_utility.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\include\hfsm2\detail\control.inl" />
-    <None Include="..\..\include\hfsm2\detail\injections.inl" />
-    <None Include="..\..\include\hfsm2\detail\plan.inl" />
-    <None Include="..\..\include\hfsm2\detail\plan_data.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\array.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\array_view.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\iterator.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\list.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\object_pool.inl" />
-    <None Include="..\..\include\hfsm2\detail\state_registry.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\composite.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\composite_sub.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_1.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\root.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\state.inl" />
+    <Text Include="..\..\examples\basic_audio_player\CMakeLists.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{D2176F37-135E-4003-9A90-7A9E78E0371F}</ProjectGuid>
+    <ProjectGuid>{824E695C-BC39-4A3B-B93D-A4CAAD5BD69F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -134,25 +66,21 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="shared-clang.props" />
     <Import Project="shared-clang-debug.props" />
-    <Import Project="catch2.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="shared-clang.props" />
     <Import Project="shared-clang-release.props" />
-    <Import Project="catch2.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="shared-clang.props" />
     <Import Project="shared-clang-debug.props" />
-    <Import Project="catch2.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="shared-clang.props" />
     <Import Project="shared-clang-release.props" />
-    <Import Project="catch2.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" />
