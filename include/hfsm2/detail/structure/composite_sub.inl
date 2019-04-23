@@ -167,7 +167,7 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && !defined __clang__
+#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 UProng
@@ -235,7 +235,7 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeUtilitarian(Control& contro
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && !defined __clang__
+#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 UProng

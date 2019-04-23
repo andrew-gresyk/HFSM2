@@ -84,7 +84,7 @@ struct _C {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined _MSC_VER || defined __clang__
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
 
 	template <RegionStrategy TG = STRATEGY>
 	HFSM_INLINE UProng deepRequestChange			 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
@@ -110,7 +110,7 @@ struct _C {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined _MSC_VER || defined __clang__
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
 
 	template <RegionStrategy TG = STRATEGY>
 	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);

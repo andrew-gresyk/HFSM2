@@ -5249,7 +5249,7 @@ struct _CS {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined _MSC_VER || defined __clang__
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
 
 	template <RegionStrategy TG = STRATEGY>
 	HFSM_INLINE UProng deepRequestChange			 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
@@ -5275,7 +5275,7 @@ struct _CS {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined _MSC_VER || defined __clang__
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
 
 	template <RegionStrategy TG = STRATEGY>
 	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
@@ -5501,7 +5501,7 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && !defined __clang__
+#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 UProng
@@ -5569,7 +5569,7 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeUtilitarian(Control& contro
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && !defined __clang__
+#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 UProng
@@ -5809,7 +5809,7 @@ struct _C {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined _MSC_VER || defined __clang__
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
 
 	template <RegionStrategy TG = STRATEGY>
 	HFSM_INLINE UProng deepRequestChange			 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
@@ -5835,7 +5835,7 @@ struct _C {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined _MSC_VER || defined __clang__
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
 
 	template <RegionStrategy TG = STRATEGY>
 	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
@@ -6149,7 +6149,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && !defined __clang__
+#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 UProng
@@ -6219,7 +6219,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && !defined __clang__
+#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 UProng
