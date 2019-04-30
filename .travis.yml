@@ -194,12 +194,12 @@ script:
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
   - make
 
-  - cd "${TRAVIS_BUILD_DIR}/examples/basic_traffic_light"
+  - cd "${TRAVIS_BUILD_DIR}/examples/basic_audio_player"
   - mkdir build && cd build
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
   - make
 
-  - cd "${TRAVIS_BUILD_DIR}/examples/basic_transition_payload"
+  - cd "${TRAVIS_BUILD_DIR}/examples/basic_traffic_light"
   - mkdir build && cd build
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
   - make
