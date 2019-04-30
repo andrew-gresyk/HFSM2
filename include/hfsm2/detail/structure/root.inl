@@ -13,8 +13,7 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 	HFSM_IF_STRUCTURE(getStateNames());
 
-	for (auto& payload : _requestPayloads)
-		payload.reset();
+	_payloadsSet.clear();
 
 	initialEnter();
 
@@ -148,10 +147,9 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
-							  TPayload* const payload)
+							  const Payload& payload)
 {
 	const Request request(Request::Type::CHANGE, stateId, payload);
 	_requests << request;
@@ -165,10 +163,9 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::restart(const StateID stateId,
-							 TPayload* const payload)
+							 const Payload& payload)
 {
 	const Request request(Request::Type::RESTART, stateId, payload);
 	_requests << request;
@@ -182,10 +179,9 @@ _R<TC, TG, TPL, TA>::restart(const StateID stateId,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::resume(const StateID stateId,
-							TPayload* const payload)
+							const Payload& payload)
 {
 	const Request request(Request::Type::RESUME, stateId, payload);
 	_requests << request;
@@ -199,10 +195,9 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::utilize(const StateID stateId,
-							 TPayload* const payload)
+							 const Payload& payload)
 {
 	const Request request(Request::Type::UTILIZE, stateId, payload);
 	_requests << request;
@@ -216,10 +211,9 @@ _R<TC, TG, TPL, TA>::utilize(const StateID stateId,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
-							  TPayload* const payload)
+							  const Payload& payload)
 {
 	const Request request(Request::Type::SCHEDULE, stateId, payload);
 	_requests << request;
@@ -238,21 +232,22 @@ _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
-		_requestPayloads[stateId].reset();
+		_payloadsSet[stateId] = false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
-								  TPayload* const payload)
+								  const Payload& payload)
 {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
-	if (stateId < Payloads::CAPACITY)
-		_requestPayloads[stateId] = payload;
+	if (stateId < Payloads::CAPACITY) {
+		_payloads[stateId] = payload;
+		_payloadsSet[stateId] = true;
+	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -263,7 +258,7 @@ _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
-		return !!_requestPayloads[stateId];
+		return !!_payloadsSet[stateId];
 	else
 		return false;
 }
@@ -271,19 +266,12 @@ _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
-TPayload*
+const TPL*
 _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
-	using Payload = TPayload;
-
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
-	if (stateId < Payloads::CAPACITY) {
-		const auto& payload = _requestPayloads[stateId];
-
-		return payload.template get<Payload>();
-	} else
-		return nullptr;
+	return stateId < Payloads::CAPACITY && _payloadsSet[stateId] ?
+		&_payloads[stateId] : nullptr;
 }
 
 //------------------------------------------------------------------------------

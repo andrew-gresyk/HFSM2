@@ -1,19 +1,6 @@
 namespace hfsm2 {
 namespace detail {
 
-//------------------------------------------------------------------------------
-
-struct UProng {
-	HFSM_INLINE UProng(const float utilityCompliment_ = 1.0f,
-					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
-		: utilityCompliment{utilityCompliment_}
-		, prong{prong_}
-	{}
-
-	float utilityCompliment;
-	ShortIndex prong;
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <StateID TStateID,
@@ -25,9 +12,10 @@ struct _S {
 	using Args			= TArgs;
 	using Head			= THead;
 
-	using PayloadList	= typename Args::PayloadList;
+	using UProng		= typename Args::UProng;
+	using Payload		= typename Args::Payload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
 
 	using Control		= ControlT<Args>;

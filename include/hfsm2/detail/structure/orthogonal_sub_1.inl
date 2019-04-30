@@ -158,7 +158,7 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
 	initial  .deepRequestChange(control);
 	remaining.wideRequestChange(control);
@@ -169,12 +169,12 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideReportChange(Control& control) {
 	const UProng i = initial  .deepReportChange(control);
 	const UProng r = remaining.wideReportChange(control);
 
-	return { i.utilityCompliment * r.utilityCompliment };
+	return { i.utility * r.utility };
 }
 
 //------------------------------------------------------------------------------
@@ -216,12 +216,12 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
 	const UProng i = initial  .deepReportUtilize(control);
 	const UProng r = remaining.wideReportUtilize(control);
 
-	return { i.utilityCompliment * r.utilityCompliment };
+	return { i.utility * r.utility };
 }
 
 //------------------------------------------------------------------------------

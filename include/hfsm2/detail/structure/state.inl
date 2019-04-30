@@ -185,22 +185,15 @@ _S<NS, TA, TH>::wrapPlanFailed(FullControl& control) {
 //------------------------------------------------------------------------------
 
 template <StateID NS, typename TA, typename TH>
-UProng
+typename TA::UProng
 _S<NS, TA, TH>::wrapUtility(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
 
 	const float utility = _head.utility(static_cast<const Control&>(control));
-	const float compliment = 1.0f - utility;
-
-	const float greater = 0.0f > compliment ?
-		0.0f : compliment;
-
-	const float clamped = greater < 1.0f ?
-		greater : 1.0f;
 
 	const Parent parent = control._stateRegistry.stateParents[STATE_ID];
 
-	return {clamped, parent.prong};
+	return {utility, parent.prong};
 }
 
 //------------------------------------------------------------------------------

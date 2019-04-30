@@ -131,7 +131,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(Control& control) {
 	initial.deepRequestChange(control);
 
@@ -141,7 +141,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI>::wideReportChange(Control& control) {
 	return initial.deepReportChange(control);
 }
@@ -181,7 +181,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRequestUtilize(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI>::wideReportUtilize(Control& control) {
 	return initial.deepReportUtilize(control);
 }

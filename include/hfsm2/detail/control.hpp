@@ -239,7 +239,7 @@ class FullControlT
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
 	using Control		= ControlT<Args>;
 	using StateRegistry	= StateRegistryT<Args>;
@@ -249,8 +249,8 @@ class FullControlT
 	using Plan			= typename PlanControl::Plan;
 	using PlanData		= PlanDataT<Args>;
 
-	using Request		= RequestT <PayloadList>;
-	using Requests		= RequestsT<PayloadList, Args::COMPO_COUNT>;
+	using Request		= RequestT <Payload>;
+	using Requests		= RequestsT<Payload, Args::COMPO_COUNT>;
 
 protected:
 
@@ -360,7 +360,7 @@ class GuardControlT
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
 	using Control		= ControlT<Args>;
 	using StateRegistry	= StateRegistryT<Args>;
@@ -371,7 +371,7 @@ class GuardControlT
 	using FullControl	= FullControlT<Args>;
 
 public:
-	using Requests		= RequestsT<PayloadList, Args::COMPO_COUNT>;
+	using Requests		= RequestsT<Payload, Args::COMPO_COUNT>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -42,8 +42,7 @@ TEST_CASE("State data", "[machine]") {
 	}
 
 	WHEN("a bool is set on Origin") {
-		_.boolPayload = true;
-		machine.setStateData<Origin>(&_.boolPayload);
+		machine.setStateData<Origin>(true);
 
 		THEN("it is correctly set") {
 			REQUIRE(!machine.isStateDataSet<Top>()); //-V521
@@ -52,12 +51,12 @@ TEST_CASE("State data", "[machine]") {
 		}
 
 		AND_THEN("correctly read") {
-			bool* const payBool = machine.getStateData<Origin, bool>();
+			const bool* const read = machine.getStateData<Origin>();
 
-			REQUIRE(payBool != nullptr); //-V521
+			REQUIRE(read); //-V521
 
-			if (payBool)
-				REQUIRE(*payBool); //-V521
+			if (read)
+				REQUIRE(*read); //-V521
 		}
 	}
 
@@ -71,7 +70,7 @@ TEST_CASE("State data", "[machine]") {
 		}
 
 		AND_THEN("correctly read") {
-			REQUIRE(machine.getStateData<Origin, bool>() == nullptr); //-V521
+			REQUIRE(machine.getStateData<Origin>() == nullptr); //-V521
 		}
 	}
 }

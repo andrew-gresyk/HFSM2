@@ -129,15 +129,11 @@ struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename...>
-class VariantT;
-
 template <typename... Ts>
 struct _ITL
 	: private IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
 	using Base = IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
-	using Variant = VariantT<Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
@@ -184,59 +180,6 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 
 template <typename... Ts>
 using Merge = typename MergeT<Ts...>::TypeList;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#pragma pack(push, 1)
-
-template <typename... Ts>
-class alignas(alignof(void*)) VariantT {
-	using Types = _ITL<Ts...>;
-
-public:
-	template <typename T>
-	static constexpr LongIndex index() {
-		return Types::template index<T>();
-	}
-
-	template <typename T>
-	static constexpr bool contains() {
-		return Types::template contains<T>();
-	}
-
-	HFSM_INLINE VariantT() = default;
-
-	template <typename T,
-			  typename = typename std::enable_if<contains<T>()>::type>
-	HFSM_INLINE VariantT(T* const p)
-		: _pointer(p)
-		, _index(index<T>())
-	{
-		HFSM_ASSERT(_index != INVALID_LONG_INDEX);
-	}
-
-	HFSM_INLINE explicit operator bool() const { return _index != INVALID_LONG_INDEX; }
-
-	HFSM_INLINE void reset() {
-		_pointer = nullptr;
-		_index = INVALID_LONG_INDEX;
-	}
-
-	template <typename T>
-	HFSM_INLINE typename std::enable_if<contains<T>(), T>::type*
-	get() const {
-		const auto INDEX = index<T>();
-
-		return INDEX == _index ?
-			reinterpret_cast<T*>(_pointer) : nullptr;
-	}
-
-private:
-	void* _pointer = nullptr;
-	LongIndex _index = INVALID_LONG_INDEX;
-};
-
-#pragma pack(pop)
 
 ////////////////////////////////////////////////////////////////////////////////
 

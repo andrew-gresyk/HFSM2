@@ -113,17 +113,49 @@
 #include "detail/structure/forward.hpp"
 
 namespace hfsm2 {
+
+//------------------------------------------------------------------------------
+
+template <typename TUtility = float,
+		  LongIndex NMaxPlanTasks = INVALID_LONG_INDEX,
+		  LongIndex NMaxSubstitutions = 4>
+struct Config {
+	using Utility = TUtility;
+
+	static constexpr LongIndex MAX_PLAN_TASKS	 = NMaxPlanTasks;
+	static constexpr LongIndex MAX_SUBSTITUTIONS = NMaxSubstitutions;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct UProng {
+		HFSM_INLINE UProng(const Utility utility_ = Utility{1.0f},
+						   const ShortIndex prong_ = INVALID_SHORT_INDEX)
+			: utility{utility_}
+			, prong{prong_}
+		{}
+
+		Utility utility;
+		ShortIndex prong;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+};
+
 namespace detail {
+
+//------------------------------------------------------------------------------
+
+struct EmptyPayload {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext,
 		  typename TConfig = Config<>,
-		  typename TPayloadList = _ITL<>>
+		  typename TPayload = EmptyPayload>
 struct _M {
-	using Context	  = TContext;
-	using Config	  = TConfig;
-	using PayloadList = TPayloadList;
+	using Context = TContext;
+	using Config  = TConfig;
+	using Payload = TPayload;
 
 	//----------------------------------------------------------------------
 
@@ -160,34 +192,34 @@ struct _M {
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Root				  = _RF<Context, Config, PayloadList, Composite  <THead, TSubStates...>>;
+	using Root				  = _RF<Context, Config, Payload, Composite  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using PeerRoot			  = _RF<Context, Config, PayloadList, CompositePeers  <  TSubStates...>>;
+	using PeerRoot			  = _RF<Context, Config, Payload, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		  = _RF<Context, Config, PayloadList, Resumable  <THead, TSubStates...>>;
+	using ResumableRoot		  = _RF<Context, Config, Payload, Resumable  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	  = _RF<Context, Config, PayloadList, ResumablePeers  <  TSubStates...>>;
+	using ResumablePeerRoot	  = _RF<Context, Config, Payload, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using UtilitarianRoot	  = _RF<Context, Config, PayloadList, Utilitarian<THead, TSubStates...>>;
+	using UtilitarianRoot	  = _RF<Context, Config, Payload, Utilitarian<THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using UtilitarianPeerRoot = _RF<Context, Config, PayloadList, UtilitarianPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = _RF<Context, Config, Payload, UtilitarianPeers<  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	  = _RF<Context, Config, PayloadList, Orthogonal <THead, TSubStates...>>;
+	using OrthogonalRoot	  = _RF<Context, Config, Payload, Orthogonal <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot  = _RF<Context, Config, PayloadList, OrthogonalPeers <  TSubStates...>>;
+	using OrthogonalPeerRoot  = _RF<Context, Config, Payload, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -209,19 +241,19 @@ struct Machine<TContext>
 	: detail::_M<TContext>
 {};
 
-template <typename TContext, LongIndex... NConstants>
-struct Machine<TContext, Config<NConstants...>>
-	: detail::_M<TContext, Config<NConstants...>, TransitionPayloads<>>
+template <typename TContext, typename TUtility, LongIndex... NConstants>
+struct Machine<TContext, Config<TUtility, NConstants...>>
+	: detail::_M<TContext, Config<TUtility, NConstants...>, TransitionPayloads<>>
 {};
 
-template <typename TContext, typename... TPayloads>
-struct Machine<TContext, TransitionPayloads<TPayloads...>>
-	: detail::_M<TContext, Config<>, TransitionPayloads<TPayloads...>>
+template <typename TContext, typename TPayload>
+struct Machine<TContext, TPayload>
+	: detail::_M<TContext, Config<>, TPayload>
 {};
 
-template <typename TContext, LongIndex... NConstants, typename... TPayloads>
-struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>>
-	: detail::_M<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>>
+template <typename TContext, typename TUtility, LongIndex... NConstants, typename TPayload>
+struct Machine<TContext, Config<TUtility, NConstants...>, TPayload>
+	: detail::_M<TContext, Config<TUtility, NConstants...>, TPayload>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////

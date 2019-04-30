@@ -4,14 +4,9 @@ namespace test_state_data {
 
 //------------------------------------------------------------------------------
 
-struct Context {
-	bool boolPayload;
-	char charPayload;
-};
+struct Context {};
 
-using Payloads = hfsm2::TransitionPayloads<char, bool>;
-
-using M = hfsm2::Machine<Context, Payloads>;
+using M = hfsm2::Machine<Context, bool>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

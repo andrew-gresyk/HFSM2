@@ -21,12 +21,13 @@ struct _CS {
 
 	using Args			= TArgs;
 
-	using Context		= typename Args::Context;
+	using Utility		= typename Args::Utility;
+	using UProng		= typename Args::UProng;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;

@@ -1,16 +1,6 @@
 ﻿#pragma once
 
 namespace hfsm2 {
-
-//------------------------------------------------------------------------------
-
-template <LongIndex NMaxPlanTasks = INVALID_LONG_INDEX,
-		  LongIndex NMaxSubstitutions = 4>
-struct Config {
-	static constexpr LongIndex MAX_PLAN_TASKS	 = NMaxPlanTasks;
-	static constexpr LongIndex MAX_SUBSTITUTIONS = NMaxSubstitutions;
-};
-
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,14 +191,17 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
+		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct ArgsT final {
-	using Context			= TContext;
-	using Config			= TConfig;
-	using StateList			= TStateList;
-	using RegionList		= TRegionList;
-	using PayloadList		= TPayloadList;
+	using Context	 = TContext;
+	using Config	 = TConfig;
+	using StateList	 = TStateList;
+	using RegionList = TRegionList;
+	using Payload	 = TPayload;
+
+	using Utility	 = typename TConfig::Utility;
+	using UProng	 = typename TConfig::UProng;
 
 	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
 	static constexpr ShortIndex COMPO_COUNT	  = NCompoCount;
@@ -271,13 +264,13 @@ using Material = typename MaterialT<NS, NC, NO, TS...>::Type;
 
 template <typename TContext,
 		  typename TConfig,
-		  typename TPayloadList,
+		  typename TPayload,
 		  typename TApex>
 struct _RF final {
-	using Context			= TContext;
-	using Config			= TConfig;
-	using PayloadList		= TPayloadList;
-	using Apex				= TApex;
+	using Context		= TContext;
+	using Config		= TConfig;
+	using Payload		= TPayload;
+	using Apex			= TApex;
 
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
@@ -285,34 +278,34 @@ struct _RF final {
 	static constexpr LongIndex TASK_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
 													   Config::MAX_PLAN_TASKS : Apex::PRONG_COUNT * 2;
 
-	using Instance			= _R<Context, Config, PayloadList, Apex>;
+	using Instance		= _R<Context, Config, Payload, Apex>;
 
 	static constexpr ShortIndex COMPO_COUNT		 = Apex::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT		 = Apex::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS		 = Apex::ORTHO_UNITS;
 
-	using StateList			= Indexed<typename Apex::StateList>;
-	using RegionList		= Indexed<typename Apex::RegionList>;
+	using StateList		= Indexed<typename Apex::StateList>;
+	using RegionList	= Indexed<typename Apex::RegionList>;
 
-	using Args				= ArgsT<Context,
-									Config,
-									StateList,
-									RegionList,
-									COMPO_COUNT,
-									ORTHO_COUNT,
-									ORTHO_UNITS,
-									PayloadList,
-									TASK_CAPACITY>;
+	using Args			= ArgsT<Context,
+								Config,
+								StateList,
+								RegionList,
+								COMPO_COUNT,
+								ORTHO_COUNT,
+								ORTHO_UNITS,
+								Payload,
+								TASK_CAPACITY>;
 
-	using Control			= ControlT	   <Args>;
-	using FullControl		= FullControlT <Args>;
-	using GuardControl		= GuardControlT<Args>;
+	using Control		= ControlT	   <Args>;
+	using FullControl	= FullControlT <Args>;
+	using GuardControl	= GuardControlT<Args>;
 
-	using Bare				= BareT<Args>;
-	using State				= Empty<Args>;
+	using Bare			= BareT<Args>;
+	using State			= Empty<Args>;
 
 	template <typename... TInjections>
-	using BaseT				= _B<TInjections...>;
+	using BaseT			= _B<TInjections...>;
 
 	template <typename T>
 	static constexpr LongIndex stateId() {

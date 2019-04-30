@@ -6,12 +6,8 @@ namespace detail {
 
 #pragma pack(push, 2)
 
-//template <typename TPayloadList>
-//struct TaskLinkT {
-
 struct TaskLink {
-	//using PayloadList	= TPayloadList;
-	//using PayloadBox		= typename PayloadList::Variant;
+	//using PayloadBox		= ...;
 
 	HFSM_INLINE TaskLink(const StateID origin_,
 						 const StateID destination_)
@@ -63,7 +59,7 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
+		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct PlanDataT<ArgsT<TContext,
 					   TConfig,
@@ -72,7 +68,7 @@ struct PlanDataT<ArgsT<TContext,
 					   NCompoCount,
 					   NOrthoCount,
 					   NOrthoUnits,
-					   TPayloadList,
+					   TPayload,
 					   NTaskCapacity>>
 {
 	using StateList		= TStateList;
@@ -113,7 +109,7 @@ template <typename TContext,
 		  typename TRegionList,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
+		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct PlanDataT<ArgsT<TContext,
 					   TConfig,
@@ -122,7 +118,7 @@ struct PlanDataT<ArgsT<TContext,
 					   0,
 					   NOrthoCount,
 					   NOrthoUnits,
-					   TPayloadList,
+					   TPayload,
 					   NTaskCapacity>>
 {
 	static /*constexpr*/ void setSuccessful(const StateID, const bool)			{}

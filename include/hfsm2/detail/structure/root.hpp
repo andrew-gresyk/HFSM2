@@ -5,16 +5,16 @@ namespace detail {
 
 template <typename TContext,
 		  typename TConfig,
-		  typename TPayloadList,
+		  typename TPayload,
 		  typename TApex>
 class _R final {
 	using Context				 = TContext;
 	using Config				 = TConfig;
-	using PayloadList			 = TPayloadList;
+	using Payload				 = TPayload;
 	using Apex					 = TApex;
 
 	using ForwardApex			 = Wrap<Apex>;
-	using AllForward			 = _RF<Context, Config, PayloadList, Apex>;
+	using AllForward			 = _RF<Context, Config, Payload, Apex>;
 	using StateList				 = typename AllForward::StateList;
 	using RegionList			 = typename AllForward::RegionList;
 
@@ -53,8 +53,8 @@ private:
 
 	using GuardControl			 = GuardControlT<Args>;
 
-	using PayloadBox			 = typename PayloadList::Variant;
-	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
+	using Payloads				 = Array<Payload, STATE_COUNT>;
+	using PayloadsSet			 = BitArrayStorageT<LongIndex, STATE_COUNT>;
 
 	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
 
@@ -69,7 +69,7 @@ private:
 	using StructureStorage		 = Array<StructureEntry,		NAME_COUNT>;
 	using ActivityHistoryStorage = Array<char,					NAME_COUNT>;
 
-	using TransitionInfo		 = TransitionInfoT<PayloadList>;
+	using TransitionInfo		 = TransitionInfoT<Payload>;
 	using TransitionInfoStorage	 = Array<TransitionInfo,		COMPO_COUNT * 4>;
 #endif
 
@@ -113,85 +113,71 @@ public:
 	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void restart ()									{ restart (stateId<TState>());						}
+	HFSM_INLINE void restart ()									{ restart (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
+	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
+	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TPayload>
-	HFSM_INLINE void changeTo(const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void changeTo(const StateID stateId, const Payload& payload);
+	HFSM_INLINE void restart (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void resume  (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void utilize (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
 
-	template <typename TPayload>
-	HFSM_INLINE void restart (const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
 
-	template <typename TPayload>
-	HFSM_INLINE void resume  (const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
 
-	template <typename TPayload>
-	HFSM_INLINE void utilize (const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
 
-	template <typename TPayload>
-	HFSM_INLINE void schedule(const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
 
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void restart (TPayload* const payload)			{ restart (stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void utilize (TPayload* const payload)			{ utilize (stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
+	template <typename TState>
+	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void resetStateData(const StateID stateId);
-
-	template <typename TPayload>
-	HFSM_INLINE void setStateData  (const StateID stateId, TPayload* const payload);
-
+	HFSM_INLINE void setStateData  (const StateID stateId, const Payload& payload);
 	HFSM_INLINE bool isStateDataSet(const StateID stateId) const;
-
-	template <typename TPayload>
-	HFSM_INLINE TPayload* getStateData(const StateID stateId) const;
+	HFSM_INLINE const Payload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void setStateData  (TPayload* const payload)	{ setStateData  (stateId<TState>(), payload);		}
+	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());			}
 
 	template <typename TState>
-	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
+	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);	}
 
-	template <typename TState, typename TPayload>
-	HFSM_INLINE TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
+	template <typename TState>
+	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());		}
+
+	template <typename TState>
+	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const					{ return _structure;								}
-	const MachineActivity&  activity()  const					{ return _activityHistory;							}
+	const MachineStructure& structure() const					{ return _structure;							}
+	const MachineActivity&  activity()  const					{ return _activityHistory;						}
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
+	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;								}
 #endif
 
 private:
@@ -215,7 +201,8 @@ private:
 	StateRegistry _stateRegistry;
 	PlanData _planData;
 
-	Payloads _requestPayloads;
+	Payloads _payloads;
+	PayloadsSet _payloadsSet;
 	Requests _requests;
 
 	MaterialApex _apex;

@@ -1349,15 +1349,11 @@ struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename...>
-class VariantT;
-
 template <typename... Ts>
 struct _ITL
 	: private IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
 	using Base = IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
-	using Variant = VariantT<Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
@@ -1404,59 +1400,6 @@ struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
 
 template <typename... Ts>
 using Merge = typename MergeT<Ts...>::TypeList;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#pragma pack(push, 1)
-
-template <typename... Ts>
-class alignas(alignof(void*)) VariantT {
-	using Types = _ITL<Ts...>;
-
-public:
-	template <typename T>
-	static constexpr LongIndex index() {
-		return Types::template index<T>();
-	}
-
-	template <typename T>
-	static constexpr bool contains() {
-		return Types::template contains<T>();
-	}
-
-	HFSM_INLINE VariantT() = default;
-
-	template <typename T,
-			  typename = typename std::enable_if<contains<T>()>::type>
-	HFSM_INLINE VariantT(T* const p)
-		: _pointer(p)
-		, _index(index<T>())
-	{
-		HFSM_ASSERT(_index != INVALID_LONG_INDEX);
-	}
-
-	HFSM_INLINE explicit operator bool() const { return _index != INVALID_LONG_INDEX; }
-
-	HFSM_INLINE void reset() {
-		_pointer = nullptr;
-		_index = INVALID_LONG_INDEX;
-	}
-
-	template <typename T>
-	HFSM_INLINE typename std::enable_if<contains<T>(), T>::type*
-	get() const {
-		const auto INDEX = index<T>();
-
-		return INDEX == _index ?
-			reinterpret_cast<T*>(_pointer) : nullptr;
-	}
-
-private:
-	void* _pointer = nullptr;
-	LongIndex _index = INVALID_LONG_INDEX;
-};
-
-#pragma pack(pop)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1668,12 +1611,8 @@ namespace detail {
 
 #pragma pack(push, 2)
 
-//template <typename TPayloadList>
-//struct TaskLinkT {
-
 struct TaskLink {
-	//using PayloadList	= TPayloadList;
-	//using PayloadBox		= typename PayloadList::Variant;
+	//using PayloadBox		= ...;
 
 	HFSM_INLINE TaskLink(const StateID origin_,
 						 const StateID destination_)
@@ -1725,7 +1664,7 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
+		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct PlanDataT<ArgsT<TContext,
 					   TConfig,
@@ -1734,7 +1673,7 @@ struct PlanDataT<ArgsT<TContext,
 					   NCompoCount,
 					   NOrthoCount,
 					   NOrthoUnits,
-					   TPayloadList,
+					   TPayload,
 					   NTaskCapacity>>
 {
 	using StateList		= TStateList;
@@ -1775,7 +1714,7 @@ template <typename TContext,
 		  typename TRegionList,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
+		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct PlanDataT<ArgsT<TContext,
 					   TConfig,
@@ -1784,7 +1723,7 @@ struct PlanDataT<ArgsT<TContext,
 					   0,
 					   NOrthoCount,
 					   NOrthoUnits,
-					   TPayloadList,
+					   TPayload,
 					   NTaskCapacity>>
 {
 	static /*constexpr*/ void setSuccessful(const StateID, const bool)			{}
@@ -1921,7 +1860,7 @@ class ConstPlanT {
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
 	static constexpr LongIndex TASK_CAPACITY = Args::TASK_CAPACITY;
 
@@ -1988,7 +1927,7 @@ class PlanT {
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
 	static constexpr LongIndex  TASK_CAPACITY	= Args::TASK_CAPACITY;
 
@@ -2365,10 +2304,9 @@ struct alignas(2 * sizeof(ShortIndex)) Parent {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TPayloadList>
+template <typename TPayload>
 struct RequestT {
-	using PayloadList = TPayloadList;
-	using PayloadBox = typename PayloadList::Variant;
+	using Payload = TPayload;
 
 	enum Type {
 		REMAIN,
@@ -2381,9 +2319,6 @@ struct RequestT {
 		COUNT
 	};
 
-	template <typename T>
-	static constexpr bool contains() { return PayloadList::template contains<T>();	}
-
 	HFSM_INLINE RequestT() = default;
 
 	HFSM_INLINE RequestT(const Type type_,
@@ -2394,11 +2329,9 @@ struct RequestT {
 		HFSM_ASSERT(type_ < Type::COUNT);
 	}
 
-	template <typename T,
-			  typename = typename std::enable_if<contains<T>(), T>::type>
 	HFSM_INLINE RequestT(const Type type_,
 						 const StateID stateId_,
-						 T* const payload_)
+						 const Payload& payload_)
 		: type{type_}
 		, stateId{stateId_}
 		, payload{payload_}
@@ -2408,11 +2341,11 @@ struct RequestT {
 
 	Type type = CHANGE;
 	StateID stateId = INVALID_STATE_ID;
-	PayloadBox payload;
+	Payload payload;
 };
 
-template <typename TPayloadList, ShortIndex NCount>
-using RequestsT = Array<RequestT<TPayloadList>, NCount>;
+template <typename TPayload, ShortIndex NCount>
+using RequestsT = Array<RequestT<TPayload>, NCount>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2467,7 +2400,7 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
+		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct StateRegistryT<ArgsT<TContext,
 							TConfig,
@@ -2476,14 +2409,14 @@ struct StateRegistryT<ArgsT<TContext,
 							NCompoCount,
 							NOrthoCount,
 							NOrthoUnits,
-							TPayloadList,
+							TPayload,
 							NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
-	using PayloadList	= TPayloadList;
+	using Payload		= TPayload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 
 	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
 	static constexpr ShortIndex COMPO_COUNT = NCompoCount;
@@ -2540,7 +2473,7 @@ template <typename TContext,
 		  typename TStateList,
 		  typename TRegionList,
 		  LongIndex NCompoCount,
-		  typename TPayloadList,
+		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct StateRegistryT<ArgsT<TContext,
 							TConfig,
@@ -2549,14 +2482,14 @@ struct StateRegistryT<ArgsT<TContext,
 							NCompoCount,
 							0,
 							0,
-							TPayloadList,
+							TPayload,
 							NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
-	using PayloadList	= TPayloadList;
+	using Payload		= TPayload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 
 	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
 	static constexpr ShortIndex COMPO_COUNT = NCompoCount;
@@ -3365,7 +3298,7 @@ class FullControlT
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
 	using Control		= ControlT<Args>;
 	using StateRegistry	= StateRegistryT<Args>;
@@ -3375,8 +3308,8 @@ class FullControlT
 	using Plan			= typename PlanControl::Plan;
 	using PlanData		= PlanDataT<Args>;
 
-	using Request		= RequestT <PayloadList>;
-	using Requests		= RequestsT<PayloadList, Args::COMPO_COUNT>;
+	using Request		= RequestT <Payload>;
+	using Requests		= RequestsT<Payload, Args::COMPO_COUNT>;
 
 protected:
 
@@ -3486,7 +3419,7 @@ class GuardControlT
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
 	using Control		= ControlT<Args>;
 	using StateRegistry	= StateRegistryT<Args>;
@@ -3497,7 +3430,7 @@ class GuardControlT
 	using FullControl	= FullControlT<Args>;
 
 public:
-	using Requests		= RequestsT<PayloadList, Args::COMPO_COUNT>;
+	using Requests		= RequestsT<Payload, Args::COMPO_COUNT>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3981,10 +3914,10 @@ using StructureStateInfos = ArrayView<StructureStateInfo>;
 
 //------------------------------------------------------------------------------
 
-template <typename TPayloadList>
+template <typename TPayload>
 Transition
-HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
-	using Request = RequestT<TPayloadList>;
+HFSM_INLINE get(const typename RequestT<TPayload>::Type type) {
+	using Request = RequestT<TPayload>;
 
 	switch (type) {
 		case Request::CHANGE:
@@ -4010,10 +3943,10 @@ HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
 
 #pragma pack(push, 1)
 
-template <typename TPayloadList>
+template <typename TPayload>
 struct alignas(4) TransitionInfoT {
-	using PayloadList = TPayloadList;
-	using Request	  = RequestT<PayloadList>;
+	using Payload = TPayload;
+	using Request = RequestT<TPayload>;
 
 	HFSM_INLINE TransitionInfoT() = default;
 
@@ -4021,7 +3954,7 @@ struct alignas(4) TransitionInfoT {
 								const Method method_)
 		: stateId{transition_.stateId}
 		, method{method_}
-		, transition{get<PayloadList>(transition_.type)}
+		, transition{get<Payload>(transition_.type)}
 	{
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}
@@ -4266,16 +4199,6 @@ _B<TF>::widePostExit(typename TF::Context& context) {
 }
 
 namespace hfsm2 {
-
-//------------------------------------------------------------------------------
-
-template <LongIndex NMaxPlanTasks = INVALID_LONG_INDEX,
-		  LongIndex NMaxSubstitutions = 4>
-struct Config {
-	static constexpr LongIndex MAX_PLAN_TASKS	 = NMaxPlanTasks;
-	static constexpr LongIndex MAX_SUBSTITUTIONS = NMaxSubstitutions;
-};
-
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4466,14 +4389,17 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayloadList,
+		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct ArgsT final {
-	using Context			= TContext;
-	using Config			= TConfig;
-	using StateList			= TStateList;
-	using RegionList		= TRegionList;
-	using PayloadList		= TPayloadList;
+	using Context	 = TContext;
+	using Config	 = TConfig;
+	using StateList	 = TStateList;
+	using RegionList = TRegionList;
+	using Payload	 = TPayload;
+
+	using Utility	 = typename TConfig::Utility;
+	using UProng	 = typename TConfig::UProng;
 
 	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
 	static constexpr ShortIndex COMPO_COUNT	  = NCompoCount;
@@ -4536,13 +4462,13 @@ using Material = typename MaterialT<NS, NC, NO, TS...>::Type;
 
 template <typename TContext,
 		  typename TConfig,
-		  typename TPayloadList,
+		  typename TPayload,
 		  typename TApex>
 struct _RF final {
-	using Context			= TContext;
-	using Config			= TConfig;
-	using PayloadList		= TPayloadList;
-	using Apex				= TApex;
+	using Context		= TContext;
+	using Config		= TConfig;
+	using Payload		= TPayload;
+	using Apex			= TApex;
 
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
@@ -4550,34 +4476,34 @@ struct _RF final {
 	static constexpr LongIndex TASK_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
 													   Config::MAX_PLAN_TASKS : Apex::PRONG_COUNT * 2;
 
-	using Instance			= _R<Context, Config, PayloadList, Apex>;
+	using Instance		= _R<Context, Config, Payload, Apex>;
 
 	static constexpr ShortIndex COMPO_COUNT		 = Apex::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT		 = Apex::ORTHO_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS		 = Apex::ORTHO_UNITS;
 
-	using StateList			= Indexed<typename Apex::StateList>;
-	using RegionList		= Indexed<typename Apex::RegionList>;
+	using StateList		= Indexed<typename Apex::StateList>;
+	using RegionList	= Indexed<typename Apex::RegionList>;
 
-	using Args				= ArgsT<Context,
-									Config,
-									StateList,
-									RegionList,
-									COMPO_COUNT,
-									ORTHO_COUNT,
-									ORTHO_UNITS,
-									PayloadList,
-									TASK_CAPACITY>;
+	using Args			= ArgsT<Context,
+								Config,
+								StateList,
+								RegionList,
+								COMPO_COUNT,
+								ORTHO_COUNT,
+								ORTHO_UNITS,
+								Payload,
+								TASK_CAPACITY>;
 
-	using Control			= ControlT	   <Args>;
-	using FullControl		= FullControlT <Args>;
-	using GuardControl		= GuardControlT<Args>;
+	using Control		= ControlT	   <Args>;
+	using FullControl	= FullControlT <Args>;
+	using GuardControl	= GuardControlT<Args>;
 
-	using Bare				= BareT<Args>;
-	using State				= Empty<Args>;
+	using Bare			= BareT<Args>;
+	using State			= Empty<Args>;
 
 	template <typename... TInjections>
-	using BaseT				= _B<TInjections...>;
+	using BaseT			= _B<TInjections...>;
 
 	template <typename T>
 	static constexpr LongIndex stateId() {
@@ -4644,17 +4570,49 @@ struct ForwardT<_CS<NS, NC, NO, TA, TG, NI, TS...>> {
 }
 
 namespace hfsm2 {
+
+//------------------------------------------------------------------------------
+
+template <typename TUtility = float,
+		  LongIndex NMaxPlanTasks = INVALID_LONG_INDEX,
+		  LongIndex NMaxSubstitutions = 4>
+struct Config {
+	using Utility = TUtility;
+
+	static constexpr LongIndex MAX_PLAN_TASKS	 = NMaxPlanTasks;
+	static constexpr LongIndex MAX_SUBSTITUTIONS = NMaxSubstitutions;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct UProng {
+		HFSM_INLINE UProng(const Utility utility_ = Utility{1.0f},
+						   const ShortIndex prong_ = INVALID_SHORT_INDEX)
+			: utility{utility_}
+			, prong{prong_}
+		{}
+
+		Utility utility;
+		ShortIndex prong;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+};
+
 namespace detail {
+
+//------------------------------------------------------------------------------
+
+struct EmptyPayload {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext,
 		  typename TConfig = Config<>,
-		  typename TPayloadList = _ITL<>>
+		  typename TPayload = EmptyPayload>
 struct _M {
-	using Context	  = TContext;
-	using Config	  = TConfig;
-	using PayloadList = TPayloadList;
+	using Context = TContext;
+	using Config  = TConfig;
+	using Payload = TPayload;
 
 	//----------------------------------------------------------------------
 
@@ -4691,34 +4649,34 @@ struct _M {
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Root				  = _RF<Context, Config, PayloadList, Composite  <THead, TSubStates...>>;
+	using Root				  = _RF<Context, Config, Payload, Composite  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using PeerRoot			  = _RF<Context, Config, PayloadList, CompositePeers  <  TSubStates...>>;
+	using PeerRoot			  = _RF<Context, Config, Payload, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		  = _RF<Context, Config, PayloadList, Resumable  <THead, TSubStates...>>;
+	using ResumableRoot		  = _RF<Context, Config, Payload, Resumable  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	  = _RF<Context, Config, PayloadList, ResumablePeers  <  TSubStates...>>;
+	using ResumablePeerRoot	  = _RF<Context, Config, Payload, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using UtilitarianRoot	  = _RF<Context, Config, PayloadList, Utilitarian<THead, TSubStates...>>;
+	using UtilitarianRoot	  = _RF<Context, Config, Payload, Utilitarian<THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using UtilitarianPeerRoot = _RF<Context, Config, PayloadList, UtilitarianPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = _RF<Context, Config, Payload, UtilitarianPeers<  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	  = _RF<Context, Config, PayloadList, Orthogonal <THead, TSubStates...>>;
+	using OrthogonalRoot	  = _RF<Context, Config, Payload, Orthogonal <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot  = _RF<Context, Config, PayloadList, OrthogonalPeers <  TSubStates...>>;
+	using OrthogonalPeerRoot  = _RF<Context, Config, Payload, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -4740,19 +4698,19 @@ struct Machine<TContext>
 	: detail::_M<TContext>
 {};
 
-template <typename TContext, LongIndex... NConstants>
-struct Machine<TContext, Config<NConstants...>>
-	: detail::_M<TContext, Config<NConstants...>, TransitionPayloads<>>
+template <typename TContext, typename TUtility, LongIndex... NConstants>
+struct Machine<TContext, Config<TUtility, NConstants...>>
+	: detail::_M<TContext, Config<TUtility, NConstants...>, TransitionPayloads<>>
 {};
 
-template <typename TContext, typename... TPayloads>
-struct Machine<TContext, TransitionPayloads<TPayloads...>>
-	: detail::_M<TContext, Config<>, TransitionPayloads<TPayloads...>>
+template <typename TContext, typename TPayload>
+struct Machine<TContext, TPayload>
+	: detail::_M<TContext, Config<>, TPayload>
 {};
 
-template <typename TContext, LongIndex... NConstants, typename... TPayloads>
-struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>>
-	: detail::_M<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>>
+template <typename TContext, typename TUtility, LongIndex... NConstants, typename TPayload>
+struct Machine<TContext, Config<TUtility, NConstants...>, TPayload>
+	: detail::_M<TContext, Config<TUtility, NConstants...>, TPayload>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4761,19 +4719,6 @@ struct Machine<TContext, Config<NConstants...>, TransitionPayloads<TPayloads...>
 
 namespace hfsm2 {
 namespace detail {
-
-//------------------------------------------------------------------------------
-
-struct UProng {
-	HFSM_INLINE UProng(const float utilityCompliment_ = 1.0f,
-					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
-		: utilityCompliment{utilityCompliment_}
-		, prong{prong_}
-	{}
-
-	float utilityCompliment;
-	ShortIndex prong;
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -4786,9 +4731,10 @@ struct _S {
 	using Args			= TArgs;
 	using Head			= THead;
 
-	using PayloadList	= typename Args::PayloadList;
+	using UProng		= typename Args::UProng;
+	using Payload		= typename Args::Payload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
 
 	using Control		= ControlT<Args>;
@@ -5087,22 +5033,15 @@ _S<NS, TA, TH>::wrapPlanFailed(FullControl& control) {
 //------------------------------------------------------------------------------
 
 template <StateID NS, typename TA, typename TH>
-UProng
+typename TA::UProng
 _S<NS, TA, TH>::wrapUtility(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
 
 	const float utility = _head.utility(static_cast<const Control&>(control));
-	const float compliment = 1.0f - utility;
-
-	const float greater = 0.0f > compliment ?
-		0.0f : compliment;
-
-	const float clamped = greater < 1.0f ?
-		greater : 1.0f;
 
 	const Parent parent = control._stateRegistry.stateParents[STATE_ID];
 
-	return {clamped, parent.prong};
+	return {utility, parent.prong};
 }
 
 //------------------------------------------------------------------------------
@@ -5184,12 +5123,13 @@ struct _CS {
 
 	using Args			= TArgs;
 
-	using Context		= typename Args::Context;
+	using Utility		= typename Args::Utility;
+	using UProng		= typename Args::UProng;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
@@ -5504,7 +5444,7 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
 #if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 													  const ShortIndex prong)
 {
@@ -5529,7 +5469,7 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
 	lHalf.deepRequestChange(control);
 
@@ -5539,7 +5479,7 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control)
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
 															   const ShortIndex prong)
 {
@@ -5556,15 +5496,15 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	const UProng l = lHalf.deepRequestChange(control);
 	const UProng r = rHalf.deepRequestChange(control);
 
-	const ShortIndex prong = l.utilityCompliment < r.utilityCompliment ?
+	const ShortIndex prong = l.utility >= r.utility ?
 		l.prong : r.prong;
 
-	return { 1.0f, prong };
+	return { Utility{1.0f}, prong };
 }
 
 //------------------------------------------------------------------------------
@@ -5572,9 +5512,9 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeUtilitarian(Control& contro
 #if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChange(Control& control,
-													   const ShortIndex prong)
+													 const ShortIndex prong)
 {
 	switch (STRATEGY) {
 	case RegionStrategy::Composite:
@@ -5597,7 +5537,7 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
 	return lHalf.deepReportChange(control);
 }
@@ -5605,9 +5545,9 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
-																const ShortIndex prong)
+															  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -5620,12 +5560,12 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
 	const UProng l = lHalf.deepReportChange(control);
 	const UProng r = rHalf.deepReportChange(control);
 
-	return l.utilityCompliment < r.utilityCompliment ?
+	return l.utility >= r.utility ?
 		l : r;
 }
 
@@ -5663,12 +5603,12 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegist
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-UProng
+typename TA::UProng
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
 	const UProng l = lHalf.deepReportUtilize(control);
 	const UProng r = rHalf.deepReportUtilize(control);
 
-	return l.utilityCompliment <= r.utilityCompliment ?
+	return l.utility >= r.utility ?
 		l : r;
 }
 
@@ -5747,12 +5687,12 @@ struct _C {
 	using Args			= TArgs;
 	using Head			= THead;
 
-	using Context		= typename Args::Context;
+	using UProng		= typename Args::UProng;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
@@ -6152,7 +6092,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequest(Control& control,
 #if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 													 const ShortIndex /*prong*/)
 {
@@ -6177,7 +6117,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 
@@ -6191,7 +6131,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
@@ -6207,7 +6147,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	const UProng result = _subStates.deepReportChange(control);
 
@@ -6222,7 +6162,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control
 #if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChange(Control& control,
 													  const ShortIndex /*prong*/)
 {
@@ -6247,7 +6187,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 
@@ -6256,13 +6196,13 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
 	const UProng h = _headState.wrapUtility(control);
 	const UProng s = _subStates.deepReportChange(control);
 
-	return { h.utilityCompliment * s.utilityCompliment };
+	return { h.utility * s.utility };
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
@@ -6273,13 +6213,13 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 	const UProng h = _headState.wrapUtility(control);
 	const UProng s = _subStates.deepReportChange(control, requested);
 
-	return { h.utilityCompliment * s.utilityCompliment };
+	return { h.utility * s.utility };
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	const UProng h = _headState.wrapUtility(control);
 	const UProng s = _subStates.deepReportChange(control);
@@ -6287,7 +6227,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control)
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	return { h.utilityCompliment * s.utilityCompliment };
+	return { h.utility * s.utility };
 }
 
 //------------------------------------------------------------------------------
@@ -6337,23 +6277,23 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistr
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
-	const UProng result = _subStates.deepReportUtilize(control);
+	const UProng s = _subStates.deepReportUtilize(control);
 
 	ShortIndex& requested = compoRequested(control);
-	requested = result.prong;
+	requested = s.prong;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
-	const UProng headResult = _headState.deepReportUtilize(control);
-	const UProng subResults = _subStates.deepReportUtilize(control);
+	const UProng h = _headState.deepReportUtilize(control);
+	const UProng s = _subStates.deepReportUtilize(control);
 
 	UProng result{
-		headResult.utilityCompliment * subResults.utilityCompliment,
-		subResults.prong
+		h.utility * s.utility,
+		s.prong
 	};
 
 	ShortIndex& requested = compoRequested(control);
@@ -6468,9 +6408,10 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	using Args			 = TArgs;
 
-	using PayloadList	 = typename Args::PayloadList;
+	using UProng		 = typename Args::UProng;
+	using Payload		 = typename Args::Payload;
 
-	using Request		 = RequestT<PayloadList>;
+	using Request		 = RequestT<Payload>;
 	using RequestType	 = typename Request::Type;
 
 	using StateRegistry	 = StateRegistryT<Args>;
@@ -6563,23 +6504,24 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
-	using Args			 = TArgs;
+	using Args			= TArgs;
 
-	using PayloadList	 = typename Args::PayloadList;
+	using UProng		= typename Args::UProng;
+	using Payload		= typename Args::Payload;
 
-	using Request		 = RequestT<PayloadList>;
-	using RequestType	 = typename Request::Type;
+	using Request		= RequestT<Payload>;
+	using RequestType	= typename Request::Type;
 
-	using StateRegistry	 = StateRegistryT<Args>;
-	using StateParents	 = typename StateRegistry::StateParents;
+	using StateRegistry	= StateRegistryT<Args>;
+	using StateParents	= typename StateRegistry::StateParents;
 
-	using Control		 = ControlT		<Args>;
-	using PlanControl	 = PlanControlT	<Args>;
-	using FullControl	 = FullControlT	<Args>;
-	using GuardControl	 = GuardControlT<Args>;
+	using Control		= ControlT		<Args>;
+	using PlanControl	= PlanControlT	<Args>;
+	using FullControl	= FullControlT	<Args>;
+	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		 = Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
-	using AllForward	 = _OSF<TInitial>;
+	using Initial		= Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
+	using AllForward	= _OSF<TInitial>;
 
 	HFSM_INLINE void   wideRegister			(StateRegistry& stateRegistry, const ForkID forkId);
 
@@ -6800,7 +6742,7 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
 	initial  .deepRequestChange(control);
 	remaining.wideRequestChange(control);
@@ -6811,12 +6753,12 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideReportChange(Control& control) {
 	const UProng i = initial  .deepReportChange(control);
 	const UProng r = remaining.wideReportChange(control);
 
-	return { i.utilityCompliment * r.utilityCompliment };
+	return { i.utility * r.utility };
 }
 
 //------------------------------------------------------------------------------
@@ -6858,12 +6800,12 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
 	const UProng i = initial  .deepReportUtilize(control);
 	const UProng r = remaining.wideReportUtilize(control);
 
-	return { i.utilityCompliment * r.utilityCompliment };
+	return { i.utility * r.utility };
 }
 
 //------------------------------------------------------------------------------
@@ -7037,7 +6979,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(Control& control) {
 	initial.deepRequestChange(control);
 
@@ -7047,7 +6989,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI>::wideReportChange(Control& control) {
 	return initial.deepReportChange(control);
 }
@@ -7087,7 +7029,7 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRequestUtilize(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-UProng
+typename TA::UProng
 _OS<NS, NC, NO, TA, NI, TI>::wideReportUtilize(Control& control) {
 	return initial.deepReportUtilize(control);
 }
@@ -7148,11 +7090,13 @@ struct _O final {
 	using Args			= TArgs;
 	using Head			= THead;
 
+	using Utility		= typename Args::Utility;
+	using UProng		= typename Args::UProng;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
@@ -7174,6 +7118,7 @@ struct _O final {
 	using AllForward	= _OF<Head, TSubStates...>;
 
 	static constexpr ShortIndex REGION_SIZE	= AllForward::STATE_COUNT;
+	static constexpr ShortIndex PRONG_COUNT	= sizeof...(TSubStates);
 
 	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateRegistry& stateRegistry)			{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
 	HFSM_INLINE const OrthoFork& orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
@@ -7465,7 +7410,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _O<NS, NC, NO, TA, TH, TS...>::deepRequestChange(Control& control,
 												 const ShortIndex /*prong*/)
 {
@@ -7477,7 +7422,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequestChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _O<NS, NC, NO, TA, TH, TS...>::deepReportChange(Control& control,
 												  const ShortIndex /*prong*/)
 {
@@ -7523,14 +7468,16 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequestUtilize(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _O<NS, NC, NO, TA, TH, TS...>::deepReportUtilize(Control& control) {
-	const UProng headResult = _headState.deepReportUtilize(control);
-	const UProng subResults = _subStates.wideReportUtilize(control);
+	const UProng h = _headState.deepReportUtilize(control);
+	const UProng s = _subStates.wideReportUtilize(control);
+
+	const Utility subUtility = s.utility / PRONG_COUNT;
 
 	return {
-		headResult.utilityCompliment * subResults.utilityCompliment,
-		subResults.prong
+		h.utility * subUtility,
+		s.prong
 	};
 }
 
@@ -7585,16 +7532,16 @@ namespace detail {
 
 template <typename TContext,
 		  typename TConfig,
-		  typename TPayloadList,
+		  typename TPayload,
 		  typename TApex>
 class _R final {
 	using Context				 = TContext;
 	using Config				 = TConfig;
-	using PayloadList			 = TPayloadList;
+	using Payload				 = TPayload;
 	using Apex					 = TApex;
 
 	using ForwardApex			 = Wrap<Apex>;
-	using AllForward			 = _RF<Context, Config, PayloadList, Apex>;
+	using AllForward			 = _RF<Context, Config, Payload, Apex>;
 	using StateList				 = typename AllForward::StateList;
 	using RegionList			 = typename AllForward::RegionList;
 
@@ -7633,8 +7580,8 @@ private:
 
 	using GuardControl			 = GuardControlT<Args>;
 
-	using PayloadBox			 = typename PayloadList::Variant;
-	using Payloads				 = Array<PayloadBox, STATE_COUNT>;
+	using Payloads				 = Array<Payload, STATE_COUNT>;
+	using PayloadsSet			 = BitArrayStorageT<LongIndex, STATE_COUNT>;
 
 	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
 
@@ -7649,7 +7596,7 @@ private:
 	using StructureStorage		 = Array<StructureEntry,		NAME_COUNT>;
 	using ActivityHistoryStorage = Array<char,					NAME_COUNT>;
 
-	using TransitionInfo		 = TransitionInfoT<PayloadList>;
+	using TransitionInfo		 = TransitionInfoT<Payload>;
 	using TransitionInfoStorage	 = Array<TransitionInfo,		COMPO_COUNT * 4>;
 #endif
 
@@ -7693,85 +7640,71 @@ public:
 	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void restart ()									{ restart (stateId<TState>());						}
+	HFSM_INLINE void restart ()									{ restart (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
+	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
+	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TPayload>
-	HFSM_INLINE void changeTo(const StateID stateId, TPayload* const payload);
+	HFSM_INLINE void changeTo(const StateID stateId, const Payload& payload);
+	HFSM_INLINE void restart (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void resume  (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void utilize (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
 
-	template <typename TPayload>
-	HFSM_INLINE void restart (const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
 
-	template <typename TPayload>
-	HFSM_INLINE void resume  (const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
 
-	template <typename TPayload>
-	HFSM_INLINE void utilize (const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
 
-	template <typename TPayload>
-	HFSM_INLINE void schedule(const StateID stateId, TPayload* const payload);
+	template <typename TState>
+	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
 
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void changeTo(TPayload* const payload)			{ changeTo(stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void restart (TPayload* const payload)			{ restart (stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void resume	(TPayload* const payload)			{ resume  (stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void utilize (TPayload* const payload)			{ utilize (stateId<TState>(), payload);				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void schedule(TPayload* const payload)			{ schedule(stateId<TState>(), payload);				}
+	template <typename TState>
+	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void resetStateData(const StateID stateId);
-
-	template <typename TPayload>
-	HFSM_INLINE void setStateData  (const StateID stateId, TPayload* const payload);
-
+	HFSM_INLINE void setStateData  (const StateID stateId, const Payload& payload);
 	HFSM_INLINE bool isStateDataSet(const StateID stateId) const;
-
-	template <typename TPayload>
-	HFSM_INLINE TPayload* getStateData(const StateID stateId) const;
+	HFSM_INLINE const Payload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
-
-	template <typename TState, typename TPayload>
-	HFSM_INLINE void setStateData  (TPayload* const payload)	{ setStateData  (stateId<TState>(), payload);		}
+	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());			}
 
 	template <typename TState>
-	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
+	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);	}
 
-	template <typename TState, typename TPayload>
-	HFSM_INLINE TPayload* getStateData() const					{ return getStateData<TPayload>(stateId<TState>());	}
+	template <typename TState>
+	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());		}
+
+	template <typename TState>
+	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const					{ return _structure;								}
-	const MachineActivity&  activity()  const					{ return _activityHistory;							}
+	const MachineStructure& structure() const					{ return _structure;							}
+	const MachineActivity&  activity()  const					{ return _activityHistory;						}
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
+	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;								}
 #endif
 
 private:
@@ -7795,7 +7728,8 @@ private:
 	StateRegistry _stateRegistry;
 	PlanData _planData;
 
-	Payloads _requestPayloads;
+	Payloads _payloads;
+	PayloadsSet _payloadsSet;
 	Requests _requests;
 
 	MaterialApex _apex;
@@ -7833,8 +7767,7 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 	HFSM_IF_STRUCTURE(getStateNames());
 
-	for (auto& payload : _requestPayloads)
-		payload.reset();
+	_payloadsSet.clear();
 
 	initialEnter();
 
@@ -7968,10 +7901,9 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
-							  TPayload* const payload)
+							  const Payload& payload)
 {
 	const Request request(Request::Type::CHANGE, stateId, payload);
 	_requests << request;
@@ -7985,10 +7917,9 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::restart(const StateID stateId,
-							 TPayload* const payload)
+							 const Payload& payload)
 {
 	const Request request(Request::Type::RESTART, stateId, payload);
 	_requests << request;
@@ -8002,10 +7933,9 @@ _R<TC, TG, TPL, TA>::restart(const StateID stateId,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::resume(const StateID stateId,
-							TPayload* const payload)
+							const Payload& payload)
 {
 	const Request request(Request::Type::RESUME, stateId, payload);
 	_requests << request;
@@ -8019,10 +7949,9 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::utilize(const StateID stateId,
-							 TPayload* const payload)
+							 const Payload& payload)
 {
 	const Request request(Request::Type::UTILIZE, stateId, payload);
 	_requests << request;
@@ -8036,10 +7965,9 @@ _R<TC, TG, TPL, TA>::utilize(const StateID stateId,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
-							  TPayload* const payload)
+							  const Payload& payload)
 {
 	const Request request(Request::Type::SCHEDULE, stateId, payload);
 	_requests << request;
@@ -8058,21 +7986,22 @@ _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
-		_requestPayloads[stateId].reset();
+		_payloadsSet[stateId] = false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
 void
 _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
-								  TPayload* const payload)
+								  const Payload& payload)
 {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
-	if (stateId < Payloads::CAPACITY)
-		_requestPayloads[stateId] = payload;
+	if (stateId < Payloads::CAPACITY) {
+		_payloads[stateId] = payload;
+		_payloadsSet[stateId] = true;
+	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8083,7 +8012,7 @@ _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
-		return !!_requestPayloads[stateId];
+		return !!_payloadsSet[stateId];
 	else
 		return false;
 }
@@ -8091,19 +8020,12 @@ _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TPL, typename TA>
-template <typename TPayload>
-TPayload*
+const TPL*
 _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
-	using Payload = TPayload;
-
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
-	if (stateId < Payloads::CAPACITY) {
-		const auto& payload = _requestPayloads[stateId];
-
-		return payload.template get<Payload>();
-	} else
-		return nullptr;
+	return stateId < Payloads::CAPACITY && _payloadsSet[stateId] ?
+		&_payloads[stateId] : nullptr;
 }
 
 //------------------------------------------------------------------------------

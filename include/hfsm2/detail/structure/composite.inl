@@ -257,7 +257,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequest(Control& control,
 #if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 													 const ShortIndex /*prong*/)
 {
@@ -282,7 +282,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 
@@ -296,7 +296,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
@@ -312,7 +312,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	const UProng result = _subStates.deepReportChange(control);
 
@@ -327,7 +327,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control
 #if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChange(Control& control,
 													  const ShortIndex /*prong*/)
 {
@@ -352,7 +352,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 
@@ -361,13 +361,13 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
 	const UProng h = _headState.wrapUtility(control);
 	const UProng s = _subStates.deepReportChange(control);
 
-	return { h.utilityCompliment * s.utilityCompliment };
+	return { h.utility * s.utility };
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
@@ -378,13 +378,13 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 	const UProng h = _headState.wrapUtility(control);
 	const UProng s = _subStates.deepReportChange(control, requested);
 
-	return { h.utilityCompliment * s.utilityCompliment };
+	return { h.utility * s.utility };
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	const UProng h = _headState.wrapUtility(control);
 	const UProng s = _subStates.deepReportChange(control);
@@ -392,7 +392,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control)
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	return { h.utilityCompliment * s.utilityCompliment };
+	return { h.utility * s.utility };
 }
 
 //------------------------------------------------------------------------------
@@ -442,23 +442,23 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistr
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 void
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
-	const UProng result = _subStates.deepReportUtilize(control);
+	const UProng s = _subStates.deepReportUtilize(control);
 
 	ShortIndex& requested = compoRequested(control);
-	requested = result.prong;
+	requested = s.prong;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
-	const UProng headResult = _headState.deepReportUtilize(control);
-	const UProng subResults = _subStates.deepReportUtilize(control);
+	const UProng h = _headState.deepReportUtilize(control);
+	const UProng s = _subStates.deepReportUtilize(control);
 
 	UProng result{
-		headResult.utilityCompliment * subResults.utilityCompliment,
-		subResults.prong
+		h.utility * s.utility,
+		s.prong
 	};
 
 	ShortIndex& requested = compoRequested(control);

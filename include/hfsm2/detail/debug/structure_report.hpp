@@ -52,10 +52,10 @@ using StructureStateInfos = ArrayView<StructureStateInfo>;
 
 //------------------------------------------------------------------------------
 
-template <typename TPayloadList>
+template <typename TPayload>
 Transition
-HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
-	using Request = RequestT<TPayloadList>;
+HFSM_INLINE get(const typename RequestT<TPayload>::Type type) {
+	using Request = RequestT<TPayload>;
 
 	switch (type) {
 		case Request::CHANGE:
@@ -81,10 +81,10 @@ HFSM_INLINE get(const typename RequestT<TPayloadList>::Type type) {
 
 #pragma pack(push, 1)
 
-template <typename TPayloadList>
+template <typename TPayload>
 struct alignas(4) TransitionInfoT {
-	using PayloadList = TPayloadList;
-	using Request	  = RequestT<PayloadList>;
+	using Payload = TPayload;
+	using Request = RequestT<TPayload>;
 
 	HFSM_INLINE TransitionInfoT() = default;
 
@@ -92,7 +92,7 @@ struct alignas(4) TransitionInfoT {
 								const Method method_)
 		: stateId{transition_.stateId}
 		, method{method_}
-		, transition{get<PayloadList>(transition_.type)}
+		, transition{get<Payload>(transition_.type)}
 	{
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}

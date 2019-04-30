@@ -19,11 +19,13 @@ struct _O final {
 	using Args			= TArgs;
 	using Head			= THead;
 
+	using Utility		= typename Args::Utility;
+	using UProng		= typename Args::UProng;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
-	using Request		= RequestT<PayloadList>;
+	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
@@ -45,6 +47,7 @@ struct _O final {
 	using AllForward	= _OF<Head, TSubStates...>;
 
 	static constexpr ShortIndex REGION_SIZE	= AllForward::STATE_COUNT;
+	static constexpr ShortIndex PRONG_COUNT	= sizeof...(TSubStates);
 
 	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateRegistry& stateRegistry)			{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
 	HFSM_INLINE const OrthoFork& orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}

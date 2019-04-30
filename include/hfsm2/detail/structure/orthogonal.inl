@@ -219,7 +219,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _O<NS, NC, NO, TA, TH, TS...>::deepRequestChange(Control& control,
 												 const ShortIndex /*prong*/)
 {
@@ -231,7 +231,7 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequestChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _O<NS, NC, NO, TA, TH, TS...>::deepReportChange(Control& control,
 												  const ShortIndex /*prong*/)
 {
@@ -277,14 +277,16 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequestUtilize(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-UProng
+typename TA::UProng
 _O<NS, NC, NO, TA, TH, TS...>::deepReportUtilize(Control& control) {
-	const UProng headResult = _headState.deepReportUtilize(control);
-	const UProng subResults = _subStates.wideReportUtilize(control);
+	const UProng h = _headState.deepReportUtilize(control);
+	const UProng s = _subStates.wideReportUtilize(control);
+
+	const Utility subUtility = s.utility / PRONG_COUNT;
 
 	return {
-		headResult.utilityCompliment * subResults.utilityCompliment,
-		subResults.prong
+		h.utility * subUtility,
+		s.prong
 	};
 }
 

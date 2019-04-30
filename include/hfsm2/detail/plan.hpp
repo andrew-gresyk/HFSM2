@@ -50,7 +50,7 @@ class ConstPlanT {
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
 	static constexpr LongIndex TASK_CAPACITY = Args::TASK_CAPACITY;
 
@@ -117,7 +117,7 @@ class PlanT {
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using PayloadList	= typename Args::PayloadList;
+	using Payload		= typename Args::Payload;
 
 	static constexpr LongIndex  TASK_CAPACITY	= Args::TASK_CAPACITY;
 

@@ -24,9 +24,10 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	using Args			 = TArgs;
 
-	using PayloadList	 = typename Args::PayloadList;
+	using UProng		 = typename Args::UProng;
+	using Payload		 = typename Args::Payload;
 
-	using Request		 = RequestT<PayloadList>;
+	using Request		 = RequestT<Payload>;
 	using RequestType	 = typename Request::Type;
 
 	using StateRegistry	 = StateRegistryT<Args>;
@@ -119,23 +120,24 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
-	using Args			 = TArgs;
+	using Args			= TArgs;
 
-	using PayloadList	 = typename Args::PayloadList;
+	using UProng		= typename Args::UProng;
+	using Payload		= typename Args::Payload;
 
-	using Request		 = RequestT<PayloadList>;
-	using RequestType	 = typename Request::Type;
+	using Request		= RequestT<Payload>;
+	using RequestType	= typename Request::Type;
 
-	using StateRegistry	 = StateRegistryT<Args>;
-	using StateParents	 = typename StateRegistry::StateParents;
+	using StateRegistry	= StateRegistryT<Args>;
+	using StateParents	= typename StateRegistry::StateParents;
 
-	using Control		 = ControlT		<Args>;
-	using PlanControl	 = PlanControlT	<Args>;
-	using FullControl	 = FullControlT	<Args>;
-	using GuardControl	 = GuardControlT<Args>;
+	using Control		= ControlT		<Args>;
+	using PlanControl	= PlanControlT	<Args>;
+	using FullControl	= FullControlT	<Args>;
+	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		 = Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
-	using AllForward	 = _OSF<TInitial>;
+	using Initial		= Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
+	using AllForward	= _OSF<TInitial>;
 
 	HFSM_INLINE void   wideRegister			(StateRegistry& stateRegistry, const ForkID forkId);
 
