@@ -5,7 +5,7 @@ namespace test_internal_transitions {
 ////////////////////////////////////////////////////////////////////////////////
 
 using Context = float;
-using M = hfsm2::Machine<Context>;
+using M = hfsm2::MachineT<Context>;
 
 using Action = bool;
 

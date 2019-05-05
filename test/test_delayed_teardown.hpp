@@ -5,8 +5,7 @@ namespace test_delayed_teardown {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using Context = float;
-using M = hfsm2::Machine<Context>;
+using M = hfsm2::Machine;
 
 using Action = bool;
 

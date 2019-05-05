@@ -4423,7 +4423,7 @@ template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
 struct _O;
 
 template <typename, typename, typename, typename>
-class _R;
+class _RW;
 
 //------------------------------------------------------------------------------
 
@@ -4476,7 +4476,7 @@ struct _RF final {
 	static constexpr LongIndex TASK_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
 													   Config::MAX_PLAN_TASKS : Apex::PRONG_COUNT * 2;
 
-	using Instance		= _R<Context, Config, Payload, Apex>;
+	using Instance		= _RW<Context, Config, Payload, Apex>;
 
 	static constexpr ShortIndex COMPO_COUNT		 = Apex::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT		 = Apex::ORTHO_COUNT;
@@ -4602,6 +4602,7 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
+struct EmptyContext {};
 struct EmptyPayload {};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4685,31 +4686,28 @@ struct _M {
 
 }
 
-template <typename... Ts>
-using TransitionPayloads = detail::_ITL<Ts...>;
-
-//------------------------------------------------------------------------------
+using Machine = detail::_M<detail::EmptyContext>;
 
 template <typename...>
-struct Machine;
+struct MachineT;
 
 template <typename TContext>
-struct Machine<TContext>
+struct MachineT<TContext>
 	: detail::_M<TContext>
 {};
 
 template <typename TContext, typename TUtility, LongIndex... NConstants>
-struct Machine<TContext, Config<TUtility, NConstants...>>
-	: detail::_M<TContext, Config<TUtility, NConstants...>, TransitionPayloads<>>
+struct MachineT<TContext, Config<TUtility, NConstants...>>
+	: detail::_M<TContext, Config<TUtility, NConstants...>, detail::EmptyPayload>
 {};
 
 template <typename TContext, typename TPayload>
-struct Machine<TContext, TPayload>
+struct MachineT<TContext, TPayload>
 	: detail::_M<TContext, Config<>, TPayload>
 {};
 
 template <typename TContext, typename TUtility, LongIndex... NConstants, typename TPayload>
-struct Machine<TContext, Config<TUtility, NConstants...>, TPayload>
+struct MachineT<TContext, Config<TUtility, NConstants...>, TPayload>
 	: detail::_M<TContext, Config<TUtility, NConstants...>, TPayload>
 {};
 
@@ -7534,7 +7532,7 @@ template <typename TContext,
 		  typename TConfig,
 		  typename TPayload,
 		  typename TApex>
-class _R final {
+class _R {
 	using Context				 = TContext;
 	using Config				 = TConfig;
 	using Payload				 = TPayload;
@@ -7745,6 +7743,43 @@ private:
 #endif
 
 	HFSM_IF_LOGGER(LoggerInterface* _logger);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TContext,
+		  typename TConfig,
+		  typename TPayload,
+		  typename TApex>
+class _RW final
+	: public _R<TContext, TConfig, TPayload, TApex>
+{
+public:
+	using _R<TContext, TConfig, TPayload, TApex>::_R;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TConfig,
+		  typename TPayload,
+		  typename TApex>
+class _RW<EmptyContext, TConfig, TPayload, TApex> final
+	: public _R<EmptyContext, TConfig, TPayload, TApex>
+	, EmptyContext
+{
+	using R = _R<EmptyContext, TConfig, TPayload, TApex>;
+
+public:
+
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+	_RW(LoggerInterface* const logger = nullptr)
+		: R{*this, logger}
+	{}
+#else
+	_RW()
+		: R{*this}
+	{}
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////

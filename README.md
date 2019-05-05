@@ -43,7 +43,7 @@ struct Context {
 4. (Optional, recommended) Typedef hfsm2::Machine for convenience:
 
 ```cpp
-using M = hfsm2::Machine<Context>;
+using M = hfsm2::MachineT<Context>;
 ```
 
 5. Declare state machine structure:

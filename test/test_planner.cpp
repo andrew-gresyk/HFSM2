@@ -30,10 +30,9 @@ namespace {
 //------------------------------------------------------------------------------
 
 TEST_CASE("Planner", "[machine]") {
-	Context _;
 	Logger logger;
 
-	FSM::Instance machine(_, &logger);
+	FSM::Instance machine(&logger);
 	{
 		const Events reference = {
 			{ FSM::stateId<Apex>(),		Event::ENTRY_GUARD },

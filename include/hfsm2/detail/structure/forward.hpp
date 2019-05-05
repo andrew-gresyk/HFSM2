@@ -225,7 +225,7 @@ template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
 struct _O;
 
 template <typename, typename, typename, typename>
-class _R;
+class _RW;
 
 //------------------------------------------------------------------------------
 
@@ -278,7 +278,7 @@ struct _RF final {
 	static constexpr LongIndex TASK_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
 													   Config::MAX_PLAN_TASKS : Apex::PRONG_COUNT * 2;
 
-	using Instance		= _R<Context, Config, Payload, Apex>;
+	using Instance		= _RW<Context, Config, Payload, Apex>;
 
 	static constexpr ShortIndex COMPO_COUNT		 = Apex::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT		 = Apex::ORTHO_COUNT;

@@ -6,7 +6,7 @@ namespace test_state_data {
 
 struct Context {};
 
-using M = hfsm2::Machine<Context, bool>;
+using M = hfsm2::MachineT<Context, bool>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

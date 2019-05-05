@@ -50,7 +50,7 @@
 struct Context {};
 
 // convenience typedef
-using M = hfsm2::Machine<Context>;
+using M = hfsm2::MachineT<Context>;
 
 #define S(s) struct s
 

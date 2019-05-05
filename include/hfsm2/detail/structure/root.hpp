@@ -7,7 +7,7 @@ template <typename TContext,
 		  typename TConfig,
 		  typename TPayload,
 		  typename TApex>
-class _R final {
+class _R {
 	using Context				 = TContext;
 	using Config				 = TConfig;
 	using Payload				 = TPayload;
@@ -218,6 +218,43 @@ private:
 #endif
 
 	HFSM_IF_LOGGER(LoggerInterface* _logger);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TContext,
+		  typename TConfig,
+		  typename TPayload,
+		  typename TApex>
+class _RW final
+	: public _R<TContext, TConfig, TPayload, TApex>
+{
+public:
+	using _R<TContext, TConfig, TPayload, TApex>::_R;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TConfig,
+		  typename TPayload,
+		  typename TApex>
+class _RW<EmptyContext, TConfig, TPayload, TApex> final
+	: public _R<EmptyContext, TConfig, TPayload, TApex>
+	, EmptyContext
+{
+	using R = _R<EmptyContext, TConfig, TPayload, TApex>;
+
+public:
+
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+	_RW(LoggerInterface* const logger = nullptr)
+		: R{*this, logger}
+	{}
+#else
+	_RW()
+		: R{*this}
+	{}
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////

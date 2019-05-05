@@ -31,7 +31,7 @@
 
 struct Context {};
 
-using M = hfsm2::Machine<Context>;
+using M = hfsm2::MachineT<Context>;
 
 struct PrimaryEvent {};
 struct SecondaryEvent { int payload; };

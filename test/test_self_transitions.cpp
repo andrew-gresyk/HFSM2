@@ -26,12 +26,10 @@ namespace {
 //------------------------------------------------------------------------------
 
 TEST_CASE("Self transition", "[machine]") {
-	Context _;
 	Logger logger;
 
 	{
-		FSM::Instance machine(_, &logger);
-
+		FSM::Instance machine(&logger);
 		{
 			const Events reference = {
 				{ 0u,					Event::ENTRY_GUARD },

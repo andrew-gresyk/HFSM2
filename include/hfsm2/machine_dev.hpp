@@ -145,6 +145,7 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
+struct EmptyContext {};
 struct EmptyPayload {};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -228,31 +229,28 @@ struct _M {
 
 }
 
-template <typename... Ts>
-using TransitionPayloads = detail::_ITL<Ts...>;
-
-//------------------------------------------------------------------------------
+using Machine = detail::_M<detail::EmptyContext>;
 
 template <typename...>
-struct Machine;
+struct MachineT;
 
 template <typename TContext>
-struct Machine<TContext>
+struct MachineT<TContext>
 	: detail::_M<TContext>
 {};
 
 template <typename TContext, typename TUtility, LongIndex... NConstants>
-struct Machine<TContext, Config<TUtility, NConstants...>>
-	: detail::_M<TContext, Config<TUtility, NConstants...>, TransitionPayloads<>>
+struct MachineT<TContext, Config<TUtility, NConstants...>>
+	: detail::_M<TContext, Config<TUtility, NConstants...>, detail::EmptyPayload>
 {};
 
 template <typename TContext, typename TPayload>
-struct Machine<TContext, TPayload>
+struct MachineT<TContext, TPayload>
 	: detail::_M<TContext, Config<>, TPayload>
 {};
 
 template <typename TContext, typename TUtility, LongIndex... NConstants, typename TPayload>
-struct Machine<TContext, Config<TUtility, NConstants...>, TPayload>
+struct MachineT<TContext, Config<TUtility, NConstants...>, TPayload>
 	: detail::_M<TContext, Config<TUtility, NConstants...>, TPayload>
 {};
 
