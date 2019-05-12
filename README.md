@@ -13,7 +13,7 @@ Header-only heriarchical FSM framework in C++14, completely static (no dynamic a
 
 - Visual Studio 14, 15, 16
 - GCC 5, 6, 7, 8
-- Clang 3.6, 3.7, 3.8, 3.9, 4, 5, 6, 7
+- Clang 3.7, 3.8, 3.9, 4, 5, 6, 7
 
 ---
 

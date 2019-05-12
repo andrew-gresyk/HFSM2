@@ -42,7 +42,7 @@
 
 #include <typeindex>
 
-#if _MSC_VER == 1900 || __clang_major__ == 3 && __clang_minor__ == 6 || __GNUC__ == 4
+#if _MSC_VER == 1900
 #include <new>			// @VS14: placement new with non-default ctor
 #endif
 

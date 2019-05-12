@@ -61,20 +61,6 @@ matrix:
     - env: COMPILER=g++-8 BUILD_TYPE=Coverage
       addons: *gcc8
 
-    # Clang 3.6
-    - env: COMPILER=clang++-3.6 BUILD_TYPE=Debug
-      addons: &clang36
-        apt:
-          packages:
-            - clang-3.6
-            - g++-5
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
-
-    - env: COMPILER=clang++-3.6 BUILD_TYPE=Release
-      addons: *clang36
-
     # Clang 3.7
     - env: COMPILER=clang++-3.7 BUILD_TYPE=Debug
       addons: &clang37
