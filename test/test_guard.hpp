@@ -91,7 +91,7 @@ struct Apex : FSM::State {};
 //------------------------------------------------------------------------------
 
 struct Step1
-	: FSM::BaseT<ExitGuardTracked>
+	: FSM::StateT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
 		if (exitGuardCount() == 1)
@@ -102,7 +102,7 @@ struct Step1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Step1_1
-	: FSM::BaseT<ExitGuardTracked>
+	: FSM::StateT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
 		if (exitGuardCount() == 1)
@@ -113,7 +113,7 @@ struct Step1_1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Step1_2
-	: FSM::BaseT<ExitGuardTracked>
+	: FSM::StateT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
 		if (exitGuardCount() == 2)
@@ -124,7 +124,7 @@ struct Step1_2
 //------------------------------------------------------------------------------
 
 struct Step2
-	: FSM::BaseT<EntryGuardTracked>
+	: FSM::StateT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
 		if (entryGuardCount() == 1)
@@ -135,7 +135,7 @@ struct Step2
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Step2_1
-	: FSM::BaseT<EntryGuardTracked>
+	: FSM::StateT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
 		if (entryGuardCount() == 1)
@@ -146,7 +146,7 @@ struct Step2_1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Step2_2
-	: FSM::BaseT<EntryGuardTracked>
+	: FSM::StateT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
 		if (entryGuardCount() == 2)

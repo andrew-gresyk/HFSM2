@@ -63,7 +63,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
+	HFSM_INLINE Status wideReact			(FullControl& control, const TEvent& event);
 
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control);
@@ -152,7 +152,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
+	HFSM_INLINE Status wideReact			(FullControl& control, const TEvent& event);
 
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control);

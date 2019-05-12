@@ -18,7 +18,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("State data", "[machine]") {
+TEST_CASE("State Data", "[machine]") {
 	Context _;
 	FSM::Instance machine(_);
 

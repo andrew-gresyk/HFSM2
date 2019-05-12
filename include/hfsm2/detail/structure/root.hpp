@@ -74,14 +74,16 @@ private:
 #endif
 
 public:
-	_R(Context& context
-	   HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr));
+	explicit _R(Context& context
+				HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr));
 
 	~_R();
 
 	template <typename T>
-	static constexpr LongIndex
-	stateId()													{ return StateList::template index<T>();			}
+	static constexpr StateID  stateId()						{ return			StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()					{ return (RegionID) RegionList::template index<T>();	}
 
 	void update();
 
@@ -113,19 +115,19 @@ public:
 	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void restart ()									{ restart (stateId<TState>());					}
+	HFSM_INLINE void restart ()									{ restart (stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());					}
+	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());					}
+	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -136,19 +138,19 @@ public:
 	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
 
 	template <typename TState>
-	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
+	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);				}
 
 	template <typename TState>
-	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
+	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);				}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
+	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);				}
 
 	template <typename TState>
-	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
+	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);				}
 
 	template <typename TState>
-	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
+	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -158,26 +160,26 @@ public:
 	HFSM_INLINE const Payload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());			}
+	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
 
 	template <typename TState>
-	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);	}
+	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());		}
+	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
 
 	template <typename TState>
-	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());		}
+	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const					{ return _structure;							}
-	const MachineActivity&  activity()  const					{ return _activityHistory;						}
+	const MachineStructure& structure() const					{ return _structure;								}
+	const MachineActivity&  activity()  const					{ return _activityHistory;							}
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;								}
+	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
 #endif
 
 private:
@@ -248,11 +250,11 @@ public:
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	_RW(LoggerInterface* const logger = nullptr)
-		: R{*this, logger}
+		: R{static_cast<EmptyContext&>(*this), logger}
 	{}
 #else
 	_RW()
-		: R{*this}
+		: R{static_cast<EmptyContext&>(*this)}
 	{}
 #endif
 };

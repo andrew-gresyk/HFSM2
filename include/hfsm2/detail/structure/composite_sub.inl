@@ -75,16 +75,15 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 template <typename TEvent>
-void
+Status
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReact(FullControl& control,
 											  const TEvent& event,
 											  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
-	if (prong < R_PRONG)
-		lHalf.deepReact(control, event, prong);
-	else
+	return prong < R_PRONG ?
+		lHalf.deepReact(control, event, prong) :
 		rHalf.deepReact(control, event, prong);
 }
 

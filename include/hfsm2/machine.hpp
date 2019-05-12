@@ -35,11 +35,17 @@
 #endif
 
 #include <stdint.h>
+
 #ifdef __GNUC__
 #include <stdlib.h>		// @GCC-7: div()
 #endif
 
 #include <typeindex>
+
+#if _MSC_VER == 1900
+#include <new>			// @VS14: placement new with non-default ctor
+#endif
+
 #ifdef __GNUC__
 #include <utility>		// @GCC: std::conditional<>, move(), forward()
 #endif
@@ -409,7 +415,7 @@ ArrayView<T>::resize(const LongIndex count) {
 
 	if (clampedCount > _count) {
 		for (LongIndex i = _count; i < clampedCount; ++i)
-			get(i) = Item();
+			get(i) = Item{};
 	}
 	else if (clampedCount < _count) {
 		for (LongIndex i = _count - 1; i >= clampedCount; --i)
@@ -427,7 +433,7 @@ LongIndex
 ArrayView<T>::operator << (TValue&& value) {
 	HFSM_ASSERT(_count < _capacity);
 
-	new (&get(_count)) Item(std::move(value));
+	new (&get(_count)) Item{std::move(value)};
 
 	return _count++;
 }
@@ -1895,15 +1901,15 @@ private:
 						   const RegionID regionId);
 
 	template <typename T>
-	static constexpr LongIndex stateId()	{ return StateList ::template index<T>();	}
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
 public:
 	HFSM_INLINE explicit operator bool() const;
 
-	HFSM_INLINE Iterator begin()			{ return Iterator{*this};					}
+	HFSM_INLINE Iterator begin()			{ return Iterator{*this};								}
 
 private:
 	const PlanData& _planData;
@@ -1967,25 +1973,25 @@ private:
 					  const RegionID regionId);
 
 	template <typename T>
-	static constexpr LongIndex stateId()	{ return StateList ::template index<T>();	}
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
 public:
 	HFSM_INLINE explicit operator bool() const;
 
 	HFSM_INLINE void clear();
 
-	void add(const StateID origin,
-			 const StateID destination);
+	void append(const StateID origin,
+				const StateID destination);
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE void add()			{ add(stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE void append()				{ append(stateId<TOrigin>(), stateId<TDestination>());	}
 
 	void remove(const LongIndex task);
 
-	HFSM_INLINE Iterator begin()			{ return Iterator{*this};					}
+	HFSM_INLINE Iterator begin()			{ return Iterator{*this};								}
 
 private:
 	PlanData& _planData;
@@ -2200,8 +2206,8 @@ PlanT<TArgs>::clear() {
 
 template <typename TArgs>
 void
-PlanT<TArgs>::add(const StateID origin,
-				  const StateID destination)
+PlanT<TArgs>::append(const StateID origin,
+					 const StateID destination)
 {
 	_planExists = true;
 	const auto index = _planData.taskLinks.emplace(origin, destination);
@@ -3120,10 +3126,10 @@ protected:
 
 public:
 	template <typename T>
-	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();	}
+	static constexpr StateID  stateId()				{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()						{ return RegionList::template index<T>();	}
+	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<T>();	}
 
 	HFSM_INLINE Context& _()									{ return _context;							}
 	HFSM_INLINE Context& context()								{ return _context;							}
@@ -3243,10 +3249,10 @@ public:
 	using Control::context;
 
 	template <typename T>
-	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
+	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3351,10 +3357,10 @@ public:
 	using Control::context;
 
 	template <typename T>
-	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3460,10 +3466,10 @@ public:
 	using Control::context;
 
 	template <typename T>
-	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
+	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4068,10 +4074,10 @@ struct _B<TFirst>
 	HFSM_INLINE void  widePostExit	   (typename First::Context& context);
 
 	template <typename T>
-	static constexpr LongIndex stateId()  { return StateList ::template index<T>();	}
+	static constexpr StateID  stateId()			{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr LongIndex regionId() { return RegionList::template index<T>();	}
+	static constexpr RegionID regionId()		{ return (RegionID) RegionList::template index<T>();	}
 };
 
 template <typename TArgs>
@@ -4500,15 +4506,11 @@ struct _RF final {
 	using GuardControl	= GuardControlT<Args>;
 
 	using Bare			= BareT<Args>;
+
 	using State			= Empty<Args>;
 
 	template <typename... TInjections>
-	using BaseT			= _B<TInjections...>;
-
-	template <typename T>
-	static constexpr LongIndex stateId() {
-		return StateList::template index<T>();
-	}
+	using StateT		= _B<TInjections...>;
 
 	template <typename T>
 	static constexpr bool contains() {
@@ -4516,9 +4518,10 @@ struct _RF final {
 	}
 
 	template <typename T>
-	static constexpr LongIndex regionId() {
-		return RegionList::template index<T>();
-	}
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4759,7 +4762,7 @@ struct _S {
 	HFSM_INLINE Status deepUpdate			(FullControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(FullControl& control, const TEvent& event, const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE Status deepReact			(FullControl& control, const TEvent& event, const ShortIndex = INVALID_SHORT_INDEX);
 
 	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl&,								const ShortIndex = INVALID_SHORT_INDEX)	{ return false; }
 	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
@@ -4831,10 +4834,11 @@ struct _S {
 	}
 #endif
 
+	// if you see..
 	// VS	 - error C2079: 'hfsm2::detail::_S<BLAH>::_head' uses undefined struct 'Blah'
 	// Clang - error : field has incomplete type 'hfsm2::detail::_S<BLAH>::Head' (aka 'Blah')
 	//
-	// State 'Blah' hasn't been defined
+	// .. remember to add definition for the state 'Blah'
 	Head _head;
 	HFSM_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(Head));
 };
@@ -4952,7 +4956,7 @@ _S<NS, TA, TH>::deepUpdate(FullControl& control,
 
 template <StateID NS, typename TA, typename TH>
 template <typename TEvent>
-void
+Status
 _S<NS, TA, TH>::deepReact(FullControl& control,
 						  const TEvent& event,
 						  const ShortIndex /*prong*/)
@@ -4963,8 +4967,9 @@ _S<NS, TA, TH>::deepReact(FullControl& control,
 	ScopedOrigin origin{control, STATE_ID};
 
 	_head.widePreReact(event, control.context());
+	(_head.*reaction)(event, control);				//_head.react(event, control);
 
-	(_head.*reaction)(event, control);		//_head.react(event, control);
+	return control._status;
 }
 
 //------------------------------------------------------------------------------
@@ -4997,6 +5002,11 @@ _S<NS, TA, TH>::deepExit(PlanControl& control,
 
 	ScopedOrigin origin{control, STATE_ID};
 
+	// if you see..
+	// VS	 - error C2039:  'exit': is not a member of 'Blah'
+	// Clang - error : no member named 'exit' in 'Blah'
+	//
+	// .. inherit state 'Blah' from hfsm2::Machine::Instance::State
 	_head.exit(control);
 	_head.widePostExit(control.context());
 
@@ -5173,7 +5183,7 @@ struct _CS {
 	HFSM_INLINE Status deepUpdate			(FullControl& control,							const ShortIndex prong);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex prong);
+	HFSM_INLINE Status deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex prong);
 
 	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,							const ShortIndex prong);
 	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,							const ShortIndex prong);
@@ -5347,16 +5357,15 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
 template <typename TEvent>
-void
+Status
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReact(FullControl& control,
 											  const TEvent& event,
 											  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
-	if (prong < R_PRONG)
-		lHalf.deepReact(control, event, prong);
-	else
+	return prong < R_PRONG ?
+		lHalf.deepReact(control, event, prong) :
 		rHalf.deepReact(control, event, prong);
 }
 
@@ -5731,7 +5740,7 @@ struct _C {
 	HFSM_INLINE Status deepUpdate			(FullControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE Status deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex = INVALID_SHORT_INDEX);
 
 	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
@@ -5946,7 +5955,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepUpdate(FullControl& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 template <typename TEvent>
-void
+Status
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReact(FullControl& control,
 											 const TEvent& event,
 											 const ShortIndex /*prong*/)
@@ -5954,10 +5963,24 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReact(FullControl& control,
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepReact(control, event);
-	_subStates.deepReact(control, event, active);
+	if (const Status headStatus = _headState.deepReact(control, event)) {
+		ControlLock lock{control};
+		_subStates.deepReact(control, event, active);
+
+		return headStatus;
+	} else {
+		const Status subStatus = _subStates.deepReact(control, event, active);
+
+		if (subStatus.outerTransition)
+			return subStatus;
+
+		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+		return subStatus && control.planData().planExists[REGION_ID] ?
+			control.updatePlan(_headState, subStatus) : subStatus;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -6445,7 +6468,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
+	HFSM_INLINE Status wideReact			(FullControl& control, const TEvent& event);
 
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control);
@@ -6534,7 +6557,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	HFSM_INLINE Status wideUpdate			(FullControl& control);
 
 	template <typename TEvent>
-	HFSM_INLINE void   wideReact			(const TEvent& event, FullControl& control);
+	HFSM_INLINE Status wideReact			(FullControl& control, const TEvent& event);
 
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control,							const OrthoFork& prongs);
 	HFSM_INLINE bool   wideForwardExitGuard	(GuardControl& control);
@@ -6653,12 +6676,12 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename TEvent>
-void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(const TEvent& event,
-											  FullControl& control)
+Status
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(FullControl& control,
+											  const TEvent& event)
 {
-	initial  .deepReact(control, event);
-	remaining.wideReact(event, control);
+	const auto status =	   initial	.deepReact(control, event);
+	return combine(status, remaining.wideReact(control, event));
 }
 
 //------------------------------------------------------------------------------
@@ -6904,11 +6927,11 @@ _OS<NS, NC, NO, TA, NI, TI>::wideUpdate(FullControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
-void
-_OS<NS, NC, NO, TA, NI, TI>::wideReact(const TEvent& event,
-									   FullControl& control)
+Status
+_OS<NS, NC, NO, TA, NI, TI>::wideReact(FullControl& control,
+									   const TEvent& event)
 {
-	initial.deepReact(control, event);
+	return initial.deepReact(control, event);
 }
 
 //------------------------------------------------------------------------------
@@ -7136,7 +7159,7 @@ struct _O final {
 	HFSM_INLINE Status deepUpdate			(FullControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE Status deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex = INVALID_SHORT_INDEX);
 
 	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
@@ -7288,15 +7311,29 @@ _O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
-void
+Status
 _O<NS, NC, NO, TA, TH, TS...>::deepReact(FullControl& control,
 										 const TEvent& event,
 										 const ShortIndex /*prong*/)
 {
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepReact(control, event);
-	_subStates.wideReact(event, control);
+	if (const auto headStatus = _headState.deepReact(control, event)) {
+		ControlLock lock{control};
+		_subStates.wideReact(control, event);
+
+		return headStatus;
+	} else {
+		const Status subStatus = _subStates.wideReact(control, event);
+
+		if (subStatus.outerTransition)
+			return subStatus;
+
+		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+		return subStatus && control.planData().planExists[REGION_ID] ?
+			control.updatePlan(_headState, subStatus) : subStatus;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -7599,14 +7636,16 @@ private:
 #endif
 
 public:
-	_R(Context& context
-	   HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr));
+	explicit _R(Context& context
+				HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr));
 
 	~_R();
 
 	template <typename T>
-	static constexpr LongIndex
-	stateId()													{ return StateList::template index<T>();			}
+	static constexpr StateID  stateId()						{ return			StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()					{ return (RegionID) RegionList::template index<T>();	}
 
 	void update();
 
@@ -7638,19 +7677,19 @@ public:
 	HFSM_INLINE void schedule(const StateID stateId);
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void restart ()									{ restart (stateId<TState>());					}
+	HFSM_INLINE void restart ()									{ restart (stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());					}
+	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());					}
+	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -7661,19 +7700,19 @@ public:
 	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
 
 	template <typename TState>
-	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
+	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);				}
 
 	template <typename TState>
-	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
+	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);				}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
+	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);				}
 
 	template <typename TState>
-	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
+	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);				}
 
 	template <typename TState>
-	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
+	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -7683,26 +7722,26 @@ public:
 	HFSM_INLINE const Payload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());			}
+	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
 
 	template <typename TState>
-	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);	}
+	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());		}
+	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
 
 	template <typename TState>
-	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());		}
+	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const					{ return _structure;							}
-	const MachineActivity&  activity()  const					{ return _activityHistory;						}
+	const MachineStructure& structure() const					{ return _structure;								}
+	const MachineActivity&  activity()  const					{ return _activityHistory;							}
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;								}
+	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
 #endif
 
 private:
@@ -7773,11 +7812,11 @@ public:
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
 	_RW(LoggerInterface* const logger = nullptr)
-		: R{*this, logger}
+		: R{static_cast<EmptyContext&>(*this), logger}
 	{}
 #else
 	_RW()
-		: R{*this}
+		: R{static_cast<EmptyContext&>(*this)}
 	{}
 #endif
 };

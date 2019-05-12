@@ -106,7 +106,7 @@ _S<NS, TA, TH>::deepUpdate(FullControl& control,
 
 template <StateID NS, typename TA, typename TH>
 template <typename TEvent>
-void
+Status
 _S<NS, TA, TH>::deepReact(FullControl& control,
 						  const TEvent& event,
 						  const ShortIndex /*prong*/)
@@ -117,8 +117,9 @@ _S<NS, TA, TH>::deepReact(FullControl& control,
 	ScopedOrigin origin{control, STATE_ID};
 
 	_head.widePreReact(event, control.context());
+	(_head.*reaction)(event, control);				//_head.react(event, control);
 
-	(_head.*reaction)(event, control);		//_head.react(event, control);
+	return control._status;
 }
 
 //------------------------------------------------------------------------------
@@ -151,6 +152,11 @@ _S<NS, TA, TH>::deepExit(PlanControl& control,
 
 	ScopedOrigin origin{control, STATE_ID};
 
+	// if you see..
+	// VS	 - error C2039:  'exit': is not a member of 'Blah'
+	// Clang - error : no member named 'exit' in 'Blah'
+	//
+	// .. inherit state 'Blah' from hfsm2::Machine::Instance::State
 	_head.exit(control);
 	_head.widePostExit(control.context());
 

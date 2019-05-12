@@ -23,7 +23,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Composite BST", "[machine]") {
+TEST_CASE("FSM.Composite BST", "[machine]") {
 	Logger logger;
 
 	FSM::Instance machine{&logger};

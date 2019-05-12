@@ -20,7 +20,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Guard", "[machine]") {
+TEST_CASE("FSM.Entry Guard", "[machine]") {
 	Logger logger;
 
 	FSM::Instance machine(&logger);

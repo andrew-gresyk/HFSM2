@@ -200,8 +200,8 @@ PlanT<TArgs>::clear() {
 
 template <typename TArgs>
 void
-PlanT<TArgs>::add(const StateID origin,
-				  const StateID destination)
+PlanT<TArgs>::append(const StateID origin,
+					 const StateID destination)
 {
 	_planExists = true;
 	const auto index = _planData.taskLinks.emplace(origin, destination);

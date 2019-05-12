@@ -195,7 +195,7 @@ struct HistoryBase
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-using State = FSM::BaseT<EntryGuardTracked, Timed, HistoryBase<T>>;
+using State = FSM::StateT<EntryGuardTracked, Timed, HistoryBase<T>>;
 
 //------------------------------------------------------------------------------
 

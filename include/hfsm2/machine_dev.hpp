@@ -35,11 +35,17 @@
 #endif
 
 #include <stdint.h>
+
 #ifdef __GNUC__
 #include <stdlib.h>		// @GCC-7: div()
 #endif
 
 #include <typeindex>
+
+#if _MSC_VER == 1900
+#include <new>			// @VS14: placement new with non-default ctor
+#endif
+
 #ifdef __GNUC__
 #include <utility>		// @GCC: std::conditional<>, move(), forward()
 #endif

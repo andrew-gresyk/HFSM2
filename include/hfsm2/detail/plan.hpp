@@ -85,15 +85,15 @@ private:
 						   const RegionID regionId);
 
 	template <typename T>
-	static constexpr LongIndex stateId()	{ return StateList ::template index<T>();	}
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
 public:
 	HFSM_INLINE explicit operator bool() const;
 
-	HFSM_INLINE Iterator begin()			{ return Iterator{*this};					}
+	HFSM_INLINE Iterator begin()			{ return Iterator{*this};								}
 
 private:
 	const PlanData& _planData;
@@ -157,25 +157,25 @@ private:
 					  const RegionID regionId);
 
 	template <typename T>
-	static constexpr LongIndex stateId()	{ return StateList ::template index<T>();	}
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr LongIndex regionId()	{ return RegionList::template index<T>();	}
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
 public:
 	HFSM_INLINE explicit operator bool() const;
 
 	HFSM_INLINE void clear();
 
-	void add(const StateID origin,
-			 const StateID destination);
+	void append(const StateID origin,
+				const StateID destination);
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE void add()			{ add(stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE void append()				{ append(stateId<TOrigin>(), stateId<TDestination>());	}
 
 	void remove(const LongIndex task);
 
-	HFSM_INLINE Iterator begin()			{ return Iterator{*this};					}
+	HFSM_INLINE Iterator begin()			{ return Iterator{*this};								}
 
 private:
 	PlanData& _planData;

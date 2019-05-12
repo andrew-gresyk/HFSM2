@@ -21,7 +21,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Resumable", "[machine]") {
+TEST_CASE("FSM.Resumable", "[machine]") {
 	Logger logger;
 
 	FSM::Instance machine(&logger);

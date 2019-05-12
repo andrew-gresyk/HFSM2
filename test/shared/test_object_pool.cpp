@@ -24,7 +24,7 @@ using ObjectPool = hfsm2::detail::ObjectPool<Base, 4, sizeof(Material) * 4>;
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("ObjectPool<>", "[shared]") {
+TEST_CASE("Shared.ObjectPool<>", "[shared]") {
 	ObjectPool objectPool;
 
 	REQUIRE(objectPool.emplace<Material>(1) == 0); //-V521

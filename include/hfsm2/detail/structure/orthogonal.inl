@@ -99,15 +99,29 @@ _O<NS, NC, NO, TA, TH, TS...>::deepUpdate(FullControl& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 template <typename TEvent>
-void
+Status
 _O<NS, NC, NO, TA, TH, TS...>::deepReact(FullControl& control,
 										 const TEvent& event,
 										 const ShortIndex /*prong*/)
 {
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepReact(control, event);
-	_subStates.wideReact(event, control);
+	if (const auto headStatus = _headState.deepReact(control, event)) {
+		ControlLock lock{control};
+		_subStates.wideReact(control, event);
+
+		return headStatus;
+	} else {
+		const Status subStatus = _subStates.wideReact(control, event);
+
+		if (subStatus.outerTransition)
+			return subStatus;
+
+		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+		return subStatus && control.planData().planExists[REGION_ID] ?
+			control.updatePlan(_headState, subStatus) : subStatus;
+	}
 }
 
 //------------------------------------------------------------------------------

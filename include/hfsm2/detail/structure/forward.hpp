@@ -302,15 +302,11 @@ struct _RF final {
 	using GuardControl	= GuardControlT<Args>;
 
 	using Bare			= BareT<Args>;
+
 	using State			= Empty<Args>;
 
 	template <typename... TInjections>
-	using BaseT			= _B<TInjections...>;
-
-	template <typename T>
-	static constexpr LongIndex stateId() {
-		return StateList::template index<T>();
-	}
+	using StateT		= _B<TInjections...>;
 
 	template <typename T>
 	static constexpr bool contains() {
@@ -318,9 +314,10 @@ struct _RF final {
 	}
 
 	template <typename T>
-	static constexpr LongIndex regionId() {
-		return RegionList::template index<T>();
-	}
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -25,7 +25,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Self transition", "[machine]") {
+TEST_CASE("FSM.Self Transition", "[machine]") {
 	Logger logger;
 
 	{

@@ -71,12 +71,12 @@ _OS<NS, NC, NO, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename TEvent>
-void
-_OS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(const TEvent& event,
-											  FullControl& control)
+Status
+_OS<NS, NC, NO, TA, NI, TI, TR...>::wideReact(FullControl& control,
+											  const TEvent& event)
 {
-	initial  .deepReact(control, event);
-	remaining.wideReact(event, control);
+	const auto status =	   initial	.deepReact(control, event);
+	return combine(status, remaining.wideReact(control, event));
 }
 
 //------------------------------------------------------------------------------

@@ -73,7 +73,7 @@ struct _CS {
 	HFSM_INLINE Status deepUpdate			(FullControl& control,							const ShortIndex prong);
 
 	template <typename TEvent>
-	HFSM_INLINE void   deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex prong);
+	HFSM_INLINE Status deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex prong);
 
 	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,							const ShortIndex prong);
 	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,							const ShortIndex prong);

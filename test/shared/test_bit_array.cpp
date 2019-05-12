@@ -19,7 +19,7 @@ verifySingleEntry(const BitArray& bitArray,
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("BitArrayT<>", "[shared]") {
+TEST_CASE("Shared.BitArrayT<>", "[shared]") {
 	BitArray bitArray;
 
 	for (hfsm2::ShortIndex i = 0; i < bitArray.capacity; ++i)

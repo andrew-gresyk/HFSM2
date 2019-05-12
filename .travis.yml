@@ -209,6 +209,11 @@ script:
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
   - make
 
+  - cd "${TRAVIS_BUILD_DIR}/examples/snippets"
+  - mkdir build && cd build
+  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+  - make
+
 after_success:
   - bash <(curl -s https://codecov.io/bash) -f "build/hfsm2_test.profdata" || echo "Codecov did not collect coverage reports"
   - coveralls --exclude lib --exclude tests --gcov-options '\-lp'

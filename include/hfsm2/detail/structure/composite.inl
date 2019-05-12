@@ -113,7 +113,7 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepUpdate(FullControl& control,
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
 template <typename TEvent>
-void
+Status
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReact(FullControl& control,
 											 const TEvent& event,
 											 const ShortIndex /*prong*/)
@@ -121,10 +121,24 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReact(FullControl& control,
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepReact(control, event);
-	_subStates.deepReact(control, event, active);
+	if (const Status headStatus = _headState.deepReact(control, event)) {
+		ControlLock lock{control};
+		_subStates.deepReact(control, event, active);
+
+		return headStatus;
+	} else {
+		const Status subStatus = _subStates.deepReact(control, event, active);
+
+		if (subStatus.outerTransition)
+			return subStatus;
+
+		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+		return subStatus && control.planData().planExists[REGION_ID] ?
+			control.updatePlan(_headState, subStatus) : subStatus;
+	}
 }
 
 //------------------------------------------------------------------------------

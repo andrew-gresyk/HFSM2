@@ -20,7 +20,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Delayed teardown", "[machine]") {
+TEST_CASE("FSM.Exit Guard", "[machine]") {
 	Logger logger;
 
 	FSM::Instance machine(&logger);

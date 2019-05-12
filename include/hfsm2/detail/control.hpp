@@ -61,10 +61,10 @@ protected:
 
 public:
 	template <typename T>
-	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();	}
+	static constexpr StateID  stateId()				{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()						{ return RegionList::template index<T>();	}
+	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<T>();	}
 
 	HFSM_INLINE Context& _()									{ return _context;							}
 	HFSM_INLINE Context& context()								{ return _context;							}
@@ -184,10 +184,10 @@ public:
 	using Control::context;
 
 	template <typename T>
-	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
+	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -292,10 +292,10 @@ public:
 	using Control::context;
 
 	template <typename T>
-	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -401,10 +401,10 @@ public:
 	using Control::context;
 
 	template <typename T>
-	static constexpr LongIndex stateId()						{ return StateList ::template index<T>();		}
+	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()						{ return RegionList::template index<T>();		}
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

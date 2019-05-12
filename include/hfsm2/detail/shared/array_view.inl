@@ -27,7 +27,7 @@ ArrayView<T>::resize(const LongIndex count) {
 
 	if (clampedCount > _count) {
 		for (LongIndex i = _count; i < clampedCount; ++i)
-			get(i) = Item();
+			get(i) = Item{};
 	}
 	else if (clampedCount < _count) {
 		for (LongIndex i = _count - 1; i >= clampedCount; --i)
@@ -45,7 +45,7 @@ LongIndex
 ArrayView<T>::operator << (TValue&& value) {
 	HFSM_ASSERT(_count < _capacity);
 
-	new (&get(_count)) Item(std::move(value));
+	new (&get(_count)) Item{std::move(value)};
 
 	return _count++;
 }

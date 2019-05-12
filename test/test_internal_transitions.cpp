@@ -25,7 +25,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Internal transition", "[machine]") {
+TEST_CASE("FSM.Internal Transition", "[machine]") {
 	Context _;
 	Logger logger;
 

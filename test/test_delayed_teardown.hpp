@@ -66,7 +66,7 @@ struct Work
 			control.cancelPendingChanges();
 
 			// TODO: query destination from the in-flight transition
-			control.plan().add<Teardown, Step2>();
+			control.plan().append<Teardown, Step2>();
 
 			control.changeTo<Teardown>();
 		}
