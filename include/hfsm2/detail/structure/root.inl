@@ -5,7 +5,7 @@ namespace detail {
 
 template <typename TC, typename TG, typename TPL, typename TA>
 _R<TC, TG, TPL, TA>::_R(Context& context
-						HFSM_IF_LOGGER(, LoggerInterface* const logger))
+						HFSM_IF_LOGGER(, Logger* const logger))
 	: _context{context}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
@@ -79,85 +79,34 @@ _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
-	const Request request(Request::Type::CHANGE, stateId);
+	const Request request{Request::Type::CHANGE, stateId};
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::CHANGE, stateId);
-#endif
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::CHANGE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-void
-_R<TC, TG, TPL, TA>::restart(const StateID stateId) {
-	const Request request(Request::Type::RESTART, stateId);
-	_requests << request;
-
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::RESTART, stateId);
-#endif
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-void
-_R<TC, TG, TPL, TA>::resume(const StateID stateId) {
-	const Request request(Request::Type::RESUME, stateId);
-	_requests << request;
-
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::RESUME, stateId);
-#endif
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-void
-_R<TC, TG, TPL, TA>::utilize(const StateID stateId) {
-	const Request request(Request::Type::UTILIZE, stateId);
-	_requests << request;
-
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::UTILIZE, stateId);
-#endif
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC, typename TG, typename TPL, typename TA>
-void
-_R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
-	const Request request(Request::Type::SCHEDULE, stateId);
-	_requests << request;
-
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
-#endif
-}
-
-//------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 							  const Payload& payload)
 {
-	const Request request(Request::Type::CHANGE, stateId, payload);
+	const Request request{Request::Type::CHANGE, stateId, payload};
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::CHANGE, stateId);
-#endif
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::CHANGE, stateId);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
+_R<TC, TG, TPL, TA>::restart(const StateID stateId) {
+	const Request request{Request::Type::RESTART, stateId};
+	_requests << request;
+
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESTART, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -167,13 +116,21 @@ void
 _R<TC, TG, TPL, TA>::restart(const StateID stateId,
 							 const Payload& payload)
 {
-	const Request request(Request::Type::RESTART, stateId, payload);
+	const Request request{Request::Type::RESTART, stateId, payload};
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::RESTART, stateId);
-#endif
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESTART, stateId);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
+_R<TC, TG, TPL, TA>::resume(const StateID stateId) {
+	const Request request{Request::Type::RESUME, stateId};
+	_requests << request;
+
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESUME, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -183,13 +140,21 @@ void
 _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 							const Payload& payload)
 {
-	const Request request(Request::Type::RESUME, stateId, payload);
+	const Request request{Request::Type::RESUME, stateId, payload};
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::RESUME, stateId);
-#endif
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESUME, stateId);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
+_R<TC, TG, TPL, TA>::utilize(const StateID stateId) {
+	const Request request{Request::Type::UTILIZE, stateId};
+	_requests << request;
+
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::UTILIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -199,13 +164,21 @@ void
 _R<TC, TG, TPL, TA>::utilize(const StateID stateId,
 							 const Payload& payload)
 {
-	const Request request(Request::Type::UTILIZE, stateId, payload);
+	const Request request{Request::Type::UTILIZE, stateId, payload};
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::UTILIZE, stateId);
-#endif
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::UTILIZE, stateId);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TPL, typename TA>
+void
+_R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
+	const Request request{Request::Type::SCHEDULE, stateId};
+	_requests << request;
+
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -215,13 +188,10 @@ void
 _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 							  const Payload& payload)
 {
-	const Request request(Request::Type::SCHEDULE, stateId, payload);
+	const Request request{Request::Type::SCHEDULE, stateId, payload};
 	_requests << request;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
-#endif
+	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -319,7 +289,7 @@ _R<TC, TG, TPL, TA>::initialEnter() {
 								HFSM_LOGGER_OR(_logger, nullptr)};
 
 		_apex.deepEnterRequested(planControl);
-		_stateRegistry.clearOrthoRequested();
+		_stateRegistry.clearRequests();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());
 	}
@@ -337,8 +307,6 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 	HFSM_IF_STRUCTURE(_lastTransitions.clear());
 
 	AllForks undoRequested;
-	_stateRegistry.requested.clear();
-
 	Requests lastRequests;
 
 	Control control(_context,
@@ -369,7 +337,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 								HFSM_LOGGER_OR(_logger, nullptr)};
 
 		_apex.deepChangeToRequested(planControl);
-		_stateRegistry.clearOrthoRequested();
+		_stateRegistry.clearRequests();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());
 	}

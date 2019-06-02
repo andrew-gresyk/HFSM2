@@ -8,10 +8,6 @@ void
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 												const Parent parent)
 {
-	// TODO: add parent/forks type arrays to StateRegistry
-	//HFSM_IF_DEBUG(CompoFork0& fork = compoFork(stateRegistry));
-	//HFSM_IF_DEBUG(fork.TYPE = _headState.TYPE);
-
 	stateRegistry.compoParents[COMPO_INDEX] = parent;
 
 	_headState.deepRegister(stateRegistry, parent);
@@ -68,15 +64,52 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepEnter(PlanControl& control,
 	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX &&
 				requested != INVALID_SHORT_INDEX);
 
-	active	  = requested;
-	if (requested == resumable)
-		resumable = INVALID_SHORT_INDEX;
-	requested = INVALID_SHORT_INDEX;
-
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	_headState.deepEnter(control);
+
+	active	  = requested;
+
+	if (requested == resumable)
+		resumable = INVALID_SHORT_INDEX;
+
+	requested = INVALID_SHORT_INDEX;
+
 	_subStates.deepEnter(control, active);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+void
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepReenter(PlanControl& control,
+											   const ShortIndex /*prong*/)
+{
+	ShortIndex& active	  = compoActive   (control);
+	ShortIndex& resumable = compoResumable(control);
+	ShortIndex& requested = compoRequested(control);
+
+	HFSM_ASSERT(active	  != INVALID_SHORT_INDEX &&
+				requested != INVALID_SHORT_INDEX);
+
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	_headState.deepReenter(control);
+
+	if (active == requested)
+		_subStates.deepReenter(control, active);
+	else {
+		_subStates.deepExit	  (control, active);
+
+		active	  = requested;
+
+		if (requested == resumable)
+			resumable = INVALID_SHORT_INDEX;
+
+		_subStates.deepEnter  (control, active);
+	}
+
+	requested = INVALID_SHORT_INDEX;
 }
 
 //------------------------------------------------------------------------------
@@ -227,10 +260,10 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepForwardRequest(Control& control,
 {
 	const ShortIndex requested = compoRequested(control);
 
-	if (requested != INVALID_SHORT_INDEX)
-		_subStates.deepForwardRequest(control, request, requested);
-	else
+	if (requested == INVALID_SHORT_INDEX)
 		deepRequest					 (control, request);
+	else
+		_subStates.deepForwardRequest(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -268,26 +301,25 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
+#if !HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
+void
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 													 const ShortIndex /*prong*/)
 {
 	switch (STRATEGY) {
 	case RegionStrategy::Composite:
-		return deepRequestChangeComposite  (control);
+		deepRequestChangeComposite  (control);
 
 	case RegionStrategy::Resumable:
-		return deepRequestChangeResumable  (control);
+		deepRequestChangeResumable  (control);
 
 	case RegionStrategy::Utilitarian:
-		return deepRequestChangeUtilitarian(control);
+		deepRequestChangeUtilitarian(control);
 
 	default:
 		HFSM_BREAK();
-		return {};
 	}
 }
 
@@ -296,21 +328,19 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
+void
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 
 	requested = 0;
 
 	_subStates.deepRequestChange(control);
-
-	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
+void
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
@@ -319,31 +349,85 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) 
 		resumable : 0;
 
 	_subStates.deepRequestChange(control, requested);
-
-	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
+void
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
-	const UProng result = _subStates.deepReportChange(control);
+	const UP s = _subStates.deepReportChange(control);
+	HFSM_ASSERT(s.prong != INVALID_SHORT_INDEX);
 
 	ShortIndex& requested = compoRequested(control);
-	requested = result.prong;
+	requested = s.prong;
 
-	return {};
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, s.prong, s.utility);
 }
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+void
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+	const ShortIndex  active	= compoActive   (stateRegistry);
+		  ShortIndex& requested = compoRequested(stateRegistry);
+
+	if (active == INVALID_SHORT_INDEX)
+		requested = 0;
+
+	_subStates.deepRequestRemain(stateRegistry);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
+void
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
+	ShortIndex& requested = compoRequested(stateRegistry);
+
+	requested = 0;
+
+	_subStates.deepRequestRestart(stateRegistry);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+void
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
+													 const ShortIndex /*prong*/)
+{
+	const ShortIndex  resumable = compoResumable(stateRegistry);
+		  ShortIndex& requested = compoRequested(stateRegistry);
+
+	requested = (resumable != INVALID_SHORT_INDEX) ?
+		resumable : 0;
+
+	_subStates.deepRequestResume(stateRegistry, requested);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+void
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
+	const UP s = _subStates.deepReportUtilize(control);
+
+	ShortIndex& requested = compoRequested(control);
+	requested = s.prong;
+
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, s.prong, s.utility);
+}
+
+//------------------------------------------------------------------------------
+
+#if !HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
+typename TA::UP
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChange(Control& control,
-													  const ShortIndex /*prong*/)
+													const ShortIndex /*prong*/)
 {
 	switch (STRATEGY) {
 	case RegionStrategy::Composite:
@@ -366,22 +450,21 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
+typename TA::UP
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
-
 	requested = 0;
 
-	const UProng h = _headState.wrapUtility(control);
-	const UProng s = _subStates.deepReportChange(control);
+	const UP h = _headState.deepReportChange(control);
+	const UP s = _subStates.deepReportChange(control);
 
-	return { h.utility * s.utility };
+	return { h.utility * s.utility, h.prong };
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
+typename TA::UP
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
@@ -389,96 +472,42 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 	requested = (resumable != INVALID_SHORT_INDEX) ?
 		resumable : 0;
 
-	const UProng h = _headState.wrapUtility(control);
-	const UProng s = _subStates.deepReportChange(control, requested);
+	const UP h = _headState.deepReportChange(control);
+	const UP s = _subStates.deepReportChange(control, requested);
 
-	return { h.utility * s.utility };
+	return { h.utility * s.utility, h.prong };
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
+typename TA::UP
 _C<NS, NC, NO, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
-	const UProng h = _headState.wrapUtility(control);
-	const UProng s = _subStates.deepReportChange(control);
+	const UP h = _headState.deepReportChange(control);
+	const UP s = _subStates.deepReportChange(control);
 
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	return { h.utility * s.utility };
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, s.prong, s.utility);
+
+	return { h.utility * s.utility, h.prong };
 }
 
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-void
-_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
-	const ShortIndex  active	= stateRegistry.compoActive	   [COMPO_INDEX];
-		  ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
-
-	if (active == INVALID_SHORT_INDEX)
-		requested = 0;
-
-	_subStates.deepRequestRemain(stateRegistry);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-void
-_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
-	ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
-
-	requested = 0;
-
-	_subStates.deepRequestRestart(stateRegistry);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-void
-_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
-													 const ShortIndex /*prong*/)
-{
-	const ShortIndex  resumable = stateRegistry.resumable.compo[COMPO_INDEX];
-		  ShortIndex& requested = stateRegistry.requested.compo[COMPO_INDEX];
-
-	requested = (resumable != INVALID_SHORT_INDEX) ?
-		resumable : 0;
-
-	_subStates.deepRequestResume(stateRegistry, requested);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-void
-_C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
-	const UProng s = _subStates.deepReportUtilize(control);
+typename TA::UP
+_C<NS, NC, NO, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
+	const UP h = _headState.deepReportUtilize(control);
+	const UP s = _subStates.deepReportUtilize(control);
 
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
-}
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, s.prong, s.utility);
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, typename TH, typename... TS>
-typename TA::UProng
-_C<NS, NC, NO, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
-	const UProng h = _headState.deepReportUtilize(control);
-	const UProng s = _subStates.deepReportUtilize(control);
-
-	UProng result{
-		h.utility * s.utility,
-		s.prong
-	};
-
-	ShortIndex& requested = compoRequested(control);
-	requested = result.prong;
-
-	return result;
+	return { h.utility * s.utility, h.prong };
 }
 
 //------------------------------------------------------------------------------
@@ -516,27 +545,24 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepChangeToRequested(PlanControl& control,
 
 	if (requested == INVALID_SHORT_INDEX)
 		_subStates.deepChangeToRequested(control, active);
-	else if (requested == active) {
-		// TODO: replace exit() + enter() => reenter()
-		_subStates.deepExit				(control, active);
+	else if (requested != active) {
+		_subStates.deepExit	  (control, active);
 
-		if (requested != active) {
-			resumable = active;
-			active	  = requested;
-		}
+		resumable = active;
+		active	  = requested;
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.deepEnter(control, active);
+		_subStates.deepEnter  (control, active);
+	} else if (compoRemain(control)) {
+		_subStates.deepExit	  (control, active);
+
+		requested = INVALID_SHORT_INDEX;
+
+		_subStates.deepEnter  (control, active);
 	} else {
-		_subStates.deepExit				(control, active);
-
-		if (requested != active) {
-			resumable = active;
-			active	  = requested;
-		}
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.deepEnter(control, active);
+		_subStates.deepReenter(control, active);
 	}
 }
 

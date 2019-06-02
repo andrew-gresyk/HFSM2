@@ -1,17 +1,2 @@
-#define CATCH_CONFIG_RUNNER
-
-#include "shared.hpp"
-
-//------------------------------------------------------------------------------
-
-void deprecated();
-
-////////////////////////////////////////////////////////////////////////////////
-
-int main(int argc, char* argv[]) {
-	deprecated();
-
-	return Catch::Session().run(argc, argv);
-}
-
-////////////////////////////////////////////////////////////////////////////////
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>

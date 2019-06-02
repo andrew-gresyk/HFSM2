@@ -9,7 +9,11 @@ template <typename TContext,
 		  typename TApex>
 class _R {
 	using Context				 = TContext;
+
 	using Config				 = TConfig;
+	using Utility				 = typename Config::Utility;
+	using Logger				 = typename Config::Logger;
+
 	using Payload				 = TPayload;
 	using Apex					 = TApex;
 
@@ -75,7 +79,7 @@ private:
 
 public:
 	explicit _R(Context& context
-				HFSM_IF_LOGGER(, LoggerInterface* const logger = nullptr));
+				HFSM_IF_LOGGER(, Logger* const logger = nullptr));
 
 	~_R();
 
@@ -109,45 +113,48 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void changeTo(const StateID stateId);
+	HFSM_INLINE void changeTo(const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void restart (const StateID stateId);
+	HFSM_INLINE void restart (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void resume	 (const StateID stateId);
+	HFSM_INLINE void resume  (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void utilize (const StateID stateId);
+	HFSM_INLINE void utilize (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void schedule(const StateID stateId);
+	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TState>
 	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
 
 	template <typename TState>
-	HFSM_INLINE void restart ()									{ restart (stateId<TState>());						}
-
-	template <typename TState>
-	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
-
-	template <typename TState>
-	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
-
-	template <typename TState>
-	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void changeTo(const StateID stateId, const Payload& payload);
-	HFSM_INLINE void restart (const StateID stateId, const Payload& payload);
-	HFSM_INLINE void resume  (const StateID stateId, const Payload& payload);
-	HFSM_INLINE void utilize (const StateID stateId, const Payload& payload);
-	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
-
-	template <typename TState>
 	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);				}
+
+	template <typename TState>
+	HFSM_INLINE void restart ()									{ restart (stateId<TState>());						}
 
 	template <typename TState>
 	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);				}
 
 	template <typename TState>
+	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
+
+	template <typename TState>
 	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);				}
 
 	template <typename TState>
+	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
+
+	template <typename TState>
 	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);				}
+
+	template <typename TState>
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
 
 	template <typename TState>
 	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);				}
@@ -157,6 +164,7 @@ public:
 	HFSM_INLINE void resetStateData(const StateID stateId);
 	HFSM_INLINE void setStateData  (const StateID stateId, const Payload& payload);
 	HFSM_INLINE bool isStateDataSet(const StateID stateId) const;
+
 	HFSM_INLINE const Payload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
@@ -179,7 +187,7 @@ public:
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	void attachLogger(LoggerInterface* const logger)			{ _logger = logger;									}
+	void attachLogger(Logger* const logger)			{ _logger = logger;									}
 #endif
 
 private:
@@ -219,7 +227,7 @@ private:
 	TransitionInfoStorage _lastTransitions;
 #endif
 
-	HFSM_IF_LOGGER(LoggerInterface* _logger);
+	HFSM_IF_LOGGER(Logger* _logger);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -244,12 +252,16 @@ class _RW<EmptyContext, TConfig, TPayload, TApex> final
 	: public _R<EmptyContext, TConfig, TPayload, TApex>
 	, EmptyContext
 {
+	using Config				 = TConfig;
+	using Utility				 = typename Config::Utility;
+	using Logger				 = typename Config::Logger;
+
 	using R = _R<EmptyContext, TConfig, TPayload, TApex>;
 
 public:
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	_RW(LoggerInterface* const logger = nullptr)
+	_RW(Logger* const logger = nullptr)
 		: R{static_cast<EmptyContext&>(*this), logger}
 	{}
 #else

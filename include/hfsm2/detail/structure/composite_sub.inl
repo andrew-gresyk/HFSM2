@@ -57,6 +57,21 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepEnter(PlanControl& control,
 		rHalf.deepEnter(control, prong);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+void
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReenter(PlanControl& control,
+												const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		lHalf.deepReenter(control, prong);
+	else
+		rHalf.deepReenter(control, prong);
+}
+
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
@@ -166,26 +181,22 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
+#if !HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
+void
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 													  const ShortIndex prong)
 {
 	switch (STRATEGY) {
 	case RegionStrategy::Composite:
-		return deepRequestChangeComposite  (control);
+		deepRequestChangeComposite  (control);
 
 	case RegionStrategy::Resumable:
-		return deepRequestChangeResumable  (control, prong);
-
-	case RegionStrategy::Utilitarian:
-		return deepRequestChangeUtilitarian(control);
+		deepRequestChangeResumable  (control, prong);
 
 	default:
 		HFSM_BREAK();
-		return {};
 	}
 }
 
@@ -194,17 +205,15 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
+void
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
 	lHalf.deepRequestChange(control);
-
-	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
+void
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
 															   const ShortIndex prong)
 {
@@ -214,84 +223,6 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
 		lHalf.deepRequestChange(control, prong);
 	else
 		rHalf.deepRequestChange(control, prong);
-
-	return {};
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
-_CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChangeUtilitarian(Control& control) {
-	const UProng l = lHalf.deepRequestChange(control);
-	const UProng r = rHalf.deepRequestChange(control);
-
-	const ShortIndex prong = l.utility >= r.utility ?
-		l.prong : r.prong;
-
-	return { Utility{1.0f}, prong };
-}
-
-//------------------------------------------------------------------------------
-
-#if !defined _MSC_VER && (!defined __clang_major__ || __clang_major__ < 7)
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
-_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChange(Control& control,
-													 const ShortIndex prong)
-{
-	switch (STRATEGY) {
-	case RegionStrategy::Composite:
-		return deepReportChangeComposite  (control);
-
-	case RegionStrategy::Resumable:
-		return deepReportChangeResumable  (control, prong);
-
-	case RegionStrategy::Utilitarian:
-		return deepReportChangeUtilitarian(control);
-
-	default:
-		HFSM_BREAK();
-		return {};
-	}
-}
-
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
-_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
-	return lHalf.deepReportChange(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
-_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
-															  const ShortIndex prong)
-{
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
-
-	if (prong < R_PRONG)
-		return lHalf.deepReportChange(control, prong);
-	else
-		return rHalf.deepReportChange(control, prong);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
-_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
-	const UProng l = lHalf.deepReportChange(control);
-	const UProng r = rHalf.deepReportChange(control);
-
-	return l.utility >= r.utility ?
-		l : r;
 }
 
 //------------------------------------------------------------------------------
@@ -328,10 +259,72 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegist
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
-typename TA::UProng
+typename TA::UP
 _CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
-	const UProng l = lHalf.deepReportUtilize(control);
-	const UProng r = rHalf.deepReportUtilize(control);
+	const UP l = lHalf.deepReportUtilize(control);
+	const UP r = rHalf.deepReportUtilize(control);
+
+	return l.utility >= r.utility ?
+		l : r;
+}
+
+//------------------------------------------------------------------------------
+
+#if !HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+typename TA::UP
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChange(Control& control,
+													 const ShortIndex prong)
+{
+	switch (STRATEGY) {
+	case RegionStrategy::Composite:
+		return deepReportChangeComposite  (control);
+
+	case RegionStrategy::Resumable:
+		return deepReportChangeResumable  (control, prong);
+
+	case RegionStrategy::Utilitarian:
+		return deepReportChangeUtilitarian(control);
+
+	default:
+		HFSM_BREAK();
+		return {};
+	}
+}
+
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+typename TA::UP
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
+	return lHalf.deepReportChange(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+typename TA::UP
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
+															  const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		return lHalf.deepReportChange(control, prong);
+	else
+		return rHalf.deepReportChange(control, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, RegionStrategy TG, ShortIndex NI, typename... TS>
+typename TA::UP
+_CS<NS, NC, NO, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
+	const UP l = lHalf.deepReportChange(control);
+	const UP r = rHalf.deepReportChange(control);
 
 	return l.utility >= r.utility ?
 		l : r;

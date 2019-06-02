@@ -20,6 +20,7 @@ class ControlT {
 	friend class _R;
 
 	using Args			= TArgs;
+	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
@@ -48,7 +49,7 @@ protected:
 	HFSM_INLINE ControlT(Context& context,
 						 StateRegistry& stateRegistry,
 						 PlanData& planData,
-						 LoggerInterface* const HFSM_IF_LOGGER(logger))
+						 Logger* const HFSM_IF_LOGGER(logger))
 		: _context{context}
 		, _stateRegistry{stateRegistry}
 		, _planData{planData}
@@ -56,51 +57,51 @@ protected:
 	{}
 
 
-	HFSM_INLINE void setRegion(const RegionID id)				{ _regionId = id;							}
+	HFSM_INLINE void setRegion(const RegionID id);
 	HFSM_INLINE void resetRegion(const RegionID id);
 
 public:
 	template <typename T>
-	static constexpr StateID  stateId()				{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
 
-	HFSM_INLINE Context& _()									{ return _context;							}
-	HFSM_INLINE Context& context()								{ return _context;							}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE bool isActive   (const StateID id) const		{ return _stateRegistry.isActive   (id);	}
-	HFSM_INLINE bool isResumable(const StateID id) const		{ return _stateRegistry.isResumable(id);	}
-
-	HFSM_INLINE bool isScheduled(const StateID id) const		{ return isResumable(id);					}
-
-	template <typename TState>
-	HFSM_INLINE bool isActive() const							{ return isActive	(stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());	}
+	HFSM_INLINE Context& _()										{ return _context;							}
+	HFSM_INLINE Context& context()									{ return _context;							}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE const ConstPlan plan() const					{ return ConstPlan{_planData, _regionId};	}
-	HFSM_INLINE const ConstPlan plan(const RegionID id) const	{ return ConstPlan{_planData, id};			}
+	HFSM_INLINE bool isActive   (const StateID id) const			{ return _stateRegistry.isActive   (id);	}
+	HFSM_INLINE bool isResumable(const StateID id) const			{ return _stateRegistry.isResumable(id);	}
+
+	HFSM_INLINE bool isScheduled(const StateID id) const			{ return isResumable(id);					}
+
+	template <typename TState>
+	HFSM_INLINE bool isActive() const								{ return isActive	(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isResumable() const							{ return isResumable(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isScheduled() const							{ return isResumable(stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE const ConstPlan plan() const						{ return ConstPlan{_planData, _regionId};	}
+	HFSM_INLINE const ConstPlan plan(const RegionID id) const		{ return ConstPlan{_planData, id};			}
 
 protected:
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	HFSM_INLINE LoggerInterface* logger()						{ return _logger;							}
+	HFSM_INLINE Logger* logger()									{ return _logger;							}
 #endif
 
 protected:
 	Context& _context;
 	StateRegistry& _stateRegistry;
 	PlanData& _planData;
-	RegionID _regionId = INVALID_REGION_ID;
-	HFSM_IF_LOGGER(LoggerInterface* _logger);
+	RegionID _regionId = 0;
+	HFSM_IF_LOGGER(Logger* _logger);
 };
 
 //------------------------------------------------------------------------------
@@ -211,9 +212,9 @@ protected:
 	using Control::_regionId;
 	HFSM_IF_LOGGER(using Control::_logger);
 
-	StateID  _originId = INVALID_STATE_ID;
-	StateID  _regionIndex = INVALID_STATE_ID;
-	LongIndex _regionSize = INVALID_LONG_INDEX;
+	StateID _originId = 0;
+	StateID _regionIndex = 0;
+	LongIndex _regionSize = StateList::SIZE;
 	Status _status;
 };
 
@@ -236,6 +237,7 @@ class FullControlT
 	friend class _R;
 
 	using Args			= TArgs;
+	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
@@ -270,7 +272,7 @@ protected:
 							 StateRegistry& stateRegistry,
 							 PlanData& planData,
 							 Requests& requests,
-							 LoggerInterface* const logger)
+							 Logger* const logger)
 		: PlanControl{context, stateRegistry, planData, logger}
 		, _requests{requests}
 	{}
@@ -292,10 +294,10 @@ public:
 	using Control::context;
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -306,19 +308,19 @@ public:
 	HFSM_INLINE void schedule(const StateID id);
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()					{ changeTo(stateId<TState>());	}
+	HFSM_INLINE void changeTo()													{ changeTo(stateId<TState>());	}
 
 	template <typename TState>
-	HFSM_INLINE void restart()					{ restart (stateId<TState>());	}
+	HFSM_INLINE void restart()													{ restart (stateId<TState>());	}
 
 	template <typename TState>
-	HFSM_INLINE void resume()					{ resume  (stateId<TState>());	}
+	HFSM_INLINE void resume()													{ resume  (stateId<TState>());	}
 
 	template <typename TState>
-	HFSM_INLINE void utilize()					{ utilize (stateId<TState>());	}
+	HFSM_INLINE void utilize()													{ utilize (stateId<TState>());	}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()					{ schedule(stateId<TState>());	}
+	HFSM_INLINE void schedule()													{ schedule(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -357,6 +359,7 @@ class GuardControlT
 	friend class _R;
 
 	using Args			= TArgs;
+	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
@@ -381,7 +384,7 @@ private:
 							  PlanData& planData,
 							  Requests& requests,
 							  const Requests& pendingChanges,
-							  LoggerInterface* const logger)
+							  Logger* const logger)
 		: FullControl{context, stateRegistry, planData, requests, logger}
 		, _pending{pendingChanges}
 	{}
@@ -423,9 +426,9 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void cancelPendingChanges();
+	HFSM_INLINE void cancelPendingTransitions();
 
-	HFSM_INLINE const Requests& pendingChanges() const			{ return _pending;								}
+	HFSM_INLINE const Requests& pendingTransitions() const		{ return _pending;								}
 
 private:
 	using FullControl::_stateRegistry;

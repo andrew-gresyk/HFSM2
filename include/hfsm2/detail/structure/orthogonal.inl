@@ -68,6 +68,22 @@ _O<NS, NC, NO, TA, TH, TS...>::deepEnter(PlanControl& control,
 	_subStates.wideEnter(control);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+void
+_O<NS, NC, NO, TA, TH, TS...>::deepReenter(PlanControl& control,
+										   const ShortIndex /*prong*/)
+{
+	OrthoFork& requested = orthoRequested(control);
+	requested.clear();
+
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	_headState.deepReenter(control);
+	_subStates.wideReenter(control);
+}
+
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
@@ -233,28 +249,14 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-typename TA::UProng
+void
 _O<NS, NC, NO, TA, TH, TS...>::deepRequestChange(Control& control,
 												 const ShortIndex /*prong*/)
 {
 	_subStates.wideRequestChange(control);
-
-	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-typename TA::UProng
-_O<NS, NC, NO, TA, TH, TS...>::deepReportChange(Control& control,
-												  const ShortIndex /*prong*/)
-{
-	_subStates.wideReportChange(control);
-
-	return {};
-}
-
-//------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
 void
@@ -288,19 +290,41 @@ _O<NS, NC, NO, TA, TH, TS...>::deepRequestUtilize(Control& control) {
 	_subStates.wideRequestUtilize(control);
 }
 
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
+typename TA::UP
+_O<NS, NC, NO, TA, TH, TS...>::deepReportChange(Control& control,
+												const ShortIndex /*prong*/)
+{
+	const UP	  h = _headState.deepReportChange(control);
+	const Utility s = _subStates.wideReportChange(control);
+
+	const Utility sub = s / PRONG_COUNT;
+
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
+
+	return {
+		h.utility * sub,
+		h.prong
+	};
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, typename TH, typename... TS>
-typename TA::UProng
+typename TA::UP
 _O<NS, NC, NO, TA, TH, TS...>::deepReportUtilize(Control& control) {
-	const UProng h = _headState.deepReportUtilize(control);
-	const UProng s = _subStates.wideReportUtilize(control);
+	const UP	  h = _headState.deepReportUtilize(control);
+	const Utility s = _subStates.wideReportUtilize(control);
 
-	const Utility subUtility = s.utility / PRONG_COUNT;
+	const Utility sub = s / PRONG_COUNT;
+
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
-		h.utility * subUtility,
-		s.prong
+		h.utility * sub,
+		h.prong
 	};
 }
 

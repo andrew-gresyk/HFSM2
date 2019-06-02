@@ -19,6 +19,15 @@ _B<TF, TR...>::widePreEnter(typename TF::Context& context) {
 	_B<TR...>::widePreEnter(context);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TF, typename... TR>
+void
+_B<TF, TR...>::widePreReenter(typename TF::Context& context) {
+	TF::preReenter(context);
+	_B<TR...>::widePreReenter(context);
+}
+
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
@@ -72,6 +81,14 @@ template <typename TF>
 void
 _B<TF>::widePreEnter(typename TF::Context& context) {
 	TF::preEnter(context);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TF>
+void
+_B<TF>::widePreReenter(typename TF::Context& context) {
+	TF::preReenter(context);
 }
 
 //------------------------------------------------------------------------------

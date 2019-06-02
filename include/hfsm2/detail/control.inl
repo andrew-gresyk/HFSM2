@@ -7,7 +7,7 @@ template <typename TA>
 ControlT<TA>::Region::Region(ControlT& control_,
 							 const RegionID id)
 	: control{control_}
-	, prevId(control._regionId)
+	, prevId{control._regionId}
 {
 	control.setRegion(id);
 }
@@ -23,10 +23,20 @@ ControlT<TA>::Region::~Region() {
 
 template <typename TA>
 void
-ControlT<TA>::resetRegion(const RegionID id) {
-	HFSM_ASSERT(_regionId != INVALID_REGION_ID);
+ControlT<TA>::setRegion(const RegionID id) {
+	HFSM_ASSERT(_regionId <= id && id < RegionList::SIZE);
 
-	_regionId	 = id;
+	_regionId = id;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
+ControlT<TA>::resetRegion(const RegionID id) {
+	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
+
+	_regionId = id;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,9 +65,9 @@ PlanControlT<TA>::Region::Region(PlanControlT& control_,
 								 const StateID index,
 								 const LongIndex size)
 	: control{control_}
-	, prevId(control._regionId)
-	, prevIndex(control._regionIndex)
-	, prevSize(control._regionSize)
+	, prevId{control._regionId}
+	, prevIndex{control._regionIndex}
+	, prevSize{control._regionSize}
 {
 	control.setRegion(id, index, size);
 }
@@ -76,11 +86,8 @@ PlanControlT<TA>::Region::~Region() {
 template <typename TA>
 void
 PlanControlT<TA>::setOrigin(const StateID id) {
-	// TODO: see if this still can be used
-	//HFSM_ASSERT(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
-	//HFSM_ASSERT(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
-
-	HFSM_ASSERT(id != INVALID_STATE_ID);
+	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
+	HFSM_ASSERT(_originId <= id && id < StateList::SIZE);
 
 	_originId = id;
 }
@@ -90,11 +97,8 @@ PlanControlT<TA>::setOrigin(const StateID id) {
 template <typename TA>
 void
 PlanControlT<TA>::resetOrigin(const StateID id) {
-	// TODO: see if this still can be used
-	//HFSM_ASSERT(_regionId != INVALID_STATE_ID && _regionSize != INVALID_LONG_INDEX);
-	//HFSM_ASSERT(_regionId < StateList::SIZE && _regionId + _regionSize <= StateList::SIZE);
-
-	HFSM_ASSERT(_originId != INVALID_STATE_ID);
+	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
+	HFSM_ASSERT(id <= _originId && _originId < StateList::SIZE);
 
 	_originId = id;
 }
@@ -107,19 +111,8 @@ PlanControlT<TA>::setRegion(const RegionID id,
 							const StateID index,
 							const LongIndex size)
 {
-	HFSM_ASSERT(index != INVALID_STATE_ID && size != INVALID_LONG_INDEX);
-
-	if (_regionId == INVALID_REGION_ID) {
-		HFSM_ASSERT(_regionIndex == INVALID_STATE_ID);
-		HFSM_ASSERT(_regionSize  == INVALID_LONG_INDEX);
-		HFSM_ASSERT(index < StateList::SIZE && index + size <= StateList::SIZE);
-	} else {
-		HFSM_ASSERT(_regionIndex != INVALID_STATE_ID);
-		HFSM_ASSERT(_regionSize  != INVALID_LONG_INDEX);
-		HFSM_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
-	}
-
-	HFSM_ASSERT(_originId == INVALID_STATE_ID);
+	HFSM_ASSERT(_regionId <= id && id <  RegionList::SIZE);
+	HFSM_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
 
 	_regionId	 = id;
 	_regionIndex = index;
@@ -134,14 +127,8 @@ PlanControlT<TA>::resetRegion(const RegionID id,
 							  const StateID index,
 							  const LongIndex size)
 {
-	HFSM_ASSERT(_regionId	 != INVALID_REGION_ID);
-	HFSM_ASSERT(_regionIndex != INVALID_STATE_ID);
-	HFSM_ASSERT(_regionSize  != INVALID_LONG_INDEX);
-
-	if (index == INVALID_STATE_ID)
-		HFSM_ASSERT(size == INVALID_LONG_INDEX);
-	else
-		HFSM_ASSERT(size != INVALID_LONG_INDEX);
+	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
+	HFSM_ASSERT(index <= _regionIndex && _regionIndex + _regionSize <= index + size);
 
 	_regionId	 = id;
 	_regionIndex = index;
@@ -243,10 +230,7 @@ FullControlT<TA>::changeTo(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-		if (_logger)
-			_logger->recordTransition(_originId, Transition::CHANGE, stateId);
-	#endif
+		HFSM_LOG_TRANSITION(_originId, Transition::CHANGE, stateId);
 	}
 }
 
@@ -262,10 +246,7 @@ FullControlT<TA>::restart(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-		if (_logger)
-			_logger->recordTransition(_originId, Transition::RESTART, stateId);
-	#endif
+		HFSM_LOG_TRANSITION(_originId, Transition::RESTART, stateId);
 	}
 }
 
@@ -281,10 +262,7 @@ FullControlT<TA>::resume(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-		if (_logger)
-			_logger->recordTransition(_originId, Transition::RESUME, stateId);
-	#endif
+		HFSM_LOG_TRANSITION(_originId, Transition::RESUME, stateId);
 	}
 }
 
@@ -300,10 +278,7 @@ FullControlT<TA>::utilize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-	#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-		if (_logger)
-			_logger->recordTransition(_originId, Transition::UTILIZE, stateId);
-	#endif
+		HFSM_LOG_TRANSITION(_originId, Transition::UTILIZE, stateId);
 	}
 }
 
@@ -315,10 +290,7 @@ FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	if (_logger)
-		_logger->recordTransition(_originId, Transition::SCHEDULE, stateId);
-#endif
+	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -349,7 +321,7 @@ FullControlT<TA>::fail() {
 
 template <typename TA>
 void
-GuardControlT<TA>::cancelPendingChanges() {
+GuardControlT<TA>::cancelPendingTransitions() {
 	_cancelled = true;
 
 	HFSM_LOG_CANCELLED_PENDING(_originId);

@@ -17,11 +17,14 @@ struct Event {
 		UTILITY,
 		ENTRY_GUARD,
 		ENTER,
+		REENTER,
 		UPDATE,
 		REACT_REQUEST,
 		REACT,
 		EXIT_GUARD,
 		EXIT,
+
+		UTILITY_RESOLUTION,
 
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
@@ -42,30 +45,28 @@ struct Event {
 	};
 
 	Event(const hfsm2::StateID origin_,
-		  const Enum type_)
-		: origin(origin_)
-		, type(type_)
-		, target(hfsm2::INVALID_STATE_ID)
+		  const Enum type_,
+		  const hfsm2::StateID target_ = hfsm2::INVALID_STATE_ID,
+		  const float utility_ = 0.0f)
+		: origin{origin_}
+		, type{type_}
+		, target{target_}
+		, utility{utility_}
 	{}
 
 	Event(const Enum type_,
-		  const hfsm2::StateID target_)
-		: origin(hfsm2::INVALID_STATE_ID)
-		, type(type_)
-		, target(target_)
-	{}
-
-	Event(const hfsm2::StateID origin_,
-		  const Enum type_,
-		  const hfsm2::StateID target_)
-		: origin(origin_)
-		, type(type_)
-		, target(target_)
+		  const hfsm2::StateID target_,
+		  const float utility_ = 0.0f)
+		: origin{hfsm2::INVALID_STATE_ID}
+		, type{type_}
+		, target{target_}
+		, utility{utility_}
 	{}
 
 	hfsm2::StateID origin;
 	Enum type;
 	hfsm2::StateID target;
+	float utility;
 };
 using Events = std::vector<Event>;
 
@@ -90,6 +91,10 @@ struct Logger
 						  const StatusEvent event) override;
 
 	void recordCancelledPending(const StateID origin) override;
+
+	void recordUtilityResolution(const StateID head,
+								 const StateID prong,
+								 const Utilty utilty) override;
 
 	void assertSequence(const Events& reference);
 

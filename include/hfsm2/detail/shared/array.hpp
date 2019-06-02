@@ -4,12 +4,12 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
-// TODO: support range-based for loop
 
 template <typename T, LongIndex NCapacity>
 class StaticArray {
 public:
 	static constexpr LongIndex CAPACITY = NCapacity;
+	static constexpr LongIndex DUMMY	= INVALID_LONG_INDEX;
 
 	using Item  = T;
 	using Index = typename UnsignedIndex<CAPACITY>::Type;
@@ -21,9 +21,17 @@ public:
 	HFSM_INLINE		  Item& operator[] (const LongIndex i);
 	HFSM_INLINE const Item& operator[] (const LongIndex i) const;
 
-	HFSM_INLINE LongIndex count() const						{ return CAPACITY;	}
+	HFSM_INLINE LongIndex count() const						{ return CAPACITY;									}
 
 	HFSM_INLINE void fill(const Item filler);
+
+	HFSM_INLINE Iterator<	   StaticArray>  begin()		{ return Iterator<		StaticArray>(*this, 0);		}
+	HFSM_INLINE Iterator<const StaticArray>  begin() const	{ return Iterator<const StaticArray>(*this, 0);		}
+	HFSM_INLINE Iterator<const StaticArray> cbegin() const	{ return Iterator<const StaticArray>(*this, 0);		}
+
+	HFSM_INLINE Iterator<	   StaticArray>	 end()			{ return Iterator<		StaticArray>(*this, DUMMY);	}
+	HFSM_INLINE Iterator<const StaticArray>	 end() const	{ return Iterator<const StaticArray>(*this, DUMMY);	}
+	HFSM_INLINE Iterator<const StaticArray> cend() const	{ return Iterator<const StaticArray>(*this, DUMMY);	}
 
 private:
 	Item _items[CAPACITY];
@@ -59,13 +67,13 @@ public:
 
 	HFSM_INLINE void operator = (const Array& other);
 
-	HFSM_INLINE Iterator<	   Array>  begin()		 { return Iterator<		 Array>(*this, View::first());	}
-	HFSM_INLINE Iterator<const Array>  begin() const { return Iterator<const Array>(*this, View::first());	}
-	HFSM_INLINE Iterator<const Array> cbegin() const { return Iterator<const Array>(*this, View::first());	}
+	HFSM_INLINE Iterator<	   Array>  begin()			{ return Iterator<		Array>(*this, 0);		}
+	HFSM_INLINE Iterator<const Array>  begin() const	{ return Iterator<const Array>(*this, 0);		}
+	HFSM_INLINE Iterator<const Array> cbegin() const	{ return Iterator<const Array>(*this, 0);		}
 
-	HFSM_INLINE Iterator<	   Array>	 end()		 { return Iterator<		 Array>(*this, DUMMY);			}
-	HFSM_INLINE Iterator<const Array>	 end() const { return Iterator<const Array>(*this, DUMMY);			}
-	HFSM_INLINE Iterator<const Array>   cend() const { return Iterator<const Array>(*this, DUMMY);			}
+	HFSM_INLINE Iterator<	   Array>	 end()			{ return Iterator<		Array>(*this, DUMMY);	}
+	HFSM_INLINE Iterator<const Array>	 end() const	{ return Iterator<const Array>(*this, DUMMY);	}
+	HFSM_INLINE Iterator<const Array>   cend() const	{ return Iterator<const Array>(*this, DUMMY);	}
 
 private:
 	Item _items[CAPACITY];

@@ -65,16 +65,17 @@ private:
 
 template <typename TIndex>
 class alignas(2) BitArrayT {
-	using Index		= TIndex;
-
-	using	   Bit	=	   BitT<Index>;
-	using ConstBit	= ConstBitT<Index>;
-
 	template <typename>
 	friend class BitT;
 
 	template <typename>
 	friend class ConstBitT;
+
+public:
+	using Index		= TIndex;
+
+	using	   Bit	=	   BitT<Index>;
+	using ConstBit	= ConstBitT<Index>;
 
 protected:
 	using StorageUnit	= uint8_t;

@@ -6,7 +6,10 @@ namespace hfsm2 {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct LoggerInterface {
+template <typename TUtilty = float>
+struct LoggerInterfaceT {
+	using Utilty	  = TUtilty;
+
 	using Method	  = ::hfsm2::Method;
 	using StateID	  = ::hfsm2::StateID;
 	using RegionID	  = ::hfsm2::RegionID;
@@ -32,7 +35,14 @@ struct LoggerInterface {
 	{}
 
 	virtual void recordCancelledPending(const StateID /*origin*/) {}
+
+	virtual void recordUtilityResolution(const StateID /*head*/,
+										 const StateID /*prong*/,
+										 const Utilty /*utilty*/)
+	{}
 };
+
+using LoggerInterface = LoggerInterfaceT<float>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +52,8 @@ struct LoggerInterface {
 
 namespace hfsm2 {
 
-using LoggerInterface = void;
+template <typename = float>
+using LoggerInterfaceT = void;
 
 }
 

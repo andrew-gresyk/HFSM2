@@ -124,6 +124,8 @@ class PlanT {
 public:
 	using PlanData		= PlanDataT<Args>;
 	using TaskLinks		= typename PlanData::TaskLinks;
+	using TaskIndex		= typename TaskLinks::Index;
+
 	using RegionBit		= typename PlanData::RegionBit;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -162,16 +164,58 @@ private:
 	template <typename T>
 	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
+	TaskIndex append(const Transition transition,
+					 const StateID origin,
+					 const StateID destination);
+
 public:
 	HFSM_INLINE explicit operator bool() const;
 
 	HFSM_INLINE void clear();
 
-	void append(const StateID origin,
-				const StateID destination);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE TaskIndex change  (const StateID origin, const StateID destination)	{ return append(Transition::CHANGE,	  origin, destination); }
+	HFSM_INLINE TaskIndex restart (const StateID origin, const StateID destination)	{ return append(Transition::RESTART,  origin, destination); }
+	HFSM_INLINE TaskIndex resume  (const StateID origin, const StateID destination)	{ return append(Transition::RESUME,	  origin, destination); }
+	HFSM_INLINE TaskIndex utilize (const StateID origin, const StateID destination)	{ return append(Transition::UTILIZE,  origin, destination); }
+	HFSM_INLINE TaskIndex schedule(const StateID origin, const StateID destination)	{ return append(Transition::SCHEDULE, origin, destination); }
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TOrigin>
+	HFSM_INLINE TaskIndex change  (const StateID destination)					{ return change  (stateId<TOrigin>(), destination);				}
+
+	template <typename TOrigin>
+	HFSM_INLINE TaskIndex restart (const StateID destination)					{ return restart (stateId<TOrigin>(), destination);				}
+
+	template <typename TOrigin>
+	HFSM_INLINE TaskIndex resume  (const StateID destination)					{ return resume  (stateId<TOrigin>(), destination);				}
+
+	template <typename TOrigin>
+	HFSM_INLINE TaskIndex utilize (const StateID destination)					{ return utilize (stateId<TOrigin>(), destination);				}
+
+	template <typename TOrigin>
+	HFSM_INLINE TaskIndex schedule(const StateID destination)					{ return schedule(stateId<TOrigin>(), destination);				}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE void append()				{ append(stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE TaskIndex change  ()											{ return change  (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	template <typename TOrigin, typename TDestination>
+	HFSM_INLINE TaskIndex restart ()											{ return restart (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	template <typename TOrigin, typename TDestination>
+	HFSM_INLINE TaskIndex resume  ()											{ return resume  (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	template <typename TOrigin, typename TDestination>
+	HFSM_INLINE TaskIndex utilize ()											{ return utilize (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	template <typename TOrigin, typename TDestination>
+	HFSM_INLINE TaskIndex schedule()											{ return schedule(stateId<TOrigin>(), stateId<TDestination>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	void remove(const LongIndex task);
 

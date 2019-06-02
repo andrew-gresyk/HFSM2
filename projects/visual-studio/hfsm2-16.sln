@@ -8,6 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-41
 		..\..\.gitignore = ..\..\.gitignore
 		..\..\.travis.yml = ..\..\.travis.yml
 		..\..\appveyor.yml = ..\..\appveyor.yml
+		catch2.runsettings = catch2.runsettings
 		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
 		..\..\README.md = ..\..\README.md
 		vs-flags.txt = vs-flags.txt
@@ -28,8 +29,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{96FFB6D5-0F92-46CC-A3CB-97661FEAC775}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "snippets-16", "snippets-16.vcxproj", "{4C77E622-2167-417F-A6E6-32E077D4C98E}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "snippets-clang", "snippets-clang.vcxproj", "{33A393DF-51F8-44F8-B5C9-B254A22287A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,14 +58,6 @@ Global
 		{4C77E622-2167-417F-A6E6-32E077D4C98E}.release|x64.Build.0 = release|x64
 		{4C77E622-2167-417F-A6E6-32E077D4C98E}.release|x86.ActiveCfg = release|Win32
 		{4C77E622-2167-417F-A6E6-32E077D4C98E}.release|x86.Build.0 = release|Win32
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7}.debug|x64.ActiveCfg = debug|x64
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7}.debug|x64.Build.0 = debug|x64
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7}.debug|x86.ActiveCfg = debug|Win32
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7}.debug|x86.Build.0 = debug|Win32
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7}.release|x64.ActiveCfg = release|x64
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7}.release|x64.Build.0 = release|x64
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7}.release|x86.ActiveCfg = release|Win32
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7}.release|x86.Build.0 = release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,7 +66,6 @@ Global
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B} = {FEAA94BA-655D-4761-B7CF-32DC0457499D}
 		{0E3EA848-3FFE-4784-8D44-1DF036990C22} = {58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}
 		{4C77E622-2167-417F-A6E6-32E077D4C98E} = {96FFB6D5-0F92-46CC-A3CB-97661FEAC775}
-		{33A393DF-51F8-44F8-B5C9-B254A22287A7} = {96FFB6D5-0F92-46CC-A3CB-97661FEAC775}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3BE666E0-1098-42CF-B1FD-F0F0CA579F4C}

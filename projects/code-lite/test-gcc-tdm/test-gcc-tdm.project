@@ -60,6 +60,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_utility_regions.hpp"/>
+    <File Name="../../../test/test_utility_regions.cpp"/>
     <File Name="../../../test/test_resumable.hpp"/>
     <File Name="../../../test/test_resumable.cpp"/>
     <File Name="../../../test/test_utility.hpp"/>

@@ -49,10 +49,10 @@ struct On
     void enter(PlanControl& control) {                 // called on state activation
         auto plan = control.plan();                    // access the plan for the region
 
-        plan.append<Red, Yellow>();                    // sequence plan steps, executed when the previous state succeeds
-        plan.append<Yellow, Green>();
-        plan.append<Green, Yellow>();
-        plan.append<Yellow, Red>();
+        plan.change<Red, Yellow>();                    // sequence plan steps, executed when the previous state succeeds
+        plan.change<Yellow, Green>();
+        plan.change<Green, Yellow>();
+        plan.change<Yellow, Red>();
     }
 
     void exit(PlanControl& /*control*/) {}             // called on state deactivation

@@ -9,7 +9,6 @@ enum RegionStrategy {
 	Composite,
 	Resumable,
 	Utilitarian,
-	Selector,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -169,6 +168,9 @@ struct StateRegistryT<ArgsT<TContext,
 	using CompoForks	= StaticArray<ShortIndex, COMPO_COUNT>;
 	using AllForks		= AllForksT<COMPO_COUNT, ORTHO_COUNT, ORTHO_UNITS>;
 
+	using CompoRemains	= BitArrayStorageT<ShortIndex, COMPO_COUNT>;
+	using RemainBit		= typename CompoRemains::Bit;
+
 	bool isActive		(const StateID stateId) const;
 	bool isResumable	(const StateID stateId) const;
 
@@ -189,10 +191,12 @@ struct StateRegistryT<ArgsT<TContext,
 	HFSM_INLINE ShortIndex& requestedCompoFork(const ForkID forkId);
 	HFSM_INLINE OrthoFork&  requestedOrthoFork(const ForkID forkId);
 
+	HFSM_INLINE RemainBit		   compoRemain(const ForkID forkId)		{ return compoRemains[forkId - 1]; }
+
 	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
 
-	void clearOrthoRequested();
+	void clearRequests();
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -201,7 +205,10 @@ struct StateRegistryT<ArgsT<TContext,
 	CompoForks compoActive{INVALID_SHORT_INDEX};
 
 	AllForks resumable;
+
+	// TODO: move these to FullControl
 	AllForks requested;
+	CompoRemains compoRemains;
 };
 
 //------------------------------------------------------------------------------
@@ -239,6 +246,9 @@ struct StateRegistryT<ArgsT<TContext,
 
 	using AllForks		= AllForksT<COMPO_COUNT, 0, 0>;
 
+	using CompoRemains	= BitArrayStorageT<ShortIndex, COMPO_COUNT>;
+	using RemainBit		= typename CompoRemains::Bit;
+
 	bool isActive		(const StateID stateId) const;
 	bool isResumable	(const StateID stateId) const;
 
@@ -255,10 +265,12 @@ struct StateRegistryT<ArgsT<TContext,
 	HFSM_INLINE ShortIndex& resumableCompoFork(const ForkID forkId);
 	HFSM_INLINE ShortIndex& requestedCompoFork(const ForkID forkId);
 
+	HFSM_INLINE RemainBit		   compoRemain(const ForkID forkId)		{ return compoRemains[forkId - 1]; }
+
 	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
 
-	HFSM_INLINE void clearOrthoRequested()										{}
+	void clearRequests();
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -266,7 +278,10 @@ struct StateRegistryT<ArgsT<TContext,
 	CompoForks compoActive{INVALID_SHORT_INDEX};
 
 	AllForks resumable;
+
+	// TODO: move these to FullControl
 	AllForks requested;
+	CompoRemains compoRemains;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

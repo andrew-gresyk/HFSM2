@@ -85,6 +85,24 @@ _S<NS, TA, TH>::deepEnter(PlanControl& control,
 	_head.enter(control);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, typename TA, typename TH>
+void
+_S<NS, TA, TH>::deepReenter(PlanControl& control,
+							const ShortIndex /*prong*/)
+{
+	HFSM_ASSERT(!control.planData().hasSucceeded(STATE_ID));
+	HFSM_ASSERT(!control.planData().hasFailed   (STATE_ID));
+
+	HFSM_LOG_STATE_METHOD(&Head::reenter, Method::REENTER);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	_head.widePreReenter(control.context());
+	_head.reenter(control);
+}
+
 //------------------------------------------------------------------------------
 
 template <StateID NS, typename TA, typename TH>
@@ -141,7 +159,7 @@ _S<NS, TA, TH>::deepExitGuard(GuardControl& control,
 	return !cancelledBefore && control.cancelled();
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, typename TA, typename TH>
 void
@@ -191,13 +209,35 @@ _S<NS, TA, TH>::wrapPlanFailed(FullControl& control) {
 //------------------------------------------------------------------------------
 
 template <StateID NS, typename TA, typename TH>
-typename TA::UProng
+typename TA::Utility
 _S<NS, TA, TH>::wrapUtility(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
 
-	const float utility = _head.utility(static_cast<const Control&>(control));
+	return _head.utility(static_cast<const Control&>(control));
+}
 
-	const Parent parent = control._stateRegistry.stateParents[STATE_ID];
+//------------------------------------------------------------------------------
+
+template <StateID NS, typename TA, typename TH>
+typename TA::UP
+_S<NS, TA, TH>::deepReportChange(Control& control,
+								 const ShortIndex)
+{
+	const Utility utility = wrapUtility(control);
+
+	const Parent parent = stateParent(control);
+
+	return {utility, parent.prong};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, typename TA, typename TH>
+typename TA::UP
+_S<NS, TA, TH>::deepReportUtilize(Control& control) {
+	const Utility utility = wrapUtility(control);
+
+	const Parent parent = stateParent(control);
 
 	return {utility, parent.prong};
 }

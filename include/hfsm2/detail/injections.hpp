@@ -6,7 +6,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-class BareT {
+class InjectionT {
 	template <typename...>
 	friend struct _B;
 
@@ -27,12 +27,18 @@ protected:
 
 public:
 	HFSM_INLINE void preEntryGuard(Context&)									{}
+
 	HFSM_INLINE void preEnter	  (Context&)									{}
+	HFSM_INLINE void preReenter	  (Context&)									{}
+
 	HFSM_INLINE void preUpdate	  (Context&)									{}
+
 	template <typename TEvent>
 	HFSM_INLINE void preReact	  (const TEvent&,
 								   Context&)									{}
+
 	HFSM_INLINE void preExitGuard (Context&)									{}
+
 	HFSM_INLINE void postExit	  (Context&)									{}
 };
 
@@ -51,12 +57,18 @@ struct _B<TFirst, TRest...>
 	using First	  = TFirst;
 
 	HFSM_INLINE void widePreEntryGuard(typename First::Context& context);
+
 	HFSM_INLINE void widePreEnter	  (typename First::Context& context);
+	HFSM_INLINE void widePreReenter	  (typename First::Context& context);
+
 	HFSM_INLINE void widePreUpdate	  (typename First::Context& context);
+
 	template <typename TEvent>
 	HFSM_INLINE void widePreReact	  (const TEvent& event,
 									   typename First::Context& context);
+
 	HFSM_INLINE void widePreExitGuard (typename First::Context& context);
+
 	HFSM_INLINE void widePostExit	  (typename First::Context& context);
 };
 
@@ -74,24 +86,36 @@ struct _B<TFirst>
 	HFSM_INLINE float utility		   (const typename First::Control&)			{ return 0.0f;			}
 
 	HFSM_INLINE void  entryGuard	   (typename First::GuardControl&)			{}
+
 	HFSM_INLINE void  enter			   (typename First::PlanControl&)			{}
+	HFSM_INLINE void  reenter		   (typename First::PlanControl&)			{}
+
 	HFSM_INLINE void  update		   (typename First::FullControl&)			{}
+
 	template <typename TEvent>
 	HFSM_INLINE void  react			   (const TEvent&,
 					 				    typename First::FullControl&)			{}
+
 	HFSM_INLINE void  exitGuard		   (typename First::GuardControl&)			{}
+
 	HFSM_INLINE void  exit			   (typename First::PlanControl&)			{}
 
 	HFSM_INLINE void  planSucceeded	   (typename First::FullControl& control)	{ control.succeed();	}
 	HFSM_INLINE void  planFailed	   (typename First::FullControl& control)	{ control.fail();		}
 
 	HFSM_INLINE void  widePreEntryGuard(typename First::Context& context);
+
 	HFSM_INLINE void  widePreEnter	   (typename First::Context& context);
+	HFSM_INLINE void  widePreReenter   (typename First::Context& context);
+
 	HFSM_INLINE void  widePreUpdate	   (typename First::Context& context);
+
 	template <typename TEvent>
 	HFSM_INLINE void  widePreReact	   (const TEvent& event,
 					 				    typename First::Context& context);
+
 	HFSM_INLINE void  widePreExitGuard (typename First::Context& context);
+
 	HFSM_INLINE void  widePostExit	   (typename First::Context& context);
 
 	template <typename T>
@@ -102,7 +126,7 @@ struct _B<TFirst>
 };
 
 template <typename TArgs>
-using Empty = _B<BareT<TArgs>>;
+using Empty = _B<InjectionT<TArgs>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

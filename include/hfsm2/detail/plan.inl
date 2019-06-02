@@ -166,6 +166,38 @@ PlanT<TArgs>::operator bool() const {
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
+typename PlanDataT<TArgs>::TaskLinks::Index
+PlanT<TArgs>::append(const Transition transition,
+					 const StateID origin,
+					 const StateID destination)
+{
+	_planExists = true;
+	const TaskIndex index = _planData.taskLinks.emplace(transition, origin, destination);
+
+	if (_bounds.first < TaskLinks::CAPACITY) {
+		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
+
+		auto& last  = _planData.taskLinks[_bounds.last];
+		last.next = index;
+
+		auto& next = _planData.taskLinks[index];
+		next.prev  = _bounds.last;
+
+		_bounds.last = index;
+	} else {
+		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
+					_bounds.last  == INVALID_LONG_INDEX);
+
+		_bounds.first = index;
+		_bounds.last  = index;
+	}
+
+	return index;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
 void
 PlanT<TArgs>::clear() {
 	if (_bounds.first < TaskLinks::CAPACITY) {
@@ -194,35 +226,6 @@ PlanT<TArgs>::clear() {
 	} else
 		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
 			   _bounds.last  == INVALID_LONG_INDEX);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TArgs>
-void
-PlanT<TArgs>::append(const StateID origin,
-					 const StateID destination)
-{
-	_planExists = true;
-	const auto index = _planData.taskLinks.emplace(origin, destination);
-
-	if (_bounds.first < TaskLinks::CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
-
-		auto& last  = _planData.taskLinks[_bounds.last];
-		last.next = index;
-
-		auto& next = _planData.taskLinks[index];
-		next.prev  = _bounds.last;
-
-		_bounds.last = index;
-	} else {
-		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
-					_bounds.last  == INVALID_LONG_INDEX);
-
-		_bounds.first = index;
-		_bounds.last  = index;
-	}
 }
 
 //------------------------------------------------------------------------------

@@ -7,7 +7,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2017
+// Copyright (c) 2019
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -69,33 +69,52 @@
 //------------------------------------------------------------------------------
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+
 	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
+
 	#define HFSM_LOGGER_OR(Y, N)												Y
+
+	#define HFSM_LOG_TRANSITION(ORIGIN, TRANSITION, DESTINATION)				\
+		if (_logger)															\
+			_logger->recordTransition(ORIGIN, TRANSITION, DESTINATION);
+
 	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)						\
 		if (_logger)															\
 			_logger->recordTaskStatus(REGION, ORIGIN, STATUS);
+
 	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)								\
 		if (_logger)															\
 			_logger->recordPlanStatus(REGION, STATUS);
+
 	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)									\
 		if (_logger)															\
 			_logger->recordCancelledPending(ORIGIN);
+
+	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)					\
+		if (auto* const logger = control.logger())								\
+			logger->recordUtilityResolution(HEAD, PRONG, UTILITY);
 #else
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(Y, N)												N
+	#define HFSM_LOG_TRANSITION(ORIGIN, TRANSITION, DESTINATION)
 	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)
 	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)
 	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)
+	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)
 #endif
 
 #if defined HFSM_VERBOSE_DEBUG_LOG
+
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\
 			logger->recordMethod(STATE_ID, ID);
+
 #elif defined HFSM_ENABLE_LOG_INTERFACE
+
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\
 			log<decltype(METHOD), ID>(*logger);
+
 #else
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)
 #endif
@@ -106,6 +125,14 @@
 	#define HFSM_IF_STRUCTURE(...)									  __VA_ARGS__
 #else
 	#define HFSM_IF_STRUCTURE(...)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
+	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION									1
+#else
+	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION									0
 #endif
 
 //------------------------------------------------------------------------------
@@ -127,15 +154,16 @@ template <typename TUtility = float,
 		  LongIndex NMaxSubstitutions = 4>
 struct Config {
 	using Utility = TUtility;
+	using Logger  = LoggerInterfaceT<Utility>;
 
 	static constexpr LongIndex MAX_PLAN_TASKS	 = NMaxPlanTasks;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = NMaxSubstitutions;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct UProng {
-		HFSM_INLINE UProng(const Utility utility_ = Utility{1.0f},
-						   const ShortIndex prong_ = INVALID_SHORT_INDEX)
+	struct UP {
+		HFSM_INLINE UP(const Utility utility_ = Utility{1.0f},
+					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
 			: utility{utility_}
 			, prong{prong_}
 		{}

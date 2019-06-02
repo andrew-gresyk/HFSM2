@@ -1,4 +1,6 @@
-﻿namespace deprecated_test {
+﻿#include <catch2/catch.hpp>
+
+namespace deprecated_test {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -6,6 +8,7 @@ namespace Event {
 	enum Enum : unsigned {
 		ENTRY_GUARD,
 		ENTER,
+		REENTER,
 		UPDATE,
 		REACT_REQUEST,
 		REACT,
@@ -54,11 +57,11 @@ struct Context {
 		const auto size = std::min(historySize, referenceSize);
 
 		for (unsigned i = 0; i < size; ++i) {
-			HFSM_IF_ASSERT(const auto h = history[i]);
-			HFSM_IF_ASSERT(const auto r = reference[i]);
-			HFSM_ASSERT(h == r);
+			const auto h = history[i];
+			const auto r = reference[i];
+			REQUIRE(h == r);
 		}
-		HFSM_ASSERT(historySize == referenceSize);
+		REQUIRE(historySize == referenceSize);
 
 		history.clear();
 	}
@@ -121,7 +124,7 @@ static_assert(FSM::stateId<B_2_2>()	== 12, "");
 ////////////////////////////////////////////////////////////////////////////////
 
 class Timed
-	: public FSM::Bare
+	: public FSM::Injection
 {
 public:
 	void preEnter(Context&)		{ _elapsed = 0.0f;			}
@@ -136,7 +139,7 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class EntryGuardTracked
-	: public FSM::Bare
+	: public FSM::Injection
 {
 public:
 	void preEnter(Context&) {
@@ -165,7 +168,7 @@ struct Action {};
 
 template <typename T>
 struct HistoryBase
-	: FSM::Bare
+	: FSM::Injection
 {
 	void preEntryGuard(Context& _) const {
 		_.history.push_back(Status{ typeid(T), Event::ENTRY_GUARD });
@@ -173,6 +176,10 @@ struct HistoryBase
 
 	void preEnter(Context& _) {
 		_.history.push_back(Status{ typeid(T), Event::ENTER });
+	}
+
+	void preReenter(Context& _) {
+		_.history.push_back(Status{ typeid(T), Event::REENTER });
 	}
 
 	void preUpdate(Context& _) {
@@ -297,7 +304,7 @@ struct B_2_1
 	: State<B_2_1>
 {
 	void entryGuard(GuardControl& control) {
-		control.cancelPendingChanges();
+		control.cancelPendingTransitions();
 		resume<B_2_2>(control, control._().history);
 	}
 };
@@ -309,7 +316,7 @@ struct B_2_2
 {
 	void entryGuard(GuardControl& control) {
 		if (entryCount() == 3) {
-			control.cancelPendingChanges();
+			control.cancelPendingTransitions();
 			resume<A>(control, control._().history);
 		}
 	}

@@ -45,7 +45,7 @@ static_assert(FSM::stateId<Step3>()		==  7, "");
 ////////////////////////////////////////////////////////////////////////////////
 
 class EntryGuardTracked
-	: public FSM::Bare
+	: public FSM::Injection
 {
 public:
 	void preEntryGuard(Context&)					{ ++_entryGuardCount;		}
@@ -59,7 +59,7 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class ExitGuardTracked
-	: public FSM::Bare
+	: public FSM::Injection
 {
 public:
 	void preExitGuard(Context&)						{ ++_exitGuardCount;		}
@@ -73,7 +73,7 @@ private:
 //------------------------------------------------------------------------------
 
 class UpdateTracked
-	: public FSM::Bare
+	: public FSM::Injection
 {
 public:
 	void preUpdate(Context&)						{ ++_updateCount;			}
@@ -95,7 +95,7 @@ struct Step1
 {
 	void exitGuard(GuardControl& control) {
 		if (exitGuardCount() == 1)
-			control.cancelPendingChanges();
+			control.cancelPendingTransitions();
 	}
 };
 
@@ -106,7 +106,7 @@ struct Step1_1
 {
 	void exitGuard(GuardControl& control) {
 		if (exitGuardCount() == 1)
-			control.cancelPendingChanges();
+			control.cancelPendingTransitions();
 	}
 };
 
@@ -117,7 +117,7 @@ struct Step1_2
 {
 	void exitGuard(GuardControl& control) {
 		if (exitGuardCount() == 2)
-			control.cancelPendingChanges();
+			control.cancelPendingTransitions();
 	}
 };
 
@@ -128,7 +128,7 @@ struct Step2
 {
 	void entryGuard(GuardControl& control) {
 		if (entryGuardCount() == 1)
-			control.cancelPendingChanges();
+			control.cancelPendingTransitions();
 	}
 };
 
@@ -139,7 +139,7 @@ struct Step2_1
 {
 	void entryGuard(GuardControl& control) {
 		if (entryGuardCount() == 1)
-			control.cancelPendingChanges();
+			control.cancelPendingTransitions();
 	}
 };
 
@@ -150,7 +150,7 @@ struct Step2_2
 {
 	void entryGuard(GuardControl& control) {
 		if (entryGuardCount() == 2)
-			control.cancelPendingChanges();
+			control.cancelPendingTransitions();
 	}
 };
 

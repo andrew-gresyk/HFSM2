@@ -63,11 +63,10 @@ struct Work
 {
 	void exitGuard(GuardControl& control) {
 		if (!control.isPendingEnter<Teardown>()) {
-			control.cancelPendingChanges();
+			for (const auto& transition : control.pendingTransitions())
+				control.plan().change<Teardown>(transition.stateId);
 
-			// TODO: query destination from the in-flight transition
-			control.plan().append<Teardown, Step2>();
-
+			control.cancelPendingTransitions();
 			control.changeTo<Teardown>();
 		}
 	}

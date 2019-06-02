@@ -46,6 +46,14 @@ _OS<NS, NC, NO, TA, NI, TI>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+void
+_OS<NS, NC, NO, TA, NI, TI>::wideReenter(PlanControl& control) {
+	initial.deepReenter(control);
+}
+
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
@@ -131,22 +139,12 @@ _OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-typename TA::UProng
+void
 _OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(Control& control) {
 	initial.deepRequestChange(control);
-
-	return {};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-typename TA::UProng
-_OS<NS, NC, NO, TA, NI, TI>::wideReportChange(Control& control) {
-	return initial.deepReportChange(control);
-}
-
-//------------------------------------------------------------------------------
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
 void
@@ -178,12 +176,24 @@ _OS<NS, NC, NO, TA, NI, TI>::wideRequestUtilize(Control& control) {
 	initial.deepRequestUtilize(control);
 }
 
+//------------------------------------------------------------------------------
+
+template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+typename TA::Utility
+_OS<NS, NC, NO, TA, NI, TI>::wideReportChange(Control& control) {
+	const UP i = initial.deepReportChange(control);
+
+	return i.utility;
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
-typename TA::UProng
+typename TA::Utility
 _OS<NS, NC, NO, TA, NI, TI>::wideReportUtilize(Control& control) {
-	return initial.deepReportUtilize(control);
+	const UP i = initial.deepReportUtilize(control);
+
+	return i.utility;
 }
 
 //------------------------------------------------------------------------------

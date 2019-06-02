@@ -65,6 +65,8 @@ void
 Array<T, NC>::operator = (const Array& other) {
 	for (unsigned i = 0; i < CAPACITY; ++i)
 		_items[i] = other._items[i];
+
+	View::_count = other.count();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -67,11 +67,8 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 				{ FSM::stateId<A>(),	 Event::ENTRY_GUARD },
 				{ FSM::stateId<A_1>(),	 Event::ENTRY_GUARD },
 
-				{ FSM::stateId<A_1>(),	 Event::EXIT },
-				{ FSM::stateId<A>(),	 Event::EXIT },
-
-				{ FSM::stateId<A>(),	 Event::ENTER },
-				{ FSM::stateId<A_1>(),	 Event::ENTER },
+				{ FSM::stateId<A>(),	 Event::REENTER },
+				{ FSM::stateId<A_1>(),	 Event::REENTER },
 			};
 			logger.assertSequence(reference);
 
@@ -156,17 +153,11 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 				{ FSM::stateId<B_2>(),	 Event::ENTRY_GUARD },
 				{ FSM::stateId<B_2_1>(), Event::ENTRY_GUARD },
 
-				{ FSM::stateId<B_1_1>(), Event::EXIT },
-				{ FSM::stateId<B_1>(),	 Event::EXIT },
-				{ FSM::stateId<B_2_1>(), Event::EXIT },
-				{ FSM::stateId<B_2>(),	 Event::EXIT },
-				{ FSM::stateId<B>(),	 Event::EXIT },
-
-				{ FSM::stateId<B>(),	 Event::ENTER },
-				{ FSM::stateId<B_1>(),	 Event::ENTER },
-				{ FSM::stateId<B_1_1>(), Event::ENTER },
-				{ FSM::stateId<B_2>(),	 Event::ENTER },
-				{ FSM::stateId<B_2_1>(), Event::ENTER },
+				{ FSM::stateId<B>(),	 Event::REENTER },
+				{ FSM::stateId<B_1>(),	 Event::REENTER },
+				{ FSM::stateId<B_1_1>(), Event::REENTER },
+				{ FSM::stateId<B_2>(),	 Event::REENTER },
+				{ FSM::stateId<B_2_1>(), Event::REENTER },
 			};
 			logger.assertSequence(reference);
 

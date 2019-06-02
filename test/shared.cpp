@@ -16,6 +16,9 @@ Logger::recordMethod(const StateID origin,
 		case Method::ENTER:
 			history.emplace_back(origin, Event::ENTER);
 			break;
+		case Method::REENTER:
+			history.emplace_back(origin, Event::REENTER);
+			break;
 		case Method::UPDATE:
 			history.emplace_back(origin, Event::UPDATE);
 			break;
@@ -50,18 +53,23 @@ Logger::recordTransition(const StateID origin,
 		case Transition::CHANGE:
 			history.emplace_back(origin, Event::CHANGE,   target);
 			break;
+
 		case Transition::RESTART:
 			history.emplace_back(origin, Event::RESTART,  target);
 			break;
+
 		case Transition::RESUME:
 			history.emplace_back(origin, Event::RESUME,   target);
 			break;
+
 		case Transition::UTILIZE:
 			history.emplace_back(origin, Event::UTILIZE,  target);
 			break;
+
 		case Transition::SCHEDULE:
 			history.emplace_back(origin, Event::SCHEDULE, target);
 			break;
+
 		default:
 			HFSM_BREAK();
 	}
@@ -102,6 +110,16 @@ Logger::recordPlanStatus(const RegionID region,
 		default:
 			HFSM_BREAK();
 	}
+}
+
+//------------------------------------------------------------------------------
+
+void
+Logger::recordUtilityResolution(const StateID head,
+								const StateID prong,
+								const Utilty utilty)
+{
+	history.emplace_back(head, Event::UTILITY_RESOLUTION, prong, utilty);
 }
 
 //------------------------------------------------------------------------------

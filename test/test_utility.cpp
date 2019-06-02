@@ -66,6 +66,8 @@ TEST_CASE("Utility", "[machine]") {
 				{ FSM::stateId<U_075>(), Event::UTILITY },
 				{ FSM::stateId<U_100>(), Event::UTILITY },
 
+				{ FSM::stateId<U>(),	 Event::UTILITY_RESOLUTION, 4 },
+
 				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
 
 				{ FSM::stateId<O>(),	 Event::ENTRY_GUARD },
@@ -162,11 +164,15 @@ TEST_CASE("Utility", "[machine]") {
 				{ FSM::stateId<U_075>(), Event::UTILITY },
 				{ FSM::stateId<U_100>(), Event::UTILITY },
 
+				{ FSM::stateId<U>(),	 Event::UTILITY_RESOLUTION, 4 },
+
 				{ FSM::stateId<C_000>(), Event::UTILITY },
 				{ FSM::stateId<C_025>(), Event::UTILITY },
 				{ FSM::stateId<C_050>(), Event::UTILITY },
 				{ FSM::stateId<C_075>(), Event::UTILITY },
 				{ FSM::stateId<C_100>(), Event::UTILITY },
+
+				{ FSM::stateId<C>(),	 Event::UTILITY_RESOLUTION, 4 },
 
 				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
 

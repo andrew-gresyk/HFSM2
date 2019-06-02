@@ -10,7 +10,7 @@ using namespace deprecated_test;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void deprecated() {
+TEST_CASE("FSM.Deprecated", "[machine]") {
 	Context _;
 
 	{
@@ -27,18 +27,18 @@ void deprecated() {
 		};
 		_.assertHistory(created);
 
-		HFSM_ASSERT( machine.isActive<A>());
-		HFSM_ASSERT( machine.isActive<A_1>());
-		HFSM_ASSERT(!machine.isActive<A_2>());
-		HFSM_ASSERT(!machine.isActive<A_2_1>());
-		HFSM_ASSERT(!machine.isActive<A_2_2>());
-		HFSM_ASSERT(!machine.isActive<B>());
-		HFSM_ASSERT(!machine.isActive<B_1>());
-		HFSM_ASSERT(!machine.isActive<B_1_1>());
-		HFSM_ASSERT(!machine.isActive<B_1_2>());
-		HFSM_ASSERT(!machine.isActive<B_2>());
-		HFSM_ASSERT(!machine.isActive<B_2_1>());
-		HFSM_ASSERT(!machine.isActive<B_2_2>());
+		REQUIRE( machine.isActive<A>());
+		REQUIRE( machine.isActive<A_1>());
+		REQUIRE(!machine.isActive<A_2>());
+		REQUIRE(!machine.isActive<A_2_1>());
+		REQUIRE(!machine.isActive<A_2_2>());
+		REQUIRE(!machine.isActive<B>());
+		REQUIRE(!machine.isActive<B_1>());
+		REQUIRE(!machine.isActive<B_1_1>());
+		REQUIRE(!machine.isActive<B_1_2>());
+		REQUIRE(!machine.isActive<B_2>());
+		REQUIRE(!machine.isActive<B_2_1>());
+		REQUIRE(!machine.isActive<B_2_2>());
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -72,18 +72,18 @@ void deprecated() {
 		};
 		_.assertHistory(update1);
 
-		HFSM_ASSERT(!machine.isResumable<A>());
-		HFSM_ASSERT( machine.isResumable<A_1>());
-		HFSM_ASSERT(!machine.isResumable<A_2>());
-		HFSM_ASSERT(!machine.isResumable<A_2_1>());
-		HFSM_ASSERT(!machine.isResumable<A_2_2>());
-		HFSM_ASSERT(!machine.isResumable<B>());
-		HFSM_ASSERT(!machine.isResumable<B_1>());
-		HFSM_ASSERT(!machine.isResumable<B_1_1>());
-		HFSM_ASSERT(!machine.isResumable<B_1_2>());
-		HFSM_ASSERT(!machine.isResumable<B_2>());
-		HFSM_ASSERT(!machine.isResumable<B_2_1>());
-		HFSM_ASSERT(!machine.isResumable<B_2_2>());
+		REQUIRE(!machine.isResumable<A>());
+		REQUIRE( machine.isResumable<A_1>());
+		REQUIRE(!machine.isResumable<A_2>());
+		REQUIRE(!machine.isResumable<A_2_1>());
+		REQUIRE(!machine.isResumable<A_2_2>());
+		REQUIRE(!machine.isResumable<B>());
+		REQUIRE(!machine.isResumable<B_1>());
+		REQUIRE(!machine.isResumable<B_1_1>());
+		REQUIRE(!machine.isResumable<B_1_2>());
+		REQUIRE(!machine.isResumable<B_2>());
+		REQUIRE(!machine.isResumable<B_2_1>());
+		REQUIRE(!machine.isResumable<B_2_2>());
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -130,18 +130,18 @@ void deprecated() {
 		};
 		_.assertHistory(update2);
 
-		HFSM_ASSERT(!machine.isActive<A>());
-		HFSM_ASSERT(!machine.isActive<A_1>());
-		HFSM_ASSERT(!machine.isActive<A_2>());
-		HFSM_ASSERT(!machine.isActive<A_2_1>());
-		HFSM_ASSERT(!machine.isActive<A_2_2>());
-		HFSM_ASSERT( machine.isActive<B>());
-		HFSM_ASSERT( machine.isActive<B_1>());
-		HFSM_ASSERT( machine.isActive<B_1_1>());
-		HFSM_ASSERT(!machine.isActive<B_1_2>());
-		HFSM_ASSERT( machine.isActive<B_2>());
-		HFSM_ASSERT(!machine.isActive<B_2_1>());
-		HFSM_ASSERT( machine.isActive<B_2_2>());
+		REQUIRE(!machine.isActive<A>());
+		REQUIRE(!machine.isActive<A_1>());
+		REQUIRE(!machine.isActive<A_2>());
+		REQUIRE(!machine.isActive<A_2_1>());
+		REQUIRE(!machine.isActive<A_2_2>());
+		REQUIRE( machine.isActive<B>());
+		REQUIRE( machine.isActive<B_1>());
+		REQUIRE( machine.isActive<B_1_1>());
+		REQUIRE(!machine.isActive<B_1_2>());
+		REQUIRE( machine.isActive<B_2>());
+		REQUIRE(!machine.isActive<B_2_1>());
+		REQUIRE( machine.isActive<B_2_2>());
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -252,8 +252,7 @@ void deprecated() {
 			status<B_2_2>(Event::EXIT_GUARD),
 			status<B_2_2>(Event::ENTRY_GUARD),
 
-			status<B_2_2>(Event::EXIT),
-			status<B_2_2>(Event::ENTER),
+			status<B_2_2>(Event::REENTER),
 		};
 		_.assertHistory(update5);
 

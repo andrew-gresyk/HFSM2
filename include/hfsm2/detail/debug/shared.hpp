@@ -8,6 +8,7 @@ enum class Method : ShortIndex {
 	UTILITY,
 	ENTRY_GUARD,
 	ENTER,
+	REENTER,
 	UPDATE,
 	REACT,
 	EXIT_GUARD,
@@ -67,8 +68,10 @@ static inline
 const char*
 methodName(const Method method) {
 	switch (method) {
+		case Method::UTILITY:			return "utility";
 		case Method::ENTRY_GUARD:		return "entryGuard";
 		case Method::ENTER:				return "enter";
+		case Method::REENTER:			return "reenter";
 		case Method::UPDATE:			return "update";
 		case Method::REACT:				return "react";
 		case Method::EXIT_GUARD:		return "exitGuard";

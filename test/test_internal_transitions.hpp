@@ -59,7 +59,7 @@ static_assert(FSM::stateId<B_2_2>()	== 12, "");
 //------------------------------------------------------------------------------
 
 class Timed
-	: public FSM::Bare
+	: public FSM::Injection
 {
 public:
 	void preEnter(Context&)							{ _elapsed = 0.0f;			}
@@ -74,7 +74,7 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class Tracked
-	: public FSM::Bare
+	: public FSM::Injection
 {
 public:
 	void preEnter(Context&) {
@@ -222,7 +222,7 @@ struct B_2_1
 	: FSM::State
 {
 	void entryGuard(GuardControl& control) {
-		control.cancelPendingChanges();
+		control.cancelPendingTransitions();
 		control.resume<B_2_2>();
 	}
 
@@ -238,7 +238,7 @@ struct B_2_2
 {
 	void entryGuard(GuardControl& control) {
 		if (entryCount() == 2) {
-			control.cancelPendingChanges();
+			control.cancelPendingTransitions();
 			control.resume<A>();
 		}
 	}

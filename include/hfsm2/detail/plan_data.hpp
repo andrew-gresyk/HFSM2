@@ -7,19 +7,19 @@ namespace detail {
 #pragma pack(push, 2)
 
 struct TaskLink {
-	//using PayloadBox		= ...;
-
-	HFSM_INLINE TaskLink(const StateID origin_,
+	HFSM_INLINE TaskLink(const Transition transition_,
+						 const StateID origin_,
 						 const StateID destination_)
-		: origin(origin_)
+		: transition{transition_}
+		, origin(origin_)
 		, destination(destination_)
 		, next(INVALID_LONG_INDEX)
 	{}
 
-	//PayloadBox payload;
-
+	Transition transition;
 	StateID origin		= INVALID_STATE_ID;
 	StateID destination	= INVALID_STATE_ID;
+	// TODO: add paylaods
 
 	LongIndex prev		= INVALID_LONG_INDEX;
 	LongIndex next		= INVALID_LONG_INDEX;

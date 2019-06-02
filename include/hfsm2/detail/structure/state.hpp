@@ -10,9 +10,12 @@ struct _S {
 	static constexpr StateID STATE_ID = TStateID;
 
 	using Args			= TArgs;
+	using Logger		= typename Args::Logger;
+
 	using Head			= THead;
 
-	using UProng		= typename Args::UProng;
+	using Utility		= typename Args::Utility;
+	using UP			= typename Args::UP;
 	using Payload		= typename Args::Payload;
 
 	using Request		= RequestT<Payload>;
@@ -30,47 +33,49 @@ struct _S {
 
 	using Empty			= ::hfsm2::detail::Empty<Args>;
 
-	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
+	HFSM_INLINE Parent	stateParent			 (Control& control)		{ return control._stateRegistry.stateParents[STATE_ID]; }
+
+	HFSM_INLINE void	deepRegister		 (StateRegistry& stateRegistry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl&,								const ShortIndex = INVALID_SHORT_INDEX)	{ return false; }
-	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&,							 const ShortIndex = INVALID_SHORT_INDEX) { return false; }
+	HFSM_INLINE bool	deepEntryGuard		 (GuardControl& control,					 const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepEnter			(PlanControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepEnter			 (PlanControl& control,						 const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepReenter			 (PlanControl& control,						 const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE Status deepUpdate			(FullControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE Status	deepUpdate			 (FullControl& control,						 const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <typename TEvent>
-	HFSM_INLINE Status deepReact			(FullControl& control, const TEvent& event, const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE Status	deepReact			 (FullControl& control, const TEvent& event, const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl&,								const ShortIndex = INVALID_SHORT_INDEX)	{ return false; }
-	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&,							 const ShortIndex = INVALID_SHORT_INDEX) { return false; }
+	HFSM_INLINE bool	deepExitGuard		 (GuardControl& control,					 const ShortIndex = INVALID_SHORT_INDEX);
 
-	HFSM_INLINE void   deepExit				(PlanControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void   wrapPlanSucceeded	(FullControl& control);
-	HFSM_INLINE void   wrapPlanFailed		(FullControl& control);
-	HFSM_INLINE UProng wrapUtility			(Control& control);
+	HFSM_INLINE void	deepExit			 (PlanControl& control,						 const ShortIndex = INVALID_SHORT_INDEX);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepForwardActive	(Control&,				const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
-	HFSM_INLINE void   deepForwardRequest	(Control&,				const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void	wrapPlanSucceeded	 (FullControl& control);
+	HFSM_INLINE void	wrapPlanFailed		 (FullControl& control);
+	HFSM_INLINE Utility	wrapUtility			 (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE UProng deepRequestChange	(Control&,									const ShortIndex = INVALID_SHORT_INDEX)	{ return {}; }
-	HFSM_INLINE UProng deepReportChange		(Control& control,							const ShortIndex = INVALID_SHORT_INDEX)	{ return wrapUtility(control);	}
+	HFSM_INLINE void	deepForwardActive	 (Control&,				const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void	deepForwardRequest	 (Control&,				const RequestType,	const ShortIndex = INVALID_SHORT_INDEX)	{}
 
-	HFSM_INLINE void   deepRequestRemain	(StateRegistry&)																	{}
-	HFSM_INLINE void   deepRequestRestart	(StateRegistry&)																	{}
-	HFSM_INLINE void   deepRequestResume	(StateRegistry&,							const ShortIndex = INVALID_SHORT_INDEX)	{}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepRequestUtilize	(Control&)																			{}
-	HFSM_INLINE UProng deepReportUtilize	(Control& control)																	{ return wrapUtility(control);	}
+	HFSM_INLINE void	deepRequestChange	 (Control&,									const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void	deepRequestRemain	 (StateRegistry&)																	{}
+	HFSM_INLINE void	deepRequestRestart	 (StateRegistry&)																	{}
+	HFSM_INLINE void	deepRequestResume	 (StateRegistry&,							const ShortIndex = INVALID_SHORT_INDEX)	{}
+	HFSM_INLINE void	deepRequestUtilize	 (Control&)																			{}
+
+	HFSM_INLINE UP		deepReportChange	 (Control& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -84,7 +89,7 @@ struct _S {
 #endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType		= typename StructureStateInfo::RegionType;
+	using RegionType	= typename StructureStateInfo::RegionType;
 
 	static const char* name();
 
@@ -105,11 +110,11 @@ struct _S {
 
 	template <typename TMethodType, Method>
 	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
-	log(LoggerInterface&) const {}
+	log(Logger&) const {}
 
 	template <typename TMethodType, Method TMethodId>
 	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
-	log(LoggerInterface& logger) const {
+	log(Logger& logger) const {
 		logger.recordMethod(STATE_ID, TMethodId);
 	}
 #endif
@@ -118,7 +123,7 @@ struct _S {
 	// VS	 - error C2079: 'hfsm2::detail::_S<BLAH>::_head' uses undefined struct 'Blah'
 	// Clang - error : field has incomplete type 'hfsm2::detail::_S<BLAH>::Head' (aka 'Blah')
 	//
-	// .. remember to add definition for the state 'Blah'
+	// .. add definition for the state 'Blah'
 	Head _head;
 	HFSM_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(Head));
 };

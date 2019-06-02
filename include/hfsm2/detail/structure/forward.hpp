@@ -195,13 +195,15 @@ template <typename TContext,
 		  LongIndex NTaskCapacity>
 struct ArgsT final {
 	using Context	 = TContext;
+
 	using Config	 = TConfig;
+	using Utility	 = typename Config::Utility;
+	using UP		 = typename Config::UP;
+	using Logger	 = typename Config::Logger;
+
 	using StateList	 = TStateList;
 	using RegionList = TRegionList;
 	using Payload	 = TPayload;
-
-	using Utility	 = typename TConfig::Utility;
-	using UProng	 = typename TConfig::UProng;
 
 	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
 	static constexpr ShortIndex COMPO_COUNT	  = NCompoCount;
@@ -301,7 +303,7 @@ struct _RF final {
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Bare			= BareT<Args>;
+	using Injection		= InjectionT<Args>;
 
 	using State			= Empty<Args>;
 

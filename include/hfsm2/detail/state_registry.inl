@@ -237,6 +237,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmedia
 			if (parent.forkId > 0) {
 				requestedCompoFork(parent.forkId) = parent.prong;
 
+				parent = forkParent(parent.forkId);
 				break;
 			} else if (parent.forkId < 0)
 				requestedOrthoFork(parent.forkId)[parent.prong] = true;
@@ -244,11 +245,10 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmedia
 				HFSM_BREAK();
 		}
 
-		for (parent = forkParent(parent.forkId);
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
+		for (; parent; parent = forkParent(parent.forkId)) {
 			if (parent.forkId > 0) {
+				compoRemain(parent.forkId) = true;
+
 				if (   activeCompoProng(parent.forkId) != parent.prong)
 					requestedCompoFork (parent.forkId)  = parent.prong;
 				else {
@@ -262,10 +262,12 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmedia
 		}
 
 		for (; parent; parent = forkParent(parent.forkId)) {
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId < 0)
+			if (parent.forkId > 0)
+				compoRemain(parent.forkId) = true;
+			else if (parent.forkId < 0)
 				requestedOrthoFork(parent.forkId)[parent.prong] = true;
+			else
+				HFSM_BREAK();
 		}
 	}
 
@@ -295,12 +297,9 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestSchedul
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 void
-StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::clearOrthoRequested() {
-	for (ForkID i = 0; i < requested.ortho.count(); ++i) {
-		OrthoFork& orthoRequested = requested.ortho[i];
-
-		orthoRequested.clear();
-	}
+StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::clearRequests() {
+	compoRemains.clear();
+	requested.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -490,11 +489,19 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestImmediate(c
 				 parent = forkParent(parent.forkId))
 			{
 				HFSM_ASSERT(parent.forkId > 0);
+				compoRemain(parent.forkId) = true;
 
 				if (   activeCompoProng(parent.forkId) != parent.prong)
 					requestedCompoFork (parent.forkId)  = parent.prong;
-				else
+				else {
+					parent = forkParent(parent.forkId);
 					break;
+				}
+			}
+
+			for (; parent; parent = forkParent(parent.forkId)) {
+				HFSM_ASSERT(parent.forkId > 0);
+				compoRemain(parent.forkId) = true;
 			}
 		}
 	}
@@ -515,6 +522,15 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::requestScheduled(c
 		if (HFSM_CHECKED(parent.forkId > 0))
 			resumableCompoFork(parent.forkId) = parent.prong;
 	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
+void
+StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::clearRequests() {
+	compoRemains.clear();
+	requested.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

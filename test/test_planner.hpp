@@ -85,8 +85,8 @@ struct Planned
 		auto plan = control.plan();
 		REQUIRE(!plan); //-V521
 
-		plan.append<Step1_BT, Hybrid>();
-		plan.append<Hybrid, Terminal>();
+		plan.change<Step1_BT, Hybrid>();
+		plan.change<Hybrid, Terminal>();
 	}
 
 	void planFailed(FullControl& control) {
@@ -103,7 +103,7 @@ struct Step1_BT
 		Plan plan = control.plan();
 		REQUIRE(!plan); //-V521
 
-		plan.append<Step1_2, Step1_3>();
+		plan.change<Step1_2, Step1_3>();
 	}
 };
 
@@ -140,8 +140,8 @@ struct Hybrid
 		auto plan = control.plan();
 		REQUIRE(!plan); //-V521
 
-		plan.append<Step2L_1, Step2L_2>();
-		plan.append<Step2R_1, Step2R_2>();
+		plan.change<Step2L_1, Step2L_2>();
+		plan.change<Step2R_1, Step2R_2>();
 	}
 
 	void planFailed(FullControl& control) {

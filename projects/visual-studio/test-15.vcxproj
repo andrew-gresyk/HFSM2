@@ -34,6 +34,7 @@
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
     <ClCompile Include="..\..\test\test_state_data.cpp" />
     <ClCompile Include="..\..\test\test_utility.cpp" />
+    <ClCompile Include="..\..\test\test_utility_regions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm2\detail\control.hpp" />
@@ -71,6 +72,7 @@
     <ClInclude Include="..\..\test\test_self_transitions.hpp" />
     <ClInclude Include="..\..\test\test_state_data.hpp" />
     <ClInclude Include="..\..\test\test_utility.hpp" />
+    <ClInclude Include="..\..\test\test_utility_regions.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\control.inl" />

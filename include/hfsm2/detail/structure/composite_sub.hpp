@@ -22,7 +22,7 @@ struct _CS {
 	using Args			= TArgs;
 
 	using Utility		= typename Args::Utility;
-	using UProng		= typename Args::UProng;
+	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 	using Payload		= typename Args::Payload;
@@ -61,97 +61,96 @@ struct _CS {
 									   R_PRONG,
 									   RStates>;
 
-	HFSM_INLINE void   deepRegister			(StateRegistry& stateRegistry, const Parent parent);
+	HFSM_INLINE void	deepRegister				  (StateRegistry& stateRegistry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool   deepForwardEntryGuard(GuardControl& control,							const ShortIndex prong);
-	HFSM_INLINE bool   deepEntryGuard		(GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool	deepForwardEntryGuard		  (GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool	deepEntryGuard				  (GuardControl& control,							const ShortIndex prong);
 
-	HFSM_INLINE void   deepEnter			(PlanControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	deepEnter					  (PlanControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	deepReenter					  (PlanControl& control,							const ShortIndex prong);
 
-	HFSM_INLINE Status deepUpdate			(FullControl& control,							const ShortIndex prong);
+	HFSM_INLINE Status	deepUpdate					  (FullControl& control,							const ShortIndex prong);
 
 	template <typename TEvent>
-	HFSM_INLINE Status deepReact			(FullControl& control,	const TEvent& event,	const ShortIndex prong);
+	HFSM_INLINE Status	deepReact					  (FullControl& control, const TEvent& event,		const ShortIndex prong);
 
-	HFSM_INLINE bool   deepForwardExitGuard	(GuardControl& control,							const ShortIndex prong);
-	HFSM_INLINE bool   deepExitGuard		(GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool	deepForwardExitGuard		  (GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool	deepExitGuard				  (GuardControl& control,							const ShortIndex prong);
 
-	HFSM_INLINE void   deepExit				(PlanControl& control,							const ShortIndex prong);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void   deepForwardActive	(Control& control,	const RequestType request,	const ShortIndex prong);
-	HFSM_INLINE void   deepForwardRequest	(Control& control,	const RequestType request,	const ShortIndex prong);
+	HFSM_INLINE void	deepExit					  (PlanControl& control,							const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
+	HFSM_INLINE void	deepForwardActive			  (Control& control,	 const RequestType request,	const ShortIndex prong);
+	HFSM_INLINE void	deepForwardRequest			  (Control& control,	 const RequestType request,	const ShortIndex prong);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <RegionStrategy TG = STRATEGY>
-	HFSM_INLINE UProng deepRequestChange			 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
-	HFSM_INLINE UProng deepRequestChange<Composite>	 (Control& control,	const ShortIndex)		{ return deepRequestChangeComposite  (control);			}
+	HFSM_INLINE void	deepRequestChange<Composite>  (Control& control,	 const ShortIndex)			{ deepRequestChangeComposite  (control);		}
 
 	template <>
-	HFSM_INLINE UProng deepRequestChange<Resumable>	 (Control& control,	const ShortIndex prong)	{ return deepRequestChangeResumable  (control, prong);	}
-
-	template <>
-	HFSM_INLINE UProng deepRequestChange<Utilitarian>(Control& control,	const ShortIndex)		{ return deepRequestChangeUtilitarian(control);			}
+	HFSM_INLINE	void	deepRequestChange<Resumable>  (Control& control,	 const ShortIndex prong)	{ deepRequestChangeResumable  (control, prong);	}
 
 #else
 
-	HFSM_INLINE UProng deepRequestChange			 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 #endif
 
-	HFSM_INLINE UProng deepRequestChangeComposite	 (Control& control);
-	HFSM_INLINE UProng deepRequestChangeResumable	 (Control& control,	const ShortIndex prong);
-	HFSM_INLINE UProng deepRequestChangeUtilitarian	 (Control& control);
+	HFSM_INLINE void	deepRequestChangeComposite	  (Control& control);
+	HFSM_INLINE void	deepRequestChangeResumable	  (Control& control,	 const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
+	HFSM_INLINE void	deepRequestRemain			  (StateRegistry& stateRegistry);
+	HFSM_INLINE void	deepRequestRestart			  (StateRegistry& stateRegistry);
+	HFSM_INLINE void	deepRequestResume			  (StateRegistry& stateRegistry, const ShortIndex prong);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <RegionStrategy TG = STRATEGY>
-	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE UP		deepReportChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
-	HFSM_INLINE UProng deepReportChange<Composite>   (Control& control,	const ShortIndex)		{ return deepReportChangeComposite  (control);		}
+	HFSM_INLINE UP		deepReportChange<Composite>   (Control& control,	 const ShortIndex)		 { return deepReportChangeComposite  (control);			}
 
 	template <>
-	HFSM_INLINE UProng deepReportChange<Resumable>   (Control& control,	const ShortIndex prong)	{ return deepReportChangeResumable  (control, prong);	}
+	HFSM_INLINE UP		deepReportChange<Resumable>   (Control& control,	 const ShortIndex prong) { return deepReportChangeResumable  (control, prong);	}
 
 	template <>
-	HFSM_INLINE UProng deepReportChange<Utilitarian> (Control& control,	const ShortIndex)		{ return deepReportChangeUtilitarian(control);		}
+	HFSM_INLINE UP		deepReportChange<Utilitarian> (Control& control,	 const ShortIndex)		 { return deepReportChangeUtilitarian(control);			}
 
 #else
 
-	HFSM_INLINE UProng deepReportChange				 (Control& control,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE UP deepReportChange					  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 #endif
 
-	HFSM_INLINE UProng deepReportChangeComposite	 (Control& control);
-	HFSM_INLINE UProng deepReportChangeResumable	 (Control& control,	const ShortIndex prong);
-	HFSM_INLINE UProng deepReportChangeUtilitarian   (Control& control);
+	HFSM_INLINE UP deepReportChangeComposite		  (Control& control);
+	HFSM_INLINE UP deepReportChangeResumable		  (Control& control,	 const ShortIndex prong);
+	HFSM_INLINE UP deepReportChangeUtilitarian		  (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepRequestRemain	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   deepRequestRestart	(StateRegistry& stateRegistry);
-	HFSM_INLINE void   deepRequestResume	(StateRegistry& stateRegistry,					const ShortIndex prong);
-
-	HFSM_INLINE UProng deepReportUtilize	(Control& control);
+	HFSM_INLINE UP		deepReportUtilize			  (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepEnterRequested	(PlanControl& control,							const ShortIndex prong);
-	HFSM_INLINE void   deepChangeToRequested(PlanControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	deepEnterRequested			  (PlanControl& control, const ShortIndex prong);
+	HFSM_INLINE void	deepChangeToRequested		  (PlanControl& control, const ShortIndex prong);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType		= typename StructureStateInfo::RegionType;
+	using RegionType	= typename StructureStateInfo::RegionType;
 
 	static constexpr LongIndex NAME_COUNT = LHalf::NAME_COUNT + RHalf::NAME_COUNT;
 
