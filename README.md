@@ -19,14 +19,14 @@ Header-only heriarchical FSM framework in C++14, completely static (no dynamic a
 
 ## Tutorial
 
-Check [Wiki](../../wiki/Tutorial) for basic usage and more info.
+Check [Wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) for basic usage and more info.
 
 ---
 
 ## Feature Highlights
 
-- Permissive [MIT License](LICENSE.md)
-- Written in widely-supported modern(ish) C++11
+- Permissive [MIT License](https://github.com/andrew-gresyk/HFSM2/blob/master/LICENSE)
+- Written in widely-supported modern(ish) C++14
 - Header-only
 - Fully static, no dynamic allocations
 - Uses inline-friendly compile-time pylymorphism, no virtual methods were harmed
@@ -39,6 +39,7 @@ Check [Wiki](../../wiki/Tutorial) for basic usage and more info.
 - Utility theory support.
 - Scaleable, supports state re-use via state injections
 - Debug-assisted, includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
+- Built-in logging support
 - Convenient, minimal boilerplate
 
 ---
