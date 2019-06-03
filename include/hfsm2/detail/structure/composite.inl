@@ -311,12 +311,15 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 	switch (STRATEGY) {
 	case RegionStrategy::Composite:
 		deepRequestChangeComposite  (control);
+		break;
 
 	case RegionStrategy::Resumable:
 		deepRequestChangeResumable  (control);
+		break;
 
 	case RegionStrategy::Utilitarian:
 		deepRequestChangeUtilitarian(control);
+		break;
 
 	default:
 		HFSM_BREAK();

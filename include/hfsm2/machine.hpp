@@ -5397,10 +5397,10 @@ struct _CS {
 	HFSM_INLINE void	deepRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
-	HFSM_INLINE void	deepRequestChange<Composite>  (Control& control,	 const ShortIndex)			{ deepRequestChangeComposite  (control);		}
+	HFSM_INLINE void	deepRequestChange<Composite>  (Control& control,	 const ShortIndex)			{ deepRequestChangeComposite(control);			}
 
 	template <>
-	HFSM_INLINE	void	deepRequestChange<Resumable>  (Control& control,	 const ShortIndex prong)	{ deepRequestChangeResumable  (control, prong);	}
+	HFSM_INLINE	void	deepRequestChange<Resumable>  (Control& control,	 const ShortIndex prong)	{ deepRequestChangeResumable(control, prong);	}
 
 #else
 
@@ -5435,13 +5435,13 @@ struct _CS {
 
 #else
 
-	HFSM_INLINE UP deepReportChange					  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE UP		deepReportChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 #endif
 
-	HFSM_INLINE UP deepReportChangeComposite		  (Control& control);
-	HFSM_INLINE UP deepReportChangeResumable		  (Control& control,	 const ShortIndex prong);
-	HFSM_INLINE UP deepReportChangeUtilitarian		  (Control& control);
+	HFSM_INLINE UP		deepReportChangeComposite	  (Control& control);
+	HFSM_INLINE UP		deepReportChangeResumable	  (Control& control,	 const ShortIndex prong);
+	HFSM_INLINE UP		deepReportChangeUtilitarian	  (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -5664,10 +5664,12 @@ _CS<NS, NC, NO, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 {
 	switch (STRATEGY) {
 	case RegionStrategy::Composite:
-		deepRequestChangeComposite  (control);
+		deepRequestChangeComposite(control);
+		break;
 
 	case RegionStrategy::Resumable:
-		deepRequestChangeResumable  (control, prong);
+		deepRequestChangeResumable(control, prong);
+		break;
 
 	default:
 		HFSM_BREAK();
@@ -6350,12 +6352,15 @@ _C<NS, NC, NO, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 	switch (STRATEGY) {
 	case RegionStrategy::Composite:
 		deepRequestChangeComposite  (control);
+		break;
 
 	case RegionStrategy::Resumable:
 		deepRequestChangeResumable  (control);
+		break;
 
 	case RegionStrategy::Utilitarian:
 		deepRequestChangeUtilitarian(control);
+		break;
 
 	default:
 		HFSM_BREAK();

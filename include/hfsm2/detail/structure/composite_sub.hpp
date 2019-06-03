@@ -94,10 +94,10 @@ struct _CS {
 	HFSM_INLINE void	deepRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
-	HFSM_INLINE void	deepRequestChange<Composite>  (Control& control,	 const ShortIndex)			{ deepRequestChangeComposite  (control);		}
+	HFSM_INLINE void	deepRequestChange<Composite>  (Control& control,	 const ShortIndex)			{ deepRequestChangeComposite(control);			}
 
 	template <>
-	HFSM_INLINE	void	deepRequestChange<Resumable>  (Control& control,	 const ShortIndex prong)	{ deepRequestChangeResumable  (control, prong);	}
+	HFSM_INLINE	void	deepRequestChange<Resumable>  (Control& control,	 const ShortIndex prong)	{ deepRequestChangeResumable(control, prong);	}
 
 #else
 
@@ -132,13 +132,13 @@ struct _CS {
 
 #else
 
-	HFSM_INLINE UP deepReportChange					  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE UP		deepReportChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 #endif
 
-	HFSM_INLINE UP deepReportChangeComposite		  (Control& control);
-	HFSM_INLINE UP deepReportChangeResumable		  (Control& control,	 const ShortIndex prong);
-	HFSM_INLINE UP deepReportChangeUtilitarian		  (Control& control);
+	HFSM_INLINE UP		deepReportChangeComposite	  (Control& control);
+	HFSM_INLINE UP		deepReportChangeResumable	  (Control& control,	 const ShortIndex prong);
+	HFSM_INLINE UP		deepReportChangeUtilitarian	  (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
