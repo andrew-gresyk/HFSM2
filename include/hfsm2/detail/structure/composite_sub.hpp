@@ -20,7 +20,6 @@ struct _CS {
 	static constexpr RegionStrategy STRATEGY = TStrategy;
 
 	using Args			= TArgs;
-
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
@@ -150,7 +149,8 @@ struct _CS {
 	HFSM_INLINE void	deepChangeToRequested		  (PlanControl& control, const ShortIndex prong);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType	= typename StructureStateInfo::RegionType;
+	using StructureStateInfos = typename Args::StructureStateInfos;
+	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static constexpr LongIndex NAME_COUNT = LHalf::NAME_COUNT + RHalf::NAME_COUNT;
 

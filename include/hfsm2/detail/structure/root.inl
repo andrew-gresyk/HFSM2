@@ -16,8 +16,6 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 	_payloadsSet.clear();
 
 	initialEnter();
-
-	HFSM_IF_STRUCTURE(udpateActivity());
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -509,19 +507,17 @@ _R<TC, TG, TPL, TA>::getStateNames() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::udpateActivity() {
-	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s) {
-		const auto& state = _stateInfos[s];
-
-		if (state.name[0] != L'\0') {
+	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s)
+		if (_stateInfos[s].name[0] != L'\0') {
 			_structure[i].isActive = isActive(s);
 
 			auto& activity = _activityHistory[i];
 
 			if (_structure[i].isActive) {
-				if (activity > 0)
-					activity = activity < INT8_MAX ? activity + 1 : activity;
-				else
+				if (activity < 0)
 					activity = +1;
+				else
+					activity = activity < INT8_MAX ? activity + 1 : activity;
 			} else {
 				if (activity > 0)
 					activity = -1;
@@ -531,7 +527,6 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 
 			++i;
 		}
-	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

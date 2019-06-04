@@ -72,6 +72,9 @@
     <ClCompile Include="..\..\test\test_utility_regions.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_debug.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\test_internal_transitions.hpp">
@@ -120,9 +123,6 @@
       <Filter>hfsm\detail\debug</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\array.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\array_view.hpp">
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp">
@@ -182,6 +182,9 @@
     <ClInclude Include="..\..\test\test_utility_regions.hpp">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test\test_debug.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\control.inl">
@@ -200,9 +203,6 @@
       <Filter>hfsm\detail</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\shared\array.inl">
-      <Filter>hfsm\detail\shared</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\shared\array_view.inl">
       <Filter>hfsm\detail\shared</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl">

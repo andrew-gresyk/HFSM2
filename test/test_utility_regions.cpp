@@ -40,7 +40,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Utility Regions", "[machine]") {
+TEST_CASE("FSM.Utility Regions", "[machine]") {
 	Logger logger;
 
 	FSM::Instance machine(&logger);

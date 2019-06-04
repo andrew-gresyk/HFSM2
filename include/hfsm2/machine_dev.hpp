@@ -56,7 +56,6 @@
 
 #include "detail/shared/utility.hpp"
 #include "detail/shared/iterator.hpp"
-#include "detail/shared/array_view.hpp"
 #include "detail/shared/array.hpp"
 #include "detail/shared/bit_array.hpp"
 #include "detail/shared/list.hpp"
@@ -68,7 +67,7 @@
 
 //------------------------------------------------------------------------------
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
 	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
 
@@ -93,6 +92,7 @@
 	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)					\
 		if (auto* const logger = control.logger())								\
 			logger->recordUtilityResolution(HEAD, PRONG, UTILITY);
+
 #else
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(Y, N)												N
@@ -103,7 +103,7 @@
 	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)
 #endif
 
-#if defined HFSM_VERBOSE_DEBUG_LOG
+#if defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\

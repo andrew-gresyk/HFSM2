@@ -40,33 +40,34 @@ StaticArray<T, NC>::fill(const Item filler) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, LongIndex NC>
-Array<T, NC>::Array()
-	: View(CAPACITY)
-{
-	HFSM_ASSERT(View::data() == _items);
+template <typename TValue>
+LongIndex
+Array<T, NC>::operator << (TValue&& value) {
+	HFSM_ASSERT(_count < CAPACITY);
+
+	new (&_items[_count]) Item{std::move(value)};
+
+	return _count++;
 }
 
 //------------------------------------------------------------------------------
 
 template <typename T, LongIndex NC>
-Array<T, NC>::Array(const Array& other)
-	: View(CAPACITY)
-{
-	HFSM_ASSERT(View::data() == _items);
+T&
+Array<T, NC>::operator[] (const LongIndex i) {
+	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
-	for (unsigned i = 0; i < CAPACITY; ++i)
-		_items[i] = other._items[i];
+	return _items[i];
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T, LongIndex NC>
-void
-Array<T, NC>::operator = (const Array& other) {
-	for (unsigned i = 0; i < CAPACITY; ++i)
-		_items[i] = other._items[i];
+const T&
+Array<T, NC>::operator[] (const LongIndex i) const {
+	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
-	View::_count = other.count();
+	return _items[i];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

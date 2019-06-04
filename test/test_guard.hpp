@@ -1,4 +1,4 @@
-﻿#define HFSM_VERBOSE_DEBUG_LOG
+﻿#define HFSM_ENABLE_VERBOSE_DEBUG_LOG
 #include "shared.hpp"
 
 namespace test_guard {

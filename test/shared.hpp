@@ -1,6 +1,5 @@
 #pragma once
 
-#define HFSM_ENABLE_STRUCTURE_REPORT
 #define HFSM_ENABLE_LOG_INTERFACE
 #define HFSM_ENABLE_ASSERT
 //#include <hfsm2/machine.hpp>

@@ -11,8 +11,6 @@ struct StructureEntry {
 	const wchar_t* prefix;
 	const char* name;
 };
-using MachineStructure = detail::ArrayView<StructureEntry>;
-using MachineActivity  = detail::ArrayView<char>;
 
 //------------------------------------------------------------------------------
 
@@ -47,8 +45,6 @@ struct alignas(alignof(void*)) StructureStateInfo {
 };
 
 #pragma pack(pop)
-
-using StructureStateInfos = ArrayView<StructureStateInfo>;
 
 //------------------------------------------------------------------------------
 

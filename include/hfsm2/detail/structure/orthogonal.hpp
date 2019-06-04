@@ -99,7 +99,8 @@ struct _O final {
 	HFSM_INLINE void	deepChangeToRequested(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType	= typename StructureStateInfo::RegionType;
+	using StructureStateInfos = typename Args::StructureStateInfos;
+	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static constexpr LongIndex NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
 

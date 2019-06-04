@@ -92,7 +92,7 @@ public:
 	HFSM_INLINE const ConstPlan plan(const RegionID id) const		{ return ConstPlan{_planData, id};			}
 
 protected:
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 	HFSM_INLINE Logger* logger()									{ return _logger;							}
 #endif
 

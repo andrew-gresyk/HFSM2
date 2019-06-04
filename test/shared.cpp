@@ -139,7 +139,9 @@ Logger::assertSequence(const Events& reference) {
 		REQUIRE(i < history.size()); //-V521
 		REQUIRE(i < reference.size()); //-V521
 
-		if (i < history.size() && i < reference.size()) {
+		if (i < history.size() &&
+			i < reference.size())
+		{
 			REQUIRE(history[i].type	  == reference[i].type); //-V521
 			REQUIRE(history[i].origin == reference[i].origin); //-V521
 			REQUIRE(history[i].target == reference[i].target); //-V521

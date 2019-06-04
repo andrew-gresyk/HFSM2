@@ -328,145 +328,6 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma pack(push, 4)
-
-template <typename T>
-class ArrayView {
-public:
-	using Item = T;
-
-	template <typename>
-	friend class Iterator;
-
-	static constexpr auto ITEM_ALIGNMENT = alignof(Item[2]);
-	static constexpr auto VIEW_SIZE		 = 4;
-	static constexpr auto OFFSET		 = (VIEW_SIZE + ITEM_ALIGNMENT - 1) / ITEM_ALIGNMENT * ITEM_ALIGNMENT;
-
-protected:
-	ArrayView(const LongIndex capacity);
-	~ArrayView();
-
-public:
-	HFSM_INLINE void clear()																{ _count = 0;		}
-
-	HFSM_INLINE LongIndex resize(const LongIndex count);
-
-	template <typename TValue>
-	HFSM_INLINE LongIndex operator << (TValue&& value);
-
-	HFSM_INLINE		  Item& operator[] (const LongIndex i)									{ return get(i);	}
-	HFSM_INLINE const Item& operator[] (const LongIndex i) const							{ return get(i);	}
-
-	HFSM_INLINE LongIndex count() const														{ return _count;	}
-	HFSM_INLINE LongIndex capacity() const													{ return _capacity;	}
-
-protected:
-	HFSM_INLINE LongIndex limit() const														{ return _count;	}
-
-	HFSM_INLINE LongIndex prev(const LongIndex i) const										{ return i - 1;		}
-	HFSM_INLINE LongIndex next(const LongIndex i) const										{ return i + 1;		}
-
-	HFSM_INLINE		  Item& get(const LongIndex i);
-	HFSM_INLINE const Item& get(const LongIndex i) const;
-
-protected:
-	HFSM_INLINE		  Item* data()		 { return reinterpret_cast<		 Item*>(((uintptr_t)this) + OFFSET);	}
-	HFSM_INLINE const Item* data() const { return reinterpret_cast<const Item*>(((uintptr_t)this) + OFFSET);	}
-
-protected:
-	LongIndex _count = 0;
-	const LongIndex _capacity;
-};
-
-#pragma pack(pop)
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-ArrayView<T>::ArrayView(const LongIndex capacity)
-	: _capacity(capacity)
-{}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T>
-ArrayView<T>::~ArrayView() {
-	if (_count > 0)
-		for (LongIndex i = _count - 1; i < _count; --i)
-			get(i).~Item();
-}
-
-//------------------------------------------------------------------------------
-
-template <typename T>
-LongIndex
-ArrayView<T>::resize(const LongIndex count) {
-	const auto clampedCount = count < _capacity ?
-		count : _capacity;
-
-	if (clampedCount > _count) {
-		for (LongIndex i = _count; i < clampedCount; ++i)
-			get(i) = Item{};
-	}
-	else if (clampedCount < _count) {
-		for (LongIndex i = _count - 1; i >= clampedCount; --i)
-			get(i).~Item();
-	}
-
-	return _count = clampedCount;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename T>
-template <typename TValue>
-LongIndex
-ArrayView<T>::operator << (TValue&& value) {
-	HFSM_ASSERT(_count < _capacity);
-
-	new (&get(_count)) Item{std::move(value)};
-
-	return _count++;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename T>
-T&
-ArrayView<T>::get(const LongIndex i) {
-	HFSM_ASSERT(i < _capacity);
-
-	return data()[i];
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T>
-const T&
-ArrayView<T>::get(const LongIndex i) const {
-	HFSM_ASSERT(i < _capacity);
-
-	return data()[i];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
 template <typename T, LongIndex NCapacity>
 class StaticArray {
 public:
@@ -512,22 +373,26 @@ struct StaticArray<T, 0> {
 //------------------------------------------------------------------------------
 
 template <typename T, LongIndex NCapacity>
-class Array
-	: public ArrayView<T>
-{
+class Array {
+	template <typename>
+	friend class Iterator;
+
 public:
 	static constexpr LongIndex CAPACITY = NCapacity;
-	static constexpr LongIndex INVALID	= INVALID_LONG_INDEX;
-	static constexpr LongIndex DUMMY	= INVALID;
+	static constexpr LongIndex DUMMY	= INVALID_LONG_INDEX;
 
 	using Item = T;
-	using View = ArrayView<Item>;
 
 public:
-	HFSM_INLINE Array();
-	HFSM_INLINE Array(const Array& other);
+	HFSM_INLINE void clear()														{ _count = 0;		}
 
-	HFSM_INLINE void operator = (const Array& other);
+	template <typename TValue>
+	HFSM_INLINE LongIndex operator << (TValue&& value);
+
+	HFSM_INLINE		  Item& operator[] (const LongIndex i);
+	HFSM_INLINE const Item& operator[] (const LongIndex i) const;
+
+	HFSM_INLINE LongIndex count() const												{ return _count;	}
 
 	HFSM_INLINE Iterator<	   Array>  begin()			{ return Iterator<		Array>(*this, 0);		}
 	HFSM_INLINE Iterator<const Array>  begin() const	{ return Iterator<const Array>(*this, 0);		}
@@ -538,6 +403,11 @@ public:
 	HFSM_INLINE Iterator<const Array>   cend() const	{ return Iterator<const Array>(*this, DUMMY);	}
 
 private:
+	HFSM_INLINE LongIndex next(const LongIndex i) const								{ return i + 1;		}
+	HFSM_INLINE LongIndex limit() const												{ return _count;	}
+
+private:
+	LongIndex _count = 0;
 	Item _items[CAPACITY];
 };
 
@@ -593,33 +463,34 @@ StaticArray<T, NC>::fill(const Item filler) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, LongIndex NC>
-Array<T, NC>::Array()
-	: View(CAPACITY)
-{
-	HFSM_ASSERT(View::data() == _items);
+template <typename TValue>
+LongIndex
+Array<T, NC>::operator << (TValue&& value) {
+	HFSM_ASSERT(_count < CAPACITY);
+
+	new (&_items[_count]) Item{std::move(value)};
+
+	return _count++;
 }
 
 //------------------------------------------------------------------------------
 
 template <typename T, LongIndex NC>
-Array<T, NC>::Array(const Array& other)
-	: View(CAPACITY)
-{
-	HFSM_ASSERT(View::data() == _items);
+T&
+Array<T, NC>::operator[] (const LongIndex i) {
+	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
-	for (unsigned i = 0; i < CAPACITY; ++i)
-		_items[i] = other._items[i];
+	return _items[i];
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T, LongIndex NC>
-void
-Array<T, NC>::operator = (const Array& other) {
-	for (unsigned i = 0; i < CAPACITY; ++i)
-		_items[i] = other._items[i];
+const T&
+Array<T, NC>::operator[] (const LongIndex i) const {
+	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
-	View::_count = other.count();
+	return _items[i];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1530,7 +1401,7 @@ transitionName(const Transition transition) {
 
 }
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
 namespace hfsm2 {
 
@@ -1591,7 +1462,7 @@ using LoggerInterfaceT = void;
 
 //------------------------------------------------------------------------------
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
 	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
 
@@ -1616,6 +1487,7 @@ using LoggerInterfaceT = void;
 	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)					\
 		if (auto* const logger = control.logger())								\
 			logger->recordUtilityResolution(HEAD, PRONG, UTILITY);
+
 #else
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(Y, N)												N
@@ -1626,7 +1498,7 @@ using LoggerInterfaceT = void;
 	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)
 #endif
 
-#if defined HFSM_VERBOSE_DEBUG_LOG
+#if defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
 	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
 		if (auto* const logger = control.logger())								\
@@ -3286,7 +3158,7 @@ public:
 	HFSM_INLINE const ConstPlan plan(const RegionID id) const		{ return ConstPlan{_planData, id};			}
 
 protected:
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 	HFSM_INLINE Logger* logger()									{ return _logger;							}
 #endif
 
@@ -3983,8 +3855,6 @@ struct StructureEntry {
 	const wchar_t* prefix;
 	const char* name;
 };
-using MachineStructure = detail::ArrayView<StructureEntry>;
-using MachineActivity  = detail::ArrayView<char>;
 
 //------------------------------------------------------------------------------
 
@@ -4019,8 +3889,6 @@ struct alignas(alignof(void*)) StructureStateInfo {
 };
 
 #pragma pack(pop)
-
-using StructureStateInfos = ArrayView<StructureStateInfo>;
 
 //------------------------------------------------------------------------------
 
@@ -4096,6 +3964,7 @@ class InjectionT {
 protected:
 	using Args				= TArgs;
 	using Context			= typename Args::Context;
+	using Utility			= typename Args::Utility;
 	using StateList			= typename Args::StateList;
 	using RegionList		= typename Args::RegionList;
 
@@ -4162,11 +4031,11 @@ struct _B<TFirst>
 	: TFirst
 {
 	using First				= TFirst;
-
+	using Utility			= typename First::Utility;
 	using StateList			= typename First::StateList;
 	using RegionList		= typename First::RegionList;
 
-	HFSM_INLINE float utility		   (const typename First::Control&)			{ return 0.0f;			}
+	HFSM_INLINE float utility		   (const typename First::Control&)			{ return Utility{1.0f};	}
 
 	HFSM_INLINE void  entryGuard	   (typename First::GuardControl&)			{}
 
@@ -4559,6 +4428,8 @@ struct ArgsT final {
 	static constexpr ShortIndex ORTHO_COUNT	  = NOrthoCount;
 	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
 	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
+
+	HFSM_IF_STRUCTURE(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
 };
 
 //------------------------------------------------------------------------------
@@ -4623,13 +4494,13 @@ struct _RF final {
 	using Payload		= TPayload;
 	using Apex			= TApex;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
 
 	static constexpr LongIndex TASK_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
 													   Config::MAX_PLAN_TASKS : Apex::PRONG_COUNT * 2;
-
-	using Instance		= _RW<Context, Config, Payload, Apex>;
 
 	static constexpr ShortIndex COMPO_COUNT		 = Apex::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT		 = Apex::ORTHO_COUNT;
@@ -4648,6 +4519,10 @@ struct _RF final {
 								Payload,
 								TASK_CAPACITY>;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using Instance		= _RW<Context, Config, Payload, Apex>;
+
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
@@ -4658,6 +4533,8 @@ struct _RF final {
 
 	template <typename... TInjections>
 	using StateT		= _B<TInjections...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename T>
 	static constexpr bool contains() {
@@ -4878,12 +4755,11 @@ struct _S {
 	static constexpr StateID STATE_ID = TStateID;
 
 	using Args			= TArgs;
-	using Logger		= typename Args::Logger;
-
 	using Head			= THead;
 
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+	using Logger		= typename Args::Logger;
 	using Payload		= typename Args::Payload;
 
 	using Request		= RequestT<Payload>;
@@ -4957,7 +4833,8 @@ struct _S {
 #endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType	= typename StructureStateInfo::RegionType;
+	using StructureStateInfos = typename Args::StructureStateInfos;
+	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static const char* name();
 
@@ -5323,7 +5200,6 @@ struct _CS {
 	static constexpr RegionStrategy STRATEGY = TStrategy;
 
 	using Args			= TArgs;
-
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
@@ -5453,7 +5329,8 @@ struct _CS {
 	HFSM_INLINE void	deepChangeToRequested		  (PlanControl& control, const ShortIndex prong);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType	= typename StructureStateInfo::RegionType;
+	using StructureStateInfos = typename Args::StructureStateInfos;
+	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static constexpr LongIndex NAME_COUNT = LHalf::NAME_COUNT + RHalf::NAME_COUNT;
 
@@ -6020,7 +5897,8 @@ struct _C {
 	HFSM_INLINE void	deepChangeToRequested		  (PlanControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType	= typename StructureStateInfo::RegionType;
+	using StructureStateInfos = typename Args::StructureStateInfos;
+	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static constexpr LongIndex NAME_COUNT = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
 
@@ -6656,7 +6534,6 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
-
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using Payload		= typename Args::Payload;
@@ -6667,9 +6544,9 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
 
-	using Control		= ControlT		<Args>;
-	using PlanControl	= PlanControlT	<Args>;
-	using FullControl	= FullControlT	<Args>;
+	using Control		= ControlT	   <Args>;
+	using PlanControl	= PlanControlT <Args>;
+	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
 	using Initial		= Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
@@ -6728,6 +6605,8 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
 
 	void wideGetNames(const LongIndex parent,
@@ -6755,7 +6634,6 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
-
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using Payload		= typename Args::Payload;
@@ -6818,6 +6696,8 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
 
 	void wideGetNames(const LongIndex parent,
@@ -7438,7 +7318,8 @@ struct _O final {
 	HFSM_INLINE void	deepChangeToRequested(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType	= typename StructureStateInfo::RegionType;
+	using StructureStateInfos = typename Args::StructureStateInfos;
+	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static constexpr LongIndex NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
 
@@ -7895,20 +7776,25 @@ private:
 
 	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
 
+public:
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
 
 	using Prefix				 = StaticArray<wchar_t,			REVERSE_DEPTH * 2 + 2>;
 	using Prefixes				 = StaticArray<Prefix,			STATE_COUNT>;
 
-	using StateInfoStorage		 = Array<StructureStateInfo,	STATE_COUNT>;
-
-	using StructureStorage		 = Array<StructureEntry,		NAME_COUNT>;
-	using ActivityHistoryStorage = Array<char,					NAME_COUNT>;
+	using Structure				 = Array<StructureEntry,		NAME_COUNT>;
+	using ActivityHistory		 = Array<char,					NAME_COUNT>;
 
 	using TransitionInfo		 = TransitionInfoT<Payload>;
 	using TransitionInfoStorage	 = Array<TransitionInfo,		COMPO_COUNT * 4>;
 #endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 public:
 	explicit _R(Context& context
@@ -8015,12 +7901,12 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const					{ return _structure;								}
-	const MachineActivity&  activity()  const					{ return _activityHistory;							}
+	const Structure&	   structure()		 const				{ return _structure;								}
+	const ActivityHistory& activityHistory() const				{ return _activityHistory;							}
 #endif
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	void attachLogger(Logger* const logger)			{ _logger = logger;									}
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+	void attachLogger(Logger* const logger)						{ _logger = logger;									}
 #endif
 
 private:
@@ -8052,10 +7938,10 @@ private:
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	Prefixes _prefixes;
-	StateInfoStorage _stateInfos;
+	StructureStateInfos _stateInfos;
 
-	StructureStorage _structure;
-	ActivityHistoryStorage _activityHistory;
+	Structure _structure;
+	ActivityHistory _activityHistory;
 
 	TransitionInfoStorage _lastTransitions;
 #endif
@@ -8093,12 +7979,12 @@ class _RW<EmptyContext, TConfig, TPayload, TApex> final
 
 public:
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	_RW(Logger* const logger = nullptr)
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+	HFSM_INLINE _RW(Logger* const logger = nullptr)
 		: R{static_cast<EmptyContext&>(*this), logger}
 	{}
 #else
-	_RW()
+	HFSM_INLINE _RW()
 		: R{static_cast<EmptyContext&>(*this)}
 	{}
 #endif
@@ -8127,8 +8013,6 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 	_payloadsSet.clear();
 
 	initialEnter();
-
-	HFSM_IF_STRUCTURE(udpateActivity());
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8620,19 +8504,17 @@ _R<TC, TG, TPL, TA>::getStateNames() {
 template <typename TC, typename TG, typename TPL, typename TA>
 void
 _R<TC, TG, TPL, TA>::udpateActivity() {
-	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s) {
-		const auto& state = _stateInfos[s];
-
-		if (state.name[0] != L'\0') {
+	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s)
+		if (_stateInfos[s].name[0] != L'\0') {
 			_structure[i].isActive = isActive(s);
 
 			auto& activity = _activityHistory[i];
 
 			if (_structure[i].isActive) {
-				if (activity > 0)
-					activity = activity < INT8_MAX ? activity + 1 : activity;
-				else
+				if (activity < 0)
 					activity = +1;
+				else
+					activity = activity < INT8_MAX ? activity + 1 : activity;
 			} else {
 				if (activity > 0)
 					activity = -1;
@@ -8642,7 +8524,6 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 
 			++i;
 		}
-	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -23,7 +23,6 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
-
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using Payload		= typename Args::Payload;
@@ -34,9 +33,9 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
 
-	using Control		= ControlT		<Args>;
-	using PlanControl	= PlanControlT	<Args>;
-	using FullControl	= FullControlT	<Args>;
+	using Control		= ControlT	   <Args>;
+	using PlanControl	= PlanControlT <Args>;
+	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
 	using Initial		= Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
@@ -95,6 +94,8 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
 
 	void wideGetNames(const LongIndex parent,
@@ -122,7 +123,6 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
-
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using Payload		= typename Args::Payload;
@@ -185,6 +185,8 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
 
 	void wideGetNames(const LongIndex parent,

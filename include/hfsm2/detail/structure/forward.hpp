@@ -210,6 +210,8 @@ struct ArgsT final {
 	static constexpr ShortIndex ORTHO_COUNT	  = NOrthoCount;
 	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
 	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
+
+	HFSM_IF_STRUCTURE(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
 };
 
 //------------------------------------------------------------------------------
@@ -274,13 +276,13 @@ struct _RF final {
 	using Payload		= TPayload;
 	using Apex			= TApex;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
 
 	static constexpr LongIndex TASK_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
 													   Config::MAX_PLAN_TASKS : Apex::PRONG_COUNT * 2;
-
-	using Instance		= _RW<Context, Config, Payload, Apex>;
 
 	static constexpr ShortIndex COMPO_COUNT		 = Apex::COMPO_COUNT;
 	static constexpr ShortIndex ORTHO_COUNT		 = Apex::ORTHO_COUNT;
@@ -299,6 +301,10 @@ struct _RF final {
 								Payload,
 								TASK_CAPACITY>;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using Instance		= _RW<Context, Config, Payload, Apex>;
+
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
@@ -309,6 +315,8 @@ struct _RF final {
 
 	template <typename... TInjections>
 	using StateT		= _B<TInjections...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename T>
 	static constexpr bool contains() {

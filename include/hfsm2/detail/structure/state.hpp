@@ -10,12 +10,11 @@ struct _S {
 	static constexpr StateID STATE_ID = TStateID;
 
 	using Args			= TArgs;
-	using Logger		= typename Args::Logger;
-
 	using Head			= THead;
 
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+	using Logger		= typename Args::Logger;
 	using Payload		= typename Args::Payload;
 
 	using Request		= RequestT<Payload>;
@@ -89,7 +88,8 @@ struct _S {
 #endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using RegionType	= typename StructureStateInfo::RegionType;
+	using StructureStateInfos = typename Args::StructureStateInfos;
+	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static const char* name();
 

@@ -44,8 +44,6 @@
         <File Name="../../../include/hfsm2/detail/shared/iterator.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/bit_array.inl"/>
         <File Name="../../../include/hfsm2/detail/shared/bit_array.hpp"/>
-        <File Name="../../../include/hfsm2/detail/shared/array_view.inl"/>
-        <File Name="../../../include/hfsm2/detail/shared/array_view.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/array.inl"/>
         <File Name="../../../include/hfsm2/detail/shared/array.hpp"/>
       </VirtualDirectory>
@@ -60,6 +58,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_debug.hpp"/>
+    <File Name="../../../test/test_debug.cpp"/>
     <File Name="../../../test/test_utility_regions.hpp"/>
     <File Name="../../../test/test_utility_regions.cpp"/>
     <File Name="../../../test/test_resumable.hpp"/>

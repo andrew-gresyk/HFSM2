@@ -13,6 +13,7 @@ class InjectionT {
 protected:
 	using Args				= TArgs;
 	using Context			= typename Args::Context;
+	using Utility			= typename Args::Utility;
 	using StateList			= typename Args::StateList;
 	using RegionList		= typename Args::RegionList;
 
@@ -79,11 +80,11 @@ struct _B<TFirst>
 	: TFirst
 {
 	using First				= TFirst;
-
+	using Utility			= typename First::Utility;
 	using StateList			= typename First::StateList;
 	using RegionList		= typename First::RegionList;
 
-	HFSM_INLINE float utility		   (const typename First::Control&)			{ return 0.0f;			}
+	HFSM_INLINE float utility		   (const typename First::Control&)			{ return Utility{1.0f};	}
 
 	HFSM_INLINE void  entryGuard	   (typename First::GuardControl&)			{}
 

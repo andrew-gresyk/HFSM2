@@ -62,20 +62,25 @@ private:
 
 	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
 
+public:
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
 
 	using Prefix				 = StaticArray<wchar_t,			REVERSE_DEPTH * 2 + 2>;
 	using Prefixes				 = StaticArray<Prefix,			STATE_COUNT>;
 
-	using StateInfoStorage		 = Array<StructureStateInfo,	STATE_COUNT>;
-
-	using StructureStorage		 = Array<StructureEntry,		NAME_COUNT>;
-	using ActivityHistoryStorage = Array<char,					NAME_COUNT>;
+	using Structure				 = Array<StructureEntry,		NAME_COUNT>;
+	using ActivityHistory		 = Array<char,					NAME_COUNT>;
 
 	using TransitionInfo		 = TransitionInfoT<Payload>;
 	using TransitionInfoStorage	 = Array<TransitionInfo,		COMPO_COUNT * 4>;
 #endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 public:
 	explicit _R(Context& context
@@ -182,12 +187,12 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const MachineStructure& structure() const					{ return _structure;								}
-	const MachineActivity&  activity()  const					{ return _activityHistory;							}
+	const Structure&	   structure()		 const				{ return _structure;								}
+	const ActivityHistory& activityHistory() const				{ return _activityHistory;							}
 #endif
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	void attachLogger(Logger* const logger)			{ _logger = logger;									}
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+	void attachLogger(Logger* const logger)						{ _logger = logger;									}
 #endif
 
 private:
@@ -219,10 +224,10 @@ private:
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	Prefixes _prefixes;
-	StateInfoStorage _stateInfos;
+	StructureStateInfos _stateInfos;
 
-	StructureStorage _structure;
-	ActivityHistoryStorage _activityHistory;
+	Structure _structure;
+	ActivityHistory _activityHistory;
 
 	TransitionInfoStorage _lastTransitions;
 #endif
@@ -260,12 +265,12 @@ class _RW<EmptyContext, TConfig, TPayload, TApex> final
 
 public:
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_VERBOSE_DEBUG_LOG
-	_RW(Logger* const logger = nullptr)
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+	HFSM_INLINE _RW(Logger* const logger = nullptr)
 		: R{static_cast<EmptyContext&>(*this), logger}
 	{}
 #else
-	_RW()
+	HFSM_INLINE _RW()
 		: R{static_cast<EmptyContext&>(*this)}
 	{}
 #endif
