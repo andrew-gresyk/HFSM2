@@ -3,21 +3,22 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NHeadIndex,
-		  ShortIndex NCompoIndex,
-		  ShortIndex NOrthoIndex,
+template <typename TIndices,
 		  typename TArgs,
-		  RegionStrategy TStrategy,
+		  Strategy TStrategy,
 		  typename THead,
 		  typename... TSubStates>
 struct _C {
-	static constexpr StateID	HEAD_ID		 = NHeadIndex;
-	static constexpr ShortIndex COMPO_INDEX	 = NCompoIndex;
-	static constexpr ShortIndex ORTHO_INDEX	 = NOrthoIndex;
-	static constexpr ShortIndex REGION_ID	 = COMPO_INDEX + ORTHO_INDEX;
-	static constexpr ForkID		COMPO_ID	 = COMPO_INDEX + 1;
+	using Indices		= TIndices;
+	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
+	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
+	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
+	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
 
-	static constexpr RegionStrategy STRATEGY = TStrategy;
+	static constexpr Strategy	STRATEGY	= TStrategy;
+
+	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
+	static constexpr ForkID		COMPO_ID	= COMPO_INDEX + 1;
 
 	using Args			= TArgs;
 	using Head			= THead;
@@ -33,7 +34,6 @@ struct _C {
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
-	using RemainBit		= typename StateRegistry::CompoRemains::Bit;
 
 	using Control		= ControlT<Args>;
 
@@ -48,8 +48,15 @@ struct _C {
 	using GuardControl	= GuardControlT<Args>;
 
 
-	using HeadState		= _S <HEAD_ID, Args, Head>;
-	using SubStates		= _CS<HEAD_ID + 1, COMPO_INDEX + 1, ORTHO_INDEX, Args, STRATEGY, 0, TSubStates...>;
+	using HeadState		= _S <Indices, Args, Head>;
+	using SubStates		= _CS<_I<HEAD_ID + 1,
+								 COMPO_INDEX + 1,
+								 ORTHO_INDEX,
+								 ORTHO_UNIT>,
+							  Args,
+							  STRATEGY,
+							  0,
+							  TSubStates...>;
 	using AllForward	= _CF<STRATEGY, Head, TSubStates...>;
 
 	static constexpr ShortIndex REGION_SIZE	= AllForward::STATE_COUNT;
@@ -62,7 +69,7 @@ struct _C {
 	HFSM_INLINE ShortIndex& compoResumable(Control& control)				{ return compoResumable(control._stateRegistry); }
 	HFSM_INLINE ShortIndex& compoRequested(Control& control)				{ return compoRequested(control._stateRegistry); }
 
-	HFSM_INLINE RemainBit	compoRemain	  (Control& control)				{ return control._stateRegistry.compoRemains   [COMPO_INDEX]; }
+	HFSM_INLINE bool	compoRemain		  (Control& control)				{ return control._stateRegistry.compoRemains.template get<COMPO_INDEX>(); }
 
 	HFSM_INLINE void	deepRegister				  (StateRegistry& stateRegistry, const Parent parent);
 
@@ -95,7 +102,7 @@ struct _C {
 
 #if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-	template <RegionStrategy TG = STRATEGY>
+	template <Strategy TG = STRATEGY>
 	HFSM_INLINE void	deepRequestChange			  (Control& control, const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
@@ -128,7 +135,7 @@ struct _C {
 
 #if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-	template <RegionStrategy TG = STRATEGY>
+	template <Strategy TG = STRATEGY>
 	HFSM_INLINE UP		deepReportChange			  (Control& control, const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>

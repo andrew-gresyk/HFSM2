@@ -8,19 +8,19 @@ template <typename TContext,
 		  typename TPayload,
 		  typename TApex>
 class _R {
-	using Context				 = TContext;
+	using Context				= TContext;
 
-	using Config				 = TConfig;
-	using Utility				 = typename Config::Utility;
-	using Logger				 = typename Config::Logger;
+	using Config				= TConfig;
+	using Utility				= typename Config::Utility;
+	using Logger				= typename Config::Logger;
 
-	using Payload				 = TPayload;
-	using Apex					 = TApex;
+	using Payload				= TPayload;
+	using Apex					= TApex;
 
-	using ForwardApex			 = Wrap<Apex>;
-	using AllForward			 = _RF<Context, Config, Payload, Apex>;
-	using StateList				 = typename AllForward::StateList;
-	using RegionList			 = typename AllForward::RegionList;
+	using ForwardApex			= Wrap<Apex>;
+	using AllForward			= _RF<Context, Config, Payload, Apex>;
+	using StateList				= typename AllForward::StateList;
+	using RegionList			= typename AllForward::RegionList;
 
 	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
 	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
@@ -29,10 +29,10 @@ class _R {
 
 public:
 	static constexpr LongIndex  REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
-	static constexpr ShortIndex COMPO_COUNT		 = ForwardApex::COMPO_COUNT;
-	static constexpr ShortIndex ORTHO_COUNT		 = ForwardApex::ORTHO_COUNT;
+	static constexpr ShortIndex COMPO_REGIONS	 = ForwardApex::COMPO_REGIONS;
+	static constexpr LongIndex  COMPO_PRONGS	 = ForwardApex::COMPO_PRONGS;
+	static constexpr ShortIndex ORTHO_REGIONS	 = ForwardApex::ORTHO_REGIONS;
 	static constexpr ShortIndex ORTHO_UNITS		 = ForwardApex::ORTHO_UNITS;
-	static constexpr LongIndex  PRONG_COUNT		 = ForwardApex::PRONG_COUNT;
 
 	static constexpr LongIndex  STATE_COUNT		 = ForwardApex::STATE_COUNT;
 	static constexpr LongIndex  REGION_COUNT	 = ForwardApex::REGION_COUNT;
@@ -41,43 +41,43 @@ public:
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using Args					 = typename AllForward::Args;
+	using Args					= typename AllForward::Args;
 
-	using StateRegistry			 = StateRegistryT<Args>;
-	using AllForks				 = typename StateRegistry::AllForks;
+	using StateRegistry			= StateRegistryT<Args>;
+	using AllForks				= typename StateRegistry::AllForks;
 
-	using Control				 = ControlT<Args>;
+	using Control				= ControlT<Args>;
 
-	using PlanControl			 = PlanControlT<Args>;
-	using PlanData				 = PlanDataT   <Args>;
+	using PlanControl			= PlanControlT<Args>;
+	using PlanData				= PlanDataT   <Args>;
 
-	using FullControl			 = FullControlT<Args>;
-	using Request				 = typename FullControl::Request;
-	using Requests				 = typename FullControl::Requests;
+	using FullControl			= FullControlT<Args>;
+	using Request				= typename FullControl::Request;
+	using Requests				= typename FullControl::Requests;
 
-	using GuardControl			 = GuardControlT<Args>;
+	using GuardControl			= GuardControlT<Args>;
 
-	using Payloads				 = Array<Payload, STATE_COUNT>;
-	using PayloadsSet			 = BitArrayStorageT<LongIndex, STATE_COUNT>;
+	using Payloads				= Array<Payload, STATE_COUNT>;
+	using PayloadsSet			= BitArray<LongIndex, STATE_COUNT>;
 
-	using MaterialApex			 = Material<0, 0, 0, Args, Apex>;
+	using MaterialApex			= Material<_I<0, 0, 0, 0>, Args, Apex>;
 
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using StructureStateInfos = typename Args::StructureStateInfos;
+	using StructureStateInfos	= typename Args::StructureStateInfos;
 
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
 
-	using Prefix				 = StaticArray<wchar_t,			REVERSE_DEPTH * 2 + 2>;
-	using Prefixes				 = StaticArray<Prefix,			STATE_COUNT>;
+	using Prefix				= StaticArray<wchar_t, REVERSE_DEPTH * 2 + 2>;
+	using Prefixes				= StaticArray<Prefix, STATE_COUNT>;
 
-	using Structure				 = Array<StructureEntry,		NAME_COUNT>;
-	using ActivityHistory		 = Array<char,					NAME_COUNT>;
+	using Structure				= Array<StructureEntry, NAME_COUNT>;
+	using ActivityHistory		= Array<char,			NAME_COUNT>;
 
-	using TransitionInfo		 = TransitionInfoT<Payload>;
-	using TransitionInfoStorage	 = Array<TransitionInfo,		COMPO_COUNT * 4>;
+	using TransitionInfo		= TransitionInfoT<Payload>;
+	using TransitionInfoStorage	= Array<TransitionInfo, COMPO_REGIONS * 4>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -89,10 +89,10 @@ public:
 	~_R();
 
 	template <typename T>
-	static constexpr StateID  stateId()						{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()					{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
 
 	void update();
 
@@ -101,19 +101,19 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateRegistry.isActive   (stateId);		}
-	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateRegistry.isResumable(stateId);		}
+	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateRegistry.isActive   (stateId);	}
+	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateRegistry.isResumable(stateId);	}
 
-	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);						}
-
-	template <typename TState>
-	HFSM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());			}
+	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);					}
 
 	template <typename TState>
-	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
+	HFSM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());		}
 
 	template <typename TState>
-	HFSM_INLINE bool isScheduled() const						{ return isResumable<TState>();						}
+	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());		}
+
+	template <typename TState>
+	HFSM_INLINE bool isScheduled() const						{ return isResumable<TState>();					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -135,34 +135,34 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());						}
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);				}
+	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
 
 	template <typename TState>
-	HFSM_INLINE void restart ()									{ restart (stateId<TState>());						}
+	HFSM_INLINE void restart ()									{ restart (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);				}
+	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());						}
+	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);				}
+	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
 
 	template <typename TState>
-	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());						}
+	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);				}
+	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());						}
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);				}
+	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -173,26 +173,26 @@ public:
 	HFSM_INLINE const Payload* getStateData(const StateID stateId) const;
 
 	template <typename TState>
-	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());				}
+	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());			}
 
 	template <typename TState>
-	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);		}
+	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);	}
 
 	template <typename TState>
-	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());			}
+	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());		}
 
 	template <typename TState>
-	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());			}
+	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const Structure&	   structure()		 const				{ return _structure;								}
-	const ActivityHistory& activityHistory() const				{ return _activityHistory;							}
+	const Structure&	   structure()		 const				{ return _structure;							}
+	const ActivityHistory& activityHistory() const				{ return _activityHistory;						}
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	void attachLogger(Logger* const logger)						{ _logger = logger;									}
+	void attachLogger(Logger* const logger)						{ _logger = logger;								}
 #endif
 
 private:
@@ -218,6 +218,7 @@ private:
 
 	Payloads _payloads;
 	PayloadsSet _payloadsSet;
+
 	Requests _requests;
 
 	MaterialApex _apex;

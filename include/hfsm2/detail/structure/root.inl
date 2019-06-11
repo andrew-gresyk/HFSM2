@@ -13,8 +13,6 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 	HFSM_IF_STRUCTURE(getStateNames());
 
-	_payloadsSet.clear();
-
 	initialEnter();
 }
 
@@ -200,7 +198,7 @@ _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
-		_payloadsSet[stateId] = false;
+		_payloadsSet.reset(stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -214,7 +212,7 @@ _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 
 	if (stateId < Payloads::CAPACITY) {
 		_payloads[stateId] = payload;
-		_payloadsSet[stateId] = true;
+		_payloadsSet.set(stateId);
 	}
 }
 
@@ -225,10 +223,8 @@ bool
 _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
-	if (stateId < Payloads::CAPACITY)
-		return !!_payloadsSet[stateId];
-	else
-		return false;
+	return stateId < Payloads::CAPACITY ?
+		_payloadsSet.get(stateId) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -238,7 +234,7 @@ const TPL*
 _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
-	return stateId < Payloads::CAPACITY && _payloadsSet[stateId] ?
+	return stateId < Payloads::CAPACITY && _payloadsSet.get(stateId) ?
 		&_payloads[stateId] : nullptr;
 }
 

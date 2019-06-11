@@ -3,22 +3,23 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID, ShortIndex, ShortIndex, typename, ShortIndex, typename...>
+template <typename, typename, ShortIndex, typename...>
 struct _OS;
 
 //------------------------------------------------------------------------------
 
-template <StateID NInitialID,
-		  ShortIndex NCompoIndex,
-		  ShortIndex NOrthoIndex,
+template <typename TIndices,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
-struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemaining...> {
-	static constexpr StateID	INITIAL_ID	= NInitialID;
-	static constexpr ShortIndex COMPO_INDEX	= NCompoIndex;
-	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
+struct _OS<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
+	using Indices		= TIndices;
+	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
+	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
+	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
+	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
+
 	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
@@ -32,29 +33,39 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
+	using OrthoForks	= typename StateRegistry::AllForks::Ortho;
+	using ProngBits		= typename OrthoForks::Bits;
+	using ProngConstBits= typename OrthoForks::ConstBits;
 
 	using Control		= ControlT	   <Args>;
 	using PlanControl	= PlanControlT <Args>;
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		= Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
+	using Initial		= Material<_I<INITIAL_ID,
+									  COMPO_INDEX,
+									  ORTHO_INDEX,
+									  ORTHO_UNIT>,
+								   Args,
+								   TInitial>;
+
 	using Forwarded		= Wrap<TInitial>;
 
-	using Remaining		= _OS<INITIAL_ID  + Forwarded::STATE_COUNT,
-							  COMPO_INDEX + Forwarded::COMPO_COUNT,
-							  ORTHO_INDEX + Forwarded::ORTHO_COUNT,
+	using Remaining		= _OS<_I<INITIAL_ID  + Forwarded::STATE_COUNT,
+								 COMPO_INDEX + Forwarded::COMPO_REGIONS,
+								 ORTHO_INDEX + Forwarded::ORTHO_REGIONS,
+								 ORTHO_UNIT  + Forwarded::ORTHO_UNITS>,
 							  Args,
-						   PRONG_INDEX + 1,
-						   TRemaining...>;
+							  PRONG_INDEX + 1,
+							  TRemaining...>;
 
 	using AllForward	= _OSF<TInitial, TRemaining...>;
 
-	HFSM_INLINE void	wideRegister			(StateRegistry& stateRegistry, const ForkID forkId);
+	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control,						const OrthoFork& prongs);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control,						const ProngConstBits prongs);
 	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control);
 	HFSM_INLINE bool	wideEntryGuard		 (GuardControl& control);
 
@@ -66,7 +77,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 	template <typename TEvent>
 	HFSM_INLINE Status	wideReact			 (FullControl& control, const TEvent& event);
 
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control,						const OrthoFork& prongs);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control,						const ProngConstBits prongs);
 	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control);
 	HFSM_INLINE bool	wideExitGuard		 (GuardControl& control);
 
@@ -74,8 +85,8 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideForwardActive	 (Control& control, const RequestType request,	const OrthoFork& prongs);
-	HFSM_INLINE void	wideForwardRequest	 (Control& control, const RequestType request,	const OrthoFork& prongs);
+	HFSM_INLINE void	wideForwardActive	 (Control& control, const RequestType request,	const ProngConstBits prongs);
+	HFSM_INLINE void	wideForwardRequest	 (Control& control, const RequestType request,	const ProngConstBits prongs);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -109,16 +120,17 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial, TRemai
 
 //------------------------------------------------------------------------------
 
-template <StateID NInitialID,
-		  ShortIndex NCompoIndex,
-		  ShortIndex NOrthoIndex,
+template <typename TIndices,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial>
-struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
-	static constexpr StateID	INITIAL_ID	= NInitialID;
-	static constexpr ShortIndex COMPO_INDEX	= NCompoIndex;
-	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
+struct _OS<TIndices, TArgs, NIndex, TInitial> {
+	using Indices		= TIndices;
+	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
+	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
+	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
+	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
+
 	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
@@ -132,20 +144,29 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
+	using OrthoForks	= typename StateRegistry::AllForks::Ortho;
+	using ProngBits		= typename OrthoForks::Bits;
+	using ProngConstBits= typename OrthoForks::ConstBits;
 
 	using Control		= ControlT		<Args>;
 	using PlanControl	= PlanControlT	<Args>;
 	using FullControl	= FullControlT	<Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		= Material<INITIAL_ID, COMPO_INDEX, ORTHO_INDEX, Args, TInitial>;
+	using Initial		= Material<_I<INITIAL_ID,
+									  COMPO_INDEX,
+									  ORTHO_INDEX,
+									  ORTHO_UNIT>,
+								   Args,
+								   TInitial>;
+
 	using AllForward	= _OSF<TInitial>;
 
-	HFSM_INLINE void	wideRegister			(StateRegistry& stateRegistry, const ForkID forkId);
+	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control,						const OrthoFork& prongs);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control,						const ProngConstBits prongs);
 	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control);
 	HFSM_INLINE bool	wideEntryGuard		 (GuardControl& control);
 
@@ -157,7 +178,7 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 	template <typename TEvent>
 	HFSM_INLINE Status	wideReact			 (FullControl& control, const TEvent& event);
 
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control,						const OrthoFork& prongs);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control,						const ProngConstBits prongs);
 	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control);
 	HFSM_INLINE bool	wideExitGuard		 (GuardControl& control);
 
@@ -165,8 +186,8 @@ struct _OS<NInitialID, NCompoIndex, NOrthoIndex, TArgs, NIndex, TInitial> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideForwardActive	 (Control& control, const RequestType request,	const OrthoFork& prongs);
-	HFSM_INLINE void	wideForwardRequest	 (Control& control, const RequestType request,	const OrthoFork& prongs);
+	HFSM_INLINE void	wideForwardActive	 (Control& control, const RequestType request,	const ProngConstBits prongs);
+	HFSM_INLINE void	wideForwardRequest	 (Control& control, const RequestType request,	const ProngConstBits prongs);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

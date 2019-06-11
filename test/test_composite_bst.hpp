@@ -56,11 +56,11 @@ struct S9	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT == 11, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_COUNT ==  1, "COMPO_COUNT");
-static_assert(FSM::Instance::ORTHO_COUNT ==  0, "ORTHO_COUNT");
-static_assert(FSM::Instance::ORTHO_UNITS ==  0, "ORTHO_UNITS");
-static_assert(FSM::Instance::PRONG_COUNT == 10, "PRONG_COUNT");
+static_assert(FSM::Instance::STATE_COUNT   == 11, "STATE_COUNT");
+static_assert(FSM::Instance::COMPO_REGIONS ==  1, "COMPO_REGIONS");
+static_assert(FSM::Instance::COMPO_PRONGS  == 10, "COMPO_PRONGS");
+static_assert(FSM::Instance::ORTHO_REGIONS ==  0, "ORTHO_REGIONS");
+static_assert(FSM::Instance::ORTHO_UNITS   ==  0, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

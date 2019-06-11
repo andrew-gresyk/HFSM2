@@ -3,33 +3,42 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NHeadIndex,
-		  ShortIndex NCompoIndex,
-		  ShortIndex NOrthoIndex,
+template <typename TIndices,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
 struct _O final {
-	static constexpr StateID	HEAD_ID		= NHeadIndex;
-	static constexpr ShortIndex COMPO_INDEX	= NCompoIndex;
-	static constexpr ShortIndex ORTHO_INDEX	= NOrthoIndex;
+	using Indices		= TIndices;
+	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
+	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
+	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
+	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
+
 	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ForkID		ORTHO_ID	= (ForkID) -ORTHO_INDEX - 1;
 
 	using Args			= TArgs;
-	using Head			= THead;
-
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 	using Payload		= typename Args::Payload;
 
+	using Head			= THead;
+
+	using Forward		= _OF<Head, TSubStates...>;
+	static constexpr ShortIndex WIDTH		= Forward::WIDTH;
+	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
+	static constexpr ShortIndex ORTHO_UNITS	= Forward::ORTHO_UNITS;
+
 	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
+	using OrthoForks	= typename StateRegistry::AllForks::Ortho;
+	using ProngBits		= typename OrthoForks::Bits;
+	using ProngConstBits= typename OrthoForks::ConstBits;
 
 	using Control		= ControlT<Args>;
 
@@ -42,18 +51,22 @@ struct _O final {
 
 	using GuardControl	= GuardControlT<Args>;
 
-	using HeadState		= _S <HEAD_ID, Args, Head>;
-	using SubStates		= _OS<HEAD_ID + 1, COMPO_INDEX, ORTHO_INDEX + 1, Args, 0, TSubStates...>;
-	using AllForward	= _OF<Head, TSubStates...>;
+	using HeadState		= _S<Indices, Args, Head>;
+	using SubStates		= _OS<_I<HEAD_ID + 1,
+								 COMPO_INDEX,
+								 ORTHO_INDEX + 1,
+								 ORTHO_UNIT + ORTHO_UNITS>,
+							  Args,
+							  0,
+							  TSubStates...>;
 
-	static constexpr ShortIndex REGION_SIZE	= AllForward::STATE_COUNT;
-	static constexpr ShortIndex PRONG_COUNT	= sizeof...(TSubStates);
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE		  OrthoFork& orthoRequested(	  StateRegistry& stateRegistry)			{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
-	HFSM_INLINE const OrthoFork& orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho[ORTHO_INDEX];	}
+	HFSM_INLINE ProngBits	   orthoRequested(		StateRegistry& stateRegistry)		{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM_INLINE ProngConstBits orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM_INLINE		  OrthoFork& orthoRequested(	  Control& control)						{ return orthoRequested(control._stateRegistry);		}
-	HFSM_INLINE const OrthoFork& orthoRequested(const Control& control) const				{ return orthoRequested(control._stateRegistry);		}
+	HFSM_INLINE ProngBits	   orthoRequested(		Control& control)					{ return orthoRequested(control._stateRegistry);							}
+	HFSM_INLINE ProngConstBits orthoRequested(const Control& control) const				{ return orthoRequested(control._stateRegistry);							}
 
 	HFSM_INLINE void	deepRegister		 (StateRegistry& stateRegistry, const Parent parent);
 

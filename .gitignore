@@ -1,6 +1,7 @@
 ﻿.codelite
 .idea
 .vs
+.vscode
 build
 cmake-*
 

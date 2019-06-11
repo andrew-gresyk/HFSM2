@@ -79,15 +79,8 @@ struct PlanDataT<ArgsT<TContext,
 
 	using TaskLinks		= List<TaskLink, TASK_CAPACITY>;
 	using TasksBounds	= Array<Bounds, RegionList::SIZE>;
-	using TasksBits		= BitArrayStorageT<StateID, StateList::SIZE>;
-	using RegionBit		= BitT<RegionID>;
-	using RegionBits	= BitArrayStorageT<RegionID, RegionList::SIZE>;
-
-	HFSM_INLINE void setSuccessful(const StateID stateId, const bool state) { tasksSuccesses[stateId]  = state;	}
-	HFSM_INLINE void setFailed	  (const StateID stateId, const bool state) { tasksFailures [stateId]  = state;	}
-
-	HFSM_INLINE bool hasSucceeded (const StateID stateId) const	   { return !!tasksSuccesses[stateId];			}
-	HFSM_INLINE bool hasFailed	  (const StateID stateId) const	   { return !!tasksFailures [stateId];			}
+	using TasksBits		= BitArray<StateID, StateList::SIZE>;
+	using RegionBits	= BitArray<RegionID, RegionList::SIZE>;
 
 	TaskLinks taskLinks;
 	TasksBounds tasksBounds;
@@ -121,12 +114,6 @@ struct PlanDataT<ArgsT<TContext,
 					   TPayload,
 					   NTaskCapacity>>
 {
-	static /*constexpr*/ void setSuccessful(const StateID, const bool)			{}
-	static /*constexpr*/ void setFailed	   (const StateID, const bool)			{}
-
-	static constexpr bool hasSucceeded (const StateID)			{ return false;	}
-	static constexpr bool hasFailed	   (const StateID)			{ return false;	}
-
 #ifdef HFSM_ENABLE_ASSERT
 	void verifyPlans() const													{}
 	LongIndex verifyPlan(const RegionID) const					{ return 0;		}

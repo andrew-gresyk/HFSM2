@@ -68,11 +68,11 @@ struct U_2	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT == 12, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_COUNT ==  4, "COMPO_COUNT");
-static_assert(FSM::Instance::ORTHO_COUNT ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::ORTHO_UNITS ==  1, "ORTHO_UNITS");
-static_assert(FSM::Instance::PRONG_COUNT ==  8, "PRONG_COUNT");
+static_assert(FSM::Instance::STATE_COUNT   == 12, "STATE_COUNT");
+static_assert(FSM::Instance::COMPO_REGIONS ==  4, "COMPO_REGIONS");
+static_assert(FSM::Instance::COMPO_PRONGS  ==  8, "COMPO_PRONGS");
+static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

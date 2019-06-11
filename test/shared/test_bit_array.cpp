@@ -2,34 +2,122 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using BitArray = hfsm2::detail::BitArrayStorageT<hfsm2::ShortIndex, 16>;
+using BitArray = hfsm2::detail::BitArray<hfsm2::ShortIndex, 6>;
+using Bits		= typename BitArray::Bits;
 
-//------------------------------------------------------------------------------
-
-void
-verifySingleEntry(const BitArray& bitArray,
-				  const hfsm2::ShortIndex index)
-{
-	for (hfsm2::ShortIndex i = 0; i < bitArray.capacity; ++i)
-		if (i == index)
-			REQUIRE( bitArray[i]); //-V521
-		else
-			REQUIRE(!bitArray[i]); //-V521
-}
-
-//------------------------------------------------------------------------------
-
-TEST_CASE("Shared.BitArrayT<>", "[shared]") {
+TEST_CASE("Shared.BitArray<>", "[shared]") {
 	BitArray bitArray;
 
-	for (hfsm2::ShortIndex i = 0; i < bitArray.capacity; ++i)
-		REQUIRE(!bitArray[i]); //-V521
+	bitArray.clear();
 
-	for (hfsm2::ShortIndex i = 0; i < bitArray.capacity; ++i) {
-		bitArray[i] = true; //-V601
-		verifySingleEntry(bitArray, i);
+	WHEN("Static methods") {
+		{
+			const Bits bits = bitArray.bits<3, 7>();
+			REQUIRE(!bits);
 
-		bitArray.clear();
+			REQUIRE(!bits.get<0>());
+			REQUIRE(!bits.get<1>());
+			REQUIRE(!bits.get<2>());
+			REQUIRE(!bits.get<3>());
+			REQUIRE(!bits.get<4>());
+			REQUIRE(!bits.get<5>());
+			REQUIRE(!bits.get<6>());
+		}
+
+		{
+			Bits bits = bitArray.bits<3, 7>();
+			bits.set<4>();
+		}
+
+		{
+			const Bits bits = bitArray.bits<2, 13>();
+			REQUIRE(!bits.get< 0>());
+			REQUIRE(!bits.get< 1>());
+			REQUIRE(!bits.get< 2>());
+			REQUIRE(!bits.get< 3>());
+			REQUIRE(!bits.get< 4>());
+			REQUIRE(!bits.get< 5>());
+			REQUIRE(!bits.get< 6>());
+			REQUIRE(!bits.get< 7>());
+			REQUIRE(!bits.get< 8>());
+			REQUIRE(!bits.get< 9>());
+			REQUIRE(!bits.get<10>());
+			REQUIRE(!bits.get<11>());
+			REQUIRE( bits.get<12>());
+		}
+
+		{
+			Bits bits = bitArray.bits<2, 13>();
+			bits.reset<12>();
+		}
+
+		{
+			const Bits bits = bitArray.bits<3, 7>();
+			REQUIRE(!bits);
+
+			REQUIRE(!bits.get<0>());
+			REQUIRE(!bits.get<1>());
+			REQUIRE(!bits.get<2>());
+			REQUIRE(!bits.get<3>());
+			REQUIRE(!bits.get<4>());
+			REQUIRE(!bits.get<5>());
+			REQUIRE(!bits.get<6>());
+		}
+	}
+
+	WHEN("Dynamic methods") {
+		{
+			const Bits bits = bitArray.bits<3, 7>();
+			REQUIRE(!bits);
+
+			REQUIRE(!bits.get(0));
+			REQUIRE(!bits.get(1));
+			REQUIRE(!bits.get(2));
+			REQUIRE(!bits.get(3));
+			REQUIRE(!bits.get(4));
+			REQUIRE(!bits.get(5));
+			REQUIRE(!bits.get(6));
+		}
+
+		{
+			Bits bits = bitArray.bits<3, 7>();
+			bits.set<4>();
+		}
+
+		{
+			const Bits bits = bitArray.bits<2, 13>();
+			REQUIRE(!bits.get( 0));
+			REQUIRE(!bits.get( 1));
+			REQUIRE(!bits.get( 2));
+			REQUIRE(!bits.get( 3));
+			REQUIRE(!bits.get( 4));
+			REQUIRE(!bits.get( 5));
+			REQUIRE(!bits.get( 6));
+			REQUIRE(!bits.get( 7));
+			REQUIRE(!bits.get( 8));
+			REQUIRE(!bits.get( 9));
+			REQUIRE(!bits.get(10));
+			REQUIRE(!bits.get(11));
+			REQUIRE( bits.get(12));
+		}
+
+		{
+			Bits bits = bitArray.bits<2, 13>();
+			bits.reset<12>();
+		}
+
+		{
+			const Bits bits = bitArray.bits<3, 7>();
+			REQUIRE(!bits);
+
+			REQUIRE(!bits.get(0));
+			REQUIRE(!bits.get(1));
+			REQUIRE(!bits.get(2));
+			REQUIRE(!bits.get(3));
+			REQUIRE(!bits.get(4));
+			REQUIRE(!bits.get(5));
+			REQUIRE(!bits.get(6));
+		}
 	}
 }
 

@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\test\test_debug.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_ortho_units.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\test_internal_transitions.hpp">
@@ -183,6 +186,9 @@
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_debug.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_ortho_units.hpp">
       <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,13 +7,13 @@ namespace detail {
 
 template <typename TArgs>
 class ControlT {
-	template <StateID, typename, typename>
+	template <typename, typename, typename>
 	friend struct _S;
 
-	template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, typename, typename...>
+	template <typename, typename, Strategy, typename, typename...>
 	friend struct _C;
 
-	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
+	template <typename, typename, typename, typename...>
 	friend struct _O;
 
 	template <typename, typename, typename, typename>
@@ -110,13 +110,13 @@ template <typename TArgs>
 class PlanControlT
 	: public ControlT<TArgs>
 {
-	template <StateID, typename, typename>
+	template <typename, typename, typename>
 	friend struct _S;
 
-	template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, typename, typename...>
+	template <typename, typename, Strategy, typename, typename...>
 	friend struct _C;
 
-	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
+	template <typename, typename, typename, typename...>
 	friend struct _O;
 
 	template <typename, typename, typename, typename>
@@ -224,13 +224,13 @@ template <typename TArgs>
 class FullControlT
 	: public PlanControlT<TArgs>
 {
-	template <StateID, typename, typename>
+	template <typename, typename, typename>
 	friend struct _S;
 
-	template <StateID, ShortIndex, ShortIndex, typename, RegionStrategy, typename, typename...>
+	template <typename, typename, Strategy, typename, typename...>
 	friend struct _C;
 
-	template <StateID, ShortIndex, ShortIndex, typename, typename, typename...>
+	template <typename, typename, typename, typename...>
 	friend struct _O;
 
 	template <typename, typename, typename, typename>
@@ -252,7 +252,7 @@ class FullControlT
 	using PlanData		= PlanDataT<Args>;
 
 	using Request		= RequestT <Payload>;
-	using Requests		= RequestsT<Payload, Args::COMPO_COUNT>;
+	using Requests		= RequestsT<Payload, Args::COMPO_REGIONS>;
 
 protected:
 
@@ -352,7 +352,7 @@ template <typename TArgs>
 class GuardControlT
 	: public FullControlT<TArgs>
 {
-	template <StateID, typename, typename>
+	template <typename, typename, typename>
 	friend struct _S;
 
 	template <typename, typename, typename, typename>
@@ -374,7 +374,7 @@ class GuardControlT
 	using FullControl	= FullControlT<Args>;
 
 public:
-	using Requests		= RequestsT<Payload, Args::COMPO_COUNT>;
+	using Requests		= RequestsT<Payload, Args::COMPO_REGIONS>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

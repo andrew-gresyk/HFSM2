@@ -5,137 +5,126 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
-class BitArrayT;
-
-template <typename TIndex>
-class BitT {
-	using Index		= TIndex;
-
-	using BitArray	= BitArrayT<Index>;
-
-	template <typename>
-	friend class BitArrayT;
-
-private:
-	HFSM_INLINE BitT(BitArray& array,
-				const Index index)
-		: _array(array)
-		, _index(index)
-	{}
-
-public:
-	HFSM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
-	HFSM_INLINE void operator = (const bool value)	{ _array.set(_index, value);	}
-
-private:
-	BitArray& _array;
-	const Index _index;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename TIndex>
-class ConstBitT {
-	using Index		= TIndex;
-
-	using BitArray	= BitArrayT<Index>;
-
-	template <typename>
-	friend class BitArrayT;
-
-private:
-	HFSM_INLINE ConstBitT(const BitArray& array,
-						  const Index index)
-		: _array(array)
-		, _index(index)
-	{}
-
-public:
-	HFSM_INLINE explicit operator bool() const		{ return _array.get(_index);	}
-
-private:
-	const BitArray& _array;
-	const Index _index;
-};
-
-//------------------------------------------------------------------------------
-
-#pragma pack(push, 1)
-
-template <typename TIndex>
-class alignas(2) BitArrayT {
-	template <typename>
-	friend class BitT;
-
-	template <typename>
-	friend class ConstBitT;
-
-public:
-	using Index		= TIndex;
-
-	using	   Bit	=	   BitT<Index>;
-	using ConstBit	= ConstBitT<Index>;
-
-protected:
-	using StorageUnit	= uint8_t;
-	using Storage		= StorageUnit*;
-
-	static constexpr Index STORAGE_UNIT_SIZE	= sizeof(StorageUnit) * 8;
-
-	static constexpr Index ITEM_ALIGNMENT		= alignof(StorageUnit[2]);
-	static constexpr Index VIEW_SIZE			= sizeof(Index);
-	static constexpr Index OFFSET				= (VIEW_SIZE + ITEM_ALIGNMENT - 1) / ITEM_ALIGNMENT * ITEM_ALIGNMENT;
-
-protected:
-	HFSM_INLINE BitArrayT(const Index capacity_);
-
-public:
-	HFSM_INLINE void clear();
-
-	HFSM_INLINE explicit operator bool() const;
-
-	HFSM_INLINE		 Bit operator[] (const Index i)			{ return	  Bit{*this, i}; }
-	HFSM_INLINE ConstBit operator[] (const Index i) const	{ return ConstBit{*this, i}; }
-
-protected:
-	HFSM_INLINE bool get(const Index i) const;
-	HFSM_INLINE void set(const Index i, const bool value);
-
-	HFSM_INLINE		  StorageUnit* storage()		{ return reinterpret_cast<		StorageUnit*>(((uintptr_t)this) + OFFSET);	}
-	HFSM_INLINE const StorageUnit* storage() const	{ return reinterpret_cast<const StorageUnit*>(((uintptr_t)this) + OFFSET);	}
-
-	HFSM_INLINE Index storageUnitCount() const		{ return (capacity + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;			}
-
-public:
-	const Index capacity;
+struct Units {
+	ShortIndex unit;
+	ShortIndex width;
 };
 
 //------------------------------------------------------------------------------
 
 template <typename TIndex, ShortIndex NCapacity>
-class BitArrayStorageT final
-	: public BitArrayT<TIndex>
-{
-	using Index			= TIndex;
+class BitArray final {
+public:
+	using Index	= TIndex;
+	using Unit	= unsigned char;
 
-	using BitArray		= BitArrayT<Index>;
+	static constexpr Index CAPACITY	= NCapacity;
 
-	using StorageUnit	= typename BitArray::StorageUnit;
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using BitArray::STORAGE_UNIT_SIZE;
+	class Bits {
+		template <typename, ShortIndex>
+		friend class BitArray;
 
-	static constexpr Index CAPACITY				= NCapacity;
-	static constexpr Index STORAGE_UNIT_COUNT	= (CAPACITY + STORAGE_UNIT_SIZE - 1) / STORAGE_UNIT_SIZE;
+	private:
+		HFSM_INLINE explicit Bits(Unit* const storage,
+								  const Index width)
+			: _storage{storage}
+			, _width{width}
+		{}
+
+	public:
+		HFSM_INLINE explicit operator bool() const;
+
+		HFSM_INLINE void clear();
+
+		template <ShortIndex NIndex>
+		HFSM_INLINE bool get() const;
+
+		template <ShortIndex NIndex>
+		HFSM_INLINE void set();
+
+		template <ShortIndex NIndex>
+		HFSM_INLINE void reset();
+
+		HFSM_INLINE bool get  (const Index index) const;
+		HFSM_INLINE void set  (const Index index);
+		HFSM_INLINE void reset(const Index index);
+
+	private:
+		Unit* const _storage;
+		const Index _width;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	class ConstBits {
+		template <typename, ShortIndex>
+		friend class BitArray;
+
+	private:
+		HFSM_INLINE explicit ConstBits(const Unit* const storage,
+									   const Index width)
+			: _storage{storage}
+			, _width{width}
+		{}
+
+	public:
+		HFSM_INLINE explicit operator bool() const;
+
+		template <ShortIndex NIndex>
+		HFSM_INLINE bool get() const;
+
+		HFSM_INLINE bool get(const Index index) const;
+
+	private:
+		const Unit* const _storage;
+		const Index _width;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 public:
-	HFSM_INLINE BitArrayStorageT();
+	BitArray() {
+		clear();
+	}
+
+	HFSM_INLINE void clear();
+
+	template <ShortIndex NIndex>
+	HFSM_INLINE bool get() const;
+
+	template <ShortIndex NIndex>
+	HFSM_INLINE void set();
+
+	template <ShortIndex NIndex>
+	HFSM_INLINE void reset();
+
+	HFSM_INLINE bool get  (const Index index) const;
+	HFSM_INLINE void set  (const Index index);
+	HFSM_INLINE void reset(const Index index);
+
+	template <ShortIndex NUnit, ShortIndex NWidth>
+	HFSM_INLINE		 Bits bits();
+
+	template <ShortIndex NUnit, ShortIndex NWidth>
+	HFSM_INLINE ConstBits bits() const;
+
+
+	HFSM_INLINE		 Bits bits(const Units& units);
+	HFSM_INLINE ConstBits bits(const Units& units) const;
 
 private:
-	StorageUnit _storage[STORAGE_UNIT_COUNT];
+	Unit _storage[CAPACITY];
 };
 
-#pragma pack(pop)
+//------------------------------------------------------------------------------
+
+template <typename TIndex>
+class BitArray<TIndex, 0> final {
+public:
+	HFSM_INLINE void clear() {}
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 

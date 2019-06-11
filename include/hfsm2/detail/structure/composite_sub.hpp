@@ -3,21 +3,22 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NInitialID,
-		  ShortIndex NCompoIndex,
-		  ShortIndex NOrthoIndex,
+template <typename TIndices,
 		  typename TArgs,
-		  RegionStrategy TStrategy,
+		  Strategy TStrategy,
 		  ShortIndex NIndex,
 		  typename... TStates>
 struct _CS {
-	static constexpr StateID	INITIAL_ID	 = NInitialID;
-	static constexpr ShortIndex COMPO_INDEX	 = NCompoIndex;
-	static constexpr ShortIndex ORTHO_INDEX	 = NOrthoIndex;
-	static constexpr ShortIndex REGION_ID	 = COMPO_INDEX + ORTHO_INDEX;
-	static constexpr ShortIndex PRONG_INDEX	 = NIndex;
+	using Indices		= TIndices;
+	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
+	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
+	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
+	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
 
-	static constexpr RegionStrategy STRATEGY = TStrategy;
+	static constexpr Strategy	STRATEGY	= TStrategy;
+
+	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
+	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
 	using Utility		= typename Args::Utility;
@@ -40,9 +41,10 @@ struct _CS {
 	static constexpr ShortIndex L_PRONG = PRONG_INDEX;
 
 	using LStates		= SplitL<TStates...>;
-	using LHalf			= CSubMaterial<INITIAL_ID,
-									   COMPO_INDEX,
-									   ORTHO_INDEX,
+	using LHalf			= CSubMaterial<_I<INITIAL_ID,
+										  COMPO_INDEX,
+										  ORTHO_INDEX,
+										  ORTHO_UNIT>,
 									   Args,
 									   STRATEGY,
 									   L_PRONG,
@@ -52,13 +54,16 @@ struct _CS {
 	static constexpr ShortIndex R_PRONG = PRONG_INDEX + LStates::SIZE;
 
 	using RStates		= SplitR<TStates...>;
-	using RHalf			= CSubMaterial<INITIAL_ID  + LHalfForward::STATE_COUNT,
-									   COMPO_INDEX + LHalfForward::COMPO_COUNT,
-									   ORTHO_INDEX + LHalfForward::ORTHO_COUNT,
+	using RHalf			= CSubMaterial<_I<INITIAL_ID  + LHalfForward::STATE_COUNT,
+										  COMPO_INDEX + LHalfForward::COMPO_REGIONS,
+										  ORTHO_INDEX + LHalfForward::ORTHO_REGIONS,
+										  ORTHO_UNIT  + LHalfForward::ORTHO_UNITS>,
 									   Args,
 									   STRATEGY,
 									   R_PRONG,
 									   RStates>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepRegister				  (StateRegistry& stateRegistry, const Parent parent);
 
@@ -89,7 +94,7 @@ struct _CS {
 
 #if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-	template <RegionStrategy TG = STRATEGY>
+	template <Strategy TG = STRATEGY>
 	HFSM_INLINE void	deepRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
@@ -117,7 +122,7 @@ struct _CS {
 
 #if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-	template <RegionStrategy TG = STRATEGY>
+	template <Strategy TG = STRATEGY>
 	HFSM_INLINE UP		deepReportChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>

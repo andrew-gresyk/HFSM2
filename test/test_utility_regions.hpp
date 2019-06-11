@@ -131,11 +131,11 @@ struct OU_3 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT == 28, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_COUNT ==  8, "COMPO_COUNT");
-static_assert(FSM::Instance::ORTHO_COUNT ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::ORTHO_UNITS ==  1, "ORTHO_UNITS");
-static_assert(FSM::Instance::PRONG_COUNT == 24, "PRONG_COUNT");
+static_assert(FSM::Instance::STATE_COUNT   == 28, "STATE_COUNT");
+static_assert(FSM::Instance::COMPO_REGIONS ==  8, "COMPO_REGIONS");
+static_assert(FSM::Instance::COMPO_PRONGS  == 24, "COMPO_PRONGS");
+static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

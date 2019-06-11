@@ -3,11 +3,13 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID TStateID,
+template <typename TIndices,
 		  typename TArgs,
 		  typename THead>
 struct _S {
-	static constexpr StateID STATE_ID = TStateID;
+	using Indices		= TIndices;
+	static constexpr StateID	STATE_ID	= Indices::STATE_ID;
+	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
 
 	using Args			= TArgs;
 	using Head			= THead;

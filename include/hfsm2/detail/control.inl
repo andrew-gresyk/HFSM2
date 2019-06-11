@@ -174,7 +174,7 @@ FullControlT<TA>::updatePlan(TState& headState,
 		if (Plan p = plan(_regionId)) {
 			for (auto it = p.begin(); it; ++it) {
 				if (isActive(it->origin) &&
-					_planData.tasksSuccesses[it->origin])
+					_planData.tasksSuccesses.get(it->origin))
 				{
 					Origin origin{*this, STATE_ID};
 
@@ -205,12 +205,12 @@ FullControlT<TA>::buildPlanStatus(const bool outerTransition) {
 	static constexpr StateID STATE_ID = State::STATE_ID;
 
 	if (_status.failure) {
-		_planData.tasksFailures[STATE_ID] = true;
+		_planData.tasksFailures.template set<STATE_ID>();
 
 		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::FAILED);
 		return {false, true,  outerTransition};
 	} else if (_status.success) {
-		_planData.tasksSuccesses[STATE_ID] = true;
+		_planData.tasksSuccesses.template set<STATE_ID>();
 
 		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::SUCCEEDED);
 		return {true,  false, outerTransition};
@@ -300,7 +300,7 @@ void
 FullControlT<TA>::succeed() {
 	_status.success = true;
 
-	_planData.tasksSuccesses[_originId] = true;
+	_planData.tasksSuccesses.set(_originId);
 
 	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::SUCCEEDED);
 }
@@ -312,7 +312,7 @@ void
 FullControlT<TA>::fail() {
 	_status.failure = true;
 
-	_planData.tasksFailures [_originId] = true;
+	_planData.tasksFailures.set(_originId);
 
 	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::FAILED);
 }

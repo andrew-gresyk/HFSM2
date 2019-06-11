@@ -195,26 +195,26 @@ struct _M {
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Composite			 = _CF<RegionStrategy::Composite,	 THead,	TSubStates...>;
+	using Composite			 = _CF<Strategy::Composite,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using CompositePeers	 = _CF<RegionStrategy::Composite,	 void,	TSubStates...>;
+	using CompositePeers	 = _CF<Strategy::Composite,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Resumable			  = _CF<RegionStrategy::Resumable,	 THead,	TSubStates...>;
+	using Resumable			  = _CF<Strategy::Resumable,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeers	  = _CF<RegionStrategy::Resumable,	 void,	TSubStates...>;
+	using ResumablePeers	  = _CF<Strategy::Resumable,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Utilitarian		  = _CF<RegionStrategy::Utilitarian, THead,	TSubStates...>;
+	using Utilitarian		  = _CF<Strategy::Utilitarian, THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using UtilitarianPeers	  = _CF<RegionStrategy::Utilitarian, void,	TSubStates...>;
+	using UtilitarianPeers	  = _CF<Strategy::Utilitarian, void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

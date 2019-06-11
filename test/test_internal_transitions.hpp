@@ -267,11 +267,11 @@ struct B_2_2
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT == 13, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_COUNT ==  5, "COMPO_COUNT");
-static_assert(FSM::Instance::ORTHO_COUNT ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::ORTHO_UNITS ==  1, "ORTHO_UNITS");
-static_assert(FSM::Instance::PRONG_COUNT == 10, "PRONG_COUNT");
+static_assert(FSM::Instance::STATE_COUNT   == 13, "STATE_COUNT");
+static_assert(FSM::Instance::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::COMPO_PRONGS  == 10, "COMPO_PRONGS");
+static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

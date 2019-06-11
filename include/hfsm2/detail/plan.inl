@@ -146,7 +146,7 @@ PlanT<TArgs>::PlanT(PlanData& planData,
 					const RegionID regionId)
 
 	: _planData{planData}
-	, _planExists{planData.planExists[regionId]}
+	, _regionId{regionId}
 	, _bounds{planData.tasksBounds[regionId]}
 {}
 
@@ -171,7 +171,8 @@ PlanT<TArgs>::append(const Transition transition,
 					 const StateID origin,
 					 const StateID destination)
 {
-	_planExists = true;
+	_planData.planExists.set(_regionId);
+
 	const TaskIndex index = _planData.taskLinks.emplace(transition, origin, destination);
 
 	if (_bounds.first < TaskLinks::CAPACITY) {
@@ -233,7 +234,7 @@ PlanT<TArgs>::clear() {
 template <typename TArgs>
 void
 PlanT<TArgs>::remove(const LongIndex task) {
-	HFSM_ASSERT(_planExists &&
+	HFSM_ASSERT(_planData.planExists.get(_regionId) &&
 				_bounds.first < TaskLinks::CAPACITY &&
 				_bounds.last  < TaskLinks::CAPACITY);
 

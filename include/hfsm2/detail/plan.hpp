@@ -57,7 +57,6 @@ class ConstPlanT {
 public:
 	using PlanData		= PlanDataT<Args>;
 	using TaskLinks		= typename PlanData::TaskLinks;
-	using RegionBit		= typename PlanData::RegionBit;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -125,8 +124,6 @@ public:
 	using PlanData		= PlanDataT<Args>;
 	using TaskLinks		= typename PlanData::TaskLinks;
 	using TaskIndex		= typename TaskLinks::Index;
-
-	using RegionBit		= typename PlanData::RegionBit;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -223,7 +220,7 @@ public:
 
 private:
 	PlanData& _planData;
-	RegionBit _planExists;
+	const RegionID _regionId;
 	Bounds& _bounds;
 };
 

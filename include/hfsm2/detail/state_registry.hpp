@@ -5,7 +5,7 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
-enum RegionStrategy {
+enum Strategy {
 	Composite,
 	Resumable,
 	Utilitarian,
@@ -86,25 +86,14 @@ using RequestsT = Array<RequestT<TPayload>, NCount>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using OrthoFork = BitArrayT<ShortIndex>;
-
-template <ShortIndex NProngCount>
-using OrthoForkT = BitArrayStorageT<ShortIndex, NProngCount>;
-
-template <ShortIndex NCapacity, LongIndex NStorageSize>
-using OrthoForksT = ObjectPool<OrthoFork, NCapacity, NStorageSize>;
-
-//------------------------------------------------------------------------------
-
 template <LongIndex NCompoCount, LongIndex NOrthoCount, LongIndex NOrthoUnits>
 struct AllForksT {
-	static constexpr ShortIndex COMPO_COUNT	  = NCompoCount;
-	static constexpr ShortIndex ORTHO_COUNT	  = NOrthoCount;
+	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
+	static constexpr ShortIndex ORTHO_REGIONS = NOrthoCount;
 	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
-	static constexpr LongIndex  ORTHO_STORAGE = ORTHO_COUNT * sizeof(OrthoFork) + ORTHO_UNITS;
 
-	using Compo = StaticArray<ShortIndex,  COMPO_COUNT>;
-	using Ortho = OrthoForksT<ORTHO_COUNT, ORTHO_STORAGE>;
+	using Compo = StaticArray<ShortIndex, COMPO_REGIONS>;
+	using Ortho = BitArray<ShortIndex, ORTHO_REGIONS>;
 
 	Compo compo{INVALID_SHORT_INDEX};
 	Ortho ortho;
@@ -155,21 +144,22 @@ struct StateRegistryT<ArgsT<TContext,
 
 	using Request		= RequestT<Payload>;
 
-	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
-	static constexpr ShortIndex COMPO_COUNT = NCompoCount;
-	static constexpr ShortIndex ORTHO_COUNT = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS = NOrthoUnits;
+	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
+	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
+	static constexpr ShortIndex ORTHO_REGIONS = NOrthoCount;
+	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
 
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
 
-	using CompoParents	= StaticArray<Parent, COMPO_COUNT>;
-	using OrthoParents	= StaticArray<Parent, ORTHO_COUNT>;
+	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
+	using OrthoParents	= StaticArray<Parent, ORTHO_REGIONS>;
+	using OrthoUnits	= StaticArray<Units,  ORTHO_REGIONS>;
 
-	using CompoForks	= StaticArray<ShortIndex, COMPO_COUNT>;
-	using AllForks		= AllForksT<COMPO_COUNT, ORTHO_COUNT, ORTHO_UNITS>;
+	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
+	using AllForks		= AllForksT<COMPO_REGIONS, ORTHO_REGIONS, ORTHO_UNITS>;
+	using OrthoBits		= typename AllForks::Ortho::Bits;
 
-	using CompoRemains	= BitArrayStorageT<ShortIndex, COMPO_COUNT>;
-	using RemainBit		= typename CompoRemains::Bit;
+	using CompoRemains	= BitArray<ShortIndex, COMPO_REGIONS>;
 
 	bool isActive		(const StateID stateId) const;
 	bool isResumable	(const StateID stateId) const;
@@ -178,20 +168,10 @@ struct StateRegistryT<ArgsT<TContext,
 	bool isPendingEnter	(const StateID stateId) const;
 	bool isPendingExit	(const StateID stateId) const;
 
-	HFSM_INLINE const Parent&		forkParent(const ForkID forkId) const;
-	HFSM_INLINE ForkID		 parentCompoForkId(const ForkID forkId) const;
+	HFSM_INLINE const Parent&	  forkParent(const ForkID forkId) const;
 
-	HFSM_INLINE ShortIndex    activeCompoProng(const ForkID forkId) const;
-	HFSM_INLINE ShortIndex resumableCompoProng(const ForkID forkId) const;
-	HFSM_INLINE ShortIndex requestedCompoProng(const ForkID forkId) const;
-
-	HFSM_INLINE ShortIndex& resumableCompoFork(const ForkID forkId);
-	HFSM_INLINE OrthoFork&  resumableOrthoFork(const ForkID forkId);
-
-	HFSM_INLINE ShortIndex& requestedCompoFork(const ForkID forkId);
-	HFSM_INLINE OrthoFork&  requestedOrthoFork(const ForkID forkId);
-
-	HFSM_INLINE RemainBit		   compoRemain(const ForkID forkId)		{ return compoRemains[forkId - 1]; }
+	HFSM_INLINE OrthoBits resumableOrthoFork(const ForkID forkId);
+	HFSM_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
 
 	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
@@ -201,6 +181,7 @@ struct StateRegistryT<ArgsT<TContext,
 	StateParents stateParents;
 	CompoParents compoParents;
 	OrthoParents orthoParents;
+	OrthoUnits orthoUnits;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
 
@@ -237,17 +218,16 @@ struct StateRegistryT<ArgsT<TContext,
 	using Request		= RequestT<Payload>;
 
 	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
-	static constexpr ShortIndex COMPO_COUNT = NCompoCount;
+	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
 
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
-	using CompoParents	= StaticArray<Parent, COMPO_COUNT>;
+	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
 
-	using CompoForks	= StaticArray<ShortIndex, COMPO_COUNT>;
+	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
 
-	using AllForks		= AllForksT<COMPO_COUNT, 0, 0>;
+	using AllForks		= AllForksT<COMPO_REGIONS, 0, 0>;
 
-	using CompoRemains	= BitArrayStorageT<ShortIndex, COMPO_COUNT>;
-	using RemainBit		= typename CompoRemains::Bit;
+	using CompoRemains	= BitArray<ShortIndex, COMPO_REGIONS>;
 
 	bool isActive		(const StateID stateId) const;
 	bool isResumable	(const StateID stateId) const;
@@ -256,16 +236,7 @@ struct StateRegistryT<ArgsT<TContext,
 	bool isPendingEnter	(const StateID stateId) const;
 	bool isPendingExit	(const StateID stateId) const;
 
-	HFSM_INLINE const Parent&		forkParent(const ForkID forkId) const;
-
-	HFSM_INLINE ShortIndex    activeCompoProng(const ForkID forkId) const;
-	HFSM_INLINE ShortIndex resumableCompoProng(const ForkID forkId) const;
-	HFSM_INLINE ShortIndex requestedCompoProng(const ForkID forkId) const;
-
-	HFSM_INLINE ShortIndex& resumableCompoFork(const ForkID forkId);
-	HFSM_INLINE ShortIndex& requestedCompoFork(const ForkID forkId);
-
-	HFSM_INLINE RemainBit		   compoRemain(const ForkID forkId)		{ return compoRemains[forkId - 1]; }
+	HFSM_INLINE const Parent& forkParent(const ForkID forkId) const;
 
 	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);

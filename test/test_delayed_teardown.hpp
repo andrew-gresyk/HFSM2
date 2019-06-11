@@ -86,11 +86,11 @@ struct Step2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT == 8, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_COUNT == 2, "COMPO_COUNT");
-static_assert(FSM::Instance::ORTHO_COUNT == 1, "ORTHO_COUNT");
-static_assert(FSM::Instance::ORTHO_UNITS == 1, "ORTHO_UNITS");
-static_assert(FSM::Instance::PRONG_COUNT == 5, "PRONG_COUNT");
+static_assert(FSM::Instance::STATE_COUNT   == 8, "STATE_COUNT");
+static_assert(FSM::Instance::COMPO_REGIONS == 2, "COMPO_REGIONS");
+static_assert(FSM::Instance::COMPO_PRONGS  == 5, "COMPO_PRONGS");
+static_assert(FSM::Instance::ORTHO_REGIONS == 1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::ORTHO_UNITS   == 1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -84,11 +84,11 @@ struct C_100 : FSM::State { float utility(const Control&) { return 1.00f; } };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT == 15, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_COUNT ==  3, "COMPO_COUNT");
-static_assert(FSM::Instance::ORTHO_COUNT ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::ORTHO_UNITS ==  1, "ORTHO_UNITS");
-static_assert(FSM::Instance::PRONG_COUNT == 12, "PRONG_COUNT");
+static_assert(FSM::Instance::STATE_COUNT   == 15, "STATE_COUNT");
+static_assert(FSM::Instance::COMPO_REGIONS ==  3, "COMPO_REGIONS");
+static_assert(FSM::Instance::COMPO_PRONGS  == 12, "COMPO_PRONGS");
+static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

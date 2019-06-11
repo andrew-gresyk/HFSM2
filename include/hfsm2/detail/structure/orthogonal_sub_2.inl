@@ -3,71 +3,71 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRegister(StateRegistry& stateRegistry,
-										  const ForkID forkId)
+_OS<TN, TA, NI, TI>::wideRegister(StateRegistry& stateRegistry,
+								  const ForkID forkId)
 {
 	initial.deepRegister(stateRegistry, Parent{forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
-												   const OrthoFork& prongs)
+_OS<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
+										   const ProngConstBits prongs)
 {
-	return prongs[PRONG_INDEX] ?
+	return prongs.get(PRONG_INDEX) ?
 		initial.deepForwardEntryGuard(control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) {
+_OS<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) {
 	return initial.deepForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<NS, NC, NO, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
+_OS<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
 	return initial.deepEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideEnter(PlanControl& control) {
+_OS<TN, TA, NI, TI>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideReenter(PlanControl& control) {
+_OS<TN, TA, NI, TI>::wideReenter(PlanControl& control) {
 	initial.deepReenter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 Status
-_OS<NS, NC, NO, TA, NI, TI>::wideUpdate(FullControl& control) {
+_OS<TN, TA, NI, TI>::wideUpdate(FullControl& control) {
 	return initial.deepUpdate(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 Status
-_OS<NS, NC, NO, TA, NI, TI>::wideReact(FullControl& control,
+_OS<TN, TA, NI, TI>::wideReact(FullControl& control,
 									   const TEvent& event)
 {
 	return initial.deepReact(control, event);
@@ -75,48 +75,48 @@ _OS<NS, NC, NO, TA, NI, TI>::wideReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
-												  const OrthoFork& prongs)
+_OS<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
+										  const ProngConstBits prongs)
 {
-	return prongs[PRONG_INDEX] ?
+	return prongs.get(PRONG_INDEX) ?
 		initial.deepForwardExitGuard(control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) {
+_OS<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) {
 	return initial.deepForwardExitGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<NS, NC, NO, TA, NI, TI>::wideExitGuard(GuardControl& control) {
+_OS<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) {
 	return initial.deepExitGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideExit(PlanControl& control) {
+_OS<TN, TA, NI, TI>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardActive(Control& control,
-											   const RequestType request,
-											   const OrthoFork& prongs)
+_OS<TN, TA, NI, TI>::wideForwardActive(Control& control,
+									   const RequestType request,
+									   const ProngConstBits prongs)
 {
-	const RequestType local = prongs[PRONG_INDEX] ?
+	const RequestType local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
 
 	initial.deepForwardActive(control, local);
@@ -124,13 +124,13 @@ _OS<NS, NC, NO, TA, NI, TI>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Control& control,
-												const RequestType request,
-												const OrthoFork& prongs)
+_OS<TN, TA, NI, TI>::wideForwardRequest(Control& control,
+										const RequestType request,
+										const ProngConstBits prongs)
 {
-	const RequestType local = prongs[PRONG_INDEX] ?
+	const RequestType local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
 
 	initial.deepForwardRequest(control, local);
@@ -138,49 +138,49 @@ _OS<NS, NC, NO, TA, NI, TI>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestChange(Control& control) {
+_OS<TN, TA, NI, TI>::wideRequestChange(Control& control) {
 	initial.deepRequestChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
+_OS<TN, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
 	initial.deepRequestRemain(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestRestart(StateRegistry& stateRegistry) {
+_OS<TN, TA, NI, TI>::wideRequestRestart(StateRegistry& stateRegistry) {
 	initial.deepRequestRestart(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestResume(StateRegistry& stateRegistry) {
+_OS<TN, TA, NI, TI>::wideRequestResume(StateRegistry& stateRegistry) {
 	initial.deepRequestResume(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideRequestUtilize(Control& control) {
+_OS<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
 	initial.deepRequestUtilize(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 typename TA::Utility
-_OS<NS, NC, NO, TA, NI, TI>::wideReportChange(Control& control) {
+_OS<TN, TA, NI, TI>::wideReportChange(Control& control) {
 	const UP i = initial.deepReportChange(control);
 
 	return i.utility;
@@ -188,9 +188,9 @@ _OS<NS, NC, NO, TA, NI, TI>::wideReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 typename TA::Utility
-_OS<NS, NC, NO, TA, NI, TI>::wideReportUtilize(Control& control) {
+_OS<TN, TA, NI, TI>::wideReportUtilize(Control& control) {
 	const UP i = initial.deepReportUtilize(control);
 
 	return i.utility;
@@ -198,17 +198,17 @@ _OS<NS, NC, NO, TA, NI, TI>::wideReportUtilize(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideEnterRequested(PlanControl& control) {
+_OS<TN, TA, NI, TI>::wideEnterRequested(PlanControl& control) {
 	initial.deepEnterRequested(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
+_OS<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 	initial.deepChangeToRequested(control);
 }
 
@@ -216,11 +216,11 @@ _OS<NS, NC, NO, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <StateID NS, ShortIndex NC, ShortIndex NO, typename TA, ShortIndex NI, typename TI>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<NS, NC, NO, TA, NI, TI>::wideGetNames(const LongIndex parent,
-										  const ShortIndex depth,
-										  StructureStateInfos& _stateInfos) const
+_OS<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
+								  const ShortIndex depth,
+								  StructureStateInfos& _stateInfos) const
 {
 	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
 }
