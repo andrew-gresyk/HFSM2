@@ -10,9 +10,7 @@ struct Context {
     bool powerOn;
 };
 
-//------------------------------------------------------------------------------
-
-using M = hfsm2::MachineT<Context>;
+using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
 
 //------------------------------------------------------------------------------
 

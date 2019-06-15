@@ -23,7 +23,7 @@ struct Stop   {};
 
 // shared data stored externally to the fsm
 using Context = std::string;
-using M = hfsm2::MachineT<Context>;
+using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
 
 // fsm structure
 #define S(s) struct s

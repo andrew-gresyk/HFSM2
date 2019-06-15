@@ -17,9 +17,7 @@ AllForksT<NCC, NOC, NOU>::clear() {
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isActive(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -38,9 +36,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isActive(const
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isResumable(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -59,9 +55,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isResumable(co
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingChange(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -81,9 +75,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingChang
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingEnter(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -103,9 +95,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingEnter
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingExit(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -213,9 +203,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmedia
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 void
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestScheduled(const StateID stateId) {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT) {
+	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
 		if (parent.forkId > 0)
@@ -241,20 +229,16 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::clearRequests(
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isActive(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
+	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
+		if (Parent parent = stateParents[stateId]) {
 			HFSM_ASSERT(parent.forkId > 0);
 
-			if (parent.forkId > 0)
-				return parent.prong == compoActive[parent.forkId - 1];
-		}
+			return parent.prong == compoActive[parent.forkId - 1];
+		} else
+			return true;
+	}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -262,17 +246,11 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isActive(const Sta
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isResumable(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM_ASSERT(parent.forkId > 0);
 
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return parent.prong == resumable.compo[parent.forkId - 1];
+			return parent.prong == resumable.compo[parent.forkId - 1];
 		}
 
 	return false;
@@ -283,21 +261,15 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isResumable(const 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingChange(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM_ASSERT(parent.forkId > 0);
 
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return requested.compo[parent.forkId - 1] !=
-						   compoActive[parent.forkId - 1];
+			return requested.compo[parent.forkId - 1] !=
+					   compoActive[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -305,21 +277,15 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingChange(co
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingEnter(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM_ASSERT(parent.forkId > 0);
 
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return parent.prong !=	   compoActive[parent.forkId - 1] &&
-					   parent.prong == requested.compo[parent.forkId - 1];
+			return parent.prong !=	   compoActive[parent.forkId - 1] &&
+				   parent.prong == requested.compo[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -327,21 +293,15 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingEnter(con
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingExit(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM_ASSERT(parent.forkId > 0);
 
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return parent.prong ==	   compoActive[parent.forkId - 1] &&
-					   parent.prong != requested.compo[parent.forkId - 1];
+			return parent.prong ==	   compoActive[parent.forkId - 1] &&
+				   parent.prong != requested.compo[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 //------------------------------------------------------------------------------

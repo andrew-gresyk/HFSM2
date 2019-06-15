@@ -29,7 +29,7 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 	Logger logger;
 
 	{
-		FSM::Instance machine(&logger);
+		FSM::Instance machine{&logger};
 		{
 			const Events reference = {
 				{ 0u,					Event::ENTRY_GUARD },

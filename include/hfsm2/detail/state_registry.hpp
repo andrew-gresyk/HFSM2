@@ -184,10 +184,8 @@ struct StateRegistryT<ArgsT<TContext,
 	OrthoUnits orthoUnits;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-
 	AllForks resumable;
 
-	// TODO: move these to FullControl
 	AllForks requested;
 	CompoRemains compoRemains;
 };
@@ -214,7 +212,6 @@ struct StateRegistryT<ArgsT<TContext,
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 	using Payload		= TPayload;
-
 	using Request		= RequestT<Payload>;
 
 	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
@@ -224,9 +221,7 @@ struct StateRegistryT<ArgsT<TContext,
 	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
 
 	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
-
 	using AllForks		= AllForksT<COMPO_REGIONS, 0, 0>;
-
 	using CompoRemains	= BitArray<ShortIndex, COMPO_REGIONS>;
 
 	bool isActive		(const StateID stateId) const;
@@ -247,10 +242,8 @@ struct StateRegistryT<ArgsT<TContext,
 	CompoParents compoParents;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-
 	AllForks resumable;
 
-	// TODO: move these to FullControl
 	AllForks requested;
 	CompoRemains compoRemains;
 };

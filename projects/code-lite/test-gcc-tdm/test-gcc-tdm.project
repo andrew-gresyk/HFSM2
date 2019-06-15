@@ -58,6 +58,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_ortho_units.hpp"/>
+    <File Name="../../../test/test_ortho_units.cpp"/>
     <File Name="../../../test/test_debug.hpp"/>
     <File Name="../../../test/test_debug.cpp"/>
     <File Name="../../../test/test_utility_regions.hpp"/>
@@ -83,7 +85,6 @@
     <File Name="../../../test/shared.hpp"/>
     <File Name="../../../test/shared.cpp"/>
     <VirtualDirectory Name="shared">
-      <File Name="../../../test/shared/test_object_pool.cpp"/>
       <File Name="../../../test/shared/test_list.cpp"/>
       <File Name="../../../test/shared/test_bit_array.cpp"/>
     </VirtualDirectory>

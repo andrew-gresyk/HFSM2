@@ -5,7 +5,13 @@ LIST(APPEND CMAKE_MODULE_PATH
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+
+set(SANITIZE_CXX_FLAGS "")
+#set(SANITIZE_CXX_FLAGS "-fsanitize=address -g -O1 -fno-omit-frame-pointer")
+#set(SANITIZE_CXX_FLAGS "-fsanitize=memory -g -O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+#set(SANITIZE_CXX_FLAGS "-fsanitize=undefined")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZE_CXX_FLAGS} -Wall -Werror")
 
 project(hfsm2_test)
 

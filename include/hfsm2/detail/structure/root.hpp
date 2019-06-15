@@ -3,45 +3,40 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TPayload,
+template <typename TConfig,
 		  typename TApex>
 class _R {
-	using Context				= TContext;
+	using Config_				= TConfig;
+	using Context				= typename Config_::Context;
+	using Utility				= typename Config_::Utility;
+	using Logger				= typename Config_::Logger;
+	using Payload				= typename Config_::Payload;
 
-	using Config				= TConfig;
-	using Utility				= typename Config::Utility;
-	using Logger				= typename Config::Logger;
-
-	using Payload				= TPayload;
 	using Apex					= TApex;
 
-	using ForwardApex			= Wrap<Apex>;
-	using AllForward			= _RF<Context, Config, Payload, Apex>;
-	using StateList				= typename AllForward::StateList;
-	using RegionList			= typename AllForward::RegionList;
+	using ApexInfo				= Wrap<Apex>;
+	using Info					= RF_<Config_, Apex>;
+	using StateList				= typename Info::StateList;
+	using RegionList			= typename Info::RegionList;
 
-	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
-	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
-
-	static constexpr LongIndex TASK_CAPACITY	 = AllForward::TASK_CAPACITY;
+	static constexpr LongIndex SUBSTITUTION_LIMIT = Info::SUBSTITUTION_LIMIT;
+	static constexpr LongIndex TASK_CAPACITY	  = Info::TASK_CAPACITY;
 
 public:
-	static constexpr LongIndex  REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
-	static constexpr ShortIndex COMPO_REGIONS	 = ForwardApex::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	 = ForwardApex::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	 = ForwardApex::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		 = ForwardApex::ORTHO_UNITS;
+	static constexpr LongIndex  REVERSE_DEPTH	  = ApexInfo::REVERSE_DEPTH;
+	static constexpr ShortIndex COMPO_REGIONS	  = ApexInfo::COMPO_REGIONS;
+	static constexpr LongIndex  COMPO_PRONGS	  = ApexInfo::COMPO_PRONGS;
+	static constexpr ShortIndex ORTHO_REGIONS	  = ApexInfo::ORTHO_REGIONS;
+	static constexpr ShortIndex ORTHO_UNITS		  = ApexInfo::ORTHO_UNITS;
 
-	static constexpr LongIndex  STATE_COUNT		 = ForwardApex::STATE_COUNT;
-	static constexpr LongIndex  REGION_COUNT	 = ForwardApex::REGION_COUNT;
+	static constexpr LongIndex  STATE_COUNT		  = ApexInfo::STATE_COUNT;
+	static constexpr LongIndex  REGION_COUNT	  = ApexInfo::REGION_COUNT;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using Args					= typename AllForward::Args;
+	using Args					= typename Info::Args;
 
 	using StateRegistry			= StateRegistryT<Args>;
 	using AllForks				= typename StateRegistry::AllForks;
@@ -60,7 +55,7 @@ private:
 	using Payloads				= Array<Payload, STATE_COUNT>;
 	using PayloadsSet			= BitArray<LongIndex, STATE_COUNT>;
 
-	using MaterialApex			= Material<_I<0, 0, 0, 0>, Args, Apex>;
+	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
 
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -238,40 +233,39 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TPayload,
+template <typename TConfig,
 		  typename TApex>
-class _RW final
-	: public _R<TContext, TConfig, TPayload, TApex>
+class RW_ final
+	: public _R<TConfig, TApex>
 {
 public:
-	using _R<TContext, TConfig, TPayload, TApex>::_R;
+	using _R<TConfig, TApex>::_R;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TConfig,
-		  typename TPayload,
+template <typename TU,
+		  typename TP,
+		  LongIndex NS,
+		  LongIndex NT,
 		  typename TApex>
-class _RW<EmptyContext, TConfig, TPayload, TApex> final
-	: public _R<EmptyContext, TConfig, TPayload, TApex>
+class RW_<::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>, TApex> final
+	: public _R<::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>, TApex>
 	, EmptyContext
 {
-	using Config				 = TConfig;
-	using Utility				 = typename Config::Utility;
-	using Logger				 = typename Config::Logger;
+	using Config_	= ::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>;
+	using Logger	= typename Config_::Logger;
 
-	using R = _R<EmptyContext, TConfig, TPayload, TApex>;
+	using R			= _R<Config_, TApex>;
 
 public:
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	HFSM_INLINE _RW(Logger* const logger = nullptr)
+	HFSM_INLINE RW_(Logger* const logger = nullptr)
 		: R{static_cast<EmptyContext&>(*this), logger}
 	{}
 #else
-	HFSM_INLINE _RW()
+	HFSM_INLINE RW_()
 		: R{static_cast<EmptyContext&>(*this)}
 	{}
 #endif

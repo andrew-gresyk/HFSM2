@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TPL, typename TA>
-_R<TC, TG, TPL, TA>::_R(Context& context
-						HFSM_IF_LOGGER(, Logger* const logger))
+template <typename TG, typename TA>
+_R<TG, TA>::_R(Context& context
+			   HFSM_IF_LOGGER(, Logger* const logger))
 	: _context{context}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
@@ -18,8 +18,8 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
-_R<TC, TG, TPL, TA>::~_R() {
+template <typename TG, typename TA>
+_R<TG, TA>::~_R() {
 	PlanControl control{_context,
 						_stateRegistry,
 						_planData,
@@ -31,9 +31,9 @@ _R<TC, TG, TPL, TA>::~_R() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::update() {
+_R<TG, TA>::update() {
 	FullControl control(_context,
 						_stateRegistry,
 						_planData,
@@ -51,10 +51,10 @@ _R<TC, TG, TPL, TA>::update() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 template <typename TEvent>
 void
-_R<TC, TG, TPL, TA>::react(const TEvent& event) {
+_R<TG, TA>::react(const TEvent& event) {
 	FullControl control(_context,
 						_stateRegistry,
 						_planData,
@@ -72,9 +72,9 @@ _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
+_R<TG, TA>::changeTo(const StateID stateId) {
 	const Request request{Request::Type::CHANGE, stateId};
 	_requests << request;
 
@@ -83,10 +83,10 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
-							  const Payload& payload)
+_R<TG, TA>::changeTo(const StateID stateId,
+					 const Payload& payload)
 {
 	const Request request{Request::Type::CHANGE, stateId, payload};
 	_requests << request;
@@ -96,9 +96,9 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::restart(const StateID stateId) {
+_R<TG, TA>::restart(const StateID stateId) {
 	const Request request{Request::Type::RESTART, stateId};
 	_requests << request;
 
@@ -107,10 +107,10 @@ _R<TC, TG, TPL, TA>::restart(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::restart(const StateID stateId,
-							 const Payload& payload)
+_R<TG, TA>::restart(const StateID stateId,
+					const Payload& payload)
 {
 	const Request request{Request::Type::RESTART, stateId, payload};
 	_requests << request;
@@ -120,9 +120,9 @@ _R<TC, TG, TPL, TA>::restart(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::resume(const StateID stateId) {
+_R<TG, TA>::resume(const StateID stateId) {
 	const Request request{Request::Type::RESUME, stateId};
 	_requests << request;
 
@@ -131,10 +131,10 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::resume(const StateID stateId,
-							const Payload& payload)
+_R<TG, TA>::resume(const StateID stateId,
+				   const Payload& payload)
 {
 	const Request request{Request::Type::RESUME, stateId, payload};
 	_requests << request;
@@ -144,9 +144,9 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::utilize(const StateID stateId) {
+_R<TG, TA>::utilize(const StateID stateId) {
 	const Request request{Request::Type::UTILIZE, stateId};
 	_requests << request;
 
@@ -155,10 +155,10 @@ _R<TC, TG, TPL, TA>::utilize(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::utilize(const StateID stateId,
-							 const Payload& payload)
+_R<TG, TA>::utilize(const StateID stateId,
+					const Payload& payload)
 {
 	const Request request{Request::Type::UTILIZE, stateId, payload};
 	_requests << request;
@@ -168,9 +168,9 @@ _R<TC, TG, TPL, TA>::utilize(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
+_R<TG, TA>::schedule(const StateID stateId) {
 	const Request request{Request::Type::SCHEDULE, stateId};
 	_requests << request;
 
@@ -179,10 +179,10 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::schedule(const StateID stateId,
-							  const Payload& payload)
+_R<TG, TA>::schedule(const StateID stateId,
+					 const Payload& payload)
 {
 	const Request request{Request::Type::SCHEDULE, stateId, payload};
 	_requests << request;
@@ -192,9 +192,9 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
+_R<TG, TA>::resetStateData(const StateID stateId) {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
@@ -203,10 +203,10 @@ _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
-								  const Payload& payload)
+_R<TG, TA>::setStateData(const StateID stateId,
+						 const Payload& payload)
 {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
@@ -218,9 +218,9 @@ _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 bool
-_R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
+_R<TG, TA>::isStateDataSet(const StateID stateId) const {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	return stateId < Payloads::CAPACITY ?
@@ -229,9 +229,9 @@ _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
-const TPL*
-_R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
+template <typename TG, typename TA>
+const typename _R<TG, TA>::Payload*
+_R<TG, TA>::getStateData(const StateID stateId) const {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	return stateId < Payloads::CAPACITY && _payloadsSet.get(stateId) ?
@@ -240,9 +240,9 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::initialEnter() {
+_R<TG, TA>::initialEnter() {
 	Control control(_context,
 					_stateRegistry,
 					_planData,
@@ -259,7 +259,7 @@ _R<TC, TG, TPL, TA>::initialEnter() {
 		_stateRegistry.requested = undoRequested;
 
 	for (LongIndex i = 0;
-		 i < MAX_SUBSTITUTIONS && _requests.count();
+		 i < SUBSTITUTION_LIMIT && _requests.count();
 		 ++i)
 	{
 		undoRequested = _stateRegistry.requested;
@@ -293,9 +293,9 @@ _R<TC, TG, TPL, TA>::initialEnter() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::processTransitions() {
+_R<TG, TA>::processTransitions() {
 	HFSM_ASSERT(_requests.count());
 
 	HFSM_IF_STRUCTURE(_lastTransitions.clear());
@@ -309,7 +309,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 					HFSM_LOGGER_OR(_logger, nullptr));
 
 	for (LongIndex i = 0;
-		i < MAX_SUBSTITUTIONS && _requests.count();
+		i < SUBSTITUTION_LIMIT && _requests.count();
 		++i)
 	{
 		undoRequested = _stateRegistry.requested;
@@ -341,9 +341,9 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 bool
-_R<TC, TG, TPL, TA>::applyRequests(Control& control) {
+_R<TG, TA>::applyRequests(Control& control) {
 	bool changesMade = false;
 
 	for (const Request& request : _requests) {
@@ -376,9 +376,9 @@ _R<TC, TG, TPL, TA>::applyRequests(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 bool
-_R<TC, TG, TPL, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
+_R<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 	GuardControl guardControl(_context,
 							  _stateRegistry,
 							  _planData,
@@ -396,9 +396,9 @@ _R<TC, TG, TPL, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 bool
-_R<TC, TG, TPL, TA>::cancelledByGuards(const Requests& pendingRequests) {
+_R<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
 	GuardControl guardControl(_context,
 							  _stateRegistry,
 							  _planData,
@@ -422,9 +422,9 @@ _R<TC, TG, TPL, TA>::cancelledByGuards(const Requests& pendingRequests) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::getStateNames() {
+_R<TG, TA>::getStateNames() {
 	_stateInfos.clear();
 	_apex.deepGetNames((LongIndex) -1, StructureStateInfo::COMPOSITE, 0, _stateInfos);
 
@@ -500,9 +500,9 @@ _R<TC, TG, TPL, TA>::getStateNames() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::udpateActivity() {
+_R<TG, TA>::udpateActivity() {
 	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s)
 		if (_stateInfos[s].name[0] != L'\0') {
 			_structure[i].isActive = isActive(s);
@@ -527,9 +527,9 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::recordRequestsAs(const Method method) {
+_R<TG, TA>::recordRequestsAs(const Method method) {
 	for (const auto& request : _requests)
 		_lastTransitions << TransitionInfo(request, method);
 }

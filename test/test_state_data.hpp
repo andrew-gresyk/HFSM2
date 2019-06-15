@@ -4,9 +4,7 @@ namespace test_state_data {
 
 //------------------------------------------------------------------------------
 
-struct Context {};
-
-using M = hfsm2::MachineT<Context, bool>;
+using M = hfsm2::MachineT<hfsm2::Config::PayloadT<bool>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

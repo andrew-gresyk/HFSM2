@@ -59,7 +59,6 @@
 #include "detail/shared/array.hpp"
 #include "detail/shared/bit_array.hpp"
 #include "detail/shared/list.hpp"
-#include "detail/shared/object_pool.hpp"
 #include "detail/shared/type_list.hpp"
 
 #include "detail/debug/shared.hpp"
@@ -149,15 +148,36 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-template <typename TUtility = float,
-		  LongIndex NMaxPlanTasks = INVALID_LONG_INDEX,
-		  LongIndex NMaxSubstitutions = 4>
-struct Config {
-	using Utility = TUtility;
+template <typename TC,
+		  typename TU,
+		  typename TP,
+		  LongIndex NS,
+		  LongIndex NT>
+struct ConfigT {
+	using Context = TC;
+
+	using Utility = TU;
 	using Logger  = LoggerInterfaceT<Utility>;
 
-	static constexpr LongIndex MAX_PLAN_TASKS	 = NMaxPlanTasks;
-	static constexpr LongIndex MAX_SUBSTITUTIONS = NMaxSubstitutions;
+	using Payload = TP;
+
+	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
+	static constexpr LongIndex TASK_CAPACITY	  = NT;
+
+	template <typename T>
+	using ContextT			 = ConfigT< T, TU, TP, NS, NT>;
+
+	template <typename T>
+	using UtilityT			 = ConfigT<TC,  T, TP, NS, NT>;
+
+	template <typename T>
+	using PayloadT			 = ConfigT<TC, TU,  T, NS, NT>;
+
+	template <LongIndex N>
+	using SubstitutionLimitN = ConfigT<TC, TU, TP,  N, NS>;
+
+	template <LongIndex N>
+	using TaskCapacityN		 = ConfigT<TC, TU, TP, NT,  N>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -175,86 +195,84 @@ struct Config {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
-namespace detail {
-
 //------------------------------------------------------------------------------
 
 struct EmptyContext {};
 struct EmptyPayload {};
 
+using Config = ConfigT<EmptyContext, float, EmptyPayload, INVALID_LONG_INDEX, 4>;
+
+namespace detail {
+
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TConfig = Config<>,
-		  typename TPayload = EmptyPayload>
-struct _M {
-	using Context = TContext;
-	using Config  = TConfig;
-	using Payload = TPayload;
+template <typename TConfig>
+struct M_ {
+	using Config_ = TConfig;
 
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Composite			 = _CF<Strategy::Composite,	 THead,	TSubStates...>;
+	using Composite			 = CI_<Strategy::Composite,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using CompositePeers	 = _CF<Strategy::Composite,	 void,	TSubStates...>;
+	using CompositePeers	 = CI_<Strategy::Composite,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Resumable			  = _CF<Strategy::Resumable,	 THead,	TSubStates...>;
+	using Resumable			  = CI_<Strategy::Resumable,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeers	  = _CF<Strategy::Resumable,	 void,	TSubStates...>;
+	using ResumablePeers	  = CI_<Strategy::Resumable,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Utilitarian		  = _CF<Strategy::Utilitarian, THead,	TSubStates...>;
+	using Utilitarian		  = CI_<Strategy::Utilitarian, THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using UtilitarianPeers	  = _CF<Strategy::Utilitarian, void,	TSubStates...>;
+	using UtilitarianPeers	  = CI_<Strategy::Utilitarian, void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Orthogonal		  = _OF<THead, TSubStates...>;
+	using Orthogonal		  = OI_<THead, TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeers	  = _OF<void,  TSubStates...>;
+	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
 
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Root				  = _RF<Context, Config, Payload, Composite  <THead, TSubStates...>>;
+	using Root				  = RF_<Config_, Composite  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using PeerRoot			  = _RF<Context, Config, Payload, CompositePeers  <  TSubStates...>>;
+	using PeerRoot			  = RF_<Config_, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		  = _RF<Context, Config, Payload, Resumable  <THead, TSubStates...>>;
+	using ResumableRoot		  = RF_<Config_, Resumable  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	  = _RF<Context, Config, Payload, ResumablePeers  <  TSubStates...>>;
+	using ResumablePeerRoot	  = RF_<Config_, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using UtilitarianRoot	  = _RF<Context, Config, Payload, Utilitarian<THead, TSubStates...>>;
+	using UtilitarianRoot	  = RF_<Config_, Utilitarian<THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using UtilitarianPeerRoot = _RF<Context, Config, Payload, UtilitarianPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = RF_<Config_, UtilitarianPeers<  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	  = _RF<Context, Config, Payload, Orthogonal <THead, TSubStates...>>;
+	using OrthogonalRoot	  = RF_<Config_, Orthogonal <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot  = _RF<Context, Config, Payload, OrthogonalPeers <  TSubStates...>>;
+	using OrthogonalPeerRoot  = RF_<Config_, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -263,30 +281,10 @@ struct _M {
 
 }
 
-using Machine = detail::_M<detail::EmptyContext>;
+using Machine = detail::M_<Config>;
 
-template <typename...>
-struct MachineT;
-
-template <typename TContext>
-struct MachineT<TContext>
-	: detail::_M<TContext>
-{};
-
-template <typename TContext, typename TUtility, LongIndex... NConstants>
-struct MachineT<TContext, Config<TUtility, NConstants...>>
-	: detail::_M<TContext, Config<TUtility, NConstants...>, detail::EmptyPayload>
-{};
-
-template <typename TContext, typename TPayload>
-struct MachineT<TContext, TPayload>
-	: detail::_M<TContext, Config<>, TPayload>
-{};
-
-template <typename TContext, typename TUtility, LongIndex... NConstants, typename TPayload>
-struct MachineT<TContext, Config<TUtility, NConstants...>, TPayload>
-	: detail::_M<TContext, Config<TUtility, NConstants...>, TPayload>
-{};
+template <typename TConfig>
+using MachineT = detail::M_<TConfig>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

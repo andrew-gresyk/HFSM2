@@ -46,11 +46,8 @@
 
 //------------------------------------------------------------------------------
 
-// data shared between FSM states and outside code
-struct Context {};
-
 // convenience typedef
-using M = hfsm2::MachineT<Context>;
+using M = hfsm2::Machine;
 
 #define S(s) struct s
 
@@ -141,16 +138,13 @@ struct To
 
 int main() {
 	{
-		// shared data storage instance
-		Context context;
-
 		// logger
 		Logger logger;
 
 		std::cout << "\n---------- ctor: ---------\n\n";
 
 		// state machine instance - all initial states are activated
-		FSM::Instance machine(context, &logger);
+		FSM::Instance machine{&logger};
 
 		// output:
 		//	enter()

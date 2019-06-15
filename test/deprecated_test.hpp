@@ -49,6 +49,8 @@ Status status(Event::Enum event) {
 struct Context {
 	using History = std::vector<Status>;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	template <unsigned NCapacity>
 	void assertHistory(const Status (&reference)[NCapacity]) {
 		const auto historySize = (unsigned) history.size();
@@ -66,11 +68,14 @@ struct Context {
 		history.clear();
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	float deltaTime = 0.0f;
 
 	History history;
 };
-using M = hfsm2::MachineT<Context>;
+
+using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
 
 //------------------------------------------------------------------------------
 
@@ -208,36 +213,36 @@ using State = FSM::StateT<EntryGuardTracked, Timed, HistoryBase<T>>;
 
 template <typename T>
 void
-changeTo(FSM::FullControl& control, Context::History& history) {
+changeTo(FSM::FullControl& control) {
 	control.template changeTo<T>();
-	history.push_back(Status{ typeid(T), Event::CHANGE });
+	control._().history.push_back(Status{ typeid(T), Event::CHANGE });
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 void
-restart(FSM::FullControl& control, Context::History& history) {
+restart(FSM::FullControl& control) {
 	control.template restart<T>();
-	history.push_back(Status{ typeid(T), Event::RESTART });
+	control._().history.push_back(Status{ typeid(T), Event::RESTART });
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 void
-resume(FSM::FullControl& control, Context::History& history) {
+resume(FSM::FullControl& control) {
 	control.template resume<T>();
-	history.push_back(Status{ typeid(T), Event::RESUME });
+	control._().history.push_back(Status{ typeid(T), Event::RESUME });
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
 void
-schedule(FSM::FullControl& control, Context::History& history) {
+schedule(FSM::FullControl& control) {
 	control.template schedule<T>();
-	history.push_back(Status{ typeid(T), Event::SCHEDULE });
+	control._().history.push_back(Status{ typeid(T), Event::SCHEDULE });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -246,7 +251,9 @@ template <typename T>
 struct Reacting
 	: State<T>
 {
-	void react(const Action&, FSM::FullControl& control) {
+	using FullControl = typename State<T>::FullControl;
+
+	void react(const Action&, FullControl& control) {
 		control._().history.push_back(Status{ typeid(T), Event::REACT });
 	}
 };
@@ -261,7 +268,7 @@ struct A_1
 	: State<A_1>
 {
 	void update(FullControl& control) {
-		changeTo<A_2>(control, control._().history);
+		changeTo<A_2>(control);
 	}
 };
 
@@ -273,11 +280,11 @@ struct A_2
 	void update(FullControl& control) {
 		switch (entryCount()) {
 		case 1:
-			changeTo<B_2_2>(control, control._().history);
+			changeTo<B_2_2>(control);
 			break;
 
 		case 2:
-			resume<B>(control, control._().history);
+			resume<B>(control);
 			break;
 		}
 	}
@@ -305,7 +312,7 @@ struct B_2_1
 {
 	void entryGuard(GuardControl& control) {
 		control.cancelPendingTransitions();
-		resume<B_2_2>(control, control._().history);
+		resume<B_2_2>(control);
 	}
 };
 
@@ -317,23 +324,23 @@ struct B_2_2
 	void entryGuard(GuardControl& control) {
 		if (entryCount() == 3) {
 			control.cancelPendingTransitions();
-			resume<A>(control, control._().history);
+			resume<A>(control);
 		}
 	}
 
 	void update(FullControl& control) {
 		switch (totalUpdateCount()) {
 		case 1:
-			resume<A>(control, control._().history);
+			resume<A>(control);
 			break;
 
 		case 2:
-			changeTo<B>(control, control._().history);
+			changeTo<B>(control);
 			break;
 
 		case 3:
-			schedule<A_2_2>(control, control._().history);
-			resume<A>(control, control._().history);
+			schedule<A_2_2>(control);
+			resume<A>(control);
 			break;
 		}
 	}

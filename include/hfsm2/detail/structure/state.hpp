@@ -6,7 +6,7 @@ namespace detail {
 template <typename TIndices,
 		  typename TArgs,
 		  typename THead>
-struct _S {
+struct S_ {
 	using Indices		= TIndices;
 	static constexpr StateID	STATE_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
@@ -122,8 +122,8 @@ struct _S {
 #endif
 
 	// if you see..
-	// VS	 - error C2079: 'hfsm2::detail::_S<BLAH>::_head' uses undefined struct 'Blah'
-	// Clang - error : field has incomplete type 'hfsm2::detail::_S<BLAH>::Head' (aka 'Blah')
+	// VS	 - error C2079: 'hfsm2::detail::S_<BLAH>::_head' uses undefined struct 'Blah'
+	// Clang - error : field has incomplete type 'hfsm2::detail::S_<BLAH>::Head' (aka 'Blah')
 	//
 	// .. add definition for the state 'Blah'
 	Head _head;

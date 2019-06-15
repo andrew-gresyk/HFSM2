@@ -46,7 +46,7 @@ struct Context {
 };
 
 // convenience typedef
-using M = hfsm2::MachineT<Context>;
+using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
 
 #define S(s) struct s
 
@@ -170,7 +170,7 @@ main() {
 	// shared data storage instance
 	Context context;
 
-	FSM::Instance machine(context);
+	FSM::Instance machine{context};
 
 	while (machine.isActive<Off>() == false)
 		machine.update();

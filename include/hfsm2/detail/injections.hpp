@@ -8,23 +8,21 @@ namespace detail {
 template <typename TArgs>
 class InjectionT {
 	template <typename...>
-	friend struct _B;
+	friend struct B_;
 
 protected:
-	using Args				= TArgs;
-	using Context			= typename Args::Context;
-	using Utility			= typename Args::Utility;
-	using StateList			= typename Args::StateList;
-	using RegionList		= typename Args::RegionList;
+	using Context		= typename TArgs::Context;
+	using Utility		= typename TArgs::Utility;
+	using StateList		= typename TArgs::StateList;
+	using RegionList	= typename TArgs::RegionList;
 
-	using Control			= ControlT<Args>;
+	using Control		= ControlT<TArgs>;
 
-	using PlanControl		= PlanControlT<Args>;
-	using Plan				= PlanT<Args>;
+	using PlanControl	= PlanControlT<TArgs>;
+	using Plan			= PlanT<TArgs>;
 
-	using FullControl		= FullControlT <Args>;
-	using GuardControl		= GuardControlT<Args>;
-
+	using FullControl	= FullControlT <TArgs>;
+	using GuardControl	= GuardControlT<TArgs>;
 
 public:
 	HFSM_INLINE void preEntryGuard(Context&)									{}
@@ -46,88 +44,82 @@ public:
 //------------------------------------------------------------------------------
 
 template <typename...>
-struct _B;
+struct B_;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TFirst, typename... TRest>
-struct _B<TFirst, TRest...>
+struct B_<TFirst, TRest...>
 	: TFirst
-	, _B<TRest...>
+	, B_<TRest...>
 {
-	using First	  = TFirst;
 
-	HFSM_INLINE void widePreEntryGuard(typename First::Context& context);
+	HFSM_INLINE void widePreEntryGuard(typename TFirst::Context& context);
 
-	HFSM_INLINE void widePreEnter	  (typename First::Context& context);
-	HFSM_INLINE void widePreReenter	  (typename First::Context& context);
+	HFSM_INLINE void widePreEnter	  (typename TFirst::Context& context);
+	HFSM_INLINE void widePreReenter	  (typename TFirst::Context& context);
 
-	HFSM_INLINE void widePreUpdate	  (typename First::Context& context);
+	HFSM_INLINE void widePreUpdate	  (typename TFirst::Context& context);
 
 	template <typename TEvent>
 	HFSM_INLINE void widePreReact	  (const TEvent& event,
-									   typename First::Context& context);
+									   typename TFirst::Context& context);
 
-	HFSM_INLINE void widePreExitGuard (typename First::Context& context);
+	HFSM_INLINE void widePreExitGuard (typename TFirst::Context& context);
 
-	HFSM_INLINE void widePostExit	  (typename First::Context& context);
+	HFSM_INLINE void widePostExit	  (typename TFirst::Context& context);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TFirst>
-struct _B<TFirst>
+struct B_<TFirst>
 	: TFirst
 {
-	using First				= TFirst;
-	using Utility			= typename First::Utility;
-	using StateList			= typename First::StateList;
-	using RegionList		= typename First::RegionList;
+	HFSM_INLINE float utility		   (const typename TFirst::Control&)		{ return typename TFirst::Utility{1.0f};	}
 
-	HFSM_INLINE float utility		   (const typename First::Control&)			{ return Utility{1.0f};	}
+	HFSM_INLINE void  entryGuard	   (typename TFirst::GuardControl&)			{}
 
-	HFSM_INLINE void  entryGuard	   (typename First::GuardControl&)			{}
+	HFSM_INLINE void  enter			   (typename TFirst::PlanControl&)			{}
+	HFSM_INLINE void  reenter		   (typename TFirst::PlanControl&)			{}
 
-	HFSM_INLINE void  enter			   (typename First::PlanControl&)			{}
-	HFSM_INLINE void  reenter		   (typename First::PlanControl&)			{}
-
-	HFSM_INLINE void  update		   (typename First::FullControl&)			{}
+	HFSM_INLINE void  update		   (typename TFirst::FullControl&)			{}
 
 	template <typename TEvent>
 	HFSM_INLINE void  react			   (const TEvent&,
-					 				    typename First::FullControl&)			{}
+					 				    typename TFirst::FullControl&)			{}
 
-	HFSM_INLINE void  exitGuard		   (typename First::GuardControl&)			{}
+	HFSM_INLINE void  exitGuard		   (typename TFirst::GuardControl&)			{}
 
-	HFSM_INLINE void  exit			   (typename First::PlanControl&)			{}
+	HFSM_INLINE void  exit			   (typename TFirst::PlanControl&)			{}
 
-	HFSM_INLINE void  planSucceeded	   (typename First::FullControl& control)	{ control.succeed();	}
-	HFSM_INLINE void  planFailed	   (typename First::FullControl& control)	{ control.fail();		}
+	HFSM_INLINE void  planSucceeded	   (typename TFirst::FullControl& control)	{ control.succeed();	}
+	HFSM_INLINE void  planFailed	   (typename TFirst::FullControl& control)	{ control.fail();		}
 
-	HFSM_INLINE void  widePreEntryGuard(typename First::Context& context);
+	HFSM_INLINE void  widePreEntryGuard(typename TFirst::Context& context);
 
-	HFSM_INLINE void  widePreEnter	   (typename First::Context& context);
-	HFSM_INLINE void  widePreReenter   (typename First::Context& context);
+	HFSM_INLINE void  widePreEnter	   (typename TFirst::Context& context);
+	HFSM_INLINE void  widePreReenter   (typename TFirst::Context& context);
 
-	HFSM_INLINE void  widePreUpdate	   (typename First::Context& context);
+	HFSM_INLINE void  widePreUpdate	   (typename TFirst::Context& context);
 
 	template <typename TEvent>
 	HFSM_INLINE void  widePreReact	   (const TEvent& event,
-					 				    typename First::Context& context);
+					 				    typename TFirst::Context& context);
 
-	HFSM_INLINE void  widePreExitGuard (typename First::Context& context);
+	HFSM_INLINE void  widePreExitGuard (typename TFirst::Context& context);
 
-	HFSM_INLINE void  widePostExit	   (typename First::Context& context);
-
-	template <typename T>
-	static constexpr StateID  stateId()			{ return			StateList ::template index<T>();	}
+	HFSM_INLINE void  widePostExit	   (typename TFirst::Context& context);
 
 	template <typename T>
-	static constexpr RegionID regionId()		{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr StateID  stateId()			{ return			typename TFirst::StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()		{ return (RegionID) typename TFirst::RegionList::template index<T>();	}
 };
 
 template <typename TArgs>
-using Empty = _B<InjectionT<TArgs>>;
+using Empty = B_<InjectionT<TArgs>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

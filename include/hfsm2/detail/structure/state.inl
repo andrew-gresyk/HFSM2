@@ -41,7 +41,7 @@ struct RegisterT<NS, TA, Empty<TA>> {
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
+S_<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 							 const Parent parent)
 {
 	using Register = RegisterT<STATE_ID, TA, Head>;
@@ -52,7 +52,7 @@ _S<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, typename TH>
 bool
-_S<TN, TA, TH>::deepEntryGuard(GuardControl& control,
+S_<TN, TA, TH>::deepEntryGuard(GuardControl& control,
 							   const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::entryGuard, Method::ENTRY_GUARD);
@@ -71,7 +71,7 @@ _S<TN, TA, TH>::deepEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepEnter(PlanControl& control,
+S_<TN, TA, TH>::deepEnter(PlanControl& control,
 						  const ShortIndex /*prong*/)
 {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
@@ -89,7 +89,7 @@ _S<TN, TA, TH>::deepEnter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepReenter(PlanControl& control,
+S_<TN, TA, TH>::deepReenter(PlanControl& control,
 							const ShortIndex /*prong*/)
 {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
@@ -107,7 +107,7 @@ _S<TN, TA, TH>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH>
 Status
-_S<TN, TA, TH>::deepUpdate(FullControl& control,
+S_<TN, TA, TH>::deepUpdate(FullControl& control,
 						   const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::update, Method::UPDATE);
@@ -125,7 +125,7 @@ _S<TN, TA, TH>::deepUpdate(FullControl& control,
 template <typename TN, typename TA, typename TH>
 template <typename TEvent>
 Status
-_S<TN, TA, TH>::deepReact(FullControl& control,
+S_<TN, TA, TH>::deepReact(FullControl& control,
 						  const TEvent& event,
 						  const ShortIndex /*prong*/)
 {
@@ -144,7 +144,7 @@ _S<TN, TA, TH>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, typename TH>
 bool
-_S<TN, TA, TH>::deepExitGuard(GuardControl& control,
+S_<TN, TA, TH>::deepExitGuard(GuardControl& control,
 							  const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::exitGuard, Method::EXIT_GUARD);
@@ -163,7 +163,7 @@ _S<TN, TA, TH>::deepExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepExit(PlanControl& control,
+S_<TN, TA, TH>::deepExit(PlanControl& control,
 						 const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
@@ -186,7 +186,7 @@ _S<TN, TA, TH>::deepExit(PlanControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
+S_<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::planSucceeded, Method::PLAN_SUCCEEDED);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -198,7 +198,7 @@ _S<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
+S_<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::planFailed, Method::PLAN_FAILED);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -210,7 +210,7 @@ _S<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
 
 template <typename TN, typename TA, typename TH>
 typename TA::Utility
-_S<TN, TA, TH>::wrapUtility(Control& control) {
+S_<TN, TA, TH>::wrapUtility(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
 
 	return _head.utility(static_cast<const Control&>(control));
@@ -220,7 +220,7 @@ _S<TN, TA, TH>::wrapUtility(Control& control) {
 
 template <typename TN, typename TA, typename TH>
 typename TA::UP
-_S<TN, TA, TH>::deepReportChange(Control& control,
+S_<TN, TA, TH>::deepReportChange(Control& control,
 								 const ShortIndex)
 {
 	const Utility utility = wrapUtility(control);
@@ -234,7 +234,7 @@ _S<TN, TA, TH>::deepReportChange(Control& control,
 
 template <typename TN, typename TA, typename TH>
 typename TA::UP
-_S<TN, TA, TH>::deepReportUtilize(Control& control) {
+S_<TN, TA, TH>::deepReportUtilize(Control& control) {
 	const Utility utility = wrapUtility(control);
 
 	const Parent parent = stateParent(control);
@@ -248,7 +248,7 @@ _S<TN, TA, TH>::deepReportUtilize(Control& control) {
 
 template <typename TN, typename TA, typename TH>
 const char*
-_S<TN, TA, TH>::name() {
+S_<TN, TA, TH>::name() {
 	if (isBare())
 		return "";
 	else {
@@ -284,7 +284,7 @@ _S<TN, TA, TH>::name() {
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepGetNames(const LongIndex parent,
+S_<TN, TA, TH>::deepGetNames(const LongIndex parent,
 							  const RegionType region,
 							  const ShortIndex depth,
 							  StructureStateInfos& _stateInfos) const

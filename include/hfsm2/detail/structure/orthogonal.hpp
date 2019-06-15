@@ -7,7 +7,7 @@ template <typename TIndices,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
-struct _O final {
+struct O_ final {
 	using Indices		= TIndices;
 	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -26,10 +26,10 @@ struct _O final {
 
 	using Head			= THead;
 
-	using Forward		= _OF<Head, TSubStates...>;
-	static constexpr ShortIndex WIDTH		= Forward::WIDTH;
-	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
-	static constexpr ShortIndex ORTHO_UNITS	= Forward::ORTHO_UNITS;
+	using Info			= OI_<Head, TSubStates...>;
+	static constexpr ShortIndex WIDTH		= Info::WIDTH;
+	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
+	static constexpr ShortIndex ORTHO_UNITS	= Info::ORTHO_UNITS;
 
 	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
@@ -51,8 +51,8 @@ struct _O final {
 
 	using GuardControl	= GuardControlT<Args>;
 
-	using HeadState		= _S<Indices, Args, Head>;
-	using SubStates		= _OS<_I<HEAD_ID + 1,
+	using HeadState		= S_<Indices, Args, Head>;
+	using SubStates		= OS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX,
 								 ORTHO_INDEX + 1,
 								 ORTHO_UNIT + ORTHO_UNITS>,

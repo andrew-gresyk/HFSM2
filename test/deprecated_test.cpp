@@ -16,7 +16,7 @@ TEST_CASE("FSM.Deprecated", "[machine]") {
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		FSM::Instance machine(_);
+		FSM::Instance machine{_};
 
 		const Status created[] = {
 			status<A>(Event::ENTRY_GUARD),

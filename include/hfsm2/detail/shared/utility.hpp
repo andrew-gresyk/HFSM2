@@ -8,10 +8,8 @@
 
 #if defined _DEBUG && defined _MSC_VER
 	#define HFSM_BREAK()			__debugbreak()
-	#define HFSM_CHECKED(x)			(!!(x) || (HFSM_BREAK(), 0))
 #else
 	#define HFSM_BREAK()			((void) 0)
-	#define HFSM_CHECKED(x)			x
 #endif
 
 #ifdef _DEBUG
@@ -26,10 +24,12 @@
 
 #ifdef HFSM_ENABLE_ASSERT
 	#define HFSM_IF_ASSERT(...)		__VA_ARGS__
+	#define HFSM_CHECKED(x)			(!!(x) || (HFSM_BREAK(), 0))
 	#define HFSM_ASSERT(x)			(!!(x) || (HFSM_BREAK(), 0))
 	#define HFSM_ASSERT_OR(y, n)	y
 #else
 	#define HFSM_IF_ASSERT(...)
+	#define HFSM_CHECKED(x)			x
 	#define HFSM_ASSERT(x)			((void) 0)
 	#define HFSM_ASSERT_OR(y, n)	n
 #endif

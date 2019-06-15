@@ -23,7 +23,7 @@ namespace {
 TEST_CASE("FSM.Entry Guard", "[machine]") {
 	Logger logger;
 
-	FSM::Instance machine(&logger);
+	FSM::Instance machine{&logger};
 	{
 		const Events reference = {
 			{ FSM::stateId<Apex>(),		Event::ENTRY_GUARD },

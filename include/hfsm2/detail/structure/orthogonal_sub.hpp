@@ -4,7 +4,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename, typename, ShortIndex, typename...>
-struct _OS;
+struct OS_;
 
 //------------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@ template <typename TIndices,
 		  ShortIndex NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
-struct _OS<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
+struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -42,24 +42,24 @@ struct _OS<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		= Material<_I<INITIAL_ID,
+	using Initial		= Material<I_<INITIAL_ID,
 									  COMPO_INDEX,
 									  ORTHO_INDEX,
 									  ORTHO_UNIT>,
 								   Args,
 								   TInitial>;
 
-	using Forwarded		= Wrap<TInitial>;
+	using InitialInfo	= Wrap<TInitial>;
 
-	using Remaining		= _OS<_I<INITIAL_ID  + Forwarded::STATE_COUNT,
-								 COMPO_INDEX + Forwarded::COMPO_REGIONS,
-								 ORTHO_INDEX + Forwarded::ORTHO_REGIONS,
-								 ORTHO_UNIT  + Forwarded::ORTHO_UNITS>,
+	using Remaining		= OS_<I_<INITIAL_ID  + InitialInfo::STATE_COUNT,
+								 COMPO_INDEX + InitialInfo::COMPO_REGIONS,
+								 ORTHO_INDEX + InitialInfo::ORTHO_REGIONS,
+								 ORTHO_UNIT  + InitialInfo::ORTHO_UNITS>,
 							  Args,
 							  PRONG_INDEX + 1,
 							  TRemaining...>;
 
-	using AllForward	= _OSF<TInitial, TRemaining...>;
+	using Info	= OSI_<TInitial, TRemaining...>;
 
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
@@ -124,7 +124,7 @@ template <typename TIndices,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial>
-struct _OS<TIndices, TArgs, NIndex, TInitial> {
+struct OS_<TIndices, TArgs, NIndex, TInitial> {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -153,14 +153,14 @@ struct _OS<TIndices, TArgs, NIndex, TInitial> {
 	using FullControl	= FullControlT	<Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		= Material<_I<INITIAL_ID,
+	using Initial		= Material<I_<INITIAL_ID,
 									  COMPO_INDEX,
 									  ORTHO_INDEX,
 									  ORTHO_UNIT>,
 								   Args,
 								   TInitial>;
 
-	using AllForward	= _OSF<TInitial>;
+	using Info	= OSI_<TInitial>;
 
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 

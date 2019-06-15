@@ -24,7 +24,6 @@
     <ClCompile Include="..\..\test\shared.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_list.cpp" />
-    <ClCompile Include="..\..\test\shared\test_object_pool.cpp" />
     <ClCompile Include="..\..\test\test_composite_bst.cpp" />
     <ClCompile Include="..\..\test\test_debug.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
@@ -50,7 +49,6 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\object_pool.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp" />
@@ -86,7 +84,6 @@
     <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\iterator.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\list.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\object_pool.inl" />
     <None Include="..\..\include\hfsm2\detail\state_registry.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite_sub.inl" />

@@ -5,36 +5,36 @@ namespace detail {
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreEntryGuard(typename TF::Context& context) {
+B_<TF, TR...>::widePreEntryGuard(typename TF::Context& context) {
 	TF::preEntryGuard(context);
-	_B<TR...>::widePreEntryGuard(context);
+	B_<TR...>::widePreEntryGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreEnter(typename TF::Context& context) {
+B_<TF, TR...>::widePreEnter(typename TF::Context& context) {
 	TF::preEnter(context);
-	_B<TR...>::widePreEnter(context);
+	B_<TR...>::widePreEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreReenter(typename TF::Context& context) {
+B_<TF, TR...>::widePreReenter(typename TF::Context& context) {
 	TF::preReenter(context);
-	_B<TR...>::widePreReenter(context);
+	B_<TR...>::widePreReenter(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreUpdate(typename TF::Context& context) {
+B_<TF, TR...>::widePreUpdate(typename TF::Context& context) {
 	TF::preUpdate(context);
-	_B<TR...>::widePreUpdate(context);
+	B_<TR...>::widePreUpdate(context);
 }
 
 //------------------------------------------------------------------------------
@@ -42,36 +42,36 @@ _B<TF, TR...>::widePreUpdate(typename TF::Context& context) {
 template <typename TF, typename... TR>
 template <typename TEvent>
 void
-_B<TF, TR...>::widePreReact(const TEvent& event,
+B_<TF, TR...>::widePreReact(const TEvent& event,
 							typename TF::Context& context)
 {
 	TF::preReact(event, context);
-	_B<TR...>::widePreReact(event, context);
+	B_<TR...>::widePreReact(event, context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreExitGuard(typename TF::Context& context) {
+B_<TF, TR...>::widePreExitGuard(typename TF::Context& context) {
 	TF::preExitGuard(context);
-	_B<TR...>::widePreExitGuard(context);
+	B_<TR...>::widePreExitGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePostExit(typename TF::Context& context) {
+B_<TF, TR...>::widePostExit(typename TF::Context& context) {
 	TF::postExit(context);
-	_B<TR...>::widePostExit(context);
+	B_<TR...>::widePostExit(context);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TF>
 void
-_B<TF>::widePreEntryGuard(typename TF::Context& context) {
+B_<TF>::widePreEntryGuard(typename TF::Context& context) {
 	TF::preEntryGuard(context);
 }
 
@@ -79,7 +79,7 @@ _B<TF>::widePreEntryGuard(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePreEnter(typename TF::Context& context) {
+B_<TF>::widePreEnter(typename TF::Context& context) {
 	TF::preEnter(context);
 }
 
@@ -87,7 +87,7 @@ _B<TF>::widePreEnter(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePreReenter(typename TF::Context& context) {
+B_<TF>::widePreReenter(typename TF::Context& context) {
 	TF::preReenter(context);
 }
 
@@ -95,7 +95,7 @@ _B<TF>::widePreReenter(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePreUpdate(typename TF::Context& context) {
+B_<TF>::widePreUpdate(typename TF::Context& context) {
 	TF::preUpdate(context);
 }
 
@@ -104,7 +104,7 @@ _B<TF>::widePreUpdate(typename TF::Context& context) {
 template <typename TF>
 template <typename TEvent>
 void
-_B<TF>::widePreReact(const TEvent& event,
+B_<TF>::widePreReact(const TEvent& event,
 					 typename TF::Context& context)
 {
 	TF::preReact(event, context);
@@ -114,7 +114,7 @@ _B<TF>::widePreReact(const TEvent& event,
 
 template <typename TF>
 void
-_B<TF>::widePreExitGuard(typename TF::Context& context) {
+B_<TF>::widePreExitGuard(typename TF::Context& context) {
 	TF::preExitGuard(context);
 }
 
@@ -122,7 +122,7 @@ _B<TF>::widePreExitGuard(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePostExit(typename TF::Context& context) {
+B_<TF>::widePostExit(typename TF::Context& context) {
 	TF::postExit(context);
 }
 

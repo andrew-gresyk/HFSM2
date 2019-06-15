@@ -4,8 +4,7 @@ namespace test_internal_transitions {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using Context = float;
-using M = hfsm2::MachineT<Context>;
+using M = hfsm2::MachineT<hfsm2::Config::ContextT<float>>;
 
 using Action = bool;
 
@@ -62,8 +61,8 @@ class Timed
 	: public FSM::Injection
 {
 public:
-	void preEnter(Context&)							{ _elapsed = 0.0f;			}
-	void preUpdate(Context& _)						{ _elapsed += _;			} //-V669
+	void preEnter(float&)							{ _elapsed = 0.0f;			}
+	void preUpdate(float& _)						{ _elapsed += _;			} //-V669
 
 	float elapsed() const							{ return _elapsed;			}
 
@@ -77,12 +76,12 @@ class Tracked
 	: public FSM::Injection
 {
 public:
-	void preEnter(Context&) {
+	void preEnter(float&) {
 		++_entryCount;
 		_currentUpdateCount = 0;
 	}
 
-	void preUpdate(Context&) {
+	void preUpdate(float&) {
 		++_currentUpdateCount;
 		++_totalUpdateCount;
 	}

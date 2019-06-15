@@ -29,9 +29,7 @@
 
 //------------------------------------------------------------------------------
 
-struct Context {};
-
-using M = hfsm2::MachineT<Context>;
+using M = hfsm2::Machine;
 
 struct PrimaryEvent {};
 struct SecondaryEvent { int payload; };
@@ -154,9 +152,7 @@ struct Target
 
 int
 main() {
-	Context context;
-
-	FSM::Instance machine(context);
+	FSM::Instance machine;
 
 	std::cout << "sending PrimaryEvent:\n";
 	machine.react(PrimaryEvent{});

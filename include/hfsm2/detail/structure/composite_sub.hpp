@@ -8,7 +8,7 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  ShortIndex NIndex,
 		  typename... TStates>
-struct _CS {
+struct CS_ {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -41,7 +41,7 @@ struct _CS {
 	static constexpr ShortIndex L_PRONG = PRONG_INDEX;
 
 	using LStates		= SplitL<TStates...>;
-	using LHalf			= CSubMaterial<_I<INITIAL_ID,
+	using LHalf			= CSubMaterial<I_<INITIAL_ID,
 										  COMPO_INDEX,
 										  ORTHO_INDEX,
 										  ORTHO_UNIT>,
@@ -49,15 +49,15 @@ struct _CS {
 									   STRATEGY,
 									   L_PRONG,
 									   LStates>;
-	using LHalfForward	= typename ForwardT<LHalf>::Type;
+	using LHalfInfo		= typename InfoT<LHalf>::Type;
 
 	static constexpr ShortIndex R_PRONG = PRONG_INDEX + LStates::SIZE;
 
 	using RStates		= SplitR<TStates...>;
-	using RHalf			= CSubMaterial<_I<INITIAL_ID  + LHalfForward::STATE_COUNT,
-										  COMPO_INDEX + LHalfForward::COMPO_REGIONS,
-										  ORTHO_INDEX + LHalfForward::ORTHO_REGIONS,
-										  ORTHO_UNIT  + LHalfForward::ORTHO_UNITS>,
+	using RHalf			= CSubMaterial<I_<INITIAL_ID  + LHalfInfo::STATE_COUNT,
+										  COMPO_INDEX + LHalfInfo::COMPO_REGIONS,
+										  ORTHO_INDEX + LHalfInfo::ORTHO_REGIONS,
+										  ORTHO_UNIT  + LHalfInfo::ORTHO_UNITS>,
 									   Args,
 									   STRATEGY,
 									   R_PRONG,

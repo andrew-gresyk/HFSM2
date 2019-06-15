@@ -51,9 +51,6 @@
     <ClCompile Include="..\..\test\shared\test_list.cpp">
       <Filter>test\shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\shared\test_object_pool.cpp">
-      <Filter>test\shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_self_transitions.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -137,9 +134,6 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp">
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\object_pool.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp">
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
@@ -218,9 +212,6 @@
       <Filter>hfsm\detail\shared</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\shared\list.inl">
-      <Filter>hfsm\detail\shared</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\shared\object_pool.inl">
       <Filter>hfsm\detail\shared</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\structure\composite.inl">

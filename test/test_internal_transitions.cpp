@@ -26,10 +26,10 @@ namespace {
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Internal Transition", "[machine]") {
-	Context _;
+	float _;
 	Logger logger;
 
-	FSM::Instance machine(_, &logger);
+	FSM::Instance machine{_, &logger};
 	{
 		const Events reference = {
 			{ FSM::stateId<A>(),	Event::ENTER },

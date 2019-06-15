@@ -63,10 +63,8 @@
 
 #if defined _DEBUG && defined _MSC_VER
 	#define HFSM_BREAK()			__debugbreak()
-	#define HFSM_CHECKED(x)			(!!(x) || (HFSM_BREAK(), 0))
 #else
 	#define HFSM_BREAK()			((void) 0)
-	#define HFSM_CHECKED(x)			x
 #endif
 
 #ifdef _DEBUG
@@ -81,10 +79,12 @@
 
 #ifdef HFSM_ENABLE_ASSERT
 	#define HFSM_IF_ASSERT(...)		__VA_ARGS__
+	#define HFSM_CHECKED(x)			(!!(x) || (HFSM_BREAK(), 0))
 	#define HFSM_ASSERT(x)			(!!(x) || (HFSM_BREAK(), 0))
 	#define HFSM_ASSERT_OR(y, n)	y
 #else
 	#define HFSM_IF_ASSERT(...)
+	#define HFSM_CHECKED(x)			x
 	#define HFSM_ASSERT(x)			((void) 0)
 	#define HFSM_ASSERT_OR(y, n)	n
 #endif
@@ -1189,151 +1189,8 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TInterface, ShortIndex NItemCapacity, LongIndex NStorageSize>
-class ObjectPool {
-public:
-	using Interface = TInterface;
-
-public:
-	static constexpr ShortIndex ITEM_COUNT	 = NItemCapacity;
-	static constexpr LongIndex  STORAGE_SIZE = NStorageSize;
-
-public:
-	HFSM_INLINE ObjectPool();
-
-	HFSM_INLINE ShortIndex count() const					{ return _count;	}
-
-	HFSM_INLINE		  Interface& operator[] (const ShortIndex i);
-	HFSM_INLINE const Interface& operator[] (const ShortIndex i) const;
-
-	template <typename TItem, typename... TArgs>
-	ShortIndex emplace(TArgs&&... args);
-
-	HFSM_INLINE void clear();
-
-private:
-	ShortIndex _offsets[ITEM_COUNT];
-	uint8_t _storage[STORAGE_SIZE];
-	ShortIndex _count = 0;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename TInterface, LongIndex NStorageSize>
-class ObjectPool<TInterface, 0, NStorageSize> {
-public:
-	HFSM_INLINE void clear()													{}
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TInterface, ShortIndex NItemCapacity>
-class ObjectPool<TInterface, NItemCapacity, 0> {
-public:
-	HFSM_INLINE void clear()													{}
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TInterface>
-class ObjectPool<TInterface, 0, 0> {
-public:
-	HFSM_INLINE void clear()													{}
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename TI, ShortIndex NIC, LongIndex NSS>
-ObjectPool<TI, NIC, NSS>::ObjectPool() {
-	_offsets[0] = 0;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TI, ShortIndex NIC, LongIndex NSS>
-TI&
-ObjectPool<TI, NIC, NSS>::operator[] (const ShortIndex i) {
-	HFSM_ASSERT(i < _count);
-
-	const ShortIndex offset = _offsets[i];
-	HFSM_ASSERT(offset + sizeof(Interface) <= STORAGE_SIZE);
-
-	return *reinterpret_cast<Interface*>(_storage + offset);
-	//return *std::launder(reinterpret_cast<Interface*>(_storage + offset));
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TI, ShortIndex NIC, LongIndex NSS>
-const TI&
-ObjectPool<TI, NIC, NSS>::operator[] (const ShortIndex i) const {
-	HFSM_ASSERT(i < _count);
-
-	const ShortIndex offset = _offsets[i];
-	HFSM_ASSERT(offset + sizeof(Interface) <= STORAGE_SIZE);
-
-	return *reinterpret_cast<const Interface*>(_storage + offset);
-	//return *std::launder(reinterpret_cast<const Interface*>(_storage + offset));
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TI, ShortIndex NIC, LongIndex NSS>
-template <typename TItem, typename... TArgs>
-ShortIndex
-ObjectPool<TI, NIC, NSS>::emplace(TArgs&&... args) {
-	ShortIndex result = _count;
-
-	using Item = TItem;
-	static constexpr LongIndex SIZE = sizeof(Item);
-
-	HFSM_ASSERT(_count < ITEM_COUNT);
-
-	const ShortIndex offset = _offsets[_count];
-	HFSM_ASSERT(offset + SIZE <= STORAGE_SIZE);
-
-	new (_storage + offset) Item{std::forward<TArgs>(args)...};
-
-	++_count;
-	if (_count < ITEM_COUNT)
-		_offsets[_count] = offset + SIZE;
-
-	return result;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TI, ShortIndex NIC, LongIndex NSS>
-void
-ObjectPool<TI, NIC, NSS>::clear() {
-	for (const ShortIndex offset : _offsets) {
-		HFSM_ASSERT(offset + sizeof(Interface) <= STORAGE_SIZE);
-
-		Interface& item = *reinterpret_cast<Interface*>(_storage + offset);
-		item.clear();
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
 template <typename... Ts>
-struct _TL {
+struct TL_ {
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 };
 
@@ -1343,8 +1200,8 @@ template <typename...>
 struct PrependT;
 
 template <typename T, typename... Ts>
-struct PrependT<T, _TL<Ts...>> {
-	using Type = _TL<T, Ts...>;
+struct PrependT<T, TL_<Ts...>> {
+	using Type = TL_<T, Ts...>;
 };
 
 template <typename... Ts>
@@ -1364,7 +1221,7 @@ struct LesserT<H, I, TFirst, TRest...> {
 
 template <size_t H, size_t I>
 struct LesserT<H, I> {
-	using Type = _TL<>;
+	using Type = TL_<>;
 };
 
 template <typename... Ts>
@@ -1379,12 +1236,12 @@ template <size_t H, size_t I, typename TFirst, typename... TRest>
 struct GreaterT<H, I, TFirst, TRest...> {
 	using Type = typename std::conditional<(I < H),
 										   typename GreaterT<H, I + 1, TRest...>::Type,
-										   _TL<TFirst, TRest...>>::type;
+										   TL_<TFirst, TRest...>>::type;
 };
 
 template <size_t H, size_t I>
 struct GreaterT<H, I> {
-	using Type = _TL<>;
+	using Type = TL_<>;
 };
 
 template <typename... Ts>
@@ -1457,7 +1314,7 @@ struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename... Ts>
-struct _ITL
+struct ITL_
 	: private IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
 	using Base = IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
@@ -1465,18 +1322,18 @@ struct _ITL
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr bool contains() { return std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value; }
+	static constexpr bool contains() { return std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value; }
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if< std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value, LongIndex>::type
+	typename std::enable_if< std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value, LongIndex>::type
 	index() {
-		return Base::template select<T>(_ITL{});
+		return Base::template select<T>(ITL_{});
 	}
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if<!std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value, LongIndex>::type
+	typename std::enable_if<!std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value, LongIndex>::type
 	index() {
 		return INVALID_LONG_INDEX;
 	}
@@ -1488,8 +1345,8 @@ template <typename...>
 struct IndexedT;
 
 template <typename... Ts>
-struct IndexedT<_TL<Ts...>> {
-	using Type = _ITL<Ts...>;
+struct IndexedT<TL_<Ts...>> {
+	using Type = ITL_<Ts...>;
 };
 
 template <typename T>
@@ -1501,8 +1358,8 @@ template <typename...>
 struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
-struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
-	using TypeList = _TL<Ts1..., Ts2...>;
+struct MergeT<TL_<Ts1...>, TL_<Ts2...>> {
+	using TypeList = TL_<Ts1..., Ts2...>;
 };
 
 template <typename... Ts>
@@ -1756,7 +1613,6 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
-// TODO: add TaskLink::payload
 
 #pragma pack(push, 2)
 
@@ -2627,10 +2483,8 @@ struct StateRegistryT<ArgsT<TContext,
 	OrthoUnits orthoUnits;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-
 	AllForks resumable;
 
-	// TODO: move these to FullControl
 	AllForks requested;
 	CompoRemains compoRemains;
 };
@@ -2657,7 +2511,6 @@ struct StateRegistryT<ArgsT<TContext,
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 	using Payload		= TPayload;
-
 	using Request		= RequestT<Payload>;
 
 	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
@@ -2667,9 +2520,7 @@ struct StateRegistryT<ArgsT<TContext,
 	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
 
 	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
-
 	using AllForks		= AllForksT<COMPO_REGIONS, 0, 0>;
-
 	using CompoRemains	= BitArray<ShortIndex, COMPO_REGIONS>;
 
 	bool isActive		(const StateID stateId) const;
@@ -2690,10 +2541,8 @@ struct StateRegistryT<ArgsT<TContext,
 	CompoParents compoParents;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-
 	AllForks resumable;
 
-	// TODO: move these to FullControl
 	AllForks requested;
 	CompoRemains compoRemains;
 };
@@ -2721,9 +2570,7 @@ AllForksT<NCC, NOC, NOU>::clear() {
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isActive(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -2742,9 +2589,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isActive(const
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isResumable(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -2763,9 +2608,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isResumable(co
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingChange(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -2785,9 +2628,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingChang
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingEnter(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -2807,9 +2648,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingEnter
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isPendingExit(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -2917,9 +2756,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestImmedia
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, typename TPL, LongIndex NTC>
 void
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::requestScheduled(const StateID stateId) {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT) {
+	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
 		if (parent.forkId > 0)
@@ -2945,20 +2782,16 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::clearRequests(
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isActive(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
+	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
+		if (Parent parent = stateParents[stateId]) {
 			HFSM_ASSERT(parent.forkId > 0);
 
-			if (parent.forkId > 0)
-				return parent.prong == compoActive[parent.forkId - 1];
-		}
+			return parent.prong == compoActive[parent.forkId - 1];
+		} else
+			return true;
+	}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2966,17 +2799,11 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isActive(const Sta
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isResumable(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM_ASSERT(parent.forkId > 0);
 
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return parent.prong == resumable.compo[parent.forkId - 1];
+			return parent.prong == resumable.compo[parent.forkId - 1];
 		}
 
 	return false;
@@ -2987,21 +2814,15 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isResumable(const 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingChange(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM_ASSERT(parent.forkId > 0);
 
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return requested.compo[parent.forkId - 1] !=
-						   compoActive[parent.forkId - 1];
+			return requested.compo[parent.forkId - 1] !=
+					   compoActive[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3009,21 +2830,15 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingChange(co
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingEnter(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM_ASSERT(parent.forkId > 0);
 
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return parent.prong !=	   compoActive[parent.forkId - 1] &&
-					   parent.prong == requested.compo[parent.forkId - 1];
+			return parent.prong !=	   compoActive[parent.forkId - 1] &&
+				   parent.prong == requested.compo[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3031,21 +2846,15 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingEnter(con
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, typename TPL, LongIndex NTC>
 bool
 StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, TPL, NTC>>::isPendingExit(const StateID stateId) const {
-	HFSM_ASSERT(stateId < STATE_COUNT);
+	if (HFSM_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM_ASSERT(parent.forkId > 0);
 
-	if (stateId < STATE_COUNT)
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return parent.prong ==	   compoActive[parent.forkId - 1] &&
-					   parent.prong != requested.compo[parent.forkId - 1];
+			return parent.prong ==	   compoActive[parent.forkId - 1] &&
+				   parent.prong != requested.compo[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 //------------------------------------------------------------------------------
@@ -3135,15 +2944,15 @@ namespace detail {
 template <typename TArgs>
 class ControlT {
 	template <typename, typename, typename>
-	friend struct _S;
+	friend struct S_;
 
 	template <typename, typename, Strategy, typename, typename...>
-	friend struct _C;
+	friend struct C_;
 
 	template <typename, typename, typename, typename...>
-	friend struct _O;
+	friend struct O_;
 
-	template <typename, typename, typename, typename>
+	template <typename, typename>
 	friend class _R;
 
 	using Args			= TArgs;
@@ -3238,15 +3047,15 @@ class PlanControlT
 	: public ControlT<TArgs>
 {
 	template <typename, typename, typename>
-	friend struct _S;
+	friend struct S_;
 
 	template <typename, typename, Strategy, typename, typename...>
-	friend struct _C;
+	friend struct C_;
 
 	template <typename, typename, typename, typename...>
-	friend struct _O;
+	friend struct O_;
 
-	template <typename, typename, typename, typename>
+	template <typename, typename>
 	friend class _R;
 
 	using Args			= TArgs;
@@ -3352,15 +3161,15 @@ class FullControlT
 	: public PlanControlT<TArgs>
 {
 	template <typename, typename, typename>
-	friend struct _S;
+	friend struct S_;
 
 	template <typename, typename, Strategy, typename, typename...>
-	friend struct _C;
+	friend struct C_;
 
 	template <typename, typename, typename, typename...>
-	friend struct _O;
+	friend struct O_;
 
-	template <typename, typename, typename, typename>
+	template <typename, typename>
 	friend class _R;
 
 	using Args			= TArgs;
@@ -3429,29 +3238,51 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void changeTo(const StateID id);
+	HFSM_INLINE void changeTo(const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void restart (const StateID id);
+	HFSM_INLINE void restart (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void resume	 (const StateID id);
+	HFSM_INLINE void resume  (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void utilize (const StateID id);
+	HFSM_INLINE void utilize (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void schedule(const StateID id);
-
-	template <typename TState>
-	HFSM_INLINE void changeTo()													{ changeTo(stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE void restart()													{ restart (stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE void resume()													{ resume  (stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE void utilize()													{ utilize (stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE void schedule()													{ schedule(stateId<TState>());	}
+	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// TODO: add payload variants
+	template <typename TState>
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void restart()									{ restart (stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void resume()									{ resume  (stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void utilize()									{ utilize (stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3480,9 +3311,9 @@ class GuardControlT
 	: public FullControlT<TArgs>
 {
 	template <typename, typename, typename>
-	friend struct _S;
+	friend struct S_;
 
-	template <typename, typename, typename, typename>
+	template <typename, typename>
 	friend class _R;
 
 	using Args			= TArgs;
@@ -3606,7 +3437,7 @@ ControlT<TA>::setRegion(const RegionID id) {
 
 template <typename TA>
 void
-ControlT<TA>::resetRegion(const RegionID id) {
+ControlT<TA>::resetRegion(const RegionID id) { //-V524
 	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
 
 	_regionId = id;
@@ -3669,7 +3500,7 @@ PlanControlT<TA>::setOrigin(const StateID id) {
 
 template <typename TA>
 void
-PlanControlT<TA>::resetOrigin(const StateID id) {
+PlanControlT<TA>::resetOrigin(const StateID id) { //-V524
 	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
 	HFSM_ASSERT(id <= _originId && _originId < StateList::SIZE);
 
@@ -3696,7 +3527,7 @@ PlanControlT<TA>::setRegion(const RegionID id,
 
 template <typename TA>
 void
-PlanControlT<TA>::resetRegion(const RegionID id,
+PlanControlT<TA>::resetRegion(const RegionID id, //-V524
 							  const StateID index,
 							  const LongIndex size)
 {
@@ -3811,6 +3642,24 @@ FullControlT<TA>::changeTo(const StateID stateId) {
 
 template <typename TA>
 void
+FullControlT<TA>::changeTo(const StateID stateId,
+						   const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::CHANGE, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::CHANGE, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
 FullControlT<TA>::restart(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::RESTART, stateId};
@@ -3824,6 +3673,24 @@ FullControlT<TA>::restart(const StateID stateId) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TA>
+void
+FullControlT<TA>::restart(const StateID stateId,
+						  const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::RESTART, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::RESTART, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TA>
 void
@@ -3843,6 +3710,24 @@ FullControlT<TA>::resume(const StateID stateId) {
 
 template <typename TA>
 void
+FullControlT<TA>::resume(const StateID stateId,
+						 const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::RESUME, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::RESUME, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
 FullControlT<TA>::utilize(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::UTILIZE, stateId};
@@ -3859,6 +3744,24 @@ FullControlT<TA>::utilize(const StateID stateId) {
 
 template <typename TA>
 void
+FullControlT<TA>::utilize(const StateID stateId,
+						  const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::UTILIZE, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::UTILIZE, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
 FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
@@ -3866,6 +3769,19 @@ FullControlT<TA>::schedule(const StateID stateId) {
 	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+template <typename TA>
+void
+FullControlT<TA>::schedule(const StateID stateId,
+						   const Payload& payload)
+{
+	const Request transition{Request::Type::SCHEDULE, stateId, payload};
+	_requests << transition;
+
+	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
+}
 //------------------------------------------------------------------------------
 
 template <typename TA>
@@ -4020,23 +3936,21 @@ namespace detail {
 template <typename TArgs>
 class InjectionT {
 	template <typename...>
-	friend struct _B;
+	friend struct B_;
 
 protected:
-	using Args				= TArgs;
-	using Context			= typename Args::Context;
-	using Utility			= typename Args::Utility;
-	using StateList			= typename Args::StateList;
-	using RegionList		= typename Args::RegionList;
+	using Context		= typename TArgs::Context;
+	using Utility		= typename TArgs::Utility;
+	using StateList		= typename TArgs::StateList;
+	using RegionList	= typename TArgs::RegionList;
 
-	using Control			= ControlT<Args>;
+	using Control		= ControlT<TArgs>;
 
-	using PlanControl		= PlanControlT<Args>;
-	using Plan				= PlanT<Args>;
+	using PlanControl	= PlanControlT<TArgs>;
+	using Plan			= PlanT<TArgs>;
 
-	using FullControl		= FullControlT <Args>;
-	using GuardControl		= GuardControlT<Args>;
-
+	using FullControl	= FullControlT <TArgs>;
+	using GuardControl	= GuardControlT<TArgs>;
 
 public:
 	HFSM_INLINE void preEntryGuard(Context&)									{}
@@ -4058,88 +3972,82 @@ public:
 //------------------------------------------------------------------------------
 
 template <typename...>
-struct _B;
+struct B_;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TFirst, typename... TRest>
-struct _B<TFirst, TRest...>
+struct B_<TFirst, TRest...>
 	: TFirst
-	, _B<TRest...>
+	, B_<TRest...>
 {
-	using First	  = TFirst;
 
-	HFSM_INLINE void widePreEntryGuard(typename First::Context& context);
+	HFSM_INLINE void widePreEntryGuard(typename TFirst::Context& context);
 
-	HFSM_INLINE void widePreEnter	  (typename First::Context& context);
-	HFSM_INLINE void widePreReenter	  (typename First::Context& context);
+	HFSM_INLINE void widePreEnter	  (typename TFirst::Context& context);
+	HFSM_INLINE void widePreReenter	  (typename TFirst::Context& context);
 
-	HFSM_INLINE void widePreUpdate	  (typename First::Context& context);
+	HFSM_INLINE void widePreUpdate	  (typename TFirst::Context& context);
 
 	template <typename TEvent>
 	HFSM_INLINE void widePreReact	  (const TEvent& event,
-									   typename First::Context& context);
+									   typename TFirst::Context& context);
 
-	HFSM_INLINE void widePreExitGuard (typename First::Context& context);
+	HFSM_INLINE void widePreExitGuard (typename TFirst::Context& context);
 
-	HFSM_INLINE void widePostExit	  (typename First::Context& context);
+	HFSM_INLINE void widePostExit	  (typename TFirst::Context& context);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TFirst>
-struct _B<TFirst>
+struct B_<TFirst>
 	: TFirst
 {
-	using First				= TFirst;
-	using Utility			= typename First::Utility;
-	using StateList			= typename First::StateList;
-	using RegionList		= typename First::RegionList;
+	HFSM_INLINE float utility		   (const typename TFirst::Control&)		{ return typename TFirst::Utility{1.0f};	}
 
-	HFSM_INLINE float utility		   (const typename First::Control&)			{ return Utility{1.0f};	}
+	HFSM_INLINE void  entryGuard	   (typename TFirst::GuardControl&)			{}
 
-	HFSM_INLINE void  entryGuard	   (typename First::GuardControl&)			{}
+	HFSM_INLINE void  enter			   (typename TFirst::PlanControl&)			{}
+	HFSM_INLINE void  reenter		   (typename TFirst::PlanControl&)			{}
 
-	HFSM_INLINE void  enter			   (typename First::PlanControl&)			{}
-	HFSM_INLINE void  reenter		   (typename First::PlanControl&)			{}
-
-	HFSM_INLINE void  update		   (typename First::FullControl&)			{}
+	HFSM_INLINE void  update		   (typename TFirst::FullControl&)			{}
 
 	template <typename TEvent>
 	HFSM_INLINE void  react			   (const TEvent&,
-					 				    typename First::FullControl&)			{}
+					 				    typename TFirst::FullControl&)			{}
 
-	HFSM_INLINE void  exitGuard		   (typename First::GuardControl&)			{}
+	HFSM_INLINE void  exitGuard		   (typename TFirst::GuardControl&)			{}
 
-	HFSM_INLINE void  exit			   (typename First::PlanControl&)			{}
+	HFSM_INLINE void  exit			   (typename TFirst::PlanControl&)			{}
 
-	HFSM_INLINE void  planSucceeded	   (typename First::FullControl& control)	{ control.succeed();	}
-	HFSM_INLINE void  planFailed	   (typename First::FullControl& control)	{ control.fail();		}
+	HFSM_INLINE void  planSucceeded	   (typename TFirst::FullControl& control)	{ control.succeed();	}
+	HFSM_INLINE void  planFailed	   (typename TFirst::FullControl& control)	{ control.fail();		}
 
-	HFSM_INLINE void  widePreEntryGuard(typename First::Context& context);
+	HFSM_INLINE void  widePreEntryGuard(typename TFirst::Context& context);
 
-	HFSM_INLINE void  widePreEnter	   (typename First::Context& context);
-	HFSM_INLINE void  widePreReenter   (typename First::Context& context);
+	HFSM_INLINE void  widePreEnter	   (typename TFirst::Context& context);
+	HFSM_INLINE void  widePreReenter   (typename TFirst::Context& context);
 
-	HFSM_INLINE void  widePreUpdate	   (typename First::Context& context);
+	HFSM_INLINE void  widePreUpdate	   (typename TFirst::Context& context);
 
 	template <typename TEvent>
 	HFSM_INLINE void  widePreReact	   (const TEvent& event,
-					 				    typename First::Context& context);
+					 				    typename TFirst::Context& context);
 
-	HFSM_INLINE void  widePreExitGuard (typename First::Context& context);
+	HFSM_INLINE void  widePreExitGuard (typename TFirst::Context& context);
 
-	HFSM_INLINE void  widePostExit	   (typename First::Context& context);
-
-	template <typename T>
-	static constexpr StateID  stateId()			{ return			StateList ::template index<T>();	}
+	HFSM_INLINE void  widePostExit	   (typename TFirst::Context& context);
 
 	template <typename T>
-	static constexpr RegionID regionId()		{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr StateID  stateId()			{ return			typename TFirst::StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()		{ return (RegionID) typename TFirst::RegionList::template index<T>();	}
 };
 
 template <typename TArgs>
-using Empty = _B<InjectionT<TArgs>>;
+using Empty = B_<InjectionT<TArgs>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -4153,36 +4061,36 @@ namespace detail {
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreEntryGuard(typename TF::Context& context) {
+B_<TF, TR...>::widePreEntryGuard(typename TF::Context& context) {
 	TF::preEntryGuard(context);
-	_B<TR...>::widePreEntryGuard(context);
+	B_<TR...>::widePreEntryGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreEnter(typename TF::Context& context) {
+B_<TF, TR...>::widePreEnter(typename TF::Context& context) {
 	TF::preEnter(context);
-	_B<TR...>::widePreEnter(context);
+	B_<TR...>::widePreEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreReenter(typename TF::Context& context) {
+B_<TF, TR...>::widePreReenter(typename TF::Context& context) {
 	TF::preReenter(context);
-	_B<TR...>::widePreReenter(context);
+	B_<TR...>::widePreReenter(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreUpdate(typename TF::Context& context) {
+B_<TF, TR...>::widePreUpdate(typename TF::Context& context) {
 	TF::preUpdate(context);
-	_B<TR...>::widePreUpdate(context);
+	B_<TR...>::widePreUpdate(context);
 }
 
 //------------------------------------------------------------------------------
@@ -4190,36 +4098,36 @@ _B<TF, TR...>::widePreUpdate(typename TF::Context& context) {
 template <typename TF, typename... TR>
 template <typename TEvent>
 void
-_B<TF, TR...>::widePreReact(const TEvent& event,
+B_<TF, TR...>::widePreReact(const TEvent& event,
 							typename TF::Context& context)
 {
 	TF::preReact(event, context);
-	_B<TR...>::widePreReact(event, context);
+	B_<TR...>::widePreReact(event, context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePreExitGuard(typename TF::Context& context) {
+B_<TF, TR...>::widePreExitGuard(typename TF::Context& context) {
 	TF::preExitGuard(context);
-	_B<TR...>::widePreExitGuard(context);
+	B_<TR...>::widePreExitGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
 void
-_B<TF, TR...>::widePostExit(typename TF::Context& context) {
+B_<TF, TR...>::widePostExit(typename TF::Context& context) {
 	TF::postExit(context);
-	_B<TR...>::widePostExit(context);
+	B_<TR...>::widePostExit(context);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TF>
 void
-_B<TF>::widePreEntryGuard(typename TF::Context& context) {
+B_<TF>::widePreEntryGuard(typename TF::Context& context) {
 	TF::preEntryGuard(context);
 }
 
@@ -4227,7 +4135,7 @@ _B<TF>::widePreEntryGuard(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePreEnter(typename TF::Context& context) {
+B_<TF>::widePreEnter(typename TF::Context& context) {
 	TF::preEnter(context);
 }
 
@@ -4235,7 +4143,7 @@ _B<TF>::widePreEnter(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePreReenter(typename TF::Context& context) {
+B_<TF>::widePreReenter(typename TF::Context& context) {
 	TF::preReenter(context);
 }
 
@@ -4243,7 +4151,7 @@ _B<TF>::widePreReenter(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePreUpdate(typename TF::Context& context) {
+B_<TF>::widePreUpdate(typename TF::Context& context) {
 	TF::preUpdate(context);
 }
 
@@ -4252,7 +4160,7 @@ _B<TF>::widePreUpdate(typename TF::Context& context) {
 template <typename TF>
 template <typename TEvent>
 void
-_B<TF>::widePreReact(const TEvent& event,
+B_<TF>::widePreReact(const TEvent& event,
 					 typename TF::Context& context)
 {
 	TF::preReact(event, context);
@@ -4262,7 +4170,7 @@ _B<TF>::widePreReact(const TEvent& event,
 
 template <typename TF>
 void
-_B<TF>::widePreExitGuard(typename TF::Context& context) {
+B_<TF>::widePreExitGuard(typename TF::Context& context) {
 	TF::preExitGuard(context);
 }
 
@@ -4270,7 +4178,7 @@ _B<TF>::widePreExitGuard(typename TF::Context& context) {
 
 template <typename TF>
 void
-_B<TF>::widePostExit(typename TF::Context& context) {
+B_<TF>::widePostExit(typename TF::Context& context) {
 	TF::postExit(context);
 }
 
@@ -4285,35 +4193,35 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename>
-struct _SF;
+struct SI_;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <Strategy, typename, typename...>
-struct _CF;
+struct CI_;
 
 template <typename...>
-struct _CSF;
+struct CSI_;
 
 template <typename TInitial, typename... TRemaining>
-struct _CSF<TInitial, TRemaining...>;
+struct CSI_<TInitial, TRemaining...>;
 
 template <typename TInitial>
-struct _CSF<TInitial>;
+struct CSI_<TInitial>;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename, typename...>
-struct _OF;
+struct OI_;
 
 template <typename...>
-struct _OSF;
+struct OSI_;
 
 template <typename TInitial, typename... TRemaining>
-struct _OSF<TInitial, TRemaining...>;
+struct OSI_<TInitial, TRemaining...>;
 
 template <typename TInitial>
-struct _OSF<TInitial>;
+struct OSI_<TInitial>;
 
 //------------------------------------------------------------------------------
 
@@ -4322,17 +4230,17 @@ struct WrapT;
 
 template <typename TH>
 struct WrapT<TH> {
-	using Type = _SF<TH>;
+	using Type = SI_<TH>;
 };
 
 template <Strategy TG, typename TH, typename... TS>
-struct WrapT<	 _CF<TG, TH, TS...>> {
-	using Type = _CF<TG, TH, TS...>;
+struct WrapT<	 CI_<TG, TH, TS...>> {
+	using Type = CI_<TG, TH, TS...>;
 };
 
 template <typename... TS>
-struct WrapT<	 _OF<TS...>> {
-	using Type = _OF<TS...>;
+struct WrapT<	 OI_<TS...>> {
+	using Type = OI_<TS...>;
 };
 
 template <typename... TS>
@@ -4341,10 +4249,10 @@ using Wrap = typename WrapT<TS...>::Type;
 //------------------------------------------------------------------------------
 
 template <typename THead>
-struct _SF final {
+struct SI_ final {
 	using Head				= THead;
-	using StateList			= _TL<Head>;
-	using RegionList		= _TL<>;
+	using StateList			= TL_<Head>;
+	using RegionList		= TL_<>;
 
 	static constexpr ShortIndex WIDTH		  = 1;
 	static constexpr LongIndex  REVERSE_DEPTH = 1;
@@ -4360,9 +4268,9 @@ struct _SF final {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TInitial, typename... TRemaining>
-struct _CSF<TInitial, TRemaining...> {
+struct CSI_<TInitial, TRemaining...> {
 	using Initial			= Wrap<TInitial>;
-	using Remaining			= _CSF<TRemaining...>;
+	using Remaining			= CSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
 
@@ -4377,7 +4285,7 @@ struct _CSF<TInitial, TRemaining...> {
 };
 
 template <typename TInitial>
-struct _CSF<TInitial> {
+struct CSI_<TInitial> {
 	using Initial			= Wrap<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
@@ -4393,14 +4301,14 @@ struct _CSF<TInitial> {
 };
 
 template <Strategy TStrategy, typename THead, typename... TSubStates>
-struct _CF final {
+struct CI_ final {
 	static constexpr Strategy STRATEGY = TStrategy;
 
 	using Head				= THead;
-	using State				= _SF<Head>;
-	using SubStates			= _CSF<TSubStates...>;
-	using StateList			= Merge<typename State::StateList, typename SubStates::StateList>;
-	using RegionList		= Merge<typename State::StateList, typename SubStates::RegionList>;
+	using HeadInfo			= SI_<Head>;
+	using SubStates			= CSI_<TSubStates...>;
+	using StateList			= Merge<typename HeadInfo::StateList, typename SubStates::StateList>;
+	using RegionList		= Merge<typename HeadInfo::StateList, typename SubStates::RegionList>;
 
 	static constexpr ShortIndex	WIDTH		  = sizeof...(TSubStates);
 	static constexpr LongIndex	REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
@@ -4416,9 +4324,9 @@ struct _CF final {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TInitial, typename... TRemaining>
-struct _OSF<TInitial, TRemaining...> {
+struct OSI_<TInitial, TRemaining...> {
 	using Initial			= Wrap<TInitial>;
-	using Remaining			= _OSF<TRemaining...>;
+	using Remaining			= OSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
 
@@ -4430,7 +4338,7 @@ struct _OSF<TInitial, TRemaining...> {
 };
 
 template <typename TInitial>
-struct _OSF<TInitial> {
+struct OSI_<TInitial> {
 	using Initial			= Wrap<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
@@ -4443,12 +4351,12 @@ struct _OSF<TInitial> {
 };
 
 template <typename THead, typename... TSubStates>
-struct _OF final {
+struct OI_ final {
 	using Head				= THead;
-	using State				= _SF<Head>;
-	using SubStates			= _OSF<TSubStates...>;
-	using StateList			= Merge<typename State::StateList, typename SubStates::StateList>;
-	using RegionList		= Merge<typename State::StateList, typename SubStates::RegionList>;
+	using HeadInfo			= SI_<Head>;
+	using SubStates			= OSI_<TSubStates...>;
+	using StateList			= Merge<typename HeadInfo::StateList, typename SubStates::StateList>;
+	using RegionList		= Merge<typename HeadInfo::StateList, typename SubStates::RegionList>;
 
 	static constexpr ShortIndex WIDTH		  = sizeof...(TSubStates);
 	static constexpr LongIndex  REVERSE_DEPTH = SubStates::REVERSE_DEPTH + 1;
@@ -4475,10 +4383,10 @@ template <typename TContext,
 struct ArgsT final {
 	using Context	 = TContext;
 
-	using Config	 = TConfig;
-	using Utility	 = typename Config::Utility;
-	using UP		 = typename Config::UP;
-	using Logger	 = typename Config::Logger;
+	using Config_	 = TConfig;
+	using Utility	 = typename Config_::Utility;
+	using UP		 = typename Config_::UP;
+	using Logger	 = typename Config_::Logger;
 
 	using StateList	 = TStateList;
 	using RegionList = TRegionList;
@@ -4499,7 +4407,7 @@ template <StateID NStateID,
 		  ShortIndex NCompoIndex,
 		  ShortIndex NOrthoIndex,
 		  ShortIndex NOrthoUnit>
-struct _I {
+struct I_ {
 	static constexpr StateID	STATE_ID	 = NStateID;
 	static constexpr ShortIndex COMPO_INDEX	 = NCompoIndex;
 	static constexpr ShortIndex ORTHO_INDEX	 = NOrthoIndex;
@@ -4509,19 +4417,19 @@ struct _I {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename, typename, typename>
-struct _S;
+struct S_;
 
 template <typename, typename, Strategy, typename, typename...>
-struct _C;
+struct C_;
 
 template <typename, typename, Strategy, ShortIndex, typename...>
-struct _CS;
+struct CS_;
 
 template <typename, typename, typename, typename...>
-struct _O;
+struct O_;
 
-template <typename, typename, typename, typename>
-class _RW;
+template <typename, typename>
+class RW_;
 
 //------------------------------------------------------------------------------
 
@@ -4530,27 +4438,27 @@ struct MaterialT;
 
 template <typename TN, typename TA, typename TH>
 struct MaterialT   <TN, TA, TH> {
-	using Type = _S<TN, TA, TH>;
+	using Type = S_<TN, TA, TH>;
 };
 
 template <typename TN, typename TA, Strategy TG, 			 typename... TS>
-struct MaterialT   <TN, TA, _CF<TG, void,	   TS...>> {
-	using Type = _C<TN, TA,		TG, Empty<TA>, TS...>;
+struct MaterialT   <TN, TA, CI_<TG, void,	   TS...>> {
+	using Type = C_<TN, TA,		TG, Empty<TA>, TS...>;
 };
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
-struct MaterialT   <TN, TA, _CF<TG, TH,	TS...>> {
-	using Type = _C<TN, TA,		TG, TH,	TS...>;
+struct MaterialT   <TN, TA, CI_<TG, TH,	TS...>> {
+	using Type = C_<TN, TA,		TG, TH,	TS...>;
 };
 
 template <typename TN, typename TA,			  typename... TS>
-struct MaterialT   <TN, TA, _OF<void,	   TS...>> {
-	using Type = _O<TN, TA,		Empty<TA>, TS...>;
+struct MaterialT   <TN, TA, OI_<void,	   TS...>> {
+	using Type = O_<TN, TA,		Empty<TA>, TS...>;
 };
 
 template <typename TN, typename TA, typename TH, typename... TS>
-struct MaterialT   <TN, TA, _OF<TH,	 TS...>> {
-	using Type = _O<TN, TA,		TH,	 TS...>;
+struct MaterialT   <TN, TA, OI_<TH,	 TS...>> {
+	using Type = O_<TN, TA,		TH,	 TS...>;
 };
 
 template <typename TN, typename... TS>
@@ -4558,23 +4466,20 @@ using Material = typename MaterialT<TN, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TPayload,
+template <typename TConfig,
 		  typename TApex>
 struct _RF final {
-	using Context		= TContext;
-	using Config		= TConfig;
-	using Payload		= TPayload;
+	using Config_		= TConfig;
+	using Context		= typename Config_::Context;
+	using Payload		= typename Config_::Payload;
 	using Apex			= TApex;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
-	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
+	static constexpr LongIndex SUBSTITUTION_LIMIT= Config_::SUBSTITUTION_LIMIT;
 
-	static constexpr LongIndex TASK_CAPACITY	 = Config::MAX_PLAN_TASKS != INVALID_LONG_INDEX ?
-													   Config::MAX_PLAN_TASKS : Apex::COMPO_PRONGS * 2;
+	static constexpr LongIndex TASK_CAPACITY	 = Config_::TASK_CAPACITY != INVALID_LONG_INDEX ?
+													   Config_::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
 
 	static constexpr ShortIndex COMPO_REGIONS	 = Apex::COMPO_REGIONS;
 	static constexpr ShortIndex ORTHO_REGIONS	 = Apex::ORTHO_REGIONS;
@@ -4584,7 +4489,7 @@ struct _RF final {
 	using RegionList	= Indexed<typename Apex::RegionList>;
 
 	using Args			= ArgsT<Context,
-								Config,
+								Config_,
 								StateList,
 								RegionList,
 								COMPO_REGIONS,
@@ -4595,7 +4500,7 @@ struct _RF final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using Instance		= _RW<Context, Config, Payload, Apex>;
+	using Instance		= RW_<Config_, Apex>;
 
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;
@@ -4606,7 +4511,7 @@ struct _RF final {
 	using State			= Empty<Args>;
 
 	template <typename... TInjections>
-	using StateT		= _B<TInjections...>;
+	using StateT		= B_<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4628,13 +4533,13 @@ template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename T>
 struct CSubMaterialT;
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename T>
-struct CSubMaterialT	 <TN, TA, TG, NI, _TL<T>> {
+struct CSubMaterialT	 <TN, TA, TG, NI, TL_<T>> {
 	using Type = Material<TN, TA,			  T>;
 };
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-struct CSubMaterialT<TN, TA, TG, NI, _TL<TS...>> {
-	using Type = _CS<TN, TA, TG, NI,	 TS...>;
+struct CSubMaterialT<TN, TA, TG, NI, TL_<TS...>> {
+	using Type = CS_<TN, TA, TG, NI,	 TS...>;
 };
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
@@ -4643,26 +4548,26 @@ using CSubMaterial = typename CSubMaterialT<TN, TA, TG, NI, TS...>::Type;
 //------------------------------------------------------------------------------
 
 template <typename...>
-struct ForwardT;
+struct InfoT;
 
 template <typename TN, typename TA, typename TH>
-struct ForwardT<  _S<TN, TA, TH>> {
-	using Type = _SF<		 TH>;
+struct InfoT<  S_<TN, TA, TH>> {
+	using Type = SI_<		 TH>;
 };
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
-struct ForwardT<_C<TN, TA, TG, TH, TS...>> {
-	using Type = _CF<	   TG, TH, TS...>;
+struct InfoT<C_<TN, TA, TG, TH, TS...>> {
+	using Type = CI_<	   TG, TH, TS...>;
 };
 
 template <typename TN, typename TA, typename TH, typename... TS>
-struct ForwardT<_O<TN, TA, TH, TS...>> {
-	using Type = _OF<			   TH, TS...>;
+struct InfoT<O_<TN, TA, TH, TS...>> {
+	using Type = OI_<			   TH, TS...>;
 };
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-struct ForwardT<_CS<TN, TA, TG, NI, TS...>> {
-	using Type = _CSF<				TS...>;
+struct InfoT<CS_<TN, TA, TG, NI, TS...>> {
+	using Type = CSI_<				TS...>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4674,15 +4579,36 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-template <typename TUtility = float,
-		  LongIndex NMaxPlanTasks = INVALID_LONG_INDEX,
-		  LongIndex NMaxSubstitutions = 4>
-struct Config {
-	using Utility = TUtility;
+template <typename TC,
+		  typename TU,
+		  typename TP,
+		  LongIndex NS,
+		  LongIndex NT>
+struct ConfigT {
+	using Context = TC;
+
+	using Utility = TU;
 	using Logger  = LoggerInterfaceT<Utility>;
 
-	static constexpr LongIndex MAX_PLAN_TASKS	 = NMaxPlanTasks;
-	static constexpr LongIndex MAX_SUBSTITUTIONS = NMaxSubstitutions;
+	using Payload = TP;
+
+	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
+	static constexpr LongIndex TASK_CAPACITY	  = NT;
+
+	template <typename T>
+	using ContextT			 = ConfigT< T, TU, TP, NS, NT>;
+
+	template <typename T>
+	using UtilityT			 = ConfigT<TC,  T, TP, NS, NT>;
+
+	template <typename T>
+	using PayloadT			 = ConfigT<TC, TU,  T, NS, NT>;
+
+	template <LongIndex N>
+	using SubstitutionLimitN = ConfigT<TC, TU, TP,  N, NS>;
+
+	template <LongIndex N>
+	using TaskCapacityN		 = ConfigT<TC, TU, TP, NT,  N>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4700,86 +4626,84 @@ struct Config {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
-namespace detail {
-
 //------------------------------------------------------------------------------
 
 struct EmptyContext {};
 struct EmptyPayload {};
 
+using Config = ConfigT<EmptyContext, float, EmptyPayload, INVALID_LONG_INDEX, 4>;
+
+namespace detail {
+
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TConfig = Config<>,
-		  typename TPayload = EmptyPayload>
-struct _M {
-	using Context = TContext;
-	using Config  = TConfig;
-	using Payload = TPayload;
+template <typename TConfig>
+struct M_ {
+	using Config_ = TConfig;
 
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Composite			 = _CF<Strategy::Composite,	 THead,	TSubStates...>;
+	using Composite			 = CI_<Strategy::Composite,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using CompositePeers	 = _CF<Strategy::Composite,	 void,	TSubStates...>;
+	using CompositePeers	 = CI_<Strategy::Composite,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Resumable			  = _CF<Strategy::Resumable,	 THead,	TSubStates...>;
+	using Resumable			  = CI_<Strategy::Resumable,	 THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeers	  = _CF<Strategy::Resumable,	 void,	TSubStates...>;
+	using ResumablePeers	  = CI_<Strategy::Resumable,	 void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Utilitarian		  = _CF<Strategy::Utilitarian, THead,	TSubStates...>;
+	using Utilitarian		  = CI_<Strategy::Utilitarian, THead,	TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using UtilitarianPeers	  = _CF<Strategy::Utilitarian, void,	TSubStates...>;
+	using UtilitarianPeers	  = CI_<Strategy::Utilitarian, void,	TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using Orthogonal		  = _OF<THead, TSubStates...>;
+	using Orthogonal		  = OI_<THead, TSubStates...>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeers	  = _OF<void,  TSubStates...>;
+	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
 
 	//----------------------------------------------------------------------
 
 	template <typename THead, typename... TSubStates>
-	using Root				  = _RF<Context, Config, Payload, Composite  <THead, TSubStates...>>;
+	using Root				  = _RF<Config_, Composite  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using PeerRoot			  = _RF<Context, Config, Payload, CompositePeers  <  TSubStates...>>;
+	using PeerRoot			  = _RF<Config_, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		  = _RF<Context, Config, Payload, Resumable  <THead, TSubStates...>>;
+	using ResumableRoot		  = _RF<Config_, Resumable  <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	  = _RF<Context, Config, Payload, ResumablePeers  <  TSubStates...>>;
+	using ResumablePeerRoot	  = _RF<Config_, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using UtilitarianRoot	  = _RF<Context, Config, Payload, Utilitarian<THead, TSubStates...>>;
+	using UtilitarianRoot	  = _RF<Config_, Utilitarian<THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using UtilitarianPeerRoot = _RF<Context, Config, Payload, UtilitarianPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = _RF<Config_, UtilitarianPeers<  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	  = _RF<Context, Config, Payload, Orthogonal <THead, TSubStates...>>;
+	using OrthogonalRoot	  = _RF<Config_, Orthogonal <THead, TSubStates...>>;
 
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot  = _RF<Context, Config, Payload, OrthogonalPeers <  TSubStates...>>;
+	using OrthogonalPeerRoot  = _RF<Config_, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -4788,30 +4712,10 @@ struct _M {
 
 }
 
-using Machine = detail::_M<detail::EmptyContext>;
+using Machine = detail::M_<Config>;
 
-template <typename...>
-struct MachineT;
-
-template <typename TContext>
-struct MachineT<TContext>
-	: detail::_M<TContext>
-{};
-
-template <typename TContext, typename TUtility, LongIndex... NConstants>
-struct MachineT<TContext, Config<TUtility, NConstants...>>
-	: detail::_M<TContext, Config<TUtility, NConstants...>, detail::EmptyPayload>
-{};
-
-template <typename TContext, typename TPayload>
-struct MachineT<TContext, TPayload>
-	: detail::_M<TContext, Config<>, TPayload>
-{};
-
-template <typename TContext, typename TUtility, LongIndex... NConstants, typename TPayload>
-struct MachineT<TContext, Config<TUtility, NConstants...>, TPayload>
-	: detail::_M<TContext, Config<TUtility, NConstants...>, TPayload>
-{};
+template <typename TConfig>
+using MachineT = detail::M_<TConfig>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -4825,7 +4729,7 @@ namespace detail {
 template <typename TIndices,
 		  typename TArgs,
 		  typename THead>
-struct _S {
+struct S_ {
 	using Indices		= TIndices;
 	static constexpr StateID	STATE_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
@@ -4941,8 +4845,8 @@ struct _S {
 #endif
 
 	// if you see..
-	// VS	 - error C2079: 'hfsm2::detail::_S<BLAH>::_head' uses undefined struct 'Blah'
-	// Clang - error : field has incomplete type 'hfsm2::detail::_S<BLAH>::Head' (aka 'Blah')
+	// VS	 - error C2079: 'hfsm2::detail::S_<BLAH>::_head' uses undefined struct 'Blah'
+	// Clang - error : field has incomplete type 'hfsm2::detail::S_<BLAH>::Head' (aka 'Blah')
 	//
 	// .. add definition for the state 'Blah'
 	Head _head;
@@ -4997,7 +4901,7 @@ struct RegisterT<NS, TA, Empty<TA>> {
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
+S_<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 							 const Parent parent)
 {
 	using Register = RegisterT<STATE_ID, TA, Head>;
@@ -5008,7 +4912,7 @@ _S<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, typename TH>
 bool
-_S<TN, TA, TH>::deepEntryGuard(GuardControl& control,
+S_<TN, TA, TH>::deepEntryGuard(GuardControl& control,
 							   const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::entryGuard, Method::ENTRY_GUARD);
@@ -5027,7 +4931,7 @@ _S<TN, TA, TH>::deepEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepEnter(PlanControl& control,
+S_<TN, TA, TH>::deepEnter(PlanControl& control,
 						  const ShortIndex /*prong*/)
 {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
@@ -5045,7 +4949,7 @@ _S<TN, TA, TH>::deepEnter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepReenter(PlanControl& control,
+S_<TN, TA, TH>::deepReenter(PlanControl& control,
 							const ShortIndex /*prong*/)
 {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
@@ -5063,7 +4967,7 @@ _S<TN, TA, TH>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH>
 Status
-_S<TN, TA, TH>::deepUpdate(FullControl& control,
+S_<TN, TA, TH>::deepUpdate(FullControl& control,
 						   const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::update, Method::UPDATE);
@@ -5081,7 +4985,7 @@ _S<TN, TA, TH>::deepUpdate(FullControl& control,
 template <typename TN, typename TA, typename TH>
 template <typename TEvent>
 Status
-_S<TN, TA, TH>::deepReact(FullControl& control,
+S_<TN, TA, TH>::deepReact(FullControl& control,
 						  const TEvent& event,
 						  const ShortIndex /*prong*/)
 {
@@ -5100,7 +5004,7 @@ _S<TN, TA, TH>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, typename TH>
 bool
-_S<TN, TA, TH>::deepExitGuard(GuardControl& control,
+S_<TN, TA, TH>::deepExitGuard(GuardControl& control,
 							  const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::exitGuard, Method::EXIT_GUARD);
@@ -5119,7 +5023,7 @@ _S<TN, TA, TH>::deepExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepExit(PlanControl& control,
+S_<TN, TA, TH>::deepExit(PlanControl& control,
 						 const ShortIndex /*prong*/)
 {
 	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
@@ -5142,7 +5046,7 @@ _S<TN, TA, TH>::deepExit(PlanControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
+S_<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::planSucceeded, Method::PLAN_SUCCEEDED);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -5154,7 +5058,7 @@ _S<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
+S_<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::planFailed, Method::PLAN_FAILED);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -5166,7 +5070,7 @@ _S<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
 
 template <typename TN, typename TA, typename TH>
 typename TA::Utility
-_S<TN, TA, TH>::wrapUtility(Control& control) {
+S_<TN, TA, TH>::wrapUtility(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
 
 	return _head.utility(static_cast<const Control&>(control));
@@ -5176,7 +5080,7 @@ _S<TN, TA, TH>::wrapUtility(Control& control) {
 
 template <typename TN, typename TA, typename TH>
 typename TA::UP
-_S<TN, TA, TH>::deepReportChange(Control& control,
+S_<TN, TA, TH>::deepReportChange(Control& control,
 								 const ShortIndex)
 {
 	const Utility utility = wrapUtility(control);
@@ -5190,7 +5094,7 @@ _S<TN, TA, TH>::deepReportChange(Control& control,
 
 template <typename TN, typename TA, typename TH>
 typename TA::UP
-_S<TN, TA, TH>::deepReportUtilize(Control& control) {
+S_<TN, TA, TH>::deepReportUtilize(Control& control) {
 	const Utility utility = wrapUtility(control);
 
 	const Parent parent = stateParent(control);
@@ -5204,7 +5108,7 @@ _S<TN, TA, TH>::deepReportUtilize(Control& control) {
 
 template <typename TN, typename TA, typename TH>
 const char*
-_S<TN, TA, TH>::name() {
+S_<TN, TA, TH>::name() {
 	if (isBare())
 		return "";
 	else {
@@ -5240,7 +5144,7 @@ _S<TN, TA, TH>::name() {
 
 template <typename TN, typename TA, typename TH>
 void
-_S<TN, TA, TH>::deepGetNames(const LongIndex parent,
+S_<TN, TA, TH>::deepGetNames(const LongIndex parent,
 							  const RegionType region,
 							  const ShortIndex depth,
 							  StructureStateInfos& _stateInfos) const
@@ -5264,7 +5168,7 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  ShortIndex NIndex,
 		  typename... TStates>
-struct _CS {
+struct CS_ {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -5297,7 +5201,7 @@ struct _CS {
 	static constexpr ShortIndex L_PRONG = PRONG_INDEX;
 
 	using LStates		= SplitL<TStates...>;
-	using LHalf			= CSubMaterial<_I<INITIAL_ID,
+	using LHalf			= CSubMaterial<I_<INITIAL_ID,
 										  COMPO_INDEX,
 										  ORTHO_INDEX,
 										  ORTHO_UNIT>,
@@ -5305,15 +5209,15 @@ struct _CS {
 									   STRATEGY,
 									   L_PRONG,
 									   LStates>;
-	using LHalfForward	= typename ForwardT<LHalf>::Type;
+	using LHalfInfo		= typename InfoT<LHalf>::Type;
 
 	static constexpr ShortIndex R_PRONG = PRONG_INDEX + LStates::SIZE;
 
 	using RStates		= SplitR<TStates...>;
-	using RHalf			= CSubMaterial<_I<INITIAL_ID  + LHalfForward::STATE_COUNT,
-										  COMPO_INDEX + LHalfForward::COMPO_REGIONS,
-										  ORTHO_INDEX + LHalfForward::ORTHO_REGIONS,
-										  ORTHO_UNIT  + LHalfForward::ORTHO_UNITS>,
+	using RHalf			= CSubMaterial<I_<INITIAL_ID  + LHalfInfo::STATE_COUNT,
+										  COMPO_INDEX + LHalfInfo::COMPO_REGIONS,
+										  ORTHO_INDEX + LHalfInfo::ORTHO_REGIONS,
+										  ORTHO_UNIT  + LHalfInfo::ORTHO_UNITS>,
 									   Args,
 									   STRATEGY,
 									   R_PRONG,
@@ -5437,7 +5341,7 @@ namespace detail {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
+CS_<TN, TA, TG, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
 												 const Parent parent)
 {
 	lHalf.deepRegister(stateRegistry, Parent{parent.forkId, L_PRONG});
@@ -5448,7 +5352,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<TN, TA, TG, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
 												  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5463,7 +5367,7 @@ _CS<TN, TA, TG, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<TN, TA, TG, NI, TS...>::deepEntryGuard(GuardControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepEntryGuard(GuardControl& control,
 										   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5478,7 +5382,7 @@ _CS<TN, TA, TG, NI, TS...>::deepEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepEnter(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepEnter(PlanControl& control,
 									  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5493,7 +5397,7 @@ _CS<TN, TA, TG, NI, TS...>::deepEnter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepReenter(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepReenter(PlanControl& control,
 										const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5508,7 +5412,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 Status
-_CS<TN, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
 									   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5523,7 +5427,7 @@ _CS<TN, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 template <typename TEvent>
 Status
-_CS<TN, TA, TG, NI, TS...>::deepReact(FullControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepReact(FullControl& control,
 									  const TEvent& event,
 									  const ShortIndex prong)
 {
@@ -5538,7 +5442,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<TN, TA, TG, NI, TS...>::deepForwardExitGuard(GuardControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepForwardExitGuard(GuardControl& control,
 												 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5553,7 +5457,7 @@ _CS<TN, TA, TG, NI, TS...>::deepForwardExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<TN, TA, TG, NI, TS...>::deepExitGuard(GuardControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepExitGuard(GuardControl& control,
 										  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5568,7 +5472,7 @@ _CS<TN, TA, TG, NI, TS...>::deepExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepExit(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepExit(PlanControl& control,
 									 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5583,7 +5487,7 @@ _CS<TN, TA, TG, NI, TS...>::deepExit(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepForwardActive(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepForwardActive(Control& control,
 											  const RequestType request,
 											  const ShortIndex prong)
 {
@@ -5599,7 +5503,7 @@ _CS<TN, TA, TG, NI, TS...>::deepForwardActive(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
 											   const RequestType request,
 											   const ShortIndex prong)
 {
@@ -5617,7 +5521,7 @@ _CS<TN, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestChange(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 											  const ShortIndex prong)
 {
 	switch (STRATEGY) {
@@ -5640,7 +5544,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
+CS_<TN, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
 	lHalf.deepRequestChange(control);
 }
 
@@ -5648,7 +5552,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
 													   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5663,7 +5567,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+CS_<TN, TA, TG, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 	lHalf.deepRequestRemain(stateRegistry);
 }
 
@@ -5671,7 +5575,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
+CS_<TN, TA, TG, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 	lHalf.deepRequestRestart(stateRegistry);
 }
 
@@ -5679,7 +5583,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
+CS_<TN, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 											  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5694,7 +5598,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
+CS_<TN, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
 	const UP l = lHalf.deepReportUtilize(control);
 	const UP r = rHalf.deepReportUtilize(control);
 
@@ -5708,7 +5612,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportChange(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepReportChange(Control& control,
 											 const ShortIndex prong)
 {
 	switch (STRATEGY) {
@@ -5733,7 +5637,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportChange(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
+CS_<TN, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
 	return lHalf.deepReportChange(control);
 }
 
@@ -5741,7 +5645,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
 													  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5756,7 +5660,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
+CS_<TN, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
 	const UP l = lHalf.deepReportChange(control);
 	const UP r = rHalf.deepReportChange(control);
 
@@ -5768,7 +5672,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepEnterRequested(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepEnterRequested(PlanControl& control,
 											   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5783,7 +5687,7 @@ _CS<TN, TA, TG, NI, TS...>::deepEnterRequested(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepChangeToRequested(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepChangeToRequested(PlanControl& control,
 												  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -5800,7 +5704,7 @@ _CS<TN, TA, TG, NI, TS...>::deepChangeToRequested(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepGetNames(const LongIndex parent,
+CS_<TN, TA, TG, NI, TS...>::deepGetNames(const LongIndex parent,
 										 const RegionType /*region*/,
 										 const ShortIndex depth,
 										 StructureStateInfos& _stateInfos) const
@@ -5825,7 +5729,7 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  typename THead,
 		  typename... TSubStates>
-struct _C {
+struct C_ {
 	using Indices		= TIndices;
 	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -5865,8 +5769,8 @@ struct _C {
 	using GuardControl	= GuardControlT<Args>;
 
 
-	using HeadState		= _S <Indices, Args, Head>;
-	using SubStates		= _CS<_I<HEAD_ID + 1,
+	using HeadState		= S_<Indices, Args, Head>;
+	using SubStates		= CS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX + 1,
 								 ORTHO_INDEX,
 								 ORTHO_UNIT>,
@@ -5874,9 +5778,9 @@ struct _C {
 							  STRATEGY,
 							  0,
 							  TSubStates...>;
-	using AllForward	= _CF<STRATEGY, Head, TSubStates...>;
 
-	static constexpr ShortIndex REGION_SIZE	= AllForward::STATE_COUNT;
+	using Info			= CI_<STRATEGY, Head, TSubStates...>;
+	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
 
 	HFSM_INLINE ShortIndex& compoActive   (StateRegistry& stateRegistry)	{ return stateRegistry.compoActive	  [COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoResumable(StateRegistry& stateRegistry)	{ return stateRegistry.resumable.compo[COMPO_INDEX]; }
@@ -5976,7 +5880,6 @@ struct _C {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// TODO: add 'deepReportRemain/Restart/Resume()'
 	HFSM_INLINE UP		deepReportUtilize			  (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6012,7 +5915,7 @@ namespace detail {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
+C_<TN, TA, TG, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 										const Parent parent)
 {
 	stateRegistry.compoParents[COMPO_INDEX] = parent;
@@ -6025,7 +5928,7 @@ _C<TN, TA, TG, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 bool
-_C<TN, TA, TG, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
+C_<TN, TA, TG, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
 												 const ShortIndex /*prong*/)
 {
 	const ShortIndex active	   = compoActive   (control);
@@ -6045,7 +5948,7 @@ _C<TN, TA, TG, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 bool
-_C<TN, TA, TG, TH, TS...>::deepEntryGuard(GuardControl& control,
+C_<TN, TA, TG, TH, TS...>::deepEntryGuard(GuardControl& control,
 										  const ShortIndex /*prong*/)
 {
 	const ShortIndex requested = compoRequested(control);
@@ -6061,7 +5964,7 @@ _C<TN, TA, TG, TH, TS...>::deepEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepEnter(PlanControl& control,
+C_<TN, TA, TG, TH, TS...>::deepEnter(PlanControl& control,
 									 const ShortIndex /*prong*/)
 {
 	ShortIndex& active	  = compoActive   (control);
@@ -6089,7 +5992,7 @@ _C<TN, TA, TG, TH, TS...>::deepEnter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepReenter(PlanControl& control,
+C_<TN, TA, TG, TH, TS...>::deepReenter(PlanControl& control,
 									   const ShortIndex /*prong*/)
 {
 	ShortIndex& active	  = compoActive   (control);
@@ -6123,7 +6026,7 @@ _C<TN, TA, TG, TH, TS...>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 Status
-_C<TN, TA, TG, TH, TS...>::deepUpdate(FullControl& control,
+C_<TN, TA, TG, TH, TS...>::deepUpdate(FullControl& control,
 									  const ShortIndex /*prong*/)
 {
 	const ShortIndex active = compoActive(control);
@@ -6154,7 +6057,7 @@ _C<TN, TA, TG, TH, TS...>::deepUpdate(FullControl& control,
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 template <typename TEvent>
 Status
-_C<TN, TA, TG, TH, TS...>::deepReact(FullControl& control,
+C_<TN, TA, TG, TH, TS...>::deepReact(FullControl& control,
 									 const TEvent& event,
 									 const ShortIndex /*prong*/)
 {
@@ -6185,7 +6088,7 @@ _C<TN, TA, TG, TH, TS...>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 bool
-_C<TN, TA, TG, TH, TS...>::deepForwardExitGuard(GuardControl& control,
+C_<TN, TA, TG, TH, TS...>::deepForwardExitGuard(GuardControl& control,
 												const ShortIndex /*prong*/)
 {
 	const ShortIndex active = compoActive(control);
@@ -6203,7 +6106,7 @@ _C<TN, TA, TG, TH, TS...>::deepForwardExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 bool
-_C<TN, TA, TG, TH, TS...>::deepExitGuard(GuardControl& control,
+C_<TN, TA, TG, TH, TS...>::deepExitGuard(GuardControl& control,
 										 const ShortIndex /*prong*/)
 {
 	const ShortIndex active = compoActive(control);
@@ -6219,7 +6122,7 @@ _C<TN, TA, TG, TH, TS...>::deepExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepExit(PlanControl& control,
+C_<TN, TA, TG, TH, TS...>::deepExit(PlanControl& control,
 									const ShortIndex /*prong*/)
 {
 	ShortIndex& active	  = compoActive   (control);
@@ -6241,7 +6144,7 @@ _C<TN, TA, TG, TH, TS...>::deepExit(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepForwardActive(Control& control,
+C_<TN, TA, TG, TH, TS...>::deepForwardActive(Control& control,
 											 const RequestType request,
 											 const ShortIndex /*prong*/)
 {
@@ -6261,7 +6164,7 @@ _C<TN, TA, TG, TH, TS...>::deepForwardActive(Control& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepForwardRequest(Control& control,
+C_<TN, TA, TG, TH, TS...>::deepForwardRequest(Control& control,
 											  const RequestType request,
 											  const ShortIndex /*prong*/)
 {
@@ -6277,7 +6180,7 @@ _C<TN, TA, TG, TH, TS...>::deepForwardRequest(Control& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequest(Control& control,
+C_<TN, TA, TG, TH, TS...>::deepRequest(Control& control,
 									   const RequestType request)
 {
 	switch (request) {
@@ -6312,7 +6215,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequest(Control& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequestChange(Control& control,
+C_<TN, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 											 const ShortIndex /*prong*/)
 {
 	switch (STRATEGY) {
@@ -6339,7 +6242,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) {
+C_<TN, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 
 	requested = 0;
@@ -6351,7 +6254,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
+C_<TN, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
 
@@ -6365,7 +6268,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
+C_<TN, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	const UP s = _subStates.deepReportChange(control);
 	HFSM_ASSERT(s.prong != INVALID_SHORT_INDEX);
 
@@ -6379,7 +6282,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+C_<TN, TA, TG, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 	const ShortIndex  active	= compoActive   (stateRegistry);
 		  ShortIndex& requested = compoRequested(stateRegistry);
 
@@ -6393,7 +6296,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
+C_<TN, TA, TG, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 	ShortIndex& requested = compoRequested(stateRegistry);
 
 	requested = 0;
@@ -6405,7 +6308,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
+C_<TN, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 											 const ShortIndex /*prong*/)
 {
 	const ShortIndex  resumable = compoResumable(stateRegistry);
@@ -6421,7 +6324,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
+C_<TN, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
 	const UP s = _subStates.deepReportUtilize(control);
 
 	ShortIndex& requested = compoRequested(control);
@@ -6436,7 +6339,7 @@ _C<TN, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 typename TA::UP
-_C<TN, TA, TG, TH, TS...>::deepReportChange(Control& control,
+C_<TN, TA, TG, TH, TS...>::deepReportChange(Control& control,
 											const ShortIndex /*prong*/)
 {
 	switch (STRATEGY) {
@@ -6461,7 +6364,7 @@ _C<TN, TA, TG, TH, TS...>::deepReportChange(Control& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 typename TA::UP
-_C<TN, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
+C_<TN, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = 0;
 
@@ -6475,7 +6378,7 @@ _C<TN, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 typename TA::UP
-_C<TN, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
+C_<TN, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
 
@@ -6492,7 +6395,7 @@ _C<TN, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 typename TA::UP
-_C<TN, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
+C_<TN, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	const UP h = _headState.deepReportChange(control);
 	const UP s = _subStates.deepReportChange(control);
 
@@ -6508,7 +6411,7 @@ _C<TN, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 typename TA::UP
-_C<TN, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
+C_<TN, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
 	const UP h = _headState.deepReportUtilize(control);
 	const UP s = _subStates.deepReportUtilize(control);
 
@@ -6524,7 +6427,7 @@ _C<TN, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepEnterRequested(PlanControl& control,
+C_<TN, TA, TG, TH, TS...>::deepEnterRequested(PlanControl& control,
 											  const ShortIndex /*prong*/)
 {
 	ShortIndex& active	  = compoActive	  (control);
@@ -6544,7 +6447,7 @@ _C<TN, TA, TG, TH, TS...>::deepEnterRequested(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepChangeToRequested(PlanControl& control,
+C_<TN, TA, TG, TH, TS...>::deepChangeToRequested(PlanControl& control,
 												 const ShortIndex /*prong*/)
 {
 	ShortIndex& active	  = compoActive	  (control);
@@ -6582,7 +6485,7 @@ _C<TN, TA, TG, TH, TS...>::deepChangeToRequested(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-_C<TN, TA, TG, TH, TS...>::deepGetNames(const LongIndex parent,
+C_<TN, TA, TG, TH, TS...>::deepGetNames(const LongIndex parent,
 										const RegionType region,
 										const ShortIndex depth,
 										StructureStateInfos& _stateInfos) const
@@ -6603,7 +6506,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename, typename, ShortIndex, typename...>
-struct _OS;
+struct OS_;
 
 //------------------------------------------------------------------------------
 
@@ -6612,7 +6515,7 @@ template <typename TIndices,
 		  ShortIndex NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
-struct _OS<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
+struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -6641,24 +6544,24 @@ struct _OS<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		= Material<_I<INITIAL_ID,
+	using Initial		= Material<I_<INITIAL_ID,
 									  COMPO_INDEX,
 									  ORTHO_INDEX,
 									  ORTHO_UNIT>,
 								   Args,
 								   TInitial>;
 
-	using Forwarded		= Wrap<TInitial>;
+	using InitialInfo	= Wrap<TInitial>;
 
-	using Remaining		= _OS<_I<INITIAL_ID  + Forwarded::STATE_COUNT,
-								 COMPO_INDEX + Forwarded::COMPO_REGIONS,
-								 ORTHO_INDEX + Forwarded::ORTHO_REGIONS,
-								 ORTHO_UNIT  + Forwarded::ORTHO_UNITS>,
+	using Remaining		= OS_<I_<INITIAL_ID  + InitialInfo::STATE_COUNT,
+								 COMPO_INDEX + InitialInfo::COMPO_REGIONS,
+								 ORTHO_INDEX + InitialInfo::ORTHO_REGIONS,
+								 ORTHO_UNIT  + InitialInfo::ORTHO_UNITS>,
 							  Args,
 							  PRONG_INDEX + 1,
 							  TRemaining...>;
 
-	using AllForward	= _OSF<TInitial, TRemaining...>;
+	using Info	= OSI_<TInitial, TRemaining...>;
 
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
@@ -6723,7 +6626,7 @@ template <typename TIndices,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial>
-struct _OS<TIndices, TArgs, NIndex, TInitial> {
+struct OS_<TIndices, TArgs, NIndex, TInitial> {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -6752,14 +6655,14 @@ struct _OS<TIndices, TArgs, NIndex, TInitial> {
 	using FullControl	= FullControlT	<Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		= Material<_I<INITIAL_ID,
+	using Initial		= Material<I_<INITIAL_ID,
 									  COMPO_INDEX,
 									  ORTHO_INDEX,
 									  ORTHO_UNIT>,
 								   Args,
 								   TInitial>;
 
-	using AllForward	= _OSF<TInitial>;
+	using Info	= OSI_<TInitial>;
 
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
@@ -6829,7 +6732,7 @@ namespace detail {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideRegister(StateRegistry& stateRegistry,
+OS_<TN, TA, NI, TI, TR...>::wideRegister(StateRegistry& stateRegistry,
 										 const ForkID forkId)
 {
 	initial  .deepRegister(stateRegistry, Parent{forkId, PRONG_INDEX});
@@ -6840,7 +6743,7 @@ _OS<TN, TA, NI, TI, TR...>::wideRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
+OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
 												  const ProngConstBits prongs)
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
@@ -6855,7 +6758,7 @@ _OS<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) {
 	const bool i = initial  .deepForwardEntryGuard(control);
 	const bool r = remaining.wideForwardEntryGuard(control);
 
@@ -6866,7 +6769,7 @@ _OS<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<TN, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) {
 	const bool i = initial  .deepEntryGuard(control);
 	const bool r = remaining.wideEntryGuard(control);
 
@@ -6877,7 +6780,7 @@ _OS<TN, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
 	initial  .deepEnter(control);
 	remaining.wideEnter(control);
 }
@@ -6886,7 +6789,7 @@ _OS<TN, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) {
 	initial  .deepReenter(control);
 	remaining.wideReenter(control);
 }
@@ -6895,7 +6798,7 @@ _OS<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 Status
-_OS<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
 	const auto status =	   initial	.deepUpdate(control);
 	return combine(status, remaining.wideUpdate(control));
 }
@@ -6905,7 +6808,7 @@ _OS<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename TEvent>
 Status
-_OS<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
+OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 									  const TEvent& event)
 {
 	const auto status =	   initial	.deepReact(control, event);
@@ -6916,7 +6819,7 @@ _OS<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
+OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
 												 const ProngConstBits prongs)
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
@@ -6931,7 +6834,7 @@ _OS<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) {
 	const bool i = initial  .deepForwardExitGuard(control);
 	const bool r = remaining.wideForwardExitGuard(control);
 
@@ -6942,7 +6845,7 @@ _OS<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-_OS<TN, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) {
 	const bool i = initial  .deepExitGuard(control);
 	const bool r = remaining.wideExitGuard(control);
 
@@ -6953,7 +6856,7 @@ _OS<TN, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
 	initial	 .deepExit(control);
 	remaining.wideExit(control);
 }
@@ -6962,7 +6865,7 @@ _OS<TN, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
+OS_<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
 											  const RequestType request,
 											  const ProngConstBits prongs)
 {
@@ -6977,7 +6880,7 @@ _OS<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
+OS_<TN, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
 											   const RequestType request,
 											   const ProngConstBits prongs)
 {
@@ -6992,7 +6895,7 @@ _OS<TN, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
 	initial  .deepRequestChange(control);
 	remaining.wideRequestChange(control);
 }
@@ -7001,7 +6904,7 @@ _OS<TN, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideRequestRemain(StateRegistry& stateRegistry) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestRemain(StateRegistry& stateRegistry) {
 	initial	 .deepRequestRemain(stateRegistry);
 	remaining.wideRequestRemain(stateRegistry);
 }
@@ -7010,7 +6913,7 @@ _OS<TN, TA, NI, TI, TR...>::wideRequestRemain(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideRequestRestart(StateRegistry& stateRegistry) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestRestart(StateRegistry& stateRegistry) {
 	initial	 .deepRequestRestart(stateRegistry);
 	remaining.wideRequestRestart(stateRegistry);
 }
@@ -7019,7 +6922,7 @@ _OS<TN, TA, NI, TI, TR...>::wideRequestRestart(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideRequestResume(StateRegistry& stateRegistry) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestResume(StateRegistry& stateRegistry) {
 	initial	 .deepRequestResume(stateRegistry);
 	remaining.wideRequestResume(stateRegistry);
 }
@@ -7028,7 +6931,7 @@ _OS<TN, TA, NI, TI, TR...>::wideRequestResume(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
 	initial  .deepRequestUtilize(control);
 	remaining.wideRequestUtilize(control);
 }
@@ -7037,7 +6940,7 @@ _OS<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 typename TA::Utility
-_OS<TN, TA, NI, TI, TR...>::wideReportChange(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideReportChange(Control& control) {
 	const UP	  i = initial  .deepReportChange(control);
 	const Utility r = remaining.wideReportChange(control);
 
@@ -7048,7 +6951,7 @@ _OS<TN, TA, NI, TI, TR...>::wideReportChange(Control& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 typename TA::Utility
-_OS<TN, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
 	const UP	  i = initial  .deepReportUtilize(control);
 	const Utility r = remaining.wideReportUtilize(control);
 
@@ -7059,7 +6962,7 @@ _OS<TN, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideEnterRequested(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideEnterRequested(PlanControl& control) {
 	initial	 .deepEnterRequested(control);
 	remaining.wideEnterRequested(control);
 }
@@ -7068,7 +6971,7 @@ _OS<TN, TA, NI, TI, TR...>::wideEnterRequested(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
 	initial	 .deepChangeToRequested(control);
 	remaining.wideChangeToRequested(control);
 }
@@ -7079,7 +6982,7 @@ _OS<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-_OS<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
+OS_<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
 										 const ShortIndex depth,
 										 StructureStateInfos& _stateInfos) const
 {
@@ -7100,7 +7003,7 @@ namespace detail {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideRegister(StateRegistry& stateRegistry,
+OS_<TN, TA, NI, TI>::wideRegister(StateRegistry& stateRegistry,
 								  const ForkID forkId)
 {
 	initial.deepRegister(stateRegistry, Parent{forkId, PRONG_INDEX});
@@ -7110,7 +7013,7 @@ _OS<TN, TA, NI, TI>::wideRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
+OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
 										   const ProngConstBits prongs)
 {
 	return prongs.get(PRONG_INDEX) ?
@@ -7121,7 +7024,7 @@ _OS<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) {
 	return initial.deepForwardEntryGuard(control);
 }
 
@@ -7129,7 +7032,7 @@ _OS<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
 	return initial.deepEntryGuard(control);
 }
 
@@ -7137,7 +7040,7 @@ _OS<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideEnter(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
 
@@ -7145,7 +7048,7 @@ _OS<TN, TA, NI, TI>::wideEnter(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideReenter(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) {
 	initial.deepReenter(control);
 }
 
@@ -7153,7 +7056,7 @@ _OS<TN, TA, NI, TI>::wideReenter(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 Status
-_OS<TN, TA, NI, TI>::wideUpdate(FullControl& control) {
+OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) {
 	return initial.deepUpdate(control);
 }
 
@@ -7162,7 +7065,7 @@ _OS<TN, TA, NI, TI>::wideUpdate(FullControl& control) {
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 Status
-_OS<TN, TA, NI, TI>::wideReact(FullControl& control,
+OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
 									   const TEvent& event)
 {
 	return initial.deepReact(control, event);
@@ -7172,7 +7075,7 @@ _OS<TN, TA, NI, TI>::wideReact(FullControl& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
+OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
 										  const ProngConstBits prongs)
 {
 	return prongs.get(PRONG_INDEX) ?
@@ -7183,7 +7086,7 @@ _OS<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) {
 	return initial.deepForwardExitGuard(control);
 }
 
@@ -7191,7 +7094,7 @@ _OS<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-_OS<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) {
 	return initial.deepExitGuard(control);
 }
 
@@ -7199,7 +7102,7 @@ _OS<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideExit(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
 }
 
@@ -7207,7 +7110,7 @@ _OS<TN, TA, NI, TI>::wideExit(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideForwardActive(Control& control,
+OS_<TN, TA, NI, TI>::wideForwardActive(Control& control,
 									   const RequestType request,
 									   const ProngConstBits prongs)
 {
@@ -7221,7 +7124,7 @@ _OS<TN, TA, NI, TI>::wideForwardActive(Control& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideForwardRequest(Control& control,
+OS_<TN, TA, NI, TI>::wideForwardRequest(Control& control,
 										const RequestType request,
 										const ProngConstBits prongs)
 {
@@ -7235,7 +7138,7 @@ _OS<TN, TA, NI, TI>::wideForwardRequest(Control& control,
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideRequestChange(Control& control) {
+OS_<TN, TA, NI, TI>::wideRequestChange(Control& control) {
 	initial.deepRequestChange(control);
 }
 
@@ -7243,7 +7146,7 @@ _OS<TN, TA, NI, TI>::wideRequestChange(Control& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
+OS_<TN, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
 	initial.deepRequestRemain(stateRegistry);
 }
 
@@ -7251,7 +7154,7 @@ _OS<TN, TA, NI, TI>::wideRequestRemain(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideRequestRestart(StateRegistry& stateRegistry) {
+OS_<TN, TA, NI, TI>::wideRequestRestart(StateRegistry& stateRegistry) {
 	initial.deepRequestRestart(stateRegistry);
 }
 
@@ -7259,7 +7162,7 @@ _OS<TN, TA, NI, TI>::wideRequestRestart(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideRequestResume(StateRegistry& stateRegistry) {
+OS_<TN, TA, NI, TI>::wideRequestResume(StateRegistry& stateRegistry) {
 	initial.deepRequestResume(stateRegistry);
 }
 
@@ -7267,7 +7170,7 @@ _OS<TN, TA, NI, TI>::wideRequestResume(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
+OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
 	initial.deepRequestUtilize(control);
 }
 
@@ -7275,7 +7178,7 @@ _OS<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 typename TA::Utility
-_OS<TN, TA, NI, TI>::wideReportChange(Control& control) {
+OS_<TN, TA, NI, TI>::wideReportChange(Control& control) {
 	const UP i = initial.deepReportChange(control);
 
 	return i.utility;
@@ -7285,7 +7188,7 @@ _OS<TN, TA, NI, TI>::wideReportChange(Control& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 typename TA::Utility
-_OS<TN, TA, NI, TI>::wideReportUtilize(Control& control) {
+OS_<TN, TA, NI, TI>::wideReportUtilize(Control& control) {
 	const UP i = initial.deepReportUtilize(control);
 
 	return i.utility;
@@ -7295,7 +7198,7 @@ _OS<TN, TA, NI, TI>::wideReportUtilize(Control& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideEnterRequested(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideEnterRequested(PlanControl& control) {
 	initial.deepEnterRequested(control);
 }
 
@@ -7303,7 +7206,7 @@ _OS<TN, TA, NI, TI>::wideEnterRequested(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 	initial.deepChangeToRequested(control);
 }
 
@@ -7313,7 +7216,7 @@ _OS<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-_OS<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
+OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
 								  const ShortIndex depth,
 								  StructureStateInfos& _stateInfos) const
 {
@@ -7335,7 +7238,7 @@ template <typename TIndices,
 		  typename TArgs,
 		  typename THead,
 		  typename... TSubStates>
-struct _O final {
+struct O_ final {
 	using Indices		= TIndices;
 	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -7354,10 +7257,10 @@ struct _O final {
 
 	using Head			= THead;
 
-	using Forward		= _OF<Head, TSubStates...>;
-	static constexpr ShortIndex WIDTH		= Forward::WIDTH;
-	static constexpr ShortIndex REGION_SIZE	= Forward::STATE_COUNT;
-	static constexpr ShortIndex ORTHO_UNITS	= Forward::ORTHO_UNITS;
+	using Info			= OI_<Head, TSubStates...>;
+	static constexpr ShortIndex WIDTH		= Info::WIDTH;
+	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
+	static constexpr ShortIndex ORTHO_UNITS	= Info::ORTHO_UNITS;
 
 	using Request		= RequestT<Payload>;
 	using RequestType	= typename Request::Type;
@@ -7379,8 +7282,8 @@ struct _O final {
 
 	using GuardControl	= GuardControlT<Args>;
 
-	using HeadState		= _S<Indices, Args, Head>;
-	using SubStates		= _OS<_I<HEAD_ID + 1,
+	using HeadState		= S_<Indices, Args, Head>;
+	using SubStates		= OS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX,
 								 ORTHO_INDEX + 1,
 								 ORTHO_UNIT + ORTHO_UNITS>,
@@ -7467,7 +7370,7 @@ namespace detail {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
+O_<TN, TA, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 									const Parent parent)
 {
 	stateRegistry.orthoParents[ORTHO_INDEX] = parent;
@@ -7481,7 +7384,7 @@ _O<TN, TA, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
-_O<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
+O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
 											 const ShortIndex /*prong*/)
 {
 	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
@@ -7498,7 +7401,7 @@ _O<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
-_O<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control,
+O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control,
 									  const ShortIndex /*prong*/)
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -7511,7 +7414,7 @@ _O<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepEnter(PlanControl& control,
+O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control,
 								 const ShortIndex /*prong*/)
 {
 	ProngBits requested = orthoRequested(control);
@@ -7527,7 +7430,7 @@ _O<TN, TA, TH, TS...>::deepEnter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepReenter(PlanControl& control,
+O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control,
 								   const ShortIndex /*prong*/)
 {
 	ProngBits requested = orthoRequested(control);
@@ -7543,7 +7446,7 @@ _O<TN, TA, TH, TS...>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 Status
-_O<TN, TA, TH, TS...>::deepUpdate(FullControl& control,
+O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control,
 								  const ShortIndex /*prong*/)
 {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -7571,7 +7474,7 @@ _O<TN, TA, TH, TS...>::deepUpdate(FullControl& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 Status
-_O<TN, TA, TH, TS...>::deepReact(FullControl& control,
+O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 								 const TEvent& event,
 								 const ShortIndex /*prong*/)
 {
@@ -7599,7 +7502,7 @@ _O<TN, TA, TH, TS...>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
-_O<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control,
+O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control,
 											const ShortIndex /*prong*/)
 {
 	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
@@ -7616,7 +7519,7 @@ _O<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
-_O<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control,
+O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control,
 									 const ShortIndex /*prong*/)
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -7629,7 +7532,7 @@ _O<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepExit(PlanControl& control,
+O_<TN, TA, TH, TS...>::deepExit(PlanControl& control,
 								const ShortIndex /*prong*/)
 {
 	_subStates.wideExit(control);
@@ -7640,7 +7543,7 @@ _O<TN, TA, TH, TS...>::deepExit(PlanControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepForwardActive(Control& control,
+O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 										 const RequestType request,
 										 const ShortIndex /*prong*/)
 {
@@ -7656,7 +7559,7 @@ _O<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
+O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
 										  const RequestType request,
 										  const ShortIndex /*prong*/)
 {
@@ -7672,7 +7575,7 @@ _O<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepRequest(Control& control,
+O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 								   const RequestType request)
 {
 	switch (request) {
@@ -7705,7 +7608,7 @@ _O<TN, TA, TH, TS...>::deepRequest(Control& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepRequestChange(Control& control,
+O_<TN, TA, TH, TS...>::deepRequestChange(Control& control,
 										 const ShortIndex /*prong*/)
 {
 	_subStates.wideRequestChange(control);
@@ -7715,7 +7618,7 @@ _O<TN, TA, TH, TS...>::deepRequestChange(Control& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+O_<TN, TA, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 	_subStates.wideRequestRemain(stateRegistry);
 }
 
@@ -7723,7 +7626,7 @@ _O<TN, TA, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
+O_<TN, TA, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 	_subStates.wideRequestRestart(stateRegistry);
 }
 
@@ -7731,7 +7634,7 @@ _O<TN, TA, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
+O_<TN, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 										 const ShortIndex /*prong*/)
 {
 	_subStates.wideRequestResume(stateRegistry);
@@ -7741,7 +7644,7 @@ _O<TN, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
+O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
 	_subStates.wideRequestUtilize(control);
 }
 
@@ -7749,7 +7652,7 @@ _O<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 typename TA::UP
-_O<TN, TA, TH, TS...>::deepReportChange(Control& control,
+O_<TN, TA, TH, TS...>::deepReportChange(Control& control,
 										const ShortIndex /*prong*/)
 {
 	const UP	  h = _headState.deepReportChange(control);
@@ -7769,7 +7672,7 @@ _O<TN, TA, TH, TS...>::deepReportChange(Control& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 typename TA::UP
-_O<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
+O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 	const UP	  h = _headState.deepReportUtilize(control);
 	const Utility s = _subStates.wideReportUtilize(control);
 
@@ -7787,10 +7690,9 @@ _O<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepEnterRequested(PlanControl& control,
+O_<TN, TA, TH, TS...>::deepEnterRequested(PlanControl& control,
 										  const ShortIndex /*prong*/)
 {
-	// TODO: pass requested orthoFork
 	_headState.deepEnter		 (control);
 	_subStates.wideEnterRequested(control);
 }
@@ -7799,10 +7701,9 @@ _O<TN, TA, TH, TS...>::deepEnterRequested(PlanControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control,
+O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control,
 											 const ShortIndex /*prong*/)
 {
-	// TODO: pass requested orthoFork
 	_subStates.wideChangeToRequested(control);
 }
 
@@ -7812,7 +7713,7 @@ _O<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-_O<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
 									const RegionType region,
 									const ShortIndex depth,
 									StructureStateInfos& _stateInfos) const
@@ -7832,45 +7733,40 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TPayload,
+template <typename TConfig,
 		  typename TApex>
 class _R {
-	using Context				= TContext;
+	using Config_				= TConfig;
+	using Context				= typename Config_::Context;
+	using Utility				= typename Config_::Utility;
+	using Logger				= typename Config_::Logger;
+	using Payload				= typename Config_::Payload;
 
-	using Config				= TConfig;
-	using Utility				= typename Config::Utility;
-	using Logger				= typename Config::Logger;
-
-	using Payload				= TPayload;
 	using Apex					= TApex;
 
-	using ForwardApex			= Wrap<Apex>;
-	using AllForward			= _RF<Context, Config, Payload, Apex>;
-	using StateList				= typename AllForward::StateList;
-	using RegionList			= typename AllForward::RegionList;
+	using ApexInfo				= Wrap<Apex>;
+	using Info					= _RF<Config_, Apex>;
+	using StateList				= typename Info::StateList;
+	using RegionList			= typename Info::RegionList;
 
-	static constexpr LongIndex MAX_PLAN_TASKS	 = Config::MAX_PLAN_TASKS;
-	static constexpr LongIndex MAX_SUBSTITUTIONS = Config::MAX_SUBSTITUTIONS;
-
-	static constexpr LongIndex TASK_CAPACITY	 = AllForward::TASK_CAPACITY;
+	static constexpr LongIndex SUBSTITUTION_LIMIT = Info::SUBSTITUTION_LIMIT;
+	static constexpr LongIndex TASK_CAPACITY	  = Info::TASK_CAPACITY;
 
 public:
-	static constexpr LongIndex  REVERSE_DEPTH	 = ForwardApex::REVERSE_DEPTH;
-	static constexpr ShortIndex COMPO_REGIONS	 = ForwardApex::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	 = ForwardApex::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	 = ForwardApex::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		 = ForwardApex::ORTHO_UNITS;
+	static constexpr LongIndex  REVERSE_DEPTH	  = ApexInfo::REVERSE_DEPTH;
+	static constexpr ShortIndex COMPO_REGIONS	  = ApexInfo::COMPO_REGIONS;
+	static constexpr LongIndex  COMPO_PRONGS	  = ApexInfo::COMPO_PRONGS;
+	static constexpr ShortIndex ORTHO_REGIONS	  = ApexInfo::ORTHO_REGIONS;
+	static constexpr ShortIndex ORTHO_UNITS		  = ApexInfo::ORTHO_UNITS;
 
-	static constexpr LongIndex  STATE_COUNT		 = ForwardApex::STATE_COUNT;
-	static constexpr LongIndex  REGION_COUNT	 = ForwardApex::REGION_COUNT;
+	static constexpr LongIndex  STATE_COUNT		  = ApexInfo::STATE_COUNT;
+	static constexpr LongIndex  REGION_COUNT	  = ApexInfo::REGION_COUNT;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 private:
-	using Args					= typename AllForward::Args;
+	using Args					= typename Info::Args;
 
 	using StateRegistry			= StateRegistryT<Args>;
 	using AllForks				= typename StateRegistry::AllForks;
@@ -7889,7 +7785,7 @@ private:
 	using Payloads				= Array<Payload, STATE_COUNT>;
 	using PayloadsSet			= BitArray<LongIndex, STATE_COUNT>;
 
-	using MaterialApex			= Material<_I<0, 0, 0, 0>, Args, Apex>;
+	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
 
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8067,40 +7963,39 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TPayload,
+template <typename TConfig,
 		  typename TApex>
-class _RW final
-	: public _R<TContext, TConfig, TPayload, TApex>
+class RW_ final
+	: public _R<TConfig, TApex>
 {
 public:
-	using _R<TContext, TConfig, TPayload, TApex>::_R;
+	using _R<TConfig, TApex>::_R;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TConfig,
-		  typename TPayload,
+template <typename TU,
+		  typename TP,
+		  LongIndex NS,
+		  LongIndex NT,
 		  typename TApex>
-class _RW<EmptyContext, TConfig, TPayload, TApex> final
-	: public _R<EmptyContext, TConfig, TPayload, TApex>
+class RW_<::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>, TApex> final
+	: public _R<::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>, TApex>
 	, EmptyContext
 {
-	using Config				 = TConfig;
-	using Utility				 = typename Config::Utility;
-	using Logger				 = typename Config::Logger;
+	using Config_	= ::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>;
+	using Logger	= typename Config_::Logger;
 
-	using R = _R<EmptyContext, TConfig, TPayload, TApex>;
+	using R			= _R<Config_, TApex>;
 
 public:
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	HFSM_INLINE _RW(Logger* const logger = nullptr)
+	HFSM_INLINE RW_(Logger* const logger = nullptr)
 		: R{static_cast<EmptyContext&>(*this), logger}
 	{}
 #else
-	HFSM_INLINE _RW()
+	HFSM_INLINE RW_()
 		: R{static_cast<EmptyContext&>(*this)}
 	{}
 #endif
@@ -8116,9 +8011,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TPL, typename TA>
-_R<TC, TG, TPL, TA>::_R(Context& context
-						HFSM_IF_LOGGER(, Logger* const logger))
+template <typename TG, typename TA>
+_R<TG, TA>::_R(Context& context
+			   HFSM_IF_LOGGER(, Logger* const logger))
 	: _context{context}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
@@ -8131,8 +8026,8 @@ _R<TC, TG, TPL, TA>::_R(Context& context
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
-_R<TC, TG, TPL, TA>::~_R() {
+template <typename TG, typename TA>
+_R<TG, TA>::~_R() {
 	PlanControl control{_context,
 						_stateRegistry,
 						_planData,
@@ -8144,9 +8039,9 @@ _R<TC, TG, TPL, TA>::~_R() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::update() {
+_R<TG, TA>::update() {
 	FullControl control(_context,
 						_stateRegistry,
 						_planData,
@@ -8164,10 +8059,10 @@ _R<TC, TG, TPL, TA>::update() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 template <typename TEvent>
 void
-_R<TC, TG, TPL, TA>::react(const TEvent& event) {
+_R<TG, TA>::react(const TEvent& event) {
 	FullControl control(_context,
 						_stateRegistry,
 						_planData,
@@ -8185,9 +8080,9 @@ _R<TC, TG, TPL, TA>::react(const TEvent& event) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
+_R<TG, TA>::changeTo(const StateID stateId) {
 	const Request request{Request::Type::CHANGE, stateId};
 	_requests << request;
 
@@ -8196,10 +8091,10 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
-							  const Payload& payload)
+_R<TG, TA>::changeTo(const StateID stateId,
+					 const Payload& payload)
 {
 	const Request request{Request::Type::CHANGE, stateId, payload};
 	_requests << request;
@@ -8209,9 +8104,9 @@ _R<TC, TG, TPL, TA>::changeTo(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::restart(const StateID stateId) {
+_R<TG, TA>::restart(const StateID stateId) {
 	const Request request{Request::Type::RESTART, stateId};
 	_requests << request;
 
@@ -8220,10 +8115,10 @@ _R<TC, TG, TPL, TA>::restart(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::restart(const StateID stateId,
-							 const Payload& payload)
+_R<TG, TA>::restart(const StateID stateId,
+					const Payload& payload)
 {
 	const Request request{Request::Type::RESTART, stateId, payload};
 	_requests << request;
@@ -8233,9 +8128,9 @@ _R<TC, TG, TPL, TA>::restart(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::resume(const StateID stateId) {
+_R<TG, TA>::resume(const StateID stateId) {
 	const Request request{Request::Type::RESUME, stateId};
 	_requests << request;
 
@@ -8244,10 +8139,10 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::resume(const StateID stateId,
-							const Payload& payload)
+_R<TG, TA>::resume(const StateID stateId,
+				   const Payload& payload)
 {
 	const Request request{Request::Type::RESUME, stateId, payload};
 	_requests << request;
@@ -8257,9 +8152,9 @@ _R<TC, TG, TPL, TA>::resume(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::utilize(const StateID stateId) {
+_R<TG, TA>::utilize(const StateID stateId) {
 	const Request request{Request::Type::UTILIZE, stateId};
 	_requests << request;
 
@@ -8268,10 +8163,10 @@ _R<TC, TG, TPL, TA>::utilize(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::utilize(const StateID stateId,
-							 const Payload& payload)
+_R<TG, TA>::utilize(const StateID stateId,
+					const Payload& payload)
 {
 	const Request request{Request::Type::UTILIZE, stateId, payload};
 	_requests << request;
@@ -8281,9 +8176,9 @@ _R<TC, TG, TPL, TA>::utilize(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
+_R<TG, TA>::schedule(const StateID stateId) {
 	const Request request{Request::Type::SCHEDULE, stateId};
 	_requests << request;
 
@@ -8292,10 +8187,10 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::schedule(const StateID stateId,
-							  const Payload& payload)
+_R<TG, TA>::schedule(const StateID stateId,
+					 const Payload& payload)
 {
 	const Request request{Request::Type::SCHEDULE, stateId, payload};
 	_requests << request;
@@ -8305,9 +8200,9 @@ _R<TC, TG, TPL, TA>::schedule(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
+_R<TG, TA>::resetStateData(const StateID stateId) {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	if (stateId < Payloads::CAPACITY)
@@ -8316,10 +8211,10 @@ _R<TC, TG, TPL, TA>::resetStateData(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
-								  const Payload& payload)
+_R<TG, TA>::setStateData(const StateID stateId,
+						 const Payload& payload)
 {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
@@ -8331,9 +8226,9 @@ _R<TC, TG, TPL, TA>::setStateData(const StateID stateId,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 bool
-_R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
+_R<TG, TA>::isStateDataSet(const StateID stateId) const {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	return stateId < Payloads::CAPACITY ?
@@ -8342,9 +8237,9 @@ _R<TC, TG, TPL, TA>::isStateDataSet(const StateID stateId) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
-const TPL*
-_R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
+template <typename TG, typename TA>
+const typename _R<TG, TA>::Payload*
+_R<TG, TA>::getStateData(const StateID stateId) const {
 	HFSM_ASSERT(stateId < Payloads::CAPACITY);
 
 	return stateId < Payloads::CAPACITY && _payloadsSet.get(stateId) ?
@@ -8353,9 +8248,9 @@ _R<TC, TG, TPL, TA>::getStateData(const StateID stateId) const {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::initialEnter() {
+_R<TG, TA>::initialEnter() {
 	Control control(_context,
 					_stateRegistry,
 					_planData,
@@ -8372,7 +8267,7 @@ _R<TC, TG, TPL, TA>::initialEnter() {
 		_stateRegistry.requested = undoRequested;
 
 	for (LongIndex i = 0;
-		 i < MAX_SUBSTITUTIONS && _requests.count();
+		 i < SUBSTITUTION_LIMIT && _requests.count();
 		 ++i)
 	{
 		undoRequested = _stateRegistry.requested;
@@ -8406,9 +8301,9 @@ _R<TC, TG, TPL, TA>::initialEnter() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::processTransitions() {
+_R<TG, TA>::processTransitions() {
 	HFSM_ASSERT(_requests.count());
 
 	HFSM_IF_STRUCTURE(_lastTransitions.clear());
@@ -8422,7 +8317,7 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 					HFSM_LOGGER_OR(_logger, nullptr));
 
 	for (LongIndex i = 0;
-		i < MAX_SUBSTITUTIONS && _requests.count();
+		i < SUBSTITUTION_LIMIT && _requests.count();
 		++i)
 	{
 		undoRequested = _stateRegistry.requested;
@@ -8454,9 +8349,9 @@ _R<TC, TG, TPL, TA>::processTransitions() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 bool
-_R<TC, TG, TPL, TA>::applyRequests(Control& control) {
+_R<TG, TA>::applyRequests(Control& control) {
 	bool changesMade = false;
 
 	for (const Request& request : _requests) {
@@ -8489,9 +8384,9 @@ _R<TC, TG, TPL, TA>::applyRequests(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 bool
-_R<TC, TG, TPL, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
+_R<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 	GuardControl guardControl(_context,
 							  _stateRegistry,
 							  _planData,
@@ -8509,9 +8404,9 @@ _R<TC, TG, TPL, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 bool
-_R<TC, TG, TPL, TA>::cancelledByGuards(const Requests& pendingRequests) {
+_R<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
 	GuardControl guardControl(_context,
 							  _stateRegistry,
 							  _planData,
@@ -8535,9 +8430,9 @@ _R<TC, TG, TPL, TA>::cancelledByGuards(const Requests& pendingRequests) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::getStateNames() {
+_R<TG, TA>::getStateNames() {
 	_stateInfos.clear();
 	_apex.deepGetNames((LongIndex) -1, StructureStateInfo::COMPOSITE, 0, _stateInfos);
 
@@ -8613,9 +8508,9 @@ _R<TC, TG, TPL, TA>::getStateNames() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::udpateActivity() {
+_R<TG, TA>::udpateActivity() {
 	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s)
 		if (_stateInfos[s].name[0] != L'\0') {
 			_structure[i].isActive = isActive(s);
@@ -8640,9 +8535,9 @@ _R<TC, TG, TPL, TA>::udpateActivity() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TPL, typename TA>
+template <typename TG, typename TA>
 void
-_R<TC, TG, TPL, TA>::recordRequestsAs(const Method method) {
+_R<TG, TA>::recordRequestsAs(const Method method) {
 	for (const auto& request : _requests)
 		_lastTransitions << TransitionInfo(request, method);
 }

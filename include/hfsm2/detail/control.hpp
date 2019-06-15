@@ -8,15 +8,15 @@ namespace detail {
 template <typename TArgs>
 class ControlT {
 	template <typename, typename, typename>
-	friend struct _S;
+	friend struct S_;
 
 	template <typename, typename, Strategy, typename, typename...>
-	friend struct _C;
+	friend struct C_;
 
 	template <typename, typename, typename, typename...>
-	friend struct _O;
+	friend struct O_;
 
-	template <typename, typename, typename, typename>
+	template <typename, typename>
 	friend class _R;
 
 	using Args			= TArgs;
@@ -111,15 +111,15 @@ class PlanControlT
 	: public ControlT<TArgs>
 {
 	template <typename, typename, typename>
-	friend struct _S;
+	friend struct S_;
 
 	template <typename, typename, Strategy, typename, typename...>
-	friend struct _C;
+	friend struct C_;
 
 	template <typename, typename, typename, typename...>
-	friend struct _O;
+	friend struct O_;
 
-	template <typename, typename, typename, typename>
+	template <typename, typename>
 	friend class _R;
 
 	using Args			= TArgs;
@@ -225,15 +225,15 @@ class FullControlT
 	: public PlanControlT<TArgs>
 {
 	template <typename, typename, typename>
-	friend struct _S;
+	friend struct S_;
 
 	template <typename, typename, Strategy, typename, typename...>
-	friend struct _C;
+	friend struct C_;
 
 	template <typename, typename, typename, typename...>
-	friend struct _O;
+	friend struct O_;
 
-	template <typename, typename, typename, typename>
+	template <typename, typename>
 	friend class _R;
 
 	using Args			= TArgs;
@@ -302,29 +302,51 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void changeTo(const StateID id);
+	HFSM_INLINE void changeTo(const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void restart (const StateID id);
+	HFSM_INLINE void restart (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void resume	 (const StateID id);
+	HFSM_INLINE void resume  (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void utilize (const StateID id);
+	HFSM_INLINE void utilize (const StateID stateId, const Payload& payload);
+
 	HFSM_INLINE void schedule(const StateID id);
-
-	template <typename TState>
-	HFSM_INLINE void changeTo()													{ changeTo(stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE void restart()													{ restart (stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE void resume()													{ resume  (stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE void utilize()													{ utilize (stateId<TState>());	}
-
-	template <typename TState>
-	HFSM_INLINE void schedule()													{ schedule(stateId<TState>());	}
+	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// TODO: add payload variants
+	template <typename TState>
+	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void restart()									{ restart (stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void resume()									{ resume  (stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void utilize()									{ utilize (stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -353,9 +375,9 @@ class GuardControlT
 	: public FullControlT<TArgs>
 {
 	template <typename, typename, typename>
-	friend struct _S;
+	friend struct S_;
 
-	template <typename, typename, typename, typename>
+	template <typename, typename>
 	friend class _R;
 
 	using Args			= TArgs;

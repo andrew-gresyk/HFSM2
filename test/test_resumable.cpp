@@ -24,7 +24,7 @@ namespace {
 TEST_CASE("FSM.Resumable", "[machine]") {
 	Logger logger;
 
-	FSM::Instance machine(&logger);
+	FSM::Instance machine{&logger};
 	{
 		const Events reference = {
 			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },

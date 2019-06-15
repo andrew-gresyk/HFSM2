@@ -8,7 +8,7 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  typename THead,
 		  typename... TSubStates>
-struct _C {
+struct C_ {
 	using Indices		= TIndices;
 	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -48,8 +48,8 @@ struct _C {
 	using GuardControl	= GuardControlT<Args>;
 
 
-	using HeadState		= _S <Indices, Args, Head>;
-	using SubStates		= _CS<_I<HEAD_ID + 1,
+	using HeadState		= S_<Indices, Args, Head>;
+	using SubStates		= CS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX + 1,
 								 ORTHO_INDEX,
 								 ORTHO_UNIT>,
@@ -57,9 +57,9 @@ struct _C {
 							  STRATEGY,
 							  0,
 							  TSubStates...>;
-	using AllForward	= _CF<STRATEGY, Head, TSubStates...>;
 
-	static constexpr ShortIndex REGION_SIZE	= AllForward::STATE_COUNT;
+	using Info			= CI_<STRATEGY, Head, TSubStates...>;
+	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
 
 	HFSM_INLINE ShortIndex& compoActive   (StateRegistry& stateRegistry)	{ return stateRegistry.compoActive	  [COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoResumable(StateRegistry& stateRegistry)	{ return stateRegistry.resumable.compo[COMPO_INDEX]; }
@@ -159,7 +159,6 @@ struct _C {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// TODO: add 'deepReportRemain/Restart/Resume()'
 	HFSM_INLINE UP		deepReportUtilize			  (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -5,7 +5,7 @@ namespace detail {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
+CS_<TN, TA, TG, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
 												 const Parent parent)
 {
 	lHalf.deepRegister(stateRegistry, Parent{parent.forkId, L_PRONG});
@@ -16,7 +16,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<TN, TA, TG, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
 												  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -31,7 +31,7 @@ _CS<TN, TA, TG, NI, TS...>::deepForwardEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<TN, TA, TG, NI, TS...>::deepEntryGuard(GuardControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepEntryGuard(GuardControl& control,
 										   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -46,7 +46,7 @@ _CS<TN, TA, TG, NI, TS...>::deepEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepEnter(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepEnter(PlanControl& control,
 									  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -61,7 +61,7 @@ _CS<TN, TA, TG, NI, TS...>::deepEnter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepReenter(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepReenter(PlanControl& control,
 										const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -76,7 +76,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 Status
-_CS<TN, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
 									   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -91,7 +91,7 @@ _CS<TN, TA, TG, NI, TS...>::deepUpdate(FullControl& control,
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 template <typename TEvent>
 Status
-_CS<TN, TA, TG, NI, TS...>::deepReact(FullControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepReact(FullControl& control,
 									  const TEvent& event,
 									  const ShortIndex prong)
 {
@@ -106,7 +106,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<TN, TA, TG, NI, TS...>::deepForwardExitGuard(GuardControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepForwardExitGuard(GuardControl& control,
 												 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -121,7 +121,7 @@ _CS<TN, TA, TG, NI, TS...>::deepForwardExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 bool
-_CS<TN, TA, TG, NI, TS...>::deepExitGuard(GuardControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepExitGuard(GuardControl& control,
 										  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -136,7 +136,7 @@ _CS<TN, TA, TG, NI, TS...>::deepExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepExit(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepExit(PlanControl& control,
 									 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -151,7 +151,7 @@ _CS<TN, TA, TG, NI, TS...>::deepExit(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepForwardActive(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepForwardActive(Control& control,
 											  const RequestType request,
 											  const ShortIndex prong)
 {
@@ -167,7 +167,7 @@ _CS<TN, TA, TG, NI, TS...>::deepForwardActive(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
 											   const RequestType request,
 											   const ShortIndex prong)
 {
@@ -185,7 +185,7 @@ _CS<TN, TA, TG, NI, TS...>::deepForwardRequest(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestChange(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 											  const ShortIndex prong)
 {
 	switch (STRATEGY) {
@@ -208,7 +208,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestChange(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
+CS_<TN, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
 	lHalf.deepRequestChange(control);
 }
 
@@ -216,7 +216,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestChangeComposite(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
 													   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -231,7 +231,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestChangeResumable(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
+CS_<TN, TA, TG, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 	lHalf.deepRequestRemain(stateRegistry);
 }
 
@@ -239,7 +239,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
+CS_<TN, TA, TG, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 	lHalf.deepRequestRestart(stateRegistry);
 }
 
@@ -247,7 +247,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
+CS_<TN, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 											  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -262,7 +262,7 @@ _CS<TN, TA, TG, NI, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
+CS_<TN, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
 	const UP l = lHalf.deepReportUtilize(control);
 	const UP r = rHalf.deepReportUtilize(control);
 
@@ -276,7 +276,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportUtilize(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportChange(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepReportChange(Control& control,
 											 const ShortIndex prong)
 {
 	switch (STRATEGY) {
@@ -301,7 +301,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportChange(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
+CS_<TN, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
 	return lHalf.deepReportChange(control);
 }
 
@@ -309,7 +309,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportChangeComposite(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
+CS_<TN, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
 													  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -324,7 +324,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportChangeResumable(Control& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 typename TA::UP
-_CS<TN, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
+CS_<TN, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
 	const UP l = lHalf.deepReportChange(control);
 	const UP r = rHalf.deepReportChange(control);
 
@@ -336,7 +336,7 @@ _CS<TN, TA, TG, NI, TS...>::deepReportChangeUtilitarian(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepEnterRequested(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepEnterRequested(PlanControl& control,
 											   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -351,7 +351,7 @@ _CS<TN, TA, TG, NI, TS...>::deepEnterRequested(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepChangeToRequested(PlanControl& control,
+CS_<TN, TA, TG, NI, TS...>::deepChangeToRequested(PlanControl& control,
 												  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -368,7 +368,7 @@ _CS<TN, TA, TG, NI, TS...>::deepChangeToRequested(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 void
-_CS<TN, TA, TG, NI, TS...>::deepGetNames(const LongIndex parent,
+CS_<TN, TA, TG, NI, TS...>::deepGetNames(const LongIndex parent,
 										 const RegionType /*region*/,
 										 const ShortIndex depth,
 										 StructureStateInfos& _stateInfos) const

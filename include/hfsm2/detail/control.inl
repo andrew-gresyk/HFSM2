@@ -33,7 +33,7 @@ ControlT<TA>::setRegion(const RegionID id) {
 
 template <typename TA>
 void
-ControlT<TA>::resetRegion(const RegionID id) {
+ControlT<TA>::resetRegion(const RegionID id) { //-V524
 	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
 
 	_regionId = id;
@@ -96,7 +96,7 @@ PlanControlT<TA>::setOrigin(const StateID id) {
 
 template <typename TA>
 void
-PlanControlT<TA>::resetOrigin(const StateID id) {
+PlanControlT<TA>::resetOrigin(const StateID id) { //-V524
 	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
 	HFSM_ASSERT(id <= _originId && _originId < StateList::SIZE);
 
@@ -123,7 +123,7 @@ PlanControlT<TA>::setRegion(const RegionID id,
 
 template <typename TA>
 void
-PlanControlT<TA>::resetRegion(const RegionID id,
+PlanControlT<TA>::resetRegion(const RegionID id, //-V524
 							  const StateID index,
 							  const LongIndex size)
 {
@@ -238,6 +238,24 @@ FullControlT<TA>::changeTo(const StateID stateId) {
 
 template <typename TA>
 void
+FullControlT<TA>::changeTo(const StateID stateId,
+						   const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::CHANGE, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::CHANGE, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
 FullControlT<TA>::restart(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::RESTART, stateId};
@@ -251,6 +269,24 @@ FullControlT<TA>::restart(const StateID stateId) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TA>
+void
+FullControlT<TA>::restart(const StateID stateId,
+						  const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::RESTART, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::RESTART, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TA>
 void
@@ -270,6 +306,24 @@ FullControlT<TA>::resume(const StateID stateId) {
 
 template <typename TA>
 void
+FullControlT<TA>::resume(const StateID stateId,
+						 const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::RESUME, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::RESUME, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
 FullControlT<TA>::utilize(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::UTILIZE, stateId};
@@ -286,6 +340,24 @@ FullControlT<TA>::utilize(const StateID stateId) {
 
 template <typename TA>
 void
+FullControlT<TA>::utilize(const StateID stateId,
+						  const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::UTILIZE, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::UTILIZE, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
 FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
@@ -293,6 +365,19 @@ FullControlT<TA>::schedule(const StateID stateId) {
 	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+template <typename TA>
+void
+FullControlT<TA>::schedule(const StateID stateId,
+						   const Payload& payload)
+{
+	const Request transition{Request::Type::SCHEDULE, stateId, payload};
+	_requests << transition;
+
+	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
+}
 //------------------------------------------------------------------------------
 
 template <typename TA>

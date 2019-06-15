@@ -6,7 +6,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename... Ts>
-struct _TL {
+struct TL_ {
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 };
 
@@ -16,8 +16,8 @@ template <typename...>
 struct PrependT;
 
 template <typename T, typename... Ts>
-struct PrependT<T, _TL<Ts...>> {
-	using Type = _TL<T, Ts...>;
+struct PrependT<T, TL_<Ts...>> {
+	using Type = TL_<T, Ts...>;
 };
 
 template <typename... Ts>
@@ -37,7 +37,7 @@ struct LesserT<H, I, TFirst, TRest...> {
 
 template <size_t H, size_t I>
 struct LesserT<H, I> {
-	using Type = _TL<>;
+	using Type = TL_<>;
 };
 
 template <typename... Ts>
@@ -52,12 +52,12 @@ template <size_t H, size_t I, typename TFirst, typename... TRest>
 struct GreaterT<H, I, TFirst, TRest...> {
 	using Type = typename std::conditional<(I < H),
 										   typename GreaterT<H, I + 1, TRest...>::Type,
-										   _TL<TFirst, TRest...>>::type;
+										   TL_<TFirst, TRest...>>::type;
 };
 
 template <size_t H, size_t I>
 struct GreaterT<H, I> {
-	using Type = _TL<>;
+	using Type = TL_<>;
 };
 
 template <typename... Ts>
@@ -130,7 +130,7 @@ struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename... Ts>
-struct _ITL
+struct ITL_
 	: private IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
 	using Base = IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
@@ -138,18 +138,18 @@ struct _ITL
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr bool contains() { return std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value; }
+	static constexpr bool contains() { return std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value; }
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if< std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value, LongIndex>::type
+	typename std::enable_if< std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value, LongIndex>::type
 	index() {
-		return Base::template select<T>(_ITL{});
+		return Base::template select<T>(ITL_{});
 	}
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if<!std::is_base_of<IndexedTypeList_EntryT<T>, _ITL>::value, LongIndex>::type
+	typename std::enable_if<!std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value, LongIndex>::type
 	index() {
 		return INVALID_LONG_INDEX;
 	}
@@ -161,8 +161,8 @@ template <typename...>
 struct IndexedT;
 
 template <typename... Ts>
-struct IndexedT<_TL<Ts...>> {
-	using Type = _ITL<Ts...>;
+struct IndexedT<TL_<Ts...>> {
+	using Type = ITL_<Ts...>;
 };
 
 template <typename T>
@@ -174,8 +174,8 @@ template <typename...>
 struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
-struct MergeT<_TL<Ts1...>, _TL<Ts2...>> {
-	using TypeList = _TL<Ts1..., Ts2...>;
+struct MergeT<TL_<Ts1...>, TL_<Ts2...>> {
+	using TypeList = TL_<Ts1..., Ts2...>;
 };
 
 template <typename... Ts>
