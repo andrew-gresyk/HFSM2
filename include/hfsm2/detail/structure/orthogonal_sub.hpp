@@ -24,6 +24,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using Payload		= typename Args::Payload;
@@ -95,9 +96,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 	HFSM_INLINE void	wideRequestRestart	 (StateRegistry& stateRegistry);
 	HFSM_INLINE void	wideRequestResume	 (StateRegistry& stateRegistry);
 	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
+	HFSM_INLINE void	wideRequestRandomize (Control& control);
 
 	HFSM_INLINE Utility	wideReportChange	 (Control& control);
 	HFSM_INLINE Utility	wideReportUtilize	 (Control& control);
+	HFSM_INLINE Utility	wideReportRandomize	 (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -135,6 +138,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using Payload		= typename Args::Payload;
@@ -196,9 +200,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 	HFSM_INLINE void	wideRequestRestart	 (StateRegistry& stateRegistry);
 	HFSM_INLINE void	wideRequestResume	 (StateRegistry& stateRegistry);
 	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
+	HFSM_INLINE void	wideRequestRandomize (Control& control);
 
 	HFSM_INLINE Utility	wideReportChange	 (Control& control);
 	HFSM_INLINE Utility	wideReportUtilize	 (Control& control);
+	HFSM_INLINE Utility	wideReportRandomize	 (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

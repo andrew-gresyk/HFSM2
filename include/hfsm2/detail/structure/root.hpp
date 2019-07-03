@@ -5,10 +5,12 @@ namespace detail {
 
 template <typename TConfig,
 		  typename TApex>
-class _R {
+class R_ {
 	using Config_				= TConfig;
 	using Context				= typename Config_::Context;
+	using Rank					= typename Config_::Rank;
 	using Utility				= typename Config_::Utility;
+	using Random_				= typename Config_::Random_;
 	using Logger				= typename Config_::Logger;
 	using Payload				= typename Config_::Payload;
 
@@ -78,10 +80,11 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 public:
-	explicit _R(Context& context
+	explicit R_(Context& context,
+				Random_& random
 				HFSM_IF_LOGGER(, Logger* const logger = nullptr));
 
-	~_R();
+	~R_();
 
 	template <typename T>
 	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
@@ -112,52 +115,61 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void changeTo(const StateID stateId);
-	HFSM_INLINE void changeTo(const StateID stateId, const Payload& payload);
+	HFSM_INLINE void changeTo (const StateID stateId);
+	HFSM_INLINE void changeTo (const StateID stateId, const Payload& payload);
 
-	HFSM_INLINE void restart (const StateID stateId);
-	HFSM_INLINE void restart (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void restart  (const StateID stateId);
+	HFSM_INLINE void restart  (const StateID stateId, const Payload& payload);
 
-	HFSM_INLINE void resume	 (const StateID stateId);
-	HFSM_INLINE void resume  (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void resume	  (const StateID stateId);
+	HFSM_INLINE void resume   (const StateID stateId, const Payload& payload);
 
-	HFSM_INLINE void utilize (const StateID stateId);
-	HFSM_INLINE void utilize (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void utilize  (const StateID stateId);
+	HFSM_INLINE void utilize  (const StateID stateId, const Payload& payload);
 
-	HFSM_INLINE void schedule(const StateID stateId);
-	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
+	HFSM_INLINE void randomize(const StateID stateId);
+	HFSM_INLINE void randomize(const StateID stateId, const Payload& payload);
+
+	HFSM_INLINE void schedule (const StateID stateId);
+	HFSM_INLINE void schedule (const StateID stateId, const Payload& payload);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
+	HFSM_INLINE void changeTo ()								{ changeTo (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
+	HFSM_INLINE void changeTo (const Payload& payload)			{ changeTo (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	HFSM_INLINE void restart ()									{ restart (stateId<TState>());					}
+	HFSM_INLINE void restart  ()								{ restart  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
+	HFSM_INLINE void restart  (const Payload& payload)			{ restart  (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 ()									{ resume  (stateId<TState>());					}
+	HFSM_INLINE void resume	  ()								{ resume   (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
+	HFSM_INLINE void resume	  (const Payload& payload)			{ resume   (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	HFSM_INLINE void utilize ()									{ utilize (stateId<TState>());					}
+	HFSM_INLINE void utilize  ()								{ utilize  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
+	HFSM_INLINE void utilize  (const Payload& payload)			{ utilize  (stateId<TState>(), payload);		}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
+	HFSM_INLINE void randomize()								{ randomize(stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
+	HFSM_INLINE void randomize(const Payload& payload)			{ randomize(stateId<TState>(), payload);		}
+
+	template <typename TState>
+	HFSM_INLINE void schedule ()								{ schedule (stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void schedule (const Payload& payload)			{ schedule (stateId<TState>(), payload);		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -207,6 +219,7 @@ private:
 
 private:
 	Context& _context;
+	Random_& _random;
 
 	StateRegistry _stateRegistry;
 	PlanData _planData;
@@ -236,39 +249,98 @@ private:
 template <typename TConfig,
 		  typename TApex>
 class RW_ final
-	: public _R<TConfig, TApex>
+	: public R_<TConfig, TApex>
 {
 public:
-	using _R<TConfig, TApex>::_R;
+	using R_<TConfig, TApex>::R_;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TU,
+template <typename TN,
+		  typename TU,
+		  typename TR,
 		  typename TP,
 		  LongIndex NS,
 		  LongIndex NT,
 		  typename TApex>
-class RW_<::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>, TApex> final
-	: public _R<::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>, TApex>
-	, EmptyContext
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, TR, TP, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, TR, TP, NS, NT>, TApex>
+	, ::hfsm2::EmptyContext
 {
-	using Config_	= ::hfsm2::ConfigT<EmptyContext, TU, TP, NS, NT>;
+	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, TR, TP, NS, NT>;
+	using Context	= typename Config_::Context;
+	using Random_	= typename Config_::Random_;
 	using Logger	= typename Config_::Logger;
 
-	using R			= _R<Config_, TApex>;
+	using R			= R_<Config_, TApex>;
 
 public:
+	explicit HFSM_INLINE RW_(Random_& random
+							 HFSM_IF_LOGGER(, Logger* const logger = nullptr))
+		: R{static_cast<Context&>(*this),
+			random
+			HFSM_IF_LOGGER(, logger)}
+	{}
+};
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	HFSM_INLINE RW_(Logger* const logger = nullptr)
-		: R{static_cast<EmptyContext&>(*this), logger}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC,
+		  typename TN,
+		  typename TU,
+		  typename TP,
+		  LongIndex NS,
+		  LongIndex NT,
+		  typename TApex>
+class RW_	   <::hfsm2::ConfigT<TC, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<TC, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>, TApex>
+	, ::hfsm2::RandomT<TU>
+{
+	using Config_	= ::hfsm2::ConfigT<TC, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>;
+	using Context	= typename Config_::Context;
+	using Random_	= typename Config_::Random_;
+	using Logger	= typename Config_::Logger;
+
+	using R			= R_<Config_, TApex>;
+
+public:
+	explicit HFSM_INLINE RW_(Context& context
+							 HFSM_IF_LOGGER(, Logger* const logger = nullptr))
+		: R{context,
+			static_cast<Random_&>(*this)
+			HFSM_IF_LOGGER(, logger)}
+		, Random_{0}
 	{}
-#else
-	HFSM_INLINE RW_()
-		: R{static_cast<EmptyContext&>(*this)}
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN,
+		  typename TU,
+		  typename TP,
+		  LongIndex NS,
+		  LongIndex NT,
+		  typename TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>, TApex>
+	, ::hfsm2::EmptyContext
+	, ::hfsm2::RandomT<TU>
+{
+	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>;
+	using Context	= typename Config_::Context;
+	using Random_	= typename Config_::Random_;
+	using Logger	= typename Config_::Logger;
+
+	using R			= R_<Config_, TApex>;
+
+public:
+	explicit HFSM_INLINE RW_(HFSM_IF_LOGGER(Logger* const logger = nullptr))
+		: R{static_cast<Context&>(*this),
+			static_cast<Random_&>(*this)
+			HFSM_IF_LOGGER(, logger)}
+		, Random_{0}
 	{}
-#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////

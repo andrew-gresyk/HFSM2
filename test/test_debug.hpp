@@ -6,7 +6,9 @@ namespace test_debug {
 
 //------------------------------------------------------------------------------
 
-using M = hfsm2::Machine;
+struct Empty {};
+
+using M = hfsm2::MachineT<hfsm2::Config::ContextT<Empty>::RandomT<hfsm2::XoShiRo128Plus>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -26,6 +28,10 @@ using FSM = M::Root<S(Apex),
 					M::Utilitarian<S(U),
 						S(U_1),
 						S(U_2)
+					>,
+					M::Random<S(N),
+						S(N_1),
+						S(N_2)
 					>
 				>
 			>;
@@ -37,6 +43,7 @@ static_assert(FSM::regionId<O>()	==  1, "");
 static_assert(FSM::regionId<R>()	==  2, "");
 static_assert(FSM::regionId<C>()	==  3, "");
 static_assert(FSM::regionId<U>()	==  4, "");
+static_assert(FSM::regionId<N>()	==  5, "");
 
 static_assert(FSM::stateId<Apex>()	==  0, "");
 static_assert(FSM::stateId<I>()		==  1, "");
@@ -50,6 +57,9 @@ static_assert(FSM::stateId<C_2>()	==  8, "");
 static_assert(FSM::stateId<U>()		==  9, "");
 static_assert(FSM::stateId<U_1>()	== 10, "");
 static_assert(FSM::stateId<U_2>()	== 11, "");
+static_assert(FSM::stateId<N>()		== 12, "");
+static_assert(FSM::stateId<N_1>()	== 13, "");
+static_assert(FSM::stateId<N_2>()	== 14, "");
 
 //------------------------------------------------------------------------------
 
@@ -65,12 +75,15 @@ struct C_2	: FSM::State {};
 struct U	: FSM::State {};
 struct U_1	: FSM::State {};
 struct U_2	: FSM::State {};
+struct N	: FSM::State {};
+struct N_1	: FSM::State {};
+struct N_2	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 12, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS ==  4, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  ==  8, "COMPO_PRONGS");
+static_assert(FSM::Instance::STATE_COUNT   == 15, "STATE_COUNT");
+static_assert(FSM::Instance::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::COMPO_PRONGS  == 10, "COMPO_PRONGS");
 static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
 static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 

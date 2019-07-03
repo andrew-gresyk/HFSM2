@@ -12,6 +12,7 @@
 
 struct Event {
 	enum Enum {
+		RANK,
 		UTILITY,
 		ENTRY_GUARD,
 		ENTER,
@@ -23,6 +24,7 @@ struct Event {
 		EXIT,
 
 		UTILITY_RESOLUTION,
+		RANDOM_RESOLUTION,
 
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
@@ -36,6 +38,7 @@ struct Event {
 		RESTART,
 		RESUME,
 		UTILIZE,
+		RANDOMIZE,
 		SCHEDULE,
 		CANCELLED_PENDING,
 
@@ -93,6 +96,10 @@ struct Logger
 	void recordUtilityResolution(const StateID head,
 								 const StateID prong,
 								 const Utilty utilty) override;
+
+	void recordRandomResolution(const StateID head,
+								const StateID prong,
+								const Utilty utilty) override;
 
 	void assertSequence(const Events& reference);
 

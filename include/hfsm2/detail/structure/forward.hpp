@@ -197,7 +197,9 @@ struct ArgsT final {
 	using Context	 = TContext;
 
 	using Config_	 = TConfig;
+	using Rank		 = typename Config_::Rank;
 	using Utility	 = typename Config_::Utility;
+	using Random_	 = typename Config_::Random_;
 	using UP		 = typename Config_::UP;
 	using Logger	 = typename Config_::Logger;
 
@@ -345,10 +347,10 @@ struct RF_ final {
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename T>
 struct CSubMaterialT;
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename T>
-struct CSubMaterialT	 <TN, TA, TG, NI, TL_<T>> {
-	using Type = Material<TN, TA,			  T>;
-};
+//template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename T>
+//struct CSubMaterialT	 <TN, TA, TG, NI, TL_<T>> {
+//	using Type = Material<TN, TA,			  T>;
+//};
 
 template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
 struct CSubMaterialT<TN, TA, TG, NI, TL_<TS...>> {

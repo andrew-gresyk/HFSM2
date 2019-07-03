@@ -7,6 +7,9 @@ Logger::recordMethod(const StateID origin,
 					 const Method method)
 {
 	switch (method) {
+		case Method::RANK:
+			history.emplace_back(origin, Event::RANK);
+			break;
 		case Method::UTILITY:
 			history.emplace_back(origin, Event::UTILITY);
 			break;
@@ -51,23 +54,27 @@ Logger::recordTransition(const StateID origin,
 {
 	switch (transition) {
 		case Transition::CHANGE:
-			history.emplace_back(origin, Event::CHANGE,   target);
+			history.emplace_back(origin, Event::CHANGE,    target);
 			break;
 
 		case Transition::RESTART:
-			history.emplace_back(origin, Event::RESTART,  target);
+			history.emplace_back(origin, Event::RESTART,   target);
 			break;
 
 		case Transition::RESUME:
-			history.emplace_back(origin, Event::RESUME,   target);
+			history.emplace_back(origin, Event::RESUME,    target);
 			break;
 
 		case Transition::UTILIZE:
-			history.emplace_back(origin, Event::UTILIZE,  target);
+			history.emplace_back(origin, Event::UTILIZE,   target);
+			break;
+
+		case Transition::RANDOMIZE:
+			history.emplace_back(origin, Event::RANDOMIZE, target);
 			break;
 
 		case Transition::SCHEDULE:
-			history.emplace_back(origin, Event::SCHEDULE, target);
+			history.emplace_back(origin, Event::SCHEDULE,  target);
 			break;
 
 		default:
@@ -120,6 +127,16 @@ Logger::recordUtilityResolution(const StateID head,
 								const Utilty utilty)
 {
 	history.emplace_back(head, Event::UTILITY_RESOLUTION, prong, utilty);
+}
+
+//------------------------------------------------------------------------------
+
+void
+Logger::recordRandomResolution(const StateID head,
+							   const StateID prong,
+							   const Utilty utilty)
+{
+	history.emplace_back(head, Event::RANDOM_RESOLUTION, prong, utilty);
 }
 
 //------------------------------------------------------------------------------

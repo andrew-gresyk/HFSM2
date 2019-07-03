@@ -1,38 +1,127 @@
 #pragma once
 
-#if defined _DEBUG && _MSC_VER
-	#include <intrin.h>		// __debugbreak()
-#endif
-
 //------------------------------------------------------------------------------
 
-#if defined _DEBUG && defined _MSC_VER
-	#define HFSM_BREAK()			__debugbreak()
+#if INTPTR_MAX == INT64_MAX
+	#define HFSM_64BIT_OR_32BIT(p64, p32)		p64
 #else
-	#define HFSM_BREAK()			((void) 0)
+	#define HFSM_64BIT_OR_32BIT(p64, p32)		p32
 #endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined _DEBUG && defined _MSC_VER
+	#define HFSM_BREAK()						__debugbreak()
+#else
+	#define HFSM_BREAK()						((void) 0)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef _DEBUG
-	#define HFSM_IF_DEBUG(...)		__VA_ARGS__
+	#define HFSM_IF_DEBUG(...)					__VA_ARGS__
 	#define HFSM_UNLESS_DEBUG(...)
-	#define HFSM_DEBUG_OR(y, n)		y
+	#define HFSM_DEBUG_OR(y, n)					y
 #else
 	#define HFSM_IF_DEBUG(...)
-	#define HFSM_UNLESS_DEBUG(...)	__VA_ARGS__
-	#define HFSM_DEBUG_OR(y, n)		n
+	#define HFSM_UNLESS_DEBUG(...)				__VA_ARGS__
+	#define HFSM_DEBUG_OR(y, n)					n
 #endif
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #ifdef HFSM_ENABLE_ASSERT
-	#define HFSM_IF_ASSERT(...)		__VA_ARGS__
-	#define HFSM_CHECKED(x)			(!!(x) || (HFSM_BREAK(), 0))
-	#define HFSM_ASSERT(x)			(!!(x) || (HFSM_BREAK(), 0))
-	#define HFSM_ASSERT_OR(y, n)	y
+	#define HFSM_IF_ASSERT(...)					__VA_ARGS__
+	#define HFSM_CHECKED(x)						(!!(x) || (HFSM_BREAK(), 0))
+	#define HFSM_ASSERT(x)						(!!(x) || (HFSM_BREAK(), 0))
+	#define HFSM_ASSERT_OR(y, n)				y
 #else
 	#define HFSM_IF_ASSERT(...)
-	#define HFSM_CHECKED(x)			x
-	#define HFSM_ASSERT(x)			((void) 0)
-	#define HFSM_ASSERT_OR(y, n)	n
+	#define HFSM_CHECKED(x)						x
+	#define HFSM_ASSERT(x)						((void) 0)
+	#define HFSM_ASSERT_OR(y, n)				n
 #endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+
+	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
+
+	#define HFSM_LOGGER_OR(Y, N)												Y
+
+	#define HFSM_LOG_TRANSITION(ORIGIN, TRANSITION, DESTINATION)				\
+		if (_logger)															\
+			_logger->recordTransition(ORIGIN, TRANSITION, DESTINATION)
+
+	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)						\
+		if (_logger)															\
+			_logger->recordTaskStatus(REGION, ORIGIN, STATUS)
+
+	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)								\
+		if (_logger)															\
+			_logger->recordPlanStatus(REGION, STATUS)
+
+	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)									\
+		if (_logger)															\
+			_logger->recordCancelledPending(ORIGIN)
+
+	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)					\
+		if (auto* const logger = control.logger())								\
+			logger->recordUtilityResolution(HEAD, PRONG, UTILITY)
+
+	#define HFSM_LOG_RANDOM_RESOLUTION(HEAD, PRONG, UTILITY)					\
+		if (auto* const logger = control.logger())								\
+			logger->recordRandomResolution(HEAD, PRONG, UTILITY)
+
+#else
+
+	#define HFSM_IF_LOGGER(...)
+	#define HFSM_LOGGER_OR(Y, N)												N
+	#define HFSM_LOG_TRANSITION(ORIGIN, TRANSITION, DESTINATION)
+	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)
+	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)
+	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)
+	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)
+	#define HFSM_LOG_RANDOM_RESOLUTION(HEAD, PRONG, UTILITY)
+
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			logger->recordMethod(STATE_ID, ID)
+
+#elif defined HFSM_ENABLE_LOG_INTERFACE
+
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+		if (auto* const logger = control.logger())								\
+			log<decltype(METHOD), ID>(*logger)
+
+#else
+	#define HFSM_LOG_STATE_METHOD(METHOD, ID)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	#define HFSM_IF_STRUCTURE(...)									  __VA_ARGS__
+#else
+	#define HFSM_IF_STRUCTURE(...)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
+	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION									1
+#else
+	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION									0
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 namespace hfsm2 {
 

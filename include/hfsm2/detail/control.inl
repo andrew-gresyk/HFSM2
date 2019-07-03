@@ -358,6 +358,40 @@ FullControlT<TA>::utilize(const StateID stateId,
 
 template <typename TA>
 void
+FullControlT<TA>::randomize(const StateID stateId) {
+	if (!_locked) {
+		const Request request{Request::Type::RANDOMIZE, stateId};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::RANDOMIZE, stateId);
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TA>
+void
+FullControlT<TA>::randomize(const StateID stateId,
+							const Payload& payload)
+{
+	if (!_locked) {
+		const Request request{Request::Type::RANDOMIZE, stateId, payload};
+		_requests << request;
+
+		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
+			_status.outerTransition = true;
+
+		HFSM_LOG_TRANSITION(_originId, Transition::RANDOMIZE, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TA>
+void
 FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;

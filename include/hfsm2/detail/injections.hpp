@@ -12,6 +12,7 @@ class InjectionT {
 
 protected:
 	using Context		= typename TArgs::Context;
+	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
 	using StateList		= typename TArgs::StateList;
 	using RegionList	= typename TArgs::RegionList;
@@ -76,7 +77,11 @@ template <typename TFirst>
 struct B_<TFirst>
 	: TFirst
 {
-	HFSM_INLINE float utility		   (const typename TFirst::Control&)		{ return typename TFirst::Utility{1.0f};	}
+	HFSM_INLINE typename TFirst::Rank
+					  rank			   (const typename TFirst::Control&)		{ return typename TFirst::Rank	 {0};		}
+
+	HFSM_INLINE typename TFirst::Utility
+					  utility		   (const typename TFirst::Control&)		{ return typename TFirst::Utility{1.0f};	}
 
 	HFSM_INLINE void  entryGuard	   (typename TFirst::GuardControl&)			{}
 
@@ -112,10 +117,10 @@ struct B_<TFirst>
 	HFSM_INLINE void  widePostExit	   (typename TFirst::Context& context);
 
 	template <typename T>
-	static constexpr StateID  stateId()			{ return			typename TFirst::StateList ::template index<T>();	}
+	static constexpr StateID  stateId()				{ return			typename TFirst::StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()		{ return (RegionID) typename TFirst::RegionList::template index<T>();	}
+	static constexpr RegionID regionId()			{ return (RegionID) typename TFirst::RegionList::template index<T>();	}
 };
 
 template <typename TArgs>

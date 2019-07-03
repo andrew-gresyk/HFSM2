@@ -60,10 +60,10 @@
     <ClCompile Include="..\..\test\test_composite_bst.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_utility.cpp">
+    <ClCompile Include="..\..\test\test_utilize.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_resumable.cpp">
+    <ClCompile Include="..\..\test\test_resume.cpp">
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test_utility_regions.cpp">
@@ -73,6 +73,9 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test_ortho_units.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_randomize.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
@@ -149,7 +152,7 @@
     <ClInclude Include="..\..\test\test_composite_bst.hpp">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\test_utility.hpp">
+    <ClInclude Include="..\..\test\test_utilize.hpp">
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\structure\composite.hpp">
@@ -173,7 +176,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp">
       <Filter>hfsm\detail\structure</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\test_resumable.hpp">
+    <ClInclude Include="..\..\test\test_resume.hpp">
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_utility_regions.hpp">
@@ -184,6 +187,12 @@
     </ClInclude>
     <ClInclude Include="..\..\test\test_ortho_units.hpp">
       <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_randomize.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp">
+      <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -217,9 +226,6 @@
     <None Include="..\..\include\hfsm2\detail\structure\composite.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\structure\composite_sub.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
@@ -234,6 +240,15 @@
     </None>
     <None Include="..\..\include\hfsm2\detail\structure\state.inl">
       <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\composite_sub_1.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\composite_sub_2.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\shared\random.inl">
+      <Filter>hfsm\detail\shared</Filter>
     </None>
   </ItemGroup>
 </Project>

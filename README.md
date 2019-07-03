@@ -33,12 +33,19 @@ Check [Wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) for basic usa
 - Hierarchical, with composite (sub-machine) and orthogonal regions
 - Gamedev-friendly, supports explicit `State::update()`
 - Also supports traditional event-based workflow with `State::react()`
-- Planning support.
-- Utility theory support.
-- Scaleable, supports state re-use via state injections
+- Dynamic planning support
+- Utility theory support (both max score and ranked weighted random)
+- Scaleable, supports robust state re-use via state injections
 - Debug-assisted, includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
 - Built-in logging support
 - Convenient, minimal boilerplate
+
+---
+
+## 3rd Party Libraries
+
+- [Catch2](https://github.com/catchorg/Catch2) unit testing framework.
+- [xoshiro](http://xoshiro.di.unimi.it/) pseuto-random number generators.
 
 ---
 

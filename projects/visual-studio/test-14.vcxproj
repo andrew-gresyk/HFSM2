@@ -31,10 +31,11 @@
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_ortho_units.cpp" />
     <ClCompile Include="..\..\test\test_planner.cpp" />
-    <ClCompile Include="..\..\test\test_resumable.cpp" />
+    <ClCompile Include="..\..\test\test_randomize.cpp" />
+    <ClCompile Include="..\..\test\test_resume.cpp" />
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
     <ClCompile Include="..\..\test\test_state_data.cpp" />
-    <ClCompile Include="..\..\test\test_utility.cpp" />
+    <ClCompile Include="..\..\test\test_utilize.cpp" />
     <ClCompile Include="..\..\test\test_utility_regions.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +50,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp" />
@@ -69,10 +71,11 @@
     <ClInclude Include="..\..\test\test_internal_transitions.hpp" />
     <ClInclude Include="..\..\test\test_ortho_units.hpp" />
     <ClInclude Include="..\..\test\test_planner.hpp" />
-    <ClInclude Include="..\..\test\test_resumable.hpp" />
+    <ClInclude Include="..\..\test\test_randomize.hpp" />
+    <ClInclude Include="..\..\test\test_resume.hpp" />
     <ClInclude Include="..\..\test\test_self_transitions.hpp" />
     <ClInclude Include="..\..\test\test_state_data.hpp" />
-    <ClInclude Include="..\..\test\test_utility.hpp" />
+    <ClInclude Include="..\..\test\test_utilize.hpp" />
     <ClInclude Include="..\..\test\test_utility_regions.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -84,9 +87,11 @@
     <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\iterator.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\list.inl" />
+    <None Include="..\..\include\hfsm2\detail\shared\random.inl" />
     <None Include="..\..\include\hfsm2\detail\state_registry.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\composite_sub.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\composite_sub_1.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\composite_sub_2.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_1.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />

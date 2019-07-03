@@ -9,6 +9,7 @@ enum Strategy {
 	Composite,
 	Resumable,
 	Utilitarian,
+	RandomUtil,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,6 +52,7 @@ struct RequestT {
 		RESTART,
 		RESUME,
 		UTILIZE,
+		RANDOMIZE,
 		SCHEDULE,
 
 		COUNT

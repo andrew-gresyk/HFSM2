@@ -18,6 +18,7 @@ struct O_ final {
 	static constexpr ForkID		ORTHO_ID	= (ForkID) -ORTHO_INDEX - 1;
 
 	using Args			= TArgs;
+	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
@@ -72,44 +73,47 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE bool	deepEntryGuard		 (GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&	control);
+	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	deepEnter			 (PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE void	deepReenter			 (PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
+	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
 
-	HFSM_INLINE Status	deepUpdate			 (FullControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE Status	deepUpdate			 (FullControl&	control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	deepReact			 (FullControl& control,	const TEvent& event,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE Status	deepReact			 (FullControl&	control, const TEvent& event);
 
-	HFSM_INLINE bool	deepForwardExitGuard (GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE bool	deepExitGuard		 (GuardControl& control,						const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&	control);
+	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	deepExit			 (PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepExit			 (PlanControl&	control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepForwardActive	 (Control& control, const RequestType request,	const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE void	deepForwardRequest	 (Control& control, const RequestType request,	const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepForwardActive	 (Control& control, const RequestType request);
+	HFSM_INLINE void	deepForwardRequest	 (Control& control, const RequestType request);
 
 	HFSM_INLINE void	deepRequest			 (Control& control, const RequestType request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepRequestChange	 (Control& control,								const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepRequestChange	 (Control& control);
 	HFSM_INLINE void	deepRequestRemain	 (StateRegistry& stateRegistry);
 	HFSM_INLINE void	deepRequestRestart	 (StateRegistry& stateRegistry);
-	HFSM_INLINE void	deepRequestResume	 (StateRegistry& stateRegistry,					const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepRequestResume	 (StateRegistry& stateRegistry);
 	HFSM_INLINE void	deepRequestUtilize	 (Control& control);
+	HFSM_INLINE void	deepRequestRandomize (Control& control);
 
-	HFSM_INLINE UP		deepReportChange	 (Control& control,								const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE UP		deepReportChange	 (Control& control);
 	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
+	HFSM_INLINE Rank	deepReportRank		 (Control& control);
+	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepEnterRequested	 (PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
-	HFSM_INLINE void	deepChangeToRequested(PlanControl& control,							const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	deepEnterRequested	 (PlanControl& control);
+	HFSM_INLINE void	deepChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;

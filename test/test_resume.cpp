@@ -1,6 +1,6 @@
-#include "test_resumable.hpp"
+#include "test_resume.hpp"
 
-using namespace test_resumable;
+using namespace test_resume;
 
 ////////////////////////////////////////////////////////////////////////////////
 

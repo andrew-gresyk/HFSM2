@@ -19,9 +19,7 @@ O_<TN, TA, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
-											 const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
 	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -36,9 +34,7 @@ O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control,
-									  const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepEntryGuard(control) ||
@@ -49,9 +45,7 @@ O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control,
-								 const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control) {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
@@ -65,9 +59,7 @@ O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control,
-								   const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
@@ -81,9 +73,7 @@ O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 Status
-O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control,
-								  const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (const auto headStatus = _headState.deepUpdate(control)) {
@@ -110,8 +100,7 @@ template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 Status
 O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
-								 const TEvent& event,
-								 const ShortIndex /*prong*/)
+								 const TEvent& event)
 {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -137,9 +126,7 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control,
-											const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
 	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -154,9 +141,7 @@ O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control,
-									 const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepExitGuard(control) ||
@@ -167,9 +152,7 @@ O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepExit(PlanControl& control,
-								const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepExit(PlanControl& control) {
 	_subStates.wideExit(control);
 	_headState.deepExit(control);
 }
@@ -179,8 +162,7 @@ O_<TN, TA, TH, TS...>::deepExit(PlanControl& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
-										 const RequestType request,
-										 const ShortIndex /*prong*/)
+										 const RequestType request)
 {
 	HFSM_ASSERT(control._stateRegistry.isActive(HEAD_ID));
 
@@ -195,8 +177,7 @@ O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
-										  const RequestType request,
-										  const ShortIndex /*prong*/)
+										  const RequestType request)
 {
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 
@@ -234,6 +215,10 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 		deepRequestUtilize(control);
 		break;
 
+	case Request::RANDOMIZE:
+		deepRequestRandomize(control);
+		break;
+
 	default:
 		HFSM_BREAK();
 	}
@@ -243,9 +228,7 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepRequestChange(Control& control,
-										 const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepRequestChange(Control& control) {
 	_subStates.wideRequestChange(control);
 }
 
@@ -269,9 +252,7 @@ O_<TN, TA, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
-										 const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry) {
 	_subStates.wideRequestResume(stateRegistry);
 }
 
@@ -283,13 +264,19 @@ O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
 	_subStates.wideRequestUtilize(control);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+void
+O_<TN, TA, TH, TS...>::deepRequestRandomize(Control& control) {
+	_subStates.wideRequestRandomize(control);
+}
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, typename TH, typename... TS>
 typename TA::UP
-O_<TN, TA, TH, TS...>::deepReportChange(Control& control,
-										const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepReportChange(Control& control) {
 	const UP	  h = _headState.deepReportChange(control);
 	const Utility s = _subStates.wideReportChange(control);
 
@@ -321,13 +308,34 @@ O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 	};
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::Rank
+O_<TN, TA, TH, TS...>::deepReportRank(Control& control) {
+	return _headState.wrapRank(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::Utility
+O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
+	const Utility h = _headState.wrapUtility(control);
+	const Utility s = _subStates.wideReportRandomize(control);
+
+	const Utility sub = s / WIDTH;
+
+	HFSM_LOG_RANDOM_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
+
+	return h * sub;
+}
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepEnterRequested(PlanControl& control,
-										  const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepEnterRequested(PlanControl& control) {
 	_headState.deepEnter		 (control);
 	_subStates.wideEnterRequested(control);
 }
@@ -336,9 +344,7 @@ O_<TN, TA, TH, TS...>::deepEnterRequested(PlanControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control,
-											 const ShortIndex /*prong*/)
-{
+O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	_subStates.wideChangeToRequested(control);
 }
 

@@ -40,6 +40,11 @@ struct LoggerInterfaceT {
 										 const StateID /*prong*/,
 										 const Utilty /*utilty*/)
 	{}
+
+	virtual void recordRandomResolution(const StateID /*head*/,
+										const StateID /*prong*/,
+										const Utilty /*utilty*/)
+	{}
 };
 
 using LoggerInterface = LoggerInterfaceT<float>;

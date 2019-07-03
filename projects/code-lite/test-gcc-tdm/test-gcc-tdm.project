@@ -34,6 +34,8 @@
         <File Name="../../../include/hfsm2/detail/structure/composite.hpp"/>
       </VirtualDirectory>
       <VirtualDirectory Name="shared">
+        <File Name="../../../include/hfsm2/detail/shared/random.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/random.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/utility.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/type_list.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/object_pool.inl"/>
@@ -58,16 +60,18 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_randomize.hpp"/>
+    <File Name="../../../test/test_randomize.cpp"/>
     <File Name="../../../test/test_ortho_units.hpp"/>
     <File Name="../../../test/test_ortho_units.cpp"/>
     <File Name="../../../test/test_debug.hpp"/>
     <File Name="../../../test/test_debug.cpp"/>
     <File Name="../../../test/test_utility_regions.hpp"/>
     <File Name="../../../test/test_utility_regions.cpp"/>
-    <File Name="../../../test/test_resumable.hpp"/>
-    <File Name="../../../test/test_resumable.cpp"/>
-    <File Name="../../../test/test_utility.hpp"/>
-    <File Name="../../../test/test_utility.cpp"/>
+    <File Name="../../../test/test_resume.hpp"/>
+    <File Name="../../../test/test_resume.cpp"/>
+    <File Name="../../../test/test_utilize.hpp"/>
+    <File Name="../../../test/test_utilize.cpp"/>
     <File Name="../../../test/test_state_data.hpp"/>
     <File Name="../../../test/test_state_data.cpp"/>
     <File Name="../../../test/test_self_transitions.hpp"/>
@@ -85,6 +89,7 @@
     <File Name="../../../test/shared.hpp"/>
     <File Name="../../../test/shared.cpp"/>
     <VirtualDirectory Name="shared">
+      <File Name="../../../test/shared/test_random.cpp"/>
       <File Name="../../../test/shared/test_list.cpp"/>
       <File Name="../../../test/shared/test_bit_array.cpp"/>
     </VirtualDirectory>
@@ -92,6 +97,8 @@
     <File Name="../../../test/deprecated_test.hpp"/>
     <File Name="../../../test/deprecated_test.cpp"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -185,6 +192,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>

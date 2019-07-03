@@ -1,11 +1,11 @@
 #define HFSM_ENABLE_VERBOSE_DEBUG_LOG
 #include "shared.hpp"
 
-namespace test_utility {
+namespace test_randomize {
 
 //------------------------------------------------------------------------------
 
-using M = hfsm2::Machine;
+using M = hfsm2::MachineT<hfsm2::Config::RandomT<hfsm2::XoShiRo256Plus>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -14,12 +14,12 @@ using M = hfsm2::Machine;
 using FSM = M::Root<S(Apex),
 				S(I),
 				M::Orthogonal<S(O),
-					M::Utilitarian<S(U),
-						S(U_000),
-						S(U_025),
-						S(U_050),
-						S(U_075),
-						S(U_100)
+					M::Random<S(N),
+						S(N_000),
+						S(N_025),
+						S(N_050),
+						S(N_075),
+						S(N_100)
 					>,
 					M::Composite<S(C),
 						S(C_000),
@@ -35,18 +35,18 @@ using FSM = M::Root<S(Apex),
 
 static_assert(FSM::regionId<Apex>()	==  0, "");
 static_assert(FSM::regionId<O>()	==  1, "");
-static_assert(FSM::regionId<U>()	==  2, "");
+static_assert(FSM::regionId<N>()	==  2, "");
 static_assert(FSM::regionId<C>()	==  3, "");
 
 static_assert(FSM::stateId<Apex>()	==  0, "");
 static_assert(FSM::stateId<I>()		==  1, "");
 static_assert(FSM::stateId<O>()		==  2, "");
-static_assert(FSM::stateId<U>()		==  3, "");
-static_assert(FSM::stateId<U_000>()	==  4, "");
-static_assert(FSM::stateId<U_025>()	==  5, "");
-static_assert(FSM::stateId<U_050>()	==  6, "");
-static_assert(FSM::stateId<U_075>()	==  7, "");
-static_assert(FSM::stateId<U_100>()	==  8, "");
+static_assert(FSM::stateId<N>()		==  3, "");
+static_assert(FSM::stateId<N_000>()	==  4, "");
+static_assert(FSM::stateId<N_025>()	==  5, "");
+static_assert(FSM::stateId<N_050>()	==  6, "");
+static_assert(FSM::stateId<N_075>()	==  7, "");
+static_assert(FSM::stateId<N_100>()	==  8, "");
 static_assert(FSM::stateId<C>()		==  9, "");
 static_assert(FSM::stateId<C_000>()	== 10, "");
 static_assert(FSM::stateId<C_025>()	== 11, "");
@@ -64,23 +64,23 @@ struct O : FSM::State {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct U : FSM::State {};
+struct N : FSM::State {};
 
-struct U_000 : FSM::State { float utility(const Control&) { return 0.00f; } };
-struct U_025 : FSM::State { float utility(const Control&) { return 0.25f; } };
-struct U_050 : FSM::State { float utility(const Control&) { return 0.50f; } };
-struct U_075 : FSM::State { float utility(const Control&) { return 0.75f; } };
-struct U_100 : FSM::State { float utility(const Control&) { return 1.00f; } };
+struct N_000 : FSM::State { Rank rank(const Control&) {return 2; } Utility utility(const Control&) { return 0.00f; } };
+struct N_025 : FSM::State { Rank rank(const Control&) {return 2; } Utility utility(const Control&) { return 0.25f; } };
+struct N_050 : FSM::State { Rank rank(const Control&) {return 0; } Utility utility(const Control&) { return 0.50f; } };
+struct N_075 : FSM::State { Rank rank(const Control&) {return 2; } Utility utility(const Control&) { return 0.75f; } };
+struct N_100 : FSM::State { Rank rank(const Control&) {return 1; } Utility utility(const Control&) { return 1.00f; } };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct C : FSM::State {};
 
-struct C_000 : FSM::State { float utility(const Control&) { return 0.00f; } };
-struct C_025 : FSM::State { float utility(const Control&) { return 0.25f; } };
-struct C_050 : FSM::State { float utility(const Control&) { return 0.50f; } };
-struct C_075 : FSM::State { float utility(const Control&) { return 0.75f; } };
-struct C_100 : FSM::State { float utility(const Control&) { return 1.00f; } };
+struct C_000 : FSM::State { Rank rank(const Control&) {return 2; } Utility utility(const Control&) { return 0.00f; } };
+struct C_025 : FSM::State { Rank rank(const Control&) {return 2; } Utility utility(const Control&) { return 0.25f; } };
+struct C_050 : FSM::State { Rank rank(const Control&) {return 0; } Utility utility(const Control&) { return 0.50f; } };
+struct C_075 : FSM::State { Rank rank(const Control&) {return 2; } Utility utility(const Control&) { return 0.75f; } };
+struct C_100 : FSM::State { Rank rank(const Control&) {return 1; } Utility utility(const Control&) { return 1.00f; } };
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -93,3 +93,5 @@ static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+
+#include <random>

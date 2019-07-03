@@ -188,28 +188,29 @@
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm2::detail::_S&lt;*&gt;">
+	<Type Name="hfsm2::detail::S_&lt;*&gt;">
 		<DisplayString>{TYPE}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm2::detail::_C&lt;*&gt;">
+	<Type Name="hfsm2::detail::C_&lt;*&gt;">
 		<DisplayString>({_headState})</DisplayString>
 	</Type>
 
-	<Type Name="hfsm2::detail::_CS&lt;*&gt;">
-		<DisplayString>{{{lHalf} {rHalf}}}</DisplayString>
+	<Type Name="hfsm2::detail::CS_&lt;*&gt;">
+		<DisplayString Optional="true">{{ {lHalf} {rHalf} }}</DisplayString>
+		<DisplayString Optional="true">{{{state}}}</DisplayString>
 	</Type>
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm2::detail::_O&lt;*&gt;">
+	<Type Name="hfsm2::detail::O_&lt;*&gt;">
 		<DisplayString>[{_headState}]</DisplayString>
 	</Type>
 
-	<Type Name="hfsm2::detail::_OS&lt;*&gt;">
+	<Type Name="hfsm2::detail::OS_&lt;*&gt;">
 		<DisplayString Optional="true">{initial} {remaining}</DisplayString>
 		<DisplayString>{initial}</DisplayString>
 		<Expand HideRawView="true" />
@@ -217,7 +218,7 @@
 
 	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
 
-	<Type Name="hfsm2::detail::_R&lt;*&gt;">
+	<Type Name="hfsm2::detail::R_&lt;*&gt;">
 		<DisplayString Optional="true">{_structure}</DisplayString>
 		<Expand>
 			<ExpandedItem Optional="true">_structure</ExpandedItem>

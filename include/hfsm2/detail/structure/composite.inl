@@ -4,6 +4,38 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
+ShortIndex
+C_<TN, TA, TG, TH, TS...>::resolveRandom(Control& control,
+										 const Utility(& options)[Info::WIDTH],
+										 const Utility sum,
+										 const Rank(& ranks)[Info::WIDTH],
+										 const Rank top)
+{
+	const Utility random = control._random.next();
+	HFSM_ASSERT(0.0f <= random && random < 1.0f);
+
+	Utility cursor = random * sum;
+
+	for (ShortIndex i = 0; i < count(ranks); ++i)
+		if (ranks[i] == top) {
+			HFSM_ASSERT(options[i] >= 0.0f);
+
+			if (cursor >= options[i])
+				cursor -= options[i];
+			else {
+				HFSM_LOG_RANDOM_RESOLUTION(HEAD_ID, i, random);
+
+				return i;
+			}
+		}
+
+	HFSM_BREAK();
+	return INVALID_SHORT_INDEX;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
 C_<TN, TA, TG, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 										const Parent parent)
@@ -11,16 +43,14 @@ C_<TN, TA, TG, TH, TS...>::deepRegister(StateRegistry& stateRegistry,
 	stateRegistry.compoParents[COMPO_INDEX] = parent;
 
 	_headState.deepRegister(stateRegistry, parent);
-	_subStates.deepRegister(stateRegistry, Parent{COMPO_ID});
+	_subStates.wideRegister(stateRegistry, Parent{COMPO_ID});
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 bool
-C_<TN, TA, TG, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
-												 const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
 	const ShortIndex active	   = compoActive   (control);
 	const ShortIndex requested = compoRequested(control);
 
@@ -29,34 +59,30 @@ C_<TN, TA, TG, TH, TS...>::deepForwardEntryGuard(GuardControl& control,
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (requested == INVALID_SHORT_INDEX)
-		return _subStates.deepForwardEntryGuard(control, active);
+		return _subStates.wideForwardEntryGuard(control, active);
 	else
-		return _subStates.deepEntryGuard	   (control, requested);
+		return _subStates.wideEntryGuard	   (control, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 bool
-C_<TN, TA, TG, TH, TS...>::deepEntryGuard(GuardControl& control,
-										  const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepEntryGuard(GuardControl& control) {
 	const ShortIndex requested = compoRequested(control);
 	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepEntryGuard(control) ||
-		   _subStates.deepEntryGuard(control, requested);
+		   _subStates.wideEntryGuard(control, requested);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-C_<TN, TA, TG, TH, TS...>::deepEnter(PlanControl& control,
-									 const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepEnter(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
@@ -75,16 +101,14 @@ C_<TN, TA, TG, TH, TS...>::deepEnter(PlanControl& control,
 
 	requested = INVALID_SHORT_INDEX;
 
-	_subStates.deepEnter(control, active);
+	_subStates.wideEnter(control, active);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-C_<TN, TA, TG, TH, TS...>::deepReenter(PlanControl& control,
-									   const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepReenter(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
@@ -97,16 +121,16 @@ C_<TN, TA, TG, TH, TS...>::deepReenter(PlanControl& control,
 	_headState.deepReenter(control);
 
 	if (active == requested)
-		_subStates.deepReenter(control, active);
+		_subStates.wideReenter(control, active);
 	else {
-		_subStates.deepExit	  (control, active);
+		_subStates.wideExit	  (control, active);
 
 		active	  = requested;
 
 		if (requested == resumable)
 			resumable = INVALID_SHORT_INDEX;
 
-		_subStates.deepEnter  (control, active);
+		_subStates.wideEnter  (control, active);
 	}
 
 	requested = INVALID_SHORT_INDEX;
@@ -116,9 +140,7 @@ C_<TN, TA, TG, TH, TS...>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 Status
-C_<TN, TA, TG, TH, TS...>::deepUpdate(FullControl& control,
-									  const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepUpdate(FullControl& control) {
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
@@ -126,11 +148,11 @@ C_<TN, TA, TG, TH, TS...>::deepUpdate(FullControl& control,
 
 	if (const Status headStatus = _headState.deepUpdate(control)) {
 		ControlLock lock{control};
-		_subStates.deepUpdate(control, active);
+		_subStates.wideUpdate(control, active);
 
 		return headStatus;
 	} else {
-		const Status subStatus = _subStates.deepUpdate(control, active);
+		const Status subStatus = _subStates.wideUpdate(control, active);
 
 		if (subStatus.outerTransition)
 			return subStatus;
@@ -148,8 +170,7 @@ template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 template <typename TEvent>
 Status
 C_<TN, TA, TG, TH, TS...>::deepReact(FullControl& control,
-									 const TEvent& event,
-									 const ShortIndex /*prong*/)
+									 const TEvent& event)
 {
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
@@ -158,11 +179,11 @@ C_<TN, TA, TG, TH, TS...>::deepReact(FullControl& control,
 
 	if (const Status headStatus = _headState.deepReact(control, event)) {
 		ControlLock lock{control};
-		_subStates.deepReact(control, event, active);
+		_subStates.wideReact(control, event, active);
 
 		return headStatus;
 	} else {
-		const Status subStatus = _subStates.deepReact(control, event, active);
+		const Status subStatus = _subStates.wideReact(control, event, active);
 
 		if (subStatus.outerTransition)
 			return subStatus;
@@ -178,49 +199,43 @@ C_<TN, TA, TG, TH, TS...>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 bool
-C_<TN, TA, TG, TH, TS...>::deepForwardExitGuard(GuardControl& control,
-												const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (compoRequested(control) == INVALID_SHORT_INDEX)
-		return _subStates.deepForwardExitGuard(control, active);
+		return _subStates.wideForwardExitGuard(control, active);
 	else
-		return _subStates.deepExitGuard		  (control, active);
+		return _subStates.wideExitGuard		  (control, active);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 bool
-C_<TN, TA, TG, TH, TS...>::deepExitGuard(GuardControl& control,
-										 const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepExitGuard(GuardControl& control) {
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepExitGuard(control) ||
-		   _subStates.deepExitGuard(control, active);
+		   _subStates.wideExitGuard(control, active);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-C_<TN, TA, TG, TH, TS...>::deepExit(PlanControl& control,
-									const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepExit(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
-	_subStates.deepExit(control, active);
+	_subStates.wideExit(control, active);
 	_headState.deepExit(control);
 
 	resumable = active;
@@ -235,8 +250,7 @@ C_<TN, TA, TG, TH, TS...>::deepExit(PlanControl& control,
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
 C_<TN, TA, TG, TH, TS...>::deepForwardActive(Control& control,
-											 const RequestType request,
-											 const ShortIndex /*prong*/)
+											 const RequestType request)
 {
 	HFSM_ASSERT(control._stateRegistry.isActive(HEAD_ID));
 
@@ -245,9 +259,9 @@ C_<TN, TA, TG, TH, TS...>::deepForwardActive(Control& control,
 	if (requested == INVALID_SHORT_INDEX) {
 		const ShortIndex active = compoActive(control);
 
-		_subStates.deepForwardActive (control, request, active);
+		_subStates.wideForwardActive (control, request, active);
 	} else
-		_subStates.deepForwardRequest(control, request, requested);
+		_subStates.wideForwardRequest(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -255,15 +269,14 @@ C_<TN, TA, TG, TH, TS...>::deepForwardActive(Control& control,
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
 C_<TN, TA, TG, TH, TS...>::deepForwardRequest(Control& control,
-											  const RequestType request,
-											  const ShortIndex /*prong*/)
+											  const RequestType request)
 {
 	const ShortIndex requested = compoRequested(control);
 
 	if (requested == INVALID_SHORT_INDEX)
 		deepRequest					 (control, request);
 	else
-		_subStates.deepForwardRequest(control, request, requested);
+		_subStates.wideForwardRequest(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -275,23 +288,27 @@ C_<TN, TA, TG, TH, TS...>::deepRequest(Control& control,
 {
 	switch (request) {
 	case Request::REMAIN:
-		deepRequestRemain (control._stateRegistry);
+		deepRequestRemain	(control._stateRegistry);
 		break;
 
 	case Request::CHANGE:
-		deepRequestChange (control);
+		deepRequestChange	(control);
 		break;
 
 	case Request::RESTART:
-		deepRequestRestart(control._stateRegistry);
+		deepRequestRestart	(control._stateRegistry);
 		break;
 
 	case Request::RESUME:
-		deepRequestResume (control._stateRegistry);
+		deepRequestResume	(control._stateRegistry);
 		break;
 
 	case Request::UTILIZE:
-		deepRequestUtilize(control);
+		deepRequestUtilize	(control);
+		break;
+
+	case Request::RANDOMIZE:
+		deepRequestRandomize(control);
 		break;
 
 	default:
@@ -305,8 +322,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequest(Control& control,
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-C_<TN, TA, TG, TH, TS...>::deepRequestChange(Control& control,
-											 const ShortIndex /*prong*/)
+C_<TN, TA, TG, TH, TS...>::deepRequestChange(Control& control)
 {
 	switch (STRATEGY) {
 	case Strategy::Composite:
@@ -319,6 +335,10 @@ C_<TN, TA, TG, TH, TS...>::deepRequestChange(Control& control,
 
 	case Strategy::Utilitarian:
 		deepRequestChangeUtilitarian(control);
+		break;
+
+	case Strategy::RandomUtil:
+		deepRequestChangeRandom		(control);
 		break;
 
 	default:
@@ -337,7 +357,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequestChangeComposite(Control& control) {
 
 	requested = 0;
 
-	_subStates.deepRequestChange(control);
+	_subStates.wideRequestChangeComposite(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -351,7 +371,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 	requested = (resumable != INVALID_SHORT_INDEX) ?
 		resumable : 0;
 
-	_subStates.deepRequestChange(control, requested);
+	_subStates.wideRequestChangeResumable(control, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -359,13 +379,29 @@ C_<TN, TA, TG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
 C_<TN, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
-	const UP s = _subStates.deepReportChange(control);
+	const UP s = _subStates.wideReportChangeUtilitarian(control);
 	HFSM_ASSERT(s.prong != INVALID_SHORT_INDEX);
 
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, s.prong, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
+void
+C_<TN, TA, TG, TH, TS...>::deepRequestChangeRandom(Control& control) {
+	Rank ranks[Info::WIDTH];
+	Rank top = _subStates.wideReportRank(control, ranks);
+
+	Utility options[Info::WIDTH];
+	const UP sum = _subStates.wideReportChangeRandom(control, options, ranks, top);
+
+	ShortIndex& requested = compoRequested(control);
+	requested = resolveRandom(control, options, sum.utility, ranks, top);
+	HFSM_ASSERT(requested < Info::WIDTH);
 }
 
 //------------------------------------------------------------------------------
@@ -379,7 +415,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequestRemain(StateRegistry& stateRegistry) {
 	if (active == INVALID_SHORT_INDEX)
 		requested = 0;
 
-	_subStates.deepRequestRemain(stateRegistry);
+	_subStates.wideRequestRemain(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -391,23 +427,21 @@ C_<TN, TA, TG, TH, TS...>::deepRequestRestart(StateRegistry& stateRegistry) {
 
 	requested = 0;
 
-	_subStates.deepRequestRestart(stateRegistry);
+	_subStates.wideRequestRestart(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-C_<TN, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
-											 const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry) {
 	const ShortIndex  resumable = compoResumable(stateRegistry);
 		  ShortIndex& requested = compoRequested(stateRegistry);
 
 	requested = (resumable != INVALID_SHORT_INDEX) ?
 		resumable : 0;
 
-	_subStates.deepRequestResume(stateRegistry, requested);
+	_subStates.wideRequestResume(stateRegistry, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -415,12 +449,28 @@ C_<TN, TA, TG, TH, TS...>::deepRequestResume(StateRegistry& stateRegistry,
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
 C_<TN, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
-	const UP s = _subStates.deepReportUtilize(control);
+	const UP s = _subStates.wideReportUtilize(control);
 
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, s.prong, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
+void
+C_<TN, TA, TG, TH, TS...>::deepRequestRandomize(Control& control) {
+	Rank ranks[Info::WIDTH];
+	Rank top = _subStates.wideReportRank(control, ranks);
+
+	Utility options[Info::WIDTH];
+	const Utility sum = _subStates.wideReportRandomize(control, options, ranks, top);
+
+	ShortIndex& requested = compoRequested(control);
+	requested = resolveRandom(control, options, sum, ranks, top);
+	HFSM_ASSERT(requested < Info::WIDTH);
 }
 
 //------------------------------------------------------------------------------
@@ -429,9 +479,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 typename TA::UP
-C_<TN, TA, TG, TH, TS...>::deepReportChange(Control& control,
-											const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepReportChange(Control& control) {
 	switch (STRATEGY) {
 	case Strategy::Composite:
 		return deepReportChangeComposite  (control);
@@ -441,6 +489,9 @@ C_<TN, TA, TG, TH, TS...>::deepReportChange(Control& control,
 
 	case Strategy::Utilitarian:
 		return deepReportChangeUtilitarian(control);
+
+	case Strategy::RandomUtil:
+		return deepReportChangeRandom	  (control);
 
 	default:
 		HFSM_BREAK();
@@ -459,9 +510,12 @@ C_<TN, TA, TG, TH, TS...>::deepReportChangeComposite(Control& control) {
 	requested = 0;
 
 	const UP h = _headState.deepReportChange(control);
-	const UP s = _subStates.deepReportChange(control);
+	const UP s = _subStates.wideReportChangeComposite(control);
 
-	return { h.utility * s.utility, h.prong };
+	return {
+		h.utility * s.utility,
+		h.prong
+	};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -476,9 +530,12 @@ C_<TN, TA, TG, TH, TS...>::deepReportChangeResumable(Control& control) {
 		resumable : 0;
 
 	const UP h = _headState.deepReportChange(control);
-	const UP s = _subStates.deepReportChange(control, requested);
+	const UP s = _subStates.wideReportChangeResumable(control, requested);
 
-	return { h.utility * s.utility, h.prong };
+	return {
+		h.utility * s.utility,
+		h.prong
+	};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -487,14 +544,40 @@ template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 typename TA::UP
 C_<TN, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	const UP h = _headState.deepReportChange(control);
-	const UP s = _subStates.deepReportChange(control);
+	const UP s = _subStates.wideReportChangeUtilitarian(control);
 
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, s.prong, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
 
-	return { h.utility * s.utility, h.prong };
+	return {
+		h.utility * s.utility,
+		h.prong
+	};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
+typename TA::UP
+C_<TN, TA, TG, TH, TS...>::deepReportChangeRandom(Control& control) {
+	const UP h = _headState.deepReportChange(control);
+
+	Rank ranks[Info::WIDTH];
+	Rank top = _subStates.wideReportRank(control, ranks);
+
+	Utility options[Info::WIDTH];
+	const UP sum = _subStates.wideReportChangeRandom(control, options, ranks, top);
+
+	ShortIndex& requested = compoRequested(control);
+	requested = resolveRandom(control, options, sum.utility, ranks, top);
+	HFSM_ASSERT(requested < Info::WIDTH);
+
+	return {
+		h.utility * options[requested],
+		h.prong
+	};
 }
 
 //------------------------------------------------------------------------------
@@ -503,23 +586,52 @@ template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 typename TA::UP
 C_<TN, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
 	const UP h = _headState.deepReportUtilize(control);
-	const UP s = _subStates.deepReportUtilize(control);
+	const UP s = _subStates.wideReportUtilize(control);
 
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, s.prong, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
 
-	return { h.utility * s.utility, h.prong };
+	return {
+		h.utility * s.utility,
+		h.prong
+	};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
+typename TA::Rank
+C_<TN, TA, TG, TH, TS...>::deepReportRank(Control& control) {
+	return _headState.wrapRank(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
+typename TA::Utility
+C_<TN, TA, TG, TH, TS...>::deepReportRandomize(Control& control) {
+	const Utility h = _headState.wrapUtility(control);
+
+	Rank ranks[Info::WIDTH];
+	Rank top = _subStates.wideReportRank(control, ranks);
+
+	Utility options[Info::WIDTH];
+	const Utility sum = _subStates.wideReportRandomize(control, options, ranks, top);
+
+	ShortIndex& requested = compoRequested(control);
+	requested = resolveRandom(control, options, sum, ranks, top);
+	HFSM_ASSERT(requested < Info::WIDTH);
+
+	return h * options[requested];
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-C_<TN, TA, TG, TH, TS...>::deepEnterRequested(PlanControl& control,
-											  const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepEnterRequested(PlanControl& control) {
 	ShortIndex& active	  = compoActive	  (control);
 	ShortIndex& requested = compoRequested(control);
 
@@ -530,16 +642,14 @@ C_<TN, TA, TG, TH, TS...>::deepEnterRequested(PlanControl& control,
 	requested = INVALID_SHORT_INDEX;
 
 	_headState.deepEnter(control);
-	_subStates.deepEnter(control, active);
+	_subStates.wideEnter(control, active);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
 void
-C_<TN, TA, TG, TH, TS...>::deepChangeToRequested(PlanControl& control,
-												 const ShortIndex /*prong*/)
-{
+C_<TN, TA, TG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	ShortIndex& active	  = compoActive	  (control);
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
@@ -547,25 +657,25 @@ C_<TN, TA, TG, TH, TS...>::deepChangeToRequested(PlanControl& control,
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
 	if (requested == INVALID_SHORT_INDEX)
-		_subStates.deepChangeToRequested(control, active);
+		_subStates.wideChangeToRequested(control, active);
 	else if (requested != active) {
-		_subStates.deepExit	  (control, active);
+		_subStates.wideExit	  (control, active);
 
 		resumable = active;
 		active	  = requested;
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.deepEnter  (control, active);
+		_subStates.wideEnter  (control, active);
 	} else if (compoRemain(control)) {
-		_subStates.deepExit	  (control, active);
+		_subStates.wideExit	  (control, active);
 
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.deepEnter  (control, active);
+		_subStates.wideEnter  (control, active);
 	} else {
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.deepReenter(control, active);
+		_subStates.wideReenter(control, active);
 	}
 }
 
@@ -581,7 +691,7 @@ C_<TN, TA, TG, TH, TS...>::deepGetNames(const LongIndex parent,
 										StructureStateInfos& _stateInfos) const
 {
 	_headState.deepGetNames(parent,					 region,						depth,	   _stateInfos);
-	_subStates.deepGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
+	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
 }
 
 #endif

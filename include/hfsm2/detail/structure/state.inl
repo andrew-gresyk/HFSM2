@@ -52,9 +52,7 @@ S_<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 
 template <typename TN, typename TA, typename TH>
 bool
-S_<TN, TA, TH>::deepEntryGuard(GuardControl& control,
-							   const ShortIndex /*prong*/)
-{
+S_<TN, TA, TH>::deepEntryGuard(GuardControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::entryGuard, Method::ENTRY_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -71,9 +69,7 @@ S_<TN, TA, TH>::deepEntryGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-S_<TN, TA, TH>::deepEnter(PlanControl& control,
-						  const ShortIndex /*prong*/)
-{
+S_<TN, TA, TH>::deepEnter(PlanControl& control) {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control.planData().tasksFailures .template get<STATE_ID>());
 
@@ -89,9 +85,7 @@ S_<TN, TA, TH>::deepEnter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-S_<TN, TA, TH>::deepReenter(PlanControl& control,
-							const ShortIndex /*prong*/)
-{
+S_<TN, TA, TH>::deepReenter(PlanControl& control) {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control.planData().tasksFailures .template get<STATE_ID>());
 
@@ -107,9 +101,7 @@ S_<TN, TA, TH>::deepReenter(PlanControl& control,
 
 template <typename TN, typename TA, typename TH>
 Status
-S_<TN, TA, TH>::deepUpdate(FullControl& control,
-						   const ShortIndex /*prong*/)
-{
+S_<TN, TA, TH>::deepUpdate(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::update, Method::UPDATE);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -126,8 +118,7 @@ template <typename TN, typename TA, typename TH>
 template <typename TEvent>
 Status
 S_<TN, TA, TH>::deepReact(FullControl& control,
-						  const TEvent& event,
-						  const ShortIndex /*prong*/)
+						  const TEvent& event)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
 	HFSM_LOG_STATE_METHOD(reaction, Method::REACT);
@@ -144,9 +135,7 @@ S_<TN, TA, TH>::deepReact(FullControl& control,
 
 template <typename TN, typename TA, typename TH>
 bool
-S_<TN, TA, TH>::deepExitGuard(GuardControl& control,
-							  const ShortIndex /*prong*/)
-{
+S_<TN, TA, TH>::deepExitGuard(GuardControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exitGuard, Method::EXIT_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -163,9 +152,7 @@ S_<TN, TA, TH>::deepExitGuard(GuardControl& control,
 
 template <typename TN, typename TA, typename TH>
 void
-S_<TN, TA, TH>::deepExit(PlanControl& control,
-						 const ShortIndex /*prong*/)
-{
+S_<TN, TA, TH>::deepExit(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -209,6 +196,16 @@ S_<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, typename TH>
+typename TA::Rank
+S_<TN, TA, TH>::wrapRank(Control& control) {
+	HFSM_LOG_STATE_METHOD(&Head::rank, Method::RANK);
+
+	return _head.rank(static_cast<const Control&>(control));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH>
 typename TA::Utility
 S_<TN, TA, TH>::wrapUtility(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
@@ -220,9 +217,7 @@ S_<TN, TA, TH>::wrapUtility(Control& control) {
 
 template <typename TN, typename TA, typename TH>
 typename TA::UP
-S_<TN, TA, TH>::deepReportChange(Control& control,
-								 const ShortIndex)
-{
+S_<TN, TA, TH>::deepReportChange(Control& control) {
 	const Utility utility = wrapUtility(control);
 
 	const Parent parent = stateParent(control);
@@ -236,10 +231,25 @@ template <typename TN, typename TA, typename TH>
 typename TA::UP
 S_<TN, TA, TH>::deepReportUtilize(Control& control) {
 	const Utility utility = wrapUtility(control);
-
-	const Parent parent = stateParent(control);
+	const Parent  parent  = stateParent(control);
 
 	return {utility, parent.prong};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH>
+typename TA::Rank
+S_<TN, TA, TH>::deepReportRank(Control& control) {
+	return wrapRank(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH>
+typename TA::Utility
+S_<TN, TA, TH>::deepReportRandomize(Control& control) {
+	return wrapUtility(control);
 }
 
 //------------------------------------------------------------------------------

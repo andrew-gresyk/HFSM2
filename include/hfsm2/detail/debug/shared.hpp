@@ -5,6 +5,7 @@
 namespace hfsm2 {
 
 enum class Method : ShortIndex {
+	RANK,
 	UTILITY,
 	ENTRY_GUARD,
 	ENTER,
@@ -24,6 +25,7 @@ enum class Transition : ShortIndex {
 	RESTART,
 	RESUME,
 	UTILIZE,
+	RANDOMIZE,
 	SCHEDULE,
 
 	COUNT
@@ -68,6 +70,7 @@ static inline
 const char*
 methodName(const Method method) {
 	switch (method) {
+		case Method::RANK:				return "rank";
 		case Method::UTILITY:			return "utility";
 		case Method::ENTRY_GUARD:		return "entryGuard";
 		case Method::ENTER:				return "enter";
@@ -95,6 +98,7 @@ transitionName(const Transition transition) {
 		case Transition::RESTART:		return "restart";
 		case Transition::RESUME:		return "resume";
 		case Transition::UTILIZE:		return "utilize";
+		case Transition::RANDOMIZE:		return "randomize";
 		case Transition::SCHEDULE:		return "schedule";
 
 		default:

@@ -17,11 +17,12 @@ class ControlT {
 	friend struct O_;
 
 	template <typename, typename>
-	friend class _R;
+	friend class R_;
 
 	using Args			= TArgs;
 	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
+	using Random_		= typename Args::Random_;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -47,10 +48,12 @@ public:
 
 protected:
 	HFSM_INLINE ControlT(Context& context,
+						 Random_& random,
 						 StateRegistry& stateRegistry,
 						 PlanData& planData,
 						 Logger* const HFSM_IF_LOGGER(logger))
 		: _context{context}
+		, _random{random}
 		, _stateRegistry{stateRegistry}
 		, _planData{planData}
 		HFSM_IF_LOGGER(, _logger{logger})
@@ -98,6 +101,7 @@ protected:
 
 protected:
 	Context& _context;
+	Random_& _random;
 	StateRegistry& _stateRegistry;
 	PlanData& _planData;
 	RegionID _regionId = 0;
@@ -120,7 +124,7 @@ class PlanControlT
 	friend struct O_;
 
 	template <typename, typename>
-	friend class _R;
+	friend class R_;
 
 	using Args			= TArgs;
 	using Context		= typename Args::Context;
@@ -234,11 +238,12 @@ class FullControlT
 	friend struct O_;
 
 	template <typename, typename>
-	friend class _R;
+	friend class R_;
 
 	using Args			= TArgs;
 	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
+	using Random_		= typename Args::Random_;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 	using Payload		= typename Args::Payload;
@@ -269,11 +274,12 @@ protected:
 
 protected:
 	HFSM_INLINE FullControlT(Context& context,
+							 Random_& random,
 							 StateRegistry& stateRegistry,
 							 PlanData& planData,
 							 Requests& requests,
 							 Logger* const logger)
-		: PlanControl{context, stateRegistry, planData, logger}
+		: PlanControl{context, random, stateRegistry, planData, logger}
 		, _requests{requests}
 	{}
 
@@ -300,53 +306,63 @@ public:
 	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// TODO: test payload versions
 
-	HFSM_INLINE void changeTo(const StateID id);
-	HFSM_INLINE void changeTo(const StateID stateId, const Payload& payload);
+	HFSM_INLINE void changeTo (const StateID id);
+	HFSM_INLINE void changeTo (const StateID stateId, const Payload& payload);
 
-	HFSM_INLINE void restart (const StateID id);
-	HFSM_INLINE void restart (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void restart  (const StateID id);
+	HFSM_INLINE void restart  (const StateID stateId, const Payload& payload);
 
-	HFSM_INLINE void resume	 (const StateID id);
-	HFSM_INLINE void resume  (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void resume	  (const StateID id);
+	HFSM_INLINE void resume   (const StateID stateId, const Payload& payload);
 
-	HFSM_INLINE void utilize (const StateID id);
-	HFSM_INLINE void utilize (const StateID stateId, const Payload& payload);
+	HFSM_INLINE void utilize  (const StateID id);
+	HFSM_INLINE void utilize  (const StateID stateId, const Payload& payload);
 
-	HFSM_INLINE void schedule(const StateID id);
-	HFSM_INLINE void schedule(const StateID stateId, const Payload& payload);
+	HFSM_INLINE void randomize(const StateID id);
+	HFSM_INLINE void randomize(const StateID stateId, const Payload& payload);
+
+	HFSM_INLINE void schedule (const StateID id);
+	HFSM_INLINE void schedule (const StateID stateId, const Payload& payload);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TState>
-	HFSM_INLINE void changeTo()									{ changeTo(stateId<TState>());					}
+	HFSM_INLINE void changeTo ()								{ changeTo (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void changeTo(const Payload& payload)			{ changeTo(stateId<TState>(), payload);			}
+	HFSM_INLINE void changeTo (const Payload& payload)			{ changeTo (stateId<TState>(), payload);			}
 
 	template <typename TState>
-	HFSM_INLINE void restart()									{ restart (stateId<TState>());					}
+	HFSM_INLINE void restart  ()								{ restart  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void restart (const Payload& payload)			{ restart (stateId<TState>(), payload);			}
+	HFSM_INLINE void restart  (const Payload& payload)			{ restart  (stateId<TState>(), payload);			}
 
 	template <typename TState>
-	HFSM_INLINE void resume()									{ resume  (stateId<TState>());					}
+	HFSM_INLINE void resume   ()								{ resume   (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void resume	 (const Payload& payload)			{ resume  (stateId<TState>(), payload);			}
+	HFSM_INLINE void resume	  (const Payload& payload)			{ resume   (stateId<TState>(), payload);			}
 
 	template <typename TState>
-	HFSM_INLINE void utilize()									{ utilize (stateId<TState>());					}
+	HFSM_INLINE void utilize  ()								{ utilize  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void utilize (const Payload& payload)			{ utilize (stateId<TState>(), payload);			}
+	HFSM_INLINE void utilize  (const Payload& payload)			{ utilize  (stateId<TState>(), payload);			}
 
 	template <typename TState>
-	HFSM_INLINE void schedule()									{ schedule(stateId<TState>());					}
+	HFSM_INLINE void randomize()								{ randomize(stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void schedule(const Payload& payload)			{ schedule(stateId<TState>(), payload);			}
+	HFSM_INLINE void randomize(const Payload& payload)			{ randomize(stateId<TState>(), payload);			}
+
+	template <typename TState>
+	HFSM_INLINE void schedule ()								{ schedule (stateId<TState>());					}
+
+	template <typename TState>
+	HFSM_INLINE void schedule (const Payload& payload)			{ schedule (stateId<TState>(), payload);			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -378,11 +394,12 @@ class GuardControlT
 	friend struct S_;
 
 	template <typename, typename>
-	friend class _R;
+	friend class R_;
 
 	using Args			= TArgs;
 	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
+	using Random_		= typename Args::Random_;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 	using Payload		= typename Args::Payload;
@@ -402,12 +419,13 @@ public:
 
 private:
 	HFSM_INLINE GuardControlT(Context& context,
+							  Random_& random,
 							  StateRegistry& stateRegistry,
 							  PlanData& planData,
 							  Requests& requests,
 							  const Requests& pendingChanges,
 							  Logger* const logger)
-		: FullControl{context, stateRegistry, planData, requests, logger}
+		: FullControl{context, random, stateRegistry, planData, requests, logger}
 		, _pending{pendingChanges}
 	{}
 

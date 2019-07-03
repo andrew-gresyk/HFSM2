@@ -1,7 +1,7 @@
 #define HFSM_ENABLE_VERBOSE_DEBUG_LOG
 #include "shared.hpp"
 
-namespace test_resumable {
+namespace test_resume {
 
 //------------------------------------------------------------------------------
 

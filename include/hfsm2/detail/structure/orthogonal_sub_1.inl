@@ -209,6 +209,15 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
 	remaining.wideRequestUtilize(control);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
+void
+OS_<TN, TA, NI, TI, TR...>::wideRequestRandomize(Control& control) {
+	initial  .deepRequestRandomize(control);
+	remaining.wideRequestRandomize(control);
+}
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
@@ -229,6 +238,17 @@ OS_<TN, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
 	const Utility r = remaining.wideReportUtilize(control);
 
 	return i.utility + r;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
+typename TA::Utility
+OS_<TN, TA, NI, TI, TR...>::wideReportRandomize(Control& control) {
+	const Utility i = initial  .deepReportRandomize(control);
+	const Utility r = remaining.wideReportRandomize(control);
+
+	return i + r;
 }
 
 //------------------------------------------------------------------------------
