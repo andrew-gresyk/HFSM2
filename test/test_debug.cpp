@@ -15,7 +15,7 @@ void
 assertStructure(const FSM::Instance::Structure& structure,
 				const StructureReference& reference)
 {
-	const auto count = std::max((size_t) structure.count(), reference.size());
+	const auto count = std::max((std::size_t) structure.count(), reference.size());
 
 	for (uint16_t i = 0; i < count; ++i) {
 		REQUIRE(i < structure.count());
@@ -42,7 +42,7 @@ void
 assertActivity(const FSM::Instance::ActivityHistory& activity,
 			   const ActivityReference& reference)
 {
-	const auto count = std::max((size_t) activity.count(), reference.size());
+	const auto count = std::max((std::size_t) activity.count(), reference.size());
 
 	for (uint16_t i = 0; i < count; ++i) {
 		REQUIRE(i < activity.count());

@@ -25,17 +25,17 @@ using Prepend = typename PrependT<Ts...>::Type;
 
 //------------------------------------------------------------------------------
 
-template <size_t, size_t, typename...>
+template <LongIndex, LongIndex, typename...>
 struct LesserT;
 
-template <size_t H, size_t I, typename TFirst, typename... TRest>
+template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
 struct LesserT<H, I, TFirst, TRest...> {
 	using Type = typename std::conditional<(I < H),
 										   Prepend<TFirst, typename LesserT<H, I + 1, TRest...>::Type>,
 										   typename LesserT<H, I + 1, TRest...>::Type>::type;
 };
 
-template <size_t H, size_t I>
+template <LongIndex H, LongIndex I>
 struct LesserT<H, I> {
 	using Type = TL_<>;
 };
@@ -45,17 +45,17 @@ using SplitL = typename LesserT<sizeof...(Ts) / 2, 0, Ts...>::Type;
 
 //------------------------------------------------------------------------------
 
-template <size_t, size_t, typename...>
+template <LongIndex, LongIndex, typename...>
 struct GreaterT;
 
-template <size_t H, size_t I, typename TFirst, typename... TRest>
+template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
 struct GreaterT<H, I, TFirst, TRest...> {
 	using Type = typename std::conditional<(I < H),
 										   typename GreaterT<H, I + 1, TRest...>::Type,
 										   TL_<TFirst, TRest...>>::type;
 };
 
-template <size_t H, size_t I>
+template <LongIndex H, LongIndex I>
 struct GreaterT<H, I> {
 	using Type = TL_<>;
 };
@@ -109,7 +109,7 @@ using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 template <typename T>
 struct IndexedTypeList_EntryT {};
 
-template <typename T, std::size_t N>
+template <typename T, LongIndex N>
 struct IndexedTypeList_EntryN
 	: IndexedTypeList_EntryT<T>
 {};
@@ -123,7 +123,7 @@ template <LongIndex... Ns, typename... Ts>
 struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
 	: IndexedTypeList_EntryN<Ts, Ns>...
 {
-	template <typename T, std::size_t N>
+	template <typename T, LongIndex N>
 	static constexpr LongIndex select(IndexedTypeList_EntryN<T, N>) { return (LongIndex) N; }
 };
 
