@@ -6,7 +6,7 @@
 
 #include <catch2/catch.hpp>
 
-#include <vector>
+//#include <vector> // already included in catch.hpp
 
 //------------------------------------------------------------------------------
 

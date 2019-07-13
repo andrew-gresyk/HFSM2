@@ -86,8 +86,8 @@ template <typename TC = EmptyContext,
 		  typename TU = float,
 		  typename TG = ::hfsm2::RandomT<TU>,
 		  typename TP = EmptyPayload,
-		  LongIndex NS = INVALID_LONG_INDEX,
-		  LongIndex NT = 4>
+		  LongIndex NS = 4,
+		  LongIndex NT = INVALID_LONG_INDEX>
 struct ConfigT {
 	using Context = TC;
 

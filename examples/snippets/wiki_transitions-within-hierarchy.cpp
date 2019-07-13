@@ -183,17 +183,13 @@ TEST_CASE("Transitions within Hierarchy.'Utilize' Transition", "[Wiki]") {
 	struct LowRated
 		: FSM::State
 	{
-		float utility(const Control&) {
-			return 0.5f;
-		}
+		float utility(const Control&) { return 0.5f; }
 	};
 
 	struct HighRated
 		: FSM::State
 	{
-		float utility(const Control&) {
-			return 2.0f;
-		}
+		float utility(const Control&) { return 2.0f; }
 	};
 
 	FSM::Instance fsm;
@@ -202,6 +198,55 @@ TEST_CASE("Transitions within Hierarchy.'Utilize' Transition", "[Wiki]") {
 	fsm.utilize<Region>();
 	fsm.update();
 	REQUIRE(fsm.isActive<HighRated>());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("Transitions within Hierarchy.'Randomize' Transition", "[Wiki]") {
+	using M = hfsm2::Machine;
+
+	using FSM = M::PeerRoot<
+					struct State,
+					M::Composite<struct Region,
+						struct FilteredOut,
+						struct LowRated,
+						struct HighRated
+					>
+				>;
+
+	struct State     : FSM::State {};
+	struct Region    : FSM::State {};
+
+	struct FilteredOut
+		: FSM::State
+	{
+		int8_t rank(const Control&) { return 0; } // filter out using low rank
+
+		float utility(const Control&) { return 0.5f; }
+	};
+
+	struct LowRated
+		: FSM::State
+	{
+		int8_t rank(const Control&) { return 1; }
+
+		float utility(const Control&) { return 0.5f; }
+	};
+
+	struct HighRated
+		: FSM::State
+	{
+		int8_t rank(const Control&) { return 1; }
+
+		float utility(const Control&) { return 2.0f; }
+	};
+
+	FSM::Instance fsm;
+	REQUIRE(fsm.isActive<State>());
+
+	fsm.randomize<Region>();
+	fsm.update();
+	REQUIRE(fsm.isActive<HighRated>()); // note, it could be LowRated if the PRNG is seeded differently
 }
 
 ////////////////////////////////////////////////////////////////////////////////
