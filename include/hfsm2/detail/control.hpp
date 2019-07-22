@@ -134,11 +134,13 @@ class PlanControlT
 	using Control		= ControlT<Args>;
 	using StateRegistry	= StateRegistryT<Args>;
 
-public:
 	using PlanData		= PlanDataT<Args>;
+
+public:
 	using Plan			= PlanT<Args>;
 	using ConstPlan		= ConstPlanT<Args>;
 
+protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Origin {
@@ -169,7 +171,6 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-protected:
 	using Control::Control;
 
 	HFSM_INLINE void setOrigin  (const StateID id);
@@ -196,20 +197,20 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE Plan plan()										{ return Plan{_planData, _regionId};			}
-	HFSM_INLINE Plan plan(const RegionID id)					{ return Plan{_planData, id};					}
+	HFSM_INLINE Plan plan()								{ return Plan{_planData, _regionId};					}
+	HFSM_INLINE Plan plan(const RegionID id)			{ return Plan{_planData, id};							}
 
 	template <typename TRegion>
-	HFSM_INLINE Plan plan()										{ return Plan{_planData, regionId<TRegion>()};	}
+	HFSM_INLINE Plan plan()								{ return Plan{_planData, regionId<TRegion>()};			}
 
 	template <typename TRegion>
-	HFSM_INLINE Plan plan() const								{ return Plan{_planData, regionId<TRegion>()};	}
+	HFSM_INLINE Plan plan() const						{ return Plan{_planData, regionId<TRegion>()};			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HFSM_INLINE		  PlanData&	planData()						{ return _planData;								}
-	HFSM_INLINE const PlanData&	planData() const				{ return _planData;								}
+	HFSM_INLINE		  PlanData&	planData()				{ return _planData;										}
+	HFSM_INLINE const PlanData&	planData() const		{ return _planData;										}
 
 protected:
 	using Control::_planData;
@@ -287,7 +288,7 @@ protected:
 	Status updatePlan(TState& headState, const Status subStatus);
 
 	template <typename TState>
-	Status buildPlanStatus(const bool outerTransition);
+	Status buildPlanStatus();
 
 public:
 	using Control::isActive;
@@ -332,37 +333,37 @@ public:
 	HFSM_INLINE void changeTo ()								{ changeTo (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void changeTo (const Payload& payload)			{ changeTo (stateId<TState>(), payload);			}
+	HFSM_INLINE void changeTo (const Payload& payload)			{ changeTo (stateId<TState>(), payload);		}
 
 	template <typename TState>
 	HFSM_INLINE void restart  ()								{ restart  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void restart  (const Payload& payload)			{ restart  (stateId<TState>(), payload);			}
+	HFSM_INLINE void restart  (const Payload& payload)			{ restart  (stateId<TState>(), payload);		}
 
 	template <typename TState>
 	HFSM_INLINE void resume   ()								{ resume   (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void resume	  (const Payload& payload)			{ resume   (stateId<TState>(), payload);			}
+	HFSM_INLINE void resume	  (const Payload& payload)			{ resume   (stateId<TState>(), payload);		}
 
 	template <typename TState>
 	HFSM_INLINE void utilize  ()								{ utilize  (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void utilize  (const Payload& payload)			{ utilize  (stateId<TState>(), payload);			}
+	HFSM_INLINE void utilize  (const Payload& payload)			{ utilize  (stateId<TState>(), payload);		}
 
 	template <typename TState>
 	HFSM_INLINE void randomize()								{ randomize(stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void randomize(const Payload& payload)			{ randomize(stateId<TState>(), payload);			}
+	HFSM_INLINE void randomize(const Payload& payload)			{ randomize(stateId<TState>(), payload);		}
 
 	template <typename TState>
 	HFSM_INLINE void schedule ()								{ schedule (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void schedule (const Payload& payload)			{ schedule (stateId<TState>(), payload);			}
+	HFSM_INLINE void schedule (const Payload& payload)			{ schedule (stateId<TState>(), payload);		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

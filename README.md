@@ -63,6 +63,5 @@ Check [Wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) for basic usa
 - [Phil Nash](https://github.com/philsquared)
 - [Romain Cheminade](https://github.com/romaincheminade)
 - [Tristan Brindle](https://github.com/tcbrindle)
-
 - [C++::London](https://www.meetup.com/CppLondon/) meetup
 - programming community at [Splash Damage](http://www.splashdamage.com/)

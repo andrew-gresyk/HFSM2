@@ -127,8 +127,8 @@ struct S_ {
 #endif
 
 	// if you see..
-	// VS	 - error C2079: 'hfsm2::detail::S_<BLAH>::_head' uses undefined struct 'Blah'
-	// Clang - error : field has incomplete type 'hfsm2::detail::S_<BLAH>::Head' (aka 'Blah')
+	// VS	 - error C2079: 'hfsm2::detail::S_<...>::_head' uses undefined struct 'Blah'
+	// Clang - error : field has incomplete type 'hfsm2::detail::S_<...>::Head' (aka 'Blah')
 	//
 	// .. add definition for the state 'Blah'
 	Head _head;

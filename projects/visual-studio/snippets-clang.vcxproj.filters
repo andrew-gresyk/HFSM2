@@ -13,5 +13,6 @@
     <ClCompile Include="..\..\examples\snippets\wiki_transitions-within-hierarchy.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_tutorial.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_utility-theory.cpp" />
+    <ClCompile Include="..\..\examples\snippets\wiki_plans.cpp" />
   </ItemGroup>
 </Project>

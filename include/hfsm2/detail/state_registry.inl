@@ -26,7 +26,7 @@ StateRegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, TPL, NTC>>::isActive(const
 
 			if (parent.forkId > 0)
 				return parent.prong == compoActive[parent.forkId - 1];
-	}
+		}
 
 	return true;
 }

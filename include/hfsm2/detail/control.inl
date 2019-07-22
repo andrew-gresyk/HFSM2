@@ -166,13 +166,17 @@ FullControlT<TA>::updatePlan(TState& headState,
 
 	HFSM_ASSERT(subStatus);
 
-	if (subStatus.failure) {
+	if (subStatus.result == Status::FAILURE) {
+		_status.result = Status::FAILURE;
 		headState.wrapPlanFailed(*this);
 
-		return buildPlanStatus<State>(subStatus.outerTransition);
-	} else if (subStatus.success) {
+		if (Plan p = plan(_regionId))
+			p.clear();
+
+		return buildPlanStatus<State>();
+	} else if (subStatus.result == Status::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
-			for (auto it = p.begin(); it; ++it) {
+			for (auto it = p.first(); it; ++it) {
 				if (isActive(it->origin) &&
 					_planData.tasksSuccesses.get(it->origin))
 				{
@@ -185,14 +189,15 @@ FullControlT<TA>::updatePlan(TState& headState,
 					break;
 			}
 
-			return {false, false, subStatus.outerTransition};
+			return Status{};
 		} else {
+			_status.result = Status::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
 
-			return buildPlanStatus<State>(subStatus.outerTransition);
+			return buildPlanStatus<State>();
 		}
 	} else
-		return {false, false, subStatus.outerTransition};
+		return Status{};
 }
 
 //------------------------------------------------------------------------------
@@ -200,22 +205,32 @@ FullControlT<TA>::updatePlan(TState& headState,
 template <typename TA>
 template <typename TState>
 Status
-FullControlT<TA>::buildPlanStatus(const bool outerTransition) {
+FullControlT<TA>::buildPlanStatus() {
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
 
-	if (_status.failure) {
-		_planData.tasksFailures.template set<STATE_ID>();
+	switch (_status.result) {
+	case Status::NONE:
+		HFSM_BREAK();
+		break;
 
-		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::FAILED);
-		return {false, true,  outerTransition};
-	} else if (_status.success) {
+	case Status::SUCCESS:
 		_planData.tasksSuccesses.template set<STATE_ID>();
 
 		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::SUCCEEDED);
-		return {true,  false, outerTransition};
-	} else
-		return {false, false, outerTransition};
+		break;
+
+	case Status::FAILURE:
+		_planData.tasksFailures.template set<STATE_ID>();
+
+		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::FAILED);
+		break;
+
+	default:
+		HFSM_BREAK();
+	}
+
+	return {_status.result};
 }
 
 //------------------------------------------------------------------------------
@@ -401,7 +416,6 @@ FullControlT<TA>::schedule(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-
 template <typename TA>
 void
 FullControlT<TA>::schedule(const StateID stateId,
@@ -412,14 +426,22 @@ FullControlT<TA>::schedule(const StateID stateId,
 
 	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
 }
+
 //------------------------------------------------------------------------------
 
 template <typename TA>
 void
 FullControlT<TA>::succeed() {
-	_status.success = true;
+	_status.result = Status::SUCCESS;
 
 	_planData.tasksSuccesses.set(_originId);
+
+	// TODO: promote taskSuccess all the way up for all regions without plans
+	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
+		HFSM_ASSERT(_regionIndex < StateList::SIZE);
+
+		_planData.tasksSuccesses.set(_regionIndex);
+	}
 
 	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::SUCCEEDED);
 }
@@ -429,9 +451,16 @@ FullControlT<TA>::succeed() {
 template <typename TA>
 void
 FullControlT<TA>::fail() {
-	_status.failure = true;
+	_status.result = Status::FAILURE;
 
 	_planData.tasksFailures.set(_originId);
+
+	// TODO: promote taskFailure all the way up for all regions without plans
+	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
+		HFSM_ASSERT(_regionIndex < StateList::SIZE);
+
+		_planData.tasksFailures.set(_regionIndex);
+	}
 
 	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::FAILED);
 }

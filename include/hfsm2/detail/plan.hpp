@@ -6,15 +6,19 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct Status {
-	bool success = false;
-	bool failure = false;
+	enum Result {
+		NONE,
+		SUCCESS,
+		FAILURE
+	};
+
+	Result result = NONE;
 	bool outerTransition = false;
 
-	inline Status(const bool success_ = false,
-				  const bool failure_ = false,
+	inline Status(const Result result_ = NONE,
 				  const bool outerTransition_ = false);
 
-	inline explicit operator bool() const { return success || failure || outerTransition; }
+	inline explicit operator bool() const { return result || outerTransition; }
 
 	inline void clear();
 };
@@ -25,9 +29,10 @@ struct Status {
 
 inline Status
 combine(const Status lhs, const Status rhs) {
-	return Status{lhs.success || rhs.success,
-				  lhs.failure || rhs.failure,
-				  lhs.outerTransition || rhs.outerTransition};
+	const Status::Result result = lhs.result > rhs.result ?
+		lhs.result : rhs.result;
+
+	return {result, lhs.outerTransition || rhs.outerTransition};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +97,7 @@ private:
 public:
 	HFSM_INLINE explicit operator bool() const;
 
-	HFSM_INLINE Iterator begin()			{ return Iterator{*this};								}
+	HFSM_INLINE Iterator first()			{ return Iterator{*this};								}
 
 private:
 	const PlanData& _planData;
@@ -161,9 +166,9 @@ private:
 	template <typename T>
 	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
-	TaskIndex append(const Transition transition,
-					 const StateID origin,
-					 const StateID destination);
+	bool append(const Transition transition,
+				const StateID origin,
+				const StateID destination);
 
 public:
 	HFSM_INLINE explicit operator bool() const;
@@ -172,58 +177,59 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE TaskIndex change   (const StateID origin, const StateID destination)	{ return append(Transition::CHANGE,	   origin, destination); }
-	HFSM_INLINE TaskIndex restart  (const StateID origin, const StateID destination)	{ return append(Transition::RESTART,   origin, destination); }
-	HFSM_INLINE TaskIndex resume   (const StateID origin, const StateID destination)	{ return append(Transition::RESUME,	   origin, destination); }
-	HFSM_INLINE TaskIndex utilize  (const StateID origin, const StateID destination)	{ return append(Transition::UTILIZE,   origin, destination); }
-	HFSM_INLINE TaskIndex randomize(const StateID origin, const StateID destination)	{ return append(Transition::RANDOMIZE, origin, destination); }
-	HFSM_INLINE TaskIndex schedule (const StateID origin, const StateID destination)	{ return append(Transition::SCHEDULE,  origin, destination); }
+	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(Transition::CHANGE,	   origin, destination); }
+	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(Transition::RESTART,   origin, destination); }
+	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(Transition::RESUME,	   origin, destination); }
+	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(Transition::UTILIZE,   origin, destination); }
+	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(Transition::RANDOMIZE, origin, destination); }
+	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(Transition::SCHEDULE,  origin, destination); }
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TOrigin>
-	HFSM_INLINE TaskIndex change   (const StateID destination)					{ return change   (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool change   (const StateID destination)					{ return change   (stateId<TOrigin>(), destination);				}
 
 	template <typename TOrigin>
-	HFSM_INLINE TaskIndex restart  (const StateID destination)					{ return restart  (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool restart  (const StateID destination)					{ return restart  (stateId<TOrigin>(), destination);				}
 
 	template <typename TOrigin>
-	HFSM_INLINE TaskIndex resume   (const StateID destination)					{ return resume   (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool resume   (const StateID destination)					{ return resume   (stateId<TOrigin>(), destination);				}
 
 	template <typename TOrigin>
-	HFSM_INLINE TaskIndex utilize  (const StateID destination)					{ return utilize  (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool utilize  (const StateID destination)					{ return utilize  (stateId<TOrigin>(), destination);				}
 
 	template <typename TOrigin>
-	HFSM_INLINE TaskIndex randomize(const StateID destination)					{ return randomize(stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool randomize(const StateID destination)					{ return randomize(stateId<TOrigin>(), destination);				}
 
 	template <typename TOrigin>
-	HFSM_INLINE TaskIndex schedule (const StateID destination)					{ return schedule (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool schedule (const StateID destination)					{ return schedule (stateId<TOrigin>(), destination);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE TaskIndex change   ()											{ return change   (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool change   ()											{ return change   (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE TaskIndex restart  ()											{ return restart  (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool restart  ()											{ return restart  (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE TaskIndex resume   ()											{ return resume   (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool resume   ()											{ return resume   (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE TaskIndex utilize  ()											{ return utilize  (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool utilize  ()											{ return utilize  (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE TaskIndex randomize()											{ return randomize(stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool randomize()											{ return randomize(stateId<TOrigin>(), stateId<TDestination>());	}
 
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE TaskIndex schedule ()											{ return schedule (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool schedule ()											{ return schedule (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	HFSM_INLINE Iterator first()			{ return Iterator{*this};								}
+
+private:
 	void remove(const LongIndex task);
-
-	HFSM_INLINE Iterator begin()			{ return Iterator{*this};								}
 
 private:
 	PlanData& _planData;

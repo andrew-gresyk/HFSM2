@@ -155,7 +155,7 @@ C_<TN, TA, TG, TH, TS...>::deepUpdate(FullControl& control) {
 		const Status subStatus = _subStates.wideUpdate(control, active);
 
 		if (subStatus.outerTransition)
-			return subStatus;
+			return Status{Status::NONE, true};
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 

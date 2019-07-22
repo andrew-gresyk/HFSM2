@@ -3,20 +3,17 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Status::Status(const bool success_,
-			   const bool failure_,
+Status::Status(const Result result_,
 			   const bool outerTransition_)
-		: success{success_}
-		, failure{failure_}
-		, outerTransition{outerTransition_}
-	{}
+	: result{result_}
+	, outerTransition{outerTransition_}
+{}
 
 //------------------------------------------------------------------------------
 
 void
 Status::clear() {
-	success = false;
-	failure = false;
+	result = NONE;
 	outerTransition = false;
 }
 
@@ -166,7 +163,7 @@ PlanT<TArgs>::operator bool() const {
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-typename PlanDataT<TArgs>::TaskLinks::Index
+bool
 PlanT<TArgs>::append(const Transition transition,
 					 const StateID origin,
 					 const StateID destination)
@@ -174,6 +171,8 @@ PlanT<TArgs>::append(const Transition transition,
 	_planData.planExists.set(_regionId);
 
 	const TaskIndex index = _planData.taskLinks.emplace(transition, origin, destination);
+	if (index == TaskLinks::INVALID)
+		return false;
 
 	if (_bounds.first < TaskLinks::CAPACITY) {
 		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
