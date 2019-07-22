@@ -33,7 +33,7 @@ Check [Wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) for basic usa
 - [Hierarchical](https://github.com/andrew-gresyk/HFSM2/wiki/Transitions-within-Hierarchy), with a selection of composite (sub-machine) and orthogonal regions
 - Gamedev-friendly, supports explicit `State::update()`
 - Also supports traditional event-based workflow with `State::react()`
-- Dynamic planning support
+- [Dynamic planning](https://github.com/andrew-gresyk/HFSM2/wiki/Plans) support
 - [Utility theory](https://github.com/andrew-gresyk/HFSM2/wiki/Utility-Theory) support (both max score and ranked weighted random)
 - Scaleable, supports robust state re-use via state injections
 - [Debug-assisted](https://gresyk.dev/features/2018/01/15/hfsm-magic.html), includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
