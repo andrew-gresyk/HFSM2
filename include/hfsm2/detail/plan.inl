@@ -192,7 +192,7 @@ PlanT<TArgs>::append(const Transition transition,
 		_bounds.last  = index;
 	}
 
-	return index;
+	return true;
 }
 
 //------------------------------------------------------------------------------

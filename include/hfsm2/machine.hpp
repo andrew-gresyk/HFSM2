@@ -2653,7 +2653,7 @@ PlanT<TArgs>::append(const Transition transition,
 		_bounds.last  = index;
 	}
 
-	return index;
+	return true;
 }
 
 //------------------------------------------------------------------------------
@@ -7407,7 +7407,7 @@ C_<TN, TA, TG, TH, TS...>::deepReportChange(Control& control) {
 
 	default:
 		HFSM_BREAK();
-		return TA::UP{};
+		return {};
 	}
 }
 
