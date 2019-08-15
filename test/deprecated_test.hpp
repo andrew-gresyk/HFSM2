@@ -138,7 +138,7 @@ public:
 	float elapsed() const		{ return _elapsed;			}
 
 private:
-	float _elapsed;
+	float _elapsed = 0.0f;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

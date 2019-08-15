@@ -1,13 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Text Include="..\..\examples\snippets\CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\examples\snippets\main.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_transitions-within-hierarchy.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_tutorial.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_utility-theory.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_plans.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="_">
+      <UniqueIdentifier>{636faecb-1762-42fb-a272-c04d60e31904}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\examples\snippets\CMakeLists.txt">
+      <Filter>_</Filter>
+    </Text>
   </ItemGroup>
 </Project>

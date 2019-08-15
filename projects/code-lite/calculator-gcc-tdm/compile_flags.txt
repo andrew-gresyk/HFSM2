@@ -1,0 +1,13 @@
+-IC:\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\5.1.0\include\c++
+-IC:\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\5.1.0\include\c++\x86_64-w64-mingw32
+-IC:\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\5.1.0\include\c++\backward
+-IC:\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\5.1.0\include
+-IC:\TDM-GCC-64\include
+-IC:\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\5.1.0\include-fixed
+-IC:\TDM-GCC-64\x86_64-w64-mingw32\include
+-IC:\Work\hfsm2\projects\code-lite\calculator-gcc-tdm
+-IC:\Work\hfsm2\external
+-IC:\Work\hfsm2\include
+-D_DEBUG
+-target
+x86_64-pc-windows-gnu

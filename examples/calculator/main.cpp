@@ -1,3 +1,6 @@
+// added by Kjeld Mathias Petersen
+// in https://github.com/DonMathi/HFSM2/commit/d258e9c0790cde92e04d98402e6b2636cbaf57fe
+
 #include <hfsm2/machine.hpp>
 #include <iostream>
 #include <conio.h>
@@ -13,7 +16,7 @@
 
 
 enum MathOperator { IDLE, PLUS, MINUS, MULTIPLY, DIVIDE };
-const std::string MathOperatorString[] = { "?", "+", "-", "*", "/" }; // NOLINT(cert-err58-cpp)
+const char* const MathOperatorString[] = { "?", "+", "-", "*", "/" }; // NOLINT(cert-err58-cpp)
 
 
 struct Context {
@@ -53,9 +56,9 @@ struct Context {
 	void display()
 	{
 		PRINTCALL;
-		std::cout << std::endl;
-		std::cout << "[" + MathOperatorString[mathOperator] << "," << decimalFactor << "]" << std::endl;
-		std::cout << "2: " << operand2 << std::endl;
+		std::cout << "\n";
+		std::cout << "[" << MathOperatorString[mathOperator] << "," << decimalFactor << "]\n";
+		std::cout << "2: " << operand2 << "\n";
 		std::cout << "1: " << operand1 << std::endl;
 	}
 
@@ -267,7 +270,7 @@ struct Ready : FSM::State
 		PRINTCALL;
 		// This is where bottom-op invocation order is needed
 		// In this higher level state I have to ask, if a lower level is active or not
-		if (control.isActive<Begin>() && op.mathOperator==MathOperator::MINUS) 
+		if (control.isActive<Begin>() && op.mathOperator==MathOperator::MINUS)
 			control.changeTo<Negated1>();
 		else
 		{
@@ -825,7 +828,7 @@ int main()
 	do
 	{
 		PRINTCALL;
-		ch = getch();
+		ch = _getch();
 		switch(ch)
 		{
 			case '0': { machine.react(Digit_0{}); break; }

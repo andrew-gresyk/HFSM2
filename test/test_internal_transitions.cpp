@@ -26,7 +26,7 @@ namespace {
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Internal Transition", "[machine]") {
-	float _;
+	float _ = 0.0f;
 	Logger logger;
 
 	FSM::Instance machine{_, &logger};

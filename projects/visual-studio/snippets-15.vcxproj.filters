@@ -6,13 +6,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\examples\snippets\CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\examples\snippets\main.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_transitions-within-hierarchy.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_tutorial.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_utility-theory.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_plans.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\examples\snippets\CMakeLists.txt">
+      <Filter>_</Filter>
+    </Text>
   </ItemGroup>
 </Project>
