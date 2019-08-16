@@ -217,13 +217,13 @@ FullControlT<TA>::buildPlanStatus() {
 	case Status::SUCCESS:
 		_planData.tasksSuccesses.template set<STATE_ID>();
 
-		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::SUCCEEDED);
+		HFSM_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
 		break;
 
 	case Status::FAILURE:
 		_planData.tasksFailures.template set<STATE_ID>();
 
-		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::FAILED);
+		HFSM_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
 		break;
 
 	default:
@@ -245,7 +245,7 @@ FullControlT<TA>::changeTo(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::CHANGE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::CHANGE, stateId);
 	}
 }
 
@@ -263,7 +263,7 @@ FullControlT<TA>::changeTo(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::CHANGE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::CHANGE, stateId);
 	}
 }
 
@@ -279,7 +279,7 @@ FullControlT<TA>::restart(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RESTART, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESTART, stateId);
 	}
 }
 
@@ -297,7 +297,7 @@ FullControlT<TA>::restart(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RESTART, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESTART, stateId);
 	}
 }
 
@@ -313,7 +313,7 @@ FullControlT<TA>::resume(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RESUME, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESUME, stateId);
 	}
 }
 
@@ -331,7 +331,7 @@ FullControlT<TA>::resume(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RESUME, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESUME, stateId);
 	}
 }
 
@@ -347,7 +347,7 @@ FullControlT<TA>::utilize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::UTILIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::UTILIZE, stateId);
 	}
 }
 
@@ -365,7 +365,7 @@ FullControlT<TA>::utilize(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::UTILIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::UTILIZE, stateId);
 	}
 }
 
@@ -381,7 +381,7 @@ FullControlT<TA>::randomize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RANDOMIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RANDOMIZE, stateId);
 	}
 }
 
@@ -399,7 +399,7 @@ FullControlT<TA>::randomize(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RANDOMIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RANDOMIZE, stateId);
 	}
 }
 
@@ -411,7 +411,7 @@ FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
 
-	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -424,7 +424,7 @@ FullControlT<TA>::schedule(const StateID stateId,
 	const Request transition{Request::Type::SCHEDULE, stateId, payload};
 	_requests << transition;
 
-	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -443,7 +443,7 @@ FullControlT<TA>::succeed() {
 		_planData.tasksSuccesses.set(_regionIndex);
 	}
 
-	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::SUCCEEDED);
+	HFSM_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::SUCCEEDED);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -462,7 +462,7 @@ FullControlT<TA>::fail() {
 		_planData.tasksFailures.set(_regionIndex);
 	}
 
-	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::FAILED);
+	HFSM_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -472,7 +472,7 @@ void
 GuardControlT<TA>::cancelPendingTransitions() {
 	_cancelled = true;
 
-	HFSM_LOG_CANCELLED_PENDING(_originId);
+	HFSM_LOG_CANCELLED_PENDING(context(), _originId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

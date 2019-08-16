@@ -29,7 +29,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Planner", "[machine]") {
+TEST_CASE("FSM.Planner", "[machine]") {
 	Logger logger;
 
 	FSM::Instance machine{&logger};

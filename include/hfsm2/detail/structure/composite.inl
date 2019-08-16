@@ -23,7 +23,7 @@ C_<TN, TA, TG, TH, TS...>::resolveRandom(Control& control,
 			if (cursor >= options[i])
 				cursor -= options[i];
 			else {
-				HFSM_LOG_RANDOM_RESOLUTION(HEAD_ID, i, random);
+				HFSM_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, i, random);
 
 				return i;
 			}
@@ -385,7 +385,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -454,7 +454,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -549,7 +549,7 @@ C_<TN, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 
 	return {
 		h.utility * s.utility,
@@ -591,7 +591,7 @@ C_<TN, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 
 	return {
 		h.utility * s.utility,

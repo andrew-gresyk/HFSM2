@@ -1,5 +1,6 @@
 // added by Kjeld Mathias Petersen
 // in https://github.com/DonMathi/HFSM2/commit/d258e9c0790cde92e04d98402e6b2636cbaf57fe
+// based on https://www.embedded.com/print/4026976
 
 #include <hfsm2/machine.hpp>
 #include <iostream>

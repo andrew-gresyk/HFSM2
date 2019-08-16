@@ -73,31 +73,48 @@ using Events = std::vector<Event>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Logger
-	: hfsm2::LoggerInterface
+template <typename TContext = hfsm2::EmptyContext>
+struct LoggerT
+	: hfsm2::LoggerInterfaceT<TContext>
 {
+	using Context	  = TContext;
+	using Interface	  = hfsm2::LoggerInterfaceT<Context>;
 
-	void recordMethod(const StateID origin,
+	using Utilty	  = typename Interface::Utilty;
+	using Method	  = typename Interface::Method;
+	using StateID	  = typename Interface::StateID;
+	using RegionID	  = typename Interface::RegionID;
+	using Transition  = typename Interface::Transition;
+	using StatusEvent = typename Interface::StatusEvent;
+
+	void recordMethod(Context& context,
+					  const StateID origin,
 					  const Method method) override;
 
-	void recordTransition(const StateID origin,
+	void recordTransition(Context& context,
+						  const StateID origin,
 						  const Transition transition,
 						  const StateID target) override;
 
-	void recordTaskStatus(const RegionID region,
+	void recordTaskStatus(Context& context,
+						  const RegionID region,
 						  const StateID origin,
 						  const StatusEvent event) override;
 
-	void recordPlanStatus(const RegionID region,
+	void recordPlanStatus(Context& context,
+						  const RegionID region,
 						  const StatusEvent event) override;
 
-	void recordCancelledPending(const StateID origin) override;
+	void recordCancelledPending(Context& context,
+								const StateID origin) override;
 
-	void recordUtilityResolution(const StateID head,
+	void recordUtilityResolution(Context& context,
+								 const StateID head,
 								 const StateID prong,
 								 const Utilty utilty) override;
 
-	void recordRandomResolution(const StateID head,
+	void recordRandomResolution(Context& context,
+								const StateID head,
 								const StateID prong,
 								const Utilty utilty) override;
 
@@ -105,6 +122,7 @@ struct Logger
 
 	Events history;
 };
+using Logger = LoggerT<>;
 
 //------------------------------------------------------------------------------
 
@@ -139,3 +157,5 @@ void assertResumable(TMachine& machine,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#include "shared.inl"

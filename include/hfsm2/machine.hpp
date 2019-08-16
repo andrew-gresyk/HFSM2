@@ -55,6 +55,13 @@
 
 //------------------------------------------------------------------------------
 
+namespace hfsm2 {
+
+struct EmptyContext {};
+struct EmptyPayload {};
+
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -106,40 +113,41 @@
 
 	#define HFSM_LOGGER_OR(Y, N)												Y
 
-	#define HFSM_LOG_TRANSITION(ORIGIN, TRANSITION, DESTINATION)				\
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TRANSITION, DESTINATION)		\
 		if (_logger)															\
-			_logger->recordTransition(ORIGIN, TRANSITION, DESTINATION)
+			_logger->recordTransition(CONTEXT, ORIGIN, TRANSITION, DESTINATION)
 
-	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)						\
+	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)				\
 		if (_logger)															\
-			_logger->recordTaskStatus(REGION, ORIGIN, STATUS)
+			_logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
 
-	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)								\
+	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)						\
 		if (_logger)															\
-			_logger->recordPlanStatus(REGION, STATUS)
+			_logger->recordPlanStatus(CONTEXT, REGION, STATUS)
 
-	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)									\
+	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)							\
 		if (_logger)															\
-			_logger->recordCancelledPending(ORIGIN)
+			_logger->recordCancelledPending(CONTEXT, ORIGIN)
 
-	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)					\
+	#define HFSM_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
 		if (auto* const logger = control.logger())								\
-			logger->recordUtilityResolution(HEAD, PRONG, UTILITY)
+			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
-	#define HFSM_LOG_RANDOM_RESOLUTION(HEAD, PRONG, UTILITY)					\
+	#define HFSM_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
 		if (auto* const logger = control.logger())								\
-			logger->recordRandomResolution(HEAD, PRONG, UTILITY)
+			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 #else
 
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(Y, N)												N
-	#define HFSM_LOG_TRANSITION(ORIGIN, TRANSITION, DESTINATION)
-	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)
-	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)
-	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)
-	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)
-	#define HFSM_LOG_RANDOM_RESOLUTION(HEAD, PRONG, UTILITY)
+
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TRANSITION, DESTINATION)
+	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)
+	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)
+	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
+	#define HFSM_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
+	#define HFSM_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
 
 #endif
 
@@ -147,18 +155,18 @@
 
 #if defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
-	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)					\
 		if (auto* const logger = control.logger())								\
-			logger->recordMethod(STATE_ID, ID)
+			logger->recordMethod(CONTEXT, STATE_ID, METHOD_ID)
 
 #elif defined HFSM_ENABLE_LOG_INTERFACE
 
-	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)					\
 		if (auto* const logger = control.logger())								\
-			log<decltype(METHOD), ID>(*logger)
+			log<decltype(METHOD)>(*logger, CONTEXT, METHOD_ID)
 
 #else
-	#define HFSM_LOG_STATE_METHOD(METHOD, ID)
+	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1960,14 +1968,16 @@ transitionName(const Transition transition) {
 
 }
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-
 namespace hfsm2 {
+
+#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TUtilty = float>
+template <typename TContext = EmptyContext,
+		  typename TUtilty = float>
 struct LoggerInterfaceT {
+	using Context	  = TContext;
 	using Utilty	  = TUtilty;
 
 	using Method	  = ::hfsm2::Method;
@@ -1976,53 +1986,58 @@ struct LoggerInterfaceT {
 	using Transition  = ::hfsm2::Transition;
 	using StatusEvent = ::hfsm2::StatusEvent;
 
-	virtual void recordMethod(const StateID /*origin*/,
+	virtual void recordMethod(Context& /*context*/,
+							  const StateID /*origin*/,
 							  const Method /*method*/)
 	{}
 
-	virtual void recordTransition(const StateID /*origin*/,
+	virtual void recordTransition(Context& /*context*/,
+								  const StateID /*origin*/,
 								  const Transition /*transition*/,
 								  const StateID /*target*/)
 	{}
 
-	virtual void recordTaskStatus(const RegionID /*region*/,
+	virtual void recordTaskStatus(Context& /*context*/,
+								  const RegionID /*region*/,
 								  const StateID /*origin*/,
 								  const StatusEvent /*event*/)
 	{}
 
-	virtual void recordPlanStatus(const RegionID /*region*/,
+	virtual void recordPlanStatus(Context& /*context*/,
+								  const RegionID /*region*/,
 								  const StatusEvent /*event*/)
 	{}
 
-	virtual void recordCancelledPending(const StateID /*origin*/) {}
+	virtual void recordCancelledPending(Context& /*context*/,
+										const StateID /*origin*/)
+	{}
 
-	virtual void recordUtilityResolution(const StateID /*head*/,
+	virtual void recordUtilityResolution(Context& /*context*/,
+										 const StateID /*head*/,
 										 const StateID /*prong*/,
 										 const Utilty /*utilty*/)
 	{}
 
-	virtual void recordRandomResolution(const StateID /*head*/,
+	virtual void recordRandomResolution(Context& /*context*/,
+										const StateID /*head*/,
 										const StateID /*prong*/,
 										const Utilty /*utilty*/)
 	{}
 };
 
-using LoggerInterface = LoggerInterfaceT<float>;
-
 ////////////////////////////////////////////////////////////////////////////////
-
-}
 
 #else
 
-namespace hfsm2 {
-
-template <typename = float>
+template <typename TContext = EmptyContext,
+		  typename TUtilty = float>
 using LoggerInterfaceT = void;
 
-}
-
 #endif
+
+using LoggerInterface = LoggerInterfaceT<>;
+
+}
 
 namespace hfsm2 {
 namespace detail {
@@ -4069,13 +4084,13 @@ FullControlT<TA>::buildPlanStatus() {
 	case Status::SUCCESS:
 		_planData.tasksSuccesses.template set<STATE_ID>();
 
-		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::SUCCEEDED);
+		HFSM_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
 		break;
 
 	case Status::FAILURE:
 		_planData.tasksFailures.template set<STATE_ID>();
 
-		HFSM_LOG_PLAN_STATUS(_regionId, StatusEvent::FAILED);
+		HFSM_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
 		break;
 
 	default:
@@ -4097,7 +4112,7 @@ FullControlT<TA>::changeTo(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::CHANGE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::CHANGE, stateId);
 	}
 }
 
@@ -4115,7 +4130,7 @@ FullControlT<TA>::changeTo(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::CHANGE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::CHANGE, stateId);
 	}
 }
 
@@ -4131,7 +4146,7 @@ FullControlT<TA>::restart(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RESTART, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESTART, stateId);
 	}
 }
 
@@ -4149,7 +4164,7 @@ FullControlT<TA>::restart(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RESTART, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESTART, stateId);
 	}
 }
 
@@ -4165,7 +4180,7 @@ FullControlT<TA>::resume(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RESUME, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESUME, stateId);
 	}
 }
 
@@ -4183,7 +4198,7 @@ FullControlT<TA>::resume(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RESUME, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESUME, stateId);
 	}
 }
 
@@ -4199,7 +4214,7 @@ FullControlT<TA>::utilize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::UTILIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::UTILIZE, stateId);
 	}
 }
 
@@ -4217,7 +4232,7 @@ FullControlT<TA>::utilize(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::UTILIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::UTILIZE, stateId);
 	}
 }
 
@@ -4233,7 +4248,7 @@ FullControlT<TA>::randomize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RANDOMIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RANDOMIZE, stateId);
 	}
 }
 
@@ -4251,7 +4266,7 @@ FullControlT<TA>::randomize(const StateID stateId,
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(_originId, Transition::RANDOMIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, Transition::RANDOMIZE, stateId);
 	}
 }
 
@@ -4263,7 +4278,7 @@ FullControlT<TA>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
 
-	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4276,7 +4291,7 @@ FullControlT<TA>::schedule(const StateID stateId,
 	const Request transition{Request::Type::SCHEDULE, stateId, payload};
 	_requests << transition;
 
-	HFSM_LOG_TRANSITION(_originId, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -4295,7 +4310,7 @@ FullControlT<TA>::succeed() {
 		_planData.tasksSuccesses.set(_regionIndex);
 	}
 
-	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::SUCCEEDED);
+	HFSM_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::SUCCEEDED);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4314,7 +4329,7 @@ FullControlT<TA>::fail() {
 		_planData.tasksFailures.set(_regionIndex);
 	}
 
-	HFSM_LOG_TASK_STATUS(_regionId, _originId, StatusEvent::FAILED);
+	HFSM_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4324,7 +4339,7 @@ void
 GuardControlT<TA>::cancelPendingTransitions() {
 	_cancelled = true;
 
-	HFSM_LOG_CANCELLED_PENDING(_originId);
+	HFSM_LOG_CANCELLED_PENDING(context(), _originId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -5100,9 +5115,6 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-struct EmptyContext {};
-struct EmptyPayload {};
-
 template <typename TC = EmptyContext,
 		  typename TN = char,
 		  typename TU = float,
@@ -5116,7 +5128,7 @@ struct ConfigT {
 	using Rank	  = TN;
 	using Utility = TU;
 	using Random_ = TG;
-	using Logger  = LoggerInterfaceT<Utility>;
+	using Logger  = LoggerInterfaceT<Context, Utility>;
 
 	using Payload = TP;
 
@@ -5284,6 +5296,7 @@ struct S_ {
 	using Args			= TArgs;
 	using Head			= THead;
 
+	using Context		= typename Args::Context;
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
@@ -5385,14 +5398,20 @@ struct S_ {
 		using State = TState;
 	};
 
-	template <typename TMethodType, Method>
+	template <typename TMethodType>
 	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
-	log(Logger&) const {}
+	log(Logger&,
+		Context&,
+		const Method) const
+	{}
 
-	template <typename TMethodType, Method TMethodId>
+	template <typename TMethodType>
 	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
-	log(Logger& logger) const {
-		logger.recordMethod(STATE_ID, TMethodId);
+	log(Logger& logger,
+		Context& context,
+		const Method method) const
+	{
+		logger.recordMethod(context, STATE_ID, method);
 	}
 #endif
 
@@ -5465,7 +5484,9 @@ S_<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 template <typename TN, typename TA, typename TH>
 bool
 S_<TN, TA, TH>::deepEntryGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::entryGuard, Method::ENTRY_GUARD);
+	HFSM_LOG_STATE_METHOD(&Head::entryGuard,
+						  control.context(),
+						  Method::ENTRY_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5485,7 +5506,9 @@ S_<TN, TA, TH>::deepEnter(PlanControl& control) {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control.planData().tasksFailures .template get<STATE_ID>());
 
-	HFSM_LOG_STATE_METHOD(&Head::enter, Method::ENTER);
+	HFSM_LOG_STATE_METHOD(&Head::enter,
+						  control.context(),
+						  Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5501,7 +5524,9 @@ S_<TN, TA, TH>::deepReenter(PlanControl& control) {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control.planData().tasksFailures .template get<STATE_ID>());
 
-	HFSM_LOG_STATE_METHOD(&Head::reenter, Method::REENTER);
+	HFSM_LOG_STATE_METHOD(&Head::reenter,
+						  control.context(),
+						  Method::REENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5514,7 +5539,9 @@ S_<TN, TA, TH>::deepReenter(PlanControl& control) {
 template <typename TN, typename TA, typename TH>
 Status
 S_<TN, TA, TH>::deepUpdate(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::update, Method::UPDATE);
+	HFSM_LOG_STATE_METHOD(&Head::update,
+						  control.context(),
+						  Method::UPDATE);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5533,7 +5560,9 @@ S_<TN, TA, TH>::deepReact(FullControl& control,
 						  const TEvent& event)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
-	HFSM_LOG_STATE_METHOD(reaction, Method::REACT);
+	HFSM_LOG_STATE_METHOD(reaction,
+						  control.context(),
+						  Method::REACT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5548,7 +5577,9 @@ S_<TN, TA, TH>::deepReact(FullControl& control,
 template <typename TN, typename TA, typename TH>
 bool
 S_<TN, TA, TH>::deepExitGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exitGuard, Method::EXIT_GUARD);
+	HFSM_LOG_STATE_METHOD(&Head::exitGuard,
+						  control.context(),
+						  Method::EXIT_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5565,7 +5596,9 @@ S_<TN, TA, TH>::deepExitGuard(GuardControl& control) {
 template <typename TN, typename TA, typename TH>
 void
 S_<TN, TA, TH>::deepExit(PlanControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
+	HFSM_LOG_STATE_METHOD(&Head::exit,
+						  control.context(),
+						  Method::EXIT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5586,7 +5619,9 @@ S_<TN, TA, TH>::deepExit(PlanControl& control) {
 template <typename TN, typename TA, typename TH>
 void
 S_<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::planSucceeded, Method::PLAN_SUCCEEDED);
+	HFSM_LOG_STATE_METHOD(&Head::planSucceeded,
+						  control.context(),
+						  Method::PLAN_SUCCEEDED);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5598,7 +5633,9 @@ S_<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 template <typename TN, typename TA, typename TH>
 void
 S_<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::planFailed, Method::PLAN_FAILED);
+	HFSM_LOG_STATE_METHOD(&Head::planFailed,
+						  control.context(),
+						  Method::PLAN_FAILED);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5610,7 +5647,9 @@ S_<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
 template <typename TN, typename TA, typename TH>
 typename TA::Rank
 S_<TN, TA, TH>::wrapRank(Control& control) {
-	HFSM_LOG_STATE_METHOD(&Head::rank, Method::RANK);
+	HFSM_LOG_STATE_METHOD(&Head::rank,
+						  control.context(),
+						  Method::RANK);
 
 	return _head.rank(static_cast<const Control&>(control));
 }
@@ -5620,7 +5659,9 @@ S_<TN, TA, TH>::wrapRank(Control& control) {
 template <typename TN, typename TA, typename TH>
 typename TA::Utility
 S_<TN, TA, TH>::wrapUtility(Control& control) {
-	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
+	HFSM_LOG_STATE_METHOD(&Head::utility,
+						  control.context(),
+						  Method::UTILITY);
 
 	return _head.utility(static_cast<const Control&>(control));
 }
@@ -6935,7 +6976,7 @@ C_<TN, TA, TG, TH, TS...>::resolveRandom(Control& control,
 			if (cursor >= options[i])
 				cursor -= options[i];
 			else {
-				HFSM_LOG_RANDOM_RESOLUTION(HEAD_ID, i, random);
+				HFSM_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, i, random);
 
 				return i;
 			}
@@ -7297,7 +7338,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7366,7 +7407,7 @@ C_<TN, TA, TG, TH, TS...>::deepRequestUtilize(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7461,7 +7502,7 @@ C_<TN, TA, TG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 
 	return {
 		h.utility * s.utility,
@@ -7503,7 +7544,7 @@ C_<TN, TA, TG, TH, TS...>::deepReportUtilize(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, requested, s.utility);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 
 	return {
 		h.utility * s.utility,
@@ -8807,7 +8848,7 @@ O_<TN, TA, TH, TS...>::deepReportChange(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
 		h.utility * sub,
@@ -8825,7 +8866,7 @@ O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
 		h.utility * sub,
@@ -8851,7 +8892,7 @@ O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_RANDOM_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return h * sub;
 }
@@ -9305,12 +9346,12 @@ template <typename TG, typename TA>
 template <typename TEvent>
 void
 R_<TG, TA>::react(const TEvent& event) {
-	FullControl control(_context,
+	FullControl control{_context,
 						_random,
 						_stateRegistry,
 						_planData,
 						_requests,
-						HFSM_LOGGER_OR(_logger, nullptr));
+						HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepReact(control, event);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -9329,7 +9370,7 @@ R_<TG, TA>::changeTo(const StateID stateId) {
 	const Request request{Request::Type::CHANGE, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::CHANGE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9342,7 +9383,7 @@ R_<TG, TA>::changeTo(const StateID stateId,
 	const Request request{Request::Type::CHANGE, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::CHANGE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -9353,7 +9394,7 @@ R_<TG, TA>::restart(const StateID stateId) {
 	const Request request{Request::Type::RESTART, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESTART, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9366,7 +9407,7 @@ R_<TG, TA>::restart(const StateID stateId,
 	const Request request{Request::Type::RESTART, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESTART, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -9377,7 +9418,7 @@ R_<TG, TA>::resume(const StateID stateId) {
 	const Request request{Request::Type::RESUME, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESUME, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9390,7 +9431,7 @@ R_<TG, TA>::resume(const StateID stateId,
 	const Request request{Request::Type::RESUME, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESUME, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -9401,7 +9442,7 @@ R_<TG, TA>::utilize(const StateID stateId) {
 	const Request request{Request::Type::UTILIZE, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::UTILIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9414,7 +9455,7 @@ R_<TG, TA>::utilize(const StateID stateId,
 	const Request request{Request::Type::UTILIZE, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::UTILIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -9425,7 +9466,7 @@ R_<TG, TA>::randomize(const StateID stateId) {
 	const Request request{Request::Type::RANDOMIZE, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9438,7 +9479,7 @@ R_<TG, TA>::randomize(const StateID stateId,
 	const Request request{Request::Type::RANDOMIZE, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -9449,7 +9490,7 @@ R_<TG, TA>::schedule(const StateID stateId) {
 	const Request request{Request::Type::SCHEDULE, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9462,7 +9503,7 @@ R_<TG, TA>::schedule(const StateID stateId,
 	const Request request{Request::Type::SCHEDULE, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -9518,11 +9559,11 @@ R_<TG, TA>::getStateData(const StateID stateId) const {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::initialEnter() {
-	Control control(_context,
+	Control control{_context,
 					_random,
 					_stateRegistry,
 					_planData,
-					HFSM_LOGGER_OR(_logger, nullptr));
+					HFSM_LOGGER_OR(_logger, nullptr)};
 
 	AllForks undoRequested = _stateRegistry.requested;
 

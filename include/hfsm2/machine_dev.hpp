@@ -55,6 +55,13 @@
 
 //------------------------------------------------------------------------------
 
+namespace hfsm2 {
+
+struct EmptyContext {};
+struct EmptyPayload {};
+
+}
+
 #include "detail/shared/utility.hpp"
 #include "detail/shared/iterator.hpp"
 #include "detail/shared/array.hpp"
@@ -78,9 +85,6 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-struct EmptyContext {};
-struct EmptyPayload {};
-
 template <typename TC = EmptyContext,
 		  typename TN = char,
 		  typename TU = float,
@@ -94,7 +98,7 @@ struct ConfigT {
 	using Rank	  = TN;
 	using Utility = TU;
 	using Random_ = TG;
-	using Logger  = LoggerInterfaceT<Utility>;
+	using Logger  = LoggerInterfaceT<Context, Utility>;
 
 	using Payload = TP;
 

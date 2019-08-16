@@ -282,7 +282,7 @@ O_<TN, TA, TH, TS...>::deepReportChange(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
 		h.utility * sub,
@@ -300,7 +300,7 @@ O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_UTILITY_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
 		h.utility * sub,
@@ -326,7 +326,7 @@ O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_RANDOM_RESOLUTION(HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return h * sub;
 }

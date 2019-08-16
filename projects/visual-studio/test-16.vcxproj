@@ -34,7 +34,6 @@
     <ClCompile Include="..\..\test\test_randomize.cpp" />
     <ClCompile Include="..\..\test\test_resume.cpp" />
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
-    <ClCompile Include="..\..\test\shared.cpp" />
     <ClCompile Include="..\..\test\test_state_data.cpp" />
     <ClCompile Include="..\..\test\test_utilize.cpp" />
     <ClCompile Include="..\..\test\test_utility_regions.cpp" />
@@ -98,6 +97,7 @@
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\root.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state.inl" />
+    <None Include="..\..\test\shared.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -22,7 +22,7 @@ using FSM = M::Root<S(Apex),
 				S(S7),
 				S(S8),
 				S(S9)
->;
+			>;
 
 #undef S
 

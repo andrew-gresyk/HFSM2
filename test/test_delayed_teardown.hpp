@@ -64,7 +64,7 @@ struct Work
 	void exitGuard(GuardControl& control) {
 		if (!control.isPendingEnter<Teardown>()) {
 			for (const auto& transition : control.pendingTransitions())
-				control.plan().change<Teardown>(transition.stateId);
+				REQUIRE(control.plan().change<Teardown>(transition.stateId));
 
 			control.cancelPendingTransitions();
 			control.changeTo<Teardown>();

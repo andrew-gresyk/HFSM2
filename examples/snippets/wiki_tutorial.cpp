@@ -93,7 +93,7 @@ struct Done
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Tutorial", "[Wiki]") {
+TEST_CASE("Wiki.Tutorial", "[Wiki]") {
     Context context;
     context.powerOn = true;
 

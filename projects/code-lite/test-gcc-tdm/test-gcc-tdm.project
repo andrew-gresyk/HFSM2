@@ -60,6 +60,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/shared.inl"/>
     <File Name="../../../test/test_randomize.hpp"/>
     <File Name="../../../test/test_randomize.cpp"/>
     <File Name="../../../test/test_ortho_units.hpp"/>
@@ -87,7 +88,6 @@
     <File Name="../../../test/test_composite_bst.hpp"/>
     <File Name="../../../test/test_composite_bst.cpp"/>
     <File Name="../../../test/shared.hpp"/>
-    <File Name="../../../test/shared.cpp"/>
     <VirtualDirectory Name="shared">
       <File Name="../../../test/shared/test_random.cpp"/>
       <File Name="../../../test/shared/test_list.cpp"/>

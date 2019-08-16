@@ -18,7 +18,7 @@ namespace {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("State Data", "[machine]") {
+TEST_CASE("FSM.State Data", "[machine]") {
 	FSM::Instance machine;
 
 	WHEN("FSM is activated initially") {

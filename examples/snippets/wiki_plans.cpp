@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Plans.Traffic Light", "[Wiki]") {
+TEST_CASE("Wiki.Plans.Traffic Light", "[Wiki]") {
     using M = hfsm2::Machine;          // stateID
 
     using FSM = M::Root<struct Apex,   //      0
@@ -70,7 +70,7 @@ TEST_CASE("Plans.Traffic Light", "[Wiki]") {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Plans.Detailed Demo", "[Wiki]") {
+TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
     using M = hfsm2::Machine;                                 // stateID
 
     using FSM = M::Root<struct Apex,                          //      0

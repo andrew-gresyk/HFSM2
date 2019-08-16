@@ -82,7 +82,7 @@ namespace {
 TEST_CASE("FSM.Debug", "[machine]") {
 	Empty context;
 	hfsm2::XoShiRo128Plus generator{0};
-	Logger logger;
+	LoggerT<Empty> logger;
 
 	FSM::Instance machine{context, generator, &logger};
 	{

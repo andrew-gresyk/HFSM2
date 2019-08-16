@@ -71,14 +71,16 @@ static_assert(FSM::stateId<To>()	==  2, "");
 struct Logger
 	: hfsm2::LoggerInterface
 {
-	void recordMethod(const hfsm2::StateID /*origin*/,
+	void recordMethod(Context& /*context*/,
+					  const hfsm2::StateID /*origin*/,
 					  const Method method) override
 	{
 		std::cout //<< hfsm2::stateName(origin) << "::"
 				  << hfsm2::methodName(method) << "()\n";
 	}
 
-	void recordTransition(const hfsm2::StateID /*origin*/,
+	void recordTransition(Context& /*context*/,
+						  const hfsm2::StateID /*origin*/,
 						  const Transition transition,
 						  const hfsm2::StateID /*target*/) override
 	{

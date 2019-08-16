@@ -59,12 +59,12 @@ template <typename TG, typename TA>
 template <typename TEvent>
 void
 R_<TG, TA>::react(const TEvent& event) {
-	FullControl control(_context,
+	FullControl control{_context,
 						_random,
 						_stateRegistry,
 						_planData,
 						_requests,
-						HFSM_LOGGER_OR(_logger, nullptr));
+						HFSM_LOGGER_OR(_logger, nullptr)};
 	_apex.deepReact(control, event);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -83,7 +83,7 @@ R_<TG, TA>::changeTo(const StateID stateId) {
 	const Request request{Request::Type::CHANGE, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::CHANGE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -96,7 +96,7 @@ R_<TG, TA>::changeTo(const StateID stateId,
 	const Request request{Request::Type::CHANGE, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::CHANGE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ R_<TG, TA>::restart(const StateID stateId) {
 	const Request request{Request::Type::RESTART, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESTART, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -120,7 +120,7 @@ R_<TG, TA>::restart(const StateID stateId,
 	const Request request{Request::Type::RESTART, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESTART, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ R_<TG, TA>::resume(const StateID stateId) {
 	const Request request{Request::Type::RESUME, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESUME, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -144,7 +144,7 @@ R_<TG, TA>::resume(const StateID stateId,
 	const Request request{Request::Type::RESUME, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RESUME, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ R_<TG, TA>::utilize(const StateID stateId) {
 	const Request request{Request::Type::UTILIZE, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::UTILIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -168,7 +168,7 @@ R_<TG, TA>::utilize(const StateID stateId,
 	const Request request{Request::Type::UTILIZE, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::UTILIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -179,7 +179,7 @@ R_<TG, TA>::randomize(const StateID stateId) {
 	const Request request{Request::Type::RANDOMIZE, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -192,7 +192,7 @@ R_<TG, TA>::randomize(const StateID stateId,
 	const Request request{Request::Type::RANDOMIZE, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ R_<TG, TA>::schedule(const StateID stateId) {
 	const Request request{Request::Type::SCHEDULE, stateId};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -216,7 +216,7 @@ R_<TG, TA>::schedule(const StateID stateId,
 	const Request request{Request::Type::SCHEDULE, stateId, payload};
 	_requests << request;
 
-	HFSM_LOG_TRANSITION(INVALID_STATE_ID, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -272,11 +272,11 @@ R_<TG, TA>::getStateData(const StateID stateId) const {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::initialEnter() {
-	Control control(_context,
+	Control control{_context,
 					_random,
 					_stateRegistry,
 					_planData,
-					HFSM_LOGGER_OR(_logger, nullptr));
+					HFSM_LOGGER_OR(_logger, nullptr)};
 
 	AllForks undoRequested = _stateRegistry.requested;
 

@@ -50,40 +50,41 @@
 
 	#define HFSM_LOGGER_OR(Y, N)												Y
 
-	#define HFSM_LOG_TRANSITION(ORIGIN, TRANSITION, DESTINATION)				\
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TRANSITION, DESTINATION)		\
 		if (_logger)															\
-			_logger->recordTransition(ORIGIN, TRANSITION, DESTINATION)
+			_logger->recordTransition(CONTEXT, ORIGIN, TRANSITION, DESTINATION)
 
-	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)						\
+	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)				\
 		if (_logger)															\
-			_logger->recordTaskStatus(REGION, ORIGIN, STATUS)
+			_logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
 
-	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)								\
+	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)						\
 		if (_logger)															\
-			_logger->recordPlanStatus(REGION, STATUS)
+			_logger->recordPlanStatus(CONTEXT, REGION, STATUS)
 
-	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)									\
+	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)							\
 		if (_logger)															\
-			_logger->recordCancelledPending(ORIGIN)
+			_logger->recordCancelledPending(CONTEXT, ORIGIN)
 
-	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)					\
+	#define HFSM_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
 		if (auto* const logger = control.logger())								\
-			logger->recordUtilityResolution(HEAD, PRONG, UTILITY)
+			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
-	#define HFSM_LOG_RANDOM_RESOLUTION(HEAD, PRONG, UTILITY)					\
+	#define HFSM_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
 		if (auto* const logger = control.logger())								\
-			logger->recordRandomResolution(HEAD, PRONG, UTILITY)
+			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 #else
 
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(Y, N)												N
-	#define HFSM_LOG_TRANSITION(ORIGIN, TRANSITION, DESTINATION)
-	#define HFSM_LOG_TASK_STATUS(REGION, ORIGIN, STATUS)
-	#define HFSM_LOG_PLAN_STATUS(REGION, STATUS)
-	#define HFSM_LOG_CANCELLED_PENDING(ORIGIN)
-	#define HFSM_LOG_UTILITY_RESOLUTION(HEAD, PRONG, UTILITY)
-	#define HFSM_LOG_RANDOM_RESOLUTION(HEAD, PRONG, UTILITY)
+
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TRANSITION, DESTINATION)
+	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)
+	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)
+	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
+	#define HFSM_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
+	#define HFSM_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
 
 #endif
 
@@ -91,18 +92,18 @@
 
 #if defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
-	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)					\
 		if (auto* const logger = control.logger())								\
-			logger->recordMethod(STATE_ID, ID)
+			logger->recordMethod(CONTEXT, STATE_ID, METHOD_ID)
 
 #elif defined HFSM_ENABLE_LOG_INTERFACE
 
-	#define HFSM_LOG_STATE_METHOD(METHOD, ID)									\
+	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)					\
 		if (auto* const logger = control.logger())								\
-			log<decltype(METHOD), ID>(*logger)
+			log<decltype(METHOD)>(*logger, CONTEXT, METHOD_ID)
 
 #else
-	#define HFSM_LOG_STATE_METHOD(METHOD, ID)
+	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

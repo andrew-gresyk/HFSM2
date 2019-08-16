@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\test\deprecated_test.cpp" />
     <ClCompile Include="..\..\test\main.cpp" />
-    <ClCompile Include="..\..\test\shared.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_list.cpp" />
     <ClCompile Include="..\..\test\test_composite_bst.cpp" />
@@ -97,6 +96,7 @@
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\root.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state.inl" />
+    <None Include="..\..\test\shared.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

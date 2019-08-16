@@ -53,7 +53,9 @@ S_<TN, TA, TH>::deepRegister(StateRegistry& stateRegistry,
 template <typename TN, typename TA, typename TH>
 bool
 S_<TN, TA, TH>::deepEntryGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::entryGuard, Method::ENTRY_GUARD);
+	HFSM_LOG_STATE_METHOD(&Head::entryGuard,
+						  control.context(),
+						  Method::ENTRY_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -73,7 +75,9 @@ S_<TN, TA, TH>::deepEnter(PlanControl& control) {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control.planData().tasksFailures .template get<STATE_ID>());
 
-	HFSM_LOG_STATE_METHOD(&Head::enter, Method::ENTER);
+	HFSM_LOG_STATE_METHOD(&Head::enter,
+						  control.context(),
+						  Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -89,7 +93,9 @@ S_<TN, TA, TH>::deepReenter(PlanControl& control) {
 	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control.planData().tasksFailures .template get<STATE_ID>());
 
-	HFSM_LOG_STATE_METHOD(&Head::reenter, Method::REENTER);
+	HFSM_LOG_STATE_METHOD(&Head::reenter,
+						  control.context(),
+						  Method::REENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -102,7 +108,9 @@ S_<TN, TA, TH>::deepReenter(PlanControl& control) {
 template <typename TN, typename TA, typename TH>
 Status
 S_<TN, TA, TH>::deepUpdate(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::update, Method::UPDATE);
+	HFSM_LOG_STATE_METHOD(&Head::update,
+						  control.context(),
+						  Method::UPDATE);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -121,7 +129,9 @@ S_<TN, TA, TH>::deepReact(FullControl& control,
 						  const TEvent& event)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
-	HFSM_LOG_STATE_METHOD(reaction, Method::REACT);
+	HFSM_LOG_STATE_METHOD(reaction,
+						  control.context(),
+						  Method::REACT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -136,7 +146,9 @@ S_<TN, TA, TH>::deepReact(FullControl& control,
 template <typename TN, typename TA, typename TH>
 bool
 S_<TN, TA, TH>::deepExitGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exitGuard, Method::EXIT_GUARD);
+	HFSM_LOG_STATE_METHOD(&Head::exitGuard,
+						  control.context(),
+						  Method::EXIT_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -153,7 +165,9 @@ S_<TN, TA, TH>::deepExitGuard(GuardControl& control) {
 template <typename TN, typename TA, typename TH>
 void
 S_<TN, TA, TH>::deepExit(PlanControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exit, Method::EXIT);
+	HFSM_LOG_STATE_METHOD(&Head::exit,
+						  control.context(),
+						  Method::EXIT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -174,7 +188,9 @@ S_<TN, TA, TH>::deepExit(PlanControl& control) {
 template <typename TN, typename TA, typename TH>
 void
 S_<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::planSucceeded, Method::PLAN_SUCCEEDED);
+	HFSM_LOG_STATE_METHOD(&Head::planSucceeded,
+						  control.context(),
+						  Method::PLAN_SUCCEEDED);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -186,7 +202,9 @@ S_<TN, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 template <typename TN, typename TA, typename TH>
 void
 S_<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::planFailed, Method::PLAN_FAILED);
+	HFSM_LOG_STATE_METHOD(&Head::planFailed,
+						  control.context(),
+						  Method::PLAN_FAILED);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -198,7 +216,9 @@ S_<TN, TA, TH>::wrapPlanFailed(FullControl& control) {
 template <typename TN, typename TA, typename TH>
 typename TA::Rank
 S_<TN, TA, TH>::wrapRank(Control& control) {
-	HFSM_LOG_STATE_METHOD(&Head::rank, Method::RANK);
+	HFSM_LOG_STATE_METHOD(&Head::rank,
+						  control.context(),
+						  Method::RANK);
 
 	return _head.rank(static_cast<const Control&>(control));
 }
@@ -208,7 +228,9 @@ S_<TN, TA, TH>::wrapRank(Control& control) {
 template <typename TN, typename TA, typename TH>
 typename TA::Utility
 S_<TN, TA, TH>::wrapUtility(Control& control) {
-	HFSM_LOG_STATE_METHOD(&Head::utility, Method::UTILITY);
+	HFSM_LOG_STATE_METHOD(&Head::utility,
+						  control.context(),
+						  Method::UTILITY);
 
 	return _head.utility(static_cast<const Control&>(control));
 }

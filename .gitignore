@@ -10,5 +10,5 @@ cmake-*
 /binaries-*
 /hfsm_test.dir
 /projects/code-lite/compile_commands.json
-/projects/code-lite/test-gcc-tdm/CMakeLists.txt
-/projects/code-lite/test-gcc-tdm/compile_flags.txt
+/projects/code-lite/*/CMakeLists.txt
+/projects/code-lite/*/compile_flags.txt

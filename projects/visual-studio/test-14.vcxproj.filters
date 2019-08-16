@@ -54,9 +54,6 @@
     <ClCompile Include="..\..\test\test_self_transitions.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\shared.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_composite_bst.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -249,6 +246,9 @@
     </None>
     <None Include="..\..\include\hfsm2\detail\shared\random.inl">
       <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\test\shared.inl">
+      <Filter>test</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Transitions within Hierarchy.Transitions into States", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into States", "[Wiki]") {
 	using M = hfsm2::Machine;
 
 	using FSM = M::PeerRoot<
@@ -27,7 +27,7 @@ TEST_CASE("Transitions within Hierarchy.Transitions into States", "[Wiki]") {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Transitions within Hierarchy.Transitions into Regions", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into Regions", "[Wiki]") {
 	using M = hfsm2::Machine;
 
 	using FSM = M::PeerRoot<
@@ -54,7 +54,7 @@ TEST_CASE("Transitions within Hierarchy.Transitions into Regions", "[Wiki]") {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Transitions within Hierarchy.External Transition Interface", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.External Transition Interface", "[Wiki]") {
 	using M = hfsm2::Machine;
 
 	using FSM = M::PeerRoot<
@@ -75,7 +75,7 @@ TEST_CASE("Transitions within Hierarchy.External Transition Interface", "[Wiki]"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Transitions within Hierarchy.Internal Transition Interface", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.Internal Transition Interface", "[Wiki]") {
 	using M = hfsm2::Machine;
 
 	using FSM = M::PeerRoot<
@@ -102,7 +102,7 @@ TEST_CASE("Transitions within Hierarchy.Internal Transition Interface", "[Wiki]"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Transitions within Hierarchy.'Restart' Transition", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.'Restart' Transition", "[Wiki]") {
 	using M = hfsm2::Machine;
 
 	using FSM = M::PeerRoot<
@@ -128,7 +128,7 @@ TEST_CASE("Transitions within Hierarchy.'Restart' Transition", "[Wiki]") {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Transitions within Hierarchy.'Resume' Transition", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.'Resume' Transition", "[Wiki]") {
 	using M = hfsm2::Machine;
 
 	using FSM = M::PeerRoot<
@@ -166,7 +166,7 @@ TEST_CASE("Transitions within Hierarchy.'Resume' Transition", "[Wiki]") {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Transitions within Hierarchy.'Utilize' Transition", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.'Utilize' Transition", "[Wiki]") {
 	using M = hfsm2::Machine;
 
 	using FSM = M::PeerRoot<
@@ -202,7 +202,7 @@ TEST_CASE("Transitions within Hierarchy.'Utilize' Transition", "[Wiki]") {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Transitions within Hierarchy.'Randomize' Transition", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.'Randomize' Transition", "[Wiki]") {
 	using M = hfsm2::Machine;
 
 	using FSM = M::PeerRoot<

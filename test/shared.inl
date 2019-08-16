@@ -1,10 +1,10 @@
-#include "shared.hpp"
-
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename TContext>
 void
-Logger::recordMethod(const StateID origin,
-					 const Method method)
+LoggerT<TContext>::recordMethod(Context& /*context*/,
+								const StateID origin,
+								const Method method)
 {
 	switch (method) {
 		case Method::RANK:
@@ -47,10 +47,12 @@ Logger::recordMethod(const StateID origin,
 
 //------------------------------------------------------------------------------
 
+template <typename TContext>
 void
-Logger::recordTransition(const StateID origin,
-						 const Transition transition,
-						 const StateID target)
+LoggerT<TContext>::recordTransition(Context& /*context*/,
+									const StateID origin,
+									const Transition transition,
+									const StateID target)
 {
 	switch (transition) {
 		case Transition::CHANGE:
@@ -84,10 +86,12 @@ Logger::recordTransition(const StateID origin,
 
 //------------------------------------------------------------------------------
 
+template <typename TContext>
 void
-Logger::recordTaskStatus(const RegionID region,
-						 const StateID origin,
-						 const StatusEvent event)
+LoggerT<TContext>::recordTaskStatus(Context& /*context*/,
+									const RegionID region,
+									const StateID origin,
+									const StatusEvent event)
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -103,9 +107,11 @@ Logger::recordTaskStatus(const RegionID region,
 
 //------------------------------------------------------------------------------
 
+template <typename TContext>
 void
-Logger::recordPlanStatus(const RegionID region,
-						 const StatusEvent event)
+LoggerT<TContext>::recordPlanStatus(Context& /*context*/,
+									const RegionID region,
+									const StatusEvent event)
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -121,35 +127,42 @@ Logger::recordPlanStatus(const RegionID region,
 
 //------------------------------------------------------------------------------
 
+template <typename TContext>
 void
-Logger::recordUtilityResolution(const StateID head,
-								const StateID prong,
-								const Utilty utilty)
+LoggerT<TContext>::recordUtilityResolution(Context& /*context*/,
+										   const StateID head,
+										   const StateID prong,
+										   const Utilty utilty)
 {
 	history.emplace_back(head, Event::UTILITY_RESOLUTION, prong, utilty);
 }
 
 //------------------------------------------------------------------------------
 
+template <typename TContext>
 void
-Logger::recordRandomResolution(const StateID head,
-							   const StateID prong,
-							   const Utilty utilty)
+LoggerT<TContext>::recordRandomResolution(Context& /*context*/,
+										  const StateID head,
+										  const StateID prong,
+										  const Utilty utilty)
 {
 	history.emplace_back(head, Event::RANDOM_RESOLUTION, prong, utilty);
 }
 
 //------------------------------------------------------------------------------
 
+template <typename TContext>
 void
-Logger::recordCancelledPending(const StateID origin) {
+LoggerT<TContext>::recordCancelledPending(Context& /*context*/,
+										  const StateID origin) {
 	history.emplace_back(origin, Event::CANCELLED_PENDING);
 }
 
 //------------------------------------------------------------------------------
 
+template <typename TContext>
 void
-Logger::assertSequence(const Events& reference) {
+LoggerT<TContext>::assertSequence(const Events& reference) {
 	const auto count = std::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {

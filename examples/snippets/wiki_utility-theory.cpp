@@ -39,7 +39,8 @@ using Events = std::vector<Event>;
 struct Logger
     : hfsm2::LoggerInterface    // requires HFSM_ENABLE_LOG_INTERFACE defined
 {
-    void recordMethod(const StateID state,
+    void recordMethod(Context& /*context*/,
+                      const StateID state,
                       const Method method) override
     {
         if (method == Method::RANK)
@@ -48,14 +49,16 @@ struct Logger
             history.emplace_back(state, Event::UTILITY);
     }
 
-    void recordUtilityResolution(const StateID head,
+    void recordUtilityResolution(Context& /*context*/,
+                                 const StateID head,
                                  const StateID prong,
                                  const Utilty /*utilty*/) override
     {
         history.emplace_back(head, Event::UTILITY_RESOLUTION,  prong);
     }
 
-    void recordRandomResolution(const StateID head,
+    void recordRandomResolution(Context& /*context*/,
+                                const StateID head,
                                 const StateID prong,
                                 const Utilty /*utilty*/) override
     {
@@ -167,7 +170,7 @@ struct O_1          : FSM::State {};
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Utility Theory", "[Wiki]") {
+TEST_CASE("Wiki.Utility Theory", "[Wiki]") {
     Logger logger;
     FSM::Instance fsm{&logger};
     REQUIRE(fsm.isActive<Origin>());        // Initial activation

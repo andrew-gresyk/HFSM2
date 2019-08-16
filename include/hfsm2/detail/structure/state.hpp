@@ -14,6 +14,7 @@ struct S_ {
 	using Args			= TArgs;
 	using Head			= THead;
 
+	using Context		= typename Args::Context;
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
@@ -115,14 +116,20 @@ struct S_ {
 		using State = TState;
 	};
 
-	template <typename TMethodType, Method>
+	template <typename TMethodType>
 	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
-	log(Logger&) const {}
+	log(Logger&,
+		Context&,
+		const Method) const
+	{}
 
-	template <typename TMethodType, Method TMethodId>
+	template <typename TMethodType>
 	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
-	log(Logger& logger) const {
-		logger.recordMethod(STATE_ID, TMethodId);
+	log(Logger& logger,
+		Context& context,
+		const Method method) const
+	{
+		logger.recordMethod(context, STATE_ID, method);
 	}
 #endif
 
