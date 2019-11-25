@@ -3,10 +3,10 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideRegister(StateRegistry& stateRegistry,
-										 const Parent parent)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRegister(StateRegistry& stateRegistry,
+											  const Parent parent)
 {
 	lHalf.wideRegister(stateRegistry, Parent{parent.forkId, L_PRONG});
 	rHalf.wideRegister(stateRegistry, Parent{parent.forkId, R_PRONG});
@@ -14,10 +14,10 @@ CS_<TN, TA, TG, NI, TS...>::wideRegister(StateRegistry& stateRegistry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 bool
-CS_<TN, TA, TG, NI, TS...>::wideForwardEntryGuard(GuardControl& control,
-												  const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardEntryGuard(GuardControl& control,
+													   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -29,10 +29,10 @@ CS_<TN, TA, TG, NI, TS...>::wideForwardEntryGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 bool
-CS_<TN, TA, TG, NI, TS...>::wideEntryGuard(GuardControl& control,
-										   const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideEntryGuard(GuardControl& control,
+												const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -44,10 +44,10 @@ CS_<TN, TA, TG, NI, TS...>::wideEntryGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideEnter(PlanControl& control,
-									  const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideEnter(PlanControl& control,
+										   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -59,10 +59,10 @@ CS_<TN, TA, TG, NI, TS...>::wideEnter(PlanControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideReenter(PlanControl& control,
-										const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReenter(PlanControl& control,
+											 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -74,10 +74,10 @@ CS_<TN, TA, TG, NI, TS...>::wideReenter(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 Status
-CS_<TN, TA, TG, NI, TS...>::wideUpdate(FullControl& control,
-									   const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideUpdate(FullControl& control,
+											const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -88,12 +88,12 @@ CS_<TN, TA, TG, NI, TS...>::wideUpdate(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 template <typename TEvent>
 Status
-CS_<TN, TA, TG, NI, TS...>::wideReact(FullControl& control,
-									  const TEvent& event,
-									  const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReact(FullControl& control,
+										   const TEvent& event,
+										   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -104,10 +104,10 @@ CS_<TN, TA, TG, NI, TS...>::wideReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 bool
-CS_<TN, TA, TG, NI, TS...>::wideForwardExitGuard(GuardControl& control,
-												 const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardExitGuard(GuardControl& control,
+													  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -119,10 +119,10 @@ CS_<TN, TA, TG, NI, TS...>::wideForwardExitGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 bool
-CS_<TN, TA, TG, NI, TS...>::wideExitGuard(GuardControl& control,
-										  const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideExitGuard(GuardControl& control,
+											   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -134,10 +134,10 @@ CS_<TN, TA, TG, NI, TS...>::wideExitGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideExit(PlanControl& control,
-									 const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideExit(PlanControl& control,
+										  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -149,11 +149,11 @@ CS_<TN, TA, TG, NI, TS...>::wideExit(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideForwardActive(Control& control,
-											  const RequestType request,
-											  const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardActive(Control& control,
+												   const RequestType request,
+												   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -165,11 +165,11 @@ CS_<TN, TA, TG, NI, TS...>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideForwardRequest(Control& control,
-											   const RequestType request,
-											   const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardRequest(Control& control,
+													const RequestType request,
+													const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -181,18 +181,18 @@ CS_<TN, TA, TG, NI, TS...>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideRequestChangeComposite(Control& control) {
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestChangeComposite(Control& control) {
 	lHalf.wideRequestChangeComposite(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideRequestChangeResumable(Control& control,
-													   const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestChangeResumable(Control& control,
+															const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -204,26 +204,26 @@ CS_<TN, TA, TG, NI, TS...>::wideRequestChangeResumable(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideRequestRemain(StateRegistry& stateRegistry) {
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestRemain(StateRegistry& stateRegistry) {
 	lHalf.wideRequestRemain(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideRequestRestart(StateRegistry& stateRegistry) {
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestRestart(StateRegistry& stateRegistry) {
 	lHalf.wideRequestRestart(stateRegistry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideRequestResume(StateRegistry& stateRegistry,
-											  const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestResume(StateRegistry& stateRegistry,
+												   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -235,9 +235,9 @@ CS_<TN, TA, TG, NI, TS...>::wideRequestResume(StateRegistry& stateRegistry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-typename TA::UP
-CS_<TN, TA, TG, NI, TS...>::wideReportUtilize(Control& control) {
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+typename TA_::UP
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportUtilize(Control& control) {
 	const UP l = lHalf.wideReportUtilize(control);
 	const UP r = rHalf.wideReportUtilize(control);
 
@@ -247,10 +247,10 @@ CS_<TN, TA, TG, NI, TS...>::wideReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-typename TA::Rank
-CS_<TN, TA, TG, NI, TS...>::wideReportRank(Control& control,
-										   Rank* const ranks)
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+typename TA_::Rank
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportRank(Control& control,
+												Rank* const ranks)
 {
 	HFSM_ASSERT(ranks);
 
@@ -263,12 +263,12 @@ CS_<TN, TA, TG, NI, TS...>::wideReportRank(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-typename TA::Utility
-CS_<TN, TA, TG, NI, TS...>::wideReportRandomize(Control& control,
-												Utility* const options,
-												const Rank* const ranks,
-												const Rank top)
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+typename TA_::Utility
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportRandomize(Control& control,
+													 Utility* const options,
+													 const Rank* const ranks,
+													 const Rank top)
 {
 	HFSM_ASSERT(options && ranks);
 
@@ -280,18 +280,18 @@ CS_<TN, TA, TG, NI, TS...>::wideReportRandomize(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-typename TA::UP
-CS_<TN, TA, TG, NI, TS...>::wideReportChangeComposite(Control& control) {
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+typename TA_::UP
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeComposite(Control& control) {
 	return lHalf.wideReportChangeComposite(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-typename TA::UP
-CS_<TN, TA, TG, NI, TS...>::wideReportChangeResumable(Control& control,
-													  const ShortIndex prong)
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+typename TA_::UP
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeResumable(Control& control,
+														   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -303,9 +303,9 @@ CS_<TN, TA, TG, NI, TS...>::wideReportChangeResumable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-typename TA::UP
-CS_<TN, TA, TG, NI, TS...>::wideReportChangeUtilitarian(Control& control) {
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+typename TA_::UP
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeUtilitarian(Control& control) {
 	const UP l = lHalf.wideReportChangeUtilitarian(control);
 	const UP r = rHalf.wideReportChangeUtilitarian(control);
 
@@ -315,12 +315,12 @@ CS_<TN, TA, TG, NI, TS...>::wideReportChangeUtilitarian(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-typename TA::Utility
-CS_<TN, TA, TG, NI, TS...>::wideReportChangeRandom(Control& control,
-												   Utility* const options,
-												   const Rank* const ranks,
-												   const Rank top)
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+typename TA_::Utility
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeRandom(Control& control,
+														Utility* const options,
+														const Rank* const ranks,
+														const Rank top)
 {
 	HFSM_ASSERT(options && ranks);
 
@@ -332,10 +332,10 @@ CS_<TN, TA, TG, NI, TS...>::wideReportChangeRandom(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideEnterRequested(PlanControl& control,
-											   const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideEnterRequested(PlanControl& control,
+													const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -347,10 +347,10 @@ CS_<TN, TA, TG, NI, TS...>::wideEnterRequested(PlanControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideChangeToRequested(PlanControl& control,
-												  const ShortIndex prong)
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideChangeToRequested(PlanControl& control,
+													   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -364,12 +364,12 @@ CS_<TN, TA, TG, NI, TS...>::wideChangeToRequested(PlanControl& control,
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN, TA, TG, NI, TS...>::wideGetNames(const LongIndex parent,
-										 const RegionType /*region*/,
-										 const ShortIndex depth,
-										 StructureStateInfos& _stateInfos) const
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideGetNames(const LongIndex parent,
+											  const RegionType /*region*/,
+											  const ShortIndex depth,
+											  StructureStateInfos& _stateInfos) const
 {
 	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);

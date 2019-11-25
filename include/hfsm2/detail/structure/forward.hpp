@@ -41,23 +41,23 @@ struct OSI_<TInitial>;
 template <typename...>
 struct WrapT;
 
-template <typename TH>
-struct WrapT<TH> {
-	using Type = SI_<TH>;
+template <typename TH_>
+struct WrapT<TH_> {
+	using Type = SI_<TH_>;
 };
 
-template <Strategy TG, typename TH, typename... TS>
-struct WrapT<	 CI_<TG, TH, TS...>> {
-	using Type = CI_<TG, TH, TS...>;
+template <Strategy TG_, typename TH_, typename... TS_>
+struct WrapT<	 CI_<TG_, TH_, TS_...>> {
+	using Type = CI_<TG_, TH_, TS_...>;
 };
 
-template <typename... TS>
-struct WrapT<	 OI_<TS...>> {
-	using Type = OI_<TS...>;
+template <typename... TS_>
+struct WrapT<	 OI_<TS_...>> {
+	using Type = OI_<TS_...>;
 };
 
-template <typename... TS>
-using Wrap = typename WrapT<TS...>::Type;
+template <typename... TS_>
+using Wrap = typename WrapT<TS_...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -251,33 +251,33 @@ class RW_;
 template <typename, typename...>
 struct MaterialT;
 
-template <typename TN, typename TA, typename TH>
-struct MaterialT   <TN, TA, TH> {
-	using Type = S_<TN, TA, TH>;
+template <typename TN_, typename TA_, typename TH_>
+struct MaterialT   <TN_, TA_, TH_> {
+	using Type = S_<TN_, TA_, TH_>;
 };
 
-template <typename TN, typename TA, Strategy TG, 			 typename... TS>
-struct MaterialT   <TN, TA, CI_<TG, void,	   TS...>> {
-	using Type = C_<TN, TA,		TG, Empty<TA>, TS...>;
+template <typename TN_, typename TA_, Strategy TG_, 			 typename... TS_>
+struct MaterialT   <TN_, TA_, CI_<TG_, void,	   TS_...>> {
+	using Type = C_<TN_, TA_,	  TG_, Empty<TA_>, TS_...>;
 };
 
-template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
-struct MaterialT   <TN, TA, CI_<TG, TH,	TS...>> {
-	using Type = C_<TN, TA,		TG, TH,	TS...>;
+template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+struct MaterialT   <TN_, TA_, CI_<TG_, TH_,	TS_...>> {
+	using Type = C_<TN_, TA_,	  TG_, TH_,	TS_...>;
 };
 
-template <typename TN, typename TA,			  typename... TS>
-struct MaterialT   <TN, TA, OI_<void,	   TS...>> {
-	using Type = O_<TN, TA,		Empty<TA>, TS...>;
+template <typename TN_, typename TA_,				typename... TS_>
+struct MaterialT   <TN_, TA_, OI_<void,		  TS_...>> {
+	using Type = O_<TN_, TA_,	  Empty<TA_>, TS_...>;
 };
 
-template <typename TN, typename TA, typename TH, typename... TS>
-struct MaterialT   <TN, TA, OI_<TH,	 TS...>> {
-	using Type = O_<TN, TA,		TH,	 TS...>;
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+struct MaterialT   <TN_, TA_, OI_<TH_,		  TS_...>> {
+	using Type = O_<TN_, TA_,	  TH_,		  TS_...>;
 };
 
-template <typename TN, typename... TS>
-using Material = typename MaterialT<TN, TS...>::Type;
+template <typename TN_, typename... TS_>
+using Material = typename MaterialT<TN_, TS_...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -344,45 +344,45 @@ struct RF_ final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename T>
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 struct CSubMaterialT;
 
-//template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename T>
-//struct CSubMaterialT	 <TN, TA, TG, NI, TL_<T>> {
-//	using Type = Material<TN, TA,			  T>;
+//template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+//struct CSubMaterialT	 <TN_, TA_, TG_, NI_, TL_<T>> {
+//	using Type = Material<TN_, TA_,				  T>;
 //};
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-struct CSubMaterialT<TN, TA, TG, NI, TL_<TS...>> {
-	using Type = CS_<TN, TA, TG, NI,	 TS...>;
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+struct CSubMaterialT<TN_, TA_, TG_, NI_, TL_<TS_...>> {
+	using Type = CS_<TN_, TA_, TG_, NI_,	 TS_...>;
 };
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-using CSubMaterial = typename CSubMaterialT<TN, TA, TG, NI, TS...>::Type;
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+using CSubMaterial = typename CSubMaterialT<TN_, TA_, TG_, NI_, TS_...>::Type;
 
 //------------------------------------------------------------------------------
 
 template <typename...>
 struct InfoT;
 
-template <typename TN, typename TA, typename TH>
-struct InfoT<  S_<TN, TA, TH>> {
-	using Type = SI_<		 TH>;
+template <typename TN_, typename TA_, typename TH_>
+struct InfoT<S_<TN_, TA_, TH_>> {
+	using Type = SI_<	  TH_>;
 };
 
-template <typename TN, typename TA, Strategy TG, typename TH, typename... TS>
-struct InfoT<C_<TN, TA, TG, TH, TS...>> {
-	using Type = CI_<	   TG, TH, TS...>;
+template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+struct InfoT<C_<TN_, TA_, TG_, TH_, TS_...>> {
+	using Type = CI_<	  TG_, TH_, TS_...>;
 };
 
-template <typename TN, typename TA, typename TH, typename... TS>
-struct InfoT<O_<TN, TA, TH, TS...>> {
-	using Type = OI_<			   TH, TS...>;
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+struct InfoT<O_<TN_, TA_, TH_, TS_...>> {
+	using Type = OI_<	  TH_, TS_...>;
 };
 
-template <typename TN, typename TA, Strategy TG, ShortIndex NI, typename... TS>
-struct InfoT<CS_<TN, TA, TG, NI, TS...>> {
-	using Type = CSI_<				TS...>;
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+struct InfoT<CS_<TN_, TA_, TG_, NI_, TS_...>> {
+	using Type = CSI_<				 TS_...>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -106,7 +106,7 @@ struct C_ {
 
 #if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-	template <Strategy TG = STRATEGY>
+	template <Strategy = STRATEGY>
 	HFSM_INLINE void	deepRequestChange			  (Control& control, const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
@@ -144,7 +144,7 @@ struct C_ {
 
 #if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-	template <Strategy TG = STRATEGY>
+	template <Strategy = STRATEGY>
 	HFSM_INLINE UP		deepReportChange			  (Control& control);
 
 	template <>

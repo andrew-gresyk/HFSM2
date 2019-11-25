@@ -3,127 +3,127 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 void
-B_<TF, TR...>::widePreEntryGuard(typename TF::Context& context) {
-	TF::preEntryGuard(context);
-	B_<TR...>::widePreEntryGuard(context);
+B_<TF_, TR_...>::widePreEntryGuard(typename TF_::Context& context) {
+	TF_::preEntryGuard(context);
+	B_<TR_...>::widePreEntryGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 void
-B_<TF, TR...>::widePreEnter(typename TF::Context& context) {
-	TF::preEnter(context);
-	B_<TR...>::widePreEnter(context);
+B_<TF_, TR_...>::widePreEnter(typename TF_::Context& context) {
+	TF_::preEnter(context);
+	B_<TR_...>::widePreEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 void
-B_<TF, TR...>::widePreReenter(typename TF::Context& context) {
-	TF::preReenter(context);
-	B_<TR...>::widePreReenter(context);
+B_<TF_, TR_...>::widePreReenter(typename TF_::Context& context) {
+	TF_::preReenter(context);
+	B_<TR_...>::widePreReenter(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 void
-B_<TF, TR...>::widePreUpdate(typename TF::Context& context) {
-	TF::preUpdate(context);
-	B_<TR...>::widePreUpdate(context);
+B_<TF_, TR_...>::widePreUpdate(typename TF_::Context& context) {
+	TF_::preUpdate(context);
+	B_<TR_...>::widePreUpdate(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 template <typename TEvent>
 void
-B_<TF, TR...>::widePreReact(const TEvent& event,
-							typename TF::Context& context)
+B_<TF_, TR_...>::widePreReact(const TEvent& event,
+							  typename TF_::Context& context)
 {
-	TF::preReact(event, context);
-	B_<TR...>::widePreReact(event, context);
+	TF_::preReact(event, context);
+	B_<TR_...>::widePreReact(event, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 void
-B_<TF, TR...>::widePreExitGuard(typename TF::Context& context) {
-	TF::preExitGuard(context);
-	B_<TR...>::widePreExitGuard(context);
+B_<TF_, TR_...>::widePreExitGuard(typename TF_::Context& context) {
+	TF_::preExitGuard(context);
+	B_<TR_...>::widePreExitGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 void
-B_<TF, TR...>::widePostExit(typename TF::Context& context) {
-	TF::postExit(context);
-	B_<TR...>::widePostExit(context);
+B_<TF_, TR_...>::widePostExit(typename TF_::Context& context) {
+	TF_::postExit(context);
+	B_<TR_...>::widePostExit(context);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TF>
+template <typename TF_>
 void
-B_<TF>::widePreEntryGuard(typename TF::Context& context) {
-	TF::preEntryGuard(context);
+B_<TF_>::widePreEntryGuard(typename TF_::Context& context) {
+	TF_::preEntryGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF>
+template <typename TF_>
 void
-B_<TF>::widePreEnter(typename TF::Context& context) {
-	TF::preEnter(context);
+B_<TF_>::widePreEnter(typename TF_::Context& context) {
+	TF_::preEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF>
+template <typename TF_>
 void
-B_<TF>::widePreReenter(typename TF::Context& context) {
-	TF::preReenter(context);
+B_<TF_>::widePreReenter(typename TF_::Context& context) {
+	TF_::preReenter(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF>
+template <typename TF_>
 void
-B_<TF>::widePreUpdate(typename TF::Context& context) {
-	TF::preUpdate(context);
+B_<TF_>::widePreUpdate(typename TF_::Context& context) {
+	TF_::preUpdate(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF>
+template <typename TF_>
 template <typename TEvent>
 void
-B_<TF>::widePreReact(const TEvent& event,
-					 typename TF::Context& context)
+B_<TF_>::widePreReact(const TEvent& event,
+					  typename TF_::Context& context)
 {
-	TF::preReact(event, context);
+	TF_::preReact(event, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF>
+template <typename TF_>
 void
-B_<TF>::widePreExitGuard(typename TF::Context& context) {
-	TF::preExitGuard(context);
+B_<TF_>::widePreExitGuard(typename TF_::Context& context) {
+	TF_::preExitGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF>
+template <typename TF_>
 void
-B_<TF>::widePostExit(typename TF::Context& context) {
-	TF::postExit(context);
+B_<TF_>::widePostExit(typename TF_::Context& context) {
+	TF_::postExit(context);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

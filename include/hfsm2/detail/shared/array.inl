@@ -3,16 +3,16 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NC>
-StaticArray<T, NC>::StaticArray(const Item filler) {
+template <typename T, LongIndex NC_>
+StaticArray<T, NC_>::StaticArray(const Item filler) {
 	fill(filler);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
+template <typename T, LongIndex NC_>
 T&
-StaticArray<T, NC>::operator[] (const LongIndex i) {
+StaticArray<T, NC_>::operator[] (const LongIndex i) {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[i];
@@ -20,9 +20,9 @@ StaticArray<T, NC>::operator[] (const LongIndex i) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NC>
+template <typename T, LongIndex NC_>
 const T&
-StaticArray<T, NC>::operator[] (const LongIndex i) const {
+StaticArray<T, NC_>::operator[] (const LongIndex i) const {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[i];
@@ -30,19 +30,19 @@ StaticArray<T, NC>::operator[] (const LongIndex i) const {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
+template <typename T, LongIndex NC_>
 void
-StaticArray<T, NC>::fill(const Item filler) {
+StaticArray<T, NC_>::fill(const Item filler) {
 	for (LongIndex i = 0; i < CAPACITY; ++i)
 		_items[i] = filler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NC>
+template <typename T, LongIndex NC_>
 template <typename TValue>
 LongIndex
-Array<T, NC>::operator << (TValue&& value) {
+Array<T, NC_>::operator << (TValue&& value) {
 	HFSM_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{std::move(value)};
@@ -52,9 +52,9 @@ Array<T, NC>::operator << (TValue&& value) {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
+template <typename T, LongIndex NC_>
 T&
-Array<T, NC>::operator[] (const LongIndex i) {
+Array<T, NC_>::operator[] (const LongIndex i) {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[i];
@@ -62,9 +62,9 @@ Array<T, NC>::operator[] (const LongIndex i) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NC>
+template <typename T, LongIndex NC_>
 const T&
-Array<T, NC>::operator[] (const LongIndex i) const {
+Array<T, NC_>::operator[] (const LongIndex i) const {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[i];

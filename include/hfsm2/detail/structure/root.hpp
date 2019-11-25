@@ -257,18 +257,18 @@ public:
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN,
-		  typename TU,
-		  typename TR,
-		  typename TP,
+template <typename TN_,
+		  typename TU_,
+		  typename TR_,
+		  typename TP_,
 		  LongIndex NS,
 		  LongIndex NT,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, TR, TP, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, TR, TP, NS, NT>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, TP_, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, TP_, NS, NT>, TApex>
 	, ::hfsm2::EmptyContext
 {
-	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, TR, TP, NS, NT>;
+	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, TP_, NS, NT>;
 	using Context	= typename Config_::Context;
 	using Random_	= typename Config_::Random_;
 	using Logger	= typename Config_::Logger;
@@ -286,18 +286,18 @@ public:
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC,
-		  typename TN,
-		  typename TU,
-		  typename TP,
+template <typename TC_,
+		  typename TN_,
+		  typename TU_,
+		  typename TP_,
 		  LongIndex NS,
 		  LongIndex NT,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<TC, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<TC, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>, TApex>
-	, ::hfsm2::RandomT<TU>
+class RW_	   <::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>, TApex>
+	, ::hfsm2::RandomT<TU_>
 {
-	using Config_	= ::hfsm2::ConfigT<TC, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>;
+	using Config_	= ::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>;
 	using Context	= typename Config_::Context;
 	using Random_	= typename Config_::Random_;
 	using Logger	= typename Config_::Logger;
@@ -316,18 +316,18 @@ public:
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN,
-		  typename TU,
-		  typename TP,
+template <typename TN_,
+		  typename TU_,
+		  typename TP_,
 		  LongIndex NS,
 		  LongIndex NT,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>, TApex>
 	, ::hfsm2::EmptyContext
-	, ::hfsm2::RandomT<TU>
+	, ::hfsm2::RandomT<TU_>
 {
-	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN, TU, ::hfsm2::RandomT<TU>, TP, NS, NT>;
+	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>;
 	using Context	= typename Config_::Context;
 	using Random_	= typename Config_::Random_;
 	using Logger	= typename Config_::Logger;

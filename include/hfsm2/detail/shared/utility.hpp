@@ -189,16 +189,16 @@ end(const T(& a)[NCapacity]) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <int N1, int N2>
+template <int N1_, int N2_>
 struct Min {
-	static constexpr auto VALUE = N1 < N2 ? N1 : N2;
+	static constexpr auto VALUE = N1_ < N2_ ? N1_ : N2_;
 };
 
 //------------------------------------------------------------------------------
 
-template <int N1, int N2>
+template <int N1_, int N2_>
 struct Max {
-	static constexpr auto VALUE = N1 > N2 ? N1 : N2;
+	static constexpr auto VALUE = N1_ > N2_ ? N1_ : N2_;
 };
 
 //------------------------------------------------------------------------------

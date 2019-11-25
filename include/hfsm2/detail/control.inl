@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TA>
-ControlT<TA>::Region::Region(ControlT& control_,
-							 const RegionID id)
+template <typename TArgs>
+ControlT<TArgs>::Region::Region(ControlT& control_,
+								const RegionID id)
 	: control{control_}
 	, prevId{control._regionId}
 {
@@ -14,16 +14,16 @@ ControlT<TA>::Region::Region(ControlT& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
-ControlT<TA>::Region::~Region() {
+template <typename TArgs>
+ControlT<TArgs>::Region::~Region() {
 	control.resetRegion(prevId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TA>
+template <typename TArgs>
 void
-ControlT<TA>::setRegion(const RegionID id) {
+ControlT<TArgs>::setRegion(const RegionID id) {
 	HFSM_ASSERT(_regionId <= id && id < RegionList::SIZE);
 
 	_regionId = id;
@@ -31,9 +31,9 @@ ControlT<TA>::setRegion(const RegionID id) {
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-ControlT<TA>::resetRegion(const RegionID id) { //-V524
+ControlT<TArgs>::resetRegion(const RegionID id) { //-V524
 	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
 
 	_regionId = id;
@@ -41,9 +41,9 @@ ControlT<TA>::resetRegion(const RegionID id) { //-V524
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TA>
-PlanControlT<TA>::Origin::Origin(PlanControlT& control_,
-								 const StateID id)
+template <typename TArgs>
+PlanControlT<TArgs>::Origin::Origin(PlanControlT& control_,
+									const StateID id)
 	: control{control_}
 	, prevId{control._originId}
 {
@@ -52,18 +52,18 @@ PlanControlT<TA>::Origin::Origin(PlanControlT& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
-PlanControlT<TA>::Origin::~Origin() {
+template <typename TArgs>
+PlanControlT<TArgs>::Origin::~Origin() {
 	control.resetOrigin(prevId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TA>
-PlanControlT<TA>::Region::Region(PlanControlT& control_,
-								 const RegionID id,
-								 const StateID index,
-								 const LongIndex size)
+template <typename TArgs>
+PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
+									const RegionID id,
+									const StateID index,
+									const LongIndex size)
 	: control{control_}
 	, prevId{control._regionId}
 	, prevIndex{control._regionIndex}
@@ -74,8 +74,8 @@ PlanControlT<TA>::Region::Region(PlanControlT& control_,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
-PlanControlT<TA>::Region::~Region() {
+template <typename TArgs>
+PlanControlT<TArgs>::Region::~Region() {
 	control.resetRegion(prevId, prevIndex, prevSize);
 
 	control._status.clear();
@@ -83,9 +83,9 @@ PlanControlT<TA>::Region::~Region() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TA>
+template <typename TArgs>
 void
-PlanControlT<TA>::setOrigin(const StateID id) {
+PlanControlT<TArgs>::setOrigin(const StateID id) {
 	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
 	HFSM_ASSERT(_originId <= id && id < StateList::SIZE);
 
@@ -94,9 +94,9 @@ PlanControlT<TA>::setOrigin(const StateID id) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-PlanControlT<TA>::resetOrigin(const StateID id) { //-V524
+PlanControlT<TArgs>::resetOrigin(const StateID id) { //-V524
 	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
 	HFSM_ASSERT(id <= _originId && _originId < StateList::SIZE);
 
@@ -105,11 +105,11 @@ PlanControlT<TA>::resetOrigin(const StateID id) { //-V524
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-PlanControlT<TA>::setRegion(const RegionID id,
-							const StateID index,
-							const LongIndex size)
+PlanControlT<TArgs>::setRegion(const RegionID id,
+							   const StateID index,
+							   const LongIndex size)
 {
 	HFSM_ASSERT(_regionId <= id && id <  RegionList::SIZE);
 	HFSM_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
@@ -121,11 +121,11 @@ PlanControlT<TA>::setRegion(const RegionID id,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-PlanControlT<TA>::resetRegion(const RegionID id, //-V524
-							  const StateID index,
-							  const LongIndex size)
+PlanControlT<TArgs>::resetRegion(const RegionID id, //-V524
+								 const StateID index,
+								 const LongIndex size)
 {
 	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
 	HFSM_ASSERT(index <= _regionIndex && _regionIndex + _regionSize <= index + size);
@@ -137,8 +137,8 @@ PlanControlT<TA>::resetRegion(const RegionID id, //-V524
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TA>
-FullControlT<TA>::Lock::Lock(FullControlT& control_)
+template <typename TArgs>
+FullControlT<TArgs>::Lock::Lock(FullControlT& control_)
 	: control(!control_._locked ? &control_ : nullptr)
 {
 	if (control)
@@ -147,19 +147,19 @@ FullControlT<TA>::Lock::Lock(FullControlT& control_)
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
-FullControlT<TA>::Lock::~Lock() {
+template <typename TArgs>
+FullControlT<TArgs>::Lock::~Lock() {
 	if (control)
 		control->_locked = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TA>
+template <typename TArgs>
 template <typename TState>
 Status
-FullControlT<TA>::updatePlan(TState& headState,
-							 const Status subStatus)
+FullControlT<TArgs>::updatePlan(TState& headState,
+								const Status subStatus)
 {
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
@@ -202,10 +202,10 @@ FullControlT<TA>::updatePlan(TState& headState,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 template <typename TState>
 Status
-FullControlT<TA>::buildPlanStatus() {
+FullControlT<TArgs>::buildPlanStatus() {
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
 
@@ -235,9 +235,9 @@ FullControlT<TA>::buildPlanStatus() {
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::changeTo(const StateID stateId) {
+FullControlT<TArgs>::changeTo(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::CHANGE, stateId};
 		_requests << request;
@@ -251,10 +251,10 @@ FullControlT<TA>::changeTo(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::changeTo(const StateID stateId,
-						   const Payload& payload)
+FullControlT<TArgs>::changeTo(const StateID stateId,
+							  const Payload& payload)
 {
 	if (!_locked) {
 		const Request request{Request::Type::CHANGE, stateId, payload};
@@ -269,9 +269,9 @@ FullControlT<TA>::changeTo(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::restart(const StateID stateId) {
+FullControlT<TArgs>::restart(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::RESTART, stateId};
 		_requests << request;
@@ -285,10 +285,10 @@ FullControlT<TA>::restart(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::restart(const StateID stateId,
-						  const Payload& payload)
+FullControlT<TArgs>::restart(const StateID stateId,
+							 const Payload& payload)
 {
 	if (!_locked) {
 		const Request request{Request::Type::RESTART, stateId, payload};
@@ -303,9 +303,9 @@ FullControlT<TA>::restart(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::resume(const StateID stateId) {
+FullControlT<TArgs>::resume(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::RESUME, stateId};
 		_requests << request;
@@ -319,10 +319,10 @@ FullControlT<TA>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::resume(const StateID stateId,
-						 const Payload& payload)
+FullControlT<TArgs>::resume(const StateID stateId,
+							const Payload& payload)
 {
 	if (!_locked) {
 		const Request request{Request::Type::RESUME, stateId, payload};
@@ -337,9 +337,9 @@ FullControlT<TA>::resume(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::utilize(const StateID stateId) {
+FullControlT<TArgs>::utilize(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::UTILIZE, stateId};
 		_requests << request;
@@ -353,10 +353,10 @@ FullControlT<TA>::utilize(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::utilize(const StateID stateId,
-						  const Payload& payload)
+FullControlT<TArgs>::utilize(const StateID stateId,
+							 const Payload& payload)
 {
 	if (!_locked) {
 		const Request request{Request::Type::UTILIZE, stateId, payload};
@@ -371,9 +371,9 @@ FullControlT<TA>::utilize(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::randomize(const StateID stateId) {
+FullControlT<TArgs>::randomize(const StateID stateId) {
 	if (!_locked) {
 		const Request request{Request::Type::RANDOMIZE, stateId};
 		_requests << request;
@@ -387,10 +387,10 @@ FullControlT<TA>::randomize(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::randomize(const StateID stateId,
-							const Payload& payload)
+FullControlT<TArgs>::randomize(const StateID stateId,
+							   const Payload& payload)
 {
 	if (!_locked) {
 		const Request request{Request::Type::RANDOMIZE, stateId, payload};
@@ -405,9 +405,9 @@ FullControlT<TA>::randomize(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::schedule(const StateID stateId) {
+FullControlT<TArgs>::schedule(const StateID stateId) {
 	const Request transition{Request::Type::SCHEDULE, stateId};
 	_requests << transition;
 
@@ -416,10 +416,10 @@ FullControlT<TA>::schedule(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::schedule(const StateID stateId,
-						   const Payload& payload)
+FullControlT<TArgs>::schedule(const StateID stateId,
+							  const Payload& payload)
 {
 	const Request transition{Request::Type::SCHEDULE, stateId, payload};
 	_requests << transition;
@@ -429,9 +429,9 @@ FullControlT<TA>::schedule(const StateID stateId,
 
 //------------------------------------------------------------------------------
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::succeed() {
+FullControlT<TArgs>::succeed() {
 	_status.result = Status::SUCCESS;
 
 	_planData.tasksSuccesses.set(_originId);
@@ -448,9 +448,9 @@ FullControlT<TA>::succeed() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TA>
+template <typename TArgs>
 void
-FullControlT<TA>::fail() {
+FullControlT<TArgs>::fail() {
 	_status.result = Status::FAILURE;
 
 	_planData.tasksFailures.set(_originId);
@@ -467,9 +467,9 @@ FullControlT<TA>::fail() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TA>
+template <typename TArgs>
 void
-GuardControlT<TA>::cancelPendingTransitions() {
+GuardControlT<TArgs>::cancelPendingTransitions() {
 	_cancelled = true;
 
 	HFSM_LOG_CANCELLED_PENDING(context(), _originId);

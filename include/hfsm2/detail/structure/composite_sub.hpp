@@ -97,7 +97,7 @@ struct CS_ {
 
 #if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-	template <Strategy TG = STRATEGY>
+	template <Strategy = STRATEGY>
 	HFSM_INLINE void	wideRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>

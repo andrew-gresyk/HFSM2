@@ -85,46 +85,46 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-template <typename TC = EmptyContext,
-		  typename TN = char,
-		  typename TU = float,
-		  typename TG = ::hfsm2::RandomT<TU>,
-		  typename TP = EmptyPayload,
+template <typename TC_ = EmptyContext,
+		  typename TN_ = char,
+		  typename TU_ = float,
+		  typename TG_ = ::hfsm2::RandomT<TU_>,
+		  typename TP_ = EmptyPayload,
 		  LongIndex NS = 4,
 		  LongIndex NT = INVALID_LONG_INDEX>
 struct ConfigT {
-	using Context = TC;
+	using Context = TC_;
 
-	using Rank	  = TN;
-	using Utility = TU;
-	using Random_ = TG;
+	using Rank	  = TN_;
+	using Utility = TU_;
+	using Random_ = TG_;
 	using Logger  = LoggerInterfaceT<Context, Utility>;
 
-	using Payload = TP;
+	using Payload = TP_;
 
 	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
 	static constexpr LongIndex TASK_CAPACITY	  = NT;
 
 	template <typename T>
-	using ContextT			 = ConfigT< T, TN, TU, TG, TP, NS, NT>;
+	using ContextT			 = ConfigT<  T, TN_, TU_, TG_, TP_, NS, NT>;
 
 	template <typename T>
-	using RankT				 = ConfigT<TC,  T, TU, TG, TP, NS, NT>;
+	using RankT				 = ConfigT<TC_,   T, TU_, TG_, TP_, NS, NT>;
 
 	template <typename T>
-	using UtilityT			 = ConfigT<TC, TN,  T, TG, TP, NS, NT>;
+	using UtilityT			 = ConfigT<TC_, TN_,   T, TG_, TP_, NS, NT>;
 
 	template <typename T>
-	using RandomT			 = ConfigT<TC, TN, TU,  T, TP, NS, NT>;
+	using RandomT			 = ConfigT<TC_, TN_, TU_,   T, TP_, NS, NT>;
 
 	template <typename T>
-	using PayloadT			 = ConfigT<TC, TN, TU, TG,  T, NS, NT>;
+	using PayloadT			 = ConfigT<TC_, TN_, TU_, TG_,   T, NS, NT>;
 
 	template <LongIndex N>
-	using SubstitutionLimitN = ConfigT<TC, TN, TU, TG, TP,  N, NS>;
+	using SubstitutionLimitN = ConfigT<TC_, TN_, TU_, TG_, TP_,  N, NS>;
 
 	template <LongIndex N>
-	using TaskCapacityN		 = ConfigT<TC, TN, TU, TG, TP, NT,  N>;
+	using TaskCapacityN		 = ConfigT<TC_, TN_, TU_, TG_, TP_, NT,  N>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
