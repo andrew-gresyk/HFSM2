@@ -62,7 +62,7 @@ class Timed
 {
 public:
 	void preEnter(float&)							{ _elapsed = 0.0f;			}
-	void preUpdate(float& _)						{ _elapsed += _;			}
+	void preUpdate(float& _)						{ _elapsed += _;			} //-V669
 
 	float elapsed() const							{ return _elapsed;			}
 

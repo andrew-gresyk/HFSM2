@@ -122,21 +122,21 @@ TEST_CASE("FSM.Debug", "[machine]") {
 		});
 
 		assertActivity(machine.activityHistory(), {
-			 1,
-			 1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
-			-1,
+			(char) +1,
+			(char) +1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
+			(char) -1,
 		});
 	}
 

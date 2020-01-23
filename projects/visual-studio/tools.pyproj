@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>2347027e-e5de-43c4-8ef9-5f1411ade33b</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>../../tools/join.py</StartupFile>
+    <StartupFile>..\..\tools\join.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>../../tools</WorkingDirectory>
@@ -25,10 +25,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="../../tools/join.py" />
+    <InterpreterReference Include="Global|PythonCore|3.7" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.7" />
+    <None Include="../../tools/join.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

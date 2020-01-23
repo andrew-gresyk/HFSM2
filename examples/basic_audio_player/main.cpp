@@ -128,7 +128,7 @@ int main() {
 	Logger logger;
 	FSM::Instance machine(title, &logger);
 
-	// do work :)
+	// do the work :)
 	machine.react(Play{"any"});
 	machine.react(Stop{});
 
@@ -137,7 +137,7 @@ int main() {
 	machine.react(Stop{});
 
 	machine.react(Play{"variant"});
-	machine.react(Pause{});
+	machine.react(Pause{}); //-V760
 	machine.react(Resume{});
 	machine.react(Stop{});
 

@@ -29,11 +29,6 @@
 
 #pragma once
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
-
 #include <stdint.h>
 #include <typeindex>
 
@@ -46,7 +41,7 @@
 	#include <intrin.h>		// __debugbreak()
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__GNUG__)
 	#include <math.h>		// @GCC: ldexpf()
 	#include <utility>		// @GCC: std::conditional<>, move(), forward()
 #endif
@@ -61,6 +56,19 @@ struct EmptyContext {};
 struct EmptyPayload {};
 
 }
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+#ifdef __clang__
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
+#endif
+#if defined(__GNUC__) || defined(__GNUG__)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wpedantic" // error: extra ‘;’
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -9864,12 +9872,18 @@ R_<TG_, TA_>::recordRequestsAs(const Method method) {
 }
 }
 
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+#if defined(__GNUC__) || defined(__GNUG__)
+	#pragma GCC diagnostic pop
+#endif
+
 #undef HFSM_INLINE
 #undef HFSM_IF_LOGGER
 #undef HFSM_LOGGER_OR
 #undef HFSM_LOG_STATE_METHOD
 #undef HFSM_IF_STRUCTURE
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif

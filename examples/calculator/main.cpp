@@ -105,7 +105,7 @@ struct Context {
 	void insertInOperand2(int digit)
 	{
 		PRINTCALL;
-		if (decimalFactor != 1.0)
+		if (decimalFactor != 1.0) //-V550
 		{
 			operand2 += std::copysign(digit / decimalFactor, operand2);
 			decimalFactor *= 10.0;
@@ -135,7 +135,7 @@ struct Context {
 				return true;
 
 			case DIVIDE:
-				if (operand2 != 0.0)
+				if (operand2 != 0.0) //-V550
 				{
 					operand1 /= operand2;
 					return true;
@@ -848,7 +848,7 @@ int main()
 			case '-': { machine.react(Operator{MathOperator::MINUS}); break; }
 			case '*': { machine.react(Operator{MathOperator::MULTIPLY}); break; }
 			case '/': { machine.react(Operator{MathOperator::DIVIDE}); break; }
-			case '.': { machine.react(Point{}); break; }
+			case '.': { machine.react(Point{}); break; } //-V1037
 			case ',': { machine.react(Point{}); break; }
 			case '=': { machine.react(Equals{}); break; }
 			case 'x' : break;

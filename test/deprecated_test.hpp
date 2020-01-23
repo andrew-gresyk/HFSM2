@@ -133,7 +133,7 @@ class Timed
 {
 public:
 	void preEnter(Context&)		{ _elapsed = 0.0f;			}
-	void preUpdate(Context& _)	{ _elapsed += _.deltaTime;	}
+	void preUpdate(Context& _)	{ _elapsed += _.deltaTime;	} //-V669
 
 	float elapsed() const		{ return _elapsed;			}
 
