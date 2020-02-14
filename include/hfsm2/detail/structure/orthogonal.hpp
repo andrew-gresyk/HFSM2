@@ -56,7 +56,7 @@ struct O_ final {
 	using SubStates		= OS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX,
 								 ORTHO_INDEX + 1,
-								 ORTHO_UNIT + ORTHO_UNITS>,
+								 ORTHO_UNIT + (WIDTH + 7) / 8>,
 							  Args,
 							  0,
 							  TSubStates...>;

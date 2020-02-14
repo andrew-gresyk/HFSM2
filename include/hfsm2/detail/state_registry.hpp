@@ -95,7 +95,7 @@ struct AllForksT {
 	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
 
 	using Compo = StaticArray<ShortIndex, COMPO_REGIONS>;
-	using Ortho = BitArray<ShortIndex, ORTHO_REGIONS>;
+	using Ortho = BitArray	 <ShortIndex, ORTHO_UNITS>;
 
 	Compo compo{INVALID_SHORT_INDEX};
 	Ortho ortho;
@@ -155,7 +155,7 @@ struct StateRegistryT<ArgsT<TContext,
 
 	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
 	using OrthoParents	= StaticArray<Parent, ORTHO_REGIONS>;
-	using OrthoUnits	= StaticArray<Units,  ORTHO_REGIONS>;
+	using OrthoUnits	= StaticArray<Units,  ORTHO_UNITS>;
 
 	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
 	using AllForks		= AllForksT<COMPO_REGIONS, ORTHO_REGIONS, ORTHO_UNITS>;

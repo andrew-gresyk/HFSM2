@@ -11,7 +11,7 @@ set(SANITIZE_CXX_FLAGS "")
 #set(SANITIZE_CXX_FLAGS "-fsanitize=memory -g -O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls")
 #set(SANITIZE_CXX_FLAGS "-fsanitize=undefined")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZE_CXX_FLAGS} -Wall -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZE_CXX_FLAGS} -pedantic -Werror")
 
 project(hfsm2_test)
 
