@@ -29,21 +29,15 @@
 
 #pragma once
 
+#include <math.h>			// ldexpf()
 #include <stdint.h>
-#include <typeindex>
 
-#if _MSC_VER == 1900
-	#include <math.h>		// @VS14: ldexpf()
-	#include <new>			// @VS14: placement new with non-default ctor
-#endif
+#include <new>
+#include <typeindex>
+#include <utility>			// std::conditional<>, move(), forward()
 
 #if defined _DEBUG && _MSC_VER
 	#include <intrin.h>		// __debugbreak()
-#endif
-
-#if defined(__GNUC__) || defined(__GNUG__)
-	#include <math.h>		// @GCC: ldexpf()
-	#include <utility>		// @GCC: std::conditional<>, move(), forward()
 #endif
 
 #define HFSM_INLINE														  //inline
