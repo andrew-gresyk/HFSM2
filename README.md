@@ -59,6 +59,7 @@ Check [Wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) for basic usa
 ## Special Thanks
 
 - [Kevin Greene](https://github.com/kgreenek)
+- [Kjeld Mathias Petersen](https://github.com/DonMathi)
 - Mehdi Houshmand
 - [Phil Nash](https://github.com/philsquared)
 - [Romain Cheminade](https://github.com/romaincheminade)
@@ -66,4 +67,3 @@ Check [Wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) for basic usa
 
 - [C++::London](https://www.meetup.com/CppLondon/) meetup
 - programming community at [Splash Damage](http://www.splashdamage.com/)
-

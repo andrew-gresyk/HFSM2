@@ -78,6 +78,9 @@
     <ClCompile Include="..\..\test\shared\test_random.cpp">
       <Filter>test\shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_stress.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\test_internal_transitions.hpp">
@@ -193,6 +196,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp">
       <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\machine.hpp">
+      <Filter>hfsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_stress.hpp">
+      <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
