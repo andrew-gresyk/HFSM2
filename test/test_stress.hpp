@@ -1,6 +1,6 @@
 #include "shared.hpp"
 
-namespace test_state_data {
+namespace test_stress {
 
 //------------------------------------------------------------------------------
 
