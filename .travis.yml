@@ -58,8 +58,20 @@ matrix:
     - env: COMPILER=g++-8 BUILD_TYPE=Release
       addons: *gcc8
 
-    - env: COMPILER=g++-8 BUILD_TYPE=Coverage
-      addons: *gcc8
+    # GCC 9
+    - env: COMPILER=g++-9 BUILD_TYPE=Debug
+      addons: &gcc9
+        apt:
+          packages: g++-9
+          sources: ubuntu-toolchain-r-test
+
+    - env: COMPILER=g++-9 BUILD_TYPE=Release
+      addons: *gcc9
+
+    # Coverage
+
+    - env: COMPILER=g++-9 BUILD_TYPE=Coverage
+      addons: *gcc9
 
     # Clang 3.7
     - env: COMPILER=clang++-3.7 BUILD_TYPE=Debug
@@ -67,7 +79,6 @@ matrix:
         apt:
           packages:
             - clang-3.7
-            - g++-5
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.7
@@ -81,7 +92,6 @@ matrix:
         apt:
           packages:
             - clang-3.8
-            - g++-5
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.8
@@ -95,7 +105,6 @@ matrix:
         apt:
           packages:
             - clang-3.9
-            - g++-5
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.9
@@ -109,7 +118,6 @@ matrix:
         apt:
           packages:
             - clang-4.0
-            - g++-5
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
@@ -123,7 +131,6 @@ matrix:
         apt:
           packages:
             - clang-5.0
-            - g++-7
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-5.0
@@ -137,7 +144,6 @@ matrix:
         apt:
           packages:
             - clang-6.0
-            - g++-7
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
@@ -151,13 +157,22 @@ matrix:
         apt:
           packages:
             - clang-7
-            - g++-7
           sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-7
 
-    - env: COMPILER=clang++-7 BUILD_TYPE=Release
-      addons: *clang7
+    # Clang 8.0
+    - env: COMPILER=clang++-8 BUILD_TYPE=Debug
+      addons: &clang8
+        apt:
+          packages:
+            - clang-8
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-8
+
+    - env: COMPILER=clang++-8 BUILD_TYPE=Release
+      addons: *clang8
 
 script:
   - cd "${TRAVIS_BUILD_DIR}"
@@ -176,6 +191,11 @@ script:
   - make
 
   - cd "${TRAVIS_BUILD_DIR}/examples/basic_traffic_light"
+  - mkdir build && cd build
+  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+  - make
+
+  - cd "${TRAVIS_BUILD_DIR}/examples/calculator"
   - mkdir build && cd build
   - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
   - make
