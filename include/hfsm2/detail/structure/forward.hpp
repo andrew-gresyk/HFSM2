@@ -199,7 +199,7 @@ struct ArgsT final {
 	using Config_	 = TConfig;
 	using Rank		 = typename Config_::Rank;
 	using Utility	 = typename Config_::Utility;
-	using Random_	 = typename Config_::Random_;
+	using RNG		 = typename Config_::RNG;
 	using UP		 = typename Config_::UP;
 	using Logger	 = typename Config_::Logger;
 

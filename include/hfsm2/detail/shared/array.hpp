@@ -18,8 +18,11 @@ public:
 	HFSM_INLINE StaticArray() = default;
 	HFSM_INLINE StaticArray(const Item filler);
 
-	HFSM_INLINE		  Item& operator[] (const LongIndex i);
-	HFSM_INLINE const Item& operator[] (const LongIndex i) const;
+	template <typename N>
+	HFSM_INLINE		  Item& operator[] (const N i);
+
+	template <typename N>
+	HFSM_INLINE const Item& operator[] (const N i) const;
 
 	HFSM_INLINE LongIndex count() const						{ return CAPACITY;									}
 
@@ -64,10 +67,13 @@ public:
 	HFSM_INLINE void clear()														{ _count = 0;		}
 
 	template <typename TValue>
-	HFSM_INLINE LongIndex operator << (TValue&& value);
+	HFSM_INLINE LongIndex append(TValue&& value);
 
-	HFSM_INLINE		  Item& operator[] (const LongIndex i);
-	HFSM_INLINE const Item& operator[] (const LongIndex i) const;
+	template <typename N>
+	HFSM_INLINE		  Item& operator[] (const N i);
+
+	template <typename N>
+	HFSM_INLINE const Item& operator[] (const N i) const;
 
 	HFSM_INLINE LongIndex count() const												{ return _count;	}
 

@@ -22,7 +22,7 @@ class ControlT {
 	using Args			= TArgs;
 	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
-	using Random_		= typename Args::Random_;
+	using RNG			= typename Args::RNG;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -48,12 +48,12 @@ public:
 
 protected:
 	HFSM_INLINE ControlT(Context& context,
-						 Random_& random,
+						 RNG& rng,
 						 StateRegistry& stateRegistry,
 						 PlanData& planData,
 						 Logger* const HFSM_IF_LOGGER(logger))
 		: _context{context}
-		, _random{random}
+		, _rng{rng}
 		, _stateRegistry{stateRegistry}
 		, _planData{planData}
 		HFSM_IF_LOGGER(, _logger{logger})
@@ -101,7 +101,7 @@ protected:
 
 protected:
 	Context& _context;
-	Random_& _random;
+	RNG& _rng;
 	StateRegistry& _stateRegistry;
 	PlanData& _planData;
 	RegionID _regionId = 0;
@@ -244,7 +244,7 @@ class FullControlT
 	using Args			= TArgs;
 	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
-	using Random_		= typename Args::Random_;
+	using RNG			= typename Args::RNG;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 	using Payload		= typename Args::Payload;
@@ -275,12 +275,12 @@ protected:
 
 protected:
 	HFSM_INLINE FullControlT(Context& context,
-							 Random_& random,
+							 RNG& rng,
 							 StateRegistry& stateRegistry,
 							 PlanData& planData,
 							 Requests& requests,
 							 Logger* const logger)
-		: PlanControl{context, random, stateRegistry, planData, logger}
+		: PlanControl{context, rng, stateRegistry, planData, logger}
 		, _requests{requests}
 	{}
 
@@ -400,7 +400,7 @@ class GuardControlT
 	using Args			= TArgs;
 	using Logger		= typename Args::Logger;
 	using Context		= typename Args::Context;
-	using Random_		= typename Args::Random_;
+	using RNG			= typename Args::RNG;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 	using Payload		= typename Args::Payload;
@@ -420,13 +420,13 @@ public:
 
 private:
 	HFSM_INLINE GuardControlT(Context& context,
-							  Random_& random,
+							  RNG& rng,
 							  StateRegistry& stateRegistry,
 							  PlanData& planData,
 							  Requests& requests,
 							  const Requests& pendingChanges,
 							  Logger* const logger)
-		: FullControl{context, random, stateRegistry, planData, requests, logger}
+		: FullControl{context, rng, stateRegistry, planData, requests, logger}
 		, _pending{pendingChanges}
 	{}
 

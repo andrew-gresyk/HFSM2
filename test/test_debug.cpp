@@ -54,7 +54,6 @@ assertActivity(const FSM::Instance::ActivityHistory& activity,
 			REQUIRE(activity[i] == reference[i]);
 		}
 	}
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////

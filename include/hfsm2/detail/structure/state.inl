@@ -317,11 +317,11 @@ S_<TN_, TA_, TH_>::name() {
 template <typename TN_, typename TA_, typename TH_>
 void
 S_<TN_, TA_, TH_>::deepGetNames(const LongIndex parent,
-							  const RegionType region,
-							  const ShortIndex depth,
-							  StructureStateInfos& _stateInfos) const
+								const RegionType region,
+								const ShortIndex depth,
+								StructureStateInfos& _stateInfos) const
 {
-	_stateInfos << StructureStateInfo { parent, region, depth, name() };
+	_stateInfos.append(StructureStateInfo{parent, region, depth, name()});
 }
 
 #endif

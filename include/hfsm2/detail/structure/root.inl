@@ -5,10 +5,10 @@ namespace detail {
 
 template <typename TG_, typename TA_>
 R_<TG_, TA_>::R_(Context& context,
-				 Random_& random
+				 RNG& rng
 				 HFSM_IF_LOGGER(, Logger* const logger))
 	: _context{context}
-	, _random{random}
+	, _rng{rng}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
 	_apex.deepRegister(_stateRegistry, Parent{});
@@ -23,7 +23,7 @@ R_<TG_, TA_>::R_(Context& context,
 template <typename TG_, typename TA_>
 R_<TG_, TA_>::~R_() {
 	PlanControl control{_context,
-						_random,
+						_rng,
 						_stateRegistry,
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
@@ -38,7 +38,7 @@ template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::update() {
 	FullControl control(_context,
-						_random,
+						_rng,
 						_stateRegistry,
 						_planData,
 						_requests,
@@ -60,7 +60,7 @@ template <typename TEvent>
 void
 R_<TG_, TA_>::react(const TEvent& event) {
 	FullControl control{_context,
-						_random,
+						_rng,
 						_stateRegistry,
 						_planData,
 						_requests,
@@ -80,8 +80,7 @@ R_<TG_, TA_>::react(const TEvent& event) {
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::changeTo(const StateID stateId) {
-	const Request request{Request::Type::CHANGE, stateId};
-	_requests << request;
+	_requests.append(Request{Request::Type::CHANGE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
 }
@@ -94,7 +93,7 @@ R_<TG_, TA_>::changeTo(const StateID stateId,
 					   const Payload& payload)
 {
 	const Request request{Request::Type::CHANGE, stateId, payload};
-	_requests << request;
+	_requests.append(request);
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
 }
@@ -104,8 +103,7 @@ R_<TG_, TA_>::changeTo(const StateID stateId,
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::restart(const StateID stateId) {
-	const Request request{Request::Type::RESTART, stateId};
-	_requests << request;
+	_requests.append(Request{Request::Type::RESTART, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
 }
@@ -117,8 +115,7 @@ void
 R_<TG_, TA_>::restart(const StateID stateId,
 					  const Payload& payload)
 {
-	const Request request{Request::Type::RESTART, stateId, payload};
-	_requests << request;
+	_requests.append(Request{Request::Type::RESTART, stateId, payload});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
 }
@@ -128,8 +125,7 @@ R_<TG_, TA_>::restart(const StateID stateId,
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::resume(const StateID stateId) {
-	const Request request{Request::Type::RESUME, stateId};
-	_requests << request;
+	_requests.append(Request{Request::Type::RESUME, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
 }
@@ -141,8 +137,7 @@ void
 R_<TG_, TA_>::resume(const StateID stateId,
 					 const Payload& payload)
 {
-	const Request request{Request::Type::RESUME, stateId, payload};
-	_requests << request;
+	_requests.append(Request{Request::Type::RESUME, stateId, payload});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
 }
@@ -152,8 +147,7 @@ R_<TG_, TA_>::resume(const StateID stateId,
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::utilize(const StateID stateId) {
-	const Request request{Request::Type::UTILIZE, stateId};
-	_requests << request;
+	_requests.append(Request{Request::Type::UTILIZE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
 }
@@ -165,8 +159,7 @@ void
 R_<TG_, TA_>::utilize(const StateID stateId,
 					  const Payload& payload)
 {
-	const Request request{Request::Type::UTILIZE, stateId, payload};
-	_requests << request;
+	_requests.append(Request{Request::Type::UTILIZE, stateId, payload});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
 }
@@ -176,8 +169,7 @@ R_<TG_, TA_>::utilize(const StateID stateId,
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::randomize(const StateID stateId) {
-	const Request request{Request::Type::RANDOMIZE, stateId};
-	_requests << request;
+	_requests.append(Request{Request::Type::RANDOMIZE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
 }
@@ -189,8 +181,7 @@ void
 R_<TG_, TA_>::randomize(const StateID stateId,
 						const Payload& payload)
 {
-	const Request request{Request::Type::RANDOMIZE, stateId, payload};
-	_requests << request;
+	_requests.append(Request{Request::Type::RANDOMIZE, stateId, payload});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
 }
@@ -200,8 +191,7 @@ R_<TG_, TA_>::randomize(const StateID stateId,
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::schedule(const StateID stateId) {
-	const Request request{Request::Type::SCHEDULE, stateId};
-	_requests << request;
+	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 }
@@ -213,8 +203,7 @@ void
 R_<TG_, TA_>::schedule(const StateID stateId,
 					   const Payload& payload)
 {
-	const Request request{Request::Type::SCHEDULE, stateId, payload};
-	_requests << request;
+	_requests.append(Request{Request::Type::SCHEDULE, stateId, payload});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
 }
@@ -273,7 +262,7 @@ template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::initialEnter() {
 	Control control{_context,
-					_random,
+					_rng,
 					_stateRegistry,
 					_planData,
 					HFSM_LOGGER_OR(_logger, nullptr)};
@@ -308,7 +297,7 @@ R_<TG_, TA_>::initialEnter() {
 
 	{
 		PlanControl planControl{_context,
-								_random,
+								_rng,
 								_stateRegistry,
 								_planData,
 								HFSM_LOGGER_OR(_logger, nullptr)};
@@ -335,7 +324,7 @@ R_<TG_, TA_>::processTransitions() {
 	Requests lastRequests;
 
 	Control control(_context,
-					_random,
+					_rng,
 					_stateRegistry,
 					_planData,
 					HFSM_LOGGER_OR(_logger, nullptr));
@@ -358,7 +347,7 @@ R_<TG_, TA_>::processTransitions() {
 
 	{
 		PlanControl planControl{_context,
-								_random,
+								_rng,
 								_stateRegistry,
 								_planData,
 								HFSM_LOGGER_OR(_logger, nullptr)};
@@ -380,7 +369,7 @@ R_<TG_, TA_>::applyRequests(Control& control) {
 	bool changesMade = false;
 
 	for (const Request& request : _requests) {
-		HFSM_IF_STRUCTURE(_lastTransitions << TransitionInfo(request, Method::UPDATE));
+		HFSM_IF_STRUCTURE(_lastTransitions.append(TransitionInfo{request, Method::UPDATE}));
 
 		switch (request.type) {
 		case Request::CHANGE:
@@ -414,7 +403,7 @@ template <typename TG_, typename TA_>
 bool
 R_<TG_, TA_>::cancelledByEntryGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context,
-							  _random,
+							  _rng,
 							  _stateRegistry,
 							  _planData,
 							  _requests,
@@ -435,7 +424,7 @@ template <typename TG_, typename TA_>
 bool
 R_<TG_, TA_>::cancelledByGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context,
-							  _random,
+							  _rng,
 							  _stateRegistry,
 							  _planData,
 							  _requests,
@@ -511,8 +500,8 @@ R_<TG_, TA_>::getStateNames() {
 		const LongIndex space = state.depth * 2;
 
 		if (state.name[0] != L'\0') {
-			_structure << StructureEntry { false, &prefix[margin * 2], state.name };
-			_activityHistory << (char) 0;
+			_structure.append(StructureEntry{false, &prefix[margin * 2], state.name});
+			_activityHistory.append((char) 0);
 		} else if (s + 1 < _stateInfos.count()) {
 			auto& nextPrefix = _prefixes[s + 1];
 
@@ -567,7 +556,7 @@ template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::recordRequestsAs(const Method method) {
 	for (const auto& request : _requests)
-		_lastTransitions << TransitionInfo(request, method);
+		_lastTransitions.append(TransitionInfo{request, method});
 }
 
 #endif

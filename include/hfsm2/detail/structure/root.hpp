@@ -10,7 +10,7 @@ class R_ {
 	using Context				= typename Config_::Context;
 	using Rank					= typename Config_::Rank;
 	using Utility				= typename Config_::Utility;
-	using Random_				= typename Config_::Random_;
+	using RNG					= typename Config_::RNG;
 	using Logger				= typename Config_::Logger;
 	using Payload				= typename Config_::Payload;
 
@@ -81,7 +81,7 @@ public:
 
 public:
 	explicit R_(Context& context,
-				Random_& random
+				RNG& rng
 				HFSM_IF_LOGGER(, Logger* const logger = nullptr));
 
 	~R_();
@@ -219,7 +219,7 @@ private:
 
 private:
 	Context& _context;
-	Random_& _random;
+	RNG& _rng;
 
 	StateRegistry _stateRegistry;
 	PlanData _planData;
@@ -270,16 +270,16 @@ class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, TP_, NS, NT
 {
 	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, TP_, NS, NT>;
 	using Context	= typename Config_::Context;
-	using Random_	= typename Config_::Random_;
+	using RNG		= typename Config_::RNG;
 	using Logger	= typename Config_::Logger;
 
 	using R			= R_<Config_, TApex>;
 
 public:
-	explicit HFSM_INLINE RW_(Random_& random
+	explicit HFSM_INLINE RW_(RNG& rng
 							 HFSM_IF_LOGGER(, Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
-			random
+			rng
 			HFSM_IF_LOGGER(, logger)}
 	{}
 };
@@ -299,7 +299,7 @@ class RW_	   <::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT
 {
 	using Config_	= ::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>;
 	using Context	= typename Config_::Context;
-	using Random_	= typename Config_::Random_;
+	using RNG		= typename Config_::RNG;
 	using Logger	= typename Config_::Logger;
 
 	using R			= R_<Config_, TApex>;
@@ -308,9 +308,9 @@ public:
 	explicit HFSM_INLINE RW_(Context& context
 							 HFSM_IF_LOGGER(, Logger* const logger = nullptr))
 		: R{context,
-			static_cast<Random_&>(*this)
+			static_cast<RNG&>(*this)
 			HFSM_IF_LOGGER(, logger)}
-		, Random_{0}
+		, RNG{0}
 	{}
 };
 
@@ -329,7 +329,7 @@ class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT
 {
 	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>;
 	using Context	= typename Config_::Context;
-	using Random_	= typename Config_::Random_;
+	using RNG		= typename Config_::RNG;
 	using Logger	= typename Config_::Logger;
 
 	using R			= R_<Config_, TApex>;
@@ -337,9 +337,9 @@ class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT
 public:
 	explicit HFSM_INLINE RW_(HFSM_IF_LOGGER(Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
-			static_cast<Random_&>(*this)
+			static_cast<RNG&>(*this)
 			HFSM_IF_LOGGER(, logger)}
-		, Random_{0}
+		, RNG{0}
 	{}
 };
 

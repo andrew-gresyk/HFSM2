@@ -239,8 +239,7 @@ template <typename TArgs>
 void
 FullControlT<TArgs>::changeTo(const StateID stateId) {
 	if (!_locked) {
-		const Request request{Request::Type::CHANGE, stateId};
-		_requests << request;
+		_requests.append(Request{Request::Type::CHANGE, stateId});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -257,8 +256,7 @@ FullControlT<TArgs>::changeTo(const StateID stateId,
 							  const Payload& payload)
 {
 	if (!_locked) {
-		const Request request{Request::Type::CHANGE, stateId, payload};
-		_requests << request;
+		_requests.append(Request{Request::Type::CHANGE, stateId, payload});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -273,8 +271,7 @@ template <typename TArgs>
 void
 FullControlT<TArgs>::restart(const StateID stateId) {
 	if (!_locked) {
-		const Request request{Request::Type::RESTART, stateId};
-		_requests << request;
+		_requests.append(Request{Request::Type::RESTART, stateId});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -291,8 +288,7 @@ FullControlT<TArgs>::restart(const StateID stateId,
 							 const Payload& payload)
 {
 	if (!_locked) {
-		const Request request{Request::Type::RESTART, stateId, payload};
-		_requests << request;
+		_requests.append(Request{Request::Type::RESTART, stateId, payload});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -307,8 +303,7 @@ template <typename TArgs>
 void
 FullControlT<TArgs>::resume(const StateID stateId) {
 	if (!_locked) {
-		const Request request{Request::Type::RESUME, stateId};
-		_requests << request;
+		_requests.append(Request{Request::Type::RESUME, stateId});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -325,8 +320,7 @@ FullControlT<TArgs>::resume(const StateID stateId,
 							const Payload& payload)
 {
 	if (!_locked) {
-		const Request request{Request::Type::RESUME, stateId, payload};
-		_requests << request;
+		_requests.append(Request{Request::Type::RESUME, stateId, payload});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -341,8 +335,7 @@ template <typename TArgs>
 void
 FullControlT<TArgs>::utilize(const StateID stateId) {
 	if (!_locked) {
-		const Request request{Request::Type::UTILIZE, stateId};
-		_requests << request;
+		_requests.append(Request{Request::Type::UTILIZE, stateId});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -359,8 +352,7 @@ FullControlT<TArgs>::utilize(const StateID stateId,
 							 const Payload& payload)
 {
 	if (!_locked) {
-		const Request request{Request::Type::UTILIZE, stateId, payload};
-		_requests << request;
+		_requests.append(Request{Request::Type::UTILIZE, stateId, payload});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -375,8 +367,7 @@ template <typename TArgs>
 void
 FullControlT<TArgs>::randomize(const StateID stateId) {
 	if (!_locked) {
-		const Request request{Request::Type::RANDOMIZE, stateId};
-		_requests << request;
+		_requests.append(Request{Request::Type::RANDOMIZE, stateId});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -393,8 +384,7 @@ FullControlT<TArgs>::randomize(const StateID stateId,
 							   const Payload& payload)
 {
 	if (!_locked) {
-		const Request request{Request::Type::RANDOMIZE, stateId, payload};
-		_requests << request;
+		_requests.append(Request{Request::Type::RANDOMIZE, stateId, payload});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -408,8 +398,7 @@ FullControlT<TArgs>::randomize(const StateID stateId,
 template <typename TArgs>
 void
 FullControlT<TArgs>::schedule(const StateID stateId) {
-	const Request transition{Request::Type::SCHEDULE, stateId};
-	_requests << transition;
+	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
 	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
 }
@@ -421,8 +410,7 @@ void
 FullControlT<TArgs>::schedule(const StateID stateId,
 							  const Payload& payload)
 {
-	const Request transition{Request::Type::SCHEDULE, stateId, payload};
-	_requests << transition;
+	_requests.append(Request{Request::Type::SCHEDULE, stateId, payload});
 
 	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
 }

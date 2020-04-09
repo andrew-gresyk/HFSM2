@@ -169,24 +169,6 @@ count(const T(&)[NCount]) {
 	return NCount;
 }
 
-//------------------------------------------------------------------------------
-
-template <typename T, unsigned NCapacity>
-HFSM_INLINE
-const T*
-end(const T(& a)[NCapacity]) {
-	return &a[NCapacity];
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TReturn, typename T, unsigned NCapacity>
-HFSM_INLINE
-const TReturn*
-end(const T(& a)[NCapacity]) {
-	return reinterpret_cast<const TReturn*>(&a[NCapacity]);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <int N1_, int N2_>

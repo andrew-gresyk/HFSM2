@@ -11,7 +11,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::resolveRandom(Control& control,
 											  const Rank(& ranks)[Info::WIDTH],
 											  const Rank top)
 {
-	const Utility random = control._random.next();
+	const Utility random = control._rng.next();
 	HFSM_ASSERT(0.0f <= random && random < 1.0f);
 
 	Utility cursor = random * sum;

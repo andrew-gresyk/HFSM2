@@ -165,7 +165,7 @@ struct Equals {}; // =
 
 
 // FSM Structure
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context> >;
+using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
 using FSM = M::PeerRoot<
 	struct Off,
 	M::Composite<struct On,

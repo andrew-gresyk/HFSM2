@@ -99,7 +99,7 @@ struct ConfigT {
 
 	using Rank	  = TN_;
 	using Utility = TU_;
-	using Random_ = TG_;
+	using RNG	  = TG_;
 	using Logger  = LoggerInterfaceT<Context, Utility>;
 
 	using Payload = TP_;
