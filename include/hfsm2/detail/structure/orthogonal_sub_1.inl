@@ -4,23 +4,23 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
-template <typename TState>
-TState&
+template <typename T>
+T&
 OS_<TN_, TA_, NI_, TI_, TR_...>::access() {
-	return InitialStates::template contains<TState>() ?
-		initial  .template access<TState>() :
-		remaining.template access<TState>();
+	return InitialStates::template contains<T>() ?
+		initial  .template access<T>() :
+		remaining.template access<T>();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
-template <typename TState>
-const TState&
+template <typename T>
+const T&
 OS_<TN_, TA_, NI_, TI_, TR_...>::access() const {
-	return InitialStates::template contains<TState>() ?
-		initial  .template access<TState>() :
-		remaining.template access<TState>();
+	return InitialStates::template contains<T>() ?
+		initial  .template access<T>() :
+		remaining.template access<T>();
 }
 
 //------------------------------------------------------------------------------

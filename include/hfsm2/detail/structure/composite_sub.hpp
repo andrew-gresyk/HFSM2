@@ -68,11 +68,11 @@ struct CS_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access();
+	template <typename T>
+	HFSM_INLINE		  T& access();
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const;
+	template <typename T>
+	HFSM_INLINE const T& access() const;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -210,11 +210,11 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()				  { return state.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE		  T& access()					  { return state.template access<T>();	}
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const		  { return state.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE const T& access() const				  { return state.template access<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

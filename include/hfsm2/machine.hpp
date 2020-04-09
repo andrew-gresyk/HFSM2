@@ -5317,21 +5317,21 @@ struct S_ {
 	#pragma clang diagnostic ignored "-Wnull-dereference"
 #endif
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()			{ return *reinterpret_cast<		 TState*>(0);	}
+	template <typename T>
+	HFSM_INLINE		  T&	access()			{ return *reinterpret_cast<		 T*>(0);	}
 
-	template <typename TState>
-	HFSM_INLINE	const TState& access() const	{ return *reinterpret_cast<const TState*>(0);	}
+	template <typename T>
+	HFSM_INLINE	const T&	access() const		{ return *reinterpret_cast<const T*>(0);	}
 
 #ifdef __clang__
 	#pragma clang diagnostic pop
 #endif
 
 	template <>
-	HFSM_INLINE		  Head&	  access()										{ return _head;	}
+	HFSM_INLINE		  Head&	access()										{ return _head;	}
 
 	template <>
-	HFSM_INLINE const Head&	  access() const								{ return _head;	}
+	HFSM_INLINE const Head&	access() const									{ return _head;	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -5848,11 +5848,11 @@ struct CS_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access();
+	template <typename T>
+	HFSM_INLINE		  T& access();
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const;
+	template <typename T>
+	HFSM_INLINE const T& access() const;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -5990,11 +5990,11 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()				  { return state.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE		  T& access()					  { return state.template access<T>();	}
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const		  { return state.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE const T& access() const				  { return state.template access<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -6078,23 +6078,23 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-template <typename TState>
-TState&
+template <typename T>
+T&
 CS_<TN_, TA_, TG_, NI_, TS_...>::access() {
-	return LHalf::StateList::template contains<TState>() ?
-		lHalf.template access<TState>() :
-		rHalf.template access<TState>();
+	return LHalf::StateList::template contains<T>() ?
+		lHalf.template access<T>() :
+		rHalf.template access<T>();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-template <typename TState>
-const TState&
+template <typename T>
+const T&
 CS_<TN_, TA_, TG_, NI_, TS_...>::access() const {
-	return LHalf::StateList::template contains<TState>() ?
-		lHalf.template access<TState>() :
-		rHalf.template access<TState>();
+	return LHalf::StateList::template contains<T>() ?
+		lHalf.template access<T>() :
+		rHalf.template access<T>();
 }
 
 //------------------------------------------------------------------------------
@@ -6867,17 +6867,17 @@ struct C_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()										{ return _subStates.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE		  T&	access()										{ return _subStates.template access<T>();	}
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const								{ return _subStates.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE const T&	access() const									{ return _subStates.template access<T>();	}
 
 	template <>
-	HFSM_INLINE		  Head&	  access()										{ return _headState._head;						}
+	HFSM_INLINE		  Head&	access()										{ return _headState._head;					}
 
 	template <typename TState>
-	HFSM_INLINE const Head&	  access() const								{ return _headState._head;						}
+	HFSM_INLINE const Head&	access() const									{ return _headState._head;					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -7791,11 +7791,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access();
+	template <typename T>
+	HFSM_INLINE		  T& access();
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const;
+	template <typename T>
+	HFSM_INLINE const T& access() const;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -7905,11 +7905,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()			{ return initial.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE		  T& access()			 { return initial.template access<T>();	}
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const	{ return initial.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE const T& access() const		 { return initial.template access<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -7982,23 +7982,23 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
-template <typename TState>
-TState&
+template <typename T>
+T&
 OS_<TN_, TA_, NI_, TI_, TR_...>::access() {
-	return InitialStates::template contains<TState>() ?
-		initial  .template access<TState>() :
-		remaining.template access<TState>();
+	return InitialStates::template contains<T>() ?
+		initial  .template access<T>() :
+		remaining.template access<T>();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
-template <typename TState>
-const TState&
+template <typename T>
+const T&
 OS_<TN_, TA_, NI_, TI_, TR_...>::access() const {
-	return InitialStates::template contains<TState>() ?
-		initial  .template access<TState>() :
-		remaining.template access<TState>();
+	return InitialStates::template contains<T>() ?
+		initial  .template access<T>() :
+		remaining.template access<T>();
 }
 
 //------------------------------------------------------------------------------
@@ -8605,17 +8605,17 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()		 { return _subStates.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE		  T&	access()		 { return _subStates.template access<T>();	}
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const { return _subStates.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE const T&	access() const	 { return _subStates.template access<T>();	}
 
 	template <>
-	HFSM_INLINE		  Head&	  access()		 { return _headState._head;						}
+	HFSM_INLINE		  Head&	access()		 { return _headState._head;					}
 
 	template <typename TState>
-	HFSM_INLINE const Head&	  access() const { return _headState._head;						}
+	HFSM_INLINE const Head&	access() const	 { return _headState._head;					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -9161,11 +9161,11 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()							{ return _apex.template access<TState>();		}
+	template <typename T>
+	HFSM_INLINE		  T& access()								{ return _apex.template access<T>();			}
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const					{ return _apex.template access<TState>();		}
+	template <typename T>
+	HFSM_INLINE const T& access() const							{ return _apex.template access<T>();			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

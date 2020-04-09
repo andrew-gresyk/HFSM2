@@ -65,11 +65,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access();
+	template <typename T>
+	HFSM_INLINE		  T& access();
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const;
+	template <typename T>
+	HFSM_INLINE const T& access() const;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -179,11 +179,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()			{ return initial.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE		  T& access()			 { return initial.template access<T>();	}
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const	{ return initial.template access<TState>();	}
+	template <typename T>
+	HFSM_INLINE const T& access() const		 { return initial.template access<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

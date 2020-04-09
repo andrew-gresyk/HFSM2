@@ -96,11 +96,11 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()							{ return _apex.template access<TState>();		}
+	template <typename T>
+	HFSM_INLINE		  T& access()								{ return _apex.template access<T>();			}
 
-	template <typename TState>
-	HFSM_INLINE const TState& access() const					{ return _apex.template access<TState>();		}
+	template <typename T>
+	HFSM_INLINE const T& access() const							{ return _apex.template access<T>();			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

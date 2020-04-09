@@ -43,21 +43,21 @@ struct S_ {
 	#pragma clang diagnostic ignored "-Wnull-dereference"
 #endif
 
-	template <typename TState>
-	HFSM_INLINE		  TState& access()			{ return *reinterpret_cast<		 TState*>(0);	}
+	template <typename T>
+	HFSM_INLINE		  T&	access()			{ return *reinterpret_cast<		 T*>(0);	}
 
-	template <typename TState>
-	HFSM_INLINE	const TState& access() const	{ return *reinterpret_cast<const TState*>(0);	}
+	template <typename T>
+	HFSM_INLINE	const T&	access() const		{ return *reinterpret_cast<const T*>(0);	}
 
 #ifdef __clang__
 	#pragma clang diagnostic pop
 #endif
 
 	template <>
-	HFSM_INLINE		  Head&	  access()										{ return _head;	}
+	HFSM_INLINE		  Head&	access()										{ return _head;	}
 
 	template <>
-	HFSM_INLINE const Head&	  access() const								{ return _head;	}
+	HFSM_INLINE const Head&	access() const									{ return _head;	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
