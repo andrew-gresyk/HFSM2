@@ -68,6 +68,14 @@ struct CS_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	template <typename TState>
+	HFSM_INLINE		  TState& access();
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE void	wideRegister				  (StateRegistry& stateRegistry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -199,6 +207,14 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> {
 									  ORTHO_UNIT>,
 								   Args,
 								   TState>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()				  { return state.template access<TState>();	}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const		  { return state.template access<TState>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

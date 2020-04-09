@@ -4,6 +4,28 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TState>
+TState&
+OS_<TN_, TA_, NI_, TI_, TR_...>::access() {
+	return InitialStates::template contains<TState>() ?
+		initial  .template access<TState>() :
+		remaining.template access<TState>();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TState>
+const TState&
+OS_<TN_, TA_, NI_, TI_, TR_...>::access() const {
+	return InitialStates::template contains<TState>() ?
+		initial  .template access<TState>() :
+		remaining.template access<TState>();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
 OS_<TN_, TA_, NI_, TI_, TR_...>::wideRegister(StateRegistry& stateRegistry,
 											  const ForkID forkId)

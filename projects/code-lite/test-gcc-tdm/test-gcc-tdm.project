@@ -60,6 +60,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_access.hpp"/>
+    <File Name="../../../test/test_access.cpp"/>
     <File Name="../../../test/shared.inl"/>
     <File Name="../../../test/test_randomize.hpp"/>
     <File Name="../../../test/test_randomize.cpp"/>

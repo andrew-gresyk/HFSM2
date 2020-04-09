@@ -63,6 +63,20 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	template <typename TState>
+	HFSM_INLINE		  TState& access()		 { return _subStates.template access<TState>();	}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const { return _subStates.template access<TState>();	}
+
+	template <>
+	HFSM_INLINE		  Head&	  access()		 { return _headState._head;						}
+
+	template <typename TState>
+	HFSM_INLINE const Head&	  access() const { return _headState._head;						}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE ProngBits	   orthoRequested(		StateRegistry& stateRegistry)		{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
 	HFSM_INLINE ProngConstBits orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
 

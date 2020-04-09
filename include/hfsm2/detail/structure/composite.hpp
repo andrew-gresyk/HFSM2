@@ -61,6 +61,22 @@ struct C_ {
 	using Info			= CI_<STRATEGY, Head, TSubStates...>;
 	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()										{ return _subStates.template access<TState>();	}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const								{ return _subStates.template access<TState>();	}
+
+	template <>
+	HFSM_INLINE		  Head&	  access()										{ return _headState._head;						}
+
+	template <typename TState>
+	HFSM_INLINE const Head&	  access() const								{ return _headState._head;						}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE ShortIndex& compoActive   (StateRegistry& stateRegistry)	{ return stateRegistry.compoActive	  [COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoResumable(StateRegistry& stateRegistry)	{ return stateRegistry.resumable.compo[COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoRequested(StateRegistry& stateRegistry)	{ return stateRegistry.requested.compo[COMPO_INDEX]; }

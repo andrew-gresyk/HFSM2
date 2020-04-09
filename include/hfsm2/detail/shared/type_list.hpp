@@ -5,9 +5,19 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+struct TB_ {};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 template <typename... Ts>
-struct TL_ {
+struct TL_
+	: TB_<Ts>...
+{
 	static constexpr LongIndex SIZE = sizeof...(Ts);
+
+	template <typename T>
+	static constexpr bool contains() { return std::is_base_of<TB_<T>, TL_>::value; }
 };
 
 //------------------------------------------------------------------------------

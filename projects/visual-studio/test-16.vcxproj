@@ -24,6 +24,7 @@
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_list.cpp" />
     <ClCompile Include="..\..\test\shared\test_random.cpp" />
+    <ClCompile Include="..\..\test\test_access.cpp" />
     <ClCompile Include="..\..\test\test_composite_bst.cpp" />
     <ClCompile Include="..\..\test\test_debug.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
@@ -64,6 +65,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
     <ClInclude Include="..\..\test\deprecated_test.hpp" />
+    <ClInclude Include="..\..\test\test_access.hpp" />
     <ClInclude Include="..\..\test\test_composite_bst.hpp" />
     <ClInclude Include="..\..\test\test_debug.hpp" />
     <ClInclude Include="..\..\test\test_delayed_teardown.hpp" />

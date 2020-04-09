@@ -81,6 +81,9 @@
     <ClCompile Include="..\..\test\test_stress.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_access.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\test_internal_transitions.hpp">
@@ -198,6 +201,9 @@
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\test_stress.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_access.hpp">
       <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>

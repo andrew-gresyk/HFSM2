@@ -1,7 +1,7 @@
 ﻿#define HFSM_ENABLE_VERBOSE_DEBUG_LOG
 #include "shared.hpp"
 
-namespace test_self_transitions {
+namespace test_access {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -56,18 +56,18 @@ static_assert(FSM::stateId<B_2_2>()	== 12, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct A	 : FSM::State {};
-struct A_1	 : FSM::State {};
-struct A_2	 : FSM::State {};
-struct A_2_1 : FSM::State {};
-struct A_2_2 : FSM::State {};
-struct B	 : FSM::State {};
-struct B_1	 : FSM::State {};
-struct B_1_1 : FSM::State {};
-struct B_1_2 : FSM::State {};
-struct B_2	 : FSM::State {};
-struct B_2_1 : FSM::State {};
-struct B_2_2 : FSM::State {};
+struct A	 : FSM::State { static constexpr auto id = FSM::stateId<A	 >(); /* void enter(PlanControl& c) { REQUIRE(c.access<A    >().id == id;); } */ };
+struct A_1	 : FSM::State { static constexpr auto id = FSM::stateId<A_1	 >(); /* void enter(PlanControl& c) { REQUIRE(c.access<A_1  >().id == id;); } */ };
+struct A_2	 : FSM::State { static constexpr auto id = FSM::stateId<A_2	 >(); /* void enter(PlanControl& c) { REQUIRE(c.access<A_2  >().id == id;); } */ };
+struct A_2_1 : FSM::State { static constexpr auto id = FSM::stateId<A_2_1>(); /* void enter(PlanControl& c) { REQUIRE(c.access<A_2_1>().id == id;); } */ };
+struct A_2_2 : FSM::State { static constexpr auto id = FSM::stateId<A_2_2>(); /* void enter(PlanControl& c) { REQUIRE(c.access<A_2_2>().id == id;); } */ };
+struct B	 : FSM::State { static constexpr auto id = FSM::stateId<B	 >(); /* void enter(PlanControl& c) { REQUIRE(c.access<B    >().id == id;); } */ };
+struct B_1	 : FSM::State { static constexpr auto id = FSM::stateId<B_1  >(); /* void enter(PlanControl& c) { REQUIRE(c.access<B_1  >().id == id;); } */ };
+struct B_1_1 : FSM::State { static constexpr auto id = FSM::stateId<B_1_1>(); /* void enter(PlanControl& c) { REQUIRE(c.access<B_1_1>().id == id;); } */ };
+struct B_1_2 : FSM::State { static constexpr auto id = FSM::stateId<B_1_2>(); /* void enter(PlanControl& c) { REQUIRE(c.access<B_1_2>().id == id;); } */ };
+struct B_2	 : FSM::State { static constexpr auto id = FSM::stateId<B_2	 >(); /* void enter(PlanControl& c) { REQUIRE(c.access<B_2  >().id == id;); } */ };
+struct B_2_1 : FSM::State { static constexpr auto id = FSM::stateId<B_2_1>(); /* void enter(PlanControl& c) { REQUIRE(c.access<B_2_1>().id == id;); } */ };
+struct B_2_2 : FSM::State { static constexpr auto id = FSM::stateId<B_2_2>(); /* void enter(PlanControl& c) { REQUIRE(c.access<B_2_2>().id == id;); } */ };
 
 ////////////////////////////////////////////////////////////////////////////////
 

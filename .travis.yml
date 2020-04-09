@@ -19,59 +19,59 @@ matrix:
   include:
 
     # GCC 5
-    - env: COMPILER=g++-5 BUILD_TYPE=Debug
-      addons: &gcc5
-        apt:
-          packages: g++-5
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-5 BUILD_TYPE=Release
-      addons: *gcc5
+    #- env: COMPILER=g++-5 BUILD_TYPE=Debug
+    #  addons: &gcc5
+    #    apt:
+    #      packages: g++-5
+    #      sources: ubuntu-toolchain-r-test
+    #
+    #- env: COMPILER=g++-5 BUILD_TYPE=Release
+    #  addons: *gcc5
 
     # GCC 6
-    - env: COMPILER=g++-6 BUILD_TYPE=Debug
-      addons: &gcc6
-        apt:
-          packages: g++-6
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-6 BUILD_TYPE=Release
-      addons: *gcc6
+    #- env: COMPILER=g++-6 BUILD_TYPE=Debug
+    #  addons: &gcc6
+    #    apt:
+    #      packages: g++-6
+    #      sources: ubuntu-toolchain-r-test
+    #
+    #- env: COMPILER=g++-6 BUILD_TYPE=Release
+    #  addons: *gcc6
 
     # GCC 7
-    - env: COMPILER=g++-7 BUILD_TYPE=Debug
-      addons: &gcc7
-        apt:
-          packages: g++-7
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-7 BUILD_TYPE=Release
-      addons: *gcc7
+    #- env: COMPILER=g++-7 BUILD_TYPE=Debug
+    #  addons: &gcc7
+    #    apt:
+    #      packages: g++-7
+    #      sources: ubuntu-toolchain-r-test
+    #
+    #- env: COMPILER=g++-7 BUILD_TYPE=Release
+    #  addons: *gcc7
 
     # GCC 8
-    - env: COMPILER=g++-8 BUILD_TYPE=Debug
-      addons: &gcc8
-        apt:
-          packages: g++-8
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-8 BUILD_TYPE=Release
-      addons: *gcc8
+    #- env: COMPILER=g++-8 BUILD_TYPE=Debug
+    #  addons: &gcc8
+    #    apt:
+    #      packages: g++-8
+    #      sources: ubuntu-toolchain-r-test
+    #
+    #- env: COMPILER=g++-8 BUILD_TYPE=Release
+    #  addons: *gcc8
 
     # GCC 9
-    - env: COMPILER=g++-9 BUILD_TYPE=Debug
-      addons: &gcc9
-        apt:
-          packages: g++-9
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-9 BUILD_TYPE=Release
-      addons: *gcc9
+    #- env: COMPILER=g++-9 BUILD_TYPE=Debug
+    #  addons: &gcc9
+    #    apt:
+    #      packages: g++-9
+    #      sources: ubuntu-toolchain-r-test
+    #
+    #- env: COMPILER=g++-9 BUILD_TYPE=Release
+    #  addons: *gcc9
 
     # Coverage
 
-    - env: COMPILER=g++-9 BUILD_TYPE=Coverage
-      addons: *gcc9
+    #- env: COMPILER=g++-9 BUILD_TYPE=Coverage
+    #  addons: *gcc9
 
     # Clang 3.7
     - env: COMPILER=clang++-3.7 BUILD_TYPE=Debug

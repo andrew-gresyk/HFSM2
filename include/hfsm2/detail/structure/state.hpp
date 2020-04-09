@@ -36,6 +36,31 @@ struct S_ {
 
 	using Empty			= ::hfsm2::detail::Empty<Args>;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef __clang__
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wnull-dereference"
+#endif
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()			{ return *reinterpret_cast<		 TState*>(0);	}
+
+	template <typename TState>
+	HFSM_INLINE	const TState& access() const	{ return *reinterpret_cast<const TState*>(0);	}
+
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+
+	template <>
+	HFSM_INLINE		  Head&	  access()										{ return _head;	}
+
+	template <>
+	HFSM_INLINE const Head&	  access() const								{ return _head;	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._stateRegistry.stateParents[STATE_ID]; }
 
 	HFSM_INLINE void	deepRegister		 (StateRegistry& stateRegistry, const Parent parent);

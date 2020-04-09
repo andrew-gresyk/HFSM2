@@ -7,8 +7,6 @@ namespace test_guard {
 
 using M = hfsm2::Machine;
 
-using Action = bool;
-
 //------------------------------------------------------------------------------
 
 #define S(s) struct s

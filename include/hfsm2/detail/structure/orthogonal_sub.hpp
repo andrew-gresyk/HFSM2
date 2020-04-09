@@ -51,6 +51,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 								   TInitial>;
 
 	using InitialInfo	= Wrap<TInitial>;
+	using InitialStates	= typename InitialInfo::StateList;
 
 	using Remaining		= OS_<I_<INITIAL_ID  + InitialInfo::STATE_COUNT,
 								 COMPO_INDEX + InitialInfo::COMPO_REGIONS,
@@ -61,6 +62,16 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 							  TRemaining...>;
 
 	using Info	= OSI_<TInitial, TRemaining...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access();
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
@@ -152,9 +163,9 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 	using ProngBits		= typename OrthoForks::Bits;
 	using ProngConstBits= typename OrthoForks::ConstBits;
 
-	using Control		= ControlT		<Args>;
-	using PlanControl	= PlanControlT	<Args>;
-	using FullControl	= FullControlT	<Args>;
+	using Control		= ControlT	   <Args>;
+	using PlanControl	= PlanControlT <Args>;
+	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
 	using Initial		= Material<I_<INITIAL_ID,
@@ -165,6 +176,16 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 								   TInitial>;
 
 	using Info	= OSI_<TInitial>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()			{ return initial.template access<TState>();	}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const	{ return initial.template access<TState>();	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 

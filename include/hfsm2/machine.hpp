@@ -1669,9 +1669,19 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+struct TB_ {};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 template <typename... Ts>
-struct TL_ {
+struct TL_
+	: TB_<Ts>...
+{
 	static constexpr LongIndex SIZE = sizeof...(Ts);
+
+	template <typename T>
+	static constexpr bool contains() { return std::is_base_of<TB_<T>, TL_>::value; }
 };
 
 //------------------------------------------------------------------------------
@@ -5300,6 +5310,31 @@ struct S_ {
 
 	using Empty			= ::hfsm2::detail::Empty<Args>;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef __clang__
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wnull-dereference"
+#endif
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()			{ return *reinterpret_cast<		 TState*>(0);	}
+
+	template <typename TState>
+	HFSM_INLINE	const TState& access() const	{ return *reinterpret_cast<const TState*>(0);	}
+
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+
+	template <>
+	HFSM_INLINE		  Head&	  access()										{ return _head;	}
+
+	template <>
+	HFSM_INLINE const Head&	  access() const								{ return _head;	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._stateRegistry.stateParents[STATE_ID]; }
 
 	HFSM_INLINE void	deepRegister		 (StateRegistry& stateRegistry, const Parent parent);
@@ -5813,6 +5848,14 @@ struct CS_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	template <typename TState>
+	HFSM_INLINE		  TState& access();
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE void	wideRegister				  (StateRegistry& stateRegistry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5947,6 +5990,14 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	template <typename TState>
+	HFSM_INLINE		  TState& access()				  { return state.template access<TState>();	}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const		  { return state.template access<TState>();	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE void	wideRegister				  (StateRegistry& stateRegistry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -6025,6 +6076,28 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TState>
+TState&
+CS_<TN_, TA_, TG_, NI_, TS_...>::access() {
+	return LHalf::StateList::template contains<TState>() ?
+		lHalf.template access<TState>() :
+		rHalf.template access<TState>();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TState>
+const TState&
+CS_<TN_, TA_, TG_, NI_, TS_...>::access() const {
+	return LHalf::StateList::template contains<TState>() ?
+		lHalf.template access<TState>() :
+		rHalf.template access<TState>();
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
@@ -6791,6 +6864,22 @@ struct C_ {
 
 	using Info			= CI_<STRATEGY, Head, TSubStates...>;
 	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()										{ return _subStates.template access<TState>();	}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const								{ return _subStates.template access<TState>();	}
+
+	template <>
+	HFSM_INLINE		  Head&	  access()										{ return _headState._head;						}
+
+	template <typename TState>
+	HFSM_INLINE const Head&	  access() const								{ return _headState._head;						}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE ShortIndex& compoActive   (StateRegistry& stateRegistry)	{ return stateRegistry.compoActive	  [COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoResumable(StateRegistry& stateRegistry)	{ return stateRegistry.resumable.compo[COMPO_INDEX]; }
@@ -7688,6 +7777,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 								   TInitial>;
 
 	using InitialInfo	= Wrap<TInitial>;
+	using InitialStates	= typename InitialInfo::StateList;
 
 	using Remaining		= OS_<I_<INITIAL_ID  + InitialInfo::STATE_COUNT,
 								 COMPO_INDEX + InitialInfo::COMPO_REGIONS,
@@ -7698,6 +7788,16 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 							  TRemaining...>;
 
 	using Info	= OSI_<TInitial, TRemaining...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access();
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
@@ -7789,9 +7889,9 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 	using ProngBits		= typename OrthoForks::Bits;
 	using ProngConstBits= typename OrthoForks::ConstBits;
 
-	using Control		= ControlT		<Args>;
-	using PlanControl	= PlanControlT	<Args>;
-	using FullControl	= FullControlT	<Args>;
+	using Control		= ControlT	   <Args>;
+	using PlanControl	= PlanControlT <Args>;
+	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
 	using Initial		= Material<I_<INITIAL_ID,
@@ -7802,6 +7902,16 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 								   TInitial>;
 
 	using Info	= OSI_<TInitial>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()			{ return initial.template access<TState>();	}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const	{ return initial.template access<TState>();	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
@@ -7870,6 +7980,28 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TState>
+TState&
+OS_<TN_, TA_, NI_, TI_, TR_...>::access() {
+	return InitialStates::template contains<TState>() ?
+		initial  .template access<TState>() :
+		remaining.template access<TState>();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TState>
+const TState&
+OS_<TN_, TA_, NI_, TI_, TR_...>::access() const {
+	return InitialStates::template contains<TState>() ?
+		initial  .template access<TState>() :
+		remaining.template access<TState>();
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
@@ -8473,6 +8605,20 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	template <typename TState>
+	HFSM_INLINE		  TState& access()		 { return _subStates.template access<TState>();	}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const { return _subStates.template access<TState>();	}
+
+	template <>
+	HFSM_INLINE		  Head&	  access()		 { return _headState._head;						}
+
+	template <typename TState>
+	HFSM_INLINE const Head&	  access() const { return _headState._head;						}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE ProngBits	   orthoRequested(		StateRegistry& stateRegistry)		{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
 	HFSM_INLINE ProngConstBits orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
 
@@ -9005,11 +9151,23 @@ public:
 
 	~R_();
 
-	template <typename T>
-	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename T>
-	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
+	template <typename TState>
+	static constexpr StateID  stateId()				{ return			StateList ::template index<TState>();	}
+
+	template <typename TState>
+	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<TState>();	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()							{ return _apex.template access<TState>();		}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const					{ return _apex.template access<TState>();		}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	void update();
 
@@ -9091,6 +9249,7 @@ public:
 	HFSM_INLINE void schedule (const Payload& payload)			{ schedule (stateId<TState>(), payload);		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// TODO: deprecate
 
 	HFSM_INLINE void resetStateData(const StateID stateId);
 	HFSM_INLINE void setStateData  (const StateID stateId, const Payload& payload);

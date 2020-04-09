@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\test\test_randomize.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_access.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\test_internal_transitions.hpp">
@@ -190,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp">
       <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\test_access.hpp">
+      <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

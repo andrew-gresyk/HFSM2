@@ -86,11 +86,23 @@ public:
 
 	~R_();
 
-	template <typename T>
-	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename T>
-	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
+	template <typename TState>
+	static constexpr StateID  stateId()				{ return			StateList ::template index<TState>();	}
+
+	template <typename TState>
+	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<TState>();	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TState>
+	HFSM_INLINE		  TState& access()							{ return _apex.template access<TState>();		}
+
+	template <typename TState>
+	HFSM_INLINE const TState& access() const					{ return _apex.template access<TState>();		}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	void update();
 
@@ -172,6 +184,7 @@ public:
 	HFSM_INLINE void schedule (const Payload& payload)			{ schedule (stateId<TState>(), payload);		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// TODO: deprecate
 
 	HFSM_INLINE void resetStateData(const StateID stateId);
 	HFSM_INLINE void setStateData  (const StateID stateId, const Payload& payload);
