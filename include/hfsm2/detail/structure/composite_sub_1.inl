@@ -4,28 +4,6 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-template <typename T>
-T&
-CS_<TN_, TA_, TG_, NI_, TS_...>::access() {
-	return LHalf::StateList::template contains<T>() ?
-		lHalf.template access<T>() :
-		rHalf.template access<T>();
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-template <typename T>
-const T&
-CS_<TN_, TA_, TG_, NI_, TS_...>::access() const {
-	return LHalf::StateList::template contains<T>() ?
-		lHalf.template access<T>() :
-		rHalf.template access<T>();
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
 CS_<TN_, TA_, TG_, NI_, TS_...>::wideRegister(StateRegistry& stateRegistry,
 											  const Parent parent)

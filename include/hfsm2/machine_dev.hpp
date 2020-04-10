@@ -82,6 +82,7 @@ struct EmptyPayload {};
 #include "detail/debug/structure_report.hpp"
 #include "detail/injections.hpp"
 #include "detail/structure/forward.hpp"
+#include "detail/state_access.hpp"
 
 namespace hfsm2 {
 

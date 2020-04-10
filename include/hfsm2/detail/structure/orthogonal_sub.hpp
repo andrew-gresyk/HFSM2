@@ -65,14 +65,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename T>
-	HFSM_INLINE		  T& access();
-
-	template <typename T>
-	HFSM_INLINE const T& access() const;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -176,14 +168,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 								   TInitial>;
 
 	using Info	= OSI_<TInitial>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename T>
-	HFSM_INLINE		  T& access()			 { return initial.template access<T>();	}
-
-	template <typename T>
-	HFSM_INLINE const T& access() const		 { return initial.template access<T>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

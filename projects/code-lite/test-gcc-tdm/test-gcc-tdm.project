@@ -7,6 +7,7 @@
   </Plugins>
   <VirtualDirectory Name="hfsm2">
     <VirtualDirectory Name="detail">
+      <File Name="../../../include/hfsm2/detail/state_access.hpp"/>
       <File Name="../../../include/hfsm2/detail/state_registry.inl"/>
       <File Name="../../../include/hfsm2/detail/state_registry.hpp"/>
       <File Name="../../../include/hfsm2/detail/plan_data.inl"/>

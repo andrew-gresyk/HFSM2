@@ -63,20 +63,6 @@ struct C_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename T>
-	HFSM_INLINE		  T&	access()										{ return _subStates.template access<T>();	}
-
-	template <typename T>
-	HFSM_INLINE const T&	access() const									{ return _subStates.template access<T>();	}
-
-	template <>
-	HFSM_INLINE		  Head&	access()										{ return _headState._head;					}
-
-	template <typename TState>
-	HFSM_INLINE const Head&	access() const									{ return _headState._head;					}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	HFSM_INLINE ShortIndex& compoActive   (StateRegistry& stateRegistry)	{ return stateRegistry.compoActive	  [COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoResumable(StateRegistry& stateRegistry)	{ return stateRegistry.resumable.compo[COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoRequested(StateRegistry& stateRegistry)	{ return stateRegistry.requested.compo[COMPO_INDEX]; }

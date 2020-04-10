@@ -53,6 +53,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\state_access.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\composite.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\composite_sub.hpp" />

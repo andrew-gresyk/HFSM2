@@ -197,6 +197,9 @@
     <ClInclude Include="..\..\test\test_access.hpp">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\state_access.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\shared\array.inl">

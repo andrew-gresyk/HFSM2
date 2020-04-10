@@ -243,6 +243,9 @@ struct CS_;
 template <typename, typename, typename, typename...>
 struct O_;
 
+template <typename, typename, ShortIndex, typename...>
+struct OS_;
+
 template <typename, typename>
 class RW_;
 

@@ -97,10 +97,10 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename T>
-	HFSM_INLINE		  T& access()								{ return _apex.template access<T>();			}
+	HFSM_INLINE		  T& access()								{ return detail::access<T>(_apex);				}
 
 	template <typename T>
-	HFSM_INLINE const T& access() const							{ return _apex.template access<T>();			}
+	HFSM_INLINE const T& access() const							{ return detail::access<T>(_apex);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
