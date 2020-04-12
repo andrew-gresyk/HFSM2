@@ -59,12 +59,12 @@ S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	const bool cancelledBefore = control.cancelled();
+	const bool cancelledBefore = control._cancelled;
 
 	_head.widePreEntryGuard(control.context());
 	_head.entryGuard(control);
 
-	return !cancelledBefore && control.cancelled();
+	return !cancelledBefore && control._cancelled;
 }
 
 //------------------------------------------------------------------------------
@@ -72,8 +72,8 @@ S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
 template <typename TN_, typename TA_, typename TH_>
 void
 S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
-	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
-	HFSM_ASSERT(!control.planData().tasksFailures .template get<STATE_ID>());
+	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
+	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
 	HFSM_LOG_STATE_METHOD(&Head::enter,
 						  control.context(),
@@ -90,8 +90,8 @@ S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
 template <typename TN_, typename TA_, typename TH_>
 void
 S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
-	HFSM_ASSERT(!control.planData().tasksSuccesses.template get<STATE_ID>());
-	HFSM_ASSERT(!control.planData().tasksFailures .template get<STATE_ID>());
+	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
+	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
 	HFSM_LOG_STATE_METHOD(&Head::reenter,
 						  control.context(),
@@ -152,12 +152,12 @@ S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	const bool cancelledBefore = control.cancelled();
+	const bool cancelledBefore = control._cancelled;
 
 	_head.widePreExitGuard(control.context());
 	_head.exitGuard(control);
 
-	return !cancelledBefore && control.cancelled();
+	return !cancelledBefore && control._cancelled;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -179,8 +179,8 @@ S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
 	_head.exit(control);
 	_head.widePostExit(control.context());
 
-	control.planData().tasksSuccesses.template reset<STATE_ID>();
-	control.planData().tasksFailures .template reset<STATE_ID>();
+	control._planData.tasksSuccesses.template reset<STATE_ID>();
+	control._planData.tasksFailures .template reset<STATE_ID>();
 }
 
 //------------------------------------------------------------------------------

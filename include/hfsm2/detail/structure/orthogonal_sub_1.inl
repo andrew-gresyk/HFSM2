@@ -3,6 +3,32 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename T>
+T&
+OS_<TN_, TA_, NI_, TI_, TR_...>::access() {
+	return InitialStates::template contains<T>() ?
+		initial  .template access<T>() :
+		remaining.template access<T>();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename T>
+const T&
+OS_<TN_, TA_, NI_, TI_, TR_...>::access() const {
+	return InitialStates::template contains<T>() ?
+		initial  .template access<T>() :
+		remaining.template access<T>();
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
 OS_<TN_, TA_, NI_, TI_, TR_...>::wideRegister(StateRegistry& stateRegistry,
@@ -139,10 +165,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideExit(PlanControl& control) {
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
 OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardActive(Control& control,
-												   const RequestType request,
+												   const Request::Type request,
 												   const ProngConstBits prongs)
 {
-	const RequestType local = prongs.get(PRONG_INDEX) ?
+	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
 
 	initial	 .deepForwardActive(control, local);
@@ -154,10 +180,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardActive(Control& control,
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
 OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardRequest(Control& control,
-													const RequestType request,
+													const Request::Type request,
 													const ProngConstBits prongs)
 {
-	const RequestType local = prongs.get(PRONG_INDEX) ?
+	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
 
 	initial	 .deepForwardRequest(control, local);

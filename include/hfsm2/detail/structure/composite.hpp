@@ -8,7 +8,7 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  typename THead,
 		  typename... TSubStates>
-struct C_ {
+struct C_ final {
 	using Indices		= TIndices;
 	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -26,10 +26,6 @@ struct C_ {
 	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using Payload		= typename Args::Payload;
-
-	using Request		= RequestT<Payload>;
-	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
@@ -61,7 +57,35 @@ struct C_ {
 	using Info			= CI_<STRATEGY, Head, TSubStates...>;
 	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
 
+	//----------------------------------------------------------------------
+
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+	template <typename T>
+	struct Accessor {
+		HFSM_INLINE static		 T&	   get(		 C_& c)						{ return c._subStates.template access<T>();		}
+		HFSM_INLINE static const T&	   get(const C_& c)						{ return c._subStates.template access<T>();		}
+	};
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <>
+	struct Accessor<Head> {
+		HFSM_INLINE static		 Head& get(		 C_& c)						{ return c._headState._head;					}
+		HFSM_INLINE static const Head& get(const C_& c)						{ return c._headState._head;					}
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename T>
+	HFSM_INLINE		  T&	access()										{ return Accessor<T>::get(*this);				}
+
+	template <typename T>
+	HFSM_INLINE const T&	access() const									{ return Accessor<T>::get(*this);				}
+
+#endif
+
+	//----------------------------------------------------------------------
 
 	HFSM_INLINE ShortIndex& compoActive   (StateRegistry& stateRegistry)	{ return stateRegistry.compoActive	  [COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoResumable(StateRegistry& stateRegistry)	{ return stateRegistry.resumable.compo[COMPO_INDEX]; }
@@ -99,14 +123,14 @@ struct C_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepForwardActive			  (Control& control, const RequestType request);
-	HFSM_INLINE void   deepForwardRequest			  (Control& control, const RequestType request);
+	HFSM_INLINE void   deepForwardActive			  (Control& control, const Request::Type request);
+	HFSM_INLINE void   deepForwardRequest			  (Control& control, const Request::Type request);
 
-	HFSM_INLINE void   deepRequest					  (Control& control, const RequestType request);
+	HFSM_INLINE void   deepRequest					  (Control& control, const Request::Type request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
 	HFSM_INLINE void	deepRequestChange			  (Control& control, const ShortIndex = INVALID_SHORT_INDEX);
@@ -144,7 +168,7 @@ struct C_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
 	HFSM_INLINE UP		deepReportChange			  (Control& control);
@@ -197,6 +221,8 @@ struct C_ {
 
 	HeadState _headState;
 	SubStates _subStates;
+
+	HFSM_IF_DEBUG(static constexpr Info _info = Info{});
 };
 
 ////////////////////////////////////////////////////////////////////////////////

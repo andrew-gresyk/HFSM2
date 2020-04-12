@@ -8,7 +8,7 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  ShortIndex NIndex,
 		  typename... TStates>
-struct CS_ {
+struct CS_ final {
 	static_assert(sizeof...(TStates) >= 2, "");
 
 	using Indices		= TIndices;
@@ -28,10 +28,6 @@ struct CS_ {
 	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using Payload		= typename Args::Payload;
-
-	using Request		= RequestT<Payload>;
-	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
@@ -68,6 +64,18 @@ struct CS_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+	template <typename T>
+	HFSM_INLINE		  T& access();
+
+	template <typename T>
+	HFSM_INLINE const T& access() const;
+
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE void	wideRegister				  (StateRegistry& stateRegistry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -90,12 +98,12 @@ struct CS_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideForwardActive			  (Control& control,	 const RequestType request,	const ShortIndex prong);
-	HFSM_INLINE void	wideForwardRequest			  (Control& control,	 const RequestType request,	const ShortIndex prong);
+	HFSM_INLINE void	wideForwardActive			  (Control& control,	 const Request::Type request,	const ShortIndex prong);
+	HFSM_INLINE void	wideForwardRequest			  (Control& control,	 const Request::Type request,	const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
 	HFSM_INLINE void	wideRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
@@ -162,7 +170,7 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  ShortIndex NIndex,
 		  typename TState>
-struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> {
+struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -180,10 +188,6 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> {
 	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using Payload		= typename Args::Payload;
-
-	using Request		= RequestT<Payload>;
-	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
@@ -199,6 +203,18 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> {
 									  ORTHO_UNIT>,
 								   Args,
 								   TState>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+	template <typename T>
+	HFSM_INLINE		  T& access()					  { return state.template access<T>();	}
+
+	template <typename T>
+	HFSM_INLINE const T& access() const				  { return state.template access<T>();	}
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -224,8 +240,8 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideForwardActive			  (Control& control,	 const RequestType request,	const ShortIndex prong);
-	HFSM_INLINE void	wideForwardRequest			  (Control& control,	 const RequestType request,	const ShortIndex prong);
+	HFSM_INLINE void	wideForwardActive			  (Control& control,	 const Request::Type request,	const ShortIndex prong);
+	HFSM_INLINE void	wideForwardRequest			  (Control& control,	 const Request::Type request,	const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

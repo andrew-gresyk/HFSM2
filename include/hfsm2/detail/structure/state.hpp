@@ -6,7 +6,7 @@ namespace detail {
 template <typename TIndices,
 		  typename TArgs,
 		  typename THead>
-struct S_ {
+struct S_ final {
 	using Indices		= TIndices;
 	static constexpr StateID	STATE_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
@@ -19,10 +19,6 @@ struct S_ {
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 	using Logger		= typename Args::Logger;
-	using Payload		= typename Args::Payload;
-
-	using Request		= RequestT<Payload>;
-	using RequestType	= typename Request::Type;
 
 	using Control		= ControlT<Args>;
 	using StateRegistry	= StateRegistryT<Args>;
@@ -36,7 +32,44 @@ struct S_ {
 
 	using Empty			= ::hfsm2::detail::Empty<Args>;
 
+	//----------------------------------------------------------------------
+
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+#ifdef __clang__
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wnull-dereference"
+#endif
+
+	template <typename T>
+	struct Accessor {
+		HFSM_INLINE static		 T&	   get(		 S_&  )	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+		HFSM_INLINE static const T&	   get(const S_&  )	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+	};
+
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <>
+	struct Accessor<Head> {
+		HFSM_INLINE static		 Head& get(		 S_& s)	{ return s._head;					}
+		HFSM_INLINE static const Head& get(const S_& s)	{ return s._head;					}
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename T>
+	HFSM_INLINE		  T&	access()					{ return Accessor<T>::get(*this);	}
+
+	template <typename T>
+	HFSM_INLINE const T&	access() const				{ return Accessor<T>::get(*this);	}
+
+#endif
+
+	//----------------------------------------------------------------------
 
 	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._stateRegistry.stateParents[STATE_ID]; }
 
@@ -69,8 +102,8 @@ struct S_ {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepForwardActive	 (Control&, const RequestType)					{}
-	HFSM_INLINE void	deepForwardRequest	 (Control&, const RequestType)					{}
+	HFSM_INLINE void	deepForwardActive	 (Control&, const Request::Type)					{}
+	HFSM_INLINE void	deepForwardRequest	 (Control&, const Request::Type)					{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

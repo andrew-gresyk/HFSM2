@@ -3,6 +3,32 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename T>
+T&
+CS_<TN_, TA_, TG_, NI_, TS_...>::access() {
+	return LHalfInfo::StateList::template contains<T>() ?
+		lHalf.template access<T>() :
+		rHalf.template access<T>();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename T>
+const T&
+CS_<TN_, TA_, TG_, NI_, TS_...>::access() const {
+	return LHalfInfo::StateList::template contains<T>() ?
+		lHalf.template access<T>() :
+		rHalf.template access<T>();
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
 CS_<TN_, TA_, TG_, NI_, TS_...>::wideRegister(StateRegistry& stateRegistry,
@@ -152,7 +178,7 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideExit(PlanControl& control,
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
 CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardActive(Control& control,
-												   const RequestType request,
+												   const Request::Type request,
 												   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
@@ -168,7 +194,7 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardActive(Control& control,
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
 CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardRequest(Control& control,
-													const RequestType request,
+													const Request::Type request,
 													const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);

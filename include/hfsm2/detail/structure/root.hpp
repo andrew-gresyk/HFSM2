@@ -12,7 +12,6 @@ class R_ {
 	using Utility				= typename Config_::Utility;
 	using RNG					= typename Config_::RNG;
 	using Logger				= typename Config_::Logger;
-	using Payload				= typename Config_::Payload;
 
 	using Apex					= TApex;
 
@@ -43,21 +42,17 @@ private:
 	using StateRegistry			= StateRegistryT<Args>;
 	using AllForks				= typename StateRegistry::AllForks;
 
+	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
+
 	using Control				= ControlT<Args>;
 
 	using PlanControl			= PlanControlT<Args>;
 	using PlanData				= PlanDataT   <Args>;
 
 	using FullControl			= FullControlT<Args>;
-	using Request				= typename FullControl::Request;
 	using Requests				= typename FullControl::Requests;
 
 	using GuardControl			= GuardControlT<Args>;
-
-	using Payloads				= Array<Payload, STATE_COUNT>;
-	using PayloadsSet			= BitArray<LongIndex, STATE_COUNT>;
-
-	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
 
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -73,7 +68,6 @@ public:
 	using Structure				= Array<StructureEntry, NAME_COUNT>;
 	using ActivityHistory		= Array<char,			NAME_COUNT>;
 
-	using TransitionInfo		= TransitionInfoT<Payload>;
 	using TransitionInfoStorage	= Array<TransitionInfo, COMPO_REGIONS * 4>;
 #endif
 
@@ -88,21 +82,59 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TState>
-	static constexpr StateID  stateId()				{ return			StateList ::template index<TState>();	}
+	template <typename T>
+	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
-	template <typename TState>
-	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<TState>();	}
+	template <typename T>
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
+
+	//----------------------------------------------------------------------
+
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4348) // redefinition of default parameter: parameter 2
+#endif
+
+	template <typename T, bool = StateList::template contains<T>()>
+	struct Accessor;
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
+	template <typename T>
+	struct Accessor<T, true> {
+		HFSM_INLINE static		 T& get(	  MaterialApex& apex)	{ return apex.template access<T>();			}
+		HFSM_INLINE static const T& get(const MaterialApex& apex)	{ return apex.template access<T>();			}
+	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename T>
-	HFSM_INLINE		  T& access()								{ return detail::access<T>(_apex);				}
+	// VS:		error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<T,false>'
+	// Clang:	error : implicit instantiation of undefined template 'hfsm2::detail::R_<..>::Accessor<*, false>'
+	//	You're trying to access() a type that is not present in the state machine hierarchy
 
 	template <typename T>
-	HFSM_INLINE const T& access() const							{ return detail::access<T>(_apex);				}
+	HFSM_INLINE		  T& access()									{ return Accessor<T>::get(_apex);			}
+
+	template <typename T>
+	HFSM_INLINE const T& access() const								{ return Accessor<T>::get(_apex);			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#else
+
+	template <typename T>
+	HFSM_INLINE		  T& access()						{ return Accessor<T,	   MaterialApex>{_apex}.get();	}
+
+	template <typename T>
+	HFSM_INLINE const T& access() const					{ return Accessor<T, const MaterialApex>{_apex}.get();	}
+
+#endif
+
+	//----------------------------------------------------------------------
 
 	void update();
 
@@ -128,22 +160,11 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void changeTo (const StateID stateId);
-	HFSM_INLINE void changeTo (const StateID stateId, const Payload& payload);
-
 	HFSM_INLINE void restart  (const StateID stateId);
-	HFSM_INLINE void restart  (const StateID stateId, const Payload& payload);
-
 	HFSM_INLINE void resume	  (const StateID stateId);
-	HFSM_INLINE void resume   (const StateID stateId, const Payload& payload);
-
 	HFSM_INLINE void utilize  (const StateID stateId);
-	HFSM_INLINE void utilize  (const StateID stateId, const Payload& payload);
-
 	HFSM_INLINE void randomize(const StateID stateId);
-	HFSM_INLINE void randomize(const StateID stateId, const Payload& payload);
-
 	HFSM_INLINE void schedule (const StateID stateId);
-	HFSM_INLINE void schedule (const StateID stateId, const Payload& payload);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -151,58 +172,19 @@ public:
 	HFSM_INLINE void changeTo ()								{ changeTo (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void changeTo (const Payload& payload)			{ changeTo (stateId<TState>(), payload);		}
-
-	template <typename TState>
 	HFSM_INLINE void restart  ()								{ restart  (stateId<TState>());					}
-
-	template <typename TState>
-	HFSM_INLINE void restart  (const Payload& payload)			{ restart  (stateId<TState>(), payload);		}
 
 	template <typename TState>
 	HFSM_INLINE void resume	  ()								{ resume   (stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void resume	  (const Payload& payload)			{ resume   (stateId<TState>(), payload);		}
-
-	template <typename TState>
 	HFSM_INLINE void utilize  ()								{ utilize  (stateId<TState>());					}
-
-	template <typename TState>
-	HFSM_INLINE void utilize  (const Payload& payload)			{ utilize  (stateId<TState>(), payload);		}
 
 	template <typename TState>
 	HFSM_INLINE void randomize()								{ randomize(stateId<TState>());					}
 
 	template <typename TState>
-	HFSM_INLINE void randomize(const Payload& payload)			{ randomize(stateId<TState>(), payload);		}
-
-	template <typename TState>
 	HFSM_INLINE void schedule ()								{ schedule (stateId<TState>());					}
-
-	template <typename TState>
-	HFSM_INLINE void schedule (const Payload& payload)			{ schedule (stateId<TState>(), payload);		}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	// TODO: deprecate
-
-	HFSM_INLINE void resetStateData(const StateID stateId);
-	HFSM_INLINE void setStateData  (const StateID stateId, const Payload& payload);
-	HFSM_INLINE bool isStateDataSet(const StateID stateId) const;
-
-	HFSM_INLINE const Payload* getStateData(const StateID stateId) const;
-
-	template <typename TState>
-	HFSM_INLINE void resetStateData()							{ resetStateData(stateId<TState>());			}
-
-	template <typename TState>
-	HFSM_INLINE void setStateData  (const Payload& payload)		{ setStateData  (stateId<TState>(), payload);	}
-
-	template <typename TState>
-	HFSM_INLINE bool isStateDataSet() const						{ return isStateDataSet(stateId<TState>());		}
-
-	template <typename TState>
-	HFSM_INLINE const Payload* getStateData() const				{ return getStateData(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -237,9 +219,6 @@ private:
 	StateRegistry _stateRegistry;
 	PlanData _planData;
 
-	Payloads _payloads;
-	PayloadsSet _payloadsSet;
-
 	Requests _requests;
 
 	MaterialApex _apex;
@@ -273,15 +252,14 @@ public:
 template <typename TN_,
 		  typename TU_,
 		  typename TR_,
-		  typename TP_,
 		  LongIndex NS,
 		  LongIndex NT,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, TP_, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, TP_, NS, NT>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>, TApex>
 	, ::hfsm2::EmptyContext
 {
-	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, TP_, NS, NT>;
+	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>;
 	using Context	= typename Config_::Context;
 	using RNG		= typename Config_::RNG;
 	using Logger	= typename Config_::Logger;
@@ -302,15 +280,14 @@ public:
 template <typename TC_,
 		  typename TN_,
 		  typename TU_,
-		  typename TP_,
 		  LongIndex NS,
 		  LongIndex NT,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>, TApex>
+class RW_	   <::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex>
 	, ::hfsm2::RandomT<TU_>
 {
-	using Config_	= ::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>;
+	using Config_	= ::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>;
 	using Context	= typename Config_::Context;
 	using RNG		= typename Config_::RNG;
 	using Logger	= typename Config_::Logger;
@@ -331,16 +308,15 @@ public:
 
 template <typename TN_,
 		  typename TU_,
-		  typename TP_,
 		  LongIndex NS,
 		  LongIndex NT,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex>
 	, ::hfsm2::EmptyContext
 	, ::hfsm2::RandomT<TU_>
 {
-	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, TP_, NS, NT>;
+	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>;
 	using Context	= typename Config_::Context;
 	using RNG		= typename Config_::RNG;
 	using Logger	= typename Config_::Logger;

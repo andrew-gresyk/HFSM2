@@ -181,4 +181,34 @@ LoggerT<TContext>::assertSequence(const Events& reference) {
 	history.clear();
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TMachine>
+void assertActive(TMachine& machine,
+				  const Types& all,
+				  const Types& toCheck)
+{
+	for (const auto& type : all) {
+		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
+			REQUIRE( machine.isActive(type)); //-V521
+		else
+			REQUIRE(!machine.isActive(type)); //-V521
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TMachine>
+void assertResumable(TMachine& machine,
+					 const Types& all,
+					 const Types& toCheck)
+{
+	for (const auto& type : all) {
+		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
+			REQUIRE( machine.isResumable(type)); //-V521
+		else
+			REQUIRE(!machine.isResumable(type)); //-V521
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////

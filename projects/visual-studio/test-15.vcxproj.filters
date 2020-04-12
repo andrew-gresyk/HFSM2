@@ -30,12 +30,6 @@
     <ClCompile Include="..\..\test\test_internal_transitions.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_state_data.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\test_planner.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\deprecated_test.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -78,28 +72,16 @@
     <ClCompile Include="..\..\test\test_access.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_plans.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_stress.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\test\test_internal_transitions.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_planner.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
       <Filter>hfsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_state_data.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\deprecated_test.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_guard.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_delayed_teardown.hpp">
-      <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\debug\logger_interface.hpp">
       <Filter>hfsm\detail\debug</Filter>
@@ -143,16 +125,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\test_self_transitions.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\shared.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_composite_bst.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_utilize.hpp">
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\structure\composite.hpp">
@@ -176,26 +149,8 @@
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp">
       <Filter>hfsm\detail\structure</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\test_resume.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_utility_regions.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_debug.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_ortho_units.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_randomize.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp">
       <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\test\test_access.hpp">
-      <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\state_access.hpp">
       <Filter>hfsm\detail</Filter>

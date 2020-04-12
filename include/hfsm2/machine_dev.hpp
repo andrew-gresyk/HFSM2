@@ -92,7 +92,6 @@ template <typename TC_ = EmptyContext,
 		  typename TN_ = char,
 		  typename TU_ = float,
 		  typename TG_ = ::hfsm2::RandomT<TU_>,
-		  typename TP_ = EmptyPayload,
 		  LongIndex NS = 4,
 		  LongIndex NT = INVALID_LONG_INDEX>
 struct ConfigT {
@@ -103,31 +102,26 @@ struct ConfigT {
 	using RNG	  = TG_;
 	using Logger  = LoggerInterfaceT<Context, Utility>;
 
-	using Payload = TP_;
-
 	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
 	static constexpr LongIndex TASK_CAPACITY	  = NT;
 
 	template <typename T>
-	using ContextT			 = ConfigT<  T, TN_, TU_, TG_, TP_, NS, NT>;
+	using ContextT			 = ConfigT<  T, TN_, TU_, TG_, NS, NT>;
 
 	template <typename T>
-	using RankT				 = ConfigT<TC_,   T, TU_, TG_, TP_, NS, NT>;
+	using RankT				 = ConfigT<TC_,   T, TU_, TG_, NS, NT>;
 
 	template <typename T>
-	using UtilityT			 = ConfigT<TC_, TN_,   T, TG_, TP_, NS, NT>;
+	using UtilityT			 = ConfigT<TC_, TN_,   T, TG_, NS, NT>;
 
 	template <typename T>
-	using RandomT			 = ConfigT<TC_, TN_, TU_,   T, TP_, NS, NT>;
-
-	template <typename T>
-	using PayloadT			 = ConfigT<TC_, TN_, TU_, TG_,   T, NS, NT>;
+	using RandomT			 = ConfigT<TC_, TN_, TU_,   T, NS, NT>;
 
 	template <LongIndex N>
-	using SubstitutionLimitN = ConfigT<TC_, TN_, TU_, TG_, TP_,  N, NS>;
+	using SubstitutionLimitN = ConfigT<TC_, TN_, TU_, TG_,  N, NS>;
 
 	template <LongIndex N>
-	using TaskCapacityN		 = ConfigT<TC_, TN_, TU_, TG_, TP_, NT,  N>;
+	using TaskCapacityN		 = ConfigT<TC_, TN_, TU_, TG_, NT,  N>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

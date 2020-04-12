@@ -113,10 +113,10 @@ OS_<TN_, TA_, NI_, TI_>::wideExit(PlanControl& control) {
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
 OS_<TN_, TA_, NI_, TI_>::wideForwardActive(Control& control,
-										   const RequestType request,
+										   const Request::Type request,
 										   const ProngConstBits prongs)
 {
-	const RequestType local = prongs.get(PRONG_INDEX) ?
+	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
 
 	initial.deepForwardActive(control, local);
@@ -127,10 +127,10 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardActive(Control& control,
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
 OS_<TN_, TA_, NI_, TI_>::wideForwardRequest(Control& control,
-											const RequestType request,
+											const Request::Type request,
 											const ProngConstBits prongs)
 {
-	const RequestType local = prongs.get(PRONG_INDEX) ?
+	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
 
 	initial.deepForwardRequest(control, local);

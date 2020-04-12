@@ -42,10 +42,7 @@ struct alignas(2 * sizeof(ShortIndex)) Parent {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TPayload>
-struct RequestT {
-	using Payload = TPayload;
-
+struct Request {
 	enum Type {
 		REMAIN,
 		CHANGE,
@@ -58,33 +55,22 @@ struct RequestT {
 		COUNT
 	};
 
-	HFSM_INLINE RequestT() = default;
+	HFSM_INLINE Request() = default;
 
-	HFSM_INLINE RequestT(const Type type_,
-						 const StateID stateId_)
+	HFSM_INLINE Request(const Type type_,
+						const StateID stateId_)
 		: type{type_}
 		, stateId{stateId_}
-	{
-		HFSM_ASSERT(type_ < Type::COUNT);
-	}
-
-	HFSM_INLINE RequestT(const Type type_,
-						 const StateID stateId_,
-						 const Payload& payload_)
-		: type{type_}
-		, stateId{stateId_}
-		, payload{payload_}
 	{
 		HFSM_ASSERT(type_ < Type::COUNT);
 	}
 
 	Type type = CHANGE;
 	StateID stateId = INVALID_STATE_ID;
-	Payload payload;
 };
 
-template <typename TPayload, ShortIndex NCount>
-using RequestsT = Array<RequestT<TPayload>, NCount>;
+template <ShortIndex NCount>
+using RequestsT = Array<Request, NCount>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -112,7 +98,6 @@ template <typename,
 		  LongIndex,
 		  LongIndex,
 		  LongIndex,
-		  typename,
 		  LongIndex>
 struct ArgsT;
 
@@ -128,7 +113,6 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct StateRegistryT<ArgsT<TContext,
 							TConfig,
@@ -137,14 +121,10 @@ struct StateRegistryT<ArgsT<TContext,
 							NCompoCount,
 							NOrthoCount,
 							NOrthoUnits,
-							TPayload,
 							NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
-	using Payload		= TPayload;
-
-	using Request		= RequestT<Payload>;
 
 	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
 	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
@@ -199,7 +179,6 @@ template <typename TContext,
 		  typename TStateList,
 		  typename TRegionList,
 		  LongIndex NCompoCount,
-		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct StateRegistryT<ArgsT<TContext,
 							TConfig,
@@ -208,13 +187,10 @@ struct StateRegistryT<ArgsT<TContext,
 							NCompoCount,
 							0,
 							0,
-							TPayload,
 							NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
-	using Payload		= TPayload;
-	using Request		= RequestT<Payload>;
 
 	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
 	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;

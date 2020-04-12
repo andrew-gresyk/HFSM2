@@ -23,7 +23,6 @@ struct O_ final {
 	using UP			= typename Args::UP;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-	using Payload		= typename Args::Payload;
 
 	using Head			= THead;
 
@@ -31,9 +30,6 @@ struct O_ final {
 	static constexpr ShortIndex WIDTH		= Info::WIDTH;
 	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS	= Info::ORTHO_UNITS;
-
-	using Request		= RequestT<Payload>;
-	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
@@ -61,7 +57,35 @@ struct O_ final {
 							  0,
 							  TSubStates...>;
 
+	//----------------------------------------------------------------------
+
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+	template <typename T>
+	struct Accessor {
+		HFSM_INLINE static		 T&	   get(		 O_& o)									{ return o._subStates.template access<T>();		}
+		HFSM_INLINE static const T&	   get(const O_& o)									{ return o._subStates.template access<T>();		}
+	};
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <>
+	struct Accessor<Head> {
+		HFSM_INLINE static		 Head& get(		 O_& o)									{ return o._headState._head;					}
+		HFSM_INLINE static const Head& get(const O_& o)									{ return o._headState._head;					}
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename T>
+	HFSM_INLINE		  T&	access()													{ return Accessor<T>::get(*this);				}
+
+	template <typename T>
+	HFSM_INLINE const T&	access() const												{ return Accessor<T>::get(*this);				}
+
+#endif
+
+	//----------------------------------------------------------------------
 
 	HFSM_INLINE ProngBits	   orthoRequested(		StateRegistry& stateRegistry)		{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
 	HFSM_INLINE ProngConstBits orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
@@ -91,10 +115,10 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepForwardActive	 (Control& control, const RequestType request);
-	HFSM_INLINE void	deepForwardRequest	 (Control& control, const RequestType request);
+	HFSM_INLINE void	deepForwardActive	 (Control& control, const Request::Type request);
+	HFSM_INLINE void	deepForwardRequest	 (Control& control, const Request::Type request);
 
-	HFSM_INLINE void	deepRequest			 (Control& control, const RequestType request);
+	HFSM_INLINE void	deepRequest			 (Control& control, const Request::Type request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

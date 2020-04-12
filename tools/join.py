@@ -1,4 +1,4 @@
-################################################################################
+#===============================================================================
 
 def mergeTo(folder, path, included, pragmaOnceCounter, output):
 	pathTokens = path.split("/")
@@ -38,7 +38,7 @@ def mergeTo(folder, path, included, pragmaOnceCounter, output):
 
 				output.write(line)
 
-################################################################################
+#===============================================================================
 
 output = open("../include/hfsm2/machine.hpp", 'w', encoding='utf-8-sig')
 included = []
@@ -47,4 +47,4 @@ mergeTo("../include/hfsm2", "machine_dev.hpp", included, pragmaOnceCounter, outp
 
 output.close()
 
-################################################################################
+#===============================================================================

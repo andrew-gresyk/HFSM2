@@ -5,9 +5,9 @@ namespace detail {
 
 #ifdef HFSM_ENABLE_ASSERT
 
-template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, typename TPL_, LongIndex NTC_>
+template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, LongIndex NTC_>
 void
-PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TPL_, NTC_>>::verifyPlans() const {
+PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::verifyPlans() const {
 	LongIndex planCount = 0;
 	for (RegionID id = 0; id < REGION_COUNT; ++id)
 		planCount += verifyPlan(id);
@@ -17,9 +17,9 @@ PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TPL_, NTC_>>::verifyPlan
 
 //------------------------------------------------------------------------------
 
-template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, typename TPL_, LongIndex NTC_>
+template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, LongIndex NTC_>
 LongIndex
-PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TPL_, NTC_>>::verifyPlan(const RegionID regionId) const {
+PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::verifyPlan(const RegionID regionId) const {
 	LongIndex length = 0;
 	const Bounds& bounds = tasksBounds[regionId];
 

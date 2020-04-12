@@ -85,37 +85,12 @@ R_<TG_, TA_>::changeTo(const StateID stateId) {
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-void
-R_<TG_, TA_>::changeTo(const StateID stateId,
-					   const Payload& payload)
-{
-	const Request request{Request::Type::CHANGE, stateId, payload};
-	_requests.append(request);
-
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::restart(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESTART, stateId});
-
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-void
-R_<TG_, TA_>::restart(const StateID stateId,
-					  const Payload& payload)
-{
-	_requests.append(Request{Request::Type::RESTART, stateId, payload});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
 }
@@ -130,36 +105,12 @@ R_<TG_, TA_>::resume(const StateID stateId) {
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-void
-R_<TG_, TA_>::resume(const StateID stateId,
-					 const Payload& payload)
-{
-	_requests.append(Request{Request::Type::RESUME, stateId, payload});
-
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::utilize(const StateID stateId) {
 	_requests.append(Request{Request::Type::UTILIZE, stateId});
-
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-void
-R_<TG_, TA_>::utilize(const StateID stateId,
-					  const Payload& payload)
-{
-	_requests.append(Request{Request::Type::UTILIZE, stateId, payload});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
 }
@@ -174,18 +125,6 @@ R_<TG_, TA_>::randomize(const StateID stateId) {
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-void
-R_<TG_, TA_>::randomize(const StateID stateId,
-						const Payload& payload)
-{
-	_requests.append(Request{Request::Type::RANDOMIZE, stateId, payload});
-
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TG_, typename TA_>
@@ -194,66 +133,6 @@ R_<TG_, TA_>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-void
-R_<TG_, TA_>::schedule(const StateID stateId,
-					   const Payload& payload)
-{
-	_requests.append(Request{Request::Type::SCHEDULE, stateId, payload});
-
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TG_, typename TA_>
-void
-R_<TG_, TA_>::resetStateData(const StateID stateId) {
-	HFSM_ASSERT(stateId < Payloads::CAPACITY);
-
-	if (stateId < Payloads::CAPACITY)
-		_payloadsSet.reset(stateId);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-void
-R_<TG_, TA_>::setStateData(const StateID stateId,
-						   const Payload& payload)
-{
-	HFSM_ASSERT(stateId < Payloads::CAPACITY);
-
-	if (stateId < Payloads::CAPACITY) {
-		_payloads[stateId] = payload;
-		_payloadsSet.set(stateId);
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-bool
-R_<TG_, TA_>::isStateDataSet(const StateID stateId) const {
-	HFSM_ASSERT(stateId < Payloads::CAPACITY);
-
-	return stateId < Payloads::CAPACITY ?
-		_payloadsSet.get(stateId) : false;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-const typename R_<TG_, TA_>::Payload*
-R_<TG_, TA_>::getStateData(const StateID stateId) const {
-	HFSM_ASSERT(stateId < Payloads::CAPACITY);
-
-	return stateId < Payloads::CAPACITY && _payloadsSet.get(stateId) ?
-		&_payloads[stateId] : nullptr;
 }
 
 //------------------------------------------------------------------------------

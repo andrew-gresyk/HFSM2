@@ -159,7 +159,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepUpdate(FullControl& control) {
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-		return subStatus && control.planData().planExists.template get<REGION_ID>() ?
+		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
 	}
 }
@@ -190,7 +190,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReact(FullControl& control,
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-		return subStatus && control.planData().planExists.template get<REGION_ID>() ?
+		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
 	}
 }
@@ -250,7 +250,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepExit(PlanControl& control) {
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 void
 C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardActive(Control& control,
-												  const RequestType request)
+												  const Request::Type request)
 {
 	HFSM_ASSERT(control._stateRegistry.isActive(HEAD_ID));
 
@@ -269,7 +269,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardActive(Control& control,
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 void
 C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardRequest(Control& control,
-												   const RequestType request)
+												   const Request::Type request)
 {
 	const ShortIndex requested = compoRequested(control);
 
@@ -284,7 +284,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardRequest(Control& control,
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 void
 C_<TN_, TA_, TG_, TH_, TS_...>::deepRequest(Control& control,
-											const RequestType request)
+											const Request::Type request)
 {
 	switch (request) {
 	case Request::REMAIN:
@@ -318,7 +318,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-#if !HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 void
@@ -475,7 +475,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestRandomize(Control& control) {
 
 //------------------------------------------------------------------------------
 
-#if !HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 typename TA_::UP

@@ -191,7 +191,6 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
-		  typename TPayload,
 		  LongIndex NTaskCapacity>
 struct ArgsT final {
 	using Context	 = TContext;
@@ -205,7 +204,6 @@ struct ArgsT final {
 
 	using StateList	 = TStateList;
 	using RegionList = TRegionList;
-	using Payload	 = TPayload;
 
 	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
 	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
@@ -289,7 +287,6 @@ template <typename TConfig,
 struct RF_ final {
 	using Config_		= TConfig;
 	using Context		= typename Config_::Context;
-	using Payload		= typename Config_::Payload;
 	using Apex			= TApex;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -313,7 +310,6 @@ struct RF_ final {
 								COMPO_REGIONS,
 								ORTHO_REGIONS,
 								ORTHO_UNITS,
-								Payload,
 								TASK_CAPACITY>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

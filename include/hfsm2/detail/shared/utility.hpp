@@ -117,9 +117,7 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
-	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION									1
-#else
-	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION									0
+	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

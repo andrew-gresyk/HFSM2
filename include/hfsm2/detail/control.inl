@@ -248,23 +248,6 @@ FullControlT<TArgs>::changeTo(const StateID stateId) {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-void
-FullControlT<TArgs>::changeTo(const StateID stateId,
-							  const Payload& payload)
-{
-	if (!_locked) {
-		_requests.append(Request{Request::Type::CHANGE, stateId, payload});
-
-		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
-			_status.outerTransition = true;
-
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::CHANGE, stateId);
-	}
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
@@ -272,23 +255,6 @@ void
 FullControlT<TArgs>::restart(const StateID stateId) {
 	if (!_locked) {
 		_requests.append(Request{Request::Type::RESTART, stateId});
-
-		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
-			_status.outerTransition = true;
-
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESTART, stateId);
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-void
-FullControlT<TArgs>::restart(const StateID stateId,
-							 const Payload& payload)
-{
-	if (!_locked) {
-		_requests.append(Request{Request::Type::RESTART, stateId, payload});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -312,23 +278,6 @@ FullControlT<TArgs>::resume(const StateID stateId) {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-void
-FullControlT<TArgs>::resume(const StateID stateId,
-							const Payload& payload)
-{
-	if (!_locked) {
-		_requests.append(Request{Request::Type::RESUME, stateId, payload});
-
-		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
-			_status.outerTransition = true;
-
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESUME, stateId);
-	}
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
@@ -336,23 +285,6 @@ void
 FullControlT<TArgs>::utilize(const StateID stateId) {
 	if (!_locked) {
 		_requests.append(Request{Request::Type::UTILIZE, stateId});
-
-		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
-			_status.outerTransition = true;
-
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::UTILIZE, stateId);
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-void
-FullControlT<TArgs>::utilize(const StateID stateId,
-							 const Payload& payload)
-{
-	if (!_locked) {
-		_requests.append(Request{Request::Type::UTILIZE, stateId, payload});
 
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
@@ -376,41 +308,12 @@ FullControlT<TArgs>::randomize(const StateID stateId) {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-void
-FullControlT<TArgs>::randomize(const StateID stateId,
-							   const Payload& payload)
-{
-	if (!_locked) {
-		_requests.append(Request{Request::Type::RANDOMIZE, stateId, payload});
-
-		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
-			_status.outerTransition = true;
-
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RANDOMIZE, stateId);
-	}
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
 void
 FullControlT<TArgs>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
-
-	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-void
-FullControlT<TArgs>::schedule(const StateID stateId,
-							  const Payload& payload)
-{
-	_requests.append(Request{Request::Type::SCHEDULE, stateId, payload});
 
 	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
 }

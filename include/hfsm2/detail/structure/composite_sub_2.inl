@@ -126,7 +126,7 @@ CS_<TN_, TA_, TG_, NI_, T>::wideExit(PlanControl& control,
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void
 CS_<TN_, TA_, TG_, NI_, T>::wideForwardActive(Control& control,
-											  const RequestType request,
+											  const Request::Type request,
 											  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
@@ -139,7 +139,7 @@ CS_<TN_, TA_, TG_, NI_, T>::wideForwardActive(Control& control,
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void
 CS_<TN_, TA_, TG_, NI_, T>::wideForwardRequest(Control& control,
-											   const RequestType request,
+											   const Request::Type request,
 											   const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);

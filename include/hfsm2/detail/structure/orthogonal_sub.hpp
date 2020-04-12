@@ -13,7 +13,7 @@ template <typename TIndices,
 		  ShortIndex NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
-struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
+struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -27,10 +27,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
-	using Payload		= typename Args::Payload;
-
-	using Request		= RequestT<Payload>;
-	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
@@ -65,6 +61,18 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+	template <typename T>
+	HFSM_INLINE		  T& access();
+
+	template <typename T>
+	HFSM_INLINE const T& access() const;
+
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -89,8 +97,8 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideForwardActive	 (Control& control, const RequestType request,	const ProngConstBits prongs);
-	HFSM_INLINE void	wideForwardRequest	 (Control& control, const RequestType request,	const ProngConstBits prongs);
+	HFSM_INLINE void	wideForwardActive	 (Control& control, const Request::Type request,	const ProngConstBits prongs);
+	HFSM_INLINE void	wideForwardRequest	 (Control& control, const Request::Type request,	const ProngConstBits prongs);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -130,7 +138,7 @@ template <typename TIndices,
 		  typename TArgs,
 		  ShortIndex NIndex,
 		  typename TInitial>
-struct OS_<TIndices, TArgs, NIndex, TInitial> {
+struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	using Indices		= TIndices;
 	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
 	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -144,10 +152,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
-	using Payload		= typename Args::Payload;
-
-	using Request		= RequestT<Payload>;
-	using RequestType	= typename Request::Type;
 
 	using StateRegistry	= StateRegistryT<Args>;
 	using StateParents	= typename StateRegistry::StateParents;
@@ -168,6 +172,18 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 								   TInitial>;
 
 	using Info	= OSI_<TInitial>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+	template <typename T>
+	HFSM_INLINE		  T& access()			 { return initial.template access<T>();	}
+
+	template <typename T>
+	HFSM_INLINE const T& access() const		 { return initial.template access<T>();	}
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -195,8 +211,8 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideForwardActive	 (Control& control, const RequestType request,	const ProngConstBits prongs);
-	HFSM_INLINE void	wideForwardRequest	 (Control& control, const RequestType request,	const ProngConstBits prongs);
+	HFSM_INLINE void	wideForwardActive	 (Control& control, const Request::Type request,	const ProngConstBits prongs);
+	HFSM_INLINE void	wideForwardRequest	 (Control& control, const Request::Type request,	const ProngConstBits prongs);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

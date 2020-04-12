@@ -48,11 +48,8 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 //------------------------------------------------------------------------------
 
-template <typename TPayload>
 Transition
-HFSM_INLINE get(const typename RequestT<TPayload>::Type type) {
-	using Request = RequestT<TPayload>;
-
+HFSM_INLINE get(const Request::Type type) {
 	switch (type) {
 		case Request::CHANGE:
 			return Transition::CHANGE;
@@ -80,18 +77,14 @@ HFSM_INLINE get(const typename RequestT<TPayload>::Type type) {
 
 #pragma pack(push, 1)
 
-template <typename TPayload>
-struct alignas(4) TransitionInfoT {
-	using Payload = TPayload;
-	using Request = RequestT<TPayload>;
+struct alignas(4) TransitionInfo {
+	HFSM_INLINE TransitionInfo() = default;
 
-	HFSM_INLINE TransitionInfoT() = default;
-
-	HFSM_INLINE TransitionInfoT(const Request transition_,
-								const Method method_)
+	HFSM_INLINE TransitionInfo(const Request transition_,
+							   const Method method_)
 		: stateId{transition_.stateId}
 		, method{method_}
-		, transition{get<Payload>(transition_.type)}
+		, transition{get(transition_.type)}
 	{
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}

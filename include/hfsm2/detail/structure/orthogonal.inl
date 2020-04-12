@@ -89,7 +89,7 @@ O_<TN_, TA_, TH_, TS_...>::deepUpdate(FullControl& control) {
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-		return subStatus && control.planData().planExists.template get<REGION_ID>() ?
+		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
 	}
 }
@@ -117,7 +117,7 @@ O_<TN_, TA_, TH_, TS_...>::deepReact(FullControl& control,
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-		return subStatus && control.planData().planExists.template get<REGION_ID>() ?
+		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
 	}
 }
@@ -162,7 +162,7 @@ O_<TN_, TA_, TH_, TS_...>::deepExit(PlanControl& control) {
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
 O_<TN_, TA_, TH_, TS_...>::deepForwardActive(Control& control,
-											 const RequestType request)
+											 const Request::Type request)
 {
 	HFSM_ASSERT(control._stateRegistry.isActive(HEAD_ID));
 
@@ -177,7 +177,7 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardActive(Control& control,
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
 O_<TN_, TA_, TH_, TS_...>::deepForwardRequest(Control& control,
-											  const RequestType request)
+											  const Request::Type request)
 {
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 
@@ -192,7 +192,7 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardRequest(Control& control,
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
 O_<TN_, TA_, TH_, TS_...>::deepRequest(Control& control,
-									   const RequestType request)
+									   const Request::Type request)
 {
 	switch (request) {
 	case Request::REMAIN:

@@ -1,14 +1,12 @@
 namespace hfsm2 {
 namespace detail {
 
-//------------------------------------------------------------------------------
-// these should be member S_<> functions
-// but neither GCC nor Clang can handle function specializations within class scope
+#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-template <typename TState,
-		  typename TInternal>
-TState&
-access(TInternal&);
+//------------------------------------------------------------------------------
+
+template <typename...>
+struct Accessor;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -18,11 +16,13 @@ template <typename T,
 		  Strategy TG,
 		  typename TH,
 		  typename... TS>
-HFSM_INLINE
-T&
-access(		C_<TN, TA, TG, TH, TS...>& composite) {
-	return access<T>(composite._subStates);
-}
+struct Accessor<T,		 C_<TN, TA, TG, TH, TS...>> {
+	using Host =		 C_<TN, TA, TG, TH, TS...>;
+
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -32,37 +32,43 @@ template <typename T,
 		  Strategy TG,
 		  typename TH,
 		  typename... TS>
-HFSM_INLINE
-const T&
-access(const C_<TN, TA, TG, TH, TS...>& composite) {
-	return access<T>(composite._subStates);
-}
+struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> {
+	using Host =   const C_<TN, TA, TG, TH, TS...>;
+
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
+
+	Host& host;
+};
 
 //------------------------------------------------------------------------------
 
-template <typename TN,
+template <typename T,
+		  typename TN,
 		  typename TA,
 		  Strategy TG,
-		  typename TH,
 		  typename... TS>
-HFSM_INLINE
-TH&
-access(		 C_<TN, TA, TG, TH, TS...>& composite) {
-	return composite._headState._head;
-}
+struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> {
+	using Host =		 C_<TN, TA, TG,  T, TS...>;
+
+	HFSM_INLINE		  T& get()			{ return host._headState._head;				}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN,
+template <typename T,
+		  typename TN,
 		  typename TA,
 		  Strategy TG,
-		  typename TH,
 		  typename... TS>
-HFSM_INLINE
-const TH&
-access(const C_<TN, TA, TG, TH, TS...>& composite) {
-	return composite._headState._head;
-}
+struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> {
+	using Host =   const C_<TN, TA, TG,  T, TS...>;
+
+	HFSM_INLINE const T& get() const	{ return host._headState._head;				}
+
+	Host& host;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -72,12 +78,17 @@ template <typename T,
 		  Strategy TG,
 		  ShortIndex NI,
 		  typename... TS>
-T&
-access(		 CS_<TN, TA, TG, NI, TS...>& compositeSub) {
-	return CS_<TN, TA, TG, NI, TS...>::LHalf::StateList::template contains<T>() ?
-		access<T>(compositeSub.lHalf) :
-		access<T>(compositeSub.rHalf);
-}
+struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
+	using Host =		 CS_<TN, TA, TG, NI, TS...>;
+
+	HFSM_INLINE		  T& get()		 {
+		return Host::LHalfInfo::StateList::template contains<T>() ?
+			Accessor<T,		  typename Host::LHalf>{host.lHalf}.get() :
+			Accessor<T,		  typename Host::RHalf>{host.rHalf}.get();
+	}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -87,12 +98,17 @@ template <typename T,
 		  Strategy TG,
 		  ShortIndex NI,
 		  typename... TS>
-const T&
-access(const CS_<TN, TA, TG, NI, TS...>& compositeSub) {
-	return CS_<TN, TA, TG, NI, TS...>::LHalf::StateList::template contains<T>() ?
-		access<T>(compositeSub.lHalf) :
-		access<T>(compositeSub.rHalf);
-}
+struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
+	using Host =   const CS_<TN, TA, TG, NI, TS...>;
+
+	HFSM_INLINE const T& get() const {
+		return Host::LHalfInfo::StateList::template contains<T>() ?
+			Accessor<T, const typename Host::LHalf>{host.lHalf}.get() :
+			Accessor<T, const typename Host::RHalf>{host.rHalf}.get();
+	}
+
+	Host& host;
+};
 
 //------------------------------------------------------------------------------
 
@@ -102,10 +118,13 @@ template <typename T,
 		  Strategy TG,
 		  ShortIndex NI,
 		  typename TS>
-T&
-access(		 CS_<TN, TA, TG, NI, TS>& compositeSub) {
-	return access<T>(compositeSub.state);
-}
+struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> {
+	using Host =		 CS_<TN, TA, TG, NI, TS>;
+
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::State>{host.state}.get();		}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -115,10 +134,13 @@ template <typename T,
 		  Strategy TG,
 		  ShortIndex NI,
 		  typename TS>
-const T&
-access(const CS_<TN, TA, TG, NI, TS>& compositeSub) {
-	return access<T>(compositeSub.state);
-}
+struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> {
+	using Host =   const CS_<TN, TA, TG, NI, TS>;
+
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::State>{host.state}.get();		}
+
+	Host& host;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -127,11 +149,13 @@ template <typename T,
 		  typename TA,
 		  typename TH,
 		  typename... TS>
-HFSM_INLINE
-T&
-access(		O_<TN, TA, TH, TS...>& orthogonal) {
-	return access<T>(orthogonal._subStates);
-}
+struct Accessor<T,		 O_<TN, TA, TH, TS...>> {
+	using Host =		 O_<TN, TA, TH, TS...>;
+
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -140,53 +164,60 @@ template <typename T,
 		  typename TA,
 		  typename TH,
 		  typename... TS>
-HFSM_INLINE
-const T&
-access(const O_<TN, TA, TH, TS...>& orthogonal) {
-	return access<T>(orthogonal._subStates);
-}
+struct Accessor<T, const O_<TN, TA, TH, TS...>> {
+	using Host =   const O_<TN, TA, TH, TS...>;
+
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
+
+	Host& host;
+};
 
 //------------------------------------------------------------------------------
 
-template <typename TN,
+template <typename T,
+		  typename TN,
 		  typename TA,
-		  typename TH,
 		  typename... TS>
-HFSM_INLINE
-TH&
-access(		 O_<TN, TA, TH, TS...>& orthogonal) {
-	return orthogonal._headState._head;
-}
+struct Accessor<T,		 O_<TN, TA,  T, TS...>> {
+	using Host =		 O_<TN, TA,  T, TS...>;
+
+	HFSM_INLINE		  T& get()			{ return host._headState._head;				}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN,
+template <typename T,
+		  typename TN,
 		  typename TA,
-		  typename TH,
 		  typename... TS>
-HFSM_INLINE
-const TH&
-access(const O_<TN, TA, TH, TS...>& orthogonal) {
-	return orthogonal._headState._head;
-}
+struct Accessor<T, const O_<TN, TA,  T, TS...>> {
+	using Host =   const O_<TN, TA,  T, TS...>;
+
+	HFSM_INLINE const T& get() const	{ return host._headState._head;				}
+
+	Host& host;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef __clang__
-
 template <typename T,
 		  typename TN,
 		  typename TA,
 		  ShortIndex NI,
-		  typename TI,
-		  typename... TR>
-HFSM_INLINE
-T&
-access(		OS_<TN, TA, NI, TI, TR...>& orthogonalSub) {
-	return OS_<TN, TA, NI, TI, TR...>::InitialStates::template contains<T>() ?
-		access<T>(orthogonalSub.initial  ) :
-		access<T>(orthogonalSub.remaining);
-}
+		  typename... TS>
+struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
+	using Host =		 OS_<TN, TA, NI, TS...>;
+
+	HFSM_INLINE		  T& get()		 {
+		return Host::InitialStates::template contains<T>() ?
+			Accessor<T,		  typename Host::Initial  >{host.initial  }.get() :
+			Accessor<T,		  typename Host::Remaining>{host.remaining}.get();
+	}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -194,51 +225,18 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  ShortIndex NI,
-		  typename TI,
-		  typename... TR>
-HFSM_INLINE
-const T&
-access(const OS_<TN, TA, NI, TI, TR...>& orthogonalSub) {
-	return OS_<TN, TA, NI, TI, TR...>::InitialStates::template contains<T>() ?
-		access<T>(orthogonalSub.initial  ) :
-		access<T>(orthogonalSub.remaining);
-}
+		  typename... TS>
+struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
+	using Host =   const OS_<TN, TA, NI, TS...>;
 
-#else
+	HFSM_INLINE const T& get() const {
+		return Host::InitialStates::template contains<T>() ?
+			Accessor<T, const typename Host::Initial  >{host.initial  }.get() :
+			Accessor<T, const typename Host::Remaining>{host.remaining}.get();
+	}
 
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  ShortIndex NI,
-		  typename TI,
-		  typename TR, // Clang can't figure out the correct specialization without a hint
-		  typename... TRs>
-HFSM_INLINE
-T&
-access(		OS_<TN, TA, NI, TI, TR, TRs...>& orthogonalSub) {
-	return OS_<TN, TA, NI, TI, TR, TRs...>::InitialStates::template contains<T>() ?
-		access<T>(orthogonalSub.initial  ) :
-		access<T>(orthogonalSub.remaining);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  ShortIndex NI,
-		  typename TI,
-		  typename TR, // Clang can't figure out the correct specialization without a hint
-		  typename... TRs>
-HFSM_INLINE
-const T&
-access(const OS_<TN, TA, NI, TI, TR, TRs...>& orthogonalSub) {
-	return OS_<TN, TA, NI, TI, TR, TRs...>::InitialStates::template contains<T>() ?
-		access<T>(orthogonalSub.initial  ) :
-		access<T>(orthogonalSub.remaining);
-}
-
-#endif
+	Host& host;
+};
 
 //------------------------------------------------------------------------------
 
@@ -246,12 +244,14 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  ShortIndex NI,
-		  typename TI>
-HFSM_INLINE
-T&
-access(		OS_<TN, TA, NI, TI>& orthogonalSub) {
-	return access<T>(orthogonalSub.initial);
-}
+		  typename TS>
+struct Accessor<T,		 OS_<TN, TA, NI, TS>> {
+	using Host =		 OS_<TN, TA, NI, TS>;
+
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::Initial>{host.initial  }.get();	}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -259,12 +259,14 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  ShortIndex NI,
-		  typename TI>
-HFSM_INLINE
-const T&
-access(const OS_<TN, TA, NI, TI>& orthogonalSub) {
-	return access<T>(orthogonalSub.initial);
-}
+		  typename TS>
+struct Accessor<T, const OS_<TN, TA, NI, TS>> {
+	using Host =   const OS_<TN, TA, NI, TS>;
+
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
+
+	Host& host;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -274,26 +276,30 @@ access(const OS_<TN, TA, NI, TI>& orthogonalSub) {
 #endif
 
 template <typename T,
-		  typename TI,
+		  typename TN,
 		  typename TA,
 		  typename TH>
-HFSM_INLINE
-T&
-access(		 S_<TI, TA, TH>&	  ) {
-	return *reinterpret_cast<T*>(0);
-}
+struct Accessor<T,		 S_<TN, TA, TH>> {
+	using Host =		 S_<TN, TA, TH>;
+
+	HFSM_INLINE		  T& get()			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T,
-		  typename TI,
+		  typename TN,
 		  typename TA,
 		  typename TH>
-HFSM_INLINE
-T&
-access(const S_<TI, TA, TH>&	  ) {
-	return *reinterpret_cast<T*>(0);
-}
+struct Accessor<T, const S_<TN, TA, TH>> {
+	using Host =   const S_<TN, TA, TH>;
+
+	HFSM_INLINE const T& get() const	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+
+	Host& host;
+};
 
 #ifdef __clang__
 	#pragma clang diagnostic pop
@@ -301,27 +307,33 @@ access(const S_<TI, TA, TH>&	  ) {
 
 //------------------------------------------------------------------------------
 
-template <typename TI,
-		  typename TA,
-		  typename TH>
-HFSM_INLINE
-TH&
-access(		 S_<TI, TA, TH>& state) {
-	return state._head;
-}
+template <typename T,
+		  typename TN,
+		  typename TA>
+struct Accessor<T,		 S_<TN, TA,  T>> {
+	using Host =		 S_<TN, TA,  T>;
+
+	HFSM_INLINE		  T& get()			{ return host._head;								}
+
+	Host& host;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI,
-		  typename TA,
-		  typename TH>
-HFSM_INLINE
-const TH&
-access(const S_<TI, TA, TH>& state)	{
-	return state._head;
-}
+template <typename T,
+		  typename TN,
+		  typename TA>
+struct Accessor<T, const S_<TN, TA,  T>> {
+	using Host =   const S_<TN, TA,  T>;
+
+	HFSM_INLINE const T& get() const	{ return host._head;								}
+
+	Host& host;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#endif
 
 }
 }
