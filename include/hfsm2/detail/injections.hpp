@@ -26,20 +26,26 @@ protected:
 	using GuardControl	= GuardControlT<TArgs>;
 
 public:
-	HFSM_INLINE void preEntryGuard(Context&)									{}
+	HFSM_INLINE void preEntryGuard(Context&)		{}
 
-	HFSM_INLINE void preEnter	  (Context&)									{}
-	HFSM_INLINE void preReenter	  (Context&)									{}
+	HFSM_INLINE void preEnter	  (Context&)		{}
+	HFSM_INLINE void preReenter	  (Context&)		{}
 
-	HFSM_INLINE void preUpdate	  (Context&)									{}
+	HFSM_INLINE void preUpdate	  (Context&)		{}
 
 	template <typename TEvent>
 	HFSM_INLINE void preReact	  (const TEvent&,
-								   Context&)									{}
+								   Context&)		{}
 
-	HFSM_INLINE void preExitGuard (Context&)									{}
+	HFSM_INLINE void preExitGuard (Context&)		{}
 
-	HFSM_INLINE void postExit	  (Context&)									{}
+	HFSM_INLINE void postExit	  (Context&)		{}
+
+	template <typename T>
+	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+
+	template <typename T>
+	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 };
 
 //------------------------------------------------------------------------------
@@ -54,21 +60,35 @@ struct B_<TFirst, TRest...>
 	: TFirst
 	, B_<TRest...>
 {
+	using typename TFirst::Context;
+	using typename TFirst::Rank;
+	using typename TFirst::Utility;
+	using typename TFirst::StateList;
+	using typename TFirst::RegionList;
 
-	HFSM_INLINE void widePreEntryGuard(typename TFirst::Context& context);
+	using typename TFirst::Control;
+	using typename TFirst::PlanControl;
+	using typename TFirst::Plan;
+	using typename TFirst::FullControl;
+	using typename TFirst::GuardControl;
 
-	HFSM_INLINE void widePreEnter	  (typename TFirst::Context& context);
-	HFSM_INLINE void widePreReenter	  (typename TFirst::Context& context);
+	using TFirst::stateId;
+	using TFirst::regionId;
 
-	HFSM_INLINE void widePreUpdate	  (typename TFirst::Context& context);
+	HFSM_INLINE void widePreEntryGuard(Context& context);
+
+	HFSM_INLINE void widePreEnter	  (Context& context);
+	HFSM_INLINE void widePreReenter	  (Context& context);
+
+	HFSM_INLINE void widePreUpdate	  (Context& context);
 
 	template <typename TEvent>
 	HFSM_INLINE void widePreReact	  (const TEvent& event,
-									   typename TFirst::Context& context);
+									   Context& context);
 
-	HFSM_INLINE void widePreExitGuard (typename TFirst::Context& context);
+	HFSM_INLINE void widePreExitGuard (Context& context);
 
-	HFSM_INLINE void widePostExit	  (typename TFirst::Context& context);
+	HFSM_INLINE void widePostExit	  (Context& context);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -77,50 +97,57 @@ template <typename TFirst>
 struct B_<TFirst>
 	: TFirst
 {
-	HFSM_INLINE typename TFirst::Rank
-					  rank			   (const typename TFirst::Control&)		{ return typename TFirst::Rank	 {0};		}
+	using typename TFirst::Context;
+	using typename TFirst::Rank;
+	using typename TFirst::Utility;
+	using typename TFirst::StateList;
+	using typename TFirst::RegionList;
 
-	HFSM_INLINE typename TFirst::Utility
-					  utility		   (const typename TFirst::Control&)		{ return typename TFirst::Utility{1.0f};	}
+	using typename TFirst::Control;
+	using typename TFirst::PlanControl;
+	using typename TFirst::Plan;
+	using typename TFirst::FullControl;
+	using typename TFirst::GuardControl;
 
-	HFSM_INLINE void  entryGuard	   (typename TFirst::GuardControl&)			{}
+	using TFirst::stateId;
+	using TFirst::regionId;
 
-	HFSM_INLINE void  enter			   (typename TFirst::PlanControl&)			{}
-	HFSM_INLINE void  reenter		   (typename TFirst::PlanControl&)			{}
+	HFSM_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
 
-	HFSM_INLINE void  update		   (typename TFirst::FullControl&)			{}
+	HFSM_INLINE Utility utility			 (const Control&)			{ return Utility{1.0f};	}
 
-	template <typename TEvent>
-	HFSM_INLINE void  react			   (const TEvent&,
-					 				    typename TFirst::FullControl&)			{}
+	HFSM_INLINE void	entryGuard		 (GuardControl&)			{}
 
-	HFSM_INLINE void  exitGuard		   (typename TFirst::GuardControl&)			{}
+	HFSM_INLINE void	enter			 (PlanControl&)				{}
+	HFSM_INLINE void	reenter			 (PlanControl&)				{}
 
-	HFSM_INLINE void  exit			   (typename TFirst::PlanControl&)			{}
-
-	HFSM_INLINE void  planSucceeded	   (typename TFirst::FullControl& control)	{ control.succeed();	}
-	HFSM_INLINE void  planFailed	   (typename TFirst::FullControl& control)	{ control.fail();		}
-
-	HFSM_INLINE void  widePreEntryGuard(typename TFirst::Context& context);
-
-	HFSM_INLINE void  widePreEnter	   (typename TFirst::Context& context);
-	HFSM_INLINE void  widePreReenter   (typename TFirst::Context& context);
-
-	HFSM_INLINE void  widePreUpdate	   (typename TFirst::Context& context);
+	HFSM_INLINE void	update			 (FullControl&)				{}
 
 	template <typename TEvent>
-	HFSM_INLINE void  widePreReact	   (const TEvent& event,
-					 				    typename TFirst::Context& context);
+	HFSM_INLINE void	react			 (const TEvent&,
+										  FullControl&)				{}
 
-	HFSM_INLINE void  widePreExitGuard (typename TFirst::Context& context);
+	HFSM_INLINE void	exitGuard		 (GuardControl&)			{}
 
-	HFSM_INLINE void  widePostExit	   (typename TFirst::Context& context);
+	HFSM_INLINE void	exit			 (PlanControl&)				{}
 
-	template <typename T>
-	static constexpr StateID  stateId()				{ return			typename TFirst::StateList ::template index<T>();	}
+	HFSM_INLINE void	planSucceeded	 (FullControl& control)		{ control.succeed();	}
+	HFSM_INLINE void	planFailed		 (FullControl& control)		{ control.fail();		}
 
-	template <typename T>
-	static constexpr RegionID regionId()			{ return (RegionID) typename TFirst::RegionList::template index<T>();	}
+	HFSM_INLINE void	widePreEntryGuard(Context& context);
+
+	HFSM_INLINE void	widePreEnter	 (Context& context);
+	HFSM_INLINE void	widePreReenter   (Context& context);
+
+	HFSM_INLINE void	widePreUpdate	 (Context& context);
+
+	template <typename TEvent>
+	HFSM_INLINE void	widePreReact	 (const TEvent& event,
+					 					  Context& context);
+
+	HFSM_INLINE void	widePreExitGuard (Context& context);
+
+	HFSM_INLINE void	widePostExit	 (Context& context);
 };
 
 template <typename TArgs>
