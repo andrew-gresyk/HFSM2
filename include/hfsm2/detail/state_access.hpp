@@ -50,7 +50,7 @@ template <typename T,
 struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> {
 	using Host =		 C_<TN, TA, TG,  T, TS...>;
 
-	HFSM_INLINE		  T& get()			{ return host._headState._head;				}
+	HFSM_INLINE		  T& get()			{ return host._headState._headBox.get();	}
 
 	Host& host;
 };
@@ -65,7 +65,7 @@ template <typename T,
 struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> {
 	using Host =   const C_<TN, TA, TG,  T, TS...>;
 
-	HFSM_INLINE const T& get() const	{ return host._headState._head;				}
+	HFSM_INLINE const T& get() const	{ return host._headState._headBox.get();	}
 
 	Host& host;
 };
@@ -121,7 +121,7 @@ template <typename T,
 struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> {
 	using Host =		 CS_<TN, TA, TG, NI, TS>;
 
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::State>{host.state}.get();		}
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::State>{host.state}.get();				}
 
 	Host& host;
 };
@@ -137,7 +137,7 @@ template <typename T,
 struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> {
 	using Host =   const CS_<TN, TA, TG, NI, TS>;
 
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::State>{host.state}.get();		}
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::State>{host.state}.get();				}
 
 	Host& host;
 };
@@ -181,7 +181,7 @@ template <typename T,
 struct Accessor<T,		 O_<TN, TA,  T, TS...>> {
 	using Host =		 O_<TN, TA,  T, TS...>;
 
-	HFSM_INLINE		  T& get()			{ return host._headState._head;				}
+	HFSM_INLINE		  T& get()			{ return host._headState._headBox.get();	}
 
 	Host& host;
 };
@@ -195,7 +195,7 @@ template <typename T,
 struct Accessor<T, const O_<TN, TA,  T, TS...>> {
 	using Host =   const O_<TN, TA,  T, TS...>;
 
-	HFSM_INLINE const T& get() const	{ return host._headState._head;				}
+	HFSM_INLINE const T& get() const	{ return host._headState._headBox.get();	}
 
 	Host& host;
 };
@@ -270,6 +270,9 @@ struct Accessor<T, const OS_<TN, TA, NI, TS>> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
+////////////////////////////////////////////////////////////////////////////////
+
 #ifdef __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wnull-dereference"
@@ -313,7 +316,7 @@ template <typename T,
 struct Accessor<T,		 S_<TN, TA,  T>> {
 	using Host =		 S_<TN, TA,  T>;
 
-	HFSM_INLINE		  T& get()			{ return host._head;								}
+	HFSM_INLINE		  T& get()			{ return host._headBox.get();			}
 
 	Host& host;
 };
@@ -326,7 +329,7 @@ template <typename T,
 struct Accessor<T, const S_<TN, TA,  T>> {
 	using Host =   const S_<TN, TA,  T>;
 
-	HFSM_INLINE const T& get() const	{ return host._head;								}
+	HFSM_INLINE const T& get() const	{ return host._headBox.get();			}
 
 	Host& host;
 };

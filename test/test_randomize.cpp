@@ -33,21 +33,21 @@ using FSM = M::Root<S(Apex),
 
 #undef S
 
-static_assert(FSM::regionId<Apex>()	==  0, "");
-static_assert(FSM::regionId<O>()	==  1, "");
-static_assert(FSM::regionId<N>()	==  2, "");
-static_assert(FSM::regionId<C>()	==  3, "");
+static_assert(FSM::regionId<Apex >() ==  0, "");
+static_assert(FSM::regionId<O    >() ==  1, "");
+static_assert(FSM::regionId<N    >() ==  2, "");
+static_assert(FSM::regionId<C    >() ==  3, "");
 
-static_assert(FSM::stateId<Apex>()	==  0, "");
-static_assert(FSM::stateId<I>()		==  1, "");
-static_assert(FSM::stateId<O>()		==  2, "");
-static_assert(FSM::stateId<N>()		==  3, "");
+static_assert(FSM::stateId<Apex >()	==  0, "");
+static_assert(FSM::stateId<I    >() ==  1, "");
+static_assert(FSM::stateId<O    >() ==  2, "");
+static_assert(FSM::stateId<N    >() ==  3, "");
 static_assert(FSM::stateId<N_000>()	==  4, "");
 static_assert(FSM::stateId<N_025>()	==  5, "");
 static_assert(FSM::stateId<N_050>()	==  6, "");
 static_assert(FSM::stateId<N_075>()	==  7, "");
 static_assert(FSM::stateId<N_100>()	==  8, "");
-static_assert(FSM::stateId<C>()		==  9, "");
+static_assert(FSM::stateId<C    >() ==  9, "");
 static_assert(FSM::stateId<C_000>()	== 10, "");
 static_assert(FSM::stateId<C_025>()	== 11, "");
 static_assert(FSM::stateId<C_050>()	== 12, "");
@@ -92,26 +92,22 @@ static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-	const Types all = {
-		FSM::stateId<I>(),
-		FSM::stateId<O>(),
-		FSM::stateId<N>(),
-		FSM::stateId<N_000>(),
-		FSM::stateId<N_025>(),
-		FSM::stateId<N_050>(),
-		FSM::stateId<N_075>(),
-		FSM::stateId<N_100>(),
-		FSM::stateId<C>(),
-		FSM::stateId<C_000>(),
-		FSM::stateId<C_025>(),
-		FSM::stateId<C_050>(),
-		FSM::stateId<C_075>(),
-		FSM::stateId<C_100>(),
-	};
-
-}
+const Types all = {
+	FSM::stateId<I    >(),
+	FSM::stateId<O    >(),
+	FSM::stateId<N    >(),
+	FSM::stateId<N_000>(),
+	FSM::stateId<N_025>(),
+	FSM::stateId<N_050>(),
+	FSM::stateId<N_075>(),
+	FSM::stateId<N_100>(),
+	FSM::stateId<C    >(),
+	FSM::stateId<C_000>(),
+	FSM::stateId<C_025>(),
+	FSM::stateId<C_050>(),
+	FSM::stateId<C_075>(),
+	FSM::stateId<C_100>(),
+};
 
 //------------------------------------------------------------------------------
 
@@ -119,195 +115,196 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 	hfsm2::XoShiRo256Plus generator{0};
 	Logger logger;
 
-	FSM::Instance machine{generator, &logger};
 	{
-		const Events reference = {
-			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
-			{ FSM::stateId<I>(),	Event::ENTRY_GUARD },
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-			{ FSM::stateId<Apex>(),	Event::ENTER },
-			{ FSM::stateId<I>(),	Event::ENTER },
-		};
-		logger.assertSequence(reference);
-
-		const Types active = {
-			FSM::stateId<Apex>(),
-			FSM::stateId<I>(),
-		};
-		assertActive(machine, all, active);
-
-		assertResumable(machine, all, {});
-	}
-
-	WHEN("Changing to O") {
-		machine.changeTo<O>();
-		machine.update();
+		FSM::Instance machine{generator, &logger};
 		{
-			const Events reference = {
-				{						 Event::CHANGE, FSM::stateId<O>() },
+			logger.assertSequence({
+				{ FSM::stateId<Apex >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<I    >(), Event::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex>(),	 Event::UPDATE },
-				{ FSM::stateId<I>(),	 Event::UPDATE },
+				{ FSM::stateId<Apex >(), Event::ENTER },
+				{ FSM::stateId<I    >(), Event::ENTER },
+			});
 
-				{ FSM::stateId<N_000>(), Event::RANK },
-				{ FSM::stateId<N_025>(), Event::RANK },
-				{ FSM::stateId<N_050>(), Event::RANK },
-				{ FSM::stateId<N_075>(), Event::RANK },
-				{ FSM::stateId<N_100>(), Event::RANK },
+			assertActive(machine, all, {
+				FSM::stateId<Apex >(),
+				FSM::stateId<I    >(),
+			});
 
-				{ FSM::stateId<N_000>(), Event::UTILITY },
-				{ FSM::stateId<N_025>(), Event::UTILITY },
-				{ FSM::stateId<N_075>(), Event::UTILITY },
-
-				{ FSM::stateId<N>(),	 Event::RANDOM_RESOLUTION, 3 },
-
-				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
-
-				{ FSM::stateId<O>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<N>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<N_075>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<C>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
-
-				{ FSM::stateId<I>(),	 Event::EXIT },
-
-				{ FSM::stateId<O>(),	 Event::ENTER },
-				{ FSM::stateId<N>(),	 Event::ENTER },
-				{ FSM::stateId<N_075>(), Event::ENTER },
-				{ FSM::stateId<C>(),	 Event::ENTER },
-				{ FSM::stateId<C_000>(), Event::ENTER },
-			};
-			logger.assertSequence(reference);
-
-			const Types active = {
-				FSM::stateId<Apex>(),
-				FSM::stateId<O>(),
-				FSM::stateId<N>(),
-				FSM::stateId<N_075>(),
-				FSM::stateId<C>(),
-				FSM::stateId<C_000>(),
-			};
-			assertActive(machine, all, active);
-
-			const Types resumable = {
-				FSM::stateId<I>(),
-			};
-			assertResumable(machine, all, resumable);
+			assertResumable(machine, all, {});
 		}
-	}
 
-	WHEN("Restarting O") {
-		machine.restart<O>();
-		machine.update();
-		{
-			const Events reference = {
-				{						 Event::RESTART, FSM::stateId<O>() },
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-				{ FSM::stateId<Apex>(),	 Event::UPDATE },
-				{ FSM::stateId<I>(),	 Event::UPDATE },
+		WHEN("Changing to O") {
+			machine.changeTo<O>();
+			machine.update();
+			{
+				logger.assertSequence({
+					{						 Event::CHANGE,		FSM::stateId<O    >() },
 
-				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
+					{ FSM::stateId<Apex >(), Event::UPDATE },
+					{ FSM::stateId<I    >(), Event::UPDATE },
 
-				{ FSM::stateId<O>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<N>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<N_000>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<C>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
+					{ FSM::stateId<N_000>(), Event::RANK },
+					{ FSM::stateId<N_025>(), Event::RANK },
+					{ FSM::stateId<N_050>(), Event::RANK },
+					{ FSM::stateId<N_075>(), Event::RANK },
+					{ FSM::stateId<N_100>(), Event::RANK },
 
-				{ FSM::stateId<I>(),	 Event::EXIT },
+					{ FSM::stateId<N_000>(), Event::UTILITY },
+					{ FSM::stateId<N_025>(), Event::UTILITY },
+					{ FSM::stateId<N_075>(), Event::UTILITY },
 
-				{ FSM::stateId<O>(),	 Event::ENTER },
-				{ FSM::stateId<N>(),	 Event::ENTER },
-				{ FSM::stateId<N_000>(), Event::ENTER },
-				{ FSM::stateId<C>(),	 Event::ENTER },
-				{ FSM::stateId<C_000>(), Event::ENTER },
-			};
-			logger.assertSequence(reference);
+					{ FSM::stateId<N    >(), Event::RANDOM_RESOLUTION, 3 },
 
-			const Types active = {
-				FSM::stateId<Apex>(),
-				FSM::stateId<O>(),
-				FSM::stateId<N>(),
-				FSM::stateId<N_000>(),
-				FSM::stateId<C>(),
-				FSM::stateId<C_000>(),
-			};
-			assertActive(machine, all, active);
+					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
 
-			const Types resumable = {
-				FSM::stateId<I>(),
-			};
-			assertResumable(machine, all, resumable);
+					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<N_075>(), Event::ENTRY_GUARD },
+					{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
+
+					{ FSM::stateId<I    >(), Event::EXIT },
+
+					{ FSM::stateId<O    >(), Event::ENTER },
+					{ FSM::stateId<N    >(), Event::ENTER },
+					{ FSM::stateId<N_075>(), Event::ENTER },
+					{ FSM::stateId<C    >(), Event::ENTER },
+					{ FSM::stateId<C_000>(), Event::ENTER },
+				});
+
+				assertActive(machine, all, {
+					FSM::stateId<Apex >(),
+					FSM::stateId<O    >(),
+					FSM::stateId<N    >(),
+					FSM::stateId<N_075>(),
+					FSM::stateId<C    >(),
+					FSM::stateId<C_000>(),
+				});
+
+				assertResumable(machine, all, {
+					FSM::stateId<I    >(),
+				});
+			}
 		}
-	}
 
-	WHEN("Randomizing O") {
-		machine.randomize<O>();
-		machine.update();
-		{
-			const Events reference = {
-				{						 Event::RANDOMIZE, FSM::stateId<O>() },
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-				{ FSM::stateId<Apex>(),	 Event::UPDATE },
-				{ FSM::stateId<I>(),	 Event::UPDATE },
+		WHEN("Restarting O") {
+			machine.restart<O>();
+			machine.update();
+			{
+				logger.assertSequence({
+					{						 Event::RESTART,	FSM::stateId<O    >() },
 
-				{ FSM::stateId<N_000>(), Event::RANK },
-				{ FSM::stateId<N_025>(), Event::RANK },
-				{ FSM::stateId<N_050>(), Event::RANK },
-				{ FSM::stateId<N_075>(), Event::RANK },
-				{ FSM::stateId<N_100>(), Event::RANK },
+					{ FSM::stateId<Apex >(), Event::UPDATE },
+					{ FSM::stateId<I    >(), Event::UPDATE },
 
-				{ FSM::stateId<N_000>(), Event::UTILITY },
-				{ FSM::stateId<N_025>(), Event::UTILITY },
-				{ FSM::stateId<N_075>(), Event::UTILITY },
+					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
 
-				{ FSM::stateId<N>(),	 Event::RANDOM_RESOLUTION, 3 },
+					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<N_000>(), Event::ENTRY_GUARD },
+					{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
 
-				{ FSM::stateId<C_000>(), Event::RANK },
-				{ FSM::stateId<C_025>(), Event::RANK },
-				{ FSM::stateId<C_050>(), Event::RANK },
-				{ FSM::stateId<C_075>(), Event::RANK },
-				{ FSM::stateId<C_100>(), Event::RANK },
+					{ FSM::stateId<I    >(), Event::EXIT },
 
-				{ FSM::stateId<C_000>(), Event::UTILITY },
-				{ FSM::stateId<C_025>(), Event::UTILITY },
-				{ FSM::stateId<C_075>(), Event::UTILITY },
+					{ FSM::stateId<O    >(), Event::ENTER },
+					{ FSM::stateId<N    >(), Event::ENTER },
+					{ FSM::stateId<N_000>(), Event::ENTER },
+					{ FSM::stateId<C    >(), Event::ENTER },
+					{ FSM::stateId<C_000>(), Event::ENTER },
+				});
 
-				{ FSM::stateId<C>(),	 Event::RANDOM_RESOLUTION, 3 },
+				assertActive(machine, all, {
+					FSM::stateId<Apex >(),
+					FSM::stateId<O    >(),
+					FSM::stateId<N    >(),
+					FSM::stateId<N_000>(),
+					FSM::stateId<C    >(),
+					FSM::stateId<C_000>(),
+				});
 
-				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
-
-				{ FSM::stateId<O>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<N>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<N_075>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<C>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<C_075>(), Event::ENTRY_GUARD },
-
-				{ FSM::stateId<I>(),	 Event::EXIT },
-
-				{ FSM::stateId<O>(),	 Event::ENTER },
-				{ FSM::stateId<N>(),	 Event::ENTER },
-				{ FSM::stateId<N_075>(), Event::ENTER },
-				{ FSM::stateId<C>(),	 Event::ENTER },
-				{ FSM::stateId<C_075>(), Event::ENTER },
-			};
-			logger.assertSequence(reference);
-
-			const Types active = {
-				FSM::stateId<Apex>(),
-				FSM::stateId<O>(),
-				FSM::stateId<N>(),
-				FSM::stateId<N_075>(),
-				FSM::stateId<C>(),
-				FSM::stateId<C_075>(),
-			};
-			assertActive(machine, all, active);
-
-			const Types resumable = {
-				FSM::stateId<I>(),
-			};
-			assertResumable(machine, all, resumable);
+				assertResumable(machine, all, {
+					FSM::stateId<I    >(),
+				});
+			}
 		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		WHEN("Randomizing O") {
+			machine.randomize<O>();
+			machine.update();
+			{
+				logger.assertSequence({
+					{						 Event::RANDOMIZE,	FSM::stateId<O    >() },
+
+					{ FSM::stateId<Apex >(), Event::UPDATE },
+					{ FSM::stateId<I    >(), Event::UPDATE },
+
+					{ FSM::stateId<N_000>(), Event::RANK },
+					{ FSM::stateId<N_025>(), Event::RANK },
+					{ FSM::stateId<N_050>(), Event::RANK },
+					{ FSM::stateId<N_075>(), Event::RANK },
+					{ FSM::stateId<N_100>(), Event::RANK },
+
+					{ FSM::stateId<N_000>(), Event::UTILITY },
+					{ FSM::stateId<N_025>(), Event::UTILITY },
+					{ FSM::stateId<N_075>(), Event::UTILITY },
+
+					{ FSM::stateId<N    >(), Event::RANDOM_RESOLUTION, 3 },
+
+					{ FSM::stateId<C_000>(), Event::RANK },
+					{ FSM::stateId<C_025>(), Event::RANK },
+					{ FSM::stateId<C_050>(), Event::RANK },
+					{ FSM::stateId<C_075>(), Event::RANK },
+					{ FSM::stateId<C_100>(), Event::RANK },
+
+					{ FSM::stateId<C_000>(), Event::UTILITY },
+					{ FSM::stateId<C_025>(), Event::UTILITY },
+					{ FSM::stateId<C_075>(), Event::UTILITY },
+
+					{ FSM::stateId<C    >(), Event::RANDOM_RESOLUTION, 3 },
+
+					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
+
+					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<N_075>(), Event::ENTRY_GUARD },
+					{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
+					{ FSM::stateId<C_075>(), Event::ENTRY_GUARD },
+
+					{ FSM::stateId<I    >(), Event::EXIT },
+
+					{ FSM::stateId<O    >(), Event::ENTER },
+					{ FSM::stateId<N    >(), Event::ENTER },
+					{ FSM::stateId<N_075>(), Event::ENTER },
+					{ FSM::stateId<C    >(), Event::ENTER },
+					{ FSM::stateId<C_075>(), Event::ENTER },
+				});
+
+				assertActive(machine, all, {
+					FSM::stateId<Apex >(),
+					FSM::stateId<O    >(),
+					FSM::stateId<N    >(),
+					FSM::stateId<N_075>(),
+					FSM::stateId<C    >(),
+					FSM::stateId<C_075>(),
+				});
+
+				assertResumable(machine, all, {
+					FSM::stateId<I    >(),
+				});
+			}
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	}
 }
 

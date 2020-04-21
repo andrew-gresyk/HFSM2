@@ -4,6 +4,7 @@
 #define HFSM_ENABLE_LOG_INTERFACE
 #define HFSM_ENABLE_VERBOSE_DEBUG_LOG
 #include <hfsm2/machine.hpp>
+
 #include <catch2/catch.hpp>
 
 //#include <vector> // already included in catch.hpp

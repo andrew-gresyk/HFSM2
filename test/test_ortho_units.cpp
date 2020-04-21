@@ -38,26 +38,26 @@ using FSM = M::Root<S(Apex),
 #undef S
 
 static_assert(FSM::regionId<Apex>()	==  0, "");
-static_assert(FSM::regionId<O1>()	==  1, "");
-static_assert(FSM::regionId<O2>()	==  2, "");
-static_assert(FSM::regionId<O3>()	==  3, "");
+static_assert(FSM::regionId<O1  >()	==  1, "");
+static_assert(FSM::regionId<O2  >()	==  2, "");
+static_assert(FSM::regionId<O3  >()	==  3, "");
 
-static_assert(FSM::stateId<Apex>()	==  0, "");
-static_assert(FSM::stateId<O1>()	==  1, "");
+static_assert(FSM::stateId<Apex >()	==  0, "");
+static_assert(FSM::stateId<O1   >()	==  1, "");
 static_assert(FSM::stateId<O1_01>()	==  2, "");
 static_assert(FSM::stateId<O1_02>()	==  3, "");
 static_assert(FSM::stateId<O1_03>()	==  4, "");
 static_assert(FSM::stateId<O1_04>()	==  5, "");
 static_assert(FSM::stateId<O1_05>()	==  6, "");
 
-static_assert(FSM::stateId<O2>()	==  7, "");
+static_assert(FSM::stateId<O2   >()	==  7, "");
 static_assert(FSM::stateId<O2_01>()	==  8, "");
 static_assert(FSM::stateId<O2_02>()	==  9, "");
 static_assert(FSM::stateId<O2_03>()	== 10, "");
 static_assert(FSM::stateId<O2_04>()	== 11, "");
 static_assert(FSM::stateId<O2_05>()	== 12, "");
 
-static_assert(FSM::stateId<O3>()	== 13, "");
+static_assert(FSM::stateId<O3   >()	== 13, "");
 static_assert(FSM::stateId<O3_01>()	== 14, "");
 static_assert(FSM::stateId<O3_02>()	== 15, "");
 static_assert(FSM::stateId<O3_03>()	== 16, "");
@@ -99,71 +99,81 @@ static_assert(FSM::Instance::ORTHO_UNITS   ==  3, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace {
+const Types all = {
+	FSM::stateId<O1   >(),
+	FSM::stateId<O1_01>(),
+	FSM::stateId<O1_02>(),
+	FSM::stateId<O1_03>(),
+	FSM::stateId<O1_04>(),
+	FSM::stateId<O1_05>(),
 
-	const Types all = {
-		FSM::stateId<O1>(),
-		FSM::stateId<O1_01>(),
-		FSM::stateId<O1_02>(),
-		FSM::stateId<O1_03>(),
-		FSM::stateId<O1_04>(),
-		FSM::stateId<O1_05>(),
+	FSM::stateId<O2   >(),
+	FSM::stateId<O2_01>(),
+	FSM::stateId<O2_02>(),
+	FSM::stateId<O2_03>(),
+	FSM::stateId<O2_04>(),
+	FSM::stateId<O2_05>(),
 
-		FSM::stateId<O2>(),
-		FSM::stateId<O2_01>(),
-		FSM::stateId<O2_02>(),
-		FSM::stateId<O2_03>(),
-		FSM::stateId<O2_04>(),
-		FSM::stateId<O2_05>(),
-
-		FSM::stateId<O3>(),
-		FSM::stateId<O3_01>(),
-		FSM::stateId<O3_02>(),
-		FSM::stateId<O3_03>(),
-		FSM::stateId<O3_04>(),
-		FSM::stateId<O3_05>(),
-	};
-
-}
+	FSM::stateId<O3   >(),
+	FSM::stateId<O3_01>(),
+	FSM::stateId<O3_02>(),
+	FSM::stateId<O3_03>(),
+	FSM::stateId<O3_04>(),
+	FSM::stateId<O3_05>(),
+};
 
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.OrthoUnits", "[machine]") {
 	Logger logger;
 
-	FSM::Instance machine{&logger};
 	{
-		const Events reference = {
-			{ FSM::stateId<Apex>(),	 Event::ENTRY_GUARD },
-			{ FSM::stateId<O1>(),	 Event::ENTRY_GUARD },
-			{ FSM::stateId<O1_01>(), Event::ENTRY_GUARD },
-			{ FSM::stateId<O1_02>(), Event::ENTRY_GUARD },
-			{ FSM::stateId<O1_03>(), Event::ENTRY_GUARD },
-			{ FSM::stateId<O1_04>(), Event::ENTRY_GUARD },
-			{ FSM::stateId<O1_05>(), Event::ENTRY_GUARD },
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-			{ FSM::stateId<Apex>(),	 Event::ENTER },
-			{ FSM::stateId<O1>(),	 Event::ENTER },
-			{ FSM::stateId<O1_01>(), Event::ENTER },
-			{ FSM::stateId<O1_02>(), Event::ENTER },
-			{ FSM::stateId<O1_03>(), Event::ENTER },
-			{ FSM::stateId<O1_04>(), Event::ENTER },
-			{ FSM::stateId<O1_05>(), Event::ENTER },
-		};
-		logger.assertSequence(reference);
+		FSM::Instance machine{&logger};
+		{
+			logger.assertSequence({
+				{ FSM::stateId<Apex >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<O1   >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<O1_01>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<O1_02>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<O1_03>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<O1_04>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<O1_05>(), Event::ENTRY_GUARD },
 
-		const Types active = {
-			FSM::stateId<O1>(),
-			FSM::stateId<O1_01>(),
-			FSM::stateId<O1_02>(),
-			FSM::stateId<O1_03>(),
-			FSM::stateId<O1_04>(),
-			FSM::stateId<O1_05>(),
-		};
-		assertActive(machine, all, active);
+				{ FSM::stateId<Apex >(), Event::ENTER },
+				{ FSM::stateId<O1   >(), Event::ENTER },
+				{ FSM::stateId<O1_01>(), Event::ENTER },
+				{ FSM::stateId<O1_02>(), Event::ENTER },
+				{ FSM::stateId<O1_03>(), Event::ENTER },
+				{ FSM::stateId<O1_04>(), Event::ENTER },
+				{ FSM::stateId<O1_05>(), Event::ENTER },
+			});
 
-		assertResumable(machine, all, {});
+			assertActive(machine, all, {
+				FSM::stateId<O1   >(),
+				FSM::stateId<O1_01>(),
+				FSM::stateId<O1_02>(),
+				FSM::stateId<O1_03>(),
+				FSM::stateId<O1_04>(),
+				FSM::stateId<O1_05>(),
+			});
+
+			assertResumable(machine, all, {});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	}
+
+	logger.assertSequence({
+		{ FSM::stateId<O1_01>(), Event::EXIT },
+		{ FSM::stateId<O1_02>(), Event::EXIT },
+		{ FSM::stateId<O1_03>(), Event::EXIT },
+		{ FSM::stateId<O1_04>(), Event::EXIT },
+		{ FSM::stateId<O1_05>(), Event::EXIT },
+		{ FSM::stateId<O1   >(), Event::EXIT },
+		{ FSM::stateId<Apex >(), Event::EXIT },
+	});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

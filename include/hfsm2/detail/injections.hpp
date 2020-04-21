@@ -150,8 +150,36 @@ struct B_<TFirst>
 	HFSM_INLINE void	widePostExit	 (Context& context);
 };
 
+//------------------------------------------------------------------------------
+
 template <typename TArgs>
-using Empty = B_<InjectionT<TArgs>>;
+using EmptyT = B_<InjectionT<TArgs>>;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+struct Dynamic_ {};
+
+template <typename... TI>
+struct DB_
+	: Dynamic_
+	, B_<TI...>
+{};
+
+template <typename TArgs>
+using DynamicEmptyT = DB_<InjectionT<TArgs>>;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+struct Static_ {};
+
+template <typename... TI>
+struct SB_
+	: Static_
+	, B_<TI...>
+{};
+
+template <typename TArgs>
+using StaticEmptyT = SB_<InjectionT<TArgs>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

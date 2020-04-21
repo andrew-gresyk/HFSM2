@@ -36,24 +36,24 @@ using FSM = M::PeerRoot<
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::regionId<A>()	==  1, "");
+static_assert(FSM::regionId<A  >()	==  1, "");
 static_assert(FSM::regionId<A_2>()	==  2, "");
-static_assert(FSM::regionId<B>()	==  3, "");
+static_assert(FSM::regionId<B  >()	==  3, "");
 static_assert(FSM::regionId<B_1>()	==  4, "");
 static_assert(FSM::regionId<B_2>()	==  5, "");
 
-static_assert(FSM::stateId<A>()		==  1, "");
-static_assert(FSM::stateId<A_1>()	==  2, "");
-static_assert(FSM::stateId<A_2>()	==  3, "");
-static_assert(FSM::stateId<A_2_1>()	==  4, "");
-static_assert(FSM::stateId<A_2_2>()	==  5, "");
-static_assert(FSM::stateId<B>()		==  6, "");
-static_assert(FSM::stateId<B_1>()	==  7, "");
-static_assert(FSM::stateId<B_1_1>()	==  8, "");
-static_assert(FSM::stateId<B_1_2>()	==  9, "");
-static_assert(FSM::stateId<B_2>()	== 10, "");
-static_assert(FSM::stateId<B_2_1>()	== 11, "");
-static_assert(FSM::stateId<B_2_2>()	== 12, "");
+static_assert(FSM::stateId<A    >() ==  1, "");
+static_assert(FSM::stateId<A_1  >() ==  2, "");
+static_assert(FSM::stateId<A_2  >() ==  3, "");
+static_assert(FSM::stateId<A_2_1>() ==  4, "");
+static_assert(FSM::stateId<A_2_2>() ==  5, "");
+static_assert(FSM::stateId<B    >() ==  6, "");
+static_assert(FSM::stateId<B_1  >() ==  7, "");
+static_assert(FSM::stateId<B_1_1>() ==  8, "");
+static_assert(FSM::stateId<B_1_2>() ==  9, "");
+static_assert(FSM::stateId<B_2  >() == 10, "");
+static_assert(FSM::stateId<B_2_1>() == 11, "");
+static_assert(FSM::stateId<B_2_2>() == 12, "");
 
 //------------------------------------------------------------------------------
 
@@ -236,7 +236,7 @@ struct B_2_2
 	: FSM::StateT<Tracked>
 {
 	void entryGuard(GuardControl& control) {
-		if (entryCount() == 2) {
+		if (entryCount() == 3) {
 			control.cancelPendingTransitions();
 			control.resume<A>();
 		}
@@ -274,24 +274,20 @@ static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-	const Types all = {
-		FSM::stateId<A>(),
-		FSM::stateId<A_1>(),
-		FSM::stateId<A_2>(),
-		FSM::stateId<A_2_1>(),
-		FSM::stateId<A_2_2>(),
-		FSM::stateId<B>(),
-		FSM::stateId<B_1>(),
-		FSM::stateId<B_1_1>(),
-		FSM::stateId<B_1_2>(),
-		FSM::stateId<B_2>(),
-		FSM::stateId<B_2_1>(),
-		FSM::stateId<B_2_2>(),
-	};
-
-}
+const Types all = {
+	FSM::stateId<A    >(),
+	FSM::stateId<A_1  >(),
+	FSM::stateId<A_2  >(),
+	FSM::stateId<A_2_1>(),
+	FSM::stateId<A_2_2>(),
+	FSM::stateId<B    >(),
+	FSM::stateId<B_1  >(),
+	FSM::stateId<B_1_1>(),
+	FSM::stateId<B_1_2>(),
+	FSM::stateId<B_2  >(),
+	FSM::stateId<B_2_1>(),
+	FSM::stateId<B_2_2>(),
+};
 
 //------------------------------------------------------------------------------
 
@@ -299,23 +295,309 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 	float _ = 0.0f;
 	LoggerT<float> logger;
 
-	FSM::Instance machine{_, &logger};
 	{
-		const Events reference = {
-			{ FSM::stateId<A>(),	Event::ENTER },
-			{ FSM::stateId<A_1>(),	Event::ENTER },
-		};
-		logger.assertSequence(reference);
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		FSM::Instance machine{_, &logger};
+		{
+			logger.assertSequence({
+				{ FSM::stateId<A    >(), Event::ENTER },
+				{ FSM::stateId<A_1  >(), Event::ENTER },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_1  >(),
+			});
+
+			assertResumable(machine, all, {});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.react(Action{});
+		{
+			logger.assertSequence({
+				{ 0,					 Event::REACT },
+				{ FSM::stateId<A    >(), Event::REACT },
+				{ FSM::stateId<A_1  >(), Event::REACT },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_1  >(),
+			});
+
+			assertResumable(machine, all, {});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.update();
+		{
+			logger.assertSequence({
+				{ FSM::stateId<A    >(), Event::UPDATE },
+				{ FSM::stateId<A_1  >(), Event::UPDATE },
+				{ FSM::stateId<A_1  >(), Event::CHANGE,			FSM::stateId<A_2  >() },
+				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<A_1  >(), Event::EXIT },
+				{ FSM::stateId<A_2  >(), Event::ENTER },
+				{ FSM::stateId<A_2_1>(), Event::ENTER },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<A_1  >(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.react(Action{});
+		{
+			logger.assertSequence({
+				{ 0,					 Event::REACT },
+				{ FSM::stateId<A    >(), Event::REACT },
+				{ FSM::stateId<A_2  >(), Event::REACT },
+				{ FSM::stateId<A_2_1>(), Event::REACT },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<A_1  >(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.update();
+		{
+			logger.assertSequence({
+				{ FSM::stateId<A    >(), Event::UPDATE },
+				{ FSM::stateId<A_2  >(), Event::UPDATE },
+				{ FSM::stateId<A_2  >(), Event::CHANGE,			FSM::stateId<B_2_2>() },
+				{ FSM::stateId<A_2_1>(), Event::UPDATE },
+				{ FSM::stateId<A_2  >(), Event::EXIT_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<A_2_1>(), Event::EXIT },
+				{ FSM::stateId<A_2  >(), Event::EXIT },
+				{ FSM::stateId<A    >(), Event::EXIT },
+				{ FSM::stateId<B    >(), Event::ENTER },
+				{ FSM::stateId<B_1  >(), Event::ENTER },
+				{ FSM::stateId<B_1_1>(), Event::ENTER },
+				{ FSM::stateId<B_2  >(), Event::ENTER },
+				{ FSM::stateId<B_2_2>(), Event::ENTER },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<B    >(),
+				FSM::stateId<B_1  >(),
+				FSM::stateId<B_1_1>(),
+				FSM::stateId<B_2  >(),
+				FSM::stateId<B_2_2>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.react(Action{});
+		{
+			logger.assertSequence({
+				{ 0,					 Event::REACT },
+				{ FSM::stateId<B    >(), Event::REACT },
+				{ FSM::stateId<B_1  >(), Event::REACT },
+				{ FSM::stateId<B_1_1>(), Event::REACT },
+				{ FSM::stateId<B_2  >(), Event::REACT },
+				{ FSM::stateId<B_2_2>(), Event::REACT },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<B    >(),
+				FSM::stateId<B_1  >(),
+				FSM::stateId<B_1_1>(),
+				FSM::stateId<B_2  >(),
+				FSM::stateId<B_2_2>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.update();
+		{
+			logger.assertSequence({
+				{ FSM::stateId<B    >(), Event::UPDATE },
+				{ FSM::stateId<B_1  >(), Event::UPDATE },
+				{ FSM::stateId<B_1_1>(), Event::UPDATE },
+				{ FSM::stateId<B_2  >(), Event::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::RESUME,			FSM::stateId<A    >() },
+				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
+				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B_1_1>(), Event::EXIT },
+				{ FSM::stateId<B_1  >(), Event::EXIT },
+				{ FSM::stateId<B_2_2>(), Event::EXIT },
+				{ FSM::stateId<B_2  >(), Event::EXIT },
+				{ FSM::stateId<B    >(), Event::EXIT },
+				{ FSM::stateId<A    >(), Event::ENTER },
+				{ FSM::stateId<A_2  >(), Event::ENTER },
+				{ FSM::stateId<A_2_1>(), Event::ENTER },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<B    >(),
+				FSM::stateId<B_1  >(),
+				FSM::stateId<B_1_1>(),
+				FSM::stateId<B_2  >(),
+				FSM::stateId<B_2_2>(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.update();
+		{
+			logger.assertSequence({
+				{ FSM::stateId<A    >(), Event::UPDATE },
+				{ FSM::stateId<A_2  >(), Event::UPDATE },
+				{ FSM::stateId<A_2  >(), Event::RESUME,			FSM::stateId<B    >() },
+				{ FSM::stateId<A_2_1>(), Event::UPDATE },
+				{ FSM::stateId<A_2  >(), Event::EXIT_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<A_2_1>(), Event::EXIT },
+				{ FSM::stateId<A_2  >(), Event::EXIT },
+				{ FSM::stateId<A    >(), Event::EXIT },
+				{ FSM::stateId<B    >(), Event::ENTER },
+				{ FSM::stateId<B_1  >(), Event::ENTER },
+				{ FSM::stateId<B_1_1>(), Event::ENTER },
+				{ FSM::stateId<B_2  >(), Event::ENTER },
+				{ FSM::stateId<B_2_2>(), Event::ENTER },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<B    >(),
+				FSM::stateId<B_1  >(),
+				FSM::stateId<B_1_1>(),
+				FSM::stateId<B_2  >(),
+				FSM::stateId<B_2_2>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.update();
+		{
+			logger.assertSequence({
+				{ FSM::stateId<B    >(), Event::UPDATE },
+				{ FSM::stateId<B_1  >(), Event::UPDATE },
+				{ FSM::stateId<B_1_1>(), Event::UPDATE },
+				{ FSM::stateId<B_2  >(), Event::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::CHANGE,			FSM::stateId<B    >() },
+				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
+				{ FSM::stateId<B_2_1>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B_2_1>(), Event::CANCEL_PENDING },
+				{ FSM::stateId<B_2_1>(), Event::RESUME,			FSM::stateId<B_2_2>() },
+				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::REENTER },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<B    >(),
+				FSM::stateId<B_1  >(),
+				FSM::stateId<B_1_1>(),
+				FSM::stateId<B_2  >(),
+				FSM::stateId<B_2_2>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.update();
+		{
+			logger.assertSequence({
+				{ FSM::stateId<B    >(), Event::UPDATE },
+				{ FSM::stateId<B_1  >(), Event::UPDATE },
+				{ FSM::stateId<B_1_1>(), Event::UPDATE },
+				{ FSM::stateId<B_2  >(), Event::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::SCHEDULE,		FSM::stateId<A_2_2>() },
+				{ FSM::stateId<B_2_2>(), Event::RESUME,			FSM::stateId<A    >() },
+				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
+				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B_1_1>(), Event::EXIT },
+				{ FSM::stateId<B_1  >(), Event::EXIT },
+				{ FSM::stateId<B_2_2>(), Event::EXIT },
+				{ FSM::stateId<B_2  >(), Event::EXIT },
+				{ FSM::stateId<B    >(), Event::EXIT },
+				{ FSM::stateId<A    >(), Event::ENTER },
+				{ FSM::stateId<A_2  >(), Event::ENTER },
+				{ FSM::stateId<A_2_2>(), Event::ENTER },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_2>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<B    >(),
+				FSM::stateId<B_1  >(),
+				FSM::stateId<B_1_1>(),
+				FSM::stateId<B_2  >(),
+				FSM::stateId<B_2_2>(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	}
 
-	{
-		const Types states = {
-			FSM::stateId<A>(),
-			FSM::stateId<A_1>(),
-		};
-		assertActive(machine, all, states);
-		assertResumable(machine, all, {});
-	}
+	logger.assertSequence({
+		{ FSM::stateId<A_2_2>(), Event::EXIT },
+		{ FSM::stateId<A_2  >(), Event::EXIT },
+		{ FSM::stateId<A    >(), Event::EXIT },
+	});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -81,7 +81,14 @@ struct EmptyPayload {};
 #include "detail/control.hpp"
 #include "detail/debug/structure_report.hpp"
 #include "detail/injections.hpp"
+
+#include "detail/structure/state_box.hpp"
+#include "detail/structure/state.hpp"
 #include "detail/structure/forward.hpp"
+#include "detail/structure/composite_sub.hpp"
+#include "detail/structure/composite.hpp"
+#include "detail/structure/orthogonal_sub.hpp"
+#include "detail/structure/orthogonal.hpp"
 #include "detail/state_access.hpp"
 
 namespace hfsm2 {
@@ -247,11 +254,6 @@ using MachineT = detail::M_<TConfig>;
 
 }
 
-#include "detail/structure/state.hpp"
-#include "detail/structure/composite_sub.hpp"
-#include "detail/structure/composite.hpp"
-#include "detail/structure/orthogonal_sub.hpp"
-#include "detail/structure/orthogonal.hpp"
 #include "detail/structure/root.hpp"
 
 #ifdef _MSC_VER

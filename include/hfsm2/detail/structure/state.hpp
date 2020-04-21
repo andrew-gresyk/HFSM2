@@ -7,30 +7,26 @@ template <typename TIndices,
 		  typename TArgs,
 		  typename THead>
 struct S_ final {
-	using Indices		= TIndices;
-	static constexpr StateID	STATE_ID	= Indices::STATE_ID;
-	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
+	static constexpr auto STATE_ID	 = TIndices::STATE_ID;
 
-	using Args			= TArgs;
-	using Head			= THead;
+	using Context		= typename TArgs::Context;
+	using Rank			= typename TArgs::Rank;
+	using Utility		= typename TArgs::Utility;
+	using UP			= typename TArgs::UP;
+	using Logger		= typename TArgs::Logger;
 
-	using Context		= typename Args::Context;
-	using Rank			= typename Args::Rank;
-	using Utility		= typename Args::Utility;
-	using UP			= typename Args::UP;
-	using Logger		= typename Args::Logger;
-
-	using Control		= ControlT<Args>;
-	using StateRegistry	= StateRegistryT<Args>;
+	using Control		= ControlT<TArgs>;
+	using StateRegistry	= StateRegistryT<TArgs>;
 	using StateParents	= typename StateRegistry::StateParents;
 
-	using PlanControl	= PlanControlT<Args>;
+	using PlanControl	= PlanControlT<TArgs>;
 	using ScopedOrigin	= typename PlanControl::Origin;
 
-	using FullControl	= FullControlT <Args>;
-	using GuardControl	= GuardControlT<Args>;
+	using FullControl	= FullControlT <TArgs>;
+	using GuardControl	= GuardControlT<TArgs>;
 
-	using Empty			= ::hfsm2::detail::Empty<Args>;
+	using Head			= THead;
+	using HeadBox		= Boxify<Head, TArgs>;
 
 	//----------------------------------------------------------------------
 
@@ -43,8 +39,8 @@ struct S_ final {
 
 	template <typename T>
 	struct Accessor {
-		HFSM_INLINE static		 T&	   get(		 S_&  )	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
-		HFSM_INLINE static const T&	   get(const S_&  )	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+		HFSM_INLINE static		 T&	   get(		 S_&  )			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);		}
+		HFSM_INLINE static const T&	   get(const S_&  )			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);		}
 	};
 
 #ifdef __clang__
@@ -55,17 +51,17 @@ struct S_ final {
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 S_& s)	{ return s._head;					}
-		HFSM_INLINE static const Head& get(const S_& s)	{ return s._head;					}
+		HFSM_INLINE static		 Head& get(		 S_& s)			{ return s._headBox.get();								}
+		HFSM_INLINE static const Head& get(const S_& s)			{ return s._headBox.get();								}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename T>
-	HFSM_INLINE		  T&	access()					{ return Accessor<T>::get(*this);	}
+	HFSM_INLINE		  T& access()								{ return Accessor<T>::get(*this);						}
 
 	template <typename T>
-	HFSM_INLINE const T&	access() const				{ return Accessor<T>::get(*this);	}
+	HFSM_INLINE const T& access() const							{ return Accessor<T>::get(*this);						}
 
 #endif
 
@@ -77,7 +73,7 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&)				{ return false;	}
+	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&)					{ return false;	}
 	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
 
 	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
@@ -88,7 +84,7 @@ struct S_ final {
 	template <typename TEvent>
 	HFSM_INLINE Status	deepReact			 (FullControl&	control, const TEvent& event);
 
-	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&)				{ return false; }
+	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&)					{ return false; }
 	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
 
 	HFSM_INLINE void	deepExit			 (PlanControl&	control);
@@ -107,12 +103,12 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepRequestChange	 (Control&)										{}
-	HFSM_INLINE void	deepRequestRemain	 (StateRegistry&)								{}
-	HFSM_INLINE void	deepRequestRestart	 (StateRegistry&)								{}
-	HFSM_INLINE void	deepRequestResume	 (StateRegistry&)								{}
-	HFSM_INLINE void	deepRequestUtilize	 (Control&)										{}
-	HFSM_INLINE void	deepRequestRandomize (Control&)										{}
+	HFSM_INLINE void	deepRequestChange	 (Control&)											{}
+	HFSM_INLINE void	deepRequestRemain	 (StateRegistry&)									{}
+	HFSM_INLINE void	deepRequestRestart	 (StateRegistry&)									{}
+	HFSM_INLINE void	deepRequestResume	 (StateRegistry&)									{}
+	HFSM_INLINE void	deepRequestUtilize	 (Control&)											{}
+	HFSM_INLINE void	deepRequestRandomize (Control&)											{}
 
 	HFSM_INLINE UP		deepReportChange	 (Control& control);
 	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
@@ -121,17 +117,22 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepEnterRequested	(Control&)										{}
-	HFSM_INLINE void   deepChangeToRequested(Control&)										{}
+	HFSM_INLINE void   deepEnterRequested	(Control&)											{}
+	HFSM_INLINE void   deepChangeToRequested(Control&)											{}
+
+	//----------------------------------------------------------------------
 
 #if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
-	static constexpr bool isBare()	 { return std::is_same<Head, Empty>::value;	 }
 
-	static constexpr LongIndex NAME_COUNT = isBare() ? 0 : 1;
+	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
+
 #endif
 
+	//----------------------------------------------------------------------
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using StructureStateInfos = typename Args::StructureStateInfos;
+
+	using StructureStateInfos = typename TArgs::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static const char* name();
@@ -140,41 +141,70 @@ struct S_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
+
 #endif
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	template <typename>
-	struct MemberTraits;
+	//----------------------------------------------------------------------
 
-	template <typename TReturn, typename TState, typename... Ts>
-	struct MemberTraits<TReturn(TState::*)(Ts...)> {
-		using State = TState;
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+
+	template <typename>
+	struct Traits_;
+
+	template <typename TR_, typename TH_, typename... TAs_>
+	struct Traits_<TR_(TH_::*)(TAs_...)> {
+		using Host = TH_;
 	};
 
+	template <typename TM_>
+	using Host_			= typename Traits_<TM_>::Host;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using Empty			= EmptyT<TArgs>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	template <typename TMethodType>
-	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
+	typename std::enable_if<
+				 std::is_same<
+					 Host_<TMethodType>,
+					 Empty
+				 >::value
+			 >::type
 	log(Logger&,
 		Context&,
 		const Method) const
 	{}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	template <typename TMethodType>
-	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
+	typename std::enable_if<
+				 !std::is_same<
+					 Host_<TMethodType>,
+					 Empty
+				 >::value
+			 >::type
 	log(Logger& logger,
 		Context& context,
 		const Method method) const
 	{
 		logger.recordMethod(context, STATE_ID, method);
 	}
+
 #endif
 
+	//----------------------------------------------------------------------
+
+	// TODO: account for boxing
+	//
 	// if you see..
 	// VS	 - error C2079: 'hfsm2::detail::S_<...>::_head' uses undefined struct 'Blah'
 	// Clang - error : field has incomplete type 'hfsm2::detail::S_<...>::Head' (aka 'Blah')
 	//
 	// .. add definition for the state 'Blah'
-	Head _head;
-	HFSM_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(Head));
+	HeadBox _headBox;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

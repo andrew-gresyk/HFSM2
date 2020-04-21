@@ -147,8 +147,6 @@ static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG_INDEX;
 
 namespace detail {
 
-HFSM_IF_DEBUG(struct None {});
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>

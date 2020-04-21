@@ -4,7 +4,7 @@
 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="std::type_index">
 		<DisplayString Condition="_Tptr->_Data._UndecoratedName">{_Tptr->_Data._UndecoratedName,sb}</DisplayString>
@@ -18,7 +18,7 @@
 		<Expand HideRawView="true" />
 	</Type>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::Array&lt;*&gt;">
 		<DisplayString>&lt;{_count}&gt;</DisplayString>
@@ -30,7 +30,7 @@
 		</Expand>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::StaticArray&lt;*&gt;">
 		<DisplayString>&lt;{$T2}&gt;</DisplayString>
@@ -42,10 +42,10 @@
 		</Expand>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::BitArray&lt;*&gt;">
-		<DisplayString>{CAPACITY}</DisplayString>
+		<DisplayString>&lt;{CAPACITY &amp; 0x1}&gt;</DisplayString>
 		<Expand HideRawView="true">
 			<IndexListItems>
 				<Size>(CAPACITY + 7 / 8)</Size>
@@ -54,7 +54,21 @@
 		</Expand>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<Type Name="hfsm2::detail::BitArray&lt;*&gt;::Bits">
+		<DisplayString>&lt;{CAPACITY &amp; 0x1}&gt;</DisplayString>
+		<Expand HideRawView="true">
+			<ExpandedItem>_storage</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm2::detail::BitArray&lt;*&gt;::ConstBits">
+		<DisplayString>&lt;{CAPACITY &amp; 0x1}&gt;</DisplayString>
+		<Expand HideRawView="true">
+			<ExpandedItem>_storage</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::List&lt;*&gt;">
 		<DisplayString>{_count} / {CAPACITY}</DisplayString>
@@ -66,58 +80,58 @@
 		</Expand>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::List&lt;*&gt;::Cell">
 		<DisplayString>{item}</DisplayString>
 	</Type>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::Parent">
 		<DisplayString Condition="forkId &gt; 0">({(unsigned) ( forkId - 1) &amp; 0xFF}) ► {(unsigned) prong &amp; 0xFF}</DisplayString>
 		<DisplayString Condition="forkId &lt; 0">[{(unsigned) (-forkId - 1) &amp; 0xFF}] ► {(unsigned) prong &amp; 0xFF}</DisplayString>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::CompoFork">
 		<DisplayString>[{TYPE}]: &lt;{(unsigned) resumable &amp; 0xFF}&gt; ◄ ({(unsigned) active &amp; 0xFF}) ► &lt;{(unsigned) requested &amp; 0xFF}&gt;</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::Transition">
 		<DisplayString>{type, en}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::ControlT&lt;*&gt;">
 		<DisplayString>{_context}</DisplayString>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::PlanControlT&lt;*&gt;">
-		<DisplayString>({_tasks})</DisplayString>
+		<DisplayString>({_status})</DisplayString>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
-	<Type Name="hfsm2::detail::TransitionControlT&lt;*&gt;">
+	<Type Name="hfsm2::detail::FullControlT&lt;*&gt;">
 		<DisplayString>[{_status}]</DisplayString>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
-	<Type Name="hfsm2::detail::FullControlT&lt;*,*&gt;">
-		<DisplayString>[{_status}] ({_tasks})</DisplayString>
+	<Type Name="hfsm2::detail::GuardControlT&lt;*,*&gt;">
+		<DisplayString>[{_status}] ({_pending})</DisplayString>
 	</Type>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::Status">
 		<DisplayString Condition="outerTransition">OuterTransition</DisplayString>
@@ -125,13 +139,13 @@
 		<Expand HideRawView="true" />
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::TaskLink">
 		<DisplayString>({origin} ► {destination})</DisplayString>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::PlanT&lt;*&gt;">
 		<DisplayString Condition="_bounds.first == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
@@ -152,7 +166,7 @@
 		</Expand>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::PlanT&lt;*&gt;::Iterator">
 		<DisplayString Condition="_curr == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
@@ -162,14 +176,26 @@
 		</Expand>
 	</Type>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-	<Type Name="hfsm2::detail::S_&lt;*&gt;">
+	<Type Name="hfsm2::detail::DBox&lt;*&gt;">
 		<DisplayString>{TYPE}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<Type Name="hfsm2::detail::SBox&lt;*&gt;">
+		<DisplayString>{TYPE}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
+
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+
+	<Type Name="hfsm2::detail::S_&lt;*&gt;">
+		<DisplayString>{_headBox}</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
+
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::C_&lt;*&gt;">
 		<DisplayString>({_headState})</DisplayString>
@@ -180,7 +206,7 @@
 		<DisplayString Optional="true">{{{state}}}</DisplayString>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::O_&lt;*&gt;">
 		<DisplayString>[{_headState}]</DisplayString>
@@ -192,7 +218,7 @@
 		<Expand HideRawView="true" />
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::R_&lt;*&gt;">
 		<DisplayString Optional="true">{_structure}</DisplayString>
@@ -201,7 +227,7 @@
 		</Expand>
 	</Type>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::Iterator&lt;*&gt;">
 		<DisplayString>[{_cursor}] = {_t[_cursor]}</DisplayString>
@@ -210,7 +236,7 @@
 		</Expand>
 	</Type>
 
-	<!-- · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · -->
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::StructureEntry">
 		<DisplayString Condition=" isActive">█ {prefix,sub}{name,sb}</DisplayString>
@@ -218,7 +244,7 @@
 		<Expand HideRawView="true" />
 	</Type>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="Event">
 		<DisplayString Condition="target == 65535">{type, en} [{origin}]</DisplayString>
@@ -227,6 +253,6 @@
 		<Expand HideRawView="true" />
 	</Type>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 </AutoVisualizer>

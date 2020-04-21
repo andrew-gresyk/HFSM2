@@ -49,6 +49,7 @@ struct O_ final {
 	using GuardControl	= GuardControlT<Args>;
 
 	using HeadState		= S_<Indices, Args, Head>;
+
 	using SubStates		= OS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX,
 								 ORTHO_INDEX + 1,
@@ -71,8 +72,8 @@ struct O_ final {
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 O_& o)									{ return o._headState._head;					}
-		HFSM_INLINE static const Head& get(const O_& o)									{ return o._headState._head;					}
+		HFSM_INLINE static		 Head& get(		 O_& o)									{ return o._headState._headBox.get();			}
+		HFSM_INLINE static const Head& get(const O_& o)									{ return o._headState._headBox.get();			}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

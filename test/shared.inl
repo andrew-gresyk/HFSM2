@@ -154,8 +154,9 @@ LoggerT<TContext>::recordRandomResolution(Context& /*context*/,
 template <typename TContext>
 void
 LoggerT<TContext>::recordCancelledPending(Context& /*context*/,
-										  const StateID origin) {
-	history.emplace_back(origin, Event::CANCELLED_PENDING);
+										  const StateID origin)
+{
+	history.emplace_back(origin, Event::CANCEL_PENDING);
 }
 
 //------------------------------------------------------------------------------

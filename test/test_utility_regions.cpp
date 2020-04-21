@@ -52,43 +52,43 @@ using FSM = M::Root<S(Apex),
 #undef S
 
 static_assert(FSM::regionId<Apex>()	==  0, "");
-static_assert(FSM::regionId<F>()	==  1, "");
-static_assert(FSM::regionId<C>()	==  2, "");
-static_assert(FSM::regionId<R>()	==  3, "");
-static_assert(FSM::regionId<U>()	==  4, "");
-static_assert(FSM::regionId<O>()	==  5, "");
-static_assert(FSM::regionId<OC>()	==  6, "");
-static_assert(FSM::regionId<OR>()	==  7, "");
-static_assert(FSM::regionId<OU>()	==  8, "");
+static_assert(FSM::regionId<F   >()	==  1, "");
+static_assert(FSM::regionId<C   >()	==  2, "");
+static_assert(FSM::regionId<R   >()	==  3, "");
+static_assert(FSM::regionId<U   >()	==  4, "");
+static_assert(FSM::regionId<O   >()	==  5, "");
+static_assert(FSM::regionId<OC  >()	==  6, "");
+static_assert(FSM::regionId<OR  >()	==  7, "");
+static_assert(FSM::regionId<OU  >()	==  8, "");
 
-static_assert(FSM::stateId<Apex>()	==  0, "");
-static_assert(FSM::stateId<I>()		==  1, "");
-static_assert(FSM::stateId<F>()		==  2, "");
-static_assert(FSM::stateId<C>()		==  3, "");
-static_assert(FSM::stateId<C_1>()	==  4, "");
-static_assert(FSM::stateId<C_2>()	==  5, "");
-static_assert(FSM::stateId<C_3>()	==  6, "");
-static_assert(FSM::stateId<R>()		==  7, "");
-static_assert(FSM::stateId<R_1>()	==  8, "");
-static_assert(FSM::stateId<R_2>()	==  9, "");
-static_assert(FSM::stateId<R_3>()	== 10, "");
-static_assert(FSM::stateId<U>()		== 11, "");
-static_assert(FSM::stateId<U_1>()	== 12, "");
-static_assert(FSM::stateId<U_2>()	== 13, "");
-static_assert(FSM::stateId<U_3>()	== 14, "");
-static_assert(FSM::stateId<O>()		== 15, "");
-static_assert(FSM::stateId<OC>()	== 16, "");
-static_assert(FSM::stateId<OC_1>()	== 17, "");
-static_assert(FSM::stateId<OC_2>()	== 18, "");
-static_assert(FSM::stateId<OC_3>()	== 19, "");
-static_assert(FSM::stateId<OR>()	== 20, "");
-static_assert(FSM::stateId<OR_1>()	== 21, "");
-static_assert(FSM::stateId<OR_2>()	== 22, "");
-static_assert(FSM::stateId<OR_3>()	== 23, "");
-static_assert(FSM::stateId<OU>()	== 24, "");
-static_assert(FSM::stateId<OU_1>()	== 25, "");
-static_assert(FSM::stateId<OU_2>()	== 26, "");
-static_assert(FSM::stateId<OU_3>()	== 27, "");
+static_assert(FSM::stateId<Apex>() ==  0, "");
+static_assert(FSM::stateId<I   >() ==  1, "");
+static_assert(FSM::stateId<F   >() ==  2, "");
+static_assert(FSM::stateId<C   >() ==  3, "");
+static_assert(FSM::stateId<C_1 >() ==  4, "");
+static_assert(FSM::stateId<C_2 >() ==  5, "");
+static_assert(FSM::stateId<C_3 >() ==  6, "");
+static_assert(FSM::stateId<R   >() ==  7, "");
+static_assert(FSM::stateId<R_1 >() ==  8, "");
+static_assert(FSM::stateId<R_2 >() ==  9, "");
+static_assert(FSM::stateId<R_3 >() == 10, "");
+static_assert(FSM::stateId<U   >() == 11, "");
+static_assert(FSM::stateId<U_1 >() == 12, "");
+static_assert(FSM::stateId<U_2 >() == 13, "");
+static_assert(FSM::stateId<U_3 >() == 14, "");
+static_assert(FSM::stateId<O   >() == 15, "");
+static_assert(FSM::stateId<OC  >() == 16, "");
+static_assert(FSM::stateId<OC_1>() == 17, "");
+static_assert(FSM::stateId<OC_2>() == 18, "");
+static_assert(FSM::stateId<OC_3>() == 19, "");
+static_assert(FSM::stateId<OR  >() == 20, "");
+static_assert(FSM::stateId<OR_1>() == 21, "");
+static_assert(FSM::stateId<OR_2>() == 22, "");
+static_assert(FSM::stateId<OR_3>() == 23, "");
+static_assert(FSM::stateId<OU  >() == 24, "");
+static_assert(FSM::stateId<OU_1>() == 25, "");
+static_assert(FSM::stateId<OU_2>() == 26, "");
+static_assert(FSM::stateId<OU_3>() == 27, "");
 
 //------------------------------------------------------------------------------
 
@@ -139,39 +139,35 @@ static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-	const Types all = {
-		FSM::stateId<I>(),
-		FSM::stateId<F>(),
-		FSM::stateId<C>(),
-		FSM::stateId<C_1>(),
-		FSM::stateId<C_2>(),
-		FSM::stateId<C_3>(),
-		FSM::stateId<R>(),
-		FSM::stateId<R_1>(),
-		FSM::stateId<R_2>(),
-		FSM::stateId<R_3>(),
-		FSM::stateId<U>(),
-		FSM::stateId<U_1>(),
-		FSM::stateId<U_2>(),
-		FSM::stateId<U_3>(),
-		FSM::stateId<O>(),
-		FSM::stateId<OC>(),
-		FSM::stateId<OC_1>(),
-		FSM::stateId<OC_2>(),
-		FSM::stateId<OC_3>(),
-		FSM::stateId<OR>(),
-		FSM::stateId<OR_1>(),
-		FSM::stateId<OR_2>(),
-		FSM::stateId<OR_3>(),
-		FSM::stateId<OU>(),
-		FSM::stateId<OU_1>(),
-		FSM::stateId<OU_2>(),
-		FSM::stateId<OU_3>(),
-	};
-
-}
+const Types all = {
+	FSM::stateId<I   >(),
+	FSM::stateId<F   >(),
+	FSM::stateId<C   >(),
+	FSM::stateId<C_1 >(),
+	FSM::stateId<C_2 >(),
+	FSM::stateId<C_3 >(),
+	FSM::stateId<R   >(),
+	FSM::stateId<R_1 >(),
+	FSM::stateId<R_2 >(),
+	FSM::stateId<R_3 >(),
+	FSM::stateId<U   >(),
+	FSM::stateId<U_1 >(),
+	FSM::stateId<U_2 >(),
+	FSM::stateId<U_3 >(),
+	FSM::stateId<O   >(),
+	FSM::stateId<OC  >(),
+	FSM::stateId<OC_1>(),
+	FSM::stateId<OC_2>(),
+	FSM::stateId<OC_3>(),
+	FSM::stateId<OR  >(),
+	FSM::stateId<OR_1>(),
+	FSM::stateId<OR_2>(),
+	FSM::stateId<OR_3>(),
+	FSM::stateId<OU  >(),
+	FSM::stateId<OU_1>(),
+	FSM::stateId<OU_2>(),
+	FSM::stateId<OU_3>(),
+};
 
 //------------------------------------------------------------------------------
 
@@ -180,20 +176,18 @@ TEST_CASE("FSM.Utility Regions", "[machine]") {
 
 	FSM::Instance machine{&logger};
 	{
-		const Events reference = {
+		logger.assertSequence({
 			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
-			{ FSM::stateId<I>(),	Event::ENTRY_GUARD },
+			{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
 
 			{ FSM::stateId<Apex>(),	Event::ENTER },
-			{ FSM::stateId<I>(),	Event::ENTER },
-		};
-		logger.assertSequence(reference);
+			{ FSM::stateId<I   >(),	Event::ENTER },
+		});
 
-		const Types active = {
+		assertActive(machine, all, {
 			FSM::stateId<Apex>(),
-			FSM::stateId<I>(),
-		};
-		assertActive(machine, all, active);
+			FSM::stateId<I   >(),
+		});
 
 		assertResumable(machine, all, {});
 	}
@@ -202,66 +196,63 @@ TEST_CASE("FSM.Utility Regions", "[machine]") {
 		machine.changeTo<F>();
 		machine.update();
 		{
-			const Events reference = {
-				{						 Event::CHANGE, FSM::stateId<F>() },
+			logger.assertSequence({
+				{						Event::CHANGE, FSM::stateId<F   >() },
 
-				{ FSM::stateId<Apex>(),	 Event::UPDATE },
-				{ FSM::stateId<I>(),	 Event::UPDATE },
+				{ FSM::stateId<Apex>(), Event::UPDATE },
+				{ FSM::stateId<I   >(), Event::UPDATE },
 
-				{ FSM::stateId<C>(),	 Event::UTILITY },
-				{ FSM::stateId<C_1>(),	 Event::UTILITY },
+				{ FSM::stateId<C   >(), Event::UTILITY },
+				{ FSM::stateId<C_1 >(), Event::UTILITY },
 
-				{ FSM::stateId<R>(),	 Event::UTILITY },
-				{ FSM::stateId<R_1>(),	 Event::UTILITY },
+				{ FSM::stateId<R   >(), Event::UTILITY },
+				{ FSM::stateId<R_1 >(), Event::UTILITY },
 
-				{ FSM::stateId<U>(),	 Event::UTILITY },
-				{ FSM::stateId<U_1>(),	 Event::UTILITY },
-				{ FSM::stateId<U_2>(),	 Event::UTILITY },
-				{ FSM::stateId<U_3>(),	 Event::UTILITY },
-				{ FSM::stateId<U>(),	 Event::UTILITY_RESOLUTION, 0 },
+				{ FSM::stateId<U   >(), Event::UTILITY },
+				{ FSM::stateId<U_1 >(), Event::UTILITY },
+				{ FSM::stateId<U_2 >(), Event::UTILITY },
+				{ FSM::stateId<U_3 >(), Event::UTILITY },
+				{ FSM::stateId<U   >(), Event::UTILITY_RESOLUTION, 0 },
 
-				{ FSM::stateId<O>(),	 Event::UTILITY },
+				{ FSM::stateId<O   >(), Event::UTILITY },
 
-				{ FSM::stateId<OC>(),	 Event::UTILITY },
-				{ FSM::stateId<OC_1>(),	 Event::UTILITY },
+				{ FSM::stateId<OC  >(), Event::UTILITY },
+				{ FSM::stateId<OC_1>(), Event::UTILITY },
 
-				{ FSM::stateId<OR>(),	 Event::UTILITY },
-				{ FSM::stateId<OR_1>(),	 Event::UTILITY },
+				{ FSM::stateId<OR  >(), Event::UTILITY },
+				{ FSM::stateId<OR_1>(), Event::UTILITY },
 
-				{ FSM::stateId<OU>(),	 Event::UTILITY },
-				{ FSM::stateId<OU_1>(),	 Event::UTILITY },
-				{ FSM::stateId<OU_2>(),	 Event::UTILITY },
-				{ FSM::stateId<OU_3>(),	 Event::UTILITY },
-				{ FSM::stateId<OU>(),	 Event::UTILITY_RESOLUTION, 0 },
+				{ FSM::stateId<OU  >(), Event::UTILITY },
+				{ FSM::stateId<OU_1>(), Event::UTILITY },
+				{ FSM::stateId<OU_2>(), Event::UTILITY },
+				{ FSM::stateId<OU_3>(), Event::UTILITY },
+				{ FSM::stateId<OU  >(), Event::UTILITY_RESOLUTION, 0 },
 
-				{ FSM::stateId<O>(),	 Event::UTILITY_RESOLUTION },
-				{ FSM::stateId<F>(),	 Event::UTILITY_RESOLUTION, 0 },
+				{ FSM::stateId<O   >(), Event::UTILITY_RESOLUTION },
+				{ FSM::stateId<F   >(), Event::UTILITY_RESOLUTION, 0 },
 
-				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
+				{ FSM::stateId<I   >(), Event::EXIT_GUARD },
 
-				{ FSM::stateId<F>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<C>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<C_1>(),	 Event::ENTRY_GUARD },
+				{ FSM::stateId<F   >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<C   >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<C_1 >(), Event::ENTRY_GUARD },
 
-				{ FSM::stateId<I>(),	 Event::EXIT },
+				{ FSM::stateId<I   >(), Event::EXIT },
 
-				{ FSM::stateId<F>(),	 Event::ENTER },
-				{ FSM::stateId<C>(),	 Event::ENTER },
-				{ FSM::stateId<C_1>(),	 Event::ENTER },
-			};
-			logger.assertSequence(reference);
+				{ FSM::stateId<F   >(), Event::ENTER },
+				{ FSM::stateId<C   >(), Event::ENTER },
+				{ FSM::stateId<C_1 >(), Event::ENTER },
+			});
 
-			const Types active = {
-				FSM::stateId<F>(),
-				FSM::stateId<C>(),
-				FSM::stateId<C_1>(),
-			};
-			assertActive(machine, all, active);
+			assertActive(machine, all, {
+				FSM::stateId<F   >(),
+				FSM::stateId<C   >(),
+				FSM::stateId<C_1 >(),
+			});
 
-			const Types resumable = {
-				FSM::stateId<I>(),
-			};
-			assertResumable(machine, all, resumable);
+			assertResumable(machine, all, {
+				FSM::stateId<I   >(),
+			});
 		}
 	}
 }

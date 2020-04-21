@@ -39,25 +39,25 @@ struct OSI_<TInitial>;
 //------------------------------------------------------------------------------
 
 template <typename...>
-struct WrapT;
+struct WrapInfoT;
 
 template <typename TH_>
-struct WrapT<TH_> {
+struct WrapInfoT<	 TH_> {
 	using Type = SI_<TH_>;
 };
 
 template <Strategy TG_, typename TH_, typename... TS_>
-struct WrapT<	 CI_<TG_, TH_, TS_...>> {
-	using Type = CI_<TG_, TH_, TS_...>;
+struct WrapInfoT<	 CI_<TG_, TH_, TS_...>> {
+	using Type =	 CI_<TG_, TH_, TS_...>;
 };
 
 template <typename... TS_>
-struct WrapT<	 OI_<TS_...>> {
-	using Type = OI_<TS_...>;
+struct WrapInfoT<	 OI_<TS_...>> {
+	using Type =	 OI_<TS_...>;
 };
 
 template <typename... TS_>
-using Wrap = typename WrapT<TS_...>::Type;
+using WrapInfo = typename WrapInfoT<TS_...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -82,7 +82,7 @@ struct SI_ final {
 
 template <typename TInitial, typename... TRemaining>
 struct CSI_<TInitial, TRemaining...> {
-	using Initial			= Wrap<TInitial>;
+	using Initial			= WrapInfo<TInitial>;
 	using Remaining			= CSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
@@ -99,7 +99,7 @@ struct CSI_<TInitial, TRemaining...> {
 
 template <typename TInitial>
 struct CSI_<TInitial> {
-	using Initial			= Wrap<TInitial>;
+	using Initial			= WrapInfo<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
 
@@ -138,7 +138,7 @@ struct CI_ final {
 
 template <typename TInitial, typename... TRemaining>
 struct OSI_<TInitial, TRemaining...> {
-	using Initial			= Wrap<TInitial>;
+	using Initial			= WrapInfo<TInitial>;
 	using Remaining			= OSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
@@ -152,7 +152,7 @@ struct OSI_<TInitial, TRemaining...> {
 
 template <typename TInitial>
 struct OSI_<TInitial> {
-	using Initial			= Wrap<TInitial>;
+	using Initial			= WrapInfo<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
 
@@ -258,8 +258,8 @@ struct MaterialT   <TN_, TA_, TH_> {
 };
 
 template <typename TN_, typename TA_, Strategy TG_, 			 typename... TS_>
-struct MaterialT   <TN_, TA_, CI_<TG_, void,	   TS_...>> {
-	using Type = C_<TN_, TA_,	  TG_, Empty<TA_>, TS_...>;
+struct MaterialT   <TN_, TA_, CI_<TG_, void,			  TS_...>> {
+	using Type = C_<TN_, TA_,	  TG_, StaticEmptyT<TA_>, TS_...>;
 };
 
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
@@ -268,8 +268,8 @@ struct MaterialT   <TN_, TA_, CI_<TG_, TH_,	TS_...>> {
 };
 
 template <typename TN_, typename TA_,				typename... TS_>
-struct MaterialT   <TN_, TA_, OI_<void,		  TS_...>> {
-	using Type = O_<TN_, TA_,	  Empty<TA_>, TS_...>;
+struct MaterialT   <TN_, TA_, OI_<void,				 TS_...>> {
+	using Type = O_<TN_, TA_,	  StaticEmptyT<TA_>, TS_...>;
 };
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
@@ -322,12 +322,28 @@ struct RF_ final {
 
 	using Injection		= InjectionT<Args>;
 
-	using State			= Empty<Args>;
+	//----------------------------------------------------------------------
+
+	using DynamicState	= DynamicEmptyT<Args>;
 
 	template <typename... TInjections>
-	using StateT		= B_<TInjections...>;
+	using DynamicStateT	= DB_<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using StaticState	= StaticEmptyT<Args>;
+
+	template <typename... TInjections>
+	using StaticStateT	= SB_<TInjections...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using State			= StaticState;
+
+	template <typename... TInjections>
+	using StateT		= StaticStateT<TInjections...>;
+
+	//----------------------------------------------------------------------
 
 	template <typename T>
 	static constexpr bool contains() {

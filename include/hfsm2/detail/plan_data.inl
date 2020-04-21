@@ -42,8 +42,7 @@ PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::verifyPlan(const
 						fast = taskLinks[fast].next;
 					}
 
-					if (fast != INVALID_LONG_INDEX)
-						HFSM_ASSERT(slow != fast);
+					HFSM_ASSERT(fast == INVALID_LONG_INDEX || slow != fast);
 				}
 			} else {
 				HFSM_ASSERT(task.next == INVALID_LONG_INDEX);

@@ -15,7 +15,7 @@ class R_ {
 
 	using Apex					= TApex;
 
-	using ApexInfo				= Wrap<Apex>;
+	using ApexInfo				= WrapInfo<Apex>;
 	using Info					= RF_<Config_, Apex>;
 	using StateList				= typename Info::StateList;
 	using RegionList			= typename Info::RegionList;
@@ -112,9 +112,11 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// VS:		error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<T,false>'
-	// Clang:	error : implicit instantiation of undefined template 'hfsm2::detail::R_<..>::Accessor<*, false>'
-	//	You're trying to access() a type that is not present in the state machine hierarchy
+	// if you see..
+	// VS	 - error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<T,false>'
+	// Clang - error : implicit instantiation of undefined template 'hfsm2::detail::R_<..>::Accessor<*, false>'
+	//
+	// .. you're trying to access() a type that is not present in the state machine hierarchy
 
 	template <typename T>
 	HFSM_INLINE		  T& access()									{ return Accessor<T>::get(_apex);			}

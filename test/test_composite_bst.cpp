@@ -12,17 +12,17 @@ using M = hfsm2::Machine;
 #define S(s) struct s
 
 using FSM = M::Root<S(Apex),
-	S(S0),
-	S(S1),
-	S(S2),
-	S(S3),
-	S(S4),
-	S(S5),
-	S(S6),
-	S(S7),
-	S(S8),
-	S(S9)
->;
+				S(S0),
+				S(S1),
+				S(S2),
+				S(S3),
+				S(S4),
+				S(S5),
+				S(S6),
+				S(S7),
+				S(S8),
+				S(S9)
+			>;
 
 #undef S
 
@@ -64,74 +64,78 @@ static_assert(FSM::Instance::ORTHO_UNITS   ==  0, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-	const Types all = {
-		FSM::stateId<S0>(),
-		FSM::stateId<S1>(),
-		FSM::stateId<S2>(),
-		FSM::stateId<S3>(),
-		FSM::stateId<S4>(),
-		FSM::stateId<S5>(),
-		FSM::stateId<S6>(),
-		FSM::stateId<S7>(),
-		FSM::stateId<S8>(),
-		FSM::stateId<S9>(),
-	};
-
-}
+const Types all = {
+	FSM::stateId<S0>(),
+	FSM::stateId<S1>(),
+	FSM::stateId<S2>(),
+	FSM::stateId<S3>(),
+	FSM::stateId<S4>(),
+	FSM::stateId<S5>(),
+	FSM::stateId<S6>(),
+	FSM::stateId<S7>(),
+	FSM::stateId<S8>(),
+	FSM::stateId<S9>(),
+};
 
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Composite BST", "[machine]") {
 	Logger logger;
 
-	FSM::Instance machine{&logger};
 	{
-		const Events reference = {
-			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
-			{ FSM::stateId<S0>(),	Event::ENTRY_GUARD },
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-			{ FSM::stateId<Apex>(),	Event::ENTER },
-			{ FSM::stateId<S0>(),	Event::ENTER },
-		};
-		logger.assertSequence(reference);
+		FSM::Instance machine{&logger};
+		{
+			logger.assertSequence({
+				{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<S0  >(),	Event::ENTRY_GUARD },
 
-		const Types active = {
-			FSM::stateId<S0>(),
-		};
-		assertActive(machine, all, active);
+				{ FSM::stateId<Apex>(),	Event::ENTER },
+				{ FSM::stateId<S0  >(),	Event::ENTER },
+			});
 
-		assertResumable(machine, all, {});
+			assertActive(machine, all, {
+				FSM::stateId<S0>(),
+			});
+
+			assertResumable(machine, all, {});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.changeTo<S1>();
+		machine.update();
+		{
+			logger.assertSequence({
+				{						 Event::CHANGE, FSM::stateId<S1>() },
+
+				{ 0u,					 Event::UPDATE },
+				{ FSM::stateId<S0>(),	 Event::UPDATE },
+
+				{ FSM::stateId<S0>(),	 Event::EXIT_GUARD },
+				{ FSM::stateId<S1>(),	 Event::ENTRY_GUARD },
+
+				{ FSM::stateId<S0>(),	 Event::EXIT },
+				{ FSM::stateId<S1>(),	 Event::ENTER },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<S1>(),
+			});
+
+			assertResumable(machine, all, {
+				FSM::stateId<S0>(),
+			});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	}
 
-	machine.changeTo<S1>();
-	machine.update();
-	{
-		const Events reference = {
-			{						 Event::CHANGE, FSM::stateId<S1>() },
-
-			{ 0u,					 Event::UPDATE },
-			{ FSM::stateId<S0>(),	 Event::UPDATE },
-
-			{ FSM::stateId<S0>(),	 Event::EXIT_GUARD },
-			{ FSM::stateId<S1>(),	 Event::ENTRY_GUARD },
-
-			{ FSM::stateId<S0>(),	 Event::EXIT },
-			{ FSM::stateId<S1>(),	 Event::ENTER },
-		};
-		logger.assertSequence(reference);
-
-		const Types active = {
-			FSM::stateId<S1>(),
-		};
-		assertActive(machine, all, active);
-
-		const Types resumable = {
-			FSM::stateId<S0>(),
-		};
-		assertResumable(machine, all, resumable);
-	}
+	logger.assertSequence({
+		{ FSM::stateId<S1>(),	 Event::EXIT },
+		{ 0u,					 Event::EXIT },
+	});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

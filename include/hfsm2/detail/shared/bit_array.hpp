@@ -102,7 +102,7 @@ public:
 
 	HFSM_INLINE bool get  (const Index index) const;
 	HFSM_INLINE void set  (const Index index);
-	HFSM_INLINE void reset(const Index index);
+	//HFSM_INLINE void reset(const Index index);
 
 	template <ShortIndex NUnit, ShortIndex NWidth>
 	HFSM_INLINE		 Bits bits();

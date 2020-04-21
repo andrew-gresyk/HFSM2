@@ -46,7 +46,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 								   Args,
 								   TInitial>;
 
-	using InitialInfo	= Wrap<TInitial>;
+	using InitialInfo	= WrapInfo<TInitial>;
 	using InitialStates	= typename InitialInfo::StateList;
 
 	using Remaining		= OS_<I_<INITIAL_ID  + InitialInfo::STATE_COUNT,

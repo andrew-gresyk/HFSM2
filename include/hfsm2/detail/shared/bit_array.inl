@@ -253,17 +253,17 @@ BitArray<TIndex, NCapacity>::set(const Index index) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
-void
-BitArray<TIndex, NCapacity>::reset(const Index index) {
-	HFSM_ASSERT(index < CAPACITY);
-
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
-	const Unit mask = 1 << bit;
-
-	_storage[unit] &= ~mask;
-}
+//template <typename TIndex, ShortIndex NCapacity>
+//void
+//BitArray<TIndex, NCapacity>::reset(const Index index) {
+//	HFSM_ASSERT(index < CAPACITY);
+//
+//	const Index unit = index / (sizeof(Unit) * 8);
+//	const Index bit  = index % (sizeof(Unit) * 8);
+//	const Unit mask = 1 << bit;
+//
+//	_storage[unit] &= ~mask;
+//}
 
 //------------------------------------------------------------------------------
 

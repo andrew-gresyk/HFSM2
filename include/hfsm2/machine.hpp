@@ -212,8 +212,6 @@ static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG_INDEX;
 
 namespace detail {
 
-HFSM_IF_DEBUG(struct None {});
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -690,7 +688,7 @@ public:
 
 	HFSM_INLINE bool get  (const Index index) const;
 	HFSM_INLINE void set  (const Index index);
-	HFSM_INLINE void reset(const Index index);
+	//HFSM_INLINE void reset(const Index index);
 
 	template <ShortIndex NUnit, ShortIndex NWidth>
 	HFSM_INLINE		 Bits bits();
@@ -974,17 +972,17 @@ BitArray<TIndex, NCapacity>::set(const Index index) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
-void
-BitArray<TIndex, NCapacity>::reset(const Index index) {
-	HFSM_ASSERT(index < CAPACITY);
-
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
-	const Unit mask = 1 << bit;
-
-	_storage[unit] &= ~mask;
-}
+//template <typename TIndex, ShortIndex NCapacity>
+//void
+//BitArray<TIndex, NCapacity>::reset(const Index index) {
+//	HFSM_ASSERT(index < CAPACITY);
+//
+//	const Index unit = index / (sizeof(Unit) * 8);
+//	const Index bit  = index % (sizeof(Unit) * 8);
+//	const Unit mask = 1 << bit;
+//
+//	_storage[unit] &= ~mask;
+//}
 
 //------------------------------------------------------------------------------
 
@@ -1789,10 +1787,10 @@ struct IndexedTypeList_EntryN
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename...>
-struct IndexedTypeList_Impl;
+struct ITL_Impl;
 
 template <LongIndex... Ns, typename... Ts>
-struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
+struct ITL_Impl<IndexSequence<Ns...>, Ts...>
 	: IndexedTypeList_EntryN<Ts, Ns>...
 {
 	template <typename T, LongIndex N>
@@ -1803,9 +1801,9 @@ struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
 
 template <typename... Ts>
 struct ITL_
-	: private IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
+	: private ITL_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
-	using Base = IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
+	using Base = ITL_Impl<IndexSequenceFor<Ts...>, Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
@@ -2206,8 +2204,7 @@ PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::verifyPlan(const
 						fast = taskLinks[fast].next;
 					}
 
-					if (fast != INVALID_LONG_INDEX)
-						HFSM_ASSERT(slow != fast);
+					HFSM_ASSERT(fast == INVALID_LONG_INDEX || slow != fast);
 				}
 			} else {
 				HFSM_ASSERT(task.next == INVALID_LONG_INDEX);
@@ -4425,8 +4422,36 @@ struct B_<TFirst>
 	HFSM_INLINE void	widePostExit	 (Context& context);
 };
 
+//------------------------------------------------------------------------------
+
 template <typename TArgs>
-using Empty = B_<InjectionT<TArgs>>;
+using EmptyT = B_<InjectionT<TArgs>>;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+struct Dynamic_ {};
+
+template <typename... TI>
+struct DB_
+	: Dynamic_
+	, B_<TI...>
+{};
+
+template <typename TArgs>
+using DynamicEmptyT = DB_<InjectionT<TArgs>>;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+struct Static_ {};
+
+template <typename... TI>
+struct SB_
+	: Static_
+	, B_<TI...>
+{};
+
+template <typename TArgs>
+using StaticEmptyT = SB_<InjectionT<TArgs>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -4566,6 +4591,680 @@ B_<TF_>::widePostExit(Context& context) {
 }
 }
 
+
+namespace hfsm2 {
+
+//------------------------------------------------------------------------------
+
+template <typename>
+struct Guard {
+	template <typename TArgs>
+	static void execute(hfsm2::detail::GuardControlT<TArgs>&) {}
+};
+
+//------------------------------------------------------------------------------
+
+namespace detail {
+
+//------------------------------------------------------------------------------
+
+HFSM_IF_DEBUG(struct None {});
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T, typename TArgs>
+struct DBox final {
+	static constexpr bool isBare()								{ return false;					}
+
+	union {
+		T t_;
+	};
+
+	HFSM_INLINE  DBox() {}
+	HFSM_INLINE ~DBox() {}
+
+	HFSM_INLINE void guard(GuardControlT<TArgs>& control)		{ Guard<T>::execute(control);	}
+
+	HFSM_INLINE void construct();
+	HFSM_INLINE void destruct();
+
+	HFSM_INLINE		  T& get()							{ HFSM_ASSERT(initialized_); return t_;	}
+	HFSM_INLINE const T& get() const					{ HFSM_ASSERT(initialized_); return t_;	}
+
+	HFSM_IF_ASSERT(bool initialized_ = false);
+
+	HFSM_IF_DEBUG(const std::type_index TYPE = typeid(T));
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T, typename TArgs>
+struct SBox final {
+	static constexpr bool isBare()	{ return std::is_base_of<T, StaticEmptyT<TArgs>>::value;	}
+
+	T t_;
+
+	HFSM_INLINE void guard(GuardControlT<TArgs>& control);
+
+	HFSM_INLINE void construct()																{}
+	HFSM_INLINE void destruct()																	{}
+
+	HFSM_INLINE		  T& get()									{ return t_;					}
+	HFSM_INLINE const T& get() const							{ return t_;					}
+
+	HFSM_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(T));
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T, typename TArgs>
+struct BoxifyT final {
+	using Type = typename std::conditional<
+					 std::is_base_of<Dynamic_, T>::value,
+					 DBox<T, TArgs>,
+					 SBox<T, TArgs>
+				 >::type;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T, typename TArgs>
+using Boxify = typename BoxifyT<T, TArgs>::Type;
+
+//------------------------------------------------------------------------------
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T, typename TA>
+void
+DBox<T, TA>::construct() {
+	HFSM_ASSERT(!initialized_);
+
+	new(&t_) T{};
+
+	HFSM_IF_ASSERT(initialized_ = true);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename T, typename TA>
+void
+DBox<T, TA>::destruct() {
+	HFSM_ASSERT(initialized_);
+
+	t_.~T();
+
+	HFSM_IF_ASSERT(initialized_ = false);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T, typename TA>
+void
+SBox<T, TA>::guard(GuardControlT<TA>& control) {
+	t_.widePreEntryGuard(control.context());
+	t_.		  entryGuard(control);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}
+namespace hfsm2 {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TIndices,
+		  typename TArgs,
+		  typename THead>
+struct S_ final {
+	static constexpr auto STATE_ID	 = TIndices::STATE_ID;
+
+	using Context		= typename TArgs::Context;
+	using Rank			= typename TArgs::Rank;
+	using Utility		= typename TArgs::Utility;
+	using UP			= typename TArgs::UP;
+	using Logger		= typename TArgs::Logger;
+
+	using Control		= ControlT<TArgs>;
+	using StateRegistry	= StateRegistryT<TArgs>;
+	using StateParents	= typename StateRegistry::StateParents;
+
+	using PlanControl	= PlanControlT<TArgs>;
+	using ScopedOrigin	= typename PlanControl::Origin;
+
+	using FullControl	= FullControlT <TArgs>;
+	using GuardControl	= GuardControlT<TArgs>;
+
+	using Head			= THead;
+	using HeadBox		= Boxify<Head, TArgs>;
+
+	//----------------------------------------------------------------------
+
+#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+#ifdef __clang__
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wnull-dereference"
+#endif
+
+	template <typename T>
+	struct Accessor {
+		HFSM_INLINE static		 T&	   get(		 S_&  )			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);		}
+		HFSM_INLINE static const T&	   get(const S_&  )			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);		}
+	};
+
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <>
+	struct Accessor<Head> {
+		HFSM_INLINE static		 Head& get(		 S_& s)			{ return s._headBox.get();								}
+		HFSM_INLINE static const Head& get(const S_& s)			{ return s._headBox.get();								}
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename T>
+	HFSM_INLINE		  T& access()								{ return Accessor<T>::get(*this);						}
+
+	template <typename T>
+	HFSM_INLINE const T& access() const							{ return Accessor<T>::get(*this);						}
+
+#endif
+
+	//----------------------------------------------------------------------
+
+	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._stateRegistry.stateParents[STATE_ID]; }
+
+	HFSM_INLINE void	deepRegister		 (StateRegistry& stateRegistry, const Parent parent);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&)					{ return false;	}
+	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
+
+	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
+	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
+
+	HFSM_INLINE Status	deepUpdate			 (FullControl&	control);
+
+	template <typename TEvent>
+	HFSM_INLINE Status	deepReact			 (FullControl&	control, const TEvent& event);
+
+	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&)					{ return false; }
+	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
+
+	HFSM_INLINE void	deepExit			 (PlanControl&	control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void	wrapPlanSucceeded	 (FullControl&	control);
+	HFSM_INLINE void	wrapPlanFailed		 (FullControl&	control);
+	HFSM_INLINE Rank	wrapRank			 (Control& control);
+	HFSM_INLINE Utility	wrapUtility			 (Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void	deepForwardActive	 (Control&, const Request::Type)					{}
+	HFSM_INLINE void	deepForwardRequest	 (Control&, const Request::Type)					{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void	deepRequestChange	 (Control&)											{}
+	HFSM_INLINE void	deepRequestRemain	 (StateRegistry&)									{}
+	HFSM_INLINE void	deepRequestRestart	 (StateRegistry&)									{}
+	HFSM_INLINE void	deepRequestResume	 (StateRegistry&)									{}
+	HFSM_INLINE void	deepRequestUtilize	 (Control&)											{}
+	HFSM_INLINE void	deepRequestRandomize (Control&)											{}
+
+	HFSM_INLINE UP		deepReportChange	 (Control& control);
+	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
+	HFSM_INLINE Rank	deepReportRank		 (Control& control);
+	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE void   deepEnterRequested	(Control&)											{}
+	HFSM_INLINE void   deepChangeToRequested(Control&)											{}
+
+	//----------------------------------------------------------------------
+
+#if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
+
+	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
+
+#endif
+
+	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+	using StructureStateInfos = typename TArgs::StructureStateInfos;
+	using RegionType		  = typename StructureStateInfo::RegionType;
+
+	static const char* name();
+
+	void deepGetNames(const LongIndex parent,
+					  const RegionType region,
+					  const ShortIndex depth,
+					  StructureStateInfos& stateInfos) const;
+
+#endif
+
+	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+
+	template <typename>
+	struct Traits_;
+
+	template <typename TR_, typename TH_, typename... TAs_>
+	struct Traits_<TR_(TH_::*)(TAs_...)> {
+		using Host = TH_;
+	};
+
+	template <typename TM_>
+	using Host_			= typename Traits_<TM_>::Host;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using Empty			= EmptyT<TArgs>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TMethodType>
+	typename std::enable_if<
+				 std::is_same<
+					 Host_<TMethodType>,
+					 Empty
+				 >::value
+			 >::type
+	log(Logger&,
+		Context&,
+		const Method) const
+	{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TMethodType>
+	typename std::enable_if<
+				 !std::is_same<
+					 Host_<TMethodType>,
+					 Empty
+				 >::value
+			 >::type
+	log(Logger& logger,
+		Context& context,
+		const Method method) const
+	{
+		logger.recordMethod(context, STATE_ID, method);
+	}
+
+#endif
+
+	//----------------------------------------------------------------------
+
+	// TODO: account for boxing
+	//
+	// if you see..
+	// VS	 - error C2079: 'hfsm2::detail::S_<...>::_head' uses undefined struct 'Blah'
+	// Clang - error : field has incomplete type 'hfsm2::detail::S_<...>::Head' (aka 'Blah')
+	//
+	// .. add definition for the state 'Blah'
+	HeadBox _headBox;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+//------------------------------------------------------------------------------
+
+template <StateID NS, typename TA_, typename TH_>
+struct RegisterT {
+	using StateParents	= StaticArray<Parent, TA_::STATE_COUNT>;
+	using StateList		= typename TA_::StateList;
+
+	static constexpr StateID STATE_ID = NS;
+
+	static HFSM_INLINE
+	void
+	execute(StateParents& stateParents,
+			const Parent parent)
+	{
+		static constexpr auto HEAD_ID = StateList::template index<TH_>();
+		StaticAssertEquality<STATE_ID, HEAD_ID>();
+
+		stateParents[STATE_ID] = parent;
+	}
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <StateID NS, typename TA_>
+struct RegisterT<NS, TA_, StaticEmptyT<TA_>> {
+	using StateParents	= StaticArray<Parent, TA_::STATE_COUNT>;
+
+	static HFSM_INLINE
+	void
+	execute(StateParents&, const Parent) {}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepRegister(StateRegistry& stateRegistry,
+								const Parent parent)
+{
+	using Register = RegisterT<STATE_ID, TA_, Head>;
+	Register::execute(stateRegistry.stateParents, parent);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+bool
+S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::entryGuard,
+						  control.context(),
+						  Method::ENTRY_GUARD);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	const bool cancelledBefore = control._cancelled;
+
+	_headBox.guard(control);
+
+	return !cancelledBefore && control._cancelled;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
+	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
+	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
+
+	HFSM_LOG_STATE_METHOD(&Head::enter,
+						  control.context(),
+						  Method::ENTER);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	_headBox.construct();
+
+	_headBox.get().widePreEnter(control.context());
+	_headBox.get().	   enter(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
+	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
+	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
+
+	HFSM_LOG_STATE_METHOD(&Head::reenter,
+						  control.context(),
+						  Method::REENTER);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	_headBox.destruct ();
+	_headBox.construct();
+
+	_headBox.get().widePreReenter(control.context());
+	_headBox.get().	   reenter(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+Status
+S_<TN_, TA_, TH_>::deepUpdate(FullControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::update,
+						  control.context(),
+						  Method::UPDATE);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	_headBox.get().widePreUpdate(control.context());
+	_headBox.get().	   update(control);
+
+	return control._status;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+template <typename TEvent>
+Status
+S_<TN_, TA_, TH_>::deepReact(FullControl& control,
+							 const TEvent& event)
+{
+	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
+	HFSM_LOG_STATE_METHOD(reaction,
+						  control.context(),
+						  Method::REACT);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	_headBox.get().widePreReact(event, control.context());
+	(_headBox.get().*reaction)(event, control);				//_headBox.get().react(event, control);
+
+	return control._status;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+bool
+S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::exitGuard,
+						  control.context(),
+						  Method::EXIT_GUARD);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	const bool cancelledBefore = control._cancelled;
+
+	_headBox.get().widePreExitGuard(control.context());
+	_headBox.get().	   exitGuard(control);
+
+	return !cancelledBefore && control._cancelled;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::exit,
+						  control.context(),
+						  Method::EXIT);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	// if you see..
+	// VS	 - error C2039:  'exit': is not a member of 'Blah'
+	// Clang - error : no member named 'exit' in 'Blah'
+	//
+	// .. inherit state 'Blah' from hfsm2::Machine::Instance::State
+	_headBox.get().	    exit(control);
+	_headBox.get().widePostExit(control.context());
+
+	_headBox.destruct();
+
+	control._planData.tasksSuccesses.template reset<STATE_ID>();
+	control._planData.tasksFailures .template reset<STATE_ID>();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::wrapPlanSucceeded(FullControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::planSucceeded,
+						  control.context(),
+						  Method::PLAN_SUCCEEDED);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	_headBox.get().planSucceeded(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::wrapPlanFailed(FullControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::planFailed,
+						  control.context(),
+						  Method::PLAN_FAILED);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	_headBox.get().planFailed(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+typename S_<TN_, TA_, TH_>::Rank
+S_<TN_, TA_, TH_>::wrapRank(Control& control) {
+	HFSM_LOG_STATE_METHOD(&Head::rank,
+						  control.context(),
+						  Method::RANK);
+
+	return _headBox.get().rank(static_cast<const Control&>(control));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_>
+typename S_<TN_, TA_, TH_>::Utility
+S_<TN_, TA_, TH_>::wrapUtility(Control& control) {
+	HFSM_LOG_STATE_METHOD(&Head::utility,
+						  control.context(),
+						  Method::UTILITY);
+
+	return _headBox.get().utility(static_cast<const Control&>(control));
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+typename S_<TN_, TA_, TH_>::UP
+S_<TN_, TA_, TH_>::deepReportChange(Control& control) {
+	const Utility utility = wrapUtility(control);
+
+	const Parent parent = stateParent(control);
+
+	return {utility, parent.prong};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_>
+typename S_<TN_, TA_, TH_>::UP
+S_<TN_, TA_, TH_>::deepReportUtilize(Control& control) {
+	const Utility utility = wrapUtility(control);
+	const Parent  parent  = stateParent(control);
+
+	return {utility, parent.prong};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_>
+typename S_<TN_, TA_, TH_>::Rank
+S_<TN_, TA_, TH_>::deepReportRank(Control& control) {
+	return wrapRank(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_>
+typename S_<TN_, TA_, TH_>::Utility
+S_<TN_, TA_, TH_>::deepReportRandomize(Control& control) {
+	return wrapUtility(control);
+}
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN_, typename TA_, typename TH_>
+const char*
+S_<TN_, TA_, TH_>::name() {
+	if (HeadBox::isBare())
+		return "";
+	else {
+		const std::type_index type = typeid(Head);
+		const char* const raw = type.name();
+
+	#if defined(_MSC_VER)
+
+		auto first =
+			raw[0] == 's' ? 7 : // Struct
+			raw[0] == 'c' ? 6 : // Class
+							0;
+
+		for (auto c = first; raw[c]; ++c)
+			if (raw[c] == ':')
+				first = c + 1;
+
+		return raw + first;
+
+	#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+
+		return raw;
+
+	#else
+
+		return raw;
+
+	#endif
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepGetNames(const LongIndex parent,
+								const RegionType region,
+								const ShortIndex depth,
+								StructureStateInfos& _stateInfos) const
+{
+	_stateInfos.append(StructureStateInfo{parent, region, depth, name()});
+}
+
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+}
+
 namespace hfsm2 {
 namespace detail {
 
@@ -4605,25 +5304,25 @@ struct OSI_<TInitial>;
 //------------------------------------------------------------------------------
 
 template <typename...>
-struct WrapT;
+struct WrapInfoT;
 
 template <typename TH_>
-struct WrapT<TH_> {
+struct WrapInfoT<	 TH_> {
 	using Type = SI_<TH_>;
 };
 
 template <Strategy TG_, typename TH_, typename... TS_>
-struct WrapT<	 CI_<TG_, TH_, TS_...>> {
-	using Type = CI_<TG_, TH_, TS_...>;
+struct WrapInfoT<	 CI_<TG_, TH_, TS_...>> {
+	using Type =	 CI_<TG_, TH_, TS_...>;
 };
 
 template <typename... TS_>
-struct WrapT<	 OI_<TS_...>> {
-	using Type = OI_<TS_...>;
+struct WrapInfoT<	 OI_<TS_...>> {
+	using Type =	 OI_<TS_...>;
 };
 
 template <typename... TS_>
-using Wrap = typename WrapT<TS_...>::Type;
+using WrapInfo = typename WrapInfoT<TS_...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -4648,7 +5347,7 @@ struct SI_ final {
 
 template <typename TInitial, typename... TRemaining>
 struct CSI_<TInitial, TRemaining...> {
-	using Initial			= Wrap<TInitial>;
+	using Initial			= WrapInfo<TInitial>;
 	using Remaining			= CSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
@@ -4665,7 +5364,7 @@ struct CSI_<TInitial, TRemaining...> {
 
 template <typename TInitial>
 struct CSI_<TInitial> {
-	using Initial			= Wrap<TInitial>;
+	using Initial			= WrapInfo<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
 
@@ -4704,7 +5403,7 @@ struct CI_ final {
 
 template <typename TInitial, typename... TRemaining>
 struct OSI_<TInitial, TRemaining...> {
-	using Initial			= Wrap<TInitial>;
+	using Initial			= WrapInfo<TInitial>;
 	using Remaining			= OSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
@@ -4718,7 +5417,7 @@ struct OSI_<TInitial, TRemaining...> {
 
 template <typename TInitial>
 struct OSI_<TInitial> {
-	using Initial			= Wrap<TInitial>;
+	using Initial			= WrapInfo<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
 
@@ -4824,8 +5523,8 @@ struct MaterialT   <TN_, TA_, TH_> {
 };
 
 template <typename TN_, typename TA_, Strategy TG_, 			 typename... TS_>
-struct MaterialT   <TN_, TA_, CI_<TG_, void,	   TS_...>> {
-	using Type = C_<TN_, TA_,	  TG_, Empty<TA_>, TS_...>;
+struct MaterialT   <TN_, TA_, CI_<TG_, void,			  TS_...>> {
+	using Type = C_<TN_, TA_,	  TG_, StaticEmptyT<TA_>, TS_...>;
 };
 
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
@@ -4834,8 +5533,8 @@ struct MaterialT   <TN_, TA_, CI_<TG_, TH_,	TS_...>> {
 };
 
 template <typename TN_, typename TA_,				typename... TS_>
-struct MaterialT   <TN_, TA_, OI_<void,		  TS_...>> {
-	using Type = O_<TN_, TA_,	  Empty<TA_>, TS_...>;
+struct MaterialT   <TN_, TA_, OI_<void,				 TS_...>> {
+	using Type = O_<TN_, TA_,	  StaticEmptyT<TA_>, TS_...>;
 };
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
@@ -4888,12 +5587,28 @@ struct RF_ final {
 
 	using Injection		= InjectionT<Args>;
 
-	using State			= Empty<Args>;
+	//----------------------------------------------------------------------
+
+	using DynamicState	= DynamicEmptyT<Args>;
 
 	template <typename... TInjections>
-	using StateT		= B_<TInjections...>;
+	using DynamicStateT	= DB_<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using StaticState	= StaticEmptyT<Args>;
+
+	template <typename... TInjections>
+	using StaticStateT	= SB_<TInjections...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using State			= StaticState;
+
+	template <typename... TInjections>
+	using StateT		= StaticStateT<TInjections...>;
+
+	//----------------------------------------------------------------------
 
 	template <typename T>
 	static constexpr bool contains() {
@@ -4951,1025 +5666,6 @@ struct InfoT<CS_<TN_, TA_, TG_, NI_, TS_...>> {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-namespace hfsm2 {
-namespace detail {
-
-#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
-//------------------------------------------------------------------------------
-
-template <typename...>
-struct Accessor;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  Strategy TG,
-		  typename TH,
-		  typename... TS>
-struct Accessor<T,		 C_<TN, TA, TG, TH, TS...>> {
-	using Host =		 C_<TN, TA, TG, TH, TS...>;
-
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  Strategy TG,
-		  typename TH,
-		  typename... TS>
-struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> {
-	using Host =   const C_<TN, TA, TG, TH, TS...>;
-
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
-
-	Host& host;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  Strategy TG,
-		  typename... TS>
-struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> {
-	using Host =		 C_<TN, TA, TG,  T, TS...>;
-
-	HFSM_INLINE		  T& get()			{ return host._headState._head;				}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  Strategy TG,
-		  typename... TS>
-struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> {
-	using Host =   const C_<TN, TA, TG,  T, TS...>;
-
-	HFSM_INLINE const T& get() const	{ return host._headState._head;				}
-
-	Host& host;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  Strategy TG,
-		  ShortIndex NI,
-		  typename... TS>
-struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
-	using Host =		 CS_<TN, TA, TG, NI, TS...>;
-
-	HFSM_INLINE		  T& get()		 {
-		return Host::LHalfInfo::StateList::template contains<T>() ?
-			Accessor<T,		  typename Host::LHalf>{host.lHalf}.get() :
-			Accessor<T,		  typename Host::RHalf>{host.rHalf}.get();
-	}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  Strategy TG,
-		  ShortIndex NI,
-		  typename... TS>
-struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
-	using Host =   const CS_<TN, TA, TG, NI, TS...>;
-
-	HFSM_INLINE const T& get() const {
-		return Host::LHalfInfo::StateList::template contains<T>() ?
-			Accessor<T, const typename Host::LHalf>{host.lHalf}.get() :
-			Accessor<T, const typename Host::RHalf>{host.rHalf}.get();
-	}
-
-	Host& host;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  Strategy TG,
-		  ShortIndex NI,
-		  typename TS>
-struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> {
-	using Host =		 CS_<TN, TA, TG, NI, TS>;
-
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::State>{host.state}.get();		}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  Strategy TG,
-		  ShortIndex NI,
-		  typename TS>
-struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> {
-	using Host =   const CS_<TN, TA, TG, NI, TS>;
-
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::State>{host.state}.get();		}
-
-	Host& host;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  typename TH,
-		  typename... TS>
-struct Accessor<T,		 O_<TN, TA, TH, TS...>> {
-	using Host =		 O_<TN, TA, TH, TS...>;
-
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  typename TH,
-		  typename... TS>
-struct Accessor<T, const O_<TN, TA, TH, TS...>> {
-	using Host =   const O_<TN, TA, TH, TS...>;
-
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
-
-	Host& host;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  typename... TS>
-struct Accessor<T,		 O_<TN, TA,  T, TS...>> {
-	using Host =		 O_<TN, TA,  T, TS...>;
-
-	HFSM_INLINE		  T& get()			{ return host._headState._head;				}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  typename... TS>
-struct Accessor<T, const O_<TN, TA,  T, TS...>> {
-	using Host =   const O_<TN, TA,  T, TS...>;
-
-	HFSM_INLINE const T& get() const	{ return host._headState._head;				}
-
-	Host& host;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  ShortIndex NI,
-		  typename... TS>
-struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
-	using Host =		 OS_<TN, TA, NI, TS...>;
-
-	HFSM_INLINE		  T& get()		 {
-		return Host::InitialStates::template contains<T>() ?
-			Accessor<T,		  typename Host::Initial  >{host.initial  }.get() :
-			Accessor<T,		  typename Host::Remaining>{host.remaining}.get();
-	}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  ShortIndex NI,
-		  typename... TS>
-struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
-	using Host =   const OS_<TN, TA, NI, TS...>;
-
-	HFSM_INLINE const T& get() const {
-		return Host::InitialStates::template contains<T>() ?
-			Accessor<T, const typename Host::Initial  >{host.initial  }.get() :
-			Accessor<T, const typename Host::Remaining>{host.remaining}.get();
-	}
-
-	Host& host;
-};
-
-//------------------------------------------------------------------------------
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  ShortIndex NI,
-		  typename TS>
-struct Accessor<T,		 OS_<TN, TA, NI, TS>> {
-	using Host =		 OS_<TN, TA, NI, TS>;
-
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::Initial>{host.initial  }.get();	}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  ShortIndex NI,
-		  typename TS>
-struct Accessor<T, const OS_<TN, TA, NI, TS>> {
-	using Host =   const OS_<TN, TA, NI, TS>;
-
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
-
-	Host& host;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-#ifdef __clang__
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Wnull-dereference"
-#endif
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  typename TH>
-struct Accessor<T,		 S_<TN, TA, TH>> {
-	using Host =		 S_<TN, TA, TH>;
-
-	HFSM_INLINE		  T& get()			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA,
-		  typename TH>
-struct Accessor<T, const S_<TN, TA, TH>> {
-	using Host =   const S_<TN, TA, TH>;
-
-	HFSM_INLINE const T& get() const	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
-
-	Host& host;
-};
-
-#ifdef __clang__
-	#pragma clang diagnostic pop
-#endif
-
-//------------------------------------------------------------------------------
-
-template <typename T,
-		  typename TN,
-		  typename TA>
-struct Accessor<T,		 S_<TN, TA,  T>> {
-	using Host =		 S_<TN, TA,  T>;
-
-	HFSM_INLINE		  T& get()			{ return host._head;								}
-
-	Host& host;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename T,
-		  typename TN,
-		  typename TA>
-struct Accessor<T, const S_<TN, TA,  T>> {
-	using Host =   const S_<TN, TA,  T>;
-
-	HFSM_INLINE const T& get() const	{ return host._head;								}
-
-	Host& host;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif
-
-}
-}
-
-namespace hfsm2 {
-
-//------------------------------------------------------------------------------
-
-template <typename TC_ = EmptyContext,
-		  typename TN_ = char,
-		  typename TU_ = float,
-		  typename TG_ = ::hfsm2::RandomT<TU_>,
-		  LongIndex NS = 4,
-		  LongIndex NT = INVALID_LONG_INDEX>
-struct ConfigT {
-	using Context = TC_;
-
-	using Rank	  = TN_;
-	using Utility = TU_;
-	using RNG	  = TG_;
-	using Logger  = LoggerInterfaceT<Context, Utility>;
-
-	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
-	static constexpr LongIndex TASK_CAPACITY	  = NT;
-
-	template <typename T>
-	using ContextT			 = ConfigT<  T, TN_, TU_, TG_, NS, NT>;
-
-	template <typename T>
-	using RankT				 = ConfigT<TC_,   T, TU_, TG_, NS, NT>;
-
-	template <typename T>
-	using UtilityT			 = ConfigT<TC_, TN_,   T, TG_, NS, NT>;
-
-	template <typename T>
-	using RandomT			 = ConfigT<TC_, TN_, TU_,   T, NS, NT>;
-
-	template <LongIndex N>
-	using SubstitutionLimitN = ConfigT<TC_, TN_, TU_, TG_,  N, NS>;
-
-	template <LongIndex N>
-	using TaskCapacityN		 = ConfigT<TC_, TN_, TU_, TG_, NT,  N>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	struct UP {
-		HFSM_INLINE UP(const Utility utility_  = Utility{1.0f},
-					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
-			: utility{utility_}
-			, prong{prong_}
-		{}
-
-		Utility utility;
-		ShortIndex prong;
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-};
-
-//------------------------------------------------------------------------------
-
-using Config = ConfigT<>;
-
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename TConfig>
-struct M_ {
-	using Config_ = TConfig;
-
-	//----------------------------------------------------------------------
-
-	template <typename THead, typename... TSubStates>
-	using Composite			 = CI_<Strategy::Composite,	   THead, TSubStates...>;
-
-	template <				  typename... TSubStates>
-	using CompositePeers	 = CI_<Strategy::Composite,    void,  TSubStates...>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename THead, typename... TSubStates>
-	using Resumable			  = CI_<Strategy::Resumable,   THead, TSubStates...>;
-
-	template <				  typename... TSubStates>
-	using ResumablePeers	  = CI_<Strategy::Resumable,   void,  TSubStates...>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename THead, typename... TSubStates>
-	using Utilitarian		  = CI_<Strategy::Utilitarian, THead, TSubStates...>;
-
-	template <				  typename... TSubStates>
-	using UtilitarianPeers	  = CI_<Strategy::Utilitarian, void,  TSubStates...>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename THead, typename... TSubStates>
-	using Random			  = CI_<Strategy::RandomUtil,  THead, TSubStates...>;
-
-	template <				  typename... TSubStates>
-	using RandomPeers		  = CI_<Strategy::RandomUtil,  void,  TSubStates...>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename THead, typename... TSubStates>
-	using Orthogonal		  = OI_<THead, TSubStates...>;
-
-	template <				  typename... TSubStates>
-	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
-
-	//----------------------------------------------------------------------
-
-	template <typename THead, typename... TSubStates>
-	using Root				  = RF_<Config_, Composite  <THead, TSubStates...>>;
-
-	template <				  typename... TSubStates>
-	using PeerRoot			  = RF_<Config_, CompositePeers  <  TSubStates...>>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename THead, typename... TSubStates>
-	using ResumableRoot		  = RF_<Config_, Resumable  <THead, TSubStates...>>;
-
-	template <				  typename... TSubStates>
-	using ResumablePeerRoot	  = RF_<Config_, ResumablePeers  <  TSubStates...>>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename THead, typename... TSubStates>
-	using UtilitarianRoot	  = RF_<Config_, Utilitarian<THead, TSubStates...>>;
-
-	template <				  typename... TSubStates>
-	using UtilitarianPeerRoot = RF_<Config_, UtilitarianPeers<  TSubStates...>>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename THead, typename... TSubStates>
-	using RandomRoot		  = RF_<Config_, Random		<THead, TSubStates...>>;
-
-	template <				  typename... TSubStates>
-	using RandomPeerRoot	  = RF_<Config_, RandomPeers	 <  TSubStates...>>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	  = RF_<Config_, Orthogonal <THead, TSubStates...>>;
-
-	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot  = RF_<Config_, OrthogonalPeers <  TSubStates...>>;
-
-	//----------------------------------------------------------------------
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-
-using Machine = detail::M_<Config>;
-
-template <typename TConfig>
-using MachineT = detail::M_<TConfig>;
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-
-namespace hfsm2 {
-namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename TIndices,
-		  typename TArgs,
-		  typename THead>
-struct S_ final {
-	using Indices		= TIndices;
-	static constexpr StateID	STATE_ID	= Indices::STATE_ID;
-	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
-
-	using Args			= TArgs;
-	using Head			= THead;
-
-	using Context		= typename Args::Context;
-	using Rank			= typename Args::Rank;
-	using Utility		= typename Args::Utility;
-	using UP			= typename Args::UP;
-	using Logger		= typename Args::Logger;
-
-	using Control		= ControlT<Args>;
-	using StateRegistry	= StateRegistryT<Args>;
-	using StateParents	= typename StateRegistry::StateParents;
-
-	using PlanControl	= PlanControlT<Args>;
-	using ScopedOrigin	= typename PlanControl::Origin;
-
-	using FullControl	= FullControlT <Args>;
-	using GuardControl	= GuardControlT<Args>;
-
-	using Empty			= ::hfsm2::detail::Empty<Args>;
-
-	//----------------------------------------------------------------------
-
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
-#ifdef __clang__
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Wnull-dereference"
-#endif
-
-	template <typename T>
-	struct Accessor {
-		HFSM_INLINE static		 T&	   get(		 S_&  )	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
-		HFSM_INLINE static const T&	   get(const S_&  )	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
-	};
-
-#ifdef __clang__
-	#pragma clang diagnostic pop
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <>
-	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 S_& s)	{ return s._head;					}
-		HFSM_INLINE static const Head& get(const S_& s)	{ return s._head;					}
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename T>
-	HFSM_INLINE		  T&	access()					{ return Accessor<T>::get(*this);	}
-
-	template <typename T>
-	HFSM_INLINE const T&	access() const				{ return Accessor<T>::get(*this);	}
-
-#endif
-
-	//----------------------------------------------------------------------
-
-	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._stateRegistry.stateParents[STATE_ID]; }
-
-	HFSM_INLINE void	deepRegister		 (StateRegistry& stateRegistry, const Parent parent);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&)				{ return false;	}
-	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
-
-	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
-	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
-
-	HFSM_INLINE Status	deepUpdate			 (FullControl&	control);
-
-	template <typename TEvent>
-	HFSM_INLINE Status	deepReact			 (FullControl&	control, const TEvent& event);
-
-	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&)				{ return false; }
-	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
-
-	HFSM_INLINE void	deepExit			 (PlanControl&	control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	wrapPlanSucceeded	 (FullControl&	control);
-	HFSM_INLINE void	wrapPlanFailed		 (FullControl&	control);
-	HFSM_INLINE Rank	wrapRank			 (Control& control);
-	HFSM_INLINE Utility	wrapUtility			 (Control& control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	deepForwardActive	 (Control&, const Request::Type)					{}
-	HFSM_INLINE void	deepForwardRequest	 (Control&, const Request::Type)					{}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	deepRequestChange	 (Control&)										{}
-	HFSM_INLINE void	deepRequestRemain	 (StateRegistry&)								{}
-	HFSM_INLINE void	deepRequestRestart	 (StateRegistry&)								{}
-	HFSM_INLINE void	deepRequestResume	 (StateRegistry&)								{}
-	HFSM_INLINE void	deepRequestUtilize	 (Control&)										{}
-	HFSM_INLINE void	deepRequestRandomize (Control&)										{}
-
-	HFSM_INLINE UP		deepReportChange	 (Control& control);
-	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
-	HFSM_INLINE Rank	deepReportRank		 (Control& control);
-	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void   deepEnterRequested	(Control&)										{}
-	HFSM_INLINE void   deepChangeToRequested(Control&)										{}
-
-#if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
-	static constexpr bool isBare()	 { return std::is_same<Head, Empty>::value;	 }
-
-	static constexpr LongIndex NAME_COUNT = isBare() ? 0 : 1;
-#endif
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using StructureStateInfos = typename Args::StructureStateInfos;
-	using RegionType		  = typename StructureStateInfo::RegionType;
-
-	static const char* name();
-
-	void deepGetNames(const LongIndex parent,
-					  const RegionType region,
-					  const ShortIndex depth,
-					  StructureStateInfos& stateInfos) const;
-#endif
-
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	template <typename>
-	struct MemberTraits;
-
-	template <typename TReturn, typename TState, typename... Ts>
-	struct MemberTraits<TReturn(TState::*)(Ts...)> {
-		using State = TState;
-	};
-
-	template <typename TMethodType>
-	typename std::enable_if< std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
-	log(Logger&,
-		Context&,
-		const Method) const
-	{}
-
-	template <typename TMethodType>
-	typename std::enable_if<!std::is_same<typename MemberTraits<TMethodType>::State, Empty>::value>::type
-	log(Logger& logger,
-		Context& context,
-		const Method method) const
-	{
-		logger.recordMethod(context, STATE_ID, method);
-	}
-#endif
-
-	// if you see..
-	// VS	 - error C2079: 'hfsm2::detail::S_<...>::_head' uses undefined struct 'Blah'
-	// Clang - error : field has incomplete type 'hfsm2::detail::S_<...>::Head' (aka 'Blah')
-	//
-	// .. add definition for the state 'Blah'
-	Head _head;
-	HFSM_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(Head));
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-//------------------------------------------------------------------------------
-
-namespace {
-
-template <StateID NS, typename TA_, typename TH_>
-struct RegisterT {
-	using StateParents	= StaticArray<Parent, TA_::STATE_COUNT>;
-	using StateList		= typename TA_::StateList;
-
-	static constexpr StateID STATE_ID = NS;
-
-	static HFSM_INLINE
-	void
-	execute(StateParents& stateParents,
-			const Parent parent)
-	{
-		static constexpr auto HEAD_ID = StateList::template index<TH_>();
-		StaticAssertEquality<STATE_ID, HEAD_ID>();
-
-		stateParents[STATE_ID] = parent;
-	}
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <StateID NS, typename TA_>
-struct RegisterT<NS, TA_, Empty<TA_>> {
-	using StateParents	= StaticArray<Parent, TA_::STATE_COUNT>;
-
-	static HFSM_INLINE
-	void
-	execute(StateParents&, const Parent) {}
-};
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename TN_, typename TA_, typename TH_>
-void
-S_<TN_, TA_, TH_>::deepRegister(StateRegistry& stateRegistry,
-							 const Parent parent)
-{
-	using Register = RegisterT<STATE_ID, TA_, Head>;
-	Register::execute(stateRegistry.stateParents, parent);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-bool
-S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::entryGuard,
-						  control.context(),
-						  Method::ENTRY_GUARD);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	const bool cancelledBefore = control._cancelled;
-
-	_head.widePreEntryGuard(control.context());
-	_head.entryGuard(control);
-
-	return !cancelledBefore && control._cancelled;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-void
-S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
-	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
-	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
-
-	HFSM_LOG_STATE_METHOD(&Head::enter,
-						  control.context(),
-						  Method::ENTER);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	_head.widePreEnter(control.context());
-	_head.enter(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, typename TH_>
-void
-S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
-	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
-	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
-
-	HFSM_LOG_STATE_METHOD(&Head::reenter,
-						  control.context(),
-						  Method::REENTER);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	_head.widePreReenter(control.context());
-	_head.reenter(control);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-Status
-S_<TN_, TA_, TH_>::deepUpdate(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::update,
-						  control.context(),
-						  Method::UPDATE);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	_head.widePreUpdate(control.context());
-	_head.update(control);
-
-	return control._status;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-template <typename TEvent>
-Status
-S_<TN_, TA_, TH_>::deepReact(FullControl& control,
-						  const TEvent& event)
-{
-	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
-	HFSM_LOG_STATE_METHOD(reaction,
-						  control.context(),
-						  Method::REACT);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	_head.widePreReact(event, control.context());
-	(_head.*reaction)(event, control);				//_head.react(event, control);
-
-	return control._status;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-bool
-S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exitGuard,
-						  control.context(),
-						  Method::EXIT_GUARD);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	const bool cancelledBefore = control._cancelled;
-
-	_head.widePreExitGuard(control.context());
-	_head.exitGuard(control);
-
-	return !cancelledBefore && control._cancelled;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, typename TH_>
-void
-S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exit,
-						  control.context(),
-						  Method::EXIT);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	// if you see..
-	// VS	 - error C2039:  'exit': is not a member of 'Blah'
-	// Clang - error : no member named 'exit' in 'Blah'
-	//
-	// .. inherit state 'Blah' from hfsm2::Machine::Instance::State
-	_head.exit(control);
-	_head.widePostExit(control.context());
-
-	control._planData.tasksSuccesses.template reset<STATE_ID>();
-	control._planData.tasksFailures .template reset<STATE_ID>();
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-void
-S_<TN_, TA_, TH_>::wrapPlanSucceeded(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::planSucceeded,
-						  control.context(),
-						  Method::PLAN_SUCCEEDED);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	_head.planSucceeded(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, typename TH_>
-void
-S_<TN_, TA_, TH_>::wrapPlanFailed(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::planFailed,
-						  control.context(),
-						  Method::PLAN_FAILED);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	_head.planFailed(control);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-typename TA_::Rank
-S_<TN_, TA_, TH_>::wrapRank(Control& control) {
-	HFSM_LOG_STATE_METHOD(&Head::rank,
-						  control.context(),
-						  Method::RANK);
-
-	return _head.rank(static_cast<const Control&>(control));
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, typename TH_>
-typename TA_::Utility
-S_<TN_, TA_, TH_>::wrapUtility(Control& control) {
-	HFSM_LOG_STATE_METHOD(&Head::utility,
-						  control.context(),
-						  Method::UTILITY);
-
-	return _head.utility(static_cast<const Control&>(control));
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-typename TA_::UP
-S_<TN_, TA_, TH_>::deepReportChange(Control& control) {
-	const Utility utility = wrapUtility(control);
-
-	const Parent parent = stateParent(control);
-
-	return {utility, parent.prong};
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, typename TH_>
-typename TA_::UP
-S_<TN_, TA_, TH_>::deepReportUtilize(Control& control) {
-	const Utility utility = wrapUtility(control);
-	const Parent  parent  = stateParent(control);
-
-	return {utility, parent.prong};
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, typename TH_>
-typename TA_::Rank
-S_<TN_, TA_, TH_>::deepReportRank(Control& control) {
-	return wrapRank(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, typename TH_>
-typename TA_::Utility
-S_<TN_, TA_, TH_>::deepReportRandomize(Control& control) {
-	return wrapUtility(control);
-}
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN_, typename TA_, typename TH_>
-const char*
-S_<TN_, TA_, TH_>::name() {
-	if (isBare())
-		return "";
-	else {
-		const std::type_index type = typeid(Head);
-		const char* const raw = type.name();
-
-	#if defined(_MSC_VER)
-
-		auto first =
-			raw[0] == 's' ? 7 : // Struct
-			raw[0] == 'c' ? 6 : // Class
-							0;
-
-		for (auto c = first; raw[c]; ++c)
-			if (raw[c] == ':')
-				first = c + 1;
-
-		return raw + first;
-
-	#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-
-		return raw;
-
-	#else
-
-		return raw;
-
-	#endif
-	}
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_>
-void
-S_<TN_, TA_, TH_>::deepGetNames(const LongIndex parent,
-								const RegionType region,
-								const ShortIndex depth,
-								StructureStateInfos& _stateInfos) const
-{
-	_stateInfos.append(StructureStateInfo{parent, region, depth, name()});
-}
-
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
 
 }
 }
@@ -7048,6 +6744,7 @@ struct C_ final {
 	using Head			= THead;
 
 	using HeadState		= S_<Indices, Args, Head>;
+
 	using SubStates		= CS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX + 1,
 								 ORTHO_INDEX,
@@ -7074,8 +6771,8 @@ struct C_ final {
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 C_& c)						{ return c._headState._head;					}
-		HFSM_INLINE static const Head& get(const C_& c)						{ return c._headState._head;					}
+		HFSM_INLINE static		 Head& get(		 C_& c)						{ return c._headState._headBox.get();			}
+		HFSM_INLINE static const Head& get(const C_& c)						{ return c._headState._headBox.get();			}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7983,7 +7680,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 								   Args,
 								   TInitial>;
 
-	using InitialInfo	= Wrap<TInitial>;
+	using InitialInfo	= WrapInfo<TInitial>;
 	using InitialStates	= typename InitialInfo::StateList;
 
 	using Remaining		= OS_<I_<INITIAL_ID  + InitialInfo::STATE_COUNT,
@@ -8806,6 +8503,7 @@ struct O_ final {
 	using GuardControl	= GuardControlT<Args>;
 
 	using HeadState		= S_<Indices, Args, Head>;
+
 	using SubStates		= OS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX,
 								 ORTHO_INDEX + 1,
@@ -8828,8 +8526,8 @@ struct O_ final {
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 O_& o)									{ return o._headState._head;					}
-		HFSM_INLINE static const Head& get(const O_& o)									{ return o._headState._head;					}
+		HFSM_INLINE static		 Head& get(		 O_& o)									{ return o._headState._headBox.get();			}
+		HFSM_INLINE static const Head& get(const O_& o)									{ return o._headState._headBox.get();			}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9291,6 +8989,512 @@ O_<TN_, TA_, TH_, TS_...>::deepGetNames(const LongIndex parent,
 namespace hfsm2 {
 namespace detail {
 
+#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+//------------------------------------------------------------------------------
+
+template <typename...>
+struct Accessor;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  Strategy TG,
+		  typename TH,
+		  typename... TS>
+struct Accessor<T,		 C_<TN, TA, TG, TH, TS...>> {
+	using Host =		 C_<TN, TA, TG, TH, TS...>;
+
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  Strategy TG,
+		  typename TH,
+		  typename... TS>
+struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> {
+	using Host =   const C_<TN, TA, TG, TH, TS...>;
+
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
+
+	Host& host;
+};
+
+//------------------------------------------------------------------------------
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  Strategy TG,
+		  typename... TS>
+struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> {
+	using Host =		 C_<TN, TA, TG,  T, TS...>;
+
+	HFSM_INLINE		  T& get()			{ return host._headState._headBox.get();	}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  Strategy TG,
+		  typename... TS>
+struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> {
+	using Host =   const C_<TN, TA, TG,  T, TS...>;
+
+	HFSM_INLINE const T& get() const	{ return host._headState._headBox.get();	}
+
+	Host& host;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  Strategy TG,
+		  ShortIndex NI,
+		  typename... TS>
+struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
+	using Host =		 CS_<TN, TA, TG, NI, TS...>;
+
+	HFSM_INLINE		  T& get()		 {
+		return Host::LHalfInfo::StateList::template contains<T>() ?
+			Accessor<T,		  typename Host::LHalf>{host.lHalf}.get() :
+			Accessor<T,		  typename Host::RHalf>{host.rHalf}.get();
+	}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  Strategy TG,
+		  ShortIndex NI,
+		  typename... TS>
+struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
+	using Host =   const CS_<TN, TA, TG, NI, TS...>;
+
+	HFSM_INLINE const T& get() const {
+		return Host::LHalfInfo::StateList::template contains<T>() ?
+			Accessor<T, const typename Host::LHalf>{host.lHalf}.get() :
+			Accessor<T, const typename Host::RHalf>{host.rHalf}.get();
+	}
+
+	Host& host;
+};
+
+//------------------------------------------------------------------------------
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  Strategy TG,
+		  ShortIndex NI,
+		  typename TS>
+struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> {
+	using Host =		 CS_<TN, TA, TG, NI, TS>;
+
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::State>{host.state}.get();				}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  Strategy TG,
+		  ShortIndex NI,
+		  typename TS>
+struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> {
+	using Host =   const CS_<TN, TA, TG, NI, TS>;
+
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::State>{host.state}.get();				}
+
+	Host& host;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  typename TH,
+		  typename... TS>
+struct Accessor<T,		 O_<TN, TA, TH, TS...>> {
+	using Host =		 O_<TN, TA, TH, TS...>;
+
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  typename TH,
+		  typename... TS>
+struct Accessor<T, const O_<TN, TA, TH, TS...>> {
+	using Host =   const O_<TN, TA, TH, TS...>;
+
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
+
+	Host& host;
+};
+
+//------------------------------------------------------------------------------
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  typename... TS>
+struct Accessor<T,		 O_<TN, TA,  T, TS...>> {
+	using Host =		 O_<TN, TA,  T, TS...>;
+
+	HFSM_INLINE		  T& get()			{ return host._headState._headBox.get();	}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  typename... TS>
+struct Accessor<T, const O_<TN, TA,  T, TS...>> {
+	using Host =   const O_<TN, TA,  T, TS...>;
+
+	HFSM_INLINE const T& get() const	{ return host._headState._headBox.get();	}
+
+	Host& host;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  ShortIndex NI,
+		  typename... TS>
+struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
+	using Host =		 OS_<TN, TA, NI, TS...>;
+
+	HFSM_INLINE		  T& get()		 {
+		return Host::InitialStates::template contains<T>() ?
+			Accessor<T,		  typename Host::Initial  >{host.initial  }.get() :
+			Accessor<T,		  typename Host::Remaining>{host.remaining}.get();
+	}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  ShortIndex NI,
+		  typename... TS>
+struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
+	using Host =   const OS_<TN, TA, NI, TS...>;
+
+	HFSM_INLINE const T& get() const {
+		return Host::InitialStates::template contains<T>() ?
+			Accessor<T, const typename Host::Initial  >{host.initial  }.get() :
+			Accessor<T, const typename Host::Remaining>{host.remaining}.get();
+	}
+
+	Host& host;
+};
+
+//------------------------------------------------------------------------------
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  ShortIndex NI,
+		  typename TS>
+struct Accessor<T,		 OS_<TN, TA, NI, TS>> {
+	using Host =		 OS_<TN, TA, NI, TS>;
+
+	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::Initial>{host.initial  }.get();	}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  ShortIndex NI,
+		  typename TS>
+struct Accessor<T, const OS_<TN, TA, NI, TS>> {
+	using Host =   const OS_<TN, TA, NI, TS>;
+
+	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
+
+	Host& host;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef __clang__
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wnull-dereference"
+#endif
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  typename TH>
+struct Accessor<T,		 S_<TN, TA, TH>> {
+	using Host =		 S_<TN, TA, TH>;
+
+	HFSM_INLINE		  T& get()			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA,
+		  typename TH>
+struct Accessor<T, const S_<TN, TA, TH>> {
+	using Host =   const S_<TN, TA, TH>;
+
+	HFSM_INLINE const T& get() const	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+
+	Host& host;
+};
+
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+
+//------------------------------------------------------------------------------
+
+template <typename T,
+		  typename TN,
+		  typename TA>
+struct Accessor<T,		 S_<TN, TA,  T>> {
+	using Host =		 S_<TN, TA,  T>;
+
+	HFSM_INLINE		  T& get()			{ return host._headBox.get();			}
+
+	Host& host;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T,
+		  typename TN,
+		  typename TA>
+struct Accessor<T, const S_<TN, TA,  T>> {
+	using Host =   const S_<TN, TA,  T>;
+
+	HFSM_INLINE const T& get() const	{ return host._headBox.get();			}
+
+	Host& host;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif
+
+}
+}
+
+namespace hfsm2 {
+
+//------------------------------------------------------------------------------
+
+template <typename TC_ = EmptyContext,
+		  typename TN_ = char,
+		  typename TU_ = float,
+		  typename TG_ = ::hfsm2::RandomT<TU_>,
+		  LongIndex NS = 4,
+		  LongIndex NT = INVALID_LONG_INDEX>
+struct ConfigT {
+	using Context = TC_;
+
+	using Rank	  = TN_;
+	using Utility = TU_;
+	using RNG	  = TG_;
+	using Logger  = LoggerInterfaceT<Context, Utility>;
+
+	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
+	static constexpr LongIndex TASK_CAPACITY	  = NT;
+
+	template <typename T>
+	using ContextT			 = ConfigT<  T, TN_, TU_, TG_, NS, NT>;
+
+	template <typename T>
+	using RankT				 = ConfigT<TC_,   T, TU_, TG_, NS, NT>;
+
+	template <typename T>
+	using UtilityT			 = ConfigT<TC_, TN_,   T, TG_, NS, NT>;
+
+	template <typename T>
+	using RandomT			 = ConfigT<TC_, TN_, TU_,   T, NS, NT>;
+
+	template <LongIndex N>
+	using SubstitutionLimitN = ConfigT<TC_, TN_, TU_, TG_,  N, NS>;
+
+	template <LongIndex N>
+	using TaskCapacityN		 = ConfigT<TC_, TN_, TU_, TG_, NT,  N>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct UP {
+		HFSM_INLINE UP(const Utility utility_  = Utility{1.0f},
+					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
+			: utility{utility_}
+			, prong{prong_}
+		{}
+
+		Utility utility;
+		ShortIndex prong;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+};
+
+//------------------------------------------------------------------------------
+
+using Config = ConfigT<>;
+
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TConfig>
+struct M_ {
+	using Config_ = TConfig;
+
+	//----------------------------------------------------------------------
+
+	template <typename THead, typename... TSubStates>
+	using Composite			 = CI_<Strategy::Composite,	   THead, TSubStates...>;
+
+	template <				  typename... TSubStates>
+	using CompositePeers	 = CI_<Strategy::Composite,    void,  TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using Resumable			  = CI_<Strategy::Resumable,   THead, TSubStates...>;
+
+	template <				  typename... TSubStates>
+	using ResumablePeers	  = CI_<Strategy::Resumable,   void,  TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using Utilitarian		  = CI_<Strategy::Utilitarian, THead, TSubStates...>;
+
+	template <				  typename... TSubStates>
+	using UtilitarianPeers	  = CI_<Strategy::Utilitarian, void,  TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using Random			  = CI_<Strategy::RandomUtil,  THead, TSubStates...>;
+
+	template <				  typename... TSubStates>
+	using RandomPeers		  = CI_<Strategy::RandomUtil,  void,  TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using Orthogonal		  = OI_<THead, TSubStates...>;
+
+	template <				  typename... TSubStates>
+	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
+
+	//----------------------------------------------------------------------
+
+	template <typename THead, typename... TSubStates>
+	using Root				  = RF_<Config_, Composite  <THead, TSubStates...>>;
+
+	template <				  typename... TSubStates>
+	using PeerRoot			  = RF_<Config_, CompositePeers  <  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using ResumableRoot		  = RF_<Config_, Resumable  <THead, TSubStates...>>;
+
+	template <				  typename... TSubStates>
+	using ResumablePeerRoot	  = RF_<Config_, ResumablePeers  <  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using UtilitarianRoot	  = RF_<Config_, Utilitarian<THead, TSubStates...>>;
+
+	template <				  typename... TSubStates>
+	using UtilitarianPeerRoot = RF_<Config_, UtilitarianPeers<  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using RandomRoot		  = RF_<Config_, Random		<THead, TSubStates...>>;
+
+	template <				  typename... TSubStates>
+	using RandomPeerRoot	  = RF_<Config_, RandomPeers	 <  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename THead, typename... TSubStates>
+	using OrthogonalRoot	  = RF_<Config_, Orthogonal <THead, TSubStates...>>;
+
+	template <				  typename... TSubStates>
+	using OrthogonalPeerRoot  = RF_<Config_, OrthogonalPeers <  TSubStates...>>;
+
+	//----------------------------------------------------------------------
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+
+using Machine = detail::M_<Config>;
+
+template <typename TConfig>
+using MachineT = detail::M_<TConfig>;
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+
+namespace hfsm2 {
+namespace detail {
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TConfig,
@@ -9305,7 +9509,7 @@ class R_ {
 
 	using Apex					= TApex;
 
-	using ApexInfo				= Wrap<Apex>;
+	using ApexInfo				= WrapInfo<Apex>;
 	using Info					= RF_<Config_, Apex>;
 	using StateList				= typename Info::StateList;
 	using RegionList			= typename Info::RegionList;
@@ -9402,9 +9606,11 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	// VS:		error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<T,false>'
-	// Clang:	error : implicit instantiation of undefined template 'hfsm2::detail::R_<..>::Accessor<*, false>'
-	//	You're trying to access() a type that is not present in the state machine hierarchy
+	// if you see..
+	// VS	 - error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<T,false>'
+	// Clang - error : implicit instantiation of undefined template 'hfsm2::detail::R_<..>::Accessor<*, false>'
+	//
+	// .. you're trying to access() a type that is not present in the state machine hierarchy
 
 	template <typename T>
 	HFSM_INLINE		  T& access()									{ return Accessor<T>::get(_apex);			}

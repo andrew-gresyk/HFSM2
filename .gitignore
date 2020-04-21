@@ -12,3 +12,5 @@ cmake-*
 /projects/code-lite/compile_commands.json
 /projects/code-lite/*/CMakeLists.txt
 /projects/code-lite/*/compile_flags.txt
+/projects/visual-studio/.opencppcov
+/projects/visual-studio/*.log

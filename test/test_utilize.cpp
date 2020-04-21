@@ -33,26 +33,26 @@ using FSM = M::Root<S(Apex),
 
 #undef S
 
-static_assert(FSM::regionId<Apex>()	==  0, "");
-static_assert(FSM::regionId<O>()	==  1, "");
-static_assert(FSM::regionId<U>()	==  2, "");
-static_assert(FSM::regionId<C>()	==  3, "");
+static_assert(FSM::regionId<Apex>() ==  0, "");
+static_assert(FSM::regionId<O   >() ==  1, "");
+static_assert(FSM::regionId<U   >() ==  2, "");
+static_assert(FSM::regionId<C   >() ==  3, "");
 
-static_assert(FSM::stateId<Apex>()	==  0, "");
-static_assert(FSM::stateId<I>()		==  1, "");
-static_assert(FSM::stateId<O>()		==  2, "");
-static_assert(FSM::stateId<U>()		==  3, "");
-static_assert(FSM::stateId<U_000>()	==  4, "");
-static_assert(FSM::stateId<U_025>()	==  5, "");
-static_assert(FSM::stateId<U_050>()	==  6, "");
-static_assert(FSM::stateId<U_075>()	==  7, "");
-static_assert(FSM::stateId<U_100>()	==  8, "");
-static_assert(FSM::stateId<C>()		==  9, "");
-static_assert(FSM::stateId<C_000>()	== 10, "");
-static_assert(FSM::stateId<C_025>()	== 11, "");
-static_assert(FSM::stateId<C_050>()	== 12, "");
-static_assert(FSM::stateId<C_075>()	== 13, "");
-static_assert(FSM::stateId<C_100>()	== 14, "");
+static_assert(FSM::stateId<Apex >() ==  0, "");
+static_assert(FSM::stateId<I    >() ==  1, "");
+static_assert(FSM::stateId<O    >() ==  2, "");
+static_assert(FSM::stateId<U    >() ==  3, "");
+static_assert(FSM::stateId<U_000>() ==  4, "");
+static_assert(FSM::stateId<U_025>() ==  5, "");
+static_assert(FSM::stateId<U_050>() ==  6, "");
+static_assert(FSM::stateId<U_075>() ==  7, "");
+static_assert(FSM::stateId<U_100>() ==  8, "");
+static_assert(FSM::stateId<C    >() ==  9, "");
+static_assert(FSM::stateId<C_000>() == 10, "");
+static_assert(FSM::stateId<C_025>() == 11, "");
+static_assert(FSM::stateId<C_050>() == 12, "");
+static_assert(FSM::stateId<C_075>() == 13, "");
+static_assert(FSM::stateId<C_100>() == 14, "");
 
 //------------------------------------------------------------------------------
 
@@ -92,26 +92,22 @@ static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-	const Types all = {
-		FSM::stateId<I>(),
-		FSM::stateId<O>(),
-		FSM::stateId<U>(),
-		FSM::stateId<U_000>(),
-		FSM::stateId<U_025>(),
-		FSM::stateId<U_050>(),
-		FSM::stateId<U_075>(),
-		FSM::stateId<U_100>(),
-		FSM::stateId<C>(),
-		FSM::stateId<C_000>(),
-		FSM::stateId<C_025>(),
-		FSM::stateId<C_050>(),
-		FSM::stateId<C_075>(),
-		FSM::stateId<C_100>(),
-	};
-
-}
+const Types all = {
+	FSM::stateId<I    >(),
+	FSM::stateId<O    >(),
+	FSM::stateId<U    >(),
+	FSM::stateId<U_000>(),
+	FSM::stateId<U_025>(),
+	FSM::stateId<U_050>(),
+	FSM::stateId<U_075>(),
+	FSM::stateId<U_100>(),
+	FSM::stateId<C    >(),
+	FSM::stateId<C_000>(),
+	FSM::stateId<C_025>(),
+	FSM::stateId<C_050>(),
+	FSM::stateId<C_075>(),
+	FSM::stateId<C_100>(),
+};
 
 //------------------------------------------------------------------------------
 
@@ -120,20 +116,18 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 
 	FSM::Instance machine{&logger};
 	{
-		const Events reference = {
+		logger.assertSequence({
 			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
-			{ FSM::stateId<I>(),	Event::ENTRY_GUARD },
+			{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
 
 			{ FSM::stateId<Apex>(),	Event::ENTER },
-			{ FSM::stateId<I>(),	Event::ENTER },
-		};
-		logger.assertSequence(reference);
+			{ FSM::stateId<I   >(),	Event::ENTER },
+		});
 
-		const Types active = {
+		assertActive(machine, all, {
 			FSM::stateId<Apex>(),
-			FSM::stateId<I>(),
-		};
-		assertActive(machine, all, active);
+			FSM::stateId<I   >(),
+		});
 
 		assertResumable(machine, all, {});
 	}
@@ -141,160 +135,148 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 	WHEN("Changing to O") {
 		machine.changeTo<O>();
 		machine.update();
-		{
-			const Events reference = {
-				{						 Event::CHANGE, FSM::stateId<O>() },
 
-				{ FSM::stateId<Apex>(),	 Event::UPDATE },
-				{ FSM::stateId<I>(),	 Event::UPDATE },
+		logger.assertSequence({
+			{						 Event::CHANGE, FSM::stateId<O   >() },
 
-				{ FSM::stateId<U_000>(), Event::UTILITY },
-				{ FSM::stateId<U_025>(), Event::UTILITY },
-				{ FSM::stateId<U_050>(), Event::UTILITY },
-				{ FSM::stateId<U_075>(), Event::UTILITY },
-				{ FSM::stateId<U_100>(), Event::UTILITY },
+			{ FSM::stateId<Apex >(), Event::UPDATE },
+			{ FSM::stateId<I    >(), Event::UPDATE },
 
-				{ FSM::stateId<U>(),	 Event::UTILITY_RESOLUTION, 4 },
+			{ FSM::stateId<U_000>(), Event::UTILITY },
+			{ FSM::stateId<U_025>(), Event::UTILITY },
+			{ FSM::stateId<U_050>(), Event::UTILITY },
+			{ FSM::stateId<U_075>(), Event::UTILITY },
+			{ FSM::stateId<U_100>(), Event::UTILITY },
 
-				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
+			{ FSM::stateId<U    >(), Event::UTILITY_RESOLUTION, 4 },
 
-				{ FSM::stateId<O>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<U>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<U_100>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<C>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
 
-				{ FSM::stateId<I>(),	 Event::EXIT },
+			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<U_100>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
 
-				{ FSM::stateId<O>(),	 Event::ENTER },
-				{ FSM::stateId<U>(),	 Event::ENTER },
-				{ FSM::stateId<U_100>(), Event::ENTER },
-				{ FSM::stateId<C>(),	 Event::ENTER },
-				{ FSM::stateId<C_000>(), Event::ENTER },
-			};
-			logger.assertSequence(reference);
+			{ FSM::stateId<I    >(), Event::EXIT },
 
-			const Types active = {
-				FSM::stateId<Apex>(),
-				FSM::stateId<O>(),
-				FSM::stateId<U>(),
-				FSM::stateId<U_100>(),
-				FSM::stateId<C>(),
-				FSM::stateId<C_000>(),
-			};
-			assertActive(machine, all, active);
+			{ FSM::stateId<O    >(), Event::ENTER },
+			{ FSM::stateId<U    >(), Event::ENTER },
+			{ FSM::stateId<U_100>(), Event::ENTER },
+			{ FSM::stateId<C    >(), Event::ENTER },
+			{ FSM::stateId<C_000>(), Event::ENTER },
+		});
 
-			const Types resumable = {
-				FSM::stateId<I>(),
-			};
-			assertResumable(machine, all, resumable);
-		}
+		assertActive(machine, all, {
+			FSM::stateId<Apex >(),
+			FSM::stateId<O    >(),
+			FSM::stateId<U    >(),
+			FSM::stateId<U_100>(),
+			FSM::stateId<C    >(),
+			FSM::stateId<C_000>(),
+		});
+
+		assertResumable(machine, all, {
+			FSM::stateId<I   >(),
+		});
 	}
 
 	WHEN("Restarting O") {
 		machine.restart<O>();
 		machine.update();
-		{
-			const Events reference = {
-				{						 Event::RESTART, FSM::stateId<O>() },
 
-				{ FSM::stateId<Apex>(),	 Event::UPDATE },
-				{ FSM::stateId<I>(),	 Event::UPDATE },
+		logger.assertSequence({
+			{						 Event::RESTART, FSM::stateId<O   >() },
 
-				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
+			{ FSM::stateId<Apex >(), Event::UPDATE },
+			{ FSM::stateId<I    >(), Event::UPDATE },
 
-				{ FSM::stateId<O>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<U>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<U_000>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<C>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
 
-				{ FSM::stateId<I>(),	 Event::EXIT },
+			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<U_000>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
 
-				{ FSM::stateId<O>(),	 Event::ENTER },
-				{ FSM::stateId<U>(),	 Event::ENTER },
-				{ FSM::stateId<U_000>(), Event::ENTER },
-				{ FSM::stateId<C>(),	 Event::ENTER },
-				{ FSM::stateId<C_000>(), Event::ENTER },
-			};
-			logger.assertSequence(reference);
+			{ FSM::stateId<I    >(), Event::EXIT },
 
-			const Types active = {
-				FSM::stateId<Apex>(),
-				FSM::stateId<O>(),
-				FSM::stateId<U>(),
-				FSM::stateId<U_000>(),
-				FSM::stateId<C>(),
-				FSM::stateId<C_000>(),
-			};
-			assertActive(machine, all, active);
+			{ FSM::stateId<O    >(), Event::ENTER },
+			{ FSM::stateId<U    >(), Event::ENTER },
+			{ FSM::stateId<U_000>(), Event::ENTER },
+			{ FSM::stateId<C    >(), Event::ENTER },
+			{ FSM::stateId<C_000>(), Event::ENTER },
+		});
 
-			const Types resumable = {
-				FSM::stateId<I>(),
-			};
-			assertResumable(machine, all, resumable);
-		}
+		assertActive(machine, all, {
+			FSM::stateId<Apex >(),
+			FSM::stateId<O    >(),
+			FSM::stateId<U    >(),
+			FSM::stateId<U_000>(),
+			FSM::stateId<C    >(),
+			FSM::stateId<C_000>(),
+		});
+
+		assertResumable(machine, all, {
+			FSM::stateId<I   >(),
+		});
 	}
 
 	WHEN("Utilizing O") {
 		machine.utilize<O>();
 		machine.update();
-		{
-			const Events reference = {
-				{						 Event::UTILIZE, FSM::stateId<O>() },
 
-				{ FSM::stateId<Apex>(),	 Event::UPDATE },
-				{ FSM::stateId<I>(),	 Event::UPDATE },
+		logger.assertSequence({
+			{						 Event::UTILIZE, FSM::stateId<O   >() },
 
-				{ FSM::stateId<U_000>(), Event::UTILITY },
-				{ FSM::stateId<U_025>(), Event::UTILITY },
-				{ FSM::stateId<U_050>(), Event::UTILITY },
-				{ FSM::stateId<U_075>(), Event::UTILITY },
-				{ FSM::stateId<U_100>(), Event::UTILITY },
+			{ FSM::stateId<Apex >(), Event::UPDATE },
+			{ FSM::stateId<I    >(), Event::UPDATE },
 
-				{ FSM::stateId<U>(),	 Event::UTILITY_RESOLUTION, 4 },
+			{ FSM::stateId<U_000>(), Event::UTILITY },
+			{ FSM::stateId<U_025>(), Event::UTILITY },
+			{ FSM::stateId<U_050>(), Event::UTILITY },
+			{ FSM::stateId<U_075>(), Event::UTILITY },
+			{ FSM::stateId<U_100>(), Event::UTILITY },
 
-				{ FSM::stateId<C_000>(), Event::UTILITY },
-				{ FSM::stateId<C_025>(), Event::UTILITY },
-				{ FSM::stateId<C_050>(), Event::UTILITY },
-				{ FSM::stateId<C_075>(), Event::UTILITY },
-				{ FSM::stateId<C_100>(), Event::UTILITY },
+			{ FSM::stateId<U    >(), Event::UTILITY_RESOLUTION, 4 },
 
-				{ FSM::stateId<C>(),	 Event::UTILITY_RESOLUTION, 4 },
+			{ FSM::stateId<C_000>(), Event::UTILITY },
+			{ FSM::stateId<C_025>(), Event::UTILITY },
+			{ FSM::stateId<C_050>(), Event::UTILITY },
+			{ FSM::stateId<C_075>(), Event::UTILITY },
+			{ FSM::stateId<C_100>(), Event::UTILITY },
 
-				{ FSM::stateId<I>(),	 Event::EXIT_GUARD },
+			{ FSM::stateId<C    >(), Event::UTILITY_RESOLUTION, 4 },
 
-				{ FSM::stateId<O>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<U>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<U_100>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<C>(),	 Event::ENTRY_GUARD },
-				{ FSM::stateId<C_100>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
 
-				{ FSM::stateId<I>(),	 Event::EXIT },
+			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<U_100>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
+			{ FSM::stateId<C_100>(), Event::ENTRY_GUARD },
 
-				{ FSM::stateId<O>(),	 Event::ENTER },
-				{ FSM::stateId<U>(),	 Event::ENTER },
-				{ FSM::stateId<U_100>(), Event::ENTER },
-				{ FSM::stateId<C>(),	 Event::ENTER },
-				{ FSM::stateId<C_100>(), Event::ENTER },
-			};
-			logger.assertSequence(reference);
+			{ FSM::stateId<I    >(), Event::EXIT },
 
-			const Types active = {
-				FSM::stateId<Apex>(),
-				FSM::stateId<O>(),
-				FSM::stateId<U>(),
-				FSM::stateId<U_100>(),
-				FSM::stateId<C>(),
-				FSM::stateId<C_100>(),
-			};
-			assertActive(machine, all, active);
+			{ FSM::stateId<O    >(), Event::ENTER },
+			{ FSM::stateId<U    >(), Event::ENTER },
+			{ FSM::stateId<U_100>(), Event::ENTER },
+			{ FSM::stateId<C    >(), Event::ENTER },
+			{ FSM::stateId<C_100>(), Event::ENTER },
+		});
 
-			const Types resumable = {
-				FSM::stateId<I>(),
-			};
-			assertResumable(machine, all, resumable);
-		}
+		assertActive(machine, all, {
+			FSM::stateId<Apex >(),
+			FSM::stateId<O    >(),
+			FSM::stateId<U    >(),
+			FSM::stateId<U_100>(),
+			FSM::stateId<C    >(),
+			FSM::stateId<C_100>(),
+		});
+
+		assertResumable(machine, all, {
+			FSM::stateId<I   >(),
+		});
 	}
 }
 

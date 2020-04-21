@@ -3,6 +3,7 @@
 // based on https://www.embedded.com/print/4026976
 
 #include <hfsm2/machine.hpp>
+
 #include <iostream>
 #include <conio.h>
 #include <cmath>

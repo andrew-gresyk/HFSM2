@@ -45,6 +45,7 @@ struct C_ final {
 	using Head			= THead;
 
 	using HeadState		= S_<Indices, Args, Head>;
+
 	using SubStates		= CS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX + 1,
 								 ORTHO_INDEX,
@@ -71,8 +72,8 @@ struct C_ final {
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 C_& c)						{ return c._headState._head;					}
-		HFSM_INLINE static const Head& get(const C_& c)						{ return c._headState._head;					}
+		HFSM_INLINE static		 Head& get(		 C_& c)						{ return c._headState._headBox.get();			}
+		HFSM_INLINE static const Head& get(const C_& c)						{ return c._headState._headBox.get();			}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

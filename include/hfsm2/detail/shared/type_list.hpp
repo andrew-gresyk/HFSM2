@@ -127,10 +127,10 @@ struct IndexedTypeList_EntryN
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename...>
-struct IndexedTypeList_Impl;
+struct ITL_Impl;
 
 template <LongIndex... Ns, typename... Ts>
-struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
+struct ITL_Impl<IndexSequence<Ns...>, Ts...>
 	: IndexedTypeList_EntryN<Ts, Ns>...
 {
 	template <typename T, LongIndex N>
@@ -141,9 +141,9 @@ struct IndexedTypeList_Impl<IndexSequence<Ns...>, Ts...>
 
 template <typename... Ts>
 struct ITL_
-	: private IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>
+	: private ITL_Impl<IndexSequenceFor<Ts...>, Ts...>
 {
-	using Base = IndexedTypeList_Impl<IndexSequenceFor<Ts...>, Ts...>;
+	using Base = ITL_Impl<IndexSequenceFor<Ts...>, Ts...>;
 
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
