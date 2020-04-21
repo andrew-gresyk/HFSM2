@@ -30,12 +30,6 @@
     <ClCompile Include="..\..\test\test_internal_transitions.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\deprecated_test.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\test_guard.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -79,6 +73,12 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test_plans.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_dynamic.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_guards.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
@@ -158,6 +158,9 @@
     <ClInclude Include="..\..\include\hfsm2\detail\state_access.hpp">
       <Filter>hfsm\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\state_box.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\shared\array.inl">
@@ -216,6 +219,9 @@
     </None>
     <None Include="..\..\test\shared.inl">
       <Filter>test</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\state_box.inl">
+      <Filter>hfsm\detail\structure</Filter>
     </None>
   </ItemGroup>
 </Project>

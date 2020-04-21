@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\deprecated_test.cpp" />
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_list.cpp" />
@@ -27,7 +26,13 @@
     <ClCompile Include="..\..\test\test_composite_bst.cpp" />
     <ClCompile Include="..\..\test\test_debug.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
-    <ClCompile Include="..\..\test\test_guard.cpp" />
+    <ClCompile Include="..\..\test\test_dynamic.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_guards.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_ortho_units.cpp" />
     <ClCompile Include="..\..\test\test_plans.cpp" />
@@ -62,6 +67,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\root.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\state_box.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
     <ClInclude Include="..\..\test\shared.hpp" />
   </ItemGroup>
@@ -84,6 +90,7 @@
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\root.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\state_box.inl" />
     <None Include="..\..\test\shared.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
