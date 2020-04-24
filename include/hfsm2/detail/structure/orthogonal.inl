@@ -45,10 +45,19 @@ O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
-O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) {
+O_<TN_, TA_, TH_, TS_...>::deepConstruct(PlanControl& control) {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
+	_headState.deepConstruct(control);
+	_subStates.wideConstruct(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+void
+O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	_headState.deepEnter(control);
@@ -155,6 +164,15 @@ void
 O_<TN_, TA_, TH_, TS_...>::deepExit(PlanControl& control) {
 	_subStates.wideExit(control);
 	_headState.deepExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+void
+O_<TN_, TA_, TH_, TS_...>::deepDestruct(PlanControl& control) {
+	_subStates.wideDestruct(control);
+	_headState.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -332,15 +350,6 @@ O_<TN_, TA_, TH_, TS_...>::deepReportRandomize(Control& control) {
 }
 
 //------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-void
-O_<TN_, TA_, TH_, TS_...>::deepEnterRequested(PlanControl& control) {
-	_headState.deepEnter		 (control);
-	_subStates.wideEnterRequested(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void

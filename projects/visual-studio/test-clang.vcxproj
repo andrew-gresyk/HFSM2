@@ -30,6 +30,7 @@
     <ClCompile Include="..\..\test\test_dynamic.cpp" />
     <ClCompile Include="..\..\test\test_guards.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
+    <ClCompile Include="..\..\test\test_orthogonal_root.cpp" />
     <ClCompile Include="..\..\test\test_ortho_units.cpp" />
     <ClCompile Include="..\..\test\test_plans.cpp" />
     <ClCompile Include="..\..\test\test_randomize.cpp" />
@@ -40,13 +41,15 @@
     <ClCompile Include="..\..\test\test_utility_regions.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\hfsm2\detail\control.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\debug\logger_interface.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\debug\shared.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\debug\structure_report.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\injections.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\plan.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\plan_data.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\root.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\root\control.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\root\plan.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\root\plan_data.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\root\state_access.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\root\state_registry.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\array.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp" />
@@ -54,37 +57,35 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\state_access.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\composite.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\composite_sub.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\forward.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\injections.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\root.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state_box.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
     <ClInclude Include="..\..\test\shared.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\hfsm2\detail\control.inl" />
-    <None Include="..\..\include\hfsm2\detail\injections.inl" />
-    <None Include="..\..\include\hfsm2\detail\plan.inl" />
-    <None Include="..\..\include\hfsm2\detail\plan_data.inl" />
+    <None Include="..\..\include\hfsm2\detail\root.inl" />
+    <None Include="..\..\include\hfsm2\detail\root\control.inl" />
+    <None Include="..\..\include\hfsm2\detail\root\plan.inl" />
+    <None Include="..\..\include\hfsm2\detail\root\plan_data.inl" />
+    <None Include="..\..\include\hfsm2\detail\root\state_registry.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\iterator.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\list.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\random.inl" />
-    <None Include="..\..\include\hfsm2\detail\state_registry.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite_sub_1.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite_sub_2.inl" />
+    <None Include="..\..\include\hfsm2\detail\structure\injections.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_1.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\root.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state_box.inl" />
     <None Include="..\..\test\shared.inl" />

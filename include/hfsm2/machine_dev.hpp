@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <math.h>			// ldexpf()
-#include <stdint.h>
+#include <stdint.h>			// uint32_t, uint64_t
+#include <string.h>			// memcpy_s()
 
 #include <new>
 #include <typeindex>
@@ -75,13 +75,13 @@ struct EmptyPayload {};
 #include "detail/debug/shared.hpp"
 #include "detail/debug/logger_interface.hpp"
 
-#include "detail/plan_data.hpp"
-#include "detail/plan.hpp"
-#include "detail/state_registry.hpp"
-#include "detail/control.hpp"
+#include "detail/root/plan_data.hpp"
+#include "detail/root/plan.hpp"
+#include "detail/root/state_registry.hpp"
+#include "detail/root/control.hpp"
 #include "detail/debug/structure_report.hpp"
-#include "detail/injections.hpp"
 
+#include "detail/structure/injections.hpp"
 #include "detail/structure/state_box.hpp"
 #include "detail/structure/state.hpp"
 #include "detail/structure/forward.hpp"
@@ -89,7 +89,7 @@ struct EmptyPayload {};
 #include "detail/structure/composite.hpp"
 #include "detail/structure/orthogonal_sub.hpp"
 #include "detail/structure/orthogonal.hpp"
-#include "detail/state_access.hpp"
+#include "detail/root/state_access.hpp"
 
 namespace hfsm2 {
 
@@ -254,7 +254,7 @@ using MachineT = detail::M_<TConfig>;
 
 }
 
-#include "detail/structure/root.hpp"
+#include "detail/root.hpp"
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

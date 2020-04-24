@@ -22,6 +22,9 @@
     <Filter Include="test\shared">
       <UniqueIdentifier>{26865fdc-dcef-498a-b7c1-91f82db3b7af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="hfsm\detail\root">
+      <UniqueIdentifier>{c59a1ec1-1a7f-416c-a914-1af381858ed8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp">
@@ -81,6 +84,9 @@
     <ClCompile Include="..\..\test\test_guards.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_orthogonal_root.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
@@ -113,28 +119,10 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp">
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\control.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\injections.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\plan.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\plan_data.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\state_registry.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\shared.hpp">
       <Filter>test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\root.hpp">
       <Filter>hfsm\detail\structure</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp">
@@ -155,11 +143,29 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp">
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\state_access.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state_box.hpp">
       <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\structure\injections.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\root\control.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\root\plan.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\root\plan_data.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\root\state_access.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\root\state_registry.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\root.hpp">
+      <Filter>hfsm\detail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -175,21 +181,6 @@
     <None Include="..\..\include\hfsm2\detail\shared\list.inl">
       <Filter>hfsm\detail\shared</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\control.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\injections.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\plan.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\plan_data.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\state_registry.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
@@ -197,9 +188,6 @@
       <Filter>hfsm\detail\structure</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\root.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\structure\state.inl">
@@ -222,6 +210,24 @@
     </None>
     <None Include="..\..\include\hfsm2\detail\structure\state_box.inl">
       <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\structure\injections.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root\control.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root\plan.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root\plan_data.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root\state_registry.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root.inl">
+      <Filter>hfsm\detail</Filter>
     </None>
   </ItemGroup>
 </Project>

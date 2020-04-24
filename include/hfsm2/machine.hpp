@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <math.h>			// ldexpf()
-#include <stdint.h>
+#include <stdint.h>			// uint32_t, uint64_t
+#include <string.h>			// memcpy_s()
 
 #include <new>
 #include <typeindex>
@@ -1375,16 +1375,42 @@ public:
 namespace hfsm2 {
 
 ////////////////////////////////////////////////////////////////////////////////
+
 namespace detail {
+
+template <typename TO, typename TI>
+TO convert(const TI& in) {
+	static_assert(sizeof(TI) == sizeof(TO), "");
+
+	TO out;
+	
+#if defined(__GNUC__) || defined(__GNUG__)
+	memcpy  (&out,				&in, sizeof(in));
+#else
+	memcpy_s(&out, sizeof(out), &in, sizeof(in));
+#endif
+
+	return out;
+}
+
+//------------------------------------------------------------------------------
 
 inline
 float
-toFloat(const uint32_t uint) {
-	constexpr uint32_t mask = (1ULL << 24) - 1;
-	const float x = (float) (uint & mask);
+uniformReal(const uint32_t uint) {
+	const auto real = convert<float>(UINT32_C(0x7F) << 23 | uint >> 9);
 
-	return ldexpf(x, -24);
+	return real - 1.0f;
+}
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+inline
+double
+uniformReal(const uint64_t uint) {
+	const auto real = convert<double>(UINT64_C(0x3FF) << 52 | uint >> 12);
+
+	return real - 1.0;
 }
 
 //------------------------------------------------------------------------------
@@ -1404,6 +1430,7 @@ rotl(const uint64_t x, const uint64_t k) {
 }
 
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 SplitMix64::SplitMix64(const uint64_t seed)
@@ -1479,7 +1506,7 @@ XoShiRo256Plus::seed(const uint64_t(& s)[4]) {
 
 float
 XoShiRo256Plus::next() {
-	return detail::toFloat((uint32_t) raw());
+	return detail::uniformReal((uint32_t) raw());
 }
 
 //------------------------------------------------------------------------------
@@ -1605,7 +1632,7 @@ XoShiRo128Plus::seed(const uint32_t(& s)[4]) {
 
 float
 XoShiRo128Plus::next() {
-	return detail::toFloat(raw());
+	return detail::uniformReal(raw());
 }
 
 //------------------------------------------------------------------------------
@@ -1865,12 +1892,14 @@ enum class Method : ShortIndex {
 	RANK,
 	UTILITY,
 	ENTRY_GUARD,
+	CONSTRUCT,
 	ENTER,
 	REENTER,
 	UPDATE,
 	REACT,
 	EXIT_GUARD,
 	EXIT,
+	DESTRUCT,
 	PLAN_SUCCEEDED,
 	PLAN_FAILED,
 
@@ -4272,6 +4301,7 @@ struct alignas(4) TransitionInfo {
 
 #endif
 
+
 namespace hfsm2 {
 namespace detail {
 
@@ -4591,7 +4621,6 @@ B_<TF_>::widePostExit(Context& context) {
 }
 }
 
-
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
@@ -4794,6 +4823,8 @@ struct S_ final {
 	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&)					{ return false;	}
 	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
 
+	HFSM_INLINE void	deepConstruct		 (PlanControl&  control);
+
 	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
 	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
 
@@ -4806,6 +4837,8 @@ struct S_ final {
 	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
 
 	HFSM_INLINE void	deepExit			 (PlanControl&	control);
+
+	HFSM_INLINE void	deepDestruct		 (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4835,8 +4868,7 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepEnterRequested	(Control&)											{}
-	HFSM_INLINE void   deepChangeToRequested(Control&)											{}
+	HFSM_INLINE void	deepChangeToRequested(Control&)											{}
 
 	//----------------------------------------------------------------------
 
@@ -4998,20 +5030,30 @@ S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA_, typename TH_>
 void
-S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
+S_<TN_, TA_, TH_>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
 	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
+	HFSM_LOG_STATE_METHOD(&Head::enter,
+						  control.context(),
+						  Method::CONSTRUCT);
+
+	_headBox.construct();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::enter,
 						  control.context(),
 						  Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	_headBox.construct();
-
 	_headBox.get().widePreEnter(control.context());
-	_headBox.get().	   enter(control);
+	_headBox.get().		  enter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5032,7 +5074,7 @@ S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
 	_headBox.construct();
 
 	_headBox.get().widePreReenter(control.context());
-	_headBox.get().	   reenter(control);
+	_headBox.get().		  reenter(control);
 }
 
 //------------------------------------------------------------------------------
@@ -5047,7 +5089,7 @@ S_<TN_, TA_, TH_>::deepUpdate(FullControl& control) {
 	ScopedOrigin origin{control, STATE_ID};
 
 	_headBox.get().widePreUpdate(control.context());
-	_headBox.get().	   update(control);
+	_headBox.get().		  update(control);
 
 	return control._status;
 }
@@ -5068,7 +5110,7 @@ S_<TN_, TA_, TH_>::deepReact(FullControl& control,
 	ScopedOrigin origin{control, STATE_ID};
 
 	_headBox.get().widePreReact(event, control.context());
-	(_headBox.get().*reaction)(event, control);				//_headBox.get().react(event, control);
+	(_headBox.get().*reaction) (event, control);				//_headBox.get().react(event, control);
 
 	return control._status;
 }
@@ -5087,12 +5129,12 @@ S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
 	const bool cancelledBefore = control._cancelled;
 
 	_headBox.get().widePreExitGuard(control.context());
-	_headBox.get().	   exitGuard(control);
+	_headBox.get().		  exitGuard(control);
 
 	return !cancelledBefore && control._cancelled;
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <typename TN_, typename TA_, typename TH_>
 void
@@ -5108,8 +5150,18 @@ S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
 	// Clang - error : no member named 'exit' in 'Blah'
 	//
 	// .. inherit state 'Blah' from hfsm2::Machine::Instance::State
-	_headBox.get().	    exit(control);
+	_headBox.get().		   exit(control);
 	_headBox.get().widePostExit(control.context());
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepDestruct(PlanControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::exit,
+						  control.context(),
+						  Method::DESTRUCT);
 
 	_headBox.destruct();
 
@@ -5751,21 +5803,25 @@ struct CS_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard		  (GuardControl& control,							const ShortIndex prong);
-	HFSM_INLINE bool	wideEntryGuard				  (GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool	wideForwardEntryGuard		  (GuardControl& control,								const ShortIndex prong);
+	HFSM_INLINE bool	wideEntryGuard				  (GuardControl& control,								const ShortIndex prong);
 
-	HFSM_INLINE void	wideEnter					  (PlanControl& control,							const ShortIndex prong);
-	HFSM_INLINE void	wideReenter					  (PlanControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	wideConstruct				  (PlanControl&  control,								const ShortIndex prong);
 
-	HFSM_INLINE Status	wideUpdate					  (FullControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	wideEnter					  (PlanControl&  control,								const ShortIndex prong);
+	HFSM_INLINE void	wideReenter					  (PlanControl&  control,								const ShortIndex prong);
+
+	HFSM_INLINE Status	wideUpdate					  (FullControl&  control,								const ShortIndex prong);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact					  (FullControl& control, const TEvent& event,		const ShortIndex prong);
+	HFSM_INLINE Status	wideReact					  (FullControl&  control, const TEvent& event,			const ShortIndex prong);
 
-	HFSM_INLINE bool	wideForwardExitGuard		  (GuardControl& control,							const ShortIndex prong);
-	HFSM_INLINE bool	wideExitGuard				  (GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool	wideForwardExitGuard		  (GuardControl& control,								const ShortIndex prong);
+	HFSM_INLINE bool	wideExitGuard				  (GuardControl& control,								const ShortIndex prong);
 
-	HFSM_INLINE void	wideExit					  (PlanControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	wideExit					  (PlanControl&  control,								const ShortIndex prong);
+
+	HFSM_INLINE void	wideDestruct				  (PlanControl&  control,								const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -5777,33 +5833,33 @@ struct CS_ final {
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
-	HFSM_INLINE void	wideRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	wideRequestChange			  (Control& control,									const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
-	HFSM_INLINE void	wideRequestChange<Composite>  (Control& control,	 const ShortIndex)			{ wideRequestChangeComposite(control);			}
+	HFSM_INLINE void	wideRequestChange<Composite>  (Control& control,									const ShortIndex)		{ wideRequestChangeComposite(control);			}
 
 	template <>
-	HFSM_INLINE	void	wideRequestChange<Resumable>  (Control& control,	 const ShortIndex prong)	{ wideRequestChangeResumable(control, prong);	}
+	HFSM_INLINE	void	wideRequestChange<Resumable>  (Control& control,									const ShortIndex prong)	{ wideRequestChangeResumable(control, prong);	}
 
 #else
 
-	HFSM_INLINE void	wideRequestChange			  (Control& control,	 const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM_INLINE void	wideRequestChange			  (Control& control,									const ShortIndex = INVALID_SHORT_INDEX);
 
 #endif
 
 	HFSM_INLINE void	wideRequestChangeComposite	  (Control& control);
-	HFSM_INLINE void	wideRequestChangeResumable	  (Control& control,	 const ShortIndex prong);
+	HFSM_INLINE void	wideRequestChangeResumable	  (Control& control,									const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRequestRemain			  (StateRegistry& stateRegistry);
 	HFSM_INLINE void	wideRequestRestart			  (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestResume			  (StateRegistry& stateRegistry, const ShortIndex prong);
+	HFSM_INLINE void	wideRequestResume			  (StateRegistry& stateRegistry,						const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE UP		wideReportChangeComposite	  (Control& control);
-	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,	 const ShortIndex prong);
+	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,									const ShortIndex prong);
 	HFSM_INLINE UP		wideReportChangeUtilitarian	  (Control& control);
 	HFSM_INLINE Utility	wideReportChangeRandom		  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
 
@@ -5815,7 +5871,6 @@ struct CS_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideEnterRequested			  (PlanControl& control, const ShortIndex prong);
 	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control, const ShortIndex prong);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -5893,21 +5948,25 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard		  (GuardControl& control,							const ShortIndex prong);
-	HFSM_INLINE bool	wideEntryGuard				  (GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool	wideForwardEntryGuard		  (GuardControl& control,								const ShortIndex prong);
+	HFSM_INLINE bool	wideEntryGuard				  (GuardControl& control,								const ShortIndex prong);
 
-	HFSM_INLINE void	wideEnter					  (PlanControl& control,							const ShortIndex prong);
-	HFSM_INLINE void	wideReenter					  (PlanControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	wideConstruct				  (PlanControl& control,								const ShortIndex prong);
 
-	HFSM_INLINE Status	wideUpdate					  (FullControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	wideEnter					  (PlanControl& control,								const ShortIndex prong);
+	HFSM_INLINE void	wideReenter					  (PlanControl& control,								const ShortIndex prong);
+
+	HFSM_INLINE Status	wideUpdate					  (FullControl& control,								const ShortIndex prong);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact					  (FullControl& control, const TEvent& event,		const ShortIndex prong);
+	HFSM_INLINE Status	wideReact					  (FullControl& control, const TEvent& event,			const ShortIndex prong);
 
-	HFSM_INLINE bool	wideForwardExitGuard		  (GuardControl& control,							const ShortIndex prong);
-	HFSM_INLINE bool	wideExitGuard				  (GuardControl& control,							const ShortIndex prong);
+	HFSM_INLINE bool	wideForwardExitGuard		  (GuardControl& control,								const ShortIndex prong);
+	HFSM_INLINE bool	wideExitGuard				  (GuardControl& control,								const ShortIndex prong);
 
-	HFSM_INLINE void	wideExit					  (PlanControl& control,							const ShortIndex prong);
+	HFSM_INLINE void	wideExit					  (PlanControl& control,								const ShortIndex prong);
+
+	HFSM_INLINE void	wideDestruct				  (PlanControl& control,								const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -5917,18 +5976,18 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRequestChangeComposite	  (Control& control);
-	HFSM_INLINE void	wideRequestChangeResumable	  (Control& control,	 const ShortIndex prong);
+	HFSM_INLINE void	wideRequestChangeResumable	  (Control& control,	 								const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRequestRemain			  (StateRegistry& stateRegistry);
 	HFSM_INLINE void	wideRequestRestart			  (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestResume			  (StateRegistry& stateRegistry, const ShortIndex prong);
+	HFSM_INLINE void	wideRequestResume			  (StateRegistry& stateRegistry,						const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE UP		wideReportChangeComposite	  (Control& control);
-	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,	 const ShortIndex prong);
+	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,									const ShortIndex prong);
 	HFSM_INLINE UP		wideReportChangeUtilitarian	  (Control& control);
 	HFSM_INLINE Utility	wideReportChangeRandom		  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
 
@@ -5940,8 +5999,7 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideEnterRequested			  (PlanControl& control, const ShortIndex prong);
-	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control, const ShortIndex prong);
+	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control,								const ShortIndex prong);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -6031,6 +6089,21 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideEntryGuard(GuardControl& control,
 		return lHalf.wideEntryGuard(control, prong);
 	else
 		return rHalf.wideEntryGuard(control, prong);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+void
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideConstruct(PlanControl& control,
+											   const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		lHalf.wideConstruct(control, prong);
+	else
+		rHalf.wideConstruct(control, prong);
 }
 
 //------------------------------------------------------------------------------
@@ -6136,6 +6209,21 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideExit(PlanControl& control,
 		lHalf.wideExit(control, prong);
 	else
 		rHalf.wideExit(control, prong);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+void
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideDestruct(PlanControl& control,
+											  const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		lHalf.wideDestruct(control, prong);
+	else
+		rHalf.wideDestruct(control, prong);
 }
 
 //------------------------------------------------------------------------------
@@ -6325,21 +6413,6 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeRandom(Control& control,
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideEnterRequested(PlanControl& control,
-													const ShortIndex prong)
-{
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
-
-	if (prong < R_PRONG)
-		lHalf.wideEnterRequested(control, prong);
-	else
-		rHalf.wideEnterRequested(control, prong);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-void
 CS_<TN_, TA_, TG_, NI_, TS_...>::wideChangeToRequested(PlanControl& control,
 													   const ShortIndex prong)
 {
@@ -6407,6 +6480,18 @@ CS_<TN_, TA_, TG_, NI_, T>::wideEntryGuard(GuardControl& control,
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
 	return state.deepEntryGuard(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+void
+CS_<TN_, TA_, TG_, NI_, T>::wideConstruct(PlanControl& control,
+										  const ShortIndex HFSM_IF_ASSERT(prong))
+{
+	HFSM_ASSERT(prong == PRONG_INDEX);
+
+	state.deepConstruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -6493,6 +6578,18 @@ CS_<TN_, TA_, TG_, NI_, T>::wideExit(PlanControl& control,
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
 	state.deepExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+void
+CS_<TN_, TA_, TG_, NI_, T>::wideDestruct(PlanControl& control,
+										 const ShortIndex HFSM_IF_ASSERT(prong))
+{
+	HFSM_ASSERT(prong == PRONG_INDEX);
+
+	state.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -6657,18 +6754,6 @@ CS_<TN_, TA_, TG_, NI_, T>::wideReportChangeRandom(Control& control,
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideEnterRequested(PlanControl& control,
-											   const ShortIndex HFSM_IF_ASSERT(prong))
-{
-	HFSM_ASSERT(prong == PRONG_INDEX);
-
-	state.deepEnterRequested(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-void
 CS_<TN_, TA_, TG_, NI_, T>::wideChangeToRequested(PlanControl& control,
 												  const ShortIndex HFSM_IF_ASSERT(prong))
 {
@@ -6808,6 +6893,8 @@ struct C_ final {
 	HFSM_INLINE bool	deepForwardEntryGuard		  (GuardControl& control);
 	HFSM_INLINE bool	deepEntryGuard				  (GuardControl& control);
 
+	HFSM_INLINE void	deepConstruct				  (PlanControl& control);
+
 	HFSM_INLINE void	deepEnter					  (PlanControl&  control);
 	HFSM_INLINE void	deepReenter					  (PlanControl&  control);
 
@@ -6821,12 +6908,14 @@ struct C_ final {
 
 	HFSM_INLINE void	deepExit					  (PlanControl&  control);
 
+	HFSM_INLINE void	deepDestruct				  (PlanControl&  control);
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepForwardActive			  (Control& control, const Request::Type request);
-	HFSM_INLINE void   deepForwardRequest			  (Control& control, const Request::Type request);
+	HFSM_INLINE void	deepForwardActive			  (Control& control, const Request::Type request);
+	HFSM_INLINE void	deepForwardRequest			  (Control& control, const Request::Type request);
 
-	HFSM_INLINE void   deepRequest					  (Control& control, const Request::Type request);
+	HFSM_INLINE void	deepRequest					  (Control& control, const Request::Type request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -6904,7 +6993,6 @@ struct C_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepEnterRequested			  (PlanControl& control);
 	HFSM_INLINE void	deepChangeToRequested		  (PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -7014,17 +7102,13 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepEnter(PlanControl& control) {
+C_<TN_, TA_, TG_, TH_, TS_...>::deepConstruct(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
 
-	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX &&
-				requested != INVALID_SHORT_INDEX);
-
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	_headState.deepEnter(control);
+	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX);
+	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
 
 	active	  = requested;
 
@@ -7033,6 +7117,20 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepEnter(PlanControl& control) {
 
 	requested = INVALID_SHORT_INDEX;
 
+	_headState.deepConstruct(control);
+	_subStates.wideConstruct(control, active);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+void
+C_<TN_, TA_, TG_, TH_, TS_...>::deepEnter(PlanControl& control) {
+	const ShortIndex& active = compoActive(control);
+
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	_headState.deepEnter(control);
 	_subStates.wideEnter(control, active);
 }
 
@@ -7163,12 +7261,24 @@ template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS
 void
 C_<TN_, TA_, TG_, TH_, TS_...>::deepExit(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
-	ShortIndex& resumable = compoResumable(control);
-
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
 	_subStates.wideExit(control, active);
 	_headState.deepExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+void
+C_<TN_, TA_, TG_, TH_, TS_...>::deepDestruct(PlanControl& control) {
+	ShortIndex& active	  = compoActive   (control);
+	ShortIndex& resumable = compoResumable(control);
+
+	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+
+	_subStates.wideDestruct(control, active);
+	_headState.deepDestruct(control);
 
 	resumable = active;
 	active	  = INVALID_SHORT_INDEX;
@@ -7563,24 +7673,6 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportRandomize(Control& control) {
 
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepEnterRequested(PlanControl& control) {
-	ShortIndex& active	  = compoActive	  (control);
-	ShortIndex& requested = compoRequested(control);
-
-	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX);
-	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
-
-	active	  = requested;
-	requested = INVALID_SHORT_INDEX;
-
-	_headState.deepEnter(control);
-	_subStates.wideEnter(control, active);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-void
 C_<TN_, TA_, TG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 	ShortIndex& active	  = compoActive	  (control);
 	ShortIndex& resumable = compoResumable(control);
@@ -7591,23 +7683,29 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 	if (requested == INVALID_SHORT_INDEX)
 		_subStates.wideChangeToRequested(control, active);
 	else if (requested != active) {
-		_subStates.wideExit	  (control, active);
+		_subStates.wideExit		(control, active);
+		_subStates.wideDestruct	(control, active);
 
 		resumable = active;
 		active	  = requested;
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.wideEnter  (control, active);
+		_subStates.wideConstruct(control, active);
+		_subStates.wideEnter	(control, active);
 	} else if (compoRemain(control)) {
-		_subStates.wideExit	  (control, active);
+		_subStates.wideExit		(control, active);
+		_subStates.wideDestruct	(control, active);
 
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.wideEnter  (control, active);
+		_subStates.wideConstruct(control, active);
+		_subStates.wideEnter	(control, active);
 	} else {
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.wideReenter(control, active);
+		// TODO: _subStates.wideReconstruct();
+
+		_subStates.wideReenter	(control, active);
 	}
 }
 
@@ -7711,23 +7809,27 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control,						const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control);
-	HFSM_INLINE bool	wideEntryGuard		 (GuardControl& control);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control,							const ProngConstBits prongs);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control);
+	HFSM_INLINE bool	wideEntryGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	wideEnter			 (PlanControl& control);
-	HFSM_INLINE void	wideReenter			 (PlanControl& control);
+	HFSM_INLINE void	wideConstruct		 (PlanControl&	control);
 
-	HFSM_INLINE Status	wideUpdate			 (FullControl& control);
+	HFSM_INLINE void	wideEnter			 (PlanControl&	control);
+	HFSM_INLINE void	wideReenter			 (PlanControl&	control);
+
+	HFSM_INLINE Status	wideUpdate			 (FullControl&	control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact			 (FullControl& control, const TEvent& event);
+	HFSM_INLINE Status	wideReact			 (FullControl&	control, const TEvent& event);
 
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control,						const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control);
-	HFSM_INLINE bool	wideExitGuard		 (GuardControl& control);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control,							const ProngConstBits prongs);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control);
+	HFSM_INLINE bool	wideExitGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	wideExit			 (PlanControl& control);
+	HFSM_INLINE void	wideExit			 (PlanControl&	control);
+
+	HFSM_INLINE void	wideDestruct		 (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -7749,7 +7851,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideEnterRequested	 (PlanControl& control);
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -7825,23 +7926,27 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control,						const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control);
-	HFSM_INLINE bool	wideEntryGuard		 (GuardControl& control);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control,							const ProngConstBits prongs);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control);
+	HFSM_INLINE bool	wideEntryGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	wideEnter			 (PlanControl& control);
-	HFSM_INLINE void	wideReenter			 (PlanControl& control);
+	HFSM_INLINE void	wideConstruct		 (PlanControl&	control);
 
-	HFSM_INLINE Status	wideUpdate			 (FullControl& control);
+	HFSM_INLINE void	wideEnter			 (PlanControl&	control);
+	HFSM_INLINE void	wideReenter			 (PlanControl&	control);
+
+	HFSM_INLINE Status	wideUpdate			 (FullControl&	control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact			 (FullControl& control, const TEvent& event);
+	HFSM_INLINE Status	wideReact			 (FullControl&	control, const TEvent& event);
 
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control,						const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control);
-	HFSM_INLINE bool	wideExitGuard		 (GuardControl& control);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control,							const ProngConstBits prongs);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control);
+	HFSM_INLINE bool	wideExitGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	wideExit			 (PlanControl& control);
+	HFSM_INLINE void	wideExit			 (PlanControl&	control);
+
+	HFSM_INLINE void	wideDestruct		 (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -7863,7 +7968,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideEnterRequested	 (PlanControl& control);
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -7965,6 +8069,15 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideConstruct(PlanControl& control) {
+	initial	 .deepConstruct(control);
+	remaining.wideConstruct(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+void
 OS_<TN_, TA_, NI_, TI_, TR_...>::wideEnter(PlanControl& control) {
 	initial  .deepEnter(control);
 	remaining.wideEnter(control);
@@ -8044,6 +8157,15 @@ void
 OS_<TN_, TA_, NI_, TI_, TR_...>::wideExit(PlanControl& control) {
 	initial	 .deepExit(control);
 	remaining.wideExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+void
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideDestruct(PlanControl& control) {
+	initial	 .deepDestruct(control);
+	remaining.wideDestruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -8167,15 +8289,6 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideReportRandomize(Control& control) {
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideEnterRequested(PlanControl& control) {
-	initial	 .deepEnterRequested(control);
-	remaining.wideEnterRequested(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
-void
 OS_<TN_, TA_, NI_, TI_, TR_...>::wideChangeToRequested(PlanControl& control) {
 	initial	 .deepChangeToRequested(control);
 	remaining.wideChangeToRequested(control);
@@ -8239,6 +8352,14 @@ template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 bool
 OS_<TN_, TA_, NI_, TI_>::wideEntryGuard(GuardControl& control) {
 	return initial.deepEntryGuard(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+void
+OS_<TN_, TA_, NI_, TI_>::wideConstruct(PlanControl& control) {
+	initial.deepConstruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -8309,6 +8430,14 @@ template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
 OS_<TN_, TA_, NI_, TI_>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+void
+OS_<TN_, TA_, NI_, TI_>::wideDestruct(PlanControl& control) {
+	initial.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -8418,14 +8547,6 @@ OS_<TN_, TA_, NI_, TI_>::wideReportRandomize(Control& control) {
 }
 
 //------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
-void
-OS_<TN_, TA_, NI_, TI_>::wideEnterRequested(PlanControl& control) {
-	initial.deepEnterRequested(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
@@ -8555,6 +8676,8 @@ struct O_ final {
 	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&	control);
 	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
 
+	HFSM_INLINE void	deepConstruct		 (PlanControl&	control);
+
 	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
 	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
 
@@ -8567,6 +8690,8 @@ struct O_ final {
 	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
 
 	HFSM_INLINE void	deepExit			 (PlanControl&	control);
+
+	HFSM_INLINE void	deepDestruct		 (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -8591,8 +8716,9 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepEnterRequested	 (PlanControl& control);
 	HFSM_INLINE void	deepChangeToRequested(PlanControl& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -8662,10 +8788,19 @@ O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
-O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) {
+O_<TN_, TA_, TH_, TS_...>::deepConstruct(PlanControl& control) {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
+	_headState.deepConstruct(control);
+	_subStates.wideConstruct(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+void
+O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	_headState.deepEnter(control);
@@ -8772,6 +8907,15 @@ void
 O_<TN_, TA_, TH_, TS_...>::deepExit(PlanControl& control) {
 	_subStates.wideExit(control);
 	_headState.deepExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+void
+O_<TN_, TA_, TH_, TS_...>::deepDestruct(PlanControl& control) {
+	_subStates.wideDestruct(control);
+	_headState.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -8949,15 +9093,6 @@ O_<TN_, TA_, TH_, TS_...>::deepReportRandomize(Control& control) {
 }
 
 //------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-void
-O_<TN_, TA_, TH_, TS_...>::deepEnterRequested(PlanControl& control) {
-	_headState.deepEnter		 (control);
-	_subStates.wideEnterRequested(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
@@ -9862,7 +9997,9 @@ R_<TG_, TA_>::~R_() {
 						_stateRegistry,
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
-	_apex.deepExit(control);
+
+	_apex.deepExit	  (control);
+	_apex.deepDestruct(control);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
 }
@@ -10016,7 +10153,9 @@ R_<TG_, TA_>::initialEnter() {
 								_planData,
 								HFSM_LOGGER_OR(_logger, nullptr)};
 
-		_apex.deepEnterRequested(planControl);
+		_apex.deepConstruct(planControl);
+		_apex.deepEnter	   (planControl);
+
 		_stateRegistry.clearRequests();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());

@@ -173,6 +173,9 @@ TEST_CASE("FSM.Debug", "[machine]") {
 				{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
 
+				{ FSM::stateId<Apex>(),	Event::CONSTRUCT },
+				{ FSM::stateId<I   >(),	Event::CONSTRUCT },
+
 				{ FSM::stateId<Apex>(),	Event::ENTER },
 				{ FSM::stateId<I   >(),	Event::ENTER },
 			});
@@ -256,6 +259,17 @@ TEST_CASE("FSM.Debug", "[machine]") {
 
 				{ FSM::stateId<I   >(),	Event::EXIT },
 
+				{ FSM::stateId<I   >(),	Event::DESTRUCT },
+				{ FSM::stateId<O   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<R   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<R_1 >(),	Event::CONSTRUCT },
+				{ FSM::stateId<C   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<C_1 >(),	Event::CONSTRUCT },
+				{ FSM::stateId<U   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<U_1 >(),	Event::CONSTRUCT },
+				{ FSM::stateId<N   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<N_2 >(),	Event::CONSTRUCT },
+
 				{ FSM::stateId<O   >(),	Event::ENTER },
 				{ FSM::stateId<R   >(),	Event::ENTER },
 				{ FSM::stateId<R_1 >(),	Event::ENTER },
@@ -334,6 +348,17 @@ TEST_CASE("FSM.Debug", "[machine]") {
 		{ FSM::stateId<N   >(),	Event::EXIT },
 		{ FSM::stateId<O   >(),	Event::EXIT },
 		{ 0u,					Event::EXIT },
+
+		{ FSM::stateId<R_1 >(),	Event::DESTRUCT },
+		{ FSM::stateId<R   >(),	Event::DESTRUCT },
+		{ FSM::stateId<C_1 >(),	Event::DESTRUCT },
+		{ FSM::stateId<C   >(),	Event::DESTRUCT },
+		{ FSM::stateId<U_1 >(),	Event::DESTRUCT },
+		{ FSM::stateId<U   >(),	Event::DESTRUCT },
+		{ FSM::stateId<N_2 >(),	Event::DESTRUCT },
+		{ FSM::stateId<N   >(),	Event::DESTRUCT },
+		{ FSM::stateId<O   >(),	Event::DESTRUCT },
+		{ 0u,					Event::DESTRUCT },
 	});
 }
 

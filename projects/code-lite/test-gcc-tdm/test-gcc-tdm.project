@@ -19,6 +19,8 @@
       <File Name="../../../include/hfsm2/detail/control.inl"/>
       <File Name="../../../include/hfsm2/detail/control.hpp"/>
       <VirtualDirectory Name="structure">
+        <File Name="../../../include/hfsm2/detail/structure/state_box.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/state_box.hpp"/>
         <File Name="../../../include/hfsm2/detail/structure/state.inl"/>
         <File Name="../../../include/hfsm2/detail/structure/state.hpp"/>
         <File Name="../../../include/hfsm2/detail/structure/root.inl"/>
@@ -61,6 +63,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_dynamic.cpp"/>
+    <File Name="../../../test/test_guards.cpp"/>
     <File Name="../../../test/test_utilize.cpp"/>
     <File Name="../../../test/test_utility_regions.cpp"/>
     <File Name="../../../test/test_stress.cpp"/>
@@ -70,7 +74,6 @@
     <File Name="../../../test/test_plans.cpp"/>
     <File Name="../../../test/test_ortho_units.cpp"/>
     <File Name="../../../test/test_internal_transitions.cpp"/>
-    <File Name="../../../test/test_guard.cpp"/>
     <File Name="../../../test/test_delayed_teardown.cpp"/>
     <File Name="../../../test/test_debug.cpp"/>
     <File Name="../../../test/test_composite_bst.cpp"/>
@@ -78,7 +81,6 @@
     <File Name="../../../test/shared.inl"/>
     <File Name="../../../test/shared.hpp"/>
     <File Name="../../../test/main.cpp"/>
-    <File Name="../../../test/deprecated_test.cpp"/>
     <VirtualDirectory Name="shared">
       <File Name="../../../test/shared/test_random.cpp"/>
       <File Name="../../../test/shared/test_list.cpp"/>

@@ -72,6 +72,21 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideEntryGuard(GuardControl& control,
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideConstruct(PlanControl& control,
+											   const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		lHalf.wideConstruct(control, prong);
+	else
+		rHalf.wideConstruct(control, prong);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+void
 CS_<TN_, TA_, TG_, NI_, TS_...>::wideEnter(PlanControl& control,
 										   const ShortIndex prong)
 {
@@ -171,6 +186,21 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideExit(PlanControl& control,
 		lHalf.wideExit(control, prong);
 	else
 		rHalf.wideExit(control, prong);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+void
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideDestruct(PlanControl& control,
+											  const ShortIndex prong)
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG)
+		lHalf.wideDestruct(control, prong);
+	else
+		rHalf.wideDestruct(control, prong);
 }
 
 //------------------------------------------------------------------------------
@@ -357,21 +387,6 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeRandom(Control& control,
 }
 
 //------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideEnterRequested(PlanControl& control,
-													const ShortIndex prong)
-{
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
-
-	if (prong < R_PRONG)
-		lHalf.wideEnterRequested(control, prong);
-	else
-		rHalf.wideEnterRequested(control, prong);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void

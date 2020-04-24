@@ -27,7 +27,9 @@ R_<TG_, TA_>::~R_() {
 						_stateRegistry,
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
-	_apex.deepExit(control);
+
+	_apex.deepExit	  (control);
+	_apex.deepDestruct(control);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
 }
@@ -181,7 +183,9 @@ R_<TG_, TA_>::initialEnter() {
 								_planData,
 								HFSM_LOGGER_OR(_logger, nullptr)};
 
-		_apex.deepEnterRequested(planControl);
+		_apex.deepConstruct(planControl);
+		_apex.deepEnter	   (planControl);
+
 		_stateRegistry.clearRequests();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());

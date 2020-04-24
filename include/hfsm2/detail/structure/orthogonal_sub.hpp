@@ -77,23 +77,27 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control,						const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control);
-	HFSM_INLINE bool	wideEntryGuard		 (GuardControl& control);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control,							const ProngConstBits prongs);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control);
+	HFSM_INLINE bool	wideEntryGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	wideEnter			 (PlanControl& control);
-	HFSM_INLINE void	wideReenter			 (PlanControl& control);
+	HFSM_INLINE void	wideConstruct		 (PlanControl&	control);
 
-	HFSM_INLINE Status	wideUpdate			 (FullControl& control);
+	HFSM_INLINE void	wideEnter			 (PlanControl&	control);
+	HFSM_INLINE void	wideReenter			 (PlanControl&	control);
+
+	HFSM_INLINE Status	wideUpdate			 (FullControl&	control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact			 (FullControl& control, const TEvent& event);
+	HFSM_INLINE Status	wideReact			 (FullControl&	control, const TEvent& event);
 
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control,						const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control);
-	HFSM_INLINE bool	wideExitGuard		 (GuardControl& control);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control,							const ProngConstBits prongs);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control);
+	HFSM_INLINE bool	wideExitGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	wideExit			 (PlanControl& control);
+	HFSM_INLINE void	wideExit			 (PlanControl&	control);
+
+	HFSM_INLINE void	wideDestruct		 (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -115,7 +119,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideEnterRequested	 (PlanControl& control);
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -191,23 +194,27 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control,						const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl& control);
-	HFSM_INLINE bool	wideEntryGuard		 (GuardControl& control);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control,							const ProngConstBits prongs);
+	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control);
+	HFSM_INLINE bool	wideEntryGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	wideEnter			 (PlanControl& control);
-	HFSM_INLINE void	wideReenter			 (PlanControl& control);
+	HFSM_INLINE void	wideConstruct		 (PlanControl&	control);
 
-	HFSM_INLINE Status	wideUpdate			 (FullControl& control);
+	HFSM_INLINE void	wideEnter			 (PlanControl&	control);
+	HFSM_INLINE void	wideReenter			 (PlanControl&	control);
+
+	HFSM_INLINE Status	wideUpdate			 (FullControl&	control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact			 (FullControl& control, const TEvent& event);
+	HFSM_INLINE Status	wideReact			 (FullControl&	control, const TEvent& event);
 
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control,						const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl& control);
-	HFSM_INLINE bool	wideExitGuard		 (GuardControl& control);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control,							const ProngConstBits prongs);
+	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control);
+	HFSM_INLINE bool	wideExitGuard		 (GuardControl&	control);
 
-	HFSM_INLINE void	wideExit			 (PlanControl& control);
+	HFSM_INLINE void	wideExit			 (PlanControl&	control);
+
+	HFSM_INLINE void	wideDestruct		 (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -229,7 +236,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideEnterRequested	 (PlanControl& control);
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT

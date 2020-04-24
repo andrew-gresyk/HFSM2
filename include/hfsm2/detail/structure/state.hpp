@@ -76,6 +76,8 @@ struct S_ final {
 	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&)					{ return false;	}
 	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
 
+	HFSM_INLINE void	deepConstruct		 (PlanControl&  control);
+
 	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
 	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
 
@@ -88,6 +90,8 @@ struct S_ final {
 	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
 
 	HFSM_INLINE void	deepExit			 (PlanControl&	control);
+
+	HFSM_INLINE void	deepDestruct		 (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -117,8 +121,7 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void   deepEnterRequested	(Control&)											{}
-	HFSM_INLINE void   deepChangeToRequested(Control&)											{}
+	HFSM_INLINE void	deepChangeToRequested(Control&)											{}
 
 	//----------------------------------------------------------------------
 

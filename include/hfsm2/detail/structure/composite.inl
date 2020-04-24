@@ -82,17 +82,13 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepEnter(PlanControl& control) {
+C_<TN_, TA_, TG_, TH_, TS_...>::deepConstruct(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
 
-	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX &&
-				requested != INVALID_SHORT_INDEX);
-
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	_headState.deepEnter(control);
+	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX);
+	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
 
 	active	  = requested;
 
@@ -101,6 +97,20 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepEnter(PlanControl& control) {
 
 	requested = INVALID_SHORT_INDEX;
 
+	_headState.deepConstruct(control);
+	_subStates.wideConstruct(control, active);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+void
+C_<TN_, TA_, TG_, TH_, TS_...>::deepEnter(PlanControl& control) {
+	const ShortIndex& active = compoActive(control);
+
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	_headState.deepEnter(control);
 	_subStates.wideEnter(control, active);
 }
 
@@ -231,12 +241,24 @@ template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS
 void
 C_<TN_, TA_, TG_, TH_, TS_...>::deepExit(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
-	ShortIndex& resumable = compoResumable(control);
-
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
 	_subStates.wideExit(control, active);
 	_headState.deepExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+void
+C_<TN_, TA_, TG_, TH_, TS_...>::deepDestruct(PlanControl& control) {
+	ShortIndex& active	  = compoActive   (control);
+	ShortIndex& resumable = compoResumable(control);
+
+	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+
+	_subStates.wideDestruct(control, active);
+	_headState.deepDestruct(control);
 
 	resumable = active;
 	active	  = INVALID_SHORT_INDEX;
@@ -631,24 +653,6 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportRandomize(Control& control) {
 
 template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepEnterRequested(PlanControl& control) {
-	ShortIndex& active	  = compoActive	  (control);
-	ShortIndex& requested = compoRequested(control);
-
-	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX);
-	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
-
-	active	  = requested;
-	requested = INVALID_SHORT_INDEX;
-
-	_headState.deepEnter(control);
-	_subStates.wideEnter(control, active);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-void
 C_<TN_, TA_, TG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 	ShortIndex& active	  = compoActive	  (control);
 	ShortIndex& resumable = compoResumable(control);
@@ -659,23 +663,29 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 	if (requested == INVALID_SHORT_INDEX)
 		_subStates.wideChangeToRequested(control, active);
 	else if (requested != active) {
-		_subStates.wideExit	  (control, active);
+		_subStates.wideExit		(control, active);
+		_subStates.wideDestruct	(control, active);
 
 		resumable = active;
 		active	  = requested;
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.wideEnter  (control, active);
+		_subStates.wideConstruct(control, active);
+		_subStates.wideEnter	(control, active);
 	} else if (compoRemain(control)) {
-		_subStates.wideExit	  (control, active);
+		_subStates.wideExit		(control, active);
+		_subStates.wideDestruct	(control, active);
 
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.wideEnter  (control, active);
+		_subStates.wideConstruct(control, active);
+		_subStates.wideEnter	(control, active);
 	} else {
 		requested = INVALID_SHORT_INDEX;
 
-		_subStates.wideReenter(control, active);
+		// TODO: _subStates.wideReconstruct();
+
+		_subStates.wideReenter	(control, active);
 	}
 }
 

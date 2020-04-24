@@ -89,6 +89,9 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
 
+				{ FSM::stateId<Apex>(),	Event::CONSTRUCT },
+				{ FSM::stateId<I   >(),	Event::CONSTRUCT },
+
 				{ FSM::stateId<Apex>(),	Event::ENTER },
 				{ FSM::stateId<I   >(),	Event::ENTER },
 			});
@@ -115,7 +118,6 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<I   >(),	Event::UPDATE },
 
 				{ FSM::stateId<I   >(),	Event::EXIT_GUARD },
-
 				{ FSM::stateId<O   >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<OR  >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<OR_2>(),	Event::ENTRY_GUARD },
@@ -123,6 +125,13 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<OC_2>(),	Event::ENTRY_GUARD },
 
 				{ FSM::stateId<I   >(),	Event::EXIT },
+
+				{ FSM::stateId<I   >(),	Event::DESTRUCT },
+				{ FSM::stateId<O   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OR  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OR_2>(),	Event::CONSTRUCT },
+				{ FSM::stateId<OC  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OC_2>(),	Event::CONSTRUCT },
 
 				{ FSM::stateId<O   >(),	Event::ENTER },
 				{ FSM::stateId<OR  >(),	Event::ENTER },
@@ -164,7 +173,6 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<OR_2>(),	Event::EXIT_GUARD },
 				{ FSM::stateId<OC  >(),	Event::EXIT_GUARD },
 				{ FSM::stateId<OC_2>(),	Event::EXIT_GUARD },
-
 				{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
 
 				{ FSM::stateId<OR_2>(),	Event::EXIT },
@@ -172,6 +180,13 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<OC_2>(),	Event::EXIT },
 				{ FSM::stateId<OC  >(),	Event::EXIT },
 				{ FSM::stateId<O   >(),	Event::EXIT },
+
+				{ FSM::stateId<OR_2>(),	Event::DESTRUCT },
+				{ FSM::stateId<OR  >(),	Event::DESTRUCT },
+				{ FSM::stateId<OC_2>(),	Event::DESTRUCT },
+				{ FSM::stateId<OC  >(),	Event::DESTRUCT },
+				{ FSM::stateId<O   >(),	Event::DESTRUCT },
+				{ FSM::stateId<I   >(),	Event::CONSTRUCT },
 
 				{ FSM::stateId<I   >(),	Event::ENTER },
 			});
@@ -203,7 +218,6 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<I   >(),	Event::UPDATE },
 
 				{ FSM::stateId<I   >(),	Event::EXIT_GUARD },
-
 				{ FSM::stateId<O   >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<OR  >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<OR_2>(),	Event::ENTRY_GUARD },
@@ -211,6 +225,13 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<OC_1>(),	Event::ENTRY_GUARD },
 
 				{ FSM::stateId<I   >(),	Event::EXIT },
+
+				{ FSM::stateId<I   >(),	Event::DESTRUCT },
+				{ FSM::stateId<O   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OR  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OR_2>(),	Event::CONSTRUCT },
+				{ FSM::stateId<OC  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OC_1>(),	Event::CONSTRUCT },
 
 				{ FSM::stateId<O   >(),	Event::ENTER },
 				{ FSM::stateId<OR  >(),	Event::ENTER },
@@ -246,7 +267,6 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<I   >(),	Event::UPDATE },
 
 				{ FSM::stateId<I   >(),	Event::EXIT_GUARD },
-
 				{ FSM::stateId<O   >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<OR  >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<OR_1>(),	Event::ENTRY_GUARD },
@@ -254,6 +274,13 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<OC_1>(),	Event::ENTRY_GUARD },
 
 				{ FSM::stateId<I   >(),	Event::EXIT },
+
+				{ FSM::stateId<I   >(),	Event::DESTRUCT },
+				{ FSM::stateId<O   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OR  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OR_1>(),	Event::CONSTRUCT },
+				{ FSM::stateId<OC  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OC_1>(),	Event::CONSTRUCT },
 
 				{ FSM::stateId<O   >(),	Event::ENTER },
 				{ FSM::stateId<OR  >(),	Event::ENTER },
@@ -290,7 +317,6 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<I   >(),	Event::UPDATE },
 
 				{ FSM::stateId<I   >(),	Event::EXIT_GUARD },
-
 				{ FSM::stateId<O   >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<OR  >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<OR_2>(),	Event::ENTRY_GUARD },
@@ -298,6 +324,13 @@ TEST_CASE("FSM.Resumable", "[machine]") {
 				{ FSM::stateId<OC_2>(),	Event::ENTRY_GUARD },
 
 				{ FSM::stateId<I   >(),	Event::EXIT },
+
+				{ FSM::stateId<I   >(),	Event::DESTRUCT },
+				{ FSM::stateId<O   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OR  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OR_2>(),	Event::CONSTRUCT },
+				{ FSM::stateId<OC  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<OC_2>(),	Event::CONSTRUCT },
 
 				{ FSM::stateId<O   >(),	Event::ENTER },
 				{ FSM::stateId<OR  >(),	Event::ENTER },

@@ -76,9 +76,6 @@ struct B_2_2 : FSM::DynamicState	{ static int c; B_2_2() { ++c; } ~B_2_2() { --c
 namespace hfsm2 {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename>
-	struct Guard;
-
 	template <>
 	struct Guard<test_dynamic::A_2> {
 		static void execute(test_dynamic::FSM::GuardControl& control) {
@@ -197,6 +194,10 @@ TEST_CASE("FSM.Dynamic", "[machine]") {
 				{ FSM::stateId<A    >(), Event::ENTRY_GUARD },
 				{ FSM::stateId<A_1  >(), Event::ENTRY_GUARD },
 
+				{ 0,					 Event::CONSTRUCT },
+				{ FSM::stateId<A    >(), Event::CONSTRUCT },
+				{ FSM::stateId<A_1  >(), Event::CONSTRUCT },
+
 				{ 0,					 Event::ENTER },
 				{ FSM::stateId<A    >(), Event::ENTER },
 				{ FSM::stateId<A_1  >(), Event::ENTER },
@@ -241,6 +242,10 @@ TEST_CASE("FSM.Dynamic", "[machine]") {
 		{ FSM::stateId<A_1  >(), Event::EXIT },
 		{ FSM::stateId<A    >(), Event::EXIT },
 		{ 0,					 Event::EXIT },
+
+		{ FSM::stateId<A_1  >(), Event::DESTRUCT },
+		{ FSM::stateId<A    >(), Event::DESTRUCT },
+		{ 0,					 Event::DESTRUCT },
 	});
 }
 

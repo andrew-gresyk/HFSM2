@@ -39,6 +39,18 @@ CS_<TN_, TA_, TG_, NI_, T>::wideEntryGuard(GuardControl& control,
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void
+CS_<TN_, TA_, TG_, NI_, T>::wideConstruct(PlanControl& control,
+										  const ShortIndex HFSM_IF_ASSERT(prong))
+{
+	HFSM_ASSERT(prong == PRONG_INDEX);
+
+	state.deepConstruct(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+void
 CS_<TN_, TA_, TG_, NI_, T>::wideEnter(PlanControl& control,
 									  const ShortIndex HFSM_IF_ASSERT(prong))
 {
@@ -119,6 +131,18 @@ CS_<TN_, TA_, TG_, NI_, T>::wideExit(PlanControl& control,
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
 	state.deepExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+void
+CS_<TN_, TA_, TG_, NI_, T>::wideDestruct(PlanControl& control,
+										 const ShortIndex HFSM_IF_ASSERT(prong))
+{
+	HFSM_ASSERT(prong == PRONG_INDEX);
+
+	state.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -280,18 +304,6 @@ CS_<TN_, TA_, TG_, NI_, T>::wideReportChangeRandom(Control& control,
 }
 
 //------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-void
-CS_<TN_, TA_, TG_, NI_, T>::wideEnterRequested(PlanControl& control,
-											   const ShortIndex HFSM_IF_ASSERT(prong))
-{
-	HFSM_ASSERT(prong == PRONG_INDEX);
-
-	state.deepEnterRequested(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void

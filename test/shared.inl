@@ -16,6 +16,9 @@ LoggerT<TContext>::recordMethod(Context& /*context*/,
 		case Method::ENTRY_GUARD:
 			history.emplace_back(origin, Event::ENTRY_GUARD);
 			break;
+		case Method::CONSTRUCT:
+			history.emplace_back(origin, Event::CONSTRUCT);
+			break;
 		case Method::ENTER:
 			history.emplace_back(origin, Event::ENTER);
 			break;
@@ -33,6 +36,9 @@ LoggerT<TContext>::recordMethod(Context& /*context*/,
 			break;
 		case Method::EXIT:
 			history.emplace_back(origin, Event::EXIT);
+			break;
+		case Method::DESTRUCT:
+			history.emplace_back(origin, Event::DESTRUCT);
 			break;
 		case Method::PLAN_SUCCEEDED:
 			history.emplace_back(origin, Event::PLAN_SUCCEEDED);

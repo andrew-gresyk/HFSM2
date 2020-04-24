@@ -66,20 +66,30 @@ S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA_, typename TH_>
 void
-S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
+S_<TN_, TA_, TH_>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
 	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
+	HFSM_LOG_STATE_METHOD(&Head::enter,
+						  control.context(),
+						  Method::CONSTRUCT);
+
+	_headBox.construct();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::enter,
 						  control.context(),
 						  Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	_headBox.construct();
-
 	_headBox.get().widePreEnter(control.context());
-	_headBox.get().	   enter(control);
+	_headBox.get().		  enter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -100,7 +110,7 @@ S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
 	_headBox.construct();
 
 	_headBox.get().widePreReenter(control.context());
-	_headBox.get().	   reenter(control);
+	_headBox.get().		  reenter(control);
 }
 
 //------------------------------------------------------------------------------
@@ -115,7 +125,7 @@ S_<TN_, TA_, TH_>::deepUpdate(FullControl& control) {
 	ScopedOrigin origin{control, STATE_ID};
 
 	_headBox.get().widePreUpdate(control.context());
-	_headBox.get().	   update(control);
+	_headBox.get().		  update(control);
 
 	return control._status;
 }
@@ -136,7 +146,7 @@ S_<TN_, TA_, TH_>::deepReact(FullControl& control,
 	ScopedOrigin origin{control, STATE_ID};
 
 	_headBox.get().widePreReact(event, control.context());
-	(_headBox.get().*reaction)(event, control);				//_headBox.get().react(event, control);
+	(_headBox.get().*reaction) (event, control);				//_headBox.get().react(event, control);
 
 	return control._status;
 }
@@ -155,12 +165,12 @@ S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
 	const bool cancelledBefore = control._cancelled;
 
 	_headBox.get().widePreExitGuard(control.context());
-	_headBox.get().	   exitGuard(control);
+	_headBox.get().		  exitGuard(control);
 
 	return !cancelledBefore && control._cancelled;
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <typename TN_, typename TA_, typename TH_>
 void
@@ -176,8 +186,18 @@ S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
 	// Clang - error : no member named 'exit' in 'Blah'
 	//
 	// .. inherit state 'Blah' from hfsm2::Machine::Instance::State
-	_headBox.get().	    exit(control);
+	_headBox.get().		   exit(control);
 	_headBox.get().widePostExit(control.context());
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, typename TH_>
+void
+S_<TN_, TA_, TH_>::deepDestruct(PlanControl& control) {
+	HFSM_LOG_STATE_METHOD(&Head::exit,
+						  control.context(),
+						  Method::DESTRUCT);
 
 	_headBox.destruct();
 

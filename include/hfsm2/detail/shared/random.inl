@@ -1,16 +1,42 @@
 namespace hfsm2 {
 
 ////////////////////////////////////////////////////////////////////////////////
+
 namespace detail {
+
+template <typename TO, typename TI>
+TO convert(const TI& in) {
+	static_assert(sizeof(TI) == sizeof(TO), "");
+
+	TO out;
+	
+#if defined(__GNUC__) || defined(__GNUG__)
+	memcpy  (&out,				&in, sizeof(in));
+#else
+	memcpy_s(&out, sizeof(out), &in, sizeof(in));
+#endif
+
+	return out;
+}
+
+//------------------------------------------------------------------------------
 
 inline
 float
-toFloat(const uint32_t uint) {
-	constexpr uint32_t mask = (1ULL << 24) - 1;
-	const float x = (float) (uint & mask);
+uniformReal(const uint32_t uint) {
+	const auto real = convert<float>(UINT32_C(0x7F) << 23 | uint >> 9);
 
-	return ldexpf(x, -24);
+	return real - 1.0f;
+}
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+inline
+double
+uniformReal(const uint64_t uint) {
+	const auto real = convert<double>(UINT64_C(0x3FF) << 52 | uint >> 12);
+
+	return real - 1.0;
 }
 
 //------------------------------------------------------------------------------
@@ -30,6 +56,7 @@ rotl(const uint64_t x, const uint64_t k) {
 }
 
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 SplitMix64::SplitMix64(const uint64_t seed)
@@ -105,7 +132,7 @@ XoShiRo256Plus::seed(const uint64_t(& s)[4]) {
 
 float
 XoShiRo256Plus::next() {
-	return detail::toFloat((uint32_t) raw());
+	return detail::uniformReal((uint32_t) raw());
 }
 
 //------------------------------------------------------------------------------
@@ -231,7 +258,7 @@ XoShiRo128Plus::seed(const uint32_t(& s)[4]) {
 
 float
 XoShiRo128Plus::next() {
-	return detail::toFloat(raw());
+	return detail::uniformReal(raw());
 }
 
 //------------------------------------------------------------------------------

@@ -42,6 +42,14 @@ OS_<TN_, TA_, NI_, TI_>::wideEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
+OS_<TN_, TA_, NI_, TI_>::wideConstruct(PlanControl& control) {
+	initial.deepConstruct(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+void
 OS_<TN_, TA_, NI_, TI_>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
@@ -106,6 +114,14 @@ template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
 OS_<TN_, TA_, NI_, TI_>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+void
+OS_<TN_, TA_, NI_, TI_>::wideDestruct(PlanControl& control) {
+	initial.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
@@ -215,14 +231,6 @@ OS_<TN_, TA_, NI_, TI_>::wideReportRandomize(Control& control) {
 }
 
 //------------------------------------------------------------------------------
-
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
-void
-OS_<TN_, TA_, NI_, TI_>::wideEnterRequested(PlanControl& control) {
-	initial.deepEnterRequested(control);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void

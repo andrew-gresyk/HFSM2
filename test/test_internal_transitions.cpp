@@ -301,6 +301,9 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 		FSM::Instance machine{_, &logger};
 		{
 			logger.assertSequence({
+				{ FSM::stateId<A    >(), Event::CONSTRUCT },
+				{ FSM::stateId<A_1  >(), Event::CONSTRUCT },
+
 				{ FSM::stateId<A    >(), Event::ENTER },
 				{ FSM::stateId<A_1  >(), Event::ENTER },
 			});
@@ -338,9 +341,17 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			logger.assertSequence({
 				{ FSM::stateId<A    >(), Event::UPDATE },
 				{ FSM::stateId<A_1  >(), Event::UPDATE },
+
 				{ FSM::stateId<A_1  >(), Event::CHANGE,			FSM::stateId<A_2  >() },
+
 				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+
 				{ FSM::stateId<A_1  >(), Event::EXIT },
+
+				{ FSM::stateId<A_1  >(), Event::DESTRUCT },
+				{ FSM::stateId<A_2  >(), Event::CONSTRUCT },
+				{ FSM::stateId<A_2_1>(), Event::CONSTRUCT },
+
 				{ FSM::stateId<A_2  >(), Event::ENTER },
 				{ FSM::stateId<A_2_1>(), Event::ENTER },
 			});
@@ -385,13 +396,27 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			logger.assertSequence({
 				{ FSM::stateId<A    >(), Event::UPDATE },
 				{ FSM::stateId<A_2  >(), Event::UPDATE },
+
 				{ FSM::stateId<A_2  >(), Event::CHANGE,			FSM::stateId<B_2_2>() },
+
 				{ FSM::stateId<A_2_1>(), Event::UPDATE },
+
 				{ FSM::stateId<A_2  >(), Event::EXIT_GUARD },
 				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+
 				{ FSM::stateId<A_2_1>(), Event::EXIT },
 				{ FSM::stateId<A_2  >(), Event::EXIT },
 				{ FSM::stateId<A    >(), Event::EXIT },
+
+				{ FSM::stateId<A_2_1>(), Event::DESTRUCT },
+				{ FSM::stateId<A_2  >(), Event::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::CONSTRUCT },
+				{ FSM::stateId<B_1  >(), Event::CONSTRUCT },
+				{ FSM::stateId<B_1_1>(), Event::CONSTRUCT },
+				{ FSM::stateId<B_2  >(), Event::CONSTRUCT },
+				{ FSM::stateId<B_2_2>(), Event::CONSTRUCT },
+
 				{ FSM::stateId<B    >(), Event::ENTER },
 				{ FSM::stateId<B_1  >(), Event::ENTER },
 				{ FSM::stateId<B_1_1>(), Event::ENTER },
@@ -452,14 +477,27 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 				{ FSM::stateId<B_1_1>(), Event::UPDATE },
 				{ FSM::stateId<B_2  >(), Event::UPDATE },
 				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+
 				{ FSM::stateId<B_2_2>(), Event::RESUME,			FSM::stateId<A    >() },
+
 				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
 				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+
 				{ FSM::stateId<B_1_1>(), Event::EXIT },
 				{ FSM::stateId<B_1  >(), Event::EXIT },
 				{ FSM::stateId<B_2_2>(), Event::EXIT },
 				{ FSM::stateId<B_2  >(), Event::EXIT },
 				{ FSM::stateId<B    >(), Event::EXIT },
+
+				{ FSM::stateId<B_1_1>(), Event::DESTRUCT },
+				{ FSM::stateId<B_1  >(), Event::DESTRUCT },
+				{ FSM::stateId<B_2_2>(), Event::DESTRUCT },
+				{ FSM::stateId<B_2  >(), Event::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::CONSTRUCT },
+				{ FSM::stateId<A_2  >(), Event::CONSTRUCT },
+				{ FSM::stateId<A_2_1>(), Event::CONSTRUCT },
+
 				{ FSM::stateId<A    >(), Event::ENTER },
 				{ FSM::stateId<A_2  >(), Event::ENTER },
 				{ FSM::stateId<A_2_1>(), Event::ENTER },
@@ -487,13 +525,27 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			logger.assertSequence({
 				{ FSM::stateId<A    >(), Event::UPDATE },
 				{ FSM::stateId<A_2  >(), Event::UPDATE },
+
 				{ FSM::stateId<A_2  >(), Event::RESUME,			FSM::stateId<B    >() },
+
 				{ FSM::stateId<A_2_1>(), Event::UPDATE },
+
 				{ FSM::stateId<A_2  >(), Event::EXIT_GUARD },
 				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+
 				{ FSM::stateId<A_2_1>(), Event::EXIT },
 				{ FSM::stateId<A_2  >(), Event::EXIT },
 				{ FSM::stateId<A    >(), Event::EXIT },
+
+				{ FSM::stateId<A_2_1>(), Event::DESTRUCT },
+				{ FSM::stateId<A_2  >(), Event::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::CONSTRUCT },
+				{ FSM::stateId<B_1  >(), Event::CONSTRUCT },
+				{ FSM::stateId<B_1_1>(), Event::CONSTRUCT },
+				{ FSM::stateId<B_2  >(), Event::CONSTRUCT },
+				{ FSM::stateId<B_2_2>(), Event::CONSTRUCT },
+
 				{ FSM::stateId<B    >(), Event::ENTER },
 				{ FSM::stateId<B_1  >(), Event::ENTER },
 				{ FSM::stateId<B_1_1>(), Event::ENTER },
@@ -526,13 +578,19 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 				{ FSM::stateId<B_1_1>(), Event::UPDATE },
 				{ FSM::stateId<B_2  >(), Event::UPDATE },
 				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+
 				{ FSM::stateId<B_2_2>(), Event::CHANGE,			FSM::stateId<B    >() },
+
 				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
 				{ FSM::stateId<B_2_1>(), Event::ENTRY_GUARD },
+
 				{ FSM::stateId<B_2_1>(), Event::CANCEL_PENDING },
+
 				{ FSM::stateId<B_2_1>(), Event::RESUME,			FSM::stateId<B_2_2>() },
+
 				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
 				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+
 				{ FSM::stateId<B_2_2>(), Event::REENTER },
 			});
 
@@ -561,15 +619,28 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 				{ FSM::stateId<B_1_1>(), Event::UPDATE },
 				{ FSM::stateId<B_2  >(), Event::UPDATE },
 				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+
 				{ FSM::stateId<B_2_2>(), Event::SCHEDULE,		FSM::stateId<A_2_2>() },
 				{ FSM::stateId<B_2_2>(), Event::RESUME,			FSM::stateId<A    >() },
+
 				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
 				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+
 				{ FSM::stateId<B_1_1>(), Event::EXIT },
 				{ FSM::stateId<B_1  >(), Event::EXIT },
 				{ FSM::stateId<B_2_2>(), Event::EXIT },
 				{ FSM::stateId<B_2  >(), Event::EXIT },
 				{ FSM::stateId<B    >(), Event::EXIT },
+
+				{ FSM::stateId<B_1_1>(), Event::DESTRUCT },
+				{ FSM::stateId<B_1  >(), Event::DESTRUCT },
+				{ FSM::stateId<B_2_2>(), Event::DESTRUCT },
+				{ FSM::stateId<B_2  >(), Event::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::CONSTRUCT },
+				{ FSM::stateId<A_2  >(), Event::CONSTRUCT },
+				{ FSM::stateId<A_2_2>(), Event::CONSTRUCT },
+
 				{ FSM::stateId<A    >(), Event::ENTER },
 				{ FSM::stateId<A_2  >(), Event::ENTER },
 				{ FSM::stateId<A_2_2>(), Event::ENTER },
@@ -597,6 +668,10 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 		{ FSM::stateId<A_2_2>(), Event::EXIT },
 		{ FSM::stateId<A_2  >(), Event::EXIT },
 		{ FSM::stateId<A    >(), Event::EXIT },
+
+		{ FSM::stateId<A_2_2>(), Event::DESTRUCT },
+		{ FSM::stateId<A_2  >(), Event::DESTRUCT },
+		{ FSM::stateId<A    >(), Event::DESTRUCT },
 	});
 }
 

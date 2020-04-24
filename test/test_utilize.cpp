@@ -120,6 +120,9 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
 			{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
 
+			{ FSM::stateId<Apex>(),	Event::CONSTRUCT },
+			{ FSM::stateId<I   >(),	Event::CONSTRUCT },
+
 			{ FSM::stateId<Apex>(),	Event::ENTER },
 			{ FSM::stateId<I   >(),	Event::ENTER },
 		});
@@ -151,7 +154,6 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 			{ FSM::stateId<U    >(), Event::UTILITY_RESOLUTION, 4 },
 
 			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-
 			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
 			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
 			{ FSM::stateId<U_100>(), Event::ENTRY_GUARD },
@@ -159,6 +161,13 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 			{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
 
 			{ FSM::stateId<I    >(), Event::EXIT },
+
+			{ FSM::stateId<I    >(), Event::DESTRUCT },
+			{ FSM::stateId<O    >(), Event::CONSTRUCT },
+			{ FSM::stateId<U    >(), Event::CONSTRUCT },
+			{ FSM::stateId<U_100>(), Event::CONSTRUCT },
+			{ FSM::stateId<C    >(), Event::CONSTRUCT },
+			{ FSM::stateId<C_000>(), Event::CONSTRUCT },
 
 			{ FSM::stateId<O    >(), Event::ENTER },
 			{ FSM::stateId<U    >(), Event::ENTER },
@@ -192,7 +201,6 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 			{ FSM::stateId<I    >(), Event::UPDATE },
 
 			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-
 			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
 			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
 			{ FSM::stateId<U_000>(), Event::ENTRY_GUARD },
@@ -200,6 +208,13 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 			{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
 
 			{ FSM::stateId<I    >(), Event::EXIT },
+
+			{ FSM::stateId<I    >(), Event::DESTRUCT },
+			{ FSM::stateId<O    >(), Event::CONSTRUCT },
+			{ FSM::stateId<U    >(), Event::CONSTRUCT },
+			{ FSM::stateId<U_000>(), Event::CONSTRUCT },
+			{ FSM::stateId<C    >(), Event::CONSTRUCT },
+			{ FSM::stateId<C_000>(), Event::CONSTRUCT },
 
 			{ FSM::stateId<O    >(), Event::ENTER },
 			{ FSM::stateId<U    >(), Event::ENTER },
@@ -249,7 +264,6 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 			{ FSM::stateId<C    >(), Event::UTILITY_RESOLUTION, 4 },
 
 			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-
 			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
 			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
 			{ FSM::stateId<U_100>(), Event::ENTRY_GUARD },
@@ -257,6 +271,13 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 			{ FSM::stateId<C_100>(), Event::ENTRY_GUARD },
 
 			{ FSM::stateId<I    >(), Event::EXIT },
+
+			{ FSM::stateId<I    >(), Event::DESTRUCT },
+			{ FSM::stateId<O    >(), Event::CONSTRUCT },
+			{ FSM::stateId<U    >(), Event::CONSTRUCT },
+			{ FSM::stateId<U_100>(), Event::CONSTRUCT },
+			{ FSM::stateId<C    >(), Event::CONSTRUCT },
+			{ FSM::stateId<C_100>(), Event::CONSTRUCT },
 
 			{ FSM::stateId<O    >(), Event::ENTER },
 			{ FSM::stateId<U    >(), Event::ENTER },

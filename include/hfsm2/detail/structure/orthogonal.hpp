@@ -101,6 +101,8 @@ struct O_ final {
 	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&	control);
 	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
 
+	HFSM_INLINE void	deepConstruct		 (PlanControl&	control);
+
 	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
 	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
 
@@ -113,6 +115,8 @@ struct O_ final {
 	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
 
 	HFSM_INLINE void	deepExit			 (PlanControl&	control);
+
+	HFSM_INLINE void	deepDestruct		 (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -137,8 +141,9 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepEnterRequested	 (PlanControl& control);
 	HFSM_INLINE void	deepChangeToRequested(PlanControl& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;

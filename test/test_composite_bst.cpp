@@ -91,6 +91,9 @@ TEST_CASE("FSM.Composite BST", "[machine]") {
 				{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<S0  >(),	Event::ENTRY_GUARD },
 
+				{ FSM::stateId<Apex>(),	Event::CONSTRUCT },
+				{ FSM::stateId<S0  >(),	Event::CONSTRUCT },
+
 				{ FSM::stateId<Apex>(),	Event::ENTER },
 				{ FSM::stateId<S0  >(),	Event::ENTER },
 			});
@@ -117,6 +120,8 @@ TEST_CASE("FSM.Composite BST", "[machine]") {
 				{ FSM::stateId<S1>(),	 Event::ENTRY_GUARD },
 
 				{ FSM::stateId<S0>(),	 Event::EXIT },
+				{ FSM::stateId<S0>(),	 Event::DESTRUCT },
+				{ FSM::stateId<S1>(),	 Event::CONSTRUCT },
 				{ FSM::stateId<S1>(),	 Event::ENTER },
 			});
 
@@ -135,6 +140,9 @@ TEST_CASE("FSM.Composite BST", "[machine]") {
 	logger.assertSequence({
 		{ FSM::stateId<S1>(),	 Event::EXIT },
 		{ 0u,					 Event::EXIT },
+
+		{ FSM::stateId<S1>(),	 Event::DESTRUCT },
+		{ 0u,					 Event::DESTRUCT },
 	});
 }
 

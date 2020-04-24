@@ -174,25 +174,32 @@ const Types all = {
 TEST_CASE("FSM.Utility Regions", "[machine]") {
 	Logger logger;
 
-	FSM::Instance machine{&logger};
 	{
-		logger.assertSequence({
-			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
-			{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-			{ FSM::stateId<Apex>(),	Event::ENTER },
-			{ FSM::stateId<I   >(),	Event::ENTER },
-		});
+		FSM::Instance machine{&logger};
+		{
+			logger.assertSequence({
+				{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
 
-		assertActive(machine, all, {
-			FSM::stateId<Apex>(),
-			FSM::stateId<I   >(),
-		});
+				{ FSM::stateId<Apex>(),	Event::CONSTRUCT },
+				{ FSM::stateId<I   >(),	Event::CONSTRUCT },
 
-		assertResumable(machine, all, {});
-	}
+				{ FSM::stateId<Apex>(),	Event::ENTER },
+				{ FSM::stateId<I   >(),	Event::ENTER },
+			});
 
-	{
+			assertActive(machine, all, {
+				FSM::stateId<Apex>(),
+				FSM::stateId<I   >(),
+			});
+
+			assertResumable(machine, all, {});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 		machine.changeTo<F>();
 		machine.update();
 		{
@@ -232,12 +239,16 @@ TEST_CASE("FSM.Utility Regions", "[machine]") {
 				{ FSM::stateId<F   >(), Event::UTILITY_RESOLUTION, 0 },
 
 				{ FSM::stateId<I   >(), Event::EXIT_GUARD },
-
 				{ FSM::stateId<F   >(), Event::ENTRY_GUARD },
 				{ FSM::stateId<C   >(), Event::ENTRY_GUARD },
 				{ FSM::stateId<C_1 >(), Event::ENTRY_GUARD },
 
 				{ FSM::stateId<I   >(), Event::EXIT },
+
+				{ FSM::stateId<I   >(), Event::DESTRUCT },
+				{ FSM::stateId<F   >(), Event::CONSTRUCT },
+				{ FSM::stateId<C   >(), Event::CONSTRUCT },
+				{ FSM::stateId<C_1 >(), Event::CONSTRUCT },
 
 				{ FSM::stateId<F   >(), Event::ENTER },
 				{ FSM::stateId<C   >(), Event::ENTER },
@@ -254,7 +265,21 @@ TEST_CASE("FSM.Utility Regions", "[machine]") {
 				FSM::stateId<I   >(),
 			});
 		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	}
+
+	logger.assertSequence({
+		{ FSM::stateId<C_1 >(),	 Event::EXIT },
+		{ FSM::stateId<C   >(),	 Event::EXIT },
+		{ FSM::stateId<F   >(),	 Event::EXIT },
+		{ 0u,					 Event::EXIT },
+
+		{ FSM::stateId<C_1 >(),	 Event::DESTRUCT },
+		{ FSM::stateId<C   >(),	 Event::DESTRUCT },
+		{ FSM::stateId<F   >(),	 Event::DESTRUCT },
+		{ 0u,					 Event::DESTRUCT },
+	});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,36 +1,43 @@
 #include "../shared.hpp"
 
+namespace test_random {
+
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Shared.RandomT<>", "[shared]") {
-	using Random = hfsm2::RandomT<float>;
+template <typename T>
+void
+testUniformity(const int average) {
+	using Type = T;
+	using Random = hfsm2::RandomT<Type>;
 
 	Random random{0};
 	int histogram[10] = {0};
 
-	for (unsigned i = 0; i < 10000; ++i) {
-		const float f = random.next();
-		REQUIRE(f >= 0.0f);
-		REQUIRE(f  < 1.0f);
+	for (int i = 0; i < 10 * average; ++i) {
+		const float real = random.next();
+		REQUIRE(real >= Type{0.0});
+		REQUIRE(real  < Type{1.0});
 
-		const unsigned n = (unsigned) (10.0f * f);
+		const unsigned n = (unsigned) (10.0f * real);
 		REQUIRE(n < hfsm2::detail::count(histogram));
 
 		++histogram[n];
 	}
 
-	int average = histogram[0];
-	for (unsigned i = 1; i < hfsm2::detail::count(histogram); ++i)
-		average += histogram[i];
-
-	average /= hfsm2::detail::count(histogram);
-
 	for (unsigned i = 1; i < hfsm2::detail::count(histogram); ++i) {
-		const int absolute = abs(average - histogram[i]);
-		const float relative = 1.0f * absolute / average;
+		const int delta = abs(average - histogram[i]);
+		const float relative = 1.0f * delta / average;
 
-		REQUIRE(relative < 0.1f);
+		REQUIRE(relative < 0.2f);
 	}
 }
 
+//------------------------------------------------------------------------------
+
+TEST_CASE("Shared.RandomT<>", "[shared]") {
+	testUniformity<float>(100);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
+
+}

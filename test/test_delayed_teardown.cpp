@@ -104,7 +104,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Exit Guard", "[machine]") {
+TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 	Logger logger;
 
 	{
@@ -118,6 +118,12 @@ TEST_CASE("FSM.Exit Guard", "[machine]") {
 				{ FSM::stateId<Step1_1>(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<Setup  >(),	Event::ENTRY_GUARD },
+
+				{ FSM::stateId<Apex   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1_1>(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1_2>(),	Event::CONSTRUCT },
+				{ FSM::stateId<Setup  >(),	Event::CONSTRUCT },
 
 				{ FSM::stateId<Apex   >(),	Event::ENTER },
 				{ FSM::stateId<Step1  >(),	Event::ENTER },
@@ -154,6 +160,10 @@ TEST_CASE("FSM.Exit Guard", "[machine]") {
 				{ FSM::stateId<Work   >(),	Event::ENTRY_GUARD },
 
 				{ FSM::stateId<Setup  >(),	Event::EXIT },
+
+				{ FSM::stateId<Setup  >(),	Event::DESTRUCT },
+				{ FSM::stateId<Work   >(),	Event::CONSTRUCT },
+
 				{ FSM::stateId<Work   >(),	Event::ENTER },
 			});
 
@@ -197,6 +207,10 @@ TEST_CASE("FSM.Exit Guard", "[machine]") {
 				{ FSM::stateId<Teardown>(),	Event::ENTRY_GUARD },
 
 				{ FSM::stateId<Work    >(),	Event::EXIT  },
+
+				{ FSM::stateId<Work    >(),	Event::DESTRUCT },
+				{ FSM::stateId<Teardown>(),	Event::CONSTRUCT },
+
 				{ FSM::stateId<Teardown>(),	Event::ENTER },
 			});
 
@@ -239,6 +253,12 @@ TEST_CASE("FSM.Exit Guard", "[machine]") {
 				{ FSM::stateId<Step1_2 >(),	Event::EXIT },
 				{ FSM::stateId<Step1   >(),	Event::EXIT },
 
+				{ FSM::stateId<Step1_1 >(),	Event::DESTRUCT },
+				{ FSM::stateId<Teardown>(),	Event::DESTRUCT },
+				{ FSM::stateId<Step1_2 >(),	Event::DESTRUCT },
+				{ FSM::stateId<Step1   >(),	Event::DESTRUCT },
+				{ FSM::stateId<Step2   >(),	Event::CONSTRUCT },
+
 				{ FSM::stateId<Step2   >(),	Event::ENTER },
 			});
 
@@ -261,6 +281,9 @@ TEST_CASE("FSM.Exit Guard", "[machine]") {
 	logger.assertSequence({
 		{ FSM::stateId<Step2   >(),	Event::EXIT },
 		{ FSM::stateId<Apex    >(),	Event::EXIT },
+
+		{ FSM::stateId<Step2   >(),	Event::DESTRUCT },
+		{ FSM::stateId<Apex    >(),	Event::DESTRUCT },
 	});
 }
 

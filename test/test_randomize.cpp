@@ -33,26 +33,26 @@ using FSM = M::Root<S(Apex),
 
 #undef S
 
-static_assert(FSM::regionId<Apex >() ==  0, "");
-static_assert(FSM::regionId<O    >() ==  1, "");
-static_assert(FSM::regionId<N    >() ==  2, "");
-static_assert(FSM::regionId<C    >() ==  3, "");
+static_assert(FSM::regionId<Apex>() ==  0, "");
+static_assert(FSM::regionId<O   >() ==  1, "");
+static_assert(FSM::regionId<N   >() ==  2, "");
+static_assert(FSM::regionId<C   >() ==  3, "");
 
-static_assert(FSM::stateId<Apex >()	==  0, "");
+static_assert(FSM::stateId<Apex >() ==  0, "");
 static_assert(FSM::stateId<I    >() ==  1, "");
 static_assert(FSM::stateId<O    >() ==  2, "");
 static_assert(FSM::stateId<N    >() ==  3, "");
-static_assert(FSM::stateId<N_000>()	==  4, "");
-static_assert(FSM::stateId<N_025>()	==  5, "");
-static_assert(FSM::stateId<N_050>()	==  6, "");
-static_assert(FSM::stateId<N_075>()	==  7, "");
-static_assert(FSM::stateId<N_100>()	==  8, "");
+static_assert(FSM::stateId<N_000>() ==  4, "");
+static_assert(FSM::stateId<N_025>() ==  5, "");
+static_assert(FSM::stateId<N_050>() ==  6, "");
+static_assert(FSM::stateId<N_075>() ==  7, "");
+static_assert(FSM::stateId<N_100>() ==  8, "");
 static_assert(FSM::stateId<C    >() ==  9, "");
-static_assert(FSM::stateId<C_000>()	== 10, "");
-static_assert(FSM::stateId<C_025>()	== 11, "");
-static_assert(FSM::stateId<C_050>()	== 12, "");
-static_assert(FSM::stateId<C_075>()	== 13, "");
-static_assert(FSM::stateId<C_100>()	== 14, "");
+static_assert(FSM::stateId<C_000>() == 10, "");
+static_assert(FSM::stateId<C_025>() == 11, "");
+static_assert(FSM::stateId<C_050>() == 12, "");
+static_assert(FSM::stateId<C_075>() == 13, "");
+static_assert(FSM::stateId<C_100>() == 14, "");
 
 //------------------------------------------------------------------------------
 
@@ -124,6 +124,9 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 				{ FSM::stateId<Apex >(), Event::ENTRY_GUARD },
 				{ FSM::stateId<I    >(), Event::ENTRY_GUARD },
 
+				{ FSM::stateId<Apex >(), Event::CONSTRUCT },
+				{ FSM::stateId<I    >(), Event::CONSTRUCT },
+
 				{ FSM::stateId<Apex >(), Event::ENTER },
 				{ FSM::stateId<I    >(), Event::ENTER },
 			});
@@ -161,7 +164,6 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 					{ FSM::stateId<N    >(), Event::RANDOM_RESOLUTION, 3 },
 
 					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-
 					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
 					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
 					{ FSM::stateId<N_075>(), Event::ENTRY_GUARD },
@@ -169,6 +171,13 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 					{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
 
 					{ FSM::stateId<I    >(), Event::EXIT },
+
+					{ FSM::stateId<I    >(), Event::DESTRUCT },
+					{ FSM::stateId<O    >(), Event::CONSTRUCT },
+					{ FSM::stateId<N    >(), Event::CONSTRUCT },
+					{ FSM::stateId<N_075>(), Event::CONSTRUCT },
+					{ FSM::stateId<C    >(), Event::CONSTRUCT },
+					{ FSM::stateId<C_000>(), Event::CONSTRUCT },
 
 					{ FSM::stateId<O    >(), Event::ENTER },
 					{ FSM::stateId<N    >(), Event::ENTER },
@@ -205,7 +214,6 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 					{ FSM::stateId<I    >(), Event::UPDATE },
 
 					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-
 					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
 					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
 					{ FSM::stateId<N_000>(), Event::ENTRY_GUARD },
@@ -213,6 +221,13 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 					{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
 
 					{ FSM::stateId<I    >(), Event::EXIT },
+
+					{ FSM::stateId<I    >(), Event::DESTRUCT },
+					{ FSM::stateId<O    >(), Event::CONSTRUCT },
+					{ FSM::stateId<N    >(), Event::CONSTRUCT },
+					{ FSM::stateId<N_000>(), Event::CONSTRUCT },
+					{ FSM::stateId<C    >(), Event::CONSTRUCT },
+					{ FSM::stateId<C_000>(), Event::CONSTRUCT },
 
 					{ FSM::stateId<O    >(), Event::ENTER },
 					{ FSM::stateId<N    >(), Event::ENTER },
@@ -270,23 +285,29 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 					{ FSM::stateId<C_025>(), Event::UTILITY },
 					{ FSM::stateId<C_075>(), Event::UTILITY },
 
-					{ FSM::stateId<C    >(), Event::RANDOM_RESOLUTION, 3 },
+					{ FSM::stateId<C    >(), Event::RANDOM_RESOLUTION, 1 },
 
 					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-
 					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
 					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
 					{ FSM::stateId<N_075>(), Event::ENTRY_GUARD },
 					{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<C_075>(), Event::ENTRY_GUARD },
+					{ FSM::stateId<C_025>(), Event::ENTRY_GUARD },
 
 					{ FSM::stateId<I    >(), Event::EXIT },
+
+					{ FSM::stateId<I    >(), Event::DESTRUCT },
+					{ FSM::stateId<O    >(), Event::CONSTRUCT },
+					{ FSM::stateId<N    >(), Event::CONSTRUCT },
+					{ FSM::stateId<N_075>(), Event::CONSTRUCT },
+					{ FSM::stateId<C    >(), Event::CONSTRUCT },
+					{ FSM::stateId<C_025>(), Event::CONSTRUCT },
 
 					{ FSM::stateId<O    >(), Event::ENTER },
 					{ FSM::stateId<N    >(), Event::ENTER },
 					{ FSM::stateId<N_075>(), Event::ENTER },
 					{ FSM::stateId<C    >(), Event::ENTER },
-					{ FSM::stateId<C_075>(), Event::ENTER },
+					{ FSM::stateId<C_025>(), Event::ENTER },
 				});
 
 				assertActive(machine, all, {
@@ -295,7 +316,7 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 					FSM::stateId<N    >(),
 					FSM::stateId<N_075>(),
 					FSM::stateId<C    >(),
-					FSM::stateId<C_075>(),
+					FSM::stateId<C_025>(),
 				});
 
 				assertResumable(machine, all, {

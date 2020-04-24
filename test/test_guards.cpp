@@ -27,9 +27,9 @@ using FSM = M::Root<S(Apex),
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::regionId<Apex >() ==  0, "");
-static_assert(FSM::regionId<Step1  >() ==  1, "");
-static_assert(FSM::regionId<Step2  >() ==  2, "");
+static_assert(FSM::regionId<Apex  >() ==  0, "");
+static_assert(FSM::regionId<Step1 >() ==  1, "");
+static_assert(FSM::regionId<Step2 >() ==  2, "");
 
 static_assert(FSM::stateId<Apex   >() ==  0, "");
 static_assert(FSM::stateId<Step1  >() ==  1, "");
@@ -192,6 +192,11 @@ TEST_CASE("FSM.Entry Guard", "[machine]") {
 				{ FSM::stateId<Step1  >(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::ENTRY_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::ENTRY_GUARD },
+
+				{ FSM::stateId<Apex   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1_1>(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1_2>(),	Event::CONSTRUCT },
 
 				{ FSM::stateId<Apex   >(),	Event::ENTER },
 				{ FSM::stateId<Step1  >(),	Event::ENTER },
@@ -419,6 +424,11 @@ TEST_CASE("FSM.Entry Guard", "[machine]") {
 				{ FSM::stateId<Step1_2>(),	Event::EXIT },
 				{ FSM::stateId<Step1  >(),	Event::EXIT },
 
+				{ FSM::stateId<Step1_1>(),	Event::DESTRUCT },
+				{ FSM::stateId<Step1_2>(),	Event::DESTRUCT },
+				{ FSM::stateId<Step1  >(),	Event::DESTRUCT },
+				{ FSM::stateId<Step3  >(),	Event::CONSTRUCT },
+
 				{ FSM::stateId<Step3  >(),	Event::ENTER },
 			});
 
@@ -440,6 +450,9 @@ TEST_CASE("FSM.Entry Guard", "[machine]") {
 	logger.assertSequence({
 		{ FSM::stateId<Step3  >(),	Event::EXIT },
 		{ FSM::stateId<Apex   >(),	Event::EXIT },
+
+		{ FSM::stateId<Step3  >(),	Event::DESTRUCT },
+		{ FSM::stateId<Apex   >(),	Event::DESTRUCT },
 	});
 }
 
