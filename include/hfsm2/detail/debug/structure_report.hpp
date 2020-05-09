@@ -1,10 +1,10 @@
 #pragma once
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 struct StructureEntry {
 	bool isActive;
@@ -12,11 +12,15 @@ struct StructureEntry {
 	const char* name;
 };
 
+#endif
+
 //------------------------------------------------------------------------------
 
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 #pragma pack(push, 1)
 
@@ -46,59 +50,119 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 #pragma pack(pop)
 
-//------------------------------------------------------------------------------
+#endif
 
-Transition
-HFSM_INLINE get(const Request::Type type) {
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+TransitionType
+HFSM_INLINE convert(const Request::Type type) {
 	switch (type) {
 		case Request::CHANGE:
-			return Transition::CHANGE;
+			return TransitionType::CHANGE;
 
 		case Request::RESTART:
-			return Transition::RESTART;
+			return TransitionType::RESTART;
 
 		case Request::RESUME:
-			return Transition::RESUME;
+			return TransitionType::RESUME;
 
 		case Request::UTILIZE:
-			return Transition::UTILIZE;
+			return TransitionType::UTILIZE;
 
 		case Request::RANDOMIZE:
-			return Transition::RANDOMIZE;
+			return TransitionType::RANDOMIZE;
 
 		case Request::SCHEDULE:
-			return Transition::SCHEDULE;
+			return TransitionType::SCHEDULE;
 
 		default:
 			HFSM_BREAK();
-			return Transition::CHANGE;
+			return TransitionType::CHANGE;
 	}
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Request::Type
+HFSM_INLINE convert(const TransitionType type) {
+	switch (type) {
+	case TransitionType::CHANGE:
+		return Request::CHANGE;
+
+	case TransitionType::RESTART:
+		return Request::RESTART;
+
+	case TransitionType::RESUME:
+		return Request::RESUME;
+
+	case TransitionType::UTILIZE:
+		return Request::UTILIZE;
+
+	case TransitionType::RANDOMIZE:
+		return Request::RANDOMIZE;
+
+	case TransitionType::SCHEDULE:
+		return Request::SCHEDULE;
+
+	default:
+		HFSM_BREAK();
+		return Request::CHANGE;
+	}
+}
+
+#endif
+
+}
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
 #pragma pack(push, 1)
 
-struct alignas(4) TransitionInfo {
-	HFSM_INLINE TransitionInfo() = default;
+struct alignas(4) Transition {
+	HFSM_INLINE Transition() = default;
 
-	HFSM_INLINE TransitionInfo(const Request transition_,
-							   const Method method_)
-		: stateId{transition_.stateId}
+	HFSM_INLINE Transition(const detail::Request request,
+						   const Method method_)
+		: stateId{request.stateId}
 		, method{method_}
-		, transition{get(transition_.type)}
+		, transitionType{detail::convert(request.type)}
 	{
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}
 
+	HFSM_INLINE Transition(const StateID stateId_,
+						   const Method method_,
+						   const TransitionType transitionType_)
+		: stateId{stateId_}
+		, method{method_}
+		, transitionType{transitionType_}
+	{
+		HFSM_ASSERT(method_ < Method::COUNT);
+	}
+
+	detail::Request request() const		{ return detail::Request{detail::convert(transitionType), stateId};	}
+
 	StateID stateId = INVALID_STATE_ID;
 	Method method;
-	Transition transition;
+	TransitionType transitionType;
 };
 
 #pragma pack(pop)
 
-////////////////////////////////////////////////////////////////////////////////
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-}
+bool operator == (const Transition& l, const Transition& r) {
+	return l.stateId		== r.stateId
+		&& l.method			== r.method
+		&& l.transitionType	== r.transitionType;
 }
 
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+}

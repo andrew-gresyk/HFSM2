@@ -164,13 +164,13 @@ PlanT<TArgs>::operator bool() const {
 
 template <typename TArgs>
 bool
-PlanT<TArgs>::append(const Transition transition,
+PlanT<TArgs>::append(const TransitionType transitionType,
 					 const StateID origin,
 					 const StateID destination)
 {
 	_planData.planExists.set(_regionId);
 
-	const TaskIndex index = _planData.taskLinks.emplace(transition, origin, destination);
+	const TaskIndex index = _planData.taskLinks.emplace(transitionType, origin, destination);
 	if (index == TaskLinks::INVALID)
 		return false;
 

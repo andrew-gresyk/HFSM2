@@ -164,7 +164,7 @@ private:
 	template <typename T>
 	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
-	bool append(const Transition transition,
+	bool append(const TransitionType transitionType,
 				const StateID origin,
 				const StateID destination);
 
@@ -175,12 +175,12 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(Transition::CHANGE,	   origin, destination); }
-	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(Transition::RESTART,   origin, destination); }
-	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(Transition::RESUME,	   origin, destination); }
-	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(Transition::UTILIZE,   origin, destination); }
-	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(Transition::RANDOMIZE, origin, destination); }
-	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(Transition::SCHEDULE,  origin, destination); }
+	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(TransitionType::CHANGE,	   origin, destination); }
+	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(TransitionType::RESTART,   origin, destination); }
+	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(TransitionType::RESUME,	   origin, destination); }
+	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(TransitionType::UTILIZE,   origin, destination); }
+	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(TransitionType::RANDOMIZE, origin, destination); }
+	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(TransitionType::SCHEDULE,  origin, destination); }
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -105,15 +105,15 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ 0u,					 Event::ENTRY_GUARD },
+				{ hfsm2::StateID{0}, 	 Event::ENTRY_GUARD },
 				{ FSM::stateId<A    >(), Event::ENTRY_GUARD },
 				{ FSM::stateId<A_1  >(), Event::ENTRY_GUARD },
 
-				{ 0u,					 Event::CONSTRUCT },
+				{ hfsm2::StateID{0}, 	 Event::CONSTRUCT },
 				{ FSM::stateId<A    >(), Event::CONSTRUCT },
 				{ FSM::stateId<A_1  >(), Event::CONSTRUCT },
 
-				{ 0u,					 Event::ENTER },
+				{ hfsm2::StateID{0}, 	 Event::ENTER },
 				{ FSM::stateId<A    >(), Event::ENTER },
 				{ FSM::stateId<A_1  >(), Event::ENTER },
 			});
@@ -134,7 +134,7 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 			logger.assertSequence({
 				{						 Event::CHANGE,		FSM::stateId<A    >() },
 
-				{ 0u,					 Event::UPDATE },
+				{ hfsm2::StateID{0}, 	 Event::UPDATE },
 				{ FSM::stateId<A    >(), Event::UPDATE },
 				{ FSM::stateId<A_1  >(), Event::UPDATE },
 
@@ -164,7 +164,7 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 			logger.assertSequence({
 				{						 Event::CHANGE, FSM::stateId<B    >() },
 
-				{ 0u,					 Event::UPDATE },
+				{ hfsm2::StateID{0}, 	 Event::UPDATE },
 				{ FSM::stateId<A    >(), Event::UPDATE },
 				{ FSM::stateId<A_1  >(), Event::UPDATE },
 
@@ -216,8 +216,7 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 			logger.assertSequence({
 				{						 Event::CHANGE, FSM::stateId<B    >() },
 
-				{ 0u,					 Event::UPDATE },
-
+				{ hfsm2::StateID{0}, 	 Event::UPDATE },
 				{ FSM::stateId<B    >(), Event::UPDATE },
 				{ FSM::stateId<B_1  >(), Event::UPDATE },
 				{ FSM::stateId<B_1_1>(), Event::UPDATE },
@@ -265,14 +264,14 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 		{ FSM::stateId<B_2_1>(), Event::EXIT },
 		{ FSM::stateId<B_2  >(), Event::EXIT },
 		{ FSM::stateId<B    >(), Event::EXIT },
-		{ 0u,					 Event::EXIT },
+		{ hfsm2::StateID{0}, 	 Event::EXIT },
 
 		{ FSM::stateId<B_1_1>(), Event::DESTRUCT },
 		{ FSM::stateId<B_1  >(), Event::DESTRUCT },
 		{ FSM::stateId<B_2_1>(), Event::DESTRUCT },
 		{ FSM::stateId<B_2  >(), Event::DESTRUCT },
 		{ FSM::stateId<B    >(), Event::DESTRUCT },
-		{ 0u,					 Event::DESTRUCT },
+		{ hfsm2::StateID{0}, 	 Event::DESTRUCT },
 	};
 	logger.assertSequence(reference);
 }

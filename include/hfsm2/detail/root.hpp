@@ -40,6 +40,7 @@ private:
 	using Args					= typename Info::Args;
 
 	using StateRegistry			= StateRegistryT<Args>;
+	using CompoForks			= typename StateRegistry::CompoForks;
 	using AllForks				= typename StateRegistry::AllForks;
 
 	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
@@ -67,8 +68,10 @@ public:
 
 	using Structure				= Array<StructureEntry, NAME_COUNT>;
 	using ActivityHistory		= Array<char,			NAME_COUNT>;
+#endif
 
-	using TransitionInfoStorage	= Array<TransitionInfo, COMPO_REGIONS * 4>;
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -190,9 +193,19 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	HFSM_INLINE void clearResumable()							{ _stateRegistry.resumable.clear();				}
+	HFSM_INLINE void clearRequests()							{ _stateRegistry.requested.clear();				}
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	const Structure&	   structure()		 const				{ return _structure;							}
 	const ActivityHistory& activityHistory() const				{ return _activityHistory;						}
+#endif
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	const TransitionHistory& transitionHistory() const			{ return _transitionHistory;					}
+
+	void replayTransition (const Transition& transition)		{ replayTransitions(&transition, 1);			}
+	void replayTransitions(const Transition* const transitions, const uint64_t count);
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
@@ -203,7 +216,14 @@ private:
 	void initialEnter();
 	void processTransitions();
 
+	bool applyRequest (Control& control, const Request& request);
 	bool applyRequests(Control& control);
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	bool applyRequests(Control& control,
+					   const Transition* const transitions,
+					   const uint64_t count);
+#endif
 
 	bool cancelledByEntryGuards(const Requests& pendingChanges);
 	bool cancelledByGuards(const Requests& pendingChanges);
@@ -211,8 +231,9 @@ private:
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	void getStateNames();
 	void udpateActivity();
-	void recordRequestsAs(const Method method);
 #endif
+
+	HFSM_IF_TRANSITION_HISTORY(void recordRequestsAs(const Method method));
 
 private:
 	Context& _context;
@@ -231,9 +252,9 @@ private:
 
 	Structure _structure;
 	ActivityHistory _activityHistory;
-
-	TransitionInfoStorage _lastTransitions;
 #endif
+
+	HFSM_IF_TRANSITION_HISTORY(TransitionHistory _transitionHistory);
 
 	HFSM_IF_LOGGER(Logger* _logger);
 };

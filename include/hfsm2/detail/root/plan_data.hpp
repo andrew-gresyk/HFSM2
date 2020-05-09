@@ -6,19 +6,18 @@ namespace detail {
 #pragma pack(push, 2)
 
 struct TaskLink {
-	HFSM_INLINE TaskLink(const Transition transition_,
+	HFSM_INLINE TaskLink(const TransitionType transitionType_,
 						 const StateID origin_,
 						 const StateID destination_)
-		: transition{transition_}
-		, origin(origin_)
-		, destination(destination_)
-		, next(INVALID_LONG_INDEX)
+		: transitionType{transitionType_}
+		, origin{origin_}
+		, destination{destination_}
+		, next{INVALID_LONG_INDEX}
 	{}
 
-	Transition transition;
+	TransitionType transitionType;
 	StateID origin		= INVALID_STATE_ID;
 	StateID destination	= INVALID_STATE_ID;
-	// TODO: add paylaods
 
 	LongIndex prev		= INVALID_LONG_INDEX;
 	LongIndex next		= INVALID_LONG_INDEX;

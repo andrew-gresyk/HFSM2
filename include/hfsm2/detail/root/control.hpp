@@ -296,7 +296,6 @@ public:
 	using PlanControl::plan;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	// TODO: remove payload versions
 
 	HFSM_INLINE void changeTo (const StateID id);
 	HFSM_INLINE void restart  (const StateID id);

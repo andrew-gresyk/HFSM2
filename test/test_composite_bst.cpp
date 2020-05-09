@@ -113,7 +113,7 @@ TEST_CASE("FSM.Composite BST", "[machine]") {
 			logger.assertSequence({
 				{						 Event::CHANGE, FSM::stateId<S1>() },
 
-				{ 0u,					 Event::UPDATE },
+				{ hfsm2::StateID{0},	 Event::UPDATE },
 				{ FSM::stateId<S0>(),	 Event::UPDATE },
 
 				{ FSM::stateId<S0>(),	 Event::EXIT_GUARD },
@@ -139,10 +139,10 @@ TEST_CASE("FSM.Composite BST", "[machine]") {
 
 	logger.assertSequence({
 		{ FSM::stateId<S1>(),	 Event::EXIT },
-		{ 0u,					 Event::EXIT },
+		{ hfsm2::StateID{0}, 	 Event::EXIT },
 
 		{ FSM::stateId<S1>(),	 Event::DESTRUCT },
-		{ 0u,					 Event::DESTRUCT },
+		{ hfsm2::StateID{0}, 	 Event::DESTRUCT },
 	});
 }
 

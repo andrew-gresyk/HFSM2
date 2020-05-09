@@ -61,34 +61,34 @@ static_assert(FSM::regionId<OC  >()	==  6, "");
 static_assert(FSM::regionId<OR  >()	==  7, "");
 static_assert(FSM::regionId<OU  >()	==  8, "");
 
-static_assert(FSM::stateId<Apex>() ==  0, "");
-static_assert(FSM::stateId<I   >() ==  1, "");
-static_assert(FSM::stateId<F   >() ==  2, "");
-static_assert(FSM::stateId<C   >() ==  3, "");
-static_assert(FSM::stateId<C_1 >() ==  4, "");
-static_assert(FSM::stateId<C_2 >() ==  5, "");
-static_assert(FSM::stateId<C_3 >() ==  6, "");
-static_assert(FSM::stateId<R   >() ==  7, "");
-static_assert(FSM::stateId<R_1 >() ==  8, "");
-static_assert(FSM::stateId<R_2 >() ==  9, "");
-static_assert(FSM::stateId<R_3 >() == 10, "");
-static_assert(FSM::stateId<U   >() == 11, "");
-static_assert(FSM::stateId<U_1 >() == 12, "");
-static_assert(FSM::stateId<U_2 >() == 13, "");
-static_assert(FSM::stateId<U_3 >() == 14, "");
-static_assert(FSM::stateId<O   >() == 15, "");
-static_assert(FSM::stateId<OC  >() == 16, "");
-static_assert(FSM::stateId<OC_1>() == 17, "");
-static_assert(FSM::stateId<OC_2>() == 18, "");
-static_assert(FSM::stateId<OC_3>() == 19, "");
-static_assert(FSM::stateId<OR  >() == 20, "");
-static_assert(FSM::stateId<OR_1>() == 21, "");
-static_assert(FSM::stateId<OR_2>() == 22, "");
-static_assert(FSM::stateId<OR_3>() == 23, "");
-static_assert(FSM::stateId<OU  >() == 24, "");
-static_assert(FSM::stateId<OU_1>() == 25, "");
-static_assert(FSM::stateId<OU_2>() == 26, "");
-static_assert(FSM::stateId<OU_3>() == 27, "");
+static_assert(FSM::stateId<Apex>()  ==  0, "");
+static_assert(FSM::stateId<I   >()  ==  1, "");
+static_assert(FSM::stateId<F   >()  ==  2, "");
+static_assert(FSM::stateId<C   >()  ==  3, "");
+static_assert(FSM::stateId<C_1 >()  ==  4, "");
+static_assert(FSM::stateId<C_2 >()  ==  5, "");
+static_assert(FSM::stateId<C_3 >()  ==  6, "");
+static_assert(FSM::stateId<R   >()  ==  7, "");
+static_assert(FSM::stateId<R_1 >()  ==  8, "");
+static_assert(FSM::stateId<R_2 >()  ==  9, "");
+static_assert(FSM::stateId<R_3 >()  == 10, "");
+static_assert(FSM::stateId<U   >()  == 11, "");
+static_assert(FSM::stateId<U_1 >()  == 12, "");
+static_assert(FSM::stateId<U_2 >()  == 13, "");
+static_assert(FSM::stateId<U_3 >()  == 14, "");
+static_assert(FSM::stateId<O   >()  == 15, "");
+static_assert(FSM::stateId<OC  >()  == 16, "");
+static_assert(FSM::stateId<OC_1>()  == 17, "");
+static_assert(FSM::stateId<OC_2>()  == 18, "");
+static_assert(FSM::stateId<OC_3>()  == 19, "");
+static_assert(FSM::stateId<OR  >()  == 20, "");
+static_assert(FSM::stateId<OR_1>()  == 21, "");
+static_assert(FSM::stateId<OR_2>()  == 22, "");
+static_assert(FSM::stateId<OR_3>()  == 23, "");
+static_assert(FSM::stateId<OU  >()  == 24, "");
+static_assert(FSM::stateId<OU_1>()  == 25, "");
+static_assert(FSM::stateId<OU_2>()  == 26, "");
+static_assert(FSM::stateId<OU_3>()  == 27, "");
 
 //------------------------------------------------------------------------------
 
@@ -273,12 +273,12 @@ TEST_CASE("FSM.Utility Regions", "[machine]") {
 		{ FSM::stateId<C_1 >(),	 Event::EXIT },
 		{ FSM::stateId<C   >(),	 Event::EXIT },
 		{ FSM::stateId<F   >(),	 Event::EXIT },
-		{ 0u,					 Event::EXIT },
+		{ hfsm2::StateID{0}, 	 Event::EXIT },
 
 		{ FSM::stateId<C_1 >(),	 Event::DESTRUCT },
 		{ FSM::stateId<C   >(),	 Event::DESTRUCT },
 		{ FSM::stateId<F   >(),	 Event::DESTRUCT },
-		{ 0u,					 Event::DESTRUCT },
+		{ hfsm2::StateID{0}, 	 Event::DESTRUCT },
 	});
 }
 

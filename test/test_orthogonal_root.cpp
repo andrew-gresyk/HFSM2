@@ -108,7 +108,7 @@ TEST_CASE("FSM.Orthogonal Root", "[machine]") {
 		FSM::Instance machine{_, &logger};
 		{
 			logger.assertSequence({
-				{ 0,					 Event::ENTRY_GUARD },
+				{ hfsm2::StateID{0},	 Event::ENTRY_GUARD },
 				{ FSM::stateId<A    >(), Event::ENTRY_GUARD },
 				{ FSM::stateId<A_1  >(), Event::ENTRY_GUARD },
 				{ FSM::stateId<B    >(), Event::ENTRY_GUARD },
@@ -117,7 +117,7 @@ TEST_CASE("FSM.Orthogonal Root", "[machine]") {
 				{ FSM::stateId<B_2  >(), Event::ENTRY_GUARD },
 				{ FSM::stateId<B_2_1>(), Event::ENTRY_GUARD },
 
-				{ 0,					 Event::CONSTRUCT },
+				{ hfsm2::StateID{0},	 Event::CONSTRUCT },
 				{ FSM::stateId<A    >(), Event::CONSTRUCT },
 				{ FSM::stateId<A_1  >(), Event::CONSTRUCT },
 				{ FSM::stateId<B    >(), Event::CONSTRUCT },
@@ -126,7 +126,7 @@ TEST_CASE("FSM.Orthogonal Root", "[machine]") {
 				{ FSM::stateId<B_2  >(), Event::CONSTRUCT },
 				{ FSM::stateId<B_2_1>(), Event::CONSTRUCT },
 
-				{ 0,					 Event::ENTER },
+				{ hfsm2::StateID{0},	 Event::ENTER },
 				{ FSM::stateId<A    >(), Event::ENTER },
 				{ FSM::stateId<A_1  >(), Event::ENTER },
 				{ FSM::stateId<B    >(), Event::ENTER },
@@ -160,7 +160,7 @@ TEST_CASE("FSM.Orthogonal Root", "[machine]") {
 		{ FSM::stateId<B_2_1>(), Event::EXIT },
 		{ FSM::stateId<B_2  >(), Event::EXIT },
 		{ FSM::stateId<B    >(), Event::EXIT },
-		{ 0,					 Event::EXIT },
+		{ hfsm2::StateID{0},	 Event::EXIT },
 
 		{ FSM::stateId<A_1  >(), Event::DESTRUCT },
 		{ FSM::stateId<A    >(), Event::DESTRUCT },
@@ -169,7 +169,7 @@ TEST_CASE("FSM.Orthogonal Root", "[machine]") {
 		{ FSM::stateId<B_2_1>(), Event::DESTRUCT },
 		{ FSM::stateId<B_2  >(), Event::DESTRUCT },
 		{ FSM::stateId<B    >(), Event::DESTRUCT },
-		{ 0,					 Event::DESTRUCT },
+		{ hfsm2::StateID{0},	 Event::DESTRUCT },
 	});
 }
 

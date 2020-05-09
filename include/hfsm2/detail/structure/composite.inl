@@ -683,7 +683,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 	} else {
 		requested = INVALID_SHORT_INDEX;
 
-		// TODO: _subStates.wideReconstruct();
+		// no reconstruction on reenter() by design
 
 		_subStates.wideReenter	(control, active);
 	}

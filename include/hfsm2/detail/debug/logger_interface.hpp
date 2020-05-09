@@ -9,14 +9,14 @@ namespace hfsm2 {
 template <typename TContext = EmptyContext,
 		  typename TUtilty = float>
 struct LoggerInterfaceT {
-	using Context	  = TContext;
-	using Utilty	  = TUtilty;
+	using Context		 = TContext;
+	using Utilty		 = TUtilty;
 
-	using Method	  = ::hfsm2::Method;
-	using StateID	  = ::hfsm2::StateID;
-	using RegionID	  = ::hfsm2::RegionID;
-	using Transition  = ::hfsm2::Transition;
-	using StatusEvent = ::hfsm2::StatusEvent;
+	using Method		 = ::hfsm2::Method;
+	using StateID		 = ::hfsm2::StateID;
+	using RegionID		 = ::hfsm2::RegionID;
+	using TransitionType = ::hfsm2::TransitionType;
+	using StatusEvent	 = ::hfsm2::StatusEvent;
 
 	virtual void recordMethod(Context& /*context*/,
 							  const StateID /*origin*/,
@@ -25,7 +25,7 @@ struct LoggerInterfaceT {
 
 	virtual void recordTransition(Context& /*context*/,
 								  const StateID /*origin*/,
-								  const Transition /*transition*/,
+								  const TransitionType /*transitionType*/,
 								  const StateID /*target*/)
 	{}
 

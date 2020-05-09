@@ -78,15 +78,15 @@ template <typename TContext = hfsm2::EmptyContext>
 struct LoggerT
 	: hfsm2::LoggerInterfaceT<TContext>
 {
-	using Context	  = TContext;
-	using Interface	  = hfsm2::LoggerInterfaceT<Context>;
+	using Context		  = TContext;
+	using Interface		  = hfsm2::LoggerInterfaceT<Context>;
 
-	using Utilty	  = typename Interface::Utilty;
-	using Method	  = typename Interface::Method;
-	using StateID	  = typename Interface::StateID;
-	using RegionID	  = typename Interface::RegionID;
-	using Transition  = typename Interface::Transition;
-	using StatusEvent = typename Interface::StatusEvent;
+	using Utilty		  = typename Interface::Utilty;
+	using Method		  = typename Interface::Method;
+	using StateID		  = typename Interface::StateID;
+	using RegionID		  = typename Interface::RegionID;
+	using TransitionType  = typename Interface::TransitionType;
+	using StatusEvent	  = typename Interface::StatusEvent;
 
 	void recordMethod(Context& context,
 					  const StateID origin,
@@ -94,7 +94,7 @@ struct LoggerT
 
 	void recordTransition(Context& context,
 						  const StateID origin,
-						  const Transition transition,
+						  const TransitionType transitionType,
 						  const StateID target) override;
 
 	void recordTaskStatus(Context& context,

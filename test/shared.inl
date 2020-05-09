@@ -59,33 +59,33 @@ template <typename TContext>
 void
 LoggerT<TContext>::recordTransition(Context& /*context*/,
 									const StateID origin,
-									const Transition transition,
+									const TransitionType transitionType,
 									const StateID target)
 {
-	REQUIRE(hfsm2::transitionName(transition));
+	REQUIRE(hfsm2::transitionName(transitionType));
 
-	switch (transition) {
-		case Transition::CHANGE:
+	switch (transitionType) {
+		case TransitionType::CHANGE:
 			history.emplace_back(origin, Event::CHANGE,    target);
 			break;
 
-		case Transition::RESTART:
+		case TransitionType::RESTART:
 			history.emplace_back(origin, Event::RESTART,   target);
 			break;
 
-		case Transition::RESUME:
+		case TransitionType::RESUME:
 			history.emplace_back(origin, Event::RESUME,    target);
 			break;
 
-		case Transition::UTILIZE:
+		case TransitionType::UTILIZE:
 			history.emplace_back(origin, Event::UTILIZE,   target);
 			break;
 
-		case Transition::RANDOMIZE:
+		case TransitionType::RANDOMIZE:
 			history.emplace_back(origin, Event::RANDOMIZE, target);
 			break;
 
-		case Transition::SCHEDULE:
+		case TransitionType::SCHEDULE:
 			history.emplace_back(origin, Event::SCHEDULE,  target);
 			break;
 

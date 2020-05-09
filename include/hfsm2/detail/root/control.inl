@@ -244,7 +244,7 @@ FullControlT<TArgs>::changeTo(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::CHANGE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
 	}
 }
 
@@ -259,7 +259,7 @@ FullControlT<TArgs>::restart(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESTART, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
 	}
 }
 
@@ -274,7 +274,7 @@ FullControlT<TArgs>::resume(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESUME, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
 	}
 }
 
@@ -289,7 +289,7 @@ FullControlT<TArgs>::utilize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::UTILIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
 	}
 }
 
@@ -304,7 +304,7 @@ FullControlT<TArgs>::randomize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RANDOMIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
 	}
 }
 
@@ -315,7 +315,7 @@ void
 FullControlT<TArgs>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
-	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------

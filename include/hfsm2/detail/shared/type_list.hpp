@@ -88,17 +88,17 @@ struct IndexSequence {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template<typename, typename>
-struct MakeIndexSequence_Impl {};
+struct MakeIndexSequenceT {};
 
 template<LongIndex N, LongIndex... Ns>
-struct MakeIndexSequence_Impl<IndexConstant<N>,
-							  IndexSequence<Ns...>>
-	: MakeIndexSequence_Impl<IndexConstant<N - 1>,
-							 IndexSequence<N - 1, Ns...>>
+struct MakeIndexSequenceT<IndexConstant<N>,
+						  IndexSequence<Ns...>>
+	: MakeIndexSequenceT<IndexConstant<N - 1>,
+						 IndexSequence<N - 1, Ns...>>
 {};
 
 template<LongIndex... Ns>
-struct MakeIndexSequence_Impl<IndexConstant<0>,
+struct MakeIndexSequenceT<IndexConstant<0>,
 							  IndexSequence<Ns...>>
 	: IndexSequence<Ns...>
 {};
@@ -106,8 +106,8 @@ struct MakeIndexSequence_Impl<IndexConstant<0>,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template<LongIndex N>
-using MakeIndexSequence = typename MakeIndexSequence_Impl<IndexConstant<N>,
-														  IndexSequence<>>::Type;
+using MakeIndexSequence = typename MakeIndexSequenceT<IndexConstant<N>,
+													  IndexSequence<>>::Type;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -117,11 +117,11 @@ using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct IndexedTypeList_EntryT {};
+struct ITL_EntryT {};
 
 template <typename T, LongIndex N>
-struct IndexedTypeList_EntryN
-	: IndexedTypeList_EntryT<T>
+struct ITL_EntryN
+	: ITL_EntryT<T>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -131,10 +131,10 @@ struct ITL_Impl;
 
 template <LongIndex... Ns, typename... Ts>
 struct ITL_Impl<IndexSequence<Ns...>, Ts...>
-	: IndexedTypeList_EntryN<Ts, Ns>...
+	: ITL_EntryN<Ts, Ns>...
 {
 	template <typename T, LongIndex N>
-	static constexpr LongIndex select(IndexedTypeList_EntryN<T, N>) { return (LongIndex) N; }
+	static constexpr LongIndex select(ITL_EntryN<T, N>) { return (LongIndex) N; }
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -148,18 +148,18 @@ struct ITL_
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr bool contains() { return std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value; }
+	static constexpr bool contains() { return std::is_base_of<ITL_EntryT<T>, ITL_>::value; }
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if< std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value, LongIndex>::type
+	typename std::enable_if< std::is_base_of<ITL_EntryT<T>, ITL_>::value, LongIndex>::type
 	index() {
 		return Base::template select<T>(ITL_{});
 	}
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if<!std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value, LongIndex>::type
+	typename std::enable_if<!std::is_base_of<ITL_EntryT<T>, ITL_>::value, LongIndex>::type
 	index() {
 		return INVALID_LONG_INDEX;
 	}

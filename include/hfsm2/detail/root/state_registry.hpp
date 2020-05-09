@@ -152,7 +152,6 @@ struct StateRegistryT<ArgsT<TContext,
 
 	HFSM_INLINE const Parent&	  forkParent(const ForkID forkId) const;
 
-	HFSM_INLINE OrthoBits resumableOrthoFork(const ForkID forkId);
 	HFSM_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
 
 	bool requestImmediate(const Request request);
@@ -166,7 +165,7 @@ struct StateRegistryT<ArgsT<TContext,
 	OrthoUnits orthoUnits;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-	AllForks resumable;
+	CompoForks resumable  {INVALID_SHORT_INDEX};
 
 	AllForks requested;
 	CompoRemains compoRemains;
@@ -220,7 +219,7 @@ struct StateRegistryT<ArgsT<TContext,
 	CompoParents compoParents;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-	AllForks resumable;
+	CompoForks resumable  {INVALID_SHORT_INDEX};
 
 	AllForks requested;
 	CompoRemains compoRemains;

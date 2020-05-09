@@ -50,9 +50,9 @@
 
 	#define HFSM_LOGGER_OR(Y, N)												Y
 
-	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TRANSITION, DESTINATION)		\
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		\
 		if (_logger)															\
-			_logger->recordTransition(CONTEXT, ORIGIN, TRANSITION, DESTINATION)
+			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
 
 	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)				\
 		if (_logger)															\
@@ -79,7 +79,7 @@
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(Y, N)												N
 
-	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TRANSITION, DESTINATION)
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)
 	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)
 	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)
 	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
@@ -112,6 +112,14 @@
 	#define HFSM_IF_STRUCTURE(...)									  __VA_ARGS__
 #else
 	#define HFSM_IF_STRUCTURE(...)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	#define HFSM_IF_TRANSITION_HISTORY(...)							  __VA_ARGS__
+#else
+	#define HFSM_IF_TRANSITION_HISTORY(...)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -172,7 +180,7 @@ struct Min {
 	static constexpr auto VALUE = N1_ < N2_ ? N1_ : N2_;
 };
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <int N1_, int N2_>
 struct Max {
@@ -181,8 +189,16 @@ struct Max {
 
 //------------------------------------------------------------------------------
 
+template <typename T>
+constexpr
+T
+min(const T t1, const T t2) { return t1 < t2 ? t1 : t2; }
+
+
+//------------------------------------------------------------------------------
+
 template <unsigned NCapacity>
-struct UnsignedIndex {
+struct UnsignedT {
 	static constexpr LongIndex CAPACITY = NCapacity;
 
 	using Type = typename std::conditional<CAPACITY <= UINT8_MAX,  uint8_t,
@@ -192,6 +208,34 @@ struct UnsignedIndex {
 
 	static_assert(CAPACITY <= UINT64_MAX, "STATIC ASSERT");
 };
+
+template <unsigned NCapacity>
+using Unsigned = typename UnsignedT<NCapacity>::Type;
+
+//------------------------------------------------------------------------------
+
+constexpr
+LongIndex
+roundUp(const LongIndex x,
+		const LongIndex to)
+{
+	return (x + (to - 1)) / to;
+}
+
+//------------------------------------------------------------------------------
+
+constexpr
+ShortIndex
+bitWidth(const ShortIndex x) {
+	return x <   2 ? 1 :
+		   x <   4 ? 2 :
+		   x <   8 ? 3 :
+		   x <  16 ? 4 :
+		   x <  32 ? 5 :
+		   x <  64 ? 6 :
+		   x < 128 ? 7 :
+					 8 ;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

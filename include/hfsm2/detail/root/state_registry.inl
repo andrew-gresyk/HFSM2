@@ -44,7 +44,7 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::isResumable
 			HFSM_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
-				return parent.prong == resumable.compo[parent.forkId - 1];
+				return parent.prong == resumable[parent.forkId - 1];
 		}
 
 	return false;
@@ -126,17 +126,6 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::forkParent(
 
 template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, LongIndex NTC_>
 typename StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::OrthoBits
-StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::resumableOrthoFork(const ForkID forkId) {
-	HFSM_ASSERT(forkId < 0);
-	const Units& units = orthoUnits[-forkId - 1];
-
-	return resumable.ortho.bits(units);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, LongIndex NTC_>
-typename StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::OrthoBits
 StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::requestedOrthoFork(const ForkID forkId) {
 	HFSM_ASSERT(forkId < 0);
 	const Units& units = orthoUnits[-forkId - 1];
@@ -207,9 +196,7 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::requestSche
 		const Parent parent = stateParents[stateId];
 
 		if (parent.forkId > 0)
-			resumable.compo[parent.forkId - 1] = parent.prong;
-		else if (parent.forkId < 0)
-			resumableOrthoFork(parent.forkId).set(parent.prong);
+			resumable[parent.forkId - 1] = parent.prong;
 		else
 			HFSM_BREAK();
 	}
@@ -250,7 +237,7 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, 0, 0, NTC_>>::isResumable(const
 		if (Parent parent = stateParents[stateId]) {
 			HFSM_ASSERT(parent.forkId > 0);
 
-			return parent.prong == resumable.compo[parent.forkId - 1];
+			return parent.prong == resumable[parent.forkId - 1];
 		}
 
 	return false;
@@ -365,7 +352,7 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, 0, 0, NTC_>>::requestScheduled(
 		const Parent parent = stateParents[stateId];
 
 		if (HFSM_CHECKED(parent.forkId > 0))
-			resumable.compo[parent.forkId - 1] = parent.prong;
+			resumable[parent.forkId - 1] = parent.prong;
 	}
 }
 

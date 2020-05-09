@@ -87,6 +87,9 @@
     <ClCompile Include="..\..\test\test_orthogonal_root.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_replication.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">

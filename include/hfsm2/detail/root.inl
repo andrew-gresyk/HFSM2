@@ -84,112 +84,143 @@ void
 R_<TG_, TA_>::changeTo(const StateID stateId) {
 	_requests.append(Request{Request::Type::CHANGE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::restart(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESTART, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::resume(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESUME, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::utilize(const StateID stateId) {
 	_requests.append(Request{Request::Type::UTILIZE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::randomize(const StateID stateId) {
 	_requests.append(Request{Request::Type::RANDOMIZE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+template <typename TG_, typename TA_>
+void
+R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
+								const uint64_t count)
+{
+	if (HFSM_CHECKED(transitions && count)) {
+		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
+
+		PlanControl control{_context,
+							_rng,
+							_stateRegistry,
+							_planData,
+							HFSM_LOGGER_OR(_logger, nullptr)};
+
+		if (applyRequests(control, transitions, count)) {
+			_apex.deepChangeToRequested(control);
+
+			_stateRegistry.clearRequests();
+
+			HFSM_IF_ASSERT(_planData.verifyPlans());
+		}
+
+		HFSM_IF_STRUCTURE(udpateActivity());
+	}
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::initialEnter() {
-	Control control{_context,
-					_rng,
-					_stateRegistry,
-					_planData,
-					HFSM_LOGGER_OR(_logger, nullptr)};
+	HFSM_ASSERT(_requests.count() == 0);
+	HFSM_IF_TRANSITION_HISTORY(HFSM_ASSERT(_transitionHistory.count() == 0));
 
-	AllForks undoRequested = _stateRegistry.requested;
+	CompoForks undoResumable;
+	AllForks   undoRequested;
+	HFSM_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
+
+	Requests lastRequests;
+
+	PlanControl control{_context,
+						_rng,
+						_stateRegistry,
+						_planData,
+						HFSM_LOGGER_OR(_logger, nullptr)};
 
 	_apex.deepRequestChange(control);
 
-	Requests lastRequests = _requests;
-	_requests.clear();
-
-	if (cancelledByEntryGuards(lastRequests))
-		_stateRegistry.requested = undoRequested;
+	cancelledByEntryGuards(_requests);
 
 	for (LongIndex i = 0;
 		 i < SUBSTITUTION_LIMIT && _requests.count();
 		 ++i)
 	{
+		undoResumable = _stateRegistry.resumable;
 		undoRequested = _stateRegistry.requested;
+		HFSM_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
 
 		if (applyRequests(control)) {
 			lastRequests = _requests;
 			_requests.clear();
 
-			if (cancelledByEntryGuards(lastRequests))
+			if (cancelledByEntryGuards(lastRequests)) {
+				_stateRegistry.resumable = undoResumable;
 				_stateRegistry.requested = undoRequested;
-		}
-
-		_requests.clear();
+				HFSM_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
+			}
+		} else
+			_requests.clear();
 	}
 	HFSM_ASSERT(_requests.count() == 0);
 
-	{
-		PlanControl planControl{_context,
-								_rng,
-								_stateRegistry,
-								_planData,
-								HFSM_LOGGER_OR(_logger, nullptr)};
+	_apex.deepConstruct(control);
+	_apex.deepEnter	   (control);
 
-		_apex.deepConstruct(planControl);
-		_apex.deepEnter	   (planControl);
+	_stateRegistry.clearRequests();
 
-		_stateRegistry.clearRequests();
-
-		HFSM_IF_ASSERT(_planData.verifyPlans());
-	}
+	HFSM_IF_ASSERT(_planData.verifyPlans());
 
 	HFSM_IF_STRUCTURE(udpateActivity());
 }
@@ -201,41 +232,47 @@ void
 R_<TG_, TA_>::processTransitions() {
 	HFSM_ASSERT(_requests.count());
 
-	HFSM_IF_STRUCTURE(_lastTransitions.clear());
+	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
 
-	AllForks undoRequested;
+	CompoForks undoResumable;
+	AllForks   undoRequested;
+	HFSM_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
+
 	Requests lastRequests;
 
-	Control control(_context,
-					_rng,
-					_stateRegistry,
-					_planData,
-					HFSM_LOGGER_OR(_logger, nullptr));
+	PlanControl control{_context,
+						_rng,
+						_stateRegistry,
+						_planData,
+						HFSM_LOGGER_OR(_logger, nullptr)};
+
+	bool changesMade = false;
 
 	for (LongIndex i = 0;
 		i < SUBSTITUTION_LIMIT && _requests.count();
 		++i)
 	{
+		undoResumable = _stateRegistry.resumable;
 		undoRequested = _stateRegistry.requested;
+		HFSM_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
 
 		if (applyRequests(control)) {
 			lastRequests = _requests;
 			_requests.clear();
 
-			if (cancelledByGuards(lastRequests))
+			if (cancelledByGuards(lastRequests)) {
+				_stateRegistry.resumable = undoResumable;
 				_stateRegistry.requested = undoRequested;
+				HFSM_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
+			} else
+				changesMade = true;
 		} else
 			_requests.clear();
 	}
 
-	{
-		PlanControl planControl{_context,
-								_rng,
-								_stateRegistry,
-								_planData,
-								HFSM_LOGGER_OR(_logger, nullptr)};
+	if (changesMade) {
+		_apex.deepChangeToRequested(control);
 
-		_apex.deepChangeToRequested(planControl);
 		_stateRegistry.clearRequests();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -248,37 +285,69 @@ R_<TG_, TA_>::processTransitions() {
 
 template <typename TG_, typename TA_>
 bool
+R_<TG_, TA_>::applyRequest(Control& control, const Request& request) {
+	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.append(Transition{request, Method::NONE}));
+
+	switch (request.type) {
+	case Request::CHANGE:
+	case Request::RESTART:
+	case Request::RESUME:
+	case Request::UTILIZE:
+	case Request::RANDOMIZE:
+		if (_stateRegistry.requestImmediate(request))
+			_apex.deepForwardActive(control, request.type);
+		else
+			_apex.deepRequest	   (control, request.type);
+
+		return true;
+
+	case Request::SCHEDULE:
+		_stateRegistry.requestScheduled(request.stateId);
+
+		return false;
+
+	default:
+		HFSM_BREAK();
+
+		return false;
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG_, typename TA_>
+bool
 R_<TG_, TA_>::applyRequests(Control& control) {
 	bool changesMade = false;
 
-	for (const Request& request : _requests) {
-		HFSM_IF_STRUCTURE(_lastTransitions.append(TransitionInfo{request, Method::UPDATE}));
-
-		switch (request.type) {
-		case Request::CHANGE:
-		case Request::RESTART:
-		case Request::RESUME:
-		case Request::UTILIZE:
-		case Request::RANDOMIZE:
-			if (_stateRegistry.requestImmediate(request))
-				_apex.deepForwardActive(control, request.type);
-			else
-				_apex.deepRequest	   (control, request.type);
-
-			changesMade = true;
-			break;
-
-		case Request::SCHEDULE:
-			_stateRegistry.requestScheduled(request.stateId);
-			break;
-
-		default:
-			HFSM_BREAK();
-		}
-	}
+	for (const Request& request : _requests)
+		changesMade |= applyRequest(control, request);
 
 	return changesMade;
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+template <typename TG_, typename TA_>
+bool
+R_<TG_, TA_>::applyRequests(Control& control,
+							const Transition* const transitions,
+							const uint64_t count)
+{
+	if (HFSM_CHECKED(transitions && count)) {
+		bool changesMade = false;
+
+		for (uint64_t i = 0; i < count; ++i)
+			changesMade |= applyRequest(control, transitions[i].request());
+
+		return changesMade;
+	} else
+		return false;
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -294,7 +363,7 @@ R_<TG_, TA_>::cancelledByEntryGuards(const Requests& pendingRequests) {
 		HFSM_LOGGER_OR(_logger, nullptr)};
 
 	if (_apex.deepEntryGuard(guardControl)) {
-		HFSM_IF_STRUCTURE(recordRequestsAs(Method::ENTRY_GUARD));
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
 
 		return true;
 	} else
@@ -315,11 +384,11 @@ R_<TG_, TA_>::cancelledByGuards(const Requests& pendingRequests) {
 							  HFSM_LOGGER_OR(_logger, nullptr)};
 
 	if (_apex.deepForwardExitGuard(guardControl)) {
-		HFSM_IF_STRUCTURE(recordRequestsAs(Method::EXIT_GUARD));
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::EXIT_GUARD));
 
 		return true;
 	} else if (_apex.deepForwardEntryGuard(guardControl)) {
-		HFSM_IF_STRUCTURE(recordRequestsAs(Method::ENTRY_GUARD));
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
 
 		return true;
 	} else
@@ -433,13 +502,17 @@ R_<TG_, TA_>::udpateActivity() {
 		}
 }
 
+#endif
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::recordRequestsAs(const Method method) {
 	for (const auto& request : _requests)
-		_lastTransitions.append(TransitionInfo{request, method});
+		_transitionHistory.append(Transition{request, method});
 }
 
 #endif

@@ -347,7 +347,7 @@ TEST_CASE("FSM.Debug", "[machine]") {
 		{ FSM::stateId<N_2 >(),	Event::EXIT },
 		{ FSM::stateId<N   >(),	Event::EXIT },
 		{ FSM::stateId<O   >(),	Event::EXIT },
-		{ 0u,					Event::EXIT },
+		{ hfsm2::StateID{0}, 	Event::EXIT },
 
 		{ FSM::stateId<R_1 >(),	Event::DESTRUCT },
 		{ FSM::stateId<R   >(),	Event::DESTRUCT },
@@ -358,7 +358,7 @@ TEST_CASE("FSM.Debug", "[machine]") {
 		{ FSM::stateId<N_2 >(),	Event::DESTRUCT },
 		{ FSM::stateId<N   >(),	Event::DESTRUCT },
 		{ FSM::stateId<O   >(),	Event::DESTRUCT },
-		{ 0u,					Event::DESTRUCT },
+		{ hfsm2::StateID{0}, 	Event::DESTRUCT },
 	});
 }
 

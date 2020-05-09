@@ -102,7 +102,7 @@
 
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
-	<Type Name="hfsm2::detail::Transition">
+	<Type Name="hfsm2::detail::TransitionType">
 		<DisplayString>{type, en}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
@@ -222,8 +222,11 @@
 
 	<Type Name="hfsm2::detail::R_&lt;*&gt;">
 		<DisplayString Optional="true">{_structure}</DisplayString>
+		<DisplayString Optional="true">{_requests}</DisplayString>
 		<Expand>
 			<ExpandedItem Optional="true">_structure</ExpandedItem>
+			<ExpandedItem Optional="true">_requests</ExpandedItem>
+			<ExpandedItem Optional="true">_transitionHistory</ExpandedItem>
 		</Expand>
 	</Type>
 

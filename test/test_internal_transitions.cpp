@@ -159,8 +159,8 @@ struct A_2_2
 	: FSM::State
 {
 	void enter(PlanControl&)													{}
-	void update(FullControl&)													{}
-	void react(const Action&, FullControl&)										{}
+	//void update(FullControl&)													{}
+	//void react(const Action&, FullControl&)									{}
 	void exit(PlanControl&)														{}
 };
 
@@ -200,9 +200,9 @@ struct B_1_1
 struct B_1_2
 	: FSM::State
 {
-	void enter(PlanControl&)													{}
-	void update(FullControl&)													{}
-	void exit(PlanControl&)														{}
+	//void enter(PlanControl&)													{}
+	//void update(FullControl&)													{}
+	//void exit(PlanControl&)													{}
 };
 
 //------------------------------------------------------------------------------
@@ -235,13 +235,6 @@ struct B_2_1
 struct B_2_2
 	: FSM::StateT<Tracked>
 {
-	void entryGuard(GuardControl& control) {
-		if (entryCount() == 3) {
-			control.cancelPendingTransitions();
-			control.resume<A>();
-		}
-	}
-
 	void enter(PlanControl&)													{}
 
 	void update(FullControl& control) {
@@ -321,7 +314,7 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ 0,					 Event::REACT },
+				{ hfsm2::StateID{0},	 Event::REACT },
 				{ FSM::stateId<A    >(), Event::REACT },
 				{ FSM::stateId<A_1  >(), Event::REACT },
 			});
@@ -372,7 +365,7 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ 0,					 Event::REACT },
+				{ hfsm2::StateID{0},	 Event::REACT },
 				{ FSM::stateId<A    >(), Event::REACT },
 				{ FSM::stateId<A_2  >(), Event::REACT },
 				{ FSM::stateId<A_2_1>(), Event::REACT },
@@ -444,7 +437,7 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ 0,					 Event::REACT },
+				{ hfsm2::StateID{0},	 Event::REACT },
 				{ FSM::stateId<B    >(), Event::REACT },
 				{ FSM::stateId<B_1  >(), Event::REACT },
 				{ FSM::stateId<B_1_1>(), Event::REACT },

@@ -20,7 +20,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
 	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
 
-	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
@@ -148,7 +147,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
 	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
 
-	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;

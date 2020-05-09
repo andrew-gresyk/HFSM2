@@ -4,7 +4,9 @@
 
 namespace hfsm2 {
 
-enum class Method : ShortIndex {
+enum class Method : uint8_t {
+	NONE,
+
 	RANK,
 	UTILITY,
 	ENTRY_GUARD,
@@ -22,7 +24,7 @@ enum class Method : ShortIndex {
 	COUNT
 };
 
-enum class Transition : ShortIndex {
+enum class TransitionType : uint8_t {
 	CHANGE,
 	RESTART,
 	RESUME,
@@ -33,7 +35,7 @@ enum class Transition : ShortIndex {
 	COUNT
 };
 
-enum class StatusEvent : ShortIndex {
+enum class StatusEvent : uint8_t {
 	SUCCEEDED,
 	FAILED,
 
@@ -96,14 +98,14 @@ methodName(const Method method) {
 
 static inline
 const char*
-transitionName(const Transition transition) {
-	switch (transition) {
-	case Transition::CHANGE:	return "changeTo";
-	case Transition::RESTART:	return "restart";
-	case Transition::RESUME:	return "resume";
-	case Transition::UTILIZE:	return "utilize";
-	case Transition::RANDOMIZE:	return "randomize";
-	case Transition::SCHEDULE:	return "schedule";
+transitionName(const TransitionType transitionType) {
+	switch (transitionType) {
+	case TransitionType::CHANGE:		return "changeTo";
+	case TransitionType::RESTART:		return "restart";
+	case TransitionType::RESUME:		return "resume";
+	case TransitionType::UTILIZE:		return "utilize";
+	case TransitionType::RANDOMIZE:		return "randomize";
+	case TransitionType::SCHEDULE:		return "schedule";
 
 	default:
 		HFSM_BREAK();

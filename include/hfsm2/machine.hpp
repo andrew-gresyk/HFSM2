@@ -115,9 +115,9 @@ struct EmptyPayload {};
 
 	#define HFSM_LOGGER_OR(Y, N)												Y
 
-	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TRANSITION, DESTINATION)		\
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		\
 		if (_logger)															\
-			_logger->recordTransition(CONTEXT, ORIGIN, TRANSITION, DESTINATION)
+			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
 
 	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)				\
 		if (_logger)															\
@@ -144,7 +144,7 @@ struct EmptyPayload {};
 	#define HFSM_IF_LOGGER(...)
 	#define HFSM_LOGGER_OR(Y, N)												N
 
-	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TRANSITION, DESTINATION)
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)
 	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)
 	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)
 	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
@@ -177,6 +177,14 @@ struct EmptyPayload {};
 	#define HFSM_IF_STRUCTURE(...)									  __VA_ARGS__
 #else
 	#define HFSM_IF_STRUCTURE(...)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	#define HFSM_IF_TRANSITION_HISTORY(...)							  __VA_ARGS__
+#else
+	#define HFSM_IF_TRANSITION_HISTORY(...)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -237,7 +245,7 @@ struct Min {
 	static constexpr auto VALUE = N1_ < N2_ ? N1_ : N2_;
 };
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <int N1_, int N2_>
 struct Max {
@@ -246,8 +254,16 @@ struct Max {
 
 //------------------------------------------------------------------------------
 
+template <typename T>
+constexpr
+T
+min(const T t1, const T t2) { return t1 < t2 ? t1 : t2; }
+
+
+//------------------------------------------------------------------------------
+
 template <unsigned NCapacity>
-struct UnsignedIndex {
+struct UnsignedT {
 	static constexpr LongIndex CAPACITY = NCapacity;
 
 	using Type = typename std::conditional<CAPACITY <= UINT8_MAX,  uint8_t,
@@ -257,6 +273,34 @@ struct UnsignedIndex {
 
 	static_assert(CAPACITY <= UINT64_MAX, "STATIC ASSERT");
 };
+
+template <unsigned NCapacity>
+using Unsigned = typename UnsignedT<NCapacity>::Type;
+
+//------------------------------------------------------------------------------
+
+constexpr
+LongIndex
+roundUp(const LongIndex x,
+		const LongIndex to)
+{
+	return (x + (to - 1)) / to;
+}
+
+//------------------------------------------------------------------------------
+
+constexpr
+ShortIndex
+bitWidth(const ShortIndex x) {
+	return x <   2 ? 1 :
+		   x <   4 ? 2 :
+		   x <   8 ? 3 :
+		   x <  16 ? 4 :
+		   x <  32 ? 5 :
+		   x <  64 ? 6 :
+		   x < 128 ? 7 :
+					 8 ;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -413,17 +457,14 @@ public:
 	static constexpr LongIndex DUMMY	= INVALID_LONG_INDEX;
 
 	using Item  = T;
-	using Index = typename UnsignedIndex<CAPACITY>::Type;
+	using Index = Unsigned<CAPACITY>;
 
 public:
 	HFSM_INLINE StaticArray() = default;
 	HFSM_INLINE StaticArray(const Item filler);
 
-	template <typename N>
-	HFSM_INLINE		  Item& operator[] (const N i);
-
-	template <typename N>
-	HFSM_INLINE const Item& operator[] (const N i) const;
+	HFSM_INLINE		  Item& operator[] (const uint64_t i);
+	HFSM_INLINE const Item& operator[] (const uint64_t i) const;
 
 	HFSM_INLINE LongIndex count() const						{ return CAPACITY;									}
 
@@ -470,11 +511,8 @@ public:
 	template <typename TValue>
 	HFSM_INLINE LongIndex append(TValue&& value);
 
-	template <typename N>
-	HFSM_INLINE		  Item& operator[] (const N i);
-
-	template <typename N>
-	HFSM_INLINE const Item& operator[] (const N i) const;
+	HFSM_INLINE		  Item& operator[] (const uint64_t i);
+	HFSM_INLINE const Item& operator[] (const uint64_t i) const;
 
 	HFSM_INLINE LongIndex count() const												{ return _count;	}
 
@@ -518,9 +556,8 @@ StaticArray<T, NC_>::StaticArray(const Item filler) {
 //------------------------------------------------------------------------------
 
 template <typename T, LongIndex NC_>
-template <typename N>
 T&
-StaticArray<T, NC_>::operator[] (const N i) {
+StaticArray<T, NC_>::operator[] (const uint64_t i) {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(LongIndex) i];
@@ -529,9 +566,8 @@ StaticArray<T, NC_>::operator[] (const N i) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T, LongIndex NC_>
-template <typename N>
 const T&
-StaticArray<T, NC_>::operator[] (const N i) const {
+StaticArray<T, NC_>::operator[] (const uint64_t i) const {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(LongIndex) i];
@@ -562,9 +598,8 @@ Array<T, NC_>::append(TValue&& value) {
 //------------------------------------------------------------------------------
 
 template <typename T, LongIndex NC_>
-template <typename N>
 T&
-Array<T, NC_>::operator[] (const N i) {
+Array<T, NC_>::operator[] (const uint64_t i) {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(LongIndex) i];
@@ -573,9 +608,8 @@ Array<T, NC_>::operator[] (const N i) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T, LongIndex NC_>
-template <typename N>
 const T&
-Array<T, NC_>::operator[] (const N i) const {
+Array<T, NC_>::operator[] (const uint64_t i) const {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(LongIndex) i];
@@ -1775,17 +1809,17 @@ struct IndexSequence {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template<typename, typename>
-struct MakeIndexSequence_Impl {};
+struct MakeIndexSequenceT {};
 
 template<LongIndex N, LongIndex... Ns>
-struct MakeIndexSequence_Impl<IndexConstant<N>,
-							  IndexSequence<Ns...>>
-	: MakeIndexSequence_Impl<IndexConstant<N - 1>,
-							 IndexSequence<N - 1, Ns...>>
+struct MakeIndexSequenceT<IndexConstant<N>,
+						  IndexSequence<Ns...>>
+	: MakeIndexSequenceT<IndexConstant<N - 1>,
+						 IndexSequence<N - 1, Ns...>>
 {};
 
 template<LongIndex... Ns>
-struct MakeIndexSequence_Impl<IndexConstant<0>,
+struct MakeIndexSequenceT<IndexConstant<0>,
 							  IndexSequence<Ns...>>
 	: IndexSequence<Ns...>
 {};
@@ -1793,8 +1827,8 @@ struct MakeIndexSequence_Impl<IndexConstant<0>,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template<LongIndex N>
-using MakeIndexSequence = typename MakeIndexSequence_Impl<IndexConstant<N>,
-														  IndexSequence<>>::Type;
+using MakeIndexSequence = typename MakeIndexSequenceT<IndexConstant<N>,
+													  IndexSequence<>>::Type;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1804,11 +1838,11 @@ using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct IndexedTypeList_EntryT {};
+struct ITL_EntryT {};
 
 template <typename T, LongIndex N>
-struct IndexedTypeList_EntryN
-	: IndexedTypeList_EntryT<T>
+struct ITL_EntryN
+	: ITL_EntryT<T>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1818,10 +1852,10 @@ struct ITL_Impl;
 
 template <LongIndex... Ns, typename... Ts>
 struct ITL_Impl<IndexSequence<Ns...>, Ts...>
-	: IndexedTypeList_EntryN<Ts, Ns>...
+	: ITL_EntryN<Ts, Ns>...
 {
 	template <typename T, LongIndex N>
-	static constexpr LongIndex select(IndexedTypeList_EntryN<T, N>) { return (LongIndex) N; }
+	static constexpr LongIndex select(ITL_EntryN<T, N>) { return (LongIndex) N; }
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1835,18 +1869,18 @@ struct ITL_
 	static constexpr LongIndex SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr bool contains() { return std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value; }
+	static constexpr bool contains() { return std::is_base_of<ITL_EntryT<T>, ITL_>::value; }
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if< std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value, LongIndex>::type
+	typename std::enable_if< std::is_base_of<ITL_EntryT<T>, ITL_>::value, LongIndex>::type
 	index() {
 		return Base::template select<T>(ITL_{});
 	}
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if<!std::is_base_of<IndexedTypeList_EntryT<T>, ITL_>::value, LongIndex>::type
+	typename std::enable_if<!std::is_base_of<ITL_EntryT<T>, ITL_>::value, LongIndex>::type
 	index() {
 		return INVALID_LONG_INDEX;
 	}
@@ -1888,7 +1922,9 @@ using Merge = typename MergeT<Ts...>::TypeList;
 
 namespace hfsm2 {
 
-enum class Method : ShortIndex {
+enum class Method : uint8_t {
+	NONE,
+
 	RANK,
 	UTILITY,
 	ENTRY_GUARD,
@@ -1906,7 +1942,7 @@ enum class Method : ShortIndex {
 	COUNT
 };
 
-enum class Transition : ShortIndex {
+enum class TransitionType : uint8_t {
 	CHANGE,
 	RESTART,
 	RESUME,
@@ -1917,7 +1953,7 @@ enum class Transition : ShortIndex {
 	COUNT
 };
 
-enum class StatusEvent : ShortIndex {
+enum class StatusEvent : uint8_t {
 	SUCCEEDED,
 	FAILED,
 
@@ -1980,14 +2016,14 @@ methodName(const Method method) {
 
 static inline
 const char*
-transitionName(const Transition transition) {
-	switch (transition) {
-	case Transition::CHANGE:	return "changeTo";
-	case Transition::RESTART:	return "restart";
-	case Transition::RESUME:	return "resume";
-	case Transition::UTILIZE:	return "utilize";
-	case Transition::RANDOMIZE:	return "randomize";
-	case Transition::SCHEDULE:	return "schedule";
+transitionName(const TransitionType transitionType) {
+	switch (transitionType) {
+	case TransitionType::CHANGE:		return "changeTo";
+	case TransitionType::RESTART:		return "restart";
+	case TransitionType::RESUME:		return "resume";
+	case TransitionType::UTILIZE:		return "utilize";
+	case TransitionType::RANDOMIZE:		return "randomize";
+	case TransitionType::SCHEDULE:		return "schedule";
 
 	default:
 		HFSM_BREAK();
@@ -2008,14 +2044,14 @@ namespace hfsm2 {
 template <typename TContext = EmptyContext,
 		  typename TUtilty = float>
 struct LoggerInterfaceT {
-	using Context	  = TContext;
-	using Utilty	  = TUtilty;
+	using Context		 = TContext;
+	using Utilty		 = TUtilty;
 
-	using Method	  = ::hfsm2::Method;
-	using StateID	  = ::hfsm2::StateID;
-	using RegionID	  = ::hfsm2::RegionID;
-	using Transition  = ::hfsm2::Transition;
-	using StatusEvent = ::hfsm2::StatusEvent;
+	using Method		 = ::hfsm2::Method;
+	using StateID		 = ::hfsm2::StateID;
+	using RegionID		 = ::hfsm2::RegionID;
+	using TransitionType = ::hfsm2::TransitionType;
+	using StatusEvent	 = ::hfsm2::StatusEvent;
 
 	virtual void recordMethod(Context& /*context*/,
 							  const StateID /*origin*/,
@@ -2024,7 +2060,7 @@ struct LoggerInterfaceT {
 
 	virtual void recordTransition(Context& /*context*/,
 								  const StateID /*origin*/,
-								  const Transition /*transition*/,
+								  const TransitionType /*transitionType*/,
 								  const StateID /*target*/)
 	{}
 
@@ -2078,19 +2114,18 @@ namespace detail {
 #pragma pack(push, 2)
 
 struct TaskLink {
-	HFSM_INLINE TaskLink(const Transition transition_,
+	HFSM_INLINE TaskLink(const TransitionType transitionType_,
 						 const StateID origin_,
 						 const StateID destination_)
-		: transition{transition_}
-		, origin(origin_)
-		, destination(destination_)
-		, next(INVALID_LONG_INDEX)
+		: transitionType{transitionType_}
+		, origin{origin_}
+		, destination{destination_}
+		, next{INVALID_LONG_INDEX}
 	{}
 
-	Transition transition;
+	TransitionType transitionType;
 	StateID origin		= INVALID_STATE_ID;
 	StateID destination	= INVALID_STATE_ID;
-	// TODO: add paylaods
 
 	LongIndex prev		= INVALID_LONG_INDEX;
 	LongIndex next		= INVALID_LONG_INDEX;
@@ -2421,7 +2456,7 @@ private:
 	template <typename T>
 	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
 
-	bool append(const Transition transition,
+	bool append(const TransitionType transitionType,
 				const StateID origin,
 				const StateID destination);
 
@@ -2432,12 +2467,12 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(Transition::CHANGE,	   origin, destination); }
-	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(Transition::RESTART,   origin, destination); }
-	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(Transition::RESUME,	   origin, destination); }
-	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(Transition::UTILIZE,   origin, destination); }
-	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(Transition::RANDOMIZE, origin, destination); }
-	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(Transition::SCHEDULE,  origin, destination); }
+	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(TransitionType::CHANGE,	   origin, destination); }
+	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(TransitionType::RESTART,   origin, destination); }
+	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(TransitionType::RESUME,	   origin, destination); }
+	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(TransitionType::UTILIZE,   origin, destination); }
+	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(TransitionType::RANDOMIZE, origin, destination); }
+	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(TransitionType::SCHEDULE,  origin, destination); }
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -2663,13 +2698,13 @@ PlanT<TArgs>::operator bool() const {
 
 template <typename TArgs>
 bool
-PlanT<TArgs>::append(const Transition transition,
+PlanT<TArgs>::append(const TransitionType transitionType,
 					 const StateID origin,
 					 const StateID destination)
 {
 	_planData.planExists.set(_regionId);
 
-	const TaskIndex index = _planData.taskLinks.emplace(transition, origin, destination);
+	const TaskIndex index = _planData.taskLinks.emplace(transitionType, origin, destination);
 	if (index == TaskLinks::INVALID)
 		return false;
 
@@ -2916,7 +2951,6 @@ struct StateRegistryT<ArgsT<TContext,
 
 	HFSM_INLINE const Parent&	  forkParent(const ForkID forkId) const;
 
-	HFSM_INLINE OrthoBits resumableOrthoFork(const ForkID forkId);
 	HFSM_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
 
 	bool requestImmediate(const Request request);
@@ -2930,7 +2964,7 @@ struct StateRegistryT<ArgsT<TContext,
 	OrthoUnits orthoUnits;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-	AllForks resumable;
+	CompoForks resumable  {INVALID_SHORT_INDEX};
 
 	AllForks requested;
 	CompoRemains compoRemains;
@@ -2984,7 +3018,7 @@ struct StateRegistryT<ArgsT<TContext,
 	CompoParents compoParents;
 
 	CompoForks compoActive{INVALID_SHORT_INDEX};
-	AllForks resumable;
+	CompoForks resumable  {INVALID_SHORT_INDEX};
 
 	AllForks requested;
 	CompoRemains compoRemains;
@@ -3040,7 +3074,7 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::isResumable
 			HFSM_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
-				return parent.prong == resumable.compo[parent.forkId - 1];
+				return parent.prong == resumable[parent.forkId - 1];
 		}
 
 	return false;
@@ -3122,17 +3156,6 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::forkParent(
 
 template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, LongIndex NTC_>
 typename StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::OrthoBits
-StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::resumableOrthoFork(const ForkID forkId) {
-	HFSM_ASSERT(forkId < 0);
-	const Units& units = orthoUnits[-forkId - 1];
-
-	return resumable.ortho.bits(units);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, LongIndex NTC_>
-typename StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::OrthoBits
 StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::requestedOrthoFork(const ForkID forkId) {
 	HFSM_ASSERT(forkId < 0);
 	const Units& units = orthoUnits[-forkId - 1];
@@ -3203,9 +3226,7 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NTC_>>::requestSche
 		const Parent parent = stateParents[stateId];
 
 		if (parent.forkId > 0)
-			resumable.compo[parent.forkId - 1] = parent.prong;
-		else if (parent.forkId < 0)
-			resumableOrthoFork(parent.forkId).set(parent.prong);
+			resumable[parent.forkId - 1] = parent.prong;
 		else
 			HFSM_BREAK();
 	}
@@ -3246,7 +3267,7 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, 0, 0, NTC_>>::isResumable(const
 		if (Parent parent = stateParents[stateId]) {
 			HFSM_ASSERT(parent.forkId > 0);
 
-			return parent.prong == resumable.compo[parent.forkId - 1];
+			return parent.prong == resumable[parent.forkId - 1];
 		}
 
 	return false;
@@ -3361,7 +3382,7 @@ StateRegistryT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, 0, 0, NTC_>>::requestScheduled(
 		const Parent parent = stateParents[stateId];
 
 		if (HFSM_CHECKED(parent.forkId > 0))
-			resumable.compo[parent.forkId - 1] = parent.prong;
+			resumable[parent.forkId - 1] = parent.prong;
 	}
 }
 
@@ -3675,7 +3696,6 @@ public:
 	using PlanControl::plan;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	// TODO: remove payload versions
 
 	HFSM_INLINE void changeTo (const StateID id);
 	HFSM_INLINE void restart  (const StateID id);
@@ -4073,7 +4093,7 @@ FullControlT<TArgs>::changeTo(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::CHANGE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
 	}
 }
 
@@ -4088,7 +4108,7 @@ FullControlT<TArgs>::restart(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESTART, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
 	}
 }
 
@@ -4103,7 +4123,7 @@ FullControlT<TArgs>::resume(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RESUME, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
 	}
 }
 
@@ -4118,7 +4138,7 @@ FullControlT<TArgs>::utilize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::UTILIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
 	}
 }
 
@@ -4133,7 +4153,7 @@ FullControlT<TArgs>::randomize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, Transition::RANDOMIZE, stateId);
+		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
 	}
 }
 
@@ -4144,7 +4164,7 @@ void
 FullControlT<TArgs>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
-	HFSM_LOG_TRANSITION(context(), _originId, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -4200,11 +4220,11 @@ GuardControlT<TArgs>::cancelPendingTransitions() {
 }
 }
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 struct StructureEntry {
 	bool isActive;
@@ -4212,11 +4232,15 @@ struct StructureEntry {
 	const char* name;
 };
 
+#endif
+
 //------------------------------------------------------------------------------
 
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
 #pragma pack(push, 1)
 
@@ -4246,62 +4270,122 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 #pragma pack(pop)
 
-//------------------------------------------------------------------------------
+#endif
 
-Transition
-HFSM_INLINE get(const Request::Type type) {
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+TransitionType
+HFSM_INLINE convert(const Request::Type type) {
 	switch (type) {
 		case Request::CHANGE:
-			return Transition::CHANGE;
+			return TransitionType::CHANGE;
 
 		case Request::RESTART:
-			return Transition::RESTART;
+			return TransitionType::RESTART;
 
 		case Request::RESUME:
-			return Transition::RESUME;
+			return TransitionType::RESUME;
 
 		case Request::UTILIZE:
-			return Transition::UTILIZE;
+			return TransitionType::UTILIZE;
 
 		case Request::RANDOMIZE:
-			return Transition::RANDOMIZE;
+			return TransitionType::RANDOMIZE;
 
 		case Request::SCHEDULE:
-			return Transition::SCHEDULE;
+			return TransitionType::SCHEDULE;
 
 		default:
 			HFSM_BREAK();
-			return Transition::CHANGE;
+			return TransitionType::CHANGE;
 	}
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Request::Type
+HFSM_INLINE convert(const TransitionType type) {
+	switch (type) {
+	case TransitionType::CHANGE:
+		return Request::CHANGE;
+
+	case TransitionType::RESTART:
+		return Request::RESTART;
+
+	case TransitionType::RESUME:
+		return Request::RESUME;
+
+	case TransitionType::UTILIZE:
+		return Request::UTILIZE;
+
+	case TransitionType::RANDOMIZE:
+		return Request::RANDOMIZE;
+
+	case TransitionType::SCHEDULE:
+		return Request::SCHEDULE;
+
+	default:
+		HFSM_BREAK();
+		return Request::CHANGE;
+	}
+}
+
+#endif
+
+}
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
 #pragma pack(push, 1)
 
-struct alignas(4) TransitionInfo {
-	HFSM_INLINE TransitionInfo() = default;
+struct alignas(4) Transition {
+	HFSM_INLINE Transition() = default;
 
-	HFSM_INLINE TransitionInfo(const Request transition_,
-							   const Method method_)
-		: stateId{transition_.stateId}
+	HFSM_INLINE Transition(const detail::Request request,
+						   const Method method_)
+		: stateId{request.stateId}
 		, method{method_}
-		, transition{get(transition_.type)}
+		, transitionType{detail::convert(request.type)}
 	{
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}
 
+	HFSM_INLINE Transition(const StateID stateId_,
+						   const Method method_,
+						   const TransitionType transitionType_)
+		: stateId{stateId_}
+		, method{method_}
+		, transitionType{transitionType_}
+	{
+		HFSM_ASSERT(method_ < Method::COUNT);
+	}
+
+	detail::Request request() const		{ return detail::Request{detail::convert(transitionType), stateId};	}
+
 	StateID stateId = INVALID_STATE_ID;
 	Method method;
-	Transition transition;
+	TransitionType transitionType;
 };
 
 #pragma pack(pop)
 
-////////////////////////////////////////////////////////////////////////////////
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-}
+bool operator == (const Transition& l, const Transition& r) {
+	return l.stateId		== r.stateId
+		&& l.method			== r.method
+		&& l.transitionType	== r.transitionType;
 }
 
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
 
 
 namespace hfsm2 {
@@ -6875,7 +6959,7 @@ struct C_ final {
 	//----------------------------------------------------------------------
 
 	HFSM_INLINE ShortIndex& compoActive   (StateRegistry& stateRegistry)	{ return stateRegistry.compoActive	  [COMPO_INDEX]; }
-	HFSM_INLINE ShortIndex& compoResumable(StateRegistry& stateRegistry)	{ return stateRegistry.resumable.compo[COMPO_INDEX]; }
+	HFSM_INLINE ShortIndex& compoResumable(StateRegistry& stateRegistry)	{ return stateRegistry.resumable	  [COMPO_INDEX]; }
 	HFSM_INLINE ShortIndex& compoRequested(StateRegistry& stateRegistry)	{ return stateRegistry.requested.compo[COMPO_INDEX]; }
 
 	HFSM_INLINE ShortIndex& compoActive   (Control& control)				{ return compoActive   (control._stateRegistry); }
@@ -7705,7 +7789,7 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 	} else {
 		requested = INVALID_SHORT_INDEX;
 
-		// TODO: _subStates.wideReconstruct();
+		// no reconstruction on reenter() by design
 
 		_subStates.wideReenter	(control, active);
 	}
@@ -7754,7 +7838,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
 	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
 
-	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
@@ -7882,7 +7965,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
 	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
 
-	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
@@ -9671,6 +9753,7 @@ private:
 	using Args					= typename Info::Args;
 
 	using StateRegistry			= StateRegistryT<Args>;
+	using CompoForks			= typename StateRegistry::CompoForks;
 	using AllForks				= typename StateRegistry::AllForks;
 
 	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
@@ -9698,8 +9781,10 @@ public:
 
 	using Structure				= Array<StructureEntry, NAME_COUNT>;
 	using ActivityHistory		= Array<char,			NAME_COUNT>;
+#endif
 
-	using TransitionInfoStorage	= Array<TransitionInfo, COMPO_REGIONS * 4>;
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9821,9 +9906,19 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	HFSM_INLINE void clearResumable()							{ _stateRegistry.resumable.clear();				}
+	HFSM_INLINE void clearRequests()							{ _stateRegistry.requested.clear();				}
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	const Structure&	   structure()		 const				{ return _structure;							}
 	const ActivityHistory& activityHistory() const				{ return _activityHistory;						}
+#endif
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	const TransitionHistory& transitionHistory() const			{ return _transitionHistory;					}
+
+	void replayTransition (const Transition& transition)		{ replayTransitions(&transition, 1);			}
+	void replayTransitions(const Transition* const transitions, const uint64_t count);
 #endif
 
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
@@ -9834,7 +9929,14 @@ private:
 	void initialEnter();
 	void processTransitions();
 
+	bool applyRequest (Control& control, const Request& request);
 	bool applyRequests(Control& control);
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	bool applyRequests(Control& control,
+					   const Transition* const transitions,
+					   const uint64_t count);
+#endif
 
 	bool cancelledByEntryGuards(const Requests& pendingChanges);
 	bool cancelledByGuards(const Requests& pendingChanges);
@@ -9842,8 +9944,9 @@ private:
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	void getStateNames();
 	void udpateActivity();
-	void recordRequestsAs(const Method method);
 #endif
+
+	HFSM_IF_TRANSITION_HISTORY(void recordRequestsAs(const Method method));
 
 private:
 	Context& _context;
@@ -9862,9 +9965,9 @@ private:
 
 	Structure _structure;
 	ActivityHistory _activityHistory;
-
-	TransitionInfoStorage _lastTransitions;
 #endif
+
+	HFSM_IF_TRANSITION_HISTORY(TransitionHistory _transitionHistory);
 
 	HFSM_IF_LOGGER(Logger* _logger);
 };
@@ -10056,112 +10159,143 @@ void
 R_<TG_, TA_>::changeTo(const StateID stateId) {
 	_requests.append(Request{Request::Type::CHANGE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::CHANGE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::restart(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESTART, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESTART, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::resume(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESUME, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RESUME, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::utilize(const StateID stateId) {
 	_requests.append(Request{Request::Type::UTILIZE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::UTILIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::randomize(const StateID stateId) {
 	_requests.append(Request{Request::Type::RANDOMIZE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::RANDOMIZE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, Transition::SCHEDULE, stateId);
+	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+template <typename TG_, typename TA_>
+void
+R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
+								const uint64_t count)
+{
+	if (HFSM_CHECKED(transitions && count)) {
+		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
+
+		PlanControl control{_context,
+							_rng,
+							_stateRegistry,
+							_planData,
+							HFSM_LOGGER_OR(_logger, nullptr)};
+
+		if (applyRequests(control, transitions, count)) {
+			_apex.deepChangeToRequested(control);
+
+			_stateRegistry.clearRequests();
+
+			HFSM_IF_ASSERT(_planData.verifyPlans());
+		}
+
+		HFSM_IF_STRUCTURE(udpateActivity());
+	}
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::initialEnter() {
-	Control control{_context,
-					_rng,
-					_stateRegistry,
-					_planData,
-					HFSM_LOGGER_OR(_logger, nullptr)};
+	HFSM_ASSERT(_requests.count() == 0);
+	HFSM_IF_TRANSITION_HISTORY(HFSM_ASSERT(_transitionHistory.count() == 0));
 
-	AllForks undoRequested = _stateRegistry.requested;
+	CompoForks undoResumable;
+	AllForks   undoRequested;
+	HFSM_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
+
+	Requests lastRequests;
+
+	PlanControl control{_context,
+						_rng,
+						_stateRegistry,
+						_planData,
+						HFSM_LOGGER_OR(_logger, nullptr)};
 
 	_apex.deepRequestChange(control);
 
-	Requests lastRequests = _requests;
-	_requests.clear();
-
-	if (cancelledByEntryGuards(lastRequests))
-		_stateRegistry.requested = undoRequested;
+	cancelledByEntryGuards(_requests);
 
 	for (LongIndex i = 0;
 		 i < SUBSTITUTION_LIMIT && _requests.count();
 		 ++i)
 	{
+		undoResumable = _stateRegistry.resumable;
 		undoRequested = _stateRegistry.requested;
+		HFSM_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
 
 		if (applyRequests(control)) {
 			lastRequests = _requests;
 			_requests.clear();
 
-			if (cancelledByEntryGuards(lastRequests))
+			if (cancelledByEntryGuards(lastRequests)) {
+				_stateRegistry.resumable = undoResumable;
 				_stateRegistry.requested = undoRequested;
-		}
-
-		_requests.clear();
+				HFSM_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
+			}
+		} else
+			_requests.clear();
 	}
 	HFSM_ASSERT(_requests.count() == 0);
 
-	{
-		PlanControl planControl{_context,
-								_rng,
-								_stateRegistry,
-								_planData,
-								HFSM_LOGGER_OR(_logger, nullptr)};
+	_apex.deepConstruct(control);
+	_apex.deepEnter	   (control);
 
-		_apex.deepConstruct(planControl);
-		_apex.deepEnter	   (planControl);
+	_stateRegistry.clearRequests();
 
-		_stateRegistry.clearRequests();
-
-		HFSM_IF_ASSERT(_planData.verifyPlans());
-	}
+	HFSM_IF_ASSERT(_planData.verifyPlans());
 
 	HFSM_IF_STRUCTURE(udpateActivity());
 }
@@ -10173,41 +10307,47 @@ void
 R_<TG_, TA_>::processTransitions() {
 	HFSM_ASSERT(_requests.count());
 
-	HFSM_IF_STRUCTURE(_lastTransitions.clear());
+	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
 
-	AllForks undoRequested;
+	CompoForks undoResumable;
+	AllForks   undoRequested;
+	HFSM_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
+
 	Requests lastRequests;
 
-	Control control(_context,
-					_rng,
-					_stateRegistry,
-					_planData,
-					HFSM_LOGGER_OR(_logger, nullptr));
+	PlanControl control{_context,
+						_rng,
+						_stateRegistry,
+						_planData,
+						HFSM_LOGGER_OR(_logger, nullptr)};
+
+	bool changesMade = false;
 
 	for (LongIndex i = 0;
 		i < SUBSTITUTION_LIMIT && _requests.count();
 		++i)
 	{
+		undoResumable = _stateRegistry.resumable;
 		undoRequested = _stateRegistry.requested;
+		HFSM_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
 
 		if (applyRequests(control)) {
 			lastRequests = _requests;
 			_requests.clear();
 
-			if (cancelledByGuards(lastRequests))
+			if (cancelledByGuards(lastRequests)) {
+				_stateRegistry.resumable = undoResumable;
 				_stateRegistry.requested = undoRequested;
+				HFSM_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
+			} else
+				changesMade = true;
 		} else
 			_requests.clear();
 	}
 
-	{
-		PlanControl planControl{_context,
-								_rng,
-								_stateRegistry,
-								_planData,
-								HFSM_LOGGER_OR(_logger, nullptr)};
+	if (changesMade) {
+		_apex.deepChangeToRequested(control);
 
-		_apex.deepChangeToRequested(planControl);
 		_stateRegistry.clearRequests();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -10220,37 +10360,69 @@ R_<TG_, TA_>::processTransitions() {
 
 template <typename TG_, typename TA_>
 bool
+R_<TG_, TA_>::applyRequest(Control& control, const Request& request) {
+	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.append(Transition{request, Method::NONE}));
+
+	switch (request.type) {
+	case Request::CHANGE:
+	case Request::RESTART:
+	case Request::RESUME:
+	case Request::UTILIZE:
+	case Request::RANDOMIZE:
+		if (_stateRegistry.requestImmediate(request))
+			_apex.deepForwardActive(control, request.type);
+		else
+			_apex.deepRequest	   (control, request.type);
+
+		return true;
+
+	case Request::SCHEDULE:
+		_stateRegistry.requestScheduled(request.stateId);
+
+		return false;
+
+	default:
+		HFSM_BREAK();
+
+		return false;
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG_, typename TA_>
+bool
 R_<TG_, TA_>::applyRequests(Control& control) {
 	bool changesMade = false;
 
-	for (const Request& request : _requests) {
-		HFSM_IF_STRUCTURE(_lastTransitions.append(TransitionInfo{request, Method::UPDATE}));
-
-		switch (request.type) {
-		case Request::CHANGE:
-		case Request::RESTART:
-		case Request::RESUME:
-		case Request::UTILIZE:
-		case Request::RANDOMIZE:
-			if (_stateRegistry.requestImmediate(request))
-				_apex.deepForwardActive(control, request.type);
-			else
-				_apex.deepRequest	   (control, request.type);
-
-			changesMade = true;
-			break;
-
-		case Request::SCHEDULE:
-			_stateRegistry.requestScheduled(request.stateId);
-			break;
-
-		default:
-			HFSM_BREAK();
-		}
-	}
+	for (const Request& request : _requests)
+		changesMade |= applyRequest(control, request);
 
 	return changesMade;
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+template <typename TG_, typename TA_>
+bool
+R_<TG_, TA_>::applyRequests(Control& control,
+							const Transition* const transitions,
+							const uint64_t count)
+{
+	if (HFSM_CHECKED(transitions && count)) {
+		bool changesMade = false;
+
+		for (uint64_t i = 0; i < count; ++i)
+			changesMade |= applyRequest(control, transitions[i].request());
+
+		return changesMade;
+	} else
+		return false;
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -10266,7 +10438,7 @@ R_<TG_, TA_>::cancelledByEntryGuards(const Requests& pendingRequests) {
 		HFSM_LOGGER_OR(_logger, nullptr)};
 
 	if (_apex.deepEntryGuard(guardControl)) {
-		HFSM_IF_STRUCTURE(recordRequestsAs(Method::ENTRY_GUARD));
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
 
 		return true;
 	} else
@@ -10287,11 +10459,11 @@ R_<TG_, TA_>::cancelledByGuards(const Requests& pendingRequests) {
 							  HFSM_LOGGER_OR(_logger, nullptr)};
 
 	if (_apex.deepForwardExitGuard(guardControl)) {
-		HFSM_IF_STRUCTURE(recordRequestsAs(Method::EXIT_GUARD));
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::EXIT_GUARD));
 
 		return true;
 	} else if (_apex.deepForwardEntryGuard(guardControl)) {
-		HFSM_IF_STRUCTURE(recordRequestsAs(Method::ENTRY_GUARD));
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
 
 		return true;
 	} else
@@ -10405,13 +10577,17 @@ R_<TG_, TA_>::udpateActivity() {
 		}
 }
 
+#endif
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
 template <typename TG_, typename TA_>
 void
 R_<TG_, TA_>::recordRequestsAs(const Method method) {
 	for (const auto& request : _requests)
-		_lastTransitions.append(TransitionInfo{request, method});
+		_transitionHistory.append(Transition{request, method});
 }
 
 #endif
