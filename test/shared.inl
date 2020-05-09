@@ -6,6 +6,8 @@ LoggerT<TContext>::recordMethod(Context& /*context*/,
 								const StateID origin,
 								const Method method)
 {
+	REQUIRE(hfsm2::methodName(method));
+
 	switch (method) {
 		case Method::RANK:
 			history.emplace_back(origin, Event::RANK);
@@ -60,6 +62,8 @@ LoggerT<TContext>::recordTransition(Context& /*context*/,
 									const Transition transition,
 									const StateID target)
 {
+	REQUIRE(hfsm2::transitionName(transition));
+
 	switch (transition) {
 		case Transition::CHANGE:
 			history.emplace_back(origin, Event::CHANGE,    target);

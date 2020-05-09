@@ -72,21 +72,23 @@ static inline
 const char*
 methodName(const Method method) {
 	switch (method) {
-		case Method::RANK:				return "rank";
-		case Method::UTILITY:			return "utility";
-		case Method::ENTRY_GUARD:		return "entryGuard";
-		case Method::ENTER:				return "enter";
-		case Method::REENTER:			return "reenter";
-		case Method::UPDATE:			return "update";
-		case Method::REACT:				return "react";
-		case Method::EXIT_GUARD:		return "exitGuard";
-		case Method::EXIT:				return "exit";
-		case Method::PLAN_SUCCEEDED:	return "planSucceeded";
-		case Method::PLAN_FAILED:		return "planFailed";
+	case Method::RANK:			 return "rank";
+	case Method::UTILITY:		 return "utility";
+	case Method::ENTRY_GUARD:	 return "entryGuard";
+	case Method::ENTER:			 return "enter";
+	case Method::CONSTRUCT:		 return "construct";
+	case Method::REENTER:		 return "reenter";
+	case Method::UPDATE:		 return "update";
+	case Method::REACT:			 return "react";
+	case Method::EXIT_GUARD:	 return "exitGuard";
+	case Method::EXIT:			 return "exit";
+	case Method::DESTRUCT:		 return "destruct";
+	case Method::PLAN_SUCCEEDED: return "planSucceeded";
+	case Method::PLAN_FAILED:	 return "planFailed";
 
-		default:
-			HFSM_BREAK();
-			return nullptr;
+	default:
+		HFSM_BREAK();
+		return nullptr;
 	}
 }
 
@@ -96,16 +98,16 @@ static inline
 const char*
 transitionName(const Transition transition) {
 	switch (transition) {
-		case Transition::CHANGE:		return "changeTo";
-		case Transition::RESTART:		return "restart";
-		case Transition::RESUME:		return "resume";
-		case Transition::UTILIZE:		return "utilize";
-		case Transition::RANDOMIZE:		return "randomize";
-		case Transition::SCHEDULE:		return "schedule";
+	case Transition::CHANGE:	return "changeTo";
+	case Transition::RESTART:	return "restart";
+	case Transition::RESUME:	return "resume";
+	case Transition::UTILIZE:	return "utilize";
+	case Transition::RANDOMIZE:	return "randomize";
+	case Transition::SCHEDULE:	return "schedule";
 
-		default:
-			HFSM_BREAK();
-			return nullptr;
+	default:
+		HFSM_BREAK();
+		return nullptr;
 	}
 }
 
