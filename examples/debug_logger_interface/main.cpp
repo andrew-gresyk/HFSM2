@@ -81,11 +81,11 @@ struct Logger
 
 	void recordTransition(Context& /*context*/,
 						  const hfsm2::StateID /*origin*/,
-						  const Transition transition,
+						  const TransitionType transitionType,
 						  const hfsm2::StateID /*target*/) override
 	{
 		std::cout //<< hfsm2::stateName(origin) << ": "
-				  << hfsm2::transitionName(transition) << "<"
+				  << hfsm2::transitionName(transitionType) << "<"
 				  //<< hfsm2::stateName(target) << ">()"
 				  "\n";
 	}

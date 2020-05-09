@@ -61,7 +61,7 @@ struct Logger
 
 	void recordTransition(Context& /*context*/,
 						  const StateID origin,
-						  const Transition /*transition*/,
+						  const TransitionType /*transition*/,
 						  const StateID target) override
 	{
 		std::cout << stateName(origin) << " -> " << stateName(target) << "\n";
