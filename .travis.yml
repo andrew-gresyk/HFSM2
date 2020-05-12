@@ -14,58 +14,6 @@ env:
 jobs:
   include:
 
-    # GCC 5 (default on the Xenial image)
-    - name: GCC-5 Debug
-      dist: xenial
-      env: CXX=g++-5 BUILD_TYPE=Debug
-    - name: GCC-5 Release
-      dist: xenial
-      env: CXX=g++-5 BUILD_TYPE=Release
-
-    # GCC 6
-    - name: GCC-6 Debug
-      env: CXX=g++-6 BUILD_TYPE=Debug
-      addons: &gcc6
-        apt:
-          packages: g++-6
-    - name: GCC-6 Release
-      env: CXX=g++-6 BUILD_TYPE=Release
-      addons: *gcc6
-
-    # GCC 7 (default on the Bionic image)
-    - name: GCC-7 Debug
-      env: CXX=g++-7 BUILD_TYPE=Debug
-    - name: GCC-7 Release
-      env: CXX=g++-7 BUILD_TYPE=Release
-
-    # GCC 8
-    - name: GCC-8 Debug
-      env: CXX=g++-8 BUILD_TYPE=Debug
-      addons: &gcc8
-        apt:
-          packages: g++-8
-    - name: GCC-8 Release
-      env: CXX=g++-8 BUILD_TYPE=Release
-      addons: *gcc8
-
-    # GCC 9
-    - name: GCC-9 Debug
-      env: CXX=g++-9 BUILD_TYPE=Debug
-      addons: &gcc9
-        apt:
-          sources:
-          - sourceline: ppa:ubuntu-toolchain-r/test
-          packages:
-          - g++-9
-    - name: GCC-9 Release
-      env: CXX=g++-9 BUILD_TYPE=Release
-      addons: *gcc9
-
-    # Coverage
-
-    - env: COMPILER=g++-9 BUILD_TYPE=Coverage
-      addons: *gcc9
-
     # Clang 3.7
     - name: Clang-3.7
       dist: xenial
@@ -184,6 +132,87 @@ jobs:
       env: CXX=clang++-10 BUILD_TYPE=Release
       addons: *clang10
 
+    # GCC 5 (default on the Xenial image)
+    - name: GCC-5 Debug
+      dist: xenial
+      env: CXX=g++-5 BUILD_TYPE=Debug
+    - name: GCC-5 Release
+      dist: xenial
+      env: CXX=g++-5 BUILD_TYPE=Release
+
+    # GCC 6
+    - name: GCC-6 Debug
+      env: CXX=g++-6 BUILD_TYPE=Debug
+      addons: &gcc6
+        apt:
+          packages: g++-6
+    - name: GCC-6 Release
+      env: CXX=g++-6 BUILD_TYPE=Release
+      addons: *gcc6
+
+    # GCC 7 (default on the Bionic image)
+    - name: GCC-7 Debug
+      env: CXX=g++-7 BUILD_TYPE=Debug
+    - name: GCC-7 Release
+      env: CXX=g++-7 BUILD_TYPE=Release
+
+    # GCC 8
+    - name: GCC-8 Debug
+      env: CXX=g++-8 BUILD_TYPE=Debug
+      addons: &gcc8
+        apt:
+          packages: g++-8
+    - name: GCC-8 Release
+      env: CXX=g++-8 BUILD_TYPE=Release
+      addons: *gcc8
+
+    # GCC 9
+    - name: GCC-9 Debug
+      env: CXX=g++-9 BUILD_TYPE=Debug
+      addons: &gcc9
+        apt:
+          sources:
+          - sourceline: ppa:ubuntu-toolchain-r/test
+          packages:
+          - g++-9
+    - name: GCC-9 Release
+      env: CXX=g++-9 BUILD_TYPE=Release
+      addons: *gcc9
+
+    # Coverage
+    - name: GCC-8 Coverity
+      env: CXX=g++-8 BUILD_TYPE=Debug
+      addons:
+        apt:
+          packages: g++-8
+        coverity_scan:
+          project:
+            name: "andrew-gresyk/HFSM2"
+            description: "HFSM2: High-Performance Hierarchical Finite State Machine Framework"
+          notification_email: andrew.gresyk@gmail.com
+          build_command_prepend: "cmake -D ENABLE_COVERAGE:BOOL=TRUE -D CMAKE_BUILD_TYPE:STRING=Debug . "
+          build_command: "cmake --build . -- -j2"
+          branch_pattern: coverity_scan
+
+    - name: GCC-8 Coverals
+      env: CXX=g++-8 BUILD_TYPE=Debug
+      install:
+      - cd ${TRAVIS_BUILD_DIR}
+      - wget https://github.com/linux-test-project/lcov/releases/download/v1.14/lcov-1.14.tar.gz
+      - tar xf lcov-1.14.tar.gz
+      - sudo make -C lcov-1.14/ install
+      # install lcov to coveralls conversion + upload tool
+      - gem install coveralls-lcov
+      addons:
+        apt:
+          packages: g++-8
+      after_success:
+      - cd ${TRAVIS_BUILD_DIR}
+      - lcov --directory . --capture --output-file coverage.info # capture coverage info
+      - lcov --remove coverage.info 'tests/*' '/usr/*' --output-file coverage.info # filter out system and test code
+      - lcov --list coverage.info # debug before upload
+      - coveralls-lcov --repo-token ${COVERALLS_TOKEN} coverage.info # uploads to coveralls
+
 before_install:
   - pip install --user cpp-coveralls
   - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
@@ -192,38 +221,38 @@ script:
   - cd "${TRAVIS_BUILD_DIR:?}"
   - mkdir build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
-  - cmake --build .
+  - cmake --build . -- -j2
 
   - cd "${TRAVIS_BUILD_DIR:?}/examples/advanced_event_handling"
   - mkdir build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
-  - cmake --build .
+  - cmake --build . -- -j2
 
   - cd "${TRAVIS_BUILD_DIR:?}/examples/basic_audio_player"
   - mkdir build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
-  - cmake --build .
+  - cmake --build . -- -j2
 
   - cd "${TRAVIS_BUILD_DIR:?}/examples/basic_traffic_light"
   - mkdir build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
-  - cmake --build .
+  - cmake --build . -- -j2
 
-  - cd "${TRAVIS_BUILD_DIR:?}/examples/calculator"
-  - mkdir build && cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
-  - cmake --build .
+  # - cd "${TRAVIS_BUILD_DIR:?}/examples/calculator"
+  # - mkdir build && cd build
+  # - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
+  # - cmake --build . -- -j2
 
   - cd "${TRAVIS_BUILD_DIR:?}/examples/debug_logger_interface"
   - mkdir build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
-  - cmake --build .
+  - cmake --build . -- -j2
 
   - cd "${TRAVIS_BUILD_DIR:?}/examples/snippets"
   - mkdir build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
-  - cmake --build .
+  - cmake --build . -- -j2
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash) -f "build/hfsm2_test.profdata" || echo "Codecov did not collect coverage reports"
-  - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
+# after_success:
+#   - bash <(curl -s https://codecov.io/bash) -f "build/hfsm2_test.profdata" || echo "Codecov did not collect coverage reports"
+#   - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
