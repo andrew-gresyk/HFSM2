@@ -1,71 +1,64 @@
-#sudo: false
-
 language: cpp
 
 notifications:
   email: true
 
 os: linux
-dist: trusty
+dist: bionic
 
 env:
   global:
     - TMPDIR=/tmp
+    - secure: "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAwFCXmu1bFAz5p9p13TvKic2NCF+gqQ2SyvekGYBRnbaVy/h5at+ve/g7bil3SoDSRI218uqVPQ1OWqM0feF+1/pKdjGOJ5g8cVTmy4g+/nvlZvHj29CjT7oe3tQwVAQAk9fAMoRjcwX3LWt9vPCjXq5YwAYoC6NCgMCBrjXSVzcCnvBk8eRa5M0+n8KUElF4PQ6m08/V1vo79b6CGxiSKNzod/JRxVnoCsTSrx7SZQf1/WxrVAcApcka7fC/W4J+CG4KtG2AqsSEhziF5IHn6ig9pB6S+SH6pDz5FSXJxIj3Sv4yMYn0HMa1TnBMzI5tTygPT4YeefJNNR+IRhkx1yTNF9OkIuz9z6KB+qxu4EiUCmBG9KUFM+uGE5I/6nbpGNBKlqcdkY95XRehESfXGcthtegEnCmK+hPSxYePwU2HW89ewymSHC97hOTD+bTPNIeILB4tLkmFKuWJOXjQozO0hHXn20jmGxmOpARH530zM6Xr2eV8+mq21j5MQ03UKSJa/MzmaoLbTYgTvx9TUq14Utnu9qbrLXB2/7+p2VNxPCNDWHKoNzzjzAMvvi6oNtqD7Ii2Kvg3TZvjjAj/l7bd5ULdutRlJ5i3BqaCC9QPdH1uibgse3enB7dey7BN3TTYu9Hyfioa9/8wUctW abWFU9w84xikAtN4/HESFLMCAwEAAQ=="
 
-before_install:
-  - pip install --user cpp-coveralls
-
-matrix:
+jobs:
   include:
 
-    # GCC 5
-    - env: COMPILER=g++-5 BUILD_TYPE=Debug
-      addons: &gcc5
-        apt:
-          packages: g++-5
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-5 BUILD_TYPE=Release
-      addons: *gcc5
+    # GCC 5 (default on the Xenial image)
+    - name: GCC-5 Debug
+      dist: xenial
+      env: CXX=g++-5 BUILD_TYPE=Debug
+    - name: GCC-5 Release
+      dist: xenial
+      env: CXX=g++-5 BUILD_TYPE=Release
 
     # GCC 6
-    - env: COMPILER=g++-6 BUILD_TYPE=Debug
+    - name: GCC-6 Debug
+      env: CXX=g++-6 BUILD_TYPE=Debug
       addons: &gcc6
         apt:
           packages: g++-6
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-6 BUILD_TYPE=Release
+    - name: GCC-6 Release
+      env: CXX=g++-6 BUILD_TYPE=Release
       addons: *gcc6
 
-    # GCC 7
-    - env: COMPILER=g++-7 BUILD_TYPE=Debug
-      addons: &gcc7
-        apt:
-          packages: g++-7
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-7 BUILD_TYPE=Release
-      addons: *gcc7
+    # GCC 7 (default on the Bionic image)
+    - name: GCC-7 Debug
+      env: CXX=g++-7 BUILD_TYPE=Debug
+    - name: GCC-7 Release
+      env: CXX=g++-7 BUILD_TYPE=Release
 
     # GCC 8
-    - env: COMPILER=g++-8 BUILD_TYPE=Debug
+    - name: GCC-8 Debug
+      env: CXX=g++-8 BUILD_TYPE=Debug
       addons: &gcc8
         apt:
           packages: g++-8
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-8 BUILD_TYPE=Release
+    - name: GCC-8 Release
+      env: CXX=g++-8 BUILD_TYPE=Release
       addons: *gcc8
 
     # GCC 9
-    - env: COMPILER=g++-9 BUILD_TYPE=Debug
+    - name: GCC-9 Debug
+      env: CXX=g++-9 BUILD_TYPE=Debug
       addons: &gcc9
         apt:
-          packages: g++-9
-          sources: ubuntu-toolchain-r-test
-
-    - env: COMPILER=g++-9 BUILD_TYPE=Release
+          sources:
+          - sourceline: ppa:ubuntu-toolchain-r/test
+          packages:
+          - g++-9
+    - name: GCC-9 Release
+      env: CXX=g++-9 BUILD_TYPE=Release
       addons: *gcc9
 
     # Coverage
@@ -74,136 +67,162 @@ matrix:
       addons: *gcc9
 
     # Clang 3.7
-    - env: COMPILER=clang++-3.7 BUILD_TYPE=Debug
+    - name: Clang-3.7
+      dist: xenial
+      env: CXX=clang++-3.7 BUILD_TYPE=Debug
       addons: &clang37
         apt:
           packages:
             - clang-3.7
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
-
-    - env: COMPILER=clang++-3.7 BUILD_TYPE=Release
+    - name: Clang-3.7 Release
+      dist: xenial
+      env: CXX=clang++-3.7 BUILD_TYPE=Release
       addons: *clang37
 
     # Clang 3.8
-    - env: COMPILER=clang++-3.8 BUILD_TYPE=Debug
+    - name: Clang-3.8 Debug
+      dist: xenial
+      env: CXX=clang++-3.8 BUILD_TYPE=Debug
       addons: &clang38
         apt:
           packages:
             - clang-3.8
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-
-    - env: COMPILER=clang++-3.8 BUILD_TYPE=Release
+    - name: Clang-3.8 Release
+      dist: xenial
+      env: CXX=clang++-3.8 BUILD_TYPE=Release
       addons: *clang38
 
     # Clang 3.9
-    - env: COMPILER=clang++-3.9 BUILD_TYPE=Debug
+    - name: Clang-3.9 Debug
+      env: CXX=clang++-3.9 BUILD_TYPE=Debug
       addons: &clang39
         apt:
           packages:
             - clang-3.9
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
-
-    - env: COMPILER=clang++-3.9 BUILD_TYPE=Release
+    - name: Clang-3.9 Release
+      env: CXX=clang++-3.9 BUILD_TYPE=Release
       addons: *clang39
 
     # Clang 4.0
-    - env: COMPILER=clang++-4.0 BUILD_TYPE=Debug
-      addons: &clang4
+    - name: Clang-4.0 Debug
+      env: CXX=clang++-4.0 BUILD_TYPE=Debug
+      addons: &clang40
         apt:
           packages:
             - clang-4.0
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
-
-    - env: COMPILER=clang++-4.0 BUILD_TYPE=Release
-      addons: *clang4
+    - name: Clang-4.0 Release
+      env: CXX=clang++-4.0 BUILD_TYPE=Release
+      addons: *clang40
 
     # Clang 5.0
-    - env: COMPILER=clang++-5.0 BUILD_TYPE=Debug
-      addons: &clang5
+    - name: Clang-5.0 Debug
+      env: CXX=clang++-5.0 BUILD_TYPE=Debug
+      addons: &clang50
         apt:
           packages:
             - clang-5.0
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
-
-    - env: COMPILER=clang++-5.0 BUILD_TYPE=Release
-      addons: *clang5
+    - name: Clang-5.0 Release
+      env: CXX=clang++-5.0 BUILD_TYPE=Release
+      addons: *clang50
 
     # Clang 6.0
-    - env: COMPILER=clang++-6.0 BUILD_TYPE=Debug
-      addons: &clang6
+    - name: Clang-6.0 Debug
+      env: CXX=clang++-6.0 BUILD_TYPE=Debug
+      addons: &clang60
         apt:
           packages:
             - clang-6.0
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
+    - name: Clang 6.0 Release
+      env: CXX=clang++-6.0 BUILD_TYPE=Release
+      addons: *clang60
 
-    - env: COMPILER=clang++-6.0 BUILD_TYPE=Release
-      addons: *clang6
+    # Clang 7 (default on Xenial and Bionic images)
+    - name: Clang-7 Debug
+      env: CXX=clang++ BUILD_TYPE=Debug
+    - name: Clang-7 Release
+      env: CXX=clang++ BUILD_TYPE=Release
 
-    # Clang 7.0
-    - env: COMPILER=clang++-7 BUILD_TYPE=Debug
-      addons: &clang7
-        apt:
-          packages:
-            - clang-7
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-7
-
-    # Clang 8.0
-    - env: COMPILER=clang++-8 BUILD_TYPE=Debug
+    # Clang 8
+    - name: Clang-8 Debug
+      env: CXX=clang++-8 BUILD_TYPE=Debug
       addons: &clang8
         apt:
-          packages:
-            - clang-8
           sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-8
-
-    - env: COMPILER=clang++-8 BUILD_TYPE=Release
+          - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-8 main'
+            key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+          packages:
+          - clang-8
+    - name: Clang-8 Release
+      env: CXX=clang++-8 BUILD_TYPE=Release
       addons: *clang8
 
+    # Clang 9
+    - name: Clang-9 Debug
+      env: CXX=clang++-9 BUILD_TYPE=Debug
+      addons: &clang9
+        apt:
+          sources:
+          - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main'
+            key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+          packages:
+          - clang-9
+    - name: Clang-9 Release
+      env: CXX=clang++-9 BUILD_TYPE=Release
+      addons: *clang9
+
+    # Clang 10
+    - name: Clang-10 Debug
+      env: CXX=clang++-10 BUILD_TYPE=Debug
+      addons: &clang10
+        apt:
+          sources:
+          - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+            key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+          packages:
+          - clang-10
+    - name: Clang-10 Release
+      env: CXX=clang++-10 BUILD_TYPE=Release
+      addons: *clang10
+
+before_install:
+  - pip install --user cpp-coveralls
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
 script:
-  - cd "${TRAVIS_BUILD_DIR}"
+  - cd "${TRAVIS_BUILD_DIR:?}"
   - mkdir build && cd build
-  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-  - make
+  - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
+  - cmake --build .
 
-  - cd "${TRAVIS_BUILD_DIR}/examples/advanced_event_handling"
+  - cd "${TRAVIS_BUILD_DIR:?}/examples/advanced_event_handling"
   - mkdir build && cd build
-  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-  - make
+  - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
+  - cmake --build .
 
-  - cd "${TRAVIS_BUILD_DIR}/examples/basic_audio_player"
+  - cd "${TRAVIS_BUILD_DIR:?}/examples/basic_audio_player"
   - mkdir build && cd build
-  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-  - make
+  - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
+  - cmake --build .
 
-  - cd "${TRAVIS_BUILD_DIR}/examples/basic_traffic_light"
+  - cd "${TRAVIS_BUILD_DIR:?}/examples/basic_traffic_light"
   - mkdir build && cd build
-  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-  - make
+  - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
+  - cmake --build .
 
-  - cd "${TRAVIS_BUILD_DIR}/examples/debug_logger_interface"
+  - cd "${TRAVIS_BUILD_DIR:?}/examples/calculator"
   - mkdir build && cd build
-  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-  - make
+  - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
+  - cmake --build .
 
-  - cd "${TRAVIS_BUILD_DIR}/examples/snippets"
+  - cd "${TRAVIS_BUILD_DIR:?}/examples/debug_logger_interface"
   - mkdir build && cd build
-  - cmake .. -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-  - make
+  - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
+  - cmake --build .
+
+  - cd "${TRAVIS_BUILD_DIR:?}/examples/snippets"
+  - mkdir build && cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE:?}
+  - cmake --build .
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -f "build/hfsm2_test.profdata" || echo "Codecov did not collect coverage reports"
