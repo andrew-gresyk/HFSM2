@@ -3,10 +3,10 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TItem, LongIndex NCapacity>
-template <typename... TArgs>
+template <typename T, LongIndex NC>
+template <typename... TA>
 LongIndex
-List<TItem, NCapacity>::emplace(TArgs... args) {
+List<T, NC>::emplace(TA... args) {
 	if (_count < CAPACITY) {
 		HFSM_ASSERT(_vacantHead < CAPACITY);
 		HFSM_ASSERT(_vacantTail < CAPACITY);
@@ -43,7 +43,7 @@ List<TItem, NCapacity>::emplace(TArgs... args) {
 
 		HFSM_IF_ASSERT(verifyStructure());
 
-		new (&cell.item) Item{std::forward<TArgs>(args)...};
+		new (&cell.item) Item{std::forward<TA>(args)...};
 
 		return result;
 	} else {
@@ -59,9 +59,9 @@ List<TItem, NCapacity>::emplace(TArgs... args) {
 
 //------------------------------------------------------------------------------
 
-template <typename TItem, LongIndex NCapacity>
+template <typename T, LongIndex NC>
 void
-List<TItem, NCapacity>::remove(const Index i) {
+List<T, NC>::remove(const Index i) {
 	HFSM_ASSERT(i < CAPACITY && _count);
 
 	auto& fresh = _cells[i];
@@ -97,9 +97,9 @@ List<TItem, NCapacity>::remove(const Index i) {
 
 //------------------------------------------------------------------------------
 
-template <typename TItem, LongIndex NCapacity>
-TItem&
-List<TItem, NCapacity>::operator[] (const Index i) {
+template <typename T, LongIndex NC>
+T&
+List<T, NC>::operator[] (const Index i) {
 	HFSM_IF_ASSERT(verifyStructure());
 
 	return _cells[i].item;
@@ -107,9 +107,9 @@ List<TItem, NCapacity>::operator[] (const Index i) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TItem, LongIndex NCapacity>
-const TItem&
-List<TItem, NCapacity>::operator[] (const Index i) const {
+template <typename T, LongIndex NC>
+const T&
+List<T, NC>::operator[] (const Index i) const {
 	HFSM_IF_ASSERT(verifyStructure());
 
 	return _cells[i].item;
@@ -119,9 +119,9 @@ List<TItem, NCapacity>::operator[] (const Index i) const {
 
 #ifdef HFSM_ENABLE_ASSERT
 
-template <typename TItem, LongIndex NCapacity>
+template <typename T, LongIndex NC>
 void
-List<TItem, NCapacity>::verifyStructure(const Index occupied) const {
+List<T, NC>::verifyStructure(const Index occupied) const {
 	if (_count < CAPACITY) {
 		HFSM_ASSERT(_vacantHead < CAPACITY);
 		HFSM_ASSERT(_vacantTail < CAPACITY);

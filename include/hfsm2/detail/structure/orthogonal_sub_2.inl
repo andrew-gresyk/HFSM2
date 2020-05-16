@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRegister(Registry& registry,
+OS_<TN, TA, NI, TI>::wideRegister(Registry& registry,
 									  const ForkID forkId)
 {
 	initial.deepRegister(registry, Parent{forkId, PRONG_INDEX});
@@ -13,10 +13,10 @@ OS_<TN_, TA_, NI_, TI_>::wideRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideForwardEntryGuard(GuardControl& control,
-											   const ProngConstBits prongs)
+OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
+										   const ProngConstBits prongs)
 {
 	return prongs.get(PRONG_INDEX) ?
 		initial.deepForwardEntryGuard(control) : false;
@@ -24,69 +24,69 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardEntryGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideForwardEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) {
 	return initial.deepForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
 	return initial.deepEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideConstruct(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideConstruct(PlanControl& control) {
 	initial.deepConstruct(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideEnter(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideReenter(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) {
 	initial.deepReenter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 Status
-OS_<TN_, TA_, NI_, TI_>::wideUpdate(FullControl& control) {
+OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) {
 	return initial.deepUpdate(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 Status
-OS_<TN_, TA_, NI_, TI_>::wideReact(FullControl& control,
-								   const TEvent& event)
+OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
+							   const TEvent& event)
 {
 	return initial.deepReact(control, event);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideForwardExitGuard(GuardControl& control,
-											  const ProngConstBits prongs)
+OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
+										  const ProngConstBits prongs)
 {
 	return prongs.get(PRONG_INDEX) ?
 		initial.deepForwardExitGuard(control) : false;
@@ -94,43 +94,43 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardExitGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideForwardExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) {
 	return initial.deepForwardExitGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) {
 	return initial.deepExitGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideExit(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideDestruct(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideDestruct(PlanControl& control) {
 	initial.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideForwardActive(Control& control,
-										   const Request::Type request,
-										   const ProngConstBits prongs)
+OS_<TN, TA, NI, TI>::wideForwardActive(Control& control,
+									   const Request::Type request,
+									   const ProngConstBits prongs)
 {
 	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
@@ -140,11 +140,11 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideForwardRequest(Control& control,
-											const Request::Type request,
-											const ProngConstBits prongs)
+OS_<TN, TA, NI, TI>::wideForwardRequest(Control& control,
+										const Request::Type request,
+										const ProngConstBits prongs)
 {
 	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
@@ -154,57 +154,57 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestChange(Control& control) {
+OS_<TN, TA, NI, TI>::wideRequestChange(Control& control) {
 	initial.deepRequestChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestRemain(Registry& registry) {
+OS_<TN, TA, NI, TI>::wideRequestRemain(Registry& registry) {
 	initial.deepRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestRestart(Registry& registry) {
+OS_<TN, TA, NI, TI>::wideRequestRestart(Registry& registry) {
 	initial.deepRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestResume(Registry& registry) {
+OS_<TN, TA, NI, TI>::wideRequestResume(Registry& registry) {
 	initial.deepRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestUtilize(Control& control) {
+OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
 	initial.deepRequestUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestRandomize(Control& control) {
+OS_<TN, TA, NI, TI>::wideRequestRandomize(Control& control) {
 	initial.deepRequestRandomize(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_>::wideReportChange(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+typename TA::Utility
+OS_<TN, TA, NI, TI>::wideReportChange(Control& control) {
 	const UP i = initial.deepReportChange(control);
 
 	return i.utility;
@@ -212,9 +212,9 @@ OS_<TN_, TA_, NI_, TI_>::wideReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_>::wideReportUtilize(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+typename TA::Utility
+OS_<TN, TA, NI, TI>::wideReportUtilize(Control& control) {
 	const UP i = initial.deepReportUtilize(control);
 
 	return i.utility;
@@ -222,9 +222,9 @@ OS_<TN_, TA_, NI_, TI_>::wideReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_>::wideReportRandomize(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+typename TA::Utility
+OS_<TN, TA, NI, TI>::wideReportRandomize(Control& control) {
 	const Utility i = initial.deepReportRandomize(control);
 
 	return i;
@@ -232,9 +232,9 @@ OS_<TN_, TA_, NI_, TI_>::wideReportRandomize(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideChangeToRequested(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 	initial.deepChangeToRequested(control);
 }
 
@@ -242,11 +242,11 @@ OS_<TN_, TA_, NI_, TI_>::wideChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideGetNames(const LongIndex parent,
-									  const ShortIndex depth,
-									  StructureStateInfos& _stateInfos) const
+OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
+								  const ShortIndex depth,
+								  StructureStateInfos& _stateInfos) const
 {
 	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
 }
@@ -257,40 +257,40 @@ OS_<TN_, TA_, NI_, TI_>::wideGetNames(const LongIndex parent,
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideSaveActive(const Registry& registry,
-										WriteStream& stream) const
+OS_<TN, TA, NI, TI>::wideSaveActive(const Registry& registry,
+									WriteStream& stream) const
 {
 	initial.deepSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideSaveResumable(const Registry& registry,
-										   WriteStream& stream) const
+OS_<TN, TA, NI, TI>::wideSaveResumable(const Registry& registry,
+									   WriteStream& stream) const
 {
 	initial.deepSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideLoadRequested(Registry& registry,
-										   ReadStream& stream) const
+OS_<TN, TA, NI, TI>::wideLoadRequested(Registry& registry,
+									   ReadStream& stream) const
 {
 	initial.deepLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideLoadResumable(Registry& registry,
-										   ReadStream& stream) const
+OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
+									   ReadStream& stream) const
 {
 	initial.deepLoadResumable(registry, stream);
 }

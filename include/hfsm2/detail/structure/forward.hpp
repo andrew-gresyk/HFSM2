@@ -41,31 +41,31 @@ struct OSI_<TInitial>;
 template <typename...>
 struct WrapInfoT;
 
-template <typename TH_>
-struct WrapInfoT<	 TH_> {
-	using Type = SI_<TH_>;
+template <typename TH>
+struct WrapInfoT<	 TH> {
+	using Type = SI_<TH>;
 };
 
-template <Strategy TG_, typename TH_, typename... TS_>
-struct WrapInfoT<	 CI_<TG_, TH_, TS_...>> {
-	using Type =	 CI_<TG_, TH_, TS_...>;
+template <Strategy SG, typename TH, typename... TS>
+struct WrapInfoT<	 CI_<SG, TH, TS...>> {
+	using Type =	 CI_<SG, TH, TS...>;
 };
 
-template <typename... TS_>
-struct WrapInfoT<	 OI_<TS_...>> {
-	using Type =	 OI_<TS_...>;
+template <typename... TS>
+struct WrapInfoT<	 OI_<TS...>> {
+	using Type =	 OI_<TS...>;
 };
 
-template <typename... TS_>
-using WrapInfo = typename WrapInfoT<TS_...>::Type;
+template <typename... TS>
+using WrapInfo = typename WrapInfoT<TS...>::Type;
 
 //------------------------------------------------------------------------------
 
 template <typename THead>
 struct SI_ final {
 	using Head				= THead;
-	using StateList			= TL_<Head>;
-	using RegionList		= TL_<>;
+	using StateList			= ITL_<Head>;
+	using RegionList		= ITL_<>;
 
 	static constexpr ShortIndex WIDTH			= 1;
 	static constexpr LongIndex  REVERSE_DEPTH	= 1;
@@ -283,33 +283,33 @@ class RW_;
 template <typename, typename...>
 struct MaterialT;
 
-template <typename TN_, typename TA_, typename TH_>
-struct MaterialT   <TN_, TA_, TH_> {
-	using Type = S_<TN_, TA_, TH_>;
+template <typename TN, typename TA, typename TH>
+struct MaterialT   <TN, TA, TH> {
+	using Type = S_<TN, TA, TH>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, 			 typename... TS_>
-struct MaterialT   <TN_, TA_, CI_<TG_, void,			  TS_...>> {
-	using Type = C_<TN_, TA_,	  TG_, StaticEmptyT<TA_>, TS_...>;
+template <typename TN, typename TA, Strategy SG, 			  typename... TS>
+struct MaterialT   <TN, TA, CI_<SG, void,             TS...>> {
+	using Type = C_<TN, TA,     SG, StaticEmptyT<TA>, TS...>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-struct MaterialT   <TN_, TA_, CI_<TG_, TH_,	TS_...>> {
-	using Type = C_<TN_, TA_,	  TG_, TH_,	TS_...>;
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+struct MaterialT   <TN, TA, CI_<SG, TH,	TS...>> {
+	using Type = C_<TN, TA,     SG, TH,	TS...>;
 };
 
-template <typename TN_, typename TA_,				typename... TS_>
-struct MaterialT   <TN_, TA_, OI_<void,				 TS_...>> {
-	using Type = O_<TN_, TA_,	  StaticEmptyT<TA_>, TS_...>;
+template <typename TN, typename TA,				 typename... TS>
+struct MaterialT   <TN, TA, OI_<void,			  TS...>> {
+	using Type = O_<TN, TA,     StaticEmptyT<TA>, TS...>;
 };
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-struct MaterialT   <TN_, TA_, OI_<TH_,		  TS_...>> {
-	using Type = O_<TN_, TA_,	  TH_,		  TS_...>;
+template <typename TN, typename TA, typename TH, typename... TS>
+struct MaterialT   <TN, TA, OI_<TH,				  TS...>> {
+	using Type = O_<TN, TA,     TH,				  TS...>;
 };
 
-template <typename TN_, typename... TS_>
-using Material = typename MaterialT<TN_, TS_...>::Type;
+template <typename TN, typename... TS>
+using Material = typename MaterialT<TN, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -334,8 +334,8 @@ struct RF_ final {
 	static constexpr LongIndex  ACTIVE_BITS		 = Apex::ACTIVE_BITS;
 	static constexpr LongIndex  RESUMABLE_BITS	 = Apex::RESUMABLE_BITS;
 
-	using StateList		= Indexed<typename Apex::StateList>;
-	using RegionList	= Indexed<typename Apex::RegionList>;
+	using StateList		= typename Apex::StateList;
+	using RegionList	= typename Apex::RegionList;
 
 	using Args			= ArgsT<Context,
 								Config_,
@@ -394,45 +394,40 @@ struct RF_ final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 struct CSubMaterialT;
 
-//template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-//struct CSubMaterialT	 <TN_, TA_, TG_, NI_, TL_<T>> {
-//	using Type = Material<TN_, TA_,				  T>;
-//};
-
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-struct CSubMaterialT<TN_, TA_, TG_, NI_, TL_<TS_...>> {
-	using Type = CS_<TN_, TA_, TG_, NI_,	 TS_...>;
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+struct CSubMaterialT<TN, TA, SG, NI, ITL_<TS...>> {
+	using Type = CS_<TN, TA, SG, NI,	  TS...>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-using CSubMaterial = typename CSubMaterialT<TN_, TA_, TG_, NI_, TS_...>::Type;
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+using CSubMaterial = typename CSubMaterialT<TN, TA, SG, NI, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
 template <typename...>
 struct InfoT;
 
-template <typename TN_, typename TA_, typename TH_>
-struct InfoT<S_<TN_, TA_, TH_>> {
-	using Type = SI_<	  TH_>;
+template <typename TN, typename TA, typename TH>
+struct InfoT<S_<TN, TA, TH>> {
+	using Type = SI_<	TH>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-struct InfoT<C_<TN_, TA_, TG_, TH_, TS_...>> {
-	using Type = CI_<	  TG_, TH_, TS_...>;
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+struct InfoT<C_<TN, TA, SG, TH, TS...>> {
+	using Type = CI_<	SG, TH, TS...>;
 };
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-struct InfoT<O_<TN_, TA_, TH_, TS_...>> {
-	using Type = OI_<	  TH_, TS_...>;
+template <typename TN, typename TA, typename TH, typename... TS>
+struct InfoT<O_<TN, TA, TH, TS...>> {
+	using Type = OI_<	TH, TS...>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-struct InfoT<CS_<TN_, TA_, TG_, NI_, TS_...>> {
-	using Type = CSI_<				 TS_...>;
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+struct InfoT<CS_<TN, TA, SG, NI, TS...>> {
+	using Type = CSI_<			 TS...>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

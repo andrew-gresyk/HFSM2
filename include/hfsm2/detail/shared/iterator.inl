@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContainer>
+template <typename T>
 bool
-Iterator<TContainer>::operator != (const Iterator<TContainer>& HFSM_IF_ASSERT(dummy)) const {
+Iterator<T>::operator != (const Iterator<T>& HFSM_IF_ASSERT(dummy)) const {
 	HFSM_ASSERT(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
@@ -13,9 +13,9 @@ Iterator<TContainer>::operator != (const Iterator<TContainer>& HFSM_IF_ASSERT(du
 
 //------------------------------------------------------------------------------
 
-template <typename TContainer>
-Iterator<TContainer>&
-Iterator<TContainer>::operator ++() {
+template <typename T>
+Iterator<T>&
+Iterator<T>::operator ++() {
 	_cursor = _container.next(_cursor);
 
 	return *this;
@@ -23,9 +23,9 @@ Iterator<TContainer>::operator ++() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContainer>
+template <typename T>
 bool
-Iterator<const TContainer>::operator != (const Iterator<const TContainer>& HFSM_IF_ASSERT(dummy)) const {
+Iterator<const T>::operator != (const Iterator<const T>& HFSM_IF_ASSERT(dummy)) const {
 	HFSM_ASSERT(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
@@ -33,9 +33,9 @@ Iterator<const TContainer>::operator != (const Iterator<const TContainer>& HFSM_
 
 //------------------------------------------------------------------------------
 
-template <typename TContainer>
-Iterator<const TContainer>&
-Iterator<const TContainer>::operator ++() {
+template <typename T>
+Iterator<const T>&
+Iterator<const T>::operator ++() {
 	_cursor = _container.next(_cursor);
 
 	return *this;

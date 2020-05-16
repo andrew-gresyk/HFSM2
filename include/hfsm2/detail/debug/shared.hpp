@@ -100,12 +100,12 @@ static inline
 const char*
 transitionName(const TransitionType transitionType) {
 	switch (transitionType) {
-	case TransitionType::CHANGE:		return "changeTo";
-	case TransitionType::RESTART:		return "restart";
-	case TransitionType::RESUME:		return "resume";
-	case TransitionType::UTILIZE:		return "utilize";
-	case TransitionType::RANDOMIZE:		return "randomize";
-	case TransitionType::SCHEDULE:		return "schedule";
+	case TransitionType::CHANGE:	return "changeTo";
+	case TransitionType::RESTART:	return "restart";
+	case TransitionType::RESUME:	return "resume";
+	case TransitionType::UTILIZE:	return "utilize";
+	case TransitionType::RANDOMIZE:	return "randomize";
+	case TransitionType::SCHEDULE:	return "schedule";
 
 	default:
 		HFSM_BREAK();

@@ -186,10 +186,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestScheduled(co
 	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
+		HFSM_ASSERT(parent.forkId != 0);
 		if (parent.forkId > 0)
 			compoResumable[parent.forkId - 1] = parent.prong;
-		else
-			HFSM_BREAK();
 	}
 }
 
@@ -350,13 +349,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestScheduled(const StateID stateId) {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT) {
+	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
-		if (HFSM_CHECKED(parent.forkId > 0))
-			compoResumable[parent.forkId - 1] = parent.prong;
+		HFSM_ASSERT(parent.forkId > 0);
+		compoResumable[parent.forkId - 1] = parent.prong;
 	}
 }
 

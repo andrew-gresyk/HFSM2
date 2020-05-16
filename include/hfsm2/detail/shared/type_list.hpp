@@ -5,76 +5,6 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-struct TB_ {};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename... Ts>
-struct TL_
-	: TB_<Ts>...
-{
-	static constexpr LongIndex SIZE = sizeof...(Ts);
-
-	template <typename T>
-	static constexpr bool contains() { return std::is_base_of<TB_<T>, TL_>::value; }
-};
-
-//------------------------------------------------------------------------------
-
-template <typename...>
-struct PrependT;
-
-template <typename T, typename... Ts>
-struct PrependT<T, TL_<Ts...>> {
-	using Type = TL_<T, Ts...>;
-};
-
-template <typename... Ts>
-using Prepend = typename PrependT<Ts...>::Type;
-
-//------------------------------------------------------------------------------
-
-template <LongIndex, LongIndex, typename...>
-struct LesserT;
-
-template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
-struct LesserT<H, I, TFirst, TRest...> {
-	using Type = typename std::conditional<(I < H),
-										   Prepend<TFirst, typename LesserT<H, I + 1, TRest...>::Type>,
-										   typename LesserT<H, I + 1, TRest...>::Type>::type;
-};
-
-template <LongIndex H, LongIndex I>
-struct LesserT<H, I> {
-	using Type = TL_<>;
-};
-
-template <typename... Ts>
-using SplitL = typename LesserT<sizeof...(Ts) / 2, 0, Ts...>::Type;
-
-//------------------------------------------------------------------------------
-
-template <LongIndex, LongIndex, typename...>
-struct GreaterT;
-
-template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
-struct GreaterT<H, I, TFirst, TRest...> {
-	using Type = typename std::conditional<(I < H),
-										   typename GreaterT<H, I + 1, TRest...>::Type,
-										   TL_<TFirst, TRest...>>::type;
-};
-
-template <LongIndex H, LongIndex I>
-struct GreaterT<H, I> {
-	using Type = TL_<>;
-};
-
-template <typename... Ts>
-using SplitR = typename GreaterT<sizeof...(Ts) / 2, 0, Ts...>::Type;
-
-////////////////////////////////////////////////////////////////////////////////
-
 template<LongIndex N>
 struct IndexConstant {};
 
@@ -165,18 +95,18 @@ struct ITL_
 	}
 };
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename...>
-struct IndexedT;
+struct PrependT;
 
-template <typename... Ts>
-struct IndexedT<TL_<Ts...>> {
-	using Type = ITL_<Ts...>;
+template <typename T, typename... Ts>
+struct PrependT<T, ITL_<Ts...>> {
+	using Type = ITL_<T, Ts...>;
 };
 
-template <typename T>
-using Indexed = typename IndexedT<T>::Type;
+template <typename... Ts>
+using Prepend = typename PrependT<Ts...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -184,12 +114,52 @@ template <typename...>
 struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
-struct MergeT<TL_<Ts1...>, TL_<Ts2...>> {
-	using TypeList = TL_<Ts1..., Ts2...>;
+struct MergeT<ITL_<Ts1...>, ITL_<Ts2...>> {
+	using Type = ITL_<Ts1..., Ts2...>;
 };
 
 template <typename... Ts>
-using Merge = typename MergeT<Ts...>::TypeList;
+using Merge = typename MergeT<Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+template <LongIndex, LongIndex, typename...>
+struct LesserT;
+
+template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
+struct LesserT<H, I, TFirst, TRest...> {
+	using Type = typename std::conditional<(I < H),
+										   Prepend<TFirst, typename LesserT<H, I + 1, TRest...>::Type>,
+										   typename LesserT<H, I + 1, TRest...>::Type>::type;
+};
+
+template <LongIndex H, LongIndex I>
+struct LesserT<H, I> {
+	using Type = ITL_<>;
+};
+
+template <typename... Ts>
+using SplitL = typename LesserT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+template <LongIndex, LongIndex, typename...>
+struct GreaterT;
+
+template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
+struct GreaterT<H, I, TFirst, TRest...> {
+	using Type = typename std::conditional<(I < H),
+										   typename GreaterT<H, I + 1, TRest...>::Type,
+										   ITL_<TFirst, TRest...>>::type;
+};
+
+template <LongIndex H, LongIndex I>
+struct GreaterT<H, I> {
+	using Type = ITL_<>;
+};
+
+template <typename... Ts>
+using SplitR = typename GreaterT<sizeof...(Ts) / 2, 0, Ts...>::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -3,10 +3,10 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, typename TA_, typename TH_>
+template <StateID NS, typename TA, typename TH>
 struct RegisterT {
-	using StateParents	= StaticArray<Parent, TA_::STATE_COUNT>;
-	using StateList		= typename TA_::StateList;
+	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
+	using StateList		= typename TA::StateList;
 
 	static constexpr StateID STATE_ID = NS;
 
@@ -15,7 +15,7 @@ struct RegisterT {
 	execute(StateParents& stateParents,
 			const Parent parent)
 	{
-		static constexpr auto HEAD_ID = StateList::template index<TH_>();
+		static constexpr auto HEAD_ID = StateList::template index<TH>();
 		StaticAssertEquality<STATE_ID, HEAD_ID>();
 
 		stateParents[STATE_ID] = parent;
@@ -24,9 +24,9 @@ struct RegisterT {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, typename TA_>
-struct RegisterT<NS, TA_, StaticEmptyT<TA_>> {
-	using StateParents	= StaticArray<Parent, TA_::STATE_COUNT>;
+template <StateID NS, typename TA>
+struct RegisterT<NS, TA, StaticEmptyT<TA>> {
+	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
 
 	static HFSM_INLINE
 	void
@@ -35,20 +35,20 @@ struct RegisterT<NS, TA_, StaticEmptyT<TA_>> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepRegister(Registry& registry,
-								const Parent parent)
+S_<TN_, TA, TH>::deepRegister(Registry& registry,
+							  const Parent parent)
 {
-	using Register = RegisterT<STATE_ID, TA_, Head>;
+	using Register = RegisterT<STATE_ID, TA, Head>;
 	Register::execute(registry.stateParents, parent);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 bool
-S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
+S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::entryGuard,
 						  control.context(),
 						  Method::ENTRY_GUARD);
@@ -64,9 +64,9 @@ S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
+S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
 	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
@@ -79,9 +79,9 @@ S_<TN_, TA_, TH_>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
+S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::enter,
 						  control.context(),
 						  Method::ENTER);
@@ -94,9 +94,9 @@ S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
+S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
 	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
@@ -115,9 +115,9 @@ S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 Status
-S_<TN_, TA_, TH_>::deepUpdate(FullControl& control) {
+S_<TN_, TA, TH>::deepUpdate(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::update,
 						  control.context(),
 						  Method::UPDATE);
@@ -132,11 +132,11 @@ S_<TN_, TA_, TH_>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 template <typename TEvent>
 Status
-S_<TN_, TA_, TH_>::deepReact(FullControl& control,
-							 const TEvent& event)
+S_<TN_, TA, TH>::deepReact(FullControl& control,
+						   const TEvent& event)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
 	HFSM_LOG_STATE_METHOD(reaction,
@@ -153,9 +153,9 @@ S_<TN_, TA_, TH_>::deepReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 bool
-S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
+S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exitGuard,
 						  control.context(),
 						  Method::EXIT_GUARD);
@@ -172,9 +172,9 @@ S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
+S_<TN_, TA, TH>::deepExit(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exit,
 						  control.context(),
 						  Method::EXIT);
@@ -192,9 +192,9 @@ S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepDestruct(PlanControl& control) {
+S_<TN_, TA, TH>::deepDestruct(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exit,
 						  control.context(),
 						  Method::DESTRUCT);
@@ -207,9 +207,9 @@ S_<TN_, TA_, TH_>::deepDestruct(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::wrapPlanSucceeded(FullControl& control) {
+S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::planSucceeded,
 						  control.context(),
 						  Method::PLAN_SUCCEEDED);
@@ -221,9 +221,9 @@ S_<TN_, TA_, TH_>::wrapPlanSucceeded(FullControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::wrapPlanFailed(FullControl& control) {
+S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::planFailed,
 						  control.context(),
 						  Method::PLAN_FAILED);
@@ -235,9 +235,9 @@ S_<TN_, TA_, TH_>::wrapPlanFailed(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::Rank
-S_<TN_, TA_, TH_>::wrapRank(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Rank
+S_<TN_, TA, TH>::wrapRank(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::rank,
 						  control.context(),
 						  Method::RANK);
@@ -247,9 +247,9 @@ S_<TN_, TA_, TH_>::wrapRank(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::Utility
-S_<TN_, TA_, TH_>::wrapUtility(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Utility
+S_<TN_, TA, TH>::wrapUtility(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::utility,
 						  control.context(),
 						  Method::UTILITY);
@@ -259,9 +259,9 @@ S_<TN_, TA_, TH_>::wrapUtility(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::UP
-S_<TN_, TA_, TH_>::deepReportChange(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::UP
+S_<TN_, TA, TH>::deepReportChange(Control& control) {
 	const Utility utility = wrapUtility(control);
 
 	const Parent parent = stateParent(control);
@@ -271,9 +271,9 @@ S_<TN_, TA_, TH_>::deepReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::UP
-S_<TN_, TA_, TH_>::deepReportUtilize(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::UP
+S_<TN_, TA, TH>::deepReportUtilize(Control& control) {
 	const Utility utility = wrapUtility(control);
 	const Parent  parent  = stateParent(control);
 
@@ -282,17 +282,17 @@ S_<TN_, TA_, TH_>::deepReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::Rank
-S_<TN_, TA_, TH_>::deepReportRank(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Rank
+S_<TN_, TA, TH>::deepReportRank(Control& control) {
 	return wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::Utility
-S_<TN_, TA_, TH_>::deepReportRandomize(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Utility
+S_<TN_, TA, TH>::deepReportRandomize(Control& control) {
 	return wrapUtility(control);
 }
 
@@ -300,9 +300,9 @@ S_<TN_, TA_, TH_>::deepReportRandomize(Control& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 const char*
-S_<TN_, TA_, TH_>::name() {
+S_<TN_, TA, TH>::name() {
 	if (HeadBox::isBare())
 		return "";
 	else {
@@ -336,12 +336,12 @@ S_<TN_, TA_, TH_>::name() {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepGetNames(const LongIndex parent,
-								const RegionType region,
-								const ShortIndex depth,
-								StructureStateInfos& _stateInfos) const
+S_<TN_, TA, TH>::deepGetNames(const LongIndex parent,
+							  const RegionType region,
+							  const ShortIndex depth,
+							  StructureStateInfos& _stateInfos) const
 {
 	_stateInfos.append(StructureStateInfo{parent, region, depth, name()});
 }

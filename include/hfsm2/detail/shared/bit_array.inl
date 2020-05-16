@@ -3,8 +3,8 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, ShortIndex NCapacity>
-BitArray<TIndex, NCapacity>::Bits::operator bool() const {
+template <typename TI, ShortIndex NC>
+BitArray<TI, NC>::Bits::operator bool() const {
 	const ShortIndex fullUnits = _width / (sizeof(Unit) * 8);
 
 	// TODO: cover this case
@@ -21,9 +21,9 @@ BitArray<TIndex, NCapacity>::Bits::operator bool() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::Bits::clear() {
+BitArray<TI, NC>::Bits::clear() {
 	const Index count = (_width + 7) / (sizeof(Unit) * 8);
 
 	for (Index i = 0; i < count; ++i)
@@ -32,10 +32,10 @@ BitArray<TIndex, NCapacity>::Bits::clear() {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 bool
-BitArray<TIndex, NCapacity>::Bits::get() const {
+BitArray<TI, NC>::Bits::get() const {
 	constexpr Index INDEX = NIndex;
 	HFSM_ASSERT(INDEX < _width);
 
@@ -48,10 +48,10 @@ BitArray<TIndex, NCapacity>::Bits::get() const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 void
-BitArray<TIndex, NCapacity>::Bits::set() {
+BitArray<TI, NC>::Bits::set() {
 	constexpr Index INDEX = NIndex;
 	HFSM_ASSERT(INDEX < _width);
 
@@ -64,10 +64,10 @@ BitArray<TIndex, NCapacity>::Bits::set() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 void
-BitArray<TIndex, NCapacity>::Bits::reset() {
+BitArray<TI, NC>::Bits::reset() {
 	constexpr Index INDEX = NIndex;
 	HFSM_ASSERT(INDEX < _width);
 
@@ -80,9 +80,9 @@ BitArray<TIndex, NCapacity>::Bits::reset() {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 bool
-BitArray<TIndex, NCapacity>::Bits::get(const Index index) const {
+BitArray<TI, NC>::Bits::get(const Index index) const {
 	HFSM_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -94,9 +94,9 @@ BitArray<TIndex, NCapacity>::Bits::get(const Index index) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::Bits::set(const Index index) {
+BitArray<TI, NC>::Bits::set(const Index index) {
 	HFSM_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -108,9 +108,9 @@ BitArray<TIndex, NCapacity>::Bits::set(const Index index) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::Bits::reset(const Index index) {
+BitArray<TI, NC>::Bits::reset(const Index index) {
 	HFSM_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -122,8 +122,8 @@ BitArray<TIndex, NCapacity>::Bits::reset(const Index index) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, ShortIndex NCapacity>
-BitArray<TIndex, NCapacity>::ConstBits::operator bool() const {
+template <typename TI, ShortIndex NC>
+BitArray<TI, NC>::ConstBits::operator bool() const {
 	const ShortIndex fullUnits = _width / (sizeof(Unit) * 8);
 
 	for (Index i = 0; i < fullUnits; ++i)
@@ -139,10 +139,10 @@ BitArray<TIndex, NCapacity>::ConstBits::operator bool() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 bool
-BitArray<TIndex, NCapacity>::ConstBits::get() const {
+BitArray<TI, NC>::ConstBits::get() const {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < _width, "");
 
@@ -155,9 +155,9 @@ BitArray<TIndex, NCapacity>::ConstBits::get() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 bool
-BitArray<TIndex, NCapacity>::ConstBits::get(const Index index) const {
+BitArray<TI, NC>::ConstBits::get(const Index index) const {
 	HFSM_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -169,19 +169,19 @@ BitArray<TIndex, NCapacity>::ConstBits::get(const Index index) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::clear() {
+BitArray<TI, NC>::clear() {
 	for (Unit& unit: _storage)
 		unit = Unit{0};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 bool
-BitArray<TIndex, NCapacity>::get() const {
+BitArray<TI, NC>::get() const {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < CAPACITY, "");
 
@@ -194,10 +194,10 @@ BitArray<TIndex, NCapacity>::get() const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 void
-BitArray<TIndex, NCapacity>::set() {
+BitArray<TI, NC>::set() {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < CAPACITY, "");
 
@@ -210,10 +210,10 @@ BitArray<TIndex, NCapacity>::set() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 void
-BitArray<TIndex, NCapacity>::reset() {
+BitArray<TI, NC>::reset() {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < CAPACITY, "");
 
@@ -226,9 +226,9 @@ BitArray<TIndex, NCapacity>::reset() {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 bool
-BitArray<TIndex, NCapacity>::get(const Index index) const {
+BitArray<TI, NC>::get(const Index index) const {
 	HFSM_ASSERT(index < CAPACITY);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -240,9 +240,9 @@ BitArray<TIndex, NCapacity>::get(const Index index) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::set(const Index index) {
+BitArray<TI, NC>::set(const Index index) {
 	HFSM_ASSERT(index < CAPACITY);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -254,9 +254,9 @@ BitArray<TIndex, NCapacity>::set(const Index index) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-//template <typename TIndex, ShortIndex NCapacity>
+//template <typename TI, ShortIndex NC>
 //void
-//BitArray<TIndex, NCapacity>::reset(const Index index) {
+//BitArray<TI, NC>::reset(const Index index) {
 //	HFSM_ASSERT(index < CAPACITY);
 //
 //	const Index unit = index / (sizeof(Unit) * 8);
@@ -268,10 +268,10 @@ BitArray<TIndex, NCapacity>::set(const Index index) {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NUnit, ShortIndex NWidth>
-typename BitArray<TIndex, NCapacity>::Bits
-BitArray<TIndex, NCapacity>::bits() {
+typename BitArray<TI, NC>::Bits
+BitArray<TI, NC>::bits() {
 	constexpr ShortIndex UNIT  = NUnit;
 	constexpr ShortIndex WIDTH = NWidth;
 	static_assert(UNIT + (WIDTH + 7) / (sizeof(Unit) * 8) <= CAPACITY, "");
@@ -281,10 +281,10 @@ BitArray<TIndex, NCapacity>::bits() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NUnit, ShortIndex NWidth>
-typename BitArray<TIndex, NCapacity>::ConstBits
-BitArray<TIndex, NCapacity>::bits() const {
+typename BitArray<TI, NC>::ConstBits
+BitArray<TI, NC>::bits() const {
 	constexpr ShortIndex UNIT  = NUnit;
 	constexpr ShortIndex WIDTH = NWidth;
 	static_assert(UNIT + (WIDTH + 7) / (sizeof(Unit) * 8) <= CAPACITY, "");
@@ -294,9 +294,9 @@ BitArray<TIndex, NCapacity>::bits() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
-typename BitArray<TIndex, NCapacity>::Bits
-BitArray<TIndex, NCapacity>::bits(const Units& units) {
+template <typename TI, ShortIndex NC>
+typename BitArray<TI, NC>::Bits
+BitArray<TI, NC>::bits(const Units& units) {
 	HFSM_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
 
 	return Bits{_storage + units.unit, units.width};
@@ -304,9 +304,9 @@ BitArray<TIndex, NCapacity>::bits(const Units& units) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
-typename BitArray<TIndex, NCapacity>::ConstBits
-BitArray<TIndex, NCapacity>::bits(const Units& units) const {
+template <typename TI, ShortIndex NC>
+typename BitArray<TI, NC>::ConstBits
+BitArray<TI, NC>::bits(const Units& units) const {
 	HFSM_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
 
 	return ConstBits{_storage + units.unit, units.width};

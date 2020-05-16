@@ -248,16 +248,16 @@ count(const T(&)[NCount]) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <int N1_, int N2_>
+template <int N1, int N2>
 struct Min {
-	static constexpr auto VALUE = N1_ < N2_ ? N1_ : N2_;
+	static constexpr auto VALUE = N1 < N2 ? N1 : N2;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <int N1_, int N2_>
+template <int N1, int N2>
 struct Max {
-	static constexpr auto VALUE = N1_ > N2_ ? N1_ : N2_;
+	static constexpr auto VALUE = N1 > N2 ? N1 : N2;
 };
 
 //------------------------------------------------------------------------------
@@ -452,9 +452,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContainer>
+template <typename T>
 bool
-Iterator<TContainer>::operator != (const Iterator<TContainer>& HFSM_IF_ASSERT(dummy)) const {
+Iterator<T>::operator != (const Iterator<T>& HFSM_IF_ASSERT(dummy)) const {
 	HFSM_ASSERT(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
@@ -462,9 +462,9 @@ Iterator<TContainer>::operator != (const Iterator<TContainer>& HFSM_IF_ASSERT(du
 
 //------------------------------------------------------------------------------
 
-template <typename TContainer>
-Iterator<TContainer>&
-Iterator<TContainer>::operator ++() {
+template <typename T>
+Iterator<T>&
+Iterator<T>::operator ++() {
 	_cursor = _container.next(_cursor);
 
 	return *this;
@@ -472,9 +472,9 @@ Iterator<TContainer>::operator ++() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContainer>
+template <typename T>
 bool
-Iterator<const TContainer>::operator != (const Iterator<const TContainer>& HFSM_IF_ASSERT(dummy)) const {
+Iterator<const T>::operator != (const Iterator<const T>& HFSM_IF_ASSERT(dummy)) const {
 	HFSM_ASSERT(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
@@ -482,9 +482,9 @@ Iterator<const TContainer>::operator != (const Iterator<const TContainer>& HFSM_
 
 //------------------------------------------------------------------------------
 
-template <typename TContainer>
-Iterator<const TContainer>&
-Iterator<const TContainer>::operator ++() {
+template <typename T>
+Iterator<const T>&
+Iterator<const T>::operator ++() {
 	_cursor = _container.next(_cursor);
 
 	return *this;
@@ -513,8 +513,11 @@ public:
 	HFSM_INLINE StaticArray() = default;
 	HFSM_INLINE StaticArray(const Item filler);
 
-	HFSM_INLINE		  Item& operator[] (const uint64_t i);
-	HFSM_INLINE const Item& operator[] (const uint64_t i) const;
+	template <typename N>
+	HFSM_INLINE		  Item& operator[] (const N i);
+
+	template <typename N>
+	HFSM_INLINE const Item& operator[] (const N i) const;
 
 	HFSM_INLINE LongIndex count() const						{ return CAPACITY;									}
 
@@ -555,6 +558,7 @@ public:
 	static constexpr LongIndex DUMMY	= INVALID_LONG_INDEX;
 
 	using Item = T;
+	using Index = UnsignedCapacity<CAPACITY>;
 
 public:
 	HFSM_INLINE void clear()														{ _count = 0;		}
@@ -562,8 +566,11 @@ public:
 	template <typename TValue>
 	HFSM_INLINE LongIndex append(TValue&& value);
 
-	HFSM_INLINE		  Item& operator[] (const uint64_t i);
-	HFSM_INLINE const Item& operator[] (const uint64_t i) const;
+	template <typename N>
+	HFSM_INLINE		  Item& operator[] (const N i);
+
+	template <typename N>
+	HFSM_INLINE const Item& operator[] (const N i) const;
 
 	HFSM_INLINE LongIndex count() const												{ return _count;	}
 
@@ -599,46 +606,48 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NC_>
-StaticArray<T, NC_>::StaticArray(const Item filler) {
+template <typename T, LongIndex NC>
+StaticArray<T, NC>::StaticArray(const Item filler) {
 	fill(filler);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC_>
+template <typename T, LongIndex NC>
+template <typename N>
 T&
-StaticArray<T, NC_>::operator[] (const uint64_t i) {
+StaticArray<T, NC>::operator[] (const N i) {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
-	return _items[(LongIndex) i];
+	return _items[(Index) i];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NC_>
+template <typename T, LongIndex NC>
+template <typename N>
 const T&
-StaticArray<T, NC_>::operator[] (const uint64_t i) const {
+StaticArray<T, NC>::operator[] (const N i) const {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
-	return _items[(LongIndex) i];
+	return _items[(Index) i];
 }
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC_>
+template <typename T, LongIndex NC>
 void
-StaticArray<T, NC_>::fill(const Item filler) {
+StaticArray<T, NC>::fill(const Item filler) {
 	for (LongIndex i = 0; i < CAPACITY; ++i)
 		_items[i] = filler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NC_>
+template <typename T, LongIndex NC>
 template <typename TValue>
 LongIndex
-Array<T, NC_>::append(TValue&& value) {
+Array<T, NC>::append(TValue&& value) {
 	HFSM_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{std::move(value)};
@@ -648,22 +657,24 @@ Array<T, NC_>::append(TValue&& value) {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC_>
+template <typename T, LongIndex NC>
+template <typename N>
 T&
-Array<T, NC_>::operator[] (const uint64_t i) {
+Array<T, NC>::operator[] (const N i) {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
-	return _items[(LongIndex) i];
+	return _items[(Index) i];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NC_>
+template <typename T, LongIndex NC>
+template <typename N>
 const T&
-Array<T, NC_>::operator[] (const uint64_t i) const {
+Array<T, NC>::operator[] (const N i) const {
 	HFSM_ASSERT(0 <= i && i < CAPACITY);
 
-	return _items[(LongIndex) i];
+	return _items[(Index) i];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -807,8 +818,8 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, ShortIndex NCapacity>
-BitArray<TIndex, NCapacity>::Bits::operator bool() const {
+template <typename TI, ShortIndex NC>
+BitArray<TI, NC>::Bits::operator bool() const {
 	const ShortIndex fullUnits = _width / (sizeof(Unit) * 8);
 
 	// TODO: cover this case
@@ -825,9 +836,9 @@ BitArray<TIndex, NCapacity>::Bits::operator bool() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::Bits::clear() {
+BitArray<TI, NC>::Bits::clear() {
 	const Index count = (_width + 7) / (sizeof(Unit) * 8);
 
 	for (Index i = 0; i < count; ++i)
@@ -836,10 +847,10 @@ BitArray<TIndex, NCapacity>::Bits::clear() {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 bool
-BitArray<TIndex, NCapacity>::Bits::get() const {
+BitArray<TI, NC>::Bits::get() const {
 	constexpr Index INDEX = NIndex;
 	HFSM_ASSERT(INDEX < _width);
 
@@ -852,10 +863,10 @@ BitArray<TIndex, NCapacity>::Bits::get() const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 void
-BitArray<TIndex, NCapacity>::Bits::set() {
+BitArray<TI, NC>::Bits::set() {
 	constexpr Index INDEX = NIndex;
 	HFSM_ASSERT(INDEX < _width);
 
@@ -868,10 +879,10 @@ BitArray<TIndex, NCapacity>::Bits::set() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 void
-BitArray<TIndex, NCapacity>::Bits::reset() {
+BitArray<TI, NC>::Bits::reset() {
 	constexpr Index INDEX = NIndex;
 	HFSM_ASSERT(INDEX < _width);
 
@@ -884,9 +895,9 @@ BitArray<TIndex, NCapacity>::Bits::reset() {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 bool
-BitArray<TIndex, NCapacity>::Bits::get(const Index index) const {
+BitArray<TI, NC>::Bits::get(const Index index) const {
 	HFSM_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -898,9 +909,9 @@ BitArray<TIndex, NCapacity>::Bits::get(const Index index) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::Bits::set(const Index index) {
+BitArray<TI, NC>::Bits::set(const Index index) {
 	HFSM_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -912,9 +923,9 @@ BitArray<TIndex, NCapacity>::Bits::set(const Index index) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::Bits::reset(const Index index) {
+BitArray<TI, NC>::Bits::reset(const Index index) {
 	HFSM_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -926,8 +937,8 @@ BitArray<TIndex, NCapacity>::Bits::reset(const Index index) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, ShortIndex NCapacity>
-BitArray<TIndex, NCapacity>::ConstBits::operator bool() const {
+template <typename TI, ShortIndex NC>
+BitArray<TI, NC>::ConstBits::operator bool() const {
 	const ShortIndex fullUnits = _width / (sizeof(Unit) * 8);
 
 	for (Index i = 0; i < fullUnits; ++i)
@@ -943,10 +954,10 @@ BitArray<TIndex, NCapacity>::ConstBits::operator bool() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 bool
-BitArray<TIndex, NCapacity>::ConstBits::get() const {
+BitArray<TI, NC>::ConstBits::get() const {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < _width, "");
 
@@ -959,9 +970,9 @@ BitArray<TIndex, NCapacity>::ConstBits::get() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 bool
-BitArray<TIndex, NCapacity>::ConstBits::get(const Index index) const {
+BitArray<TI, NC>::ConstBits::get(const Index index) const {
 	HFSM_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -973,19 +984,19 @@ BitArray<TIndex, NCapacity>::ConstBits::get(const Index index) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::clear() {
+BitArray<TI, NC>::clear() {
 	for (Unit& unit: _storage)
 		unit = Unit{0};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 bool
-BitArray<TIndex, NCapacity>::get() const {
+BitArray<TI, NC>::get() const {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < CAPACITY, "");
 
@@ -998,10 +1009,10 @@ BitArray<TIndex, NCapacity>::get() const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 void
-BitArray<TIndex, NCapacity>::set() {
+BitArray<TI, NC>::set() {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < CAPACITY, "");
 
@@ -1014,10 +1025,10 @@ BitArray<TIndex, NCapacity>::set() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NIndex>
 void
-BitArray<TIndex, NCapacity>::reset() {
+BitArray<TI, NC>::reset() {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < CAPACITY, "");
 
@@ -1030,9 +1041,9 @@ BitArray<TIndex, NCapacity>::reset() {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 bool
-BitArray<TIndex, NCapacity>::get(const Index index) const {
+BitArray<TI, NC>::get(const Index index) const {
 	HFSM_ASSERT(index < CAPACITY);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -1044,9 +1055,9 @@ BitArray<TIndex, NCapacity>::get(const Index index) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 void
-BitArray<TIndex, NCapacity>::set(const Index index) {
+BitArray<TI, NC>::set(const Index index) {
 	HFSM_ASSERT(index < CAPACITY);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -1058,9 +1069,9 @@ BitArray<TIndex, NCapacity>::set(const Index index) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-//template <typename TIndex, ShortIndex NCapacity>
+//template <typename TI, ShortIndex NC>
 //void
-//BitArray<TIndex, NCapacity>::reset(const Index index) {
+//BitArray<TI, NC>::reset(const Index index) {
 //	HFSM_ASSERT(index < CAPACITY);
 //
 //	const Index unit = index / (sizeof(Unit) * 8);
@@ -1072,10 +1083,10 @@ BitArray<TIndex, NCapacity>::set(const Index index) {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NUnit, ShortIndex NWidth>
-typename BitArray<TIndex, NCapacity>::Bits
-BitArray<TIndex, NCapacity>::bits() {
+typename BitArray<TI, NC>::Bits
+BitArray<TI, NC>::bits() {
 	constexpr ShortIndex UNIT  = NUnit;
 	constexpr ShortIndex WIDTH = NWidth;
 	static_assert(UNIT + (WIDTH + 7) / (sizeof(Unit) * 8) <= CAPACITY, "");
@@ -1085,10 +1096,10 @@ BitArray<TIndex, NCapacity>::bits() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TI, ShortIndex NC>
 template <ShortIndex NUnit, ShortIndex NWidth>
-typename BitArray<TIndex, NCapacity>::ConstBits
-BitArray<TIndex, NCapacity>::bits() const {
+typename BitArray<TI, NC>::ConstBits
+BitArray<TI, NC>::bits() const {
 	constexpr ShortIndex UNIT  = NUnit;
 	constexpr ShortIndex WIDTH = NWidth;
 	static_assert(UNIT + (WIDTH + 7) / (sizeof(Unit) * 8) <= CAPACITY, "");
@@ -1098,9 +1109,9 @@ BitArray<TIndex, NCapacity>::bits() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
-typename BitArray<TIndex, NCapacity>::Bits
-BitArray<TIndex, NCapacity>::bits(const Units& units) {
+template <typename TI, ShortIndex NC>
+typename BitArray<TI, NC>::Bits
+BitArray<TI, NC>::bits(const Units& units) {
 	HFSM_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
 
 	return Bits{_storage + units.unit, units.width};
@@ -1108,9 +1119,9 @@ BitArray<TIndex, NCapacity>::bits(const Units& units) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TIndex, ShortIndex NCapacity>
-typename BitArray<TIndex, NCapacity>::ConstBits
-BitArray<TIndex, NCapacity>::bits(const Units& units) const {
+template <typename TI, ShortIndex NC>
+typename BitArray<TI, NC>::ConstBits
+BitArray<TI, NC>::bits(const Units& units) const {
 	HFSM_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
 
 	return ConstBits{_storage + units.unit, units.width};
@@ -1197,17 +1208,17 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBitCapacity>
+template <LongIndex NBC>
 void
-StreamBuffer<NBitCapacity>::clear() {
+StreamBuffer<NBC>::clear() {
 	bitSize = 0;
 	fill(payload, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBitCapacity>
-BitWriteStream<NBitCapacity>::BitWriteStream(Buffer& buffer)
+template <LongIndex NBC>
+BitWriteStream<NBC>::BitWriteStream(Buffer& buffer)
 	: _buffer{buffer}
 {
 	_buffer.clear();
@@ -1215,10 +1226,10 @@ BitWriteStream<NBitCapacity>::BitWriteStream(Buffer& buffer)
 
 //------------------------------------------------------------------------------
 
-template <LongIndex NBitCapacity>
+template <LongIndex NBC>
 template <ShortIndex NBitWidth>
 void
-BitWriteStream<NBitCapacity>::write(const UnsignedBitWidth<NBitWidth> item) {
+BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
 	constexpr ShortIndex BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
@@ -1246,10 +1257,10 @@ BitWriteStream<NBitCapacity>::write(const UnsignedBitWidth<NBitWidth> item) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBitCapacity>
+template <LongIndex NBC>
 template <ShortIndex NBitWidth>
 UnsignedBitWidth<NBitWidth>
-BitReadStream<NBitCapacity>::read() {
+BitReadStream<NBC>::read() {
 	constexpr ShortIndex BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
@@ -1359,10 +1370,10 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TItem, LongIndex NCapacity>
-template <typename... TArgs>
+template <typename T, LongIndex NC>
+template <typename... TA>
 LongIndex
-List<TItem, NCapacity>::emplace(TArgs... args) {
+List<T, NC>::emplace(TA... args) {
 	if (_count < CAPACITY) {
 		HFSM_ASSERT(_vacantHead < CAPACITY);
 		HFSM_ASSERT(_vacantTail < CAPACITY);
@@ -1399,7 +1410,7 @@ List<TItem, NCapacity>::emplace(TArgs... args) {
 
 		HFSM_IF_ASSERT(verifyStructure());
 
-		new (&cell.item) Item{std::forward<TArgs>(args)...};
+		new (&cell.item) Item{std::forward<TA>(args)...};
 
 		return result;
 	} else {
@@ -1415,9 +1426,9 @@ List<TItem, NCapacity>::emplace(TArgs... args) {
 
 //------------------------------------------------------------------------------
 
-template <typename TItem, LongIndex NCapacity>
+template <typename T, LongIndex NC>
 void
-List<TItem, NCapacity>::remove(const Index i) {
+List<T, NC>::remove(const Index i) {
 	HFSM_ASSERT(i < CAPACITY && _count);
 
 	auto& fresh = _cells[i];
@@ -1453,9 +1464,9 @@ List<TItem, NCapacity>::remove(const Index i) {
 
 //------------------------------------------------------------------------------
 
-template <typename TItem, LongIndex NCapacity>
-TItem&
-List<TItem, NCapacity>::operator[] (const Index i) {
+template <typename T, LongIndex NC>
+T&
+List<T, NC>::operator[] (const Index i) {
 	HFSM_IF_ASSERT(verifyStructure());
 
 	return _cells[i].item;
@@ -1463,9 +1474,9 @@ List<TItem, NCapacity>::operator[] (const Index i) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TItem, LongIndex NCapacity>
-const TItem&
-List<TItem, NCapacity>::operator[] (const Index i) const {
+template <typename T, LongIndex NC>
+const T&
+List<T, NC>::operator[] (const Index i) const {
 	HFSM_IF_ASSERT(verifyStructure());
 
 	return _cells[i].item;
@@ -1475,9 +1486,9 @@ List<TItem, NCapacity>::operator[] (const Index i) const {
 
 #ifdef HFSM_ENABLE_ASSERT
 
-template <typename TItem, LongIndex NCapacity>
+template <typename T, LongIndex NC>
 void
-List<TItem, NCapacity>::verifyStructure(const Index occupied) const {
+List<T, NC>::verifyStructure(const Index occupied) const {
 	if (_count < CAPACITY) {
 		HFSM_ASSERT(_vacantHead < CAPACITY);
 		HFSM_ASSERT(_vacantTail < CAPACITY);
@@ -1925,76 +1936,6 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-struct TB_ {};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename... Ts>
-struct TL_
-	: TB_<Ts>...
-{
-	static constexpr LongIndex SIZE = sizeof...(Ts);
-
-	template <typename T>
-	static constexpr bool contains() { return std::is_base_of<TB_<T>, TL_>::value; }
-};
-
-//------------------------------------------------------------------------------
-
-template <typename...>
-struct PrependT;
-
-template <typename T, typename... Ts>
-struct PrependT<T, TL_<Ts...>> {
-	using Type = TL_<T, Ts...>;
-};
-
-template <typename... Ts>
-using Prepend = typename PrependT<Ts...>::Type;
-
-//------------------------------------------------------------------------------
-
-template <LongIndex, LongIndex, typename...>
-struct LesserT;
-
-template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
-struct LesserT<H, I, TFirst, TRest...> {
-	using Type = typename std::conditional<(I < H),
-										   Prepend<TFirst, typename LesserT<H, I + 1, TRest...>::Type>,
-										   typename LesserT<H, I + 1, TRest...>::Type>::type;
-};
-
-template <LongIndex H, LongIndex I>
-struct LesserT<H, I> {
-	using Type = TL_<>;
-};
-
-template <typename... Ts>
-using SplitL = typename LesserT<sizeof...(Ts) / 2, 0, Ts...>::Type;
-
-//------------------------------------------------------------------------------
-
-template <LongIndex, LongIndex, typename...>
-struct GreaterT;
-
-template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
-struct GreaterT<H, I, TFirst, TRest...> {
-	using Type = typename std::conditional<(I < H),
-										   typename GreaterT<H, I + 1, TRest...>::Type,
-										   TL_<TFirst, TRest...>>::type;
-};
-
-template <LongIndex H, LongIndex I>
-struct GreaterT<H, I> {
-	using Type = TL_<>;
-};
-
-template <typename... Ts>
-using SplitR = typename GreaterT<sizeof...(Ts) / 2, 0, Ts...>::Type;
-
-////////////////////////////////////////////////////////////////////////////////
-
 template<LongIndex N>
 struct IndexConstant {};
 
@@ -2085,18 +2026,18 @@ struct ITL_
 	}
 };
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename...>
-struct IndexedT;
+struct PrependT;
 
-template <typename... Ts>
-struct IndexedT<TL_<Ts...>> {
-	using Type = ITL_<Ts...>;
+template <typename T, typename... Ts>
+struct PrependT<T, ITL_<Ts...>> {
+	using Type = ITL_<T, Ts...>;
 };
 
-template <typename T>
-using Indexed = typename IndexedT<T>::Type;
+template <typename... Ts>
+using Prepend = typename PrependT<Ts...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -2104,12 +2045,52 @@ template <typename...>
 struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
-struct MergeT<TL_<Ts1...>, TL_<Ts2...>> {
-	using TypeList = TL_<Ts1..., Ts2...>;
+struct MergeT<ITL_<Ts1...>, ITL_<Ts2...>> {
+	using Type = ITL_<Ts1..., Ts2...>;
 };
 
 template <typename... Ts>
-using Merge = typename MergeT<Ts...>::TypeList;
+using Merge = typename MergeT<Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+template <LongIndex, LongIndex, typename...>
+struct LesserT;
+
+template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
+struct LesserT<H, I, TFirst, TRest...> {
+	using Type = typename std::conditional<(I < H),
+										   Prepend<TFirst, typename LesserT<H, I + 1, TRest...>::Type>,
+										   typename LesserT<H, I + 1, TRest...>::Type>::type;
+};
+
+template <LongIndex H, LongIndex I>
+struct LesserT<H, I> {
+	using Type = ITL_<>;
+};
+
+template <typename... Ts>
+using SplitL = typename LesserT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+template <LongIndex, LongIndex, typename...>
+struct GreaterT;
+
+template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
+struct GreaterT<H, I, TFirst, TRest...> {
+	using Type = typename std::conditional<(I < H),
+										   typename GreaterT<H, I + 1, TRest...>::Type,
+										   ITL_<TFirst, TRest...>>::type;
+};
+
+template <LongIndex H, LongIndex I>
+struct GreaterT<H, I> {
+	using Type = ITL_<>;
+};
+
+template <typename... Ts>
+using SplitR = typename GreaterT<sizeof...(Ts) / 2, 0, Ts...>::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2217,12 +2198,12 @@ static inline
 const char*
 transitionName(const TransitionType transitionType) {
 	switch (transitionType) {
-	case TransitionType::CHANGE:		return "changeTo";
-	case TransitionType::RESTART:		return "restart";
-	case TransitionType::RESUME:		return "resume";
-	case TransitionType::UTILIZE:		return "utilize";
-	case TransitionType::RANDOMIZE:		return "randomize";
-	case TransitionType::SCHEDULE:		return "schedule";
+	case TransitionType::CHANGE:	return "changeTo";
+	case TransitionType::RESTART:	return "restart";
+	case TransitionType::RESUME:	return "resume";
+	case TransitionType::UTILIZE:	return "utilize";
+	case TransitionType::RANDOMIZE:	return "randomize";
+	case TransitionType::SCHEDULE:	return "schedule";
 
 	default:
 		HFSM_BREAK();
@@ -2436,9 +2417,9 @@ namespace detail {
 
 #ifdef HFSM_ENABLE_ASSERT
 
-template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, LongIndex NSB_, LongIndex NTC_>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 void
-PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NSB_, NTC_>>::verifyPlans() const {
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlans() const {
 	LongIndex planCount = 0;
 	for (RegionID id = 0; id < REGION_COUNT; ++id)
 		planCount += verifyPlan(id);
@@ -2448,9 +2429,9 @@ PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NSB_, NTC_>>::verifyPlan
 
 //------------------------------------------------------------------------------
 
-template <typename TC_, typename TG_, typename TSL_, typename TRL_, LongIndex NCC_, LongIndex NOC_, LongIndex NOU_, LongIndex NSB_, LongIndex NTC_>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 LongIndex
-PlanDataT<ArgsT<TC_, TG_, TSL_, TRL_, NCC_, NOC_, NOU_, NSB_, NTC_>>::verifyPlan(const RegionID regionId) const {
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlan(const RegionID regionId) const {
 	LongIndex length = 0;
 	const Bounds& bounds = tasksBounds[regionId];
 
@@ -3446,10 +3427,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestScheduled(co
 	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
+		HFSM_ASSERT(parent.forkId != 0);
 		if (parent.forkId > 0)
 			compoResumable[parent.forkId - 1] = parent.prong;
-		else
-			HFSM_BREAK();
 	}
 }
 
@@ -3610,13 +3590,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestScheduled(const StateID stateId) {
-	HFSM_ASSERT(stateId < STATE_COUNT);
-
-	if (stateId < STATE_COUNT) {
+	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
-		if (HFSM_CHECKED(parent.forkId > 0))
-			compoResumable[parent.forkId - 1] = parent.prong;
+		HFSM_ASSERT(parent.forkId > 0);
+		compoResumable[parent.forkId - 1] = parent.prong;
 	}
 }
 
@@ -4826,127 +4804,127 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TF_, typename... TR_>
+template <typename TF, typename... TR>
 void
-B_<TF_, TR_...>::widePreEntryGuard(Context& context) {
-	TF_::preEntryGuard(context);
-	B_<TR_...>::widePreEntryGuard(context);
+B_<TF, TR...>::widePreEntryGuard(Context& context) {
+	TF::preEntryGuard(context);
+	B_<TR...>::widePreEntryGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_, typename... TR_>
+template <typename TF, typename... TR>
 void
-B_<TF_, TR_...>::widePreEnter(Context& context) {
-	TF_::preEnter(context);
-	B_<TR_...>::widePreEnter(context);
+B_<TF, TR...>::widePreEnter(Context& context) {
+	TF::preEnter(context);
+	B_<TR...>::widePreEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF_, typename... TR_>
+template <typename TF, typename... TR>
 void
-B_<TF_, TR_...>::widePreReenter(Context& context) {
-	TF_::preReenter(context);
-	B_<TR_...>::widePreReenter(context);
+B_<TF, TR...>::widePreReenter(Context& context) {
+	TF::preReenter(context);
+	B_<TR...>::widePreReenter(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_, typename... TR_>
+template <typename TF, typename... TR>
 void
-B_<TF_, TR_...>::widePreUpdate(Context& context) {
-	TF_::preUpdate(context);
-	B_<TR_...>::widePreUpdate(context);
+B_<TF, TR...>::widePreUpdate(Context& context) {
+	TF::preUpdate(context);
+	B_<TR...>::widePreUpdate(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_, typename... TR_>
+template <typename TF, typename... TR>
 template <typename TEvent>
 void
-B_<TF_, TR_...>::widePreReact(const TEvent& event,
-							  Context& context)
+B_<TF, TR...>::widePreReact(const TEvent& event,
+							Context& context)
 {
-	TF_::preReact(event, context);
-	B_<TR_...>::widePreReact(event, context);
+	TF::preReact(event, context);
+	B_<TR...>::widePreReact(event, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_, typename... TR_>
+template <typename TF, typename... TR>
 void
-B_<TF_, TR_...>::widePreExitGuard(Context& context) {
-	TF_::preExitGuard(context);
-	B_<TR_...>::widePreExitGuard(context);
+B_<TF, TR...>::widePreExitGuard(Context& context) {
+	TF::preExitGuard(context);
+	B_<TR...>::widePreExitGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_, typename... TR_>
+template <typename TF, typename... TR>
 void
-B_<TF_, TR_...>::widePostExit(Context& context) {
-	TF_::postExit(context);
-	B_<TR_...>::widePostExit(context);
+B_<TF, TR...>::widePostExit(Context& context) {
+	TF::postExit(context);
+	B_<TR...>::widePostExit(context);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TF_>
+template <typename TF>
 void
-B_<TF_>::widePreEntryGuard(Context& context) {
-	TF_::preEntryGuard(context);
+B_<TF>::widePreEntryGuard(Context& context) {
+	TF::preEntryGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_>
+template <typename TF>
 void
-B_<TF_>::widePreEnter(Context& context) {
-	TF_::preEnter(context);
+B_<TF>::widePreEnter(Context& context) {
+	TF::preEnter(context);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF_>
+template <typename TF>
 void
-B_<TF_>::widePreReenter(Context& context) {
-	TF_::preReenter(context);
+B_<TF>::widePreReenter(Context& context) {
+	TF::preReenter(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_>
+template <typename TF>
 void
-B_<TF_>::widePreUpdate(Context& context) {
-	TF_::preUpdate(context);
+B_<TF>::widePreUpdate(Context& context) {
+	TF::preUpdate(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_>
+template <typename TF>
 template <typename TEvent>
 void
-B_<TF_>::widePreReact(const TEvent& event,
-					  Context& context)
+B_<TF>::widePreReact(const TEvent& event,
+					 Context& context)
 {
-	TF_::preReact(event, context);
+	TF::preReact(event, context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_>
+template <typename TF>
 void
-B_<TF_>::widePreExitGuard(Context& context) {
-	TF_::preExitGuard(context);
+B_<TF>::widePreExitGuard(Context& context) {
+	TF::preExitGuard(context);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF_>
+template <typename TF>
 void
-B_<TF_>::widePostExit(Context& context) {
-	TF_::postExit(context);
+B_<TF>::widePostExit(Context& context) {
+	TF::postExit(context);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -5305,10 +5283,10 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
-template <StateID NS, typename TA_, typename TH_>
+template <StateID NS, typename TA, typename TH>
 struct RegisterT {
-	using StateParents	= StaticArray<Parent, TA_::STATE_COUNT>;
-	using StateList		= typename TA_::StateList;
+	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
+	using StateList		= typename TA::StateList;
 
 	static constexpr StateID STATE_ID = NS;
 
@@ -5317,7 +5295,7 @@ struct RegisterT {
 	execute(StateParents& stateParents,
 			const Parent parent)
 	{
-		static constexpr auto HEAD_ID = StateList::template index<TH_>();
+		static constexpr auto HEAD_ID = StateList::template index<TH>();
 		StaticAssertEquality<STATE_ID, HEAD_ID>();
 
 		stateParents[STATE_ID] = parent;
@@ -5326,9 +5304,9 @@ struct RegisterT {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <StateID NS, typename TA_>
-struct RegisterT<NS, TA_, StaticEmptyT<TA_>> {
-	using StateParents	= StaticArray<Parent, TA_::STATE_COUNT>;
+template <StateID NS, typename TA>
+struct RegisterT<NS, TA, StaticEmptyT<TA>> {
+	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
 
 	static HFSM_INLINE
 	void
@@ -5337,20 +5315,20 @@ struct RegisterT<NS, TA_, StaticEmptyT<TA_>> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepRegister(Registry& registry,
-								const Parent parent)
+S_<TN_, TA, TH>::deepRegister(Registry& registry,
+							  const Parent parent)
 {
-	using Register = RegisterT<STATE_ID, TA_, Head>;
+	using Register = RegisterT<STATE_ID, TA, Head>;
 	Register::execute(registry.stateParents, parent);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 bool
-S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
+S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::entryGuard,
 						  control.context(),
 						  Method::ENTRY_GUARD);
@@ -5366,9 +5344,9 @@ S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
+S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
 	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
@@ -5381,9 +5359,9 @@ S_<TN_, TA_, TH_>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
+S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::enter,
 						  control.context(),
 						  Method::ENTER);
@@ -5396,9 +5374,9 @@ S_<TN_, TA_, TH_>::deepEnter(PlanControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
+S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
 	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
@@ -5417,9 +5395,9 @@ S_<TN_, TA_, TH_>::deepReenter(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 Status
-S_<TN_, TA_, TH_>::deepUpdate(FullControl& control) {
+S_<TN_, TA, TH>::deepUpdate(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::update,
 						  control.context(),
 						  Method::UPDATE);
@@ -5434,11 +5412,11 @@ S_<TN_, TA_, TH_>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 template <typename TEvent>
 Status
-S_<TN_, TA_, TH_>::deepReact(FullControl& control,
-							 const TEvent& event)
+S_<TN_, TA, TH>::deepReact(FullControl& control,
+						   const TEvent& event)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
 	HFSM_LOG_STATE_METHOD(reaction,
@@ -5455,9 +5433,9 @@ S_<TN_, TA_, TH_>::deepReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 bool
-S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
+S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exitGuard,
 						  control.context(),
 						  Method::EXIT_GUARD);
@@ -5474,9 +5452,9 @@ S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
+S_<TN_, TA, TH>::deepExit(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exit,
 						  control.context(),
 						  Method::EXIT);
@@ -5494,9 +5472,9 @@ S_<TN_, TA_, TH_>::deepExit(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepDestruct(PlanControl& control) {
+S_<TN_, TA, TH>::deepDestruct(PlanControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::exit,
 						  control.context(),
 						  Method::DESTRUCT);
@@ -5509,9 +5487,9 @@ S_<TN_, TA_, TH_>::deepDestruct(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::wrapPlanSucceeded(FullControl& control) {
+S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::planSucceeded,
 						  control.context(),
 						  Method::PLAN_SUCCEEDED);
@@ -5523,9 +5501,9 @@ S_<TN_, TA_, TH_>::wrapPlanSucceeded(FullControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::wrapPlanFailed(FullControl& control) {
+S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 	HFSM_LOG_STATE_METHOD(&Head::planFailed,
 						  control.context(),
 						  Method::PLAN_FAILED);
@@ -5537,9 +5515,9 @@ S_<TN_, TA_, TH_>::wrapPlanFailed(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::Rank
-S_<TN_, TA_, TH_>::wrapRank(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Rank
+S_<TN_, TA, TH>::wrapRank(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::rank,
 						  control.context(),
 						  Method::RANK);
@@ -5549,9 +5527,9 @@ S_<TN_, TA_, TH_>::wrapRank(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::Utility
-S_<TN_, TA_, TH_>::wrapUtility(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Utility
+S_<TN_, TA, TH>::wrapUtility(Control& control) {
 	HFSM_LOG_STATE_METHOD(&Head::utility,
 						  control.context(),
 						  Method::UTILITY);
@@ -5561,9 +5539,9 @@ S_<TN_, TA_, TH_>::wrapUtility(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::UP
-S_<TN_, TA_, TH_>::deepReportChange(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::UP
+S_<TN_, TA, TH>::deepReportChange(Control& control) {
 	const Utility utility = wrapUtility(control);
 
 	const Parent parent = stateParent(control);
@@ -5573,9 +5551,9 @@ S_<TN_, TA_, TH_>::deepReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::UP
-S_<TN_, TA_, TH_>::deepReportUtilize(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::UP
+S_<TN_, TA, TH>::deepReportUtilize(Control& control) {
 	const Utility utility = wrapUtility(control);
 	const Parent  parent  = stateParent(control);
 
@@ -5584,17 +5562,17 @@ S_<TN_, TA_, TH_>::deepReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::Rank
-S_<TN_, TA_, TH_>::deepReportRank(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Rank
+S_<TN_, TA, TH>::deepReportRank(Control& control) {
 	return wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_>
-typename S_<TN_, TA_, TH_>::Utility
-S_<TN_, TA_, TH_>::deepReportRandomize(Control& control) {
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Utility
+S_<TN_, TA, TH>::deepReportRandomize(Control& control) {
 	return wrapUtility(control);
 }
 
@@ -5602,9 +5580,9 @@ S_<TN_, TA_, TH_>::deepReportRandomize(Control& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 const char*
-S_<TN_, TA_, TH_>::name() {
+S_<TN_, TA, TH>::name() {
 	if (HeadBox::isBare())
 		return "";
 	else {
@@ -5638,12 +5616,12 @@ S_<TN_, TA_, TH_>::name() {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_>
+template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA_, TH_>::deepGetNames(const LongIndex parent,
-								const RegionType region,
-								const ShortIndex depth,
-								StructureStateInfos& _stateInfos) const
+S_<TN_, TA, TH>::deepGetNames(const LongIndex parent,
+							  const RegionType region,
+							  const ShortIndex depth,
+							  StructureStateInfos& _stateInfos) const
 {
 	_stateInfos.append(StructureStateInfo{parent, region, depth, name()});
 }
@@ -5696,31 +5674,31 @@ struct OSI_<TInitial>;
 template <typename...>
 struct WrapInfoT;
 
-template <typename TH_>
-struct WrapInfoT<	 TH_> {
-	using Type = SI_<TH_>;
+template <typename TH>
+struct WrapInfoT<	 TH> {
+	using Type = SI_<TH>;
 };
 
-template <Strategy TG_, typename TH_, typename... TS_>
-struct WrapInfoT<	 CI_<TG_, TH_, TS_...>> {
-	using Type =	 CI_<TG_, TH_, TS_...>;
+template <Strategy SG, typename TH, typename... TS>
+struct WrapInfoT<	 CI_<SG, TH, TS...>> {
+	using Type =	 CI_<SG, TH, TS...>;
 };
 
-template <typename... TS_>
-struct WrapInfoT<	 OI_<TS_...>> {
-	using Type =	 OI_<TS_...>;
+template <typename... TS>
+struct WrapInfoT<	 OI_<TS...>> {
+	using Type =	 OI_<TS...>;
 };
 
-template <typename... TS_>
-using WrapInfo = typename WrapInfoT<TS_...>::Type;
+template <typename... TS>
+using WrapInfo = typename WrapInfoT<TS...>::Type;
 
 //------------------------------------------------------------------------------
 
 template <typename THead>
 struct SI_ final {
 	using Head				= THead;
-	using StateList			= TL_<Head>;
-	using RegionList		= TL_<>;
+	using StateList			= ITL_<Head>;
+	using RegionList		= ITL_<>;
 
 	static constexpr ShortIndex WIDTH			= 1;
 	static constexpr LongIndex  REVERSE_DEPTH	= 1;
@@ -5938,33 +5916,33 @@ class RW_;
 template <typename, typename...>
 struct MaterialT;
 
-template <typename TN_, typename TA_, typename TH_>
-struct MaterialT   <TN_, TA_, TH_> {
-	using Type = S_<TN_, TA_, TH_>;
+template <typename TN, typename TA, typename TH>
+struct MaterialT   <TN, TA, TH> {
+	using Type = S_<TN, TA, TH>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, 			 typename... TS_>
-struct MaterialT   <TN_, TA_, CI_<TG_, void,			  TS_...>> {
-	using Type = C_<TN_, TA_,	  TG_, StaticEmptyT<TA_>, TS_...>;
+template <typename TN, typename TA, Strategy SG, 			  typename... TS>
+struct MaterialT   <TN, TA, CI_<SG, void,             TS...>> {
+	using Type = C_<TN, TA,     SG, StaticEmptyT<TA>, TS...>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-struct MaterialT   <TN_, TA_, CI_<TG_, TH_,	TS_...>> {
-	using Type = C_<TN_, TA_,	  TG_, TH_,	TS_...>;
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+struct MaterialT   <TN, TA, CI_<SG, TH,	TS...>> {
+	using Type = C_<TN, TA,     SG, TH,	TS...>;
 };
 
-template <typename TN_, typename TA_,				typename... TS_>
-struct MaterialT   <TN_, TA_, OI_<void,				 TS_...>> {
-	using Type = O_<TN_, TA_,	  StaticEmptyT<TA_>, TS_...>;
+template <typename TN, typename TA,				 typename... TS>
+struct MaterialT   <TN, TA, OI_<void,			  TS...>> {
+	using Type = O_<TN, TA,     StaticEmptyT<TA>, TS...>;
 };
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-struct MaterialT   <TN_, TA_, OI_<TH_,		  TS_...>> {
-	using Type = O_<TN_, TA_,	  TH_,		  TS_...>;
+template <typename TN, typename TA, typename TH, typename... TS>
+struct MaterialT   <TN, TA, OI_<TH,				  TS...>> {
+	using Type = O_<TN, TA,     TH,				  TS...>;
 };
 
-template <typename TN_, typename... TS_>
-using Material = typename MaterialT<TN_, TS_...>::Type;
+template <typename TN, typename... TS>
+using Material = typename MaterialT<TN, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -5989,8 +5967,8 @@ struct RF_ final {
 	static constexpr LongIndex  ACTIVE_BITS		 = Apex::ACTIVE_BITS;
 	static constexpr LongIndex  RESUMABLE_BITS	 = Apex::RESUMABLE_BITS;
 
-	using StateList		= Indexed<typename Apex::StateList>;
-	using RegionList	= Indexed<typename Apex::RegionList>;
+	using StateList		= typename Apex::StateList;
+	using RegionList	= typename Apex::RegionList;
 
 	using Args			= ArgsT<Context,
 								Config_,
@@ -6049,45 +6027,40 @@ struct RF_ final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 struct CSubMaterialT;
 
-//template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-//struct CSubMaterialT	 <TN_, TA_, TG_, NI_, TL_<T>> {
-//	using Type = Material<TN_, TA_,				  T>;
-//};
-
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-struct CSubMaterialT<TN_, TA_, TG_, NI_, TL_<TS_...>> {
-	using Type = CS_<TN_, TA_, TG_, NI_,	 TS_...>;
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+struct CSubMaterialT<TN, TA, SG, NI, ITL_<TS...>> {
+	using Type = CS_<TN, TA, SG, NI,	  TS...>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-using CSubMaterial = typename CSubMaterialT<TN_, TA_, TG_, NI_, TS_...>::Type;
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+using CSubMaterial = typename CSubMaterialT<TN, TA, SG, NI, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
 template <typename...>
 struct InfoT;
 
-template <typename TN_, typename TA_, typename TH_>
-struct InfoT<S_<TN_, TA_, TH_>> {
-	using Type = SI_<	  TH_>;
+template <typename TN, typename TA, typename TH>
+struct InfoT<S_<TN, TA, TH>> {
+	using Type = SI_<	TH>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-struct InfoT<C_<TN_, TA_, TG_, TH_, TS_...>> {
-	using Type = CI_<	  TG_, TH_, TS_...>;
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+struct InfoT<C_<TN, TA, SG, TH, TS...>> {
+	using Type = CI_<	SG, TH, TS...>;
 };
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-struct InfoT<O_<TN_, TA_, TH_, TS_...>> {
-	using Type = OI_<	  TH_, TS_...>;
+template <typename TN, typename TA, typename TH, typename... TS>
+struct InfoT<O_<TN, TA, TH, TS...>> {
+	using Type = OI_<	TH, TS...>;
 };
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-struct InfoT<CS_<TN_, TA_, TG_, NI_, TS_...>> {
-	using Type = CSI_<				 TS_...>;
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+struct InfoT<CS_<TN, TA, SG, NI, TS...>> {
+	using Type = CSI_<			 TS...>;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -6431,10 +6404,10 @@ namespace detail {
 
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 template <typename T>
 T&
-CS_<TN_, TA_, TG_, NI_, TS_...>::access() {
+CS_<TN, TA, SG, NI, TS...>::access() {
 	return LHalfInfo::StateList::template contains<T>() ?
 		lHalf.template access<T>() :
 		rHalf.template access<T>();
@@ -6442,10 +6415,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::access() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 template <typename T>
 const T&
-CS_<TN_, TA_, TG_, NI_, TS_...>::access() const {
+CS_<TN, TA, SG, NI, TS...>::access() const {
 	return LHalfInfo::StateList::template contains<T>() ?
 		lHalf.template access<T>() :
 		rHalf.template access<T>();
@@ -6455,10 +6428,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::access() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRegister(Registry& registry,
-											  const Parent parent)
+CS_<TN, TA, SG, NI, TS...>::wideRegister(Registry& registry,
+										 const Parent parent)
 {
 	lHalf.wideRegister(registry, Parent{parent.forkId, L_PRONG});
 	rHalf.wideRegister(registry, Parent{parent.forkId, R_PRONG});
@@ -6466,10 +6439,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 bool
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardEntryGuard(GuardControl& control,
-													   const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideForwardEntryGuard(GuardControl& control,
+												  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6481,10 +6454,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardEntryGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 bool
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideEntryGuard(GuardControl& control,
-												const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideEntryGuard(GuardControl& control,
+										   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6496,10 +6469,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideEntryGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideConstruct(PlanControl& control,
-											   const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideConstruct(PlanControl& control,
+										  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6511,10 +6484,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideConstruct(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideEnter(PlanControl& control,
-										   const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideEnter(PlanControl& control,
+									  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6526,10 +6499,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideEnter(PlanControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReenter(PlanControl& control,
-											 const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideReenter(PlanControl& control,
+										const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6541,10 +6514,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReenter(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 Status
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideUpdate(FullControl& control,
-											const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideUpdate(FullControl& control,
+									   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6555,12 +6528,12 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideUpdate(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 template <typename TEvent>
 Status
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReact(FullControl& control,
-										   const TEvent& event,
-										   const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideReact(FullControl& control,
+									  const TEvent& event,
+									  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6571,10 +6544,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 bool
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardExitGuard(GuardControl& control,
-													  const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideForwardExitGuard(GuardControl& control,
+												 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6586,10 +6559,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardExitGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 bool
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideExitGuard(GuardControl& control,
-											   const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideExitGuard(GuardControl& control,
+										  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6601,10 +6574,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideExitGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideExit(PlanControl& control,
-										  const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideExit(PlanControl& control,
+									 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6616,10 +6589,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideExit(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideDestruct(PlanControl& control,
-											  const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideDestruct(PlanControl& control,
+										 const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6631,11 +6604,11 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideDestruct(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardActive(Control& control,
-												   const Request::Type request,
-												   const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideForwardActive(Control& control,
+											  const Request::Type request,
+											  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6647,11 +6620,11 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardRequest(Control& control,
-													const Request::Type request,
-													const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideForwardRequest(Control& control,
+											   const Request::Type request,
+											   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6663,18 +6636,18 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestChangeComposite(Control& control) {
+CS_<TN, TA, SG, NI, TS...>::wideRequestChangeComposite(Control& control) {
 	lHalf.wideRequestChangeComposite(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestChangeResumable(Control& control,
-															const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideRequestChangeResumable(Control& control,
+													   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6686,26 +6659,26 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestChangeResumable(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestRemain(Registry& registry) {
+CS_<TN, TA, SG, NI, TS...>::wideRequestRemain(Registry& registry) {
 	lHalf.wideRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestRestart(Registry& registry) {
+CS_<TN, TA, SG, NI, TS...>::wideRequestRestart(Registry& registry) {
 	lHalf.wideRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestResume(Registry& registry,
-												   const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideRequestResume(Registry& registry,
+											  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6717,9 +6690,9 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestResume(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-typename TA_::UP
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportUtilize(Control& control) {
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+typename TA::UP
+CS_<TN, TA, SG, NI, TS...>::wideReportUtilize(Control& control) {
 	const UP l = lHalf.wideReportUtilize(control);
 	const UP r = rHalf.wideReportUtilize(control);
 
@@ -6729,10 +6702,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-typename TA_::Rank
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportRank(Control& control,
-												Rank* const ranks)
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+typename TA::Rank
+CS_<TN, TA, SG, NI, TS...>::wideReportRank(Control& control,
+										   Rank* const ranks)
 {
 	HFSM_ASSERT(ranks);
 
@@ -6745,12 +6718,12 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportRank(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-typename TA_::Utility
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportRandomize(Control& control,
-													 Utility* const options,
-													 const Rank* const ranks,
-													 const Rank top)
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+typename TA::Utility
+CS_<TN, TA, SG, NI, TS...>::wideReportRandomize(Control& control,
+												Utility* const options,
+												const Rank* const ranks,
+												const Rank top)
 {
 	HFSM_ASSERT(options && ranks);
 
@@ -6762,18 +6735,18 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportRandomize(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-typename TA_::UP
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeComposite(Control& control) {
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+typename TA::UP
+CS_<TN, TA, SG, NI, TS...>::wideReportChangeComposite(Control& control) {
 	return lHalf.wideReportChangeComposite(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-typename TA_::UP
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeResumable(Control& control,
-														   const ShortIndex prong)
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+typename TA::UP
+CS_<TN, TA, SG, NI, TS...>::wideReportChangeResumable(Control& control,
+													  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6785,9 +6758,9 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeResumable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-typename TA_::UP
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeUtilitarian(Control& control) {
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+typename TA::UP
+CS_<TN, TA, SG, NI, TS...>::wideReportChangeUtilitarian(Control& control) {
 	const UP l = lHalf.wideReportChangeUtilitarian(control);
 	const UP r = rHalf.wideReportChangeUtilitarian(control);
 
@@ -6797,12 +6770,12 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeUtilitarian(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
-typename TA_::Utility
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeRandom(Control& control,
-														Utility* const options,
-														const Rank* const ranks,
-														const Rank top)
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+typename TA::Utility
+CS_<TN, TA, SG, NI, TS...>::wideReportChangeRandom(Control& control,
+												   Utility* const options,
+												   const Rank* const ranks,
+												   const Rank top)
 {
 	HFSM_ASSERT(options && ranks);
 
@@ -6814,10 +6787,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideReportChangeRandom(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideChangeToRequested(PlanControl& control,
-													   const ShortIndex prong)
+CS_<TN, TA, SG, NI, TS...>::wideChangeToRequested(PlanControl& control,
+												  const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6831,12 +6804,12 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideChangeToRequested(PlanControl& control,
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideGetNames(const LongIndex parent,
-											  const RegionType /*region*/,
-											  const ShortIndex depth,
-											  StructureStateInfos& _stateInfos) const
+CS_<TN, TA, SG, NI, TS...>::wideGetNames(const LongIndex parent,
+										 const RegionType /*region*/,
+										 const ShortIndex depth,
+										 StructureStateInfos& _stateInfos) const
 {
 	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
@@ -6848,11 +6821,11 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideGetNames(const LongIndex parent,
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideSaveActive(const Registry& registry,
-												WriteStream& stream,
-												const ShortIndex prong) const
+CS_<TN, TA, SG, NI, TS...>::wideSaveActive(const Registry& registry,
+										   WriteStream& stream,
+										   const ShortIndex prong) const
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6867,10 +6840,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideSaveActive(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideSaveResumable(const Registry& registry,
-												   WriteStream& stream) const
+CS_<TN, TA, SG, NI, TS...>::wideSaveResumable(const Registry& registry,
+											  WriteStream& stream) const
 {
 	lHalf.wideSaveResumable(registry, stream);
 	rHalf.wideSaveResumable(registry, stream);
@@ -6878,11 +6851,11 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideSaveResumable(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideLoadRequested(Registry& registry,
-												   ReadStream& stream,
-												   const ShortIndex prong) const
+CS_<TN, TA, SG, NI, TS...>::wideLoadRequested(Registry& registry,
+											  ReadStream& stream,
+											  const ShortIndex prong) const
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
@@ -6897,10 +6870,10 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideLoadRequested(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideLoadResumable(Registry& registry,
-												   ReadStream& stream) const
+CS_<TN, TA, SG, NI, TS...>::wideLoadResumable(Registry& registry,
+											  ReadStream& stream) const
 {
 	lHalf.wideLoadResumable(registry, stream);
 	rHalf.wideLoadResumable(registry, stream);
@@ -6917,20 +6890,20 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRegister(Registry& registry,
-										 const Parent parent)
+CS_<TN, TA, SG, NI, T>::wideRegister(Registry& registry,
+									 const Parent parent)
 {
 	state.deepRegister(registry, Parent{parent.forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 bool
-CS_<TN_, TA_, TG_, NI_, T>::wideForwardEntryGuard(GuardControl& control,
-												  const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideForwardEntryGuard(GuardControl& control,
+											  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -6939,10 +6912,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideForwardEntryGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 bool
-CS_<TN_, TA_, TG_, NI_, T>::wideEntryGuard(GuardControl& control,
-										   const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideEntryGuard(GuardControl& control,
+									   const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -6951,10 +6924,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideEntryGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideConstruct(PlanControl& control,
-										  const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideConstruct(PlanControl& control,
+									  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -6963,10 +6936,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideConstruct(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideEnter(PlanControl& control,
-									  const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideEnter(PlanControl& control,
+								  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -6975,10 +6948,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideEnter(PlanControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideReenter(PlanControl& control,
-										const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideReenter(PlanControl& control,
+									const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -6987,10 +6960,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideReenter(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 Status
-CS_<TN_, TA_, TG_, NI_, T>::wideUpdate(FullControl& control,
-									   const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideUpdate(FullControl& control,
+								   const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -6999,12 +6972,12 @@ CS_<TN_, TA_, TG_, NI_, T>::wideUpdate(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 template <typename TEvent>
 Status
-CS_<TN_, TA_, TG_, NI_, T>::wideReact(FullControl& control,
-									  const TEvent& event,
-									  const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideReact(FullControl& control,
+								  const TEvent& event,
+								  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7013,10 +6986,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 bool
-CS_<TN_, TA_, TG_, NI_, T>::wideForwardExitGuard(GuardControl& control,
-												 const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideForwardExitGuard(GuardControl& control,
+											 const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7025,10 +6998,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideForwardExitGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 bool
-CS_<TN_, TA_, TG_, NI_, T>::wideExitGuard(GuardControl& control,
-										  const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideExitGuard(GuardControl& control,
+									  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7037,10 +7010,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideExitGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideExit(PlanControl& control,
-									 const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideExit(PlanControl& control,
+								 const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7049,10 +7022,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideExit(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideDestruct(PlanControl& control,
-										 const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideDestruct(PlanControl& control,
+									 const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7061,11 +7034,11 @@ CS_<TN_, TA_, TG_, NI_, T>::wideDestruct(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideForwardActive(Control& control,
-											  const Request::Type request,
-											  const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideForwardActive(Control& control,
+										  const Request::Type request,
+										  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7074,11 +7047,11 @@ CS_<TN_, TA_, TG_, NI_, T>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideForwardRequest(Control& control,
-											   const Request::Type request,
-											   const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideForwardRequest(Control& control,
+										   const Request::Type request,
+										   const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7087,18 +7060,18 @@ CS_<TN_, TA_, TG_, NI_, T>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRequestChangeComposite(Control& control) {
+CS_<TN, TA, SG, NI, T>::wideRequestChangeComposite(Control& control) {
 	state.deepRequestChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRequestChangeResumable(Control& control,
-													   const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideRequestChangeResumable(Control& control,
+												   const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7107,26 +7080,26 @@ CS_<TN_, TA_, TG_, NI_, T>::wideRequestChangeResumable(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRequestRemain(Registry& registry) {
+CS_<TN, TA, SG, NI, T>::wideRequestRemain(Registry& registry) {
 	state.deepRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRequestRestart(Registry& registry) {
+CS_<TN, TA, SG, NI, T>::wideRequestRestart(Registry& registry) {
 	state.deepRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRequestResume(Registry& registry,
-											  const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideRequestResume(Registry& registry,
+										  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7135,18 +7108,18 @@ CS_<TN_, TA_, TG_, NI_, T>::wideRequestResume(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-typename TA_::UP
-CS_<TN_, TA_, TG_, NI_, T>::wideReportUtilize(Control& control) {
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+typename TA::UP
+CS_<TN, TA, SG, NI, T>::wideReportUtilize(Control& control) {
 	return state.deepReportUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-typename TA_::Rank
-CS_<TN_, TA_, TG_, NI_, T>::wideReportRank(Control& control,
-										   Rank* const ranks)
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+typename TA::Rank
+CS_<TN, TA, SG, NI, T>::wideReportRank(Control& control,
+									   Rank* const ranks)
 {
 	HFSM_ASSERT(ranks);
 
@@ -7157,12 +7130,12 @@ CS_<TN_, TA_, TG_, NI_, T>::wideReportRank(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-typename TA_::Utility
-CS_<TN_, TA_, TG_, NI_, T>::wideReportRandomize(Control& control,
-												Utility* const options,
-												const Rank* const ranks,
-												const Rank top)
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+typename TA::Utility
+CS_<TN, TA, SG, NI, T>::wideReportRandomize(Control& control,
+											Utility* const options,
+											const Rank* const ranks,
+											const Rank top)
 {
 	HFSM_ASSERT(options && ranks);
 
@@ -7174,18 +7147,18 @@ CS_<TN_, TA_, TG_, NI_, T>::wideReportRandomize(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-typename TA_::UP
-CS_<TN_, TA_, TG_, NI_, T>::wideReportChangeComposite(Control& control) {
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+typename TA::UP
+CS_<TN, TA, SG, NI, T>::wideReportChangeComposite(Control& control) {
 	return state.deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-typename TA_::UP
-CS_<TN_, TA_, TG_, NI_, T>::wideReportChangeResumable(Control& control,
-													  const ShortIndex HFSM_IF_ASSERT(prong))
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+typename TA::UP
+CS_<TN, TA, SG, NI, T>::wideReportChangeResumable(Control& control,
+												  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7194,20 +7167,20 @@ CS_<TN_, TA_, TG_, NI_, T>::wideReportChangeResumable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-typename TA_::UP
-CS_<TN_, TA_, TG_, NI_, T>::wideReportChangeUtilitarian(Control& control) {
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+typename TA::UP
+CS_<TN, TA, SG, NI, T>::wideReportChangeUtilitarian(Control& control) {
 	return state.deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
-typename TA_::Utility
-CS_<TN_, TA_, TG_, NI_, T>::wideReportChangeRandom(Control& control,
-												   Utility* const options,
-												   const Rank* const ranks,
-												   const Rank top)
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+typename TA::Utility
+CS_<TN, TA, SG, NI, T>::wideReportChangeRandom(Control& control,
+											   Utility* const options,
+											   const Rank* const ranks,
+											   const Rank top)
 {
 	HFSM_ASSERT(options && ranks);
 
@@ -7219,10 +7192,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideReportChangeRandom(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideChangeToRequested(PlanControl& control,
-												  const ShortIndex HFSM_IF_ASSERT(prong))
+CS_<TN, TA, SG, NI, T>::wideChangeToRequested(PlanControl& control,
+											  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7233,12 +7206,12 @@ CS_<TN_, TA_, TG_, NI_, T>::wideChangeToRequested(PlanControl& control,
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideGetNames(const LongIndex parent,
-										 const RegionType /*region*/,
-										 const ShortIndex depth,
-										 StructureStateInfos& _stateInfos) const
+CS_<TN, TA, SG, NI, T>::wideGetNames(const LongIndex parent,
+									 const RegionType /*region*/,
+									 const ShortIndex depth,
+									 StructureStateInfos& _stateInfos) const
 {
 	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
@@ -7249,11 +7222,11 @@ CS_<TN_, TA_, TG_, NI_, T>::wideGetNames(const LongIndex parent,
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideSaveActive(const Registry& registry,
-										   WriteStream& stream,
-										   const ShortIndex HFSM_IF_ASSERT(prong)) const
+CS_<TN, TA, SG, NI, T>::wideSaveActive(const Registry& registry,
+									   WriteStream& stream,
+									   const ShortIndex HFSM_IF_ASSERT(prong)) const
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7262,21 +7235,21 @@ CS_<TN_, TA_, TG_, NI_, T>::wideSaveActive(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideSaveResumable(const Registry& registry,
-											  WriteStream& stream) const
+CS_<TN, TA, SG, NI, T>::wideSaveResumable(const Registry& registry,
+										  WriteStream& stream) const
 {
 	state.deepSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideLoadRequested(Registry& registry,
-											  ReadStream& stream,
-											  const ShortIndex HFSM_IF_ASSERT(prong)) const
+CS_<TN, TA, SG, NI, T>::wideLoadRequested(Registry& registry,
+										  ReadStream& stream,
+										  const ShortIndex HFSM_IF_ASSERT(prong)) const
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
@@ -7285,10 +7258,10 @@ CS_<TN_, TA_, TG_, NI_, T>::wideLoadRequested(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideLoadResumable(Registry& registry,
-											  ReadStream& stream) const
+CS_<TN, TA, SG, NI, T>::wideLoadResumable(Registry& registry,
+										  ReadStream& stream) const
 {
 	state.deepLoadResumable(registry, stream);
 }
@@ -7563,13 +7536,13 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 ShortIndex
-C_<TN_, TA_, TG_, TH_, TS_...>::resolveRandom(Control& control,
-											  const Utility(& options)[Info::WIDTH],
-											  const Utility sum,
-											  const Rank(& ranks)[Info::WIDTH],
-											  const Rank top) const
+C_<TN, TA, SG, TH, TS...>::resolveRandom(Control& control,
+										 const Utility(& options)[Info::WIDTH],
+										 const Utility sum,
+										 const Rank(& ranks)[Info::WIDTH],
+										 const Rank top) const
 {
 	const Utility random = control._rng.next();
 	HFSM_ASSERT(0.0f <= random && random < 1.0f);
@@ -7595,10 +7568,10 @@ C_<TN_, TA_, TG_, TH_, TS_...>::resolveRandom(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRegister(Registry& registry,
-											 const Parent parent)
+C_<TN, TA, SG, TH, TS...>::deepRegister(Registry& registry,
+										const Parent parent)
 {
 	registry.compoParents[COMPO_INDEX] = parent;
 
@@ -7608,9 +7581,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
-C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardEntryGuard(GuardControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
 	const ShortIndex active	   = compoActive   (control);
 	const ShortIndex requested = compoRequested(control);
 
@@ -7626,9 +7599,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardEntryGuard(GuardControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
-C_<TN_, TA_, TG_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepEntryGuard(GuardControl& control) {
 	const ShortIndex requested = compoRequested(control);
 	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
 
@@ -7640,9 +7613,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepConstruct(PlanControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepConstruct(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
@@ -7663,9 +7636,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepConstruct(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepEnter(PlanControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepEnter(PlanControl& control) {
 	const ShortIndex& active = compoActive(control);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
@@ -7676,9 +7649,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepEnter(PlanControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReenter(PlanControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
@@ -7708,9 +7681,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReenter(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 Status
-C_<TN_, TA_, TG_, TH_, TS_...>::deepUpdate(FullControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) {
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
@@ -7736,11 +7709,11 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 template <typename TEvent>
 Status
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReact(FullControl& control,
-										  const TEvent& event)
+C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
+									 const TEvent& event)
 {
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
@@ -7767,9 +7740,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
-C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardExitGuard(GuardControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
@@ -7783,9 +7756,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardExitGuard(GuardControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
-C_<TN_, TA_, TG_, TH_, TS_...>::deepExitGuard(GuardControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepExitGuard(GuardControl& control) {
 	const ShortIndex active = compoActive(control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
@@ -7797,9 +7770,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepExitGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepExit(PlanControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
 
@@ -7809,9 +7782,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepExit(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepDestruct(PlanControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepDestruct(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 
@@ -7829,10 +7802,10 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepDestruct(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardActive(Control& control,
-												  const Request::Type request)
+C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
+											 const Request::Type request)
 {
 	HFSM_ASSERT(control._registry.isActive(HEAD_ID));
 
@@ -7848,10 +7821,10 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardRequest(Control& control,
-												   const Request::Type request)
+C_<TN, TA, SG, TH, TS...>::deepForwardRequest(Control& control,
+											  const Request::Type request)
 {
 	const ShortIndex requested = compoRequested(control);
 
@@ -7863,10 +7836,10 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepForwardRequest(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequest(Control& control,
-											const Request::Type request)
+C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
+									   const Request::Type request)
 {
 	switch (request) {
 	case Request::REMAIN:
@@ -7902,9 +7875,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequest(Control& control,
 
 #ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChange(Control& control)
+C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control)
 {
 	switch (STRATEGY) {
 	case Strategy::Composite:
@@ -7932,9 +7905,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChange(Control& control)
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChangeComposite(Control& control) {
+C_<TN, TA, SG, TH, TS...>::deepRequestChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 
 	requested = 0;
@@ -7944,9 +7917,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChangeComposite(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChangeResumable(Control& control) {
+C_<TN, TA, SG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
 
@@ -7958,9 +7931,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChangeResumable(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChangeUtilitarian(Control& control) {
+C_<TN, TA, SG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	const UP s = _subStates.wideReportChangeUtilitarian(control);
 	HFSM_ASSERT(s.prong != INVALID_SHORT_INDEX);
 
@@ -7972,9 +7945,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChangeUtilitarian(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChangeRandom(Control& control) {
+C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control) {
 	Rank ranks[Info::WIDTH];
 	Rank top = _subStates.wideReportRank(control, ranks);
 
@@ -7988,9 +7961,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestChangeRandom(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestRemain(Registry& registry) {
+C_<TN, TA, SG, TH, TS...>::deepRequestRemain(Registry& registry) {
 	const ShortIndex  active	= compoActive   (registry);
 		  ShortIndex& requested = compoRequested(registry);
 
@@ -8002,9 +7975,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestRemain(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestRestart(Registry& registry) {
+C_<TN, TA, SG, TH, TS...>::deepRequestRestart(Registry& registry) {
 	ShortIndex& requested = compoRequested(registry);
 
 	requested = 0;
@@ -8014,9 +7987,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestRestart(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestResume(Registry& registry) {
+C_<TN, TA, SG, TH, TS...>::deepRequestResume(Registry& registry) {
 	const ShortIndex  resumable = compoResumable(registry);
 		  ShortIndex& requested = compoRequested(registry);
 
@@ -8028,9 +8001,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestUtilize(Control& control) {
+C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control) {
 	const UP s = _subStates.wideReportUtilize(control);
 
 	ShortIndex& requested = compoRequested(control);
@@ -8041,9 +8014,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestRandomize(Control& control) {
+C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control) {
 	Rank ranks[Info::WIDTH];
 	Rank top = _subStates.wideReportRank(control, ranks);
 
@@ -8059,9 +8032,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepRequestRandomize(Control& control) {
 
 #ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-typename TA_::UP
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChange(Control& control) {
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+typename TA::UP
+C_<TN, TA, SG, TH, TS...>::deepReportChange(Control& control) {
 	switch (STRATEGY) {
 	case Strategy::Composite:
 		return deepReportChangeComposite  (control);
@@ -8085,9 +8058,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-typename TA_::UP
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChangeComposite(Control& control) {
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+typename TA::UP
+C_<TN, TA, SG, TH, TS...>::deepReportChangeComposite(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = 0;
 
@@ -8102,9 +8075,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChangeComposite(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-typename TA_::UP
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChangeResumable(Control& control) {
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+typename TA::UP
+C_<TN, TA, SG, TH, TS...>::deepReportChangeResumable(Control& control) {
 	const ShortIndex  resumable = compoResumable(control);
 		  ShortIndex& requested = compoRequested(control);
 
@@ -8122,9 +8095,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChangeResumable(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-typename TA_::UP
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChangeUtilitarian(Control& control) {
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+typename TA::UP
+C_<TN, TA, SG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	const UP h = _headState.deepReportChange(control);
 	const UP s = _subStates.wideReportChangeUtilitarian(control);
 
@@ -8141,9 +8114,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChangeUtilitarian(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-typename TA_::UP
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChangeRandom(Control& control) {
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+typename TA::UP
+C_<TN, TA, SG, TH, TS...>::deepReportChangeRandom(Control& control) {
 	const UP h = _headState.deepReportChange(control);
 
 	Rank ranks[Info::WIDTH];
@@ -8164,9 +8137,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportChangeRandom(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-typename TA_::UP
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReportUtilize(Control& control) {
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+typename TA::UP
+C_<TN, TA, SG, TH, TS...>::deepReportUtilize(Control& control) {
 	const UP h = _headState.deepReportUtilize(control);
 	const UP s = _subStates.wideReportUtilize(control);
 
@@ -8183,17 +8156,17 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-typename TA_::Rank
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReportRank(Control& control) {
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+typename TA::Rank
+C_<TN, TA, SG, TH, TS...>::deepReportRank(Control& control) {
 	return _headState.wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
-typename TA_::Utility
-C_<TN_, TA_, TG_, TH_, TS_...>::deepReportRandomize(Control& control) {
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+typename TA::Utility
+C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) {
 	const Utility h = _headState.wrapUtility(control);
 
 	Rank ranks[Info::WIDTH];
@@ -8211,9 +8184,9 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepReportRandomize(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
+C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	ShortIndex& active	  = compoActive	  (control);
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
@@ -8253,12 +8226,12 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepGetNames(const LongIndex parent,
-											 const RegionType region,
-											 const ShortIndex depth,
-											 StructureStateInfos& _stateInfos) const
+C_<TN, TA, SG, TH, TS...>::deepGetNames(const LongIndex parent,
+										const RegionType region,
+										const ShortIndex depth,
+										StructureStateInfos& _stateInfos) const
 {
 	_headState.deepGetNames(parent,					 region,						depth,	   _stateInfos);
 	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
@@ -8270,10 +8243,10 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepGetNames(const LongIndex parent,
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepSaveActive(const Registry& registry,
-											   WriteStream& stream) const
+C_<TN, TA, SG, TH, TS...>::deepSaveActive(const Registry& registry,
+										  WriteStream& stream) const
 {
 	const ShortIndex active	   = compoActive   (registry);
 	const ShortIndex resumable = compoResumable(registry);
@@ -8291,10 +8264,10 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepSaveActive(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
-												  WriteStream& stream) const
+C_<TN, TA, SG, TH, TS...>::deepSaveResumable(const Registry& registry,
+											 WriteStream& stream) const
 {
 	const ShortIndex resumable = compoResumable(registry);
 
@@ -8309,10 +8282,10 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepLoadRequested(Registry& registry,
-												  ReadStream& stream) const
+C_<TN, TA, SG, TH, TS...>::deepLoadRequested(Registry& registry,
+											 ReadStream& stream) const
 {
 	ShortIndex& resumable = compoResumable(registry);
 	ShortIndex& requested = compoRequested(registry);
@@ -8331,10 +8304,10 @@ C_<TN_, TA_, TG_, TH_, TS_...>::deepLoadRequested(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, Strategy TG_, typename TH_, typename... TS_>
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
-C_<TN_, TA_, TG_, TH_, TS_...>::deepLoadResumable(Registry& registry,
-												  ReadStream& stream) const
+C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
+											 ReadStream& stream) const
 {
 	ShortIndex& resumable = compoResumable(registry);
 
@@ -8646,10 +8619,10 @@ namespace detail {
 
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename T>
 T&
-OS_<TN_, TA_, NI_, TI_, TR_...>::access() {
+OS_<TN, TA, NI, TI, TR...>::access() {
 	return InitialStates::template contains<T>() ?
 		initial  .template access<T>() :
 		remaining.template access<T>();
@@ -8657,10 +8630,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::access() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename T>
 const T&
-OS_<TN_, TA_, NI_, TI_, TR_...>::access() const {
+OS_<TN, TA, NI, TI, TR...>::access() const {
 	return InitialStates::template contains<T>() ?
 		initial  .template access<T>() :
 		remaining.template access<T>();
@@ -8670,10 +8643,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::access() const {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRegister(Registry& registry,
-											  const ForkID forkId)
+OS_<TN, TA, NI, TI, TR...>::wideRegister(Registry& registry,
+										 const ForkID forkId)
 {
 	initial  .deepRegister(registry, Parent{forkId, PRONG_INDEX});
 	remaining.wideRegister(registry, forkId);
@@ -8681,10 +8654,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardEntryGuard(GuardControl& control,
-													   const ProngConstBits prongs)
+OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
+												  const ProngConstBits prongs)
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
 				   initial  .deepForwardEntryGuard(control) : false;
@@ -8696,9 +8669,9 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardEntryGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) {
 	const bool i = initial  .deepForwardEntryGuard(control);
 	const bool r = remaining.wideForwardEntryGuard(control);
 
@@ -8707,9 +8680,9 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardEntryGuard(GuardControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) {
 	const bool i = initial  .deepEntryGuard(control);
 	const bool r = remaining.wideEntryGuard(control);
 
@@ -8718,46 +8691,46 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideEntryGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideConstruct(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideConstruct(PlanControl& control) {
 	initial	 .deepConstruct(control);
 	remaining.wideConstruct(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideEnter(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
 	initial  .deepEnter(control);
 	remaining.wideEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideReenter(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) {
 	initial  .deepReenter(control);
 	remaining.wideReenter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 Status
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideUpdate(FullControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
 	const auto status =	   initial	.deepUpdate(control);
 	return combine(status, remaining.wideUpdate(control));
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename TEvent>
 Status
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideReact(FullControl& control,
+OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 									  const TEvent& event)
 {
 	const auto status =	   initial	.deepReact(control, event);
@@ -8766,10 +8739,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardExitGuard(GuardControl& control,
-													  const ProngConstBits prongs)
+OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
+												 const ProngConstBits prongs)
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
 				   initial  .deepForwardExitGuard(control) : false;
@@ -8781,9 +8754,9 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardExitGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) {
 	const bool i = initial  .deepForwardExitGuard(control);
 	const bool r = remaining.wideForwardExitGuard(control);
 
@@ -8792,9 +8765,9 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardExitGuard(GuardControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 bool
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) {
 	const bool i = initial  .deepExitGuard(control);
 	const bool r = remaining.wideExitGuard(control);
 
@@ -8803,29 +8776,29 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideExitGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideExit(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
 	initial	 .deepExit(control);
 	remaining.wideExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideDestruct(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideDestruct(PlanControl& control) {
 	initial	 .deepDestruct(control);
 	remaining.wideDestruct(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardActive(Control& control,
-												   const Request::Type request,
-												   const ProngConstBits prongs)
+OS_<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
+											  const Request::Type request,
+											  const ProngConstBits prongs)
 {
 	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
@@ -8836,11 +8809,11 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardRequest(Control& control,
-													const Request::Type request,
-													const ProngConstBits prongs)
+OS_<TN, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
+											   const Request::Type request,
+											   const ProngConstBits prongs)
 {
 	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
@@ -8851,63 +8824,63 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestChange(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestChange(Control& control) {
 	initial  .deepRequestChange(control);
 	remaining.wideRequestChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestRemain(Registry& registry) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestRemain(Registry& registry) {
 	initial	 .deepRequestRemain(registry);
 	remaining.wideRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestRestart(Registry& registry) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestRestart(Registry& registry) {
 	initial	 .deepRequestRestart(registry);
 	remaining.wideRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestResume(Registry& registry) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestResume(Registry& registry) {
 	initial	 .deepRequestResume(registry);
 	remaining.wideRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestUtilize(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
 	initial  .deepRequestUtilize(control);
 	remaining.wideRequestUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestRandomize(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideRequestRandomize(Control& control) {
 	initial  .deepRequestRandomize(control);
 	remaining.wideRequestRandomize(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideReportChange(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
+typename TA::Utility
+OS_<TN, TA, NI, TI, TR...>::wideReportChange(Control& control) {
 	const UP	  i = initial  .deepReportChange(control);
 	const Utility r = remaining.wideReportChange(control);
 
@@ -8916,9 +8889,9 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideReportUtilize(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
+typename TA::Utility
+OS_<TN, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
 	const UP	  i = initial  .deepReportUtilize(control);
 	const Utility r = remaining.wideReportUtilize(control);
 
@@ -8927,9 +8900,9 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideReportRandomize(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
+typename TA::Utility
+OS_<TN, TA, NI, TI, TR...>::wideReportRandomize(Control& control) {
 	const Utility i = initial  .deepReportRandomize(control);
 	const Utility r = remaining.wideReportRandomize(control);
 
@@ -8938,9 +8911,9 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideReportRandomize(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideChangeToRequested(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
 	initial	 .deepChangeToRequested(control);
 	remaining.wideChangeToRequested(control);
 }
@@ -8949,14 +8922,14 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideGetNames(const LongIndex parent,
-											  const ShortIndex depth,
-											  StructureStateInfos& _stateInfos) const
+OS_<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
+										 const ShortIndex depth,
+										 StructureStateInfos& stateInfos) const
 {
-	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
-	remaining.wideGetNames(parent,								   depth, _stateInfos);
+	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
+	remaining.wideGetNames(parent,								   depth, stateInfos);
 }
 
 #endif
@@ -8965,10 +8938,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideGetNames(const LongIndex parent,
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideSaveActive(const Registry& registry,
-												WriteStream& stream) const
+OS_<TN, TA, NI, TI, TR...>::wideSaveActive(const Registry& registry,
+										   WriteStream& stream) const
 {
 	initial	 .deepSaveActive(registry, stream);
 	remaining.wideSaveActive(registry, stream);
@@ -8976,10 +8949,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideSaveActive(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideSaveResumable(const Registry& registry,
-												   WriteStream& stream) const
+OS_<TN, TA, NI, TI, TR...>::wideSaveResumable(const Registry& registry,
+											  WriteStream& stream) const
 {
 	initial	 .deepSaveResumable(registry, stream);
 	remaining.wideSaveResumable(registry, stream);
@@ -8987,10 +8960,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideSaveResumable(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideLoadRequested(Registry& registry,
-												   ReadStream& stream) const
+OS_<TN, TA, NI, TI, TR...>::wideLoadRequested(Registry& registry,
+											  ReadStream& stream) const
 {
 	initial	 .deepLoadRequested(registry, stream);
 	remaining.wideLoadRequested(registry, stream);
@@ -8998,10 +8971,10 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideLoadRequested(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideLoadResumable(Registry& registry,
-												   ReadStream& stream) const
+OS_<TN, TA, NI, TI, TR...>::wideLoadResumable(Registry& registry,
+											  ReadStream& stream) const
 {
 	initial	 .deepLoadResumable(registry, stream);
 	remaining.wideLoadResumable(registry, stream);
@@ -9018,9 +8991,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRegister(Registry& registry,
+OS_<TN, TA, NI, TI>::wideRegister(Registry& registry,
 									  const ForkID forkId)
 {
 	initial.deepRegister(registry, Parent{forkId, PRONG_INDEX});
@@ -9028,10 +9001,10 @@ OS_<TN_, TA_, NI_, TI_>::wideRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideForwardEntryGuard(GuardControl& control,
-											   const ProngConstBits prongs)
+OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
+										   const ProngConstBits prongs)
 {
 	return prongs.get(PRONG_INDEX) ?
 		initial.deepForwardEntryGuard(control) : false;
@@ -9039,69 +9012,69 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardEntryGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideForwardEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) {
 	return initial.deepForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) {
 	return initial.deepEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideConstruct(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideConstruct(PlanControl& control) {
 	initial.deepConstruct(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideEnter(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideEnter(PlanControl& control) {
 	initial.deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideReenter(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) {
 	initial.deepReenter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 Status
-OS_<TN_, TA_, NI_, TI_>::wideUpdate(FullControl& control) {
+OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) {
 	return initial.deepUpdate(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 template <typename TEvent>
 Status
-OS_<TN_, TA_, NI_, TI_>::wideReact(FullControl& control,
-								   const TEvent& event)
+OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
+							   const TEvent& event)
 {
 	return initial.deepReact(control, event);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideForwardExitGuard(GuardControl& control,
-											  const ProngConstBits prongs)
+OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
+										  const ProngConstBits prongs)
 {
 	return prongs.get(PRONG_INDEX) ?
 		initial.deepForwardExitGuard(control) : false;
@@ -9109,43 +9082,43 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardExitGuard(GuardControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideForwardExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) {
 	return initial.deepForwardExitGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 bool
-OS_<TN_, TA_, NI_, TI_>::wideExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) {
 	return initial.deepExitGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideExit(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideExit(PlanControl& control) {
 	initial.deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideDestruct(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideDestruct(PlanControl& control) {
 	initial.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideForwardActive(Control& control,
-										   const Request::Type request,
-										   const ProngConstBits prongs)
+OS_<TN, TA, NI, TI>::wideForwardActive(Control& control,
+									   const Request::Type request,
+									   const ProngConstBits prongs)
 {
 	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
@@ -9155,11 +9128,11 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideForwardRequest(Control& control,
-											const Request::Type request,
-											const ProngConstBits prongs)
+OS_<TN, TA, NI, TI>::wideForwardRequest(Control& control,
+										const Request::Type request,
+										const ProngConstBits prongs)
 {
 	const Request::Type local = prongs.get(PRONG_INDEX) ?
 		request : Request::REMAIN;
@@ -9169,57 +9142,57 @@ OS_<TN_, TA_, NI_, TI_>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestChange(Control& control) {
+OS_<TN, TA, NI, TI>::wideRequestChange(Control& control) {
 	initial.deepRequestChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestRemain(Registry& registry) {
+OS_<TN, TA, NI, TI>::wideRequestRemain(Registry& registry) {
 	initial.deepRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestRestart(Registry& registry) {
+OS_<TN, TA, NI, TI>::wideRequestRestart(Registry& registry) {
 	initial.deepRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestResume(Registry& registry) {
+OS_<TN, TA, NI, TI>::wideRequestResume(Registry& registry) {
 	initial.deepRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestUtilize(Control& control) {
+OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
 	initial.deepRequestUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestRandomize(Control& control) {
+OS_<TN, TA, NI, TI>::wideRequestRandomize(Control& control) {
 	initial.deepRequestRandomize(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_>::wideReportChange(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+typename TA::Utility
+OS_<TN, TA, NI, TI>::wideReportChange(Control& control) {
 	const UP i = initial.deepReportChange(control);
 
 	return i.utility;
@@ -9227,9 +9200,9 @@ OS_<TN_, TA_, NI_, TI_>::wideReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_>::wideReportUtilize(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+typename TA::Utility
+OS_<TN, TA, NI, TI>::wideReportUtilize(Control& control) {
 	const UP i = initial.deepReportUtilize(control);
 
 	return i.utility;
@@ -9237,9 +9210,9 @@ OS_<TN_, TA_, NI_, TI_>::wideReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
-typename TA_::Utility
-OS_<TN_, TA_, NI_, TI_>::wideReportRandomize(Control& control) {
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+typename TA::Utility
+OS_<TN, TA, NI, TI>::wideReportRandomize(Control& control) {
 	const Utility i = initial.deepReportRandomize(control);
 
 	return i;
@@ -9247,9 +9220,9 @@ OS_<TN_, TA_, NI_, TI_>::wideReportRandomize(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideChangeToRequested(PlanControl& control) {
+OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 	initial.deepChangeToRequested(control);
 }
 
@@ -9257,11 +9230,11 @@ OS_<TN_, TA_, NI_, TI_>::wideChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideGetNames(const LongIndex parent,
-									  const ShortIndex depth,
-									  StructureStateInfos& _stateInfos) const
+OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
+								  const ShortIndex depth,
+								  StructureStateInfos& _stateInfos) const
 {
 	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
 }
@@ -9272,40 +9245,40 @@ OS_<TN_, TA_, NI_, TI_>::wideGetNames(const LongIndex parent,
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideSaveActive(const Registry& registry,
-										WriteStream& stream) const
+OS_<TN, TA, NI, TI>::wideSaveActive(const Registry& registry,
+									WriteStream& stream) const
 {
 	initial.deepSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideSaveResumable(const Registry& registry,
-										   WriteStream& stream) const
+OS_<TN, TA, NI, TI>::wideSaveResumable(const Registry& registry,
+									   WriteStream& stream) const
 {
 	initial.deepSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideLoadRequested(Registry& registry,
-										   ReadStream& stream) const
+OS_<TN, TA, NI, TI>::wideLoadRequested(Registry& registry,
+									   ReadStream& stream) const
 {
 	initial.deepLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
-OS_<TN_, TA_, NI_, TI_>::wideLoadResumable(Registry& registry,
-										   ReadStream& stream) const
+OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
+									   ReadStream& stream) const
 {
 	initial.deepLoadResumable(registry, stream);
 }
@@ -9498,9 +9471,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
+O_<TN, TA, TH, TS...>::deepRegister(Registry& registry,
 										const Parent parent)
 {
 	registry.orthoParents[ORTHO_INDEX] = parent;
@@ -9512,9 +9485,9 @@ O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN_, TA_, TH_, TS_...>::deepForwardEntryGuard(GuardControl& control) {
+O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
 	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -9527,9 +9500,9 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardEntryGuard(GuardControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
+O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepEntryGuard(control) ||
@@ -9538,9 +9511,9 @@ O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepConstruct(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepConstruct(PlanControl& control) {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
@@ -9550,9 +9523,9 @@ O_<TN_, TA_, TH_, TS_...>::deepConstruct(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	_headState.deepEnter(control);
@@ -9561,9 +9534,9 @@ O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepReenter(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
@@ -9575,9 +9548,9 @@ O_<TN_, TA_, TH_, TS_...>::deepReenter(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 Status
-O_<TN_, TA_, TH_, TS_...>::deepUpdate(FullControl& control) {
+O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (const auto headStatus = _headState.deepUpdate(control)) {
@@ -9600,11 +9573,11 @@ O_<TN_, TA_, TH_, TS_...>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 Status
-O_<TN_, TA_, TH_, TS_...>::deepReact(FullControl& control,
-									 const TEvent& event)
+O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
+								 const TEvent& event)
 {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -9628,9 +9601,9 @@ O_<TN_, TA_, TH_, TS_...>::deepReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN_, TA_, TH_, TS_...>::deepForwardExitGuard(GuardControl& control) {
+O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
 	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -9643,9 +9616,9 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardExitGuard(GuardControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) {
+O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepExitGuard(control) ||
@@ -9654,28 +9627,28 @@ O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepExit(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepExit(PlanControl& control) {
 	_subStates.wideExit(control);
 	_headState.deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepDestruct(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepDestruct(PlanControl& control) {
 	_subStates.wideDestruct(control);
 	_headState.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepForwardActive(Control& control,
-											 const Request::Type request)
+O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
+										 const Request::Type request)
 {
 	HFSM_ASSERT(control._registry.isActive(HEAD_ID));
 
@@ -9687,10 +9660,10 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepForwardRequest(Control& control,
-											  const Request::Type request)
+O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
+										  const Request::Type request)
 {
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 
@@ -9702,10 +9675,10 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardRequest(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequest(Control& control,
-									   const Request::Type request)
+O_<TN, TA, TH, TS...>::deepRequest(Control& control,
+								   const Request::Type request)
 {
 	switch (request) {
 	case Request::REMAIN:
@@ -9739,57 +9712,57 @@ O_<TN_, TA_, TH_, TS_...>::deepRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestChange(Control& control) {
+O_<TN, TA, TH, TS...>::deepRequestChange(Control& control) {
 	_subStates.wideRequestChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestRemain(Registry& registry) {
+O_<TN, TA, TH, TS...>::deepRequestRemain(Registry& registry) {
 	_subStates.wideRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestRestart(Registry& registry) {
+O_<TN, TA, TH, TS...>::deepRequestRestart(Registry& registry) {
 	_subStates.wideRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestResume(Registry& registry) {
+O_<TN, TA, TH, TS...>::deepRequestResume(Registry& registry) {
 	_subStates.wideRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestUtilize(Control& control) {
+O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
 	_subStates.wideRequestUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestRandomize(Control& control) {
+O_<TN, TA, TH, TS...>::deepRequestRandomize(Control& control) {
 	_subStates.wideRequestRandomize(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-typename TA_::UP
-O_<TN_, TA_, TH_, TS_...>::deepReportChange(Control& control) {
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::UP
+O_<TN, TA, TH, TS...>::deepReportChange(Control& control) {
 	const UP	  h = _headState.deepReportChange(control);
 	const Utility s = _subStates.wideReportChange(control);
 
@@ -9805,9 +9778,9 @@ O_<TN_, TA_, TH_, TS_...>::deepReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-typename TA_::UP
-O_<TN_, TA_, TH_, TS_...>::deepReportUtilize(Control& control) {
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::UP
+O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 	const UP	  h = _headState.deepReportUtilize(control);
 	const Utility s = _subStates.wideReportUtilize(control);
 
@@ -9823,17 +9796,17 @@ O_<TN_, TA_, TH_, TS_...>::deepReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-typename TA_::Rank
-O_<TN_, TA_, TH_, TS_...>::deepReportRank(Control& control) {
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::Rank
+O_<TN, TA, TH, TS...>::deepReportRank(Control& control) {
 	return _headState.wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-typename TA_::Utility
-O_<TN_, TA_, TH_, TS_...>::deepReportRandomize(Control& control) {
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::Utility
+O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
 	const Utility h = _headState.wrapUtility(control);
 	const Utility s = _subStates.wideReportRandomize(control);
 
@@ -9846,9 +9819,9 @@ O_<TN_, TA_, TH_, TS_...>::deepReportRandomize(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	_subStates.wideChangeToRequested(control);
 }
 
@@ -9856,15 +9829,15 @@ O_<TN_, TA_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepGetNames(const LongIndex parent,
-										const RegionType region,
-										const ShortIndex depth,
-										StructureStateInfos& _stateInfos) const
+O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+									const RegionType region,
+									const ShortIndex depth,
+									StructureStateInfos& stateInfos) const
 {
-	_headState.deepGetNames(parent, region,			 depth,		_stateInfos);
-	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
+	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
+	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
 }
 
 #endif
@@ -9873,40 +9846,40 @@ O_<TN_, TA_, TH_, TS_...>::deepGetNames(const LongIndex parent,
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepSaveActive(const Registry& registry,
-										  WriteStream& stream) const
+O_<TN, TA, TH, TS...>::deepSaveActive(const Registry& registry,
+									  WriteStream& stream) const
 {
 	_subStates.wideSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
-											 WriteStream& stream) const
+O_<TN, TA, TH, TS...>::deepSaveResumable(const Registry& registry,
+										 WriteStream& stream) const
 {
 	_subStates.wideSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepLoadRequested(Registry& registry,
-											 ReadStream& stream) const
+O_<TN, TA, TH, TS...>::deepLoadRequested(Registry& registry,
+										 ReadStream& stream) const
 {
 	_subStates.wideLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepLoadResumable(Registry& registry,
-											 ReadStream& stream) const
+O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
+										 ReadStream& stream) const
 {
 	_subStates.wideLoadResumable(registry, stream);
 }
@@ -10812,10 +10785,10 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TG_, typename TA_>
-R_<TG_, TA_>::R_(Context& context,
-				 RNG& rng
-				 HFSM_IF_LOGGER(, Logger* const logger))
+template <typename TG, typename TA>
+R_<TG, TA>::R_(Context& context,
+			   RNG& rng
+			   HFSM_IF_LOGGER(, Logger* const logger))
 	: _context{context}
 	, _rng{rng}
 	HFSM_IF_LOGGER(, _logger{logger})
@@ -10829,8 +10802,8 @@ R_<TG_, TA_>::R_(Context& context,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
-R_<TG_, TA_>::~R_() {
+template <typename TG, typename TA>
+R_<TG, TA>::~R_() {
 	PlanControl control{_context,
 						_rng,
 						_registry,
@@ -10845,15 +10818,16 @@ R_<TG_, TA_>::~R_() {
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::update() {
+R_<TG, TA>::update() {
 	FullControl control(_context,
 						_rng,
 						_registry,
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr));
+
 	_apex.deepUpdate(control);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -10866,16 +10840,17 @@ R_<TG_, TA_>::update() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 template <typename TEvent>
 void
-R_<TG_, TA_>::react(const TEvent& event) {
+R_<TG, TA>::react(const TEvent& event) {
 	FullControl control{_context,
 						_rng,
 						_registry,
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr)};
+
 	_apex.deepReact(control, event);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -10888,9 +10863,9 @@ R_<TG_, TA_>::react(const TEvent& event) {
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::changeTo(const StateID stateId) {
+R_<TG, TA>::changeTo(const StateID stateId) {
 	_requests.append(Request{Request::Type::CHANGE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
@@ -10898,9 +10873,9 @@ R_<TG_, TA_>::changeTo(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::restart(const StateID stateId) {
+R_<TG, TA>::restart(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESTART, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
@@ -10908,9 +10883,9 @@ R_<TG_, TA_>::restart(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::resume(const StateID stateId) {
+R_<TG, TA>::resume(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESUME, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
@@ -10918,9 +10893,9 @@ R_<TG_, TA_>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::utilize(const StateID stateId) {
+R_<TG, TA>::utilize(const StateID stateId) {
 	_requests.append(Request{Request::Type::UTILIZE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
@@ -10928,9 +10903,9 @@ R_<TG_, TA_>::utilize(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::randomize(const StateID stateId) {
+R_<TG, TA>::randomize(const StateID stateId) {
 	_requests.append(Request{Request::Type::RANDOMIZE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
@@ -10938,9 +10913,9 @@ R_<TG_, TA_>::randomize(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::schedule(const StateID stateId) {
+R_<TG, TA>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
@@ -10950,10 +10925,10 @@ R_<TG_, TA_>::schedule(const StateID stateId) {
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
-								const uint64_t count)
+R_<TG, TA>::replayTransitions(const Transition* const transitions,
+							  const uint64_t count)
 {
 	if (HFSM_CHECKED(transitions && count)) {
 		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
@@ -10980,9 +10955,9 @@ R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::reset() {
+R_<TG, TA>::reset() {
 	PlanControl control{_context,
 						_rng,
 						_registry,
@@ -11003,9 +10978,9 @@ R_<TG_, TA_>::reset() {
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::save(SerialBuffer& _buffer) const {
+R_<TG, TA>::save(SerialBuffer& _buffer) const {
 	WriteStream stream{_buffer};
 
 	_apex.deepSaveActive(_registry, stream);
@@ -11013,9 +10988,9 @@ R_<TG_, TA_>::save(SerialBuffer& _buffer) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::load(const SerialBuffer& buffer) {
+R_<TG, TA>::load(const SerialBuffer& buffer) {
 	PlanControl control{_context,
 						_rng,
 						_registry,
@@ -11036,9 +11011,9 @@ R_<TG_, TA_>::load(const SerialBuffer& buffer) {
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::initialEnter() {
+R_<TG, TA>::initialEnter() {
 	HFSM_ASSERT(_requests.count() == 0);
 	HFSM_IF_TRANSITION_HISTORY(HFSM_ASSERT(_transitionHistory.count() == 0));
 
@@ -11089,9 +11064,9 @@ R_<TG_, TA_>::initialEnter() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::processTransitions() {
+R_<TG, TA>::processTransitions() {
 	HFSM_ASSERT(_requests.count());
 
 	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
@@ -11142,9 +11117,11 @@ R_<TG_, TA_>::processTransitions() {
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::applyRequest(Control& control, const Request& request) {
+R_<TG, TA>::applyRequest(Control& control,
+						 const Request& request)
+{
 	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.append(Transition{request, Method::NONE}));
 
 	switch (request.type) {
@@ -11174,9 +11151,9 @@ R_<TG_, TA_>::applyRequest(Control& control, const Request& request) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::applyRequests(Control& control) {
+R_<TG, TA>::applyRequests(Control& control) {
 	bool changesMade = false;
 
 	for (const Request& request : _requests)
@@ -11189,11 +11166,11 @@ R_<TG_, TA_>::applyRequests(Control& control) {
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::applyRequests(Control& control,
-							const Transition* const transitions,
-							const uint64_t count)
+R_<TG, TA>::applyRequests(Control& control,
+						  const Transition* const transitions,
+						  const uint64_t count)
 {
 	if (HFSM_CHECKED(transitions && count)) {
 		bool changesMade = false;
@@ -11210,16 +11187,16 @@ R_<TG_, TA_>::applyRequests(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::cancelledByEntryGuards(const Requests& pendingRequests) {
+R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context,
 							  _rng,
 							  _registry,
 							  _planData,
 							  _requests,
 							  pendingRequests,
-		HFSM_LOGGER_OR(_logger, nullptr)};
+							  HFSM_LOGGER_OR(_logger, nullptr)};
 
 	if (_apex.deepEntryGuard(guardControl)) {
 		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
@@ -11231,9 +11208,9 @@ R_<TG_, TA_>::cancelledByEntryGuards(const Requests& pendingRequests) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::cancelledByGuards(const Requests& pendingRequests) {
+R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context,
 							  _rng,
 							  _registry,
@@ -11258,9 +11235,9 @@ R_<TG_, TA_>::cancelledByGuards(const Requests& pendingRequests) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::getStateNames() {
+R_<TG, TA>::getStateNames() {
 	_stateInfos.clear();
 	_apex.deepGetNames((LongIndex) -1, StructureStateInfo::COMPOSITE, 0, _stateInfos);
 
@@ -11336,9 +11313,9 @@ R_<TG_, TA_>::getStateNames() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::udpateActivity() {
+R_<TG, TA>::udpateActivity() {
 	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s)
 		if (_stateInfos[s].name[0] != L'\0') {
 			_structure[i].isActive = isActive(s);
@@ -11367,9 +11344,9 @@ R_<TG_, TA_>::udpateActivity() {
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::recordRequestsAs(const Method method) {
+R_<TG, TA>::recordRequestsAs(const Method method) {
 	for (const auto& request : _requests)
 		_transitionHistory.append(Transition{request, method});
 }

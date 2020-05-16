@@ -90,11 +90,11 @@ namespace test_dynamic {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 13, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS ==  5, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::STATE_COUNT   == 13, "");
+static_assert(FSM::Instance::COMPO_REGIONS ==  5, "");
+static_assert(FSM::Instance::COMPO_PRONGS  == 10, "");
+static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "");
+static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -116,10 +116,7 @@ const Types all = {
 //------------------------------------------------------------------------------
 
 template <typename... Ts>
-using TypeList = hfsm2::detail::TL_<Ts...>;
-
-template <typename... Ts>
-using StateList = hfsm2::detail::ITL_<Ts...>;
+using TypeList = hfsm2::detail::ITL_<Ts...>;
 
 //------------------------------------------------------------------------------
 
@@ -162,7 +159,7 @@ struct CheckActives;
 
 template <typename... TAllStates, typename... TActiveStates>
 struct CheckActives<
-	StateList<TAllStates...>,
+	TypeList<TAllStates...>,
 	TypeList<TActiveStates...>
 >
 	: CheckActive<TAllStates, TypeList<TActiveStates...>>...
@@ -179,7 +176,7 @@ void checkActive() {
 	CheckActives<FSM::StateList, TypeList<TActiveStates...>>{};
 }
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 TEST_CASE("FSM.Dynamic", "[machine]") {
 	Logger logger;

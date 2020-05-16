@@ -18,6 +18,7 @@ Header-only heriarchical FSM framework in C++14, with fully statically-defined s
 ## Documentation
 
 [Old Wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) docs are being upgraded and moved to the [New GitBook](https://doc.hfsm.dev/).
+
 In-line comment-based docs is an on-going effort.
 
 ---

@@ -73,6 +73,7 @@ static_assert(FSM::stateId<Work_1    >() == 17, "");
 static_assert(FSM::stateId<Work_2    >() == 18, "");
 
 ////////////////////////////////////////////////////////////////////////////////
+// TODO: make use of planFailed()
 
 struct Apex	  : FSM::State {};
 

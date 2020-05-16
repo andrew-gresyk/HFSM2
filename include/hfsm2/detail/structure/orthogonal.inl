@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
+O_<TN, TA, TH, TS...>::deepRegister(Registry& registry,
 										const Parent parent)
 {
 	registry.orthoParents[ORTHO_INDEX] = parent;
@@ -17,9 +17,9 @@ O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN_, TA_, TH_, TS_...>::deepForwardEntryGuard(GuardControl& control) {
+O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
 	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -32,9 +32,9 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardEntryGuard(GuardControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
+O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepEntryGuard(control) ||
@@ -43,9 +43,9 @@ O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepConstruct(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepConstruct(PlanControl& control) {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
@@ -55,9 +55,9 @@ O_<TN_, TA_, TH_, TS_...>::deepConstruct(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	_headState.deepEnter(control);
@@ -66,9 +66,9 @@ O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepReenter(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
@@ -80,9 +80,9 @@ O_<TN_, TA_, TH_, TS_...>::deepReenter(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 Status
-O_<TN_, TA_, TH_, TS_...>::deepUpdate(FullControl& control) {
+O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (const auto headStatus = _headState.deepUpdate(control)) {
@@ -105,11 +105,11 @@ O_<TN_, TA_, TH_, TS_...>::deepUpdate(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 Status
-O_<TN_, TA_, TH_, TS_...>::deepReact(FullControl& control,
-									 const TEvent& event)
+O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
+								 const TEvent& event)
 {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -133,9 +133,9 @@ O_<TN_, TA_, TH_, TS_...>::deepReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN_, TA_, TH_, TS_...>::deepForwardExitGuard(GuardControl& control) {
+O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
 	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -148,9 +148,9 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardExitGuard(GuardControl& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 bool
-O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) {
+O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control) {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return _headState.deepExitGuard(control) ||
@@ -159,28 +159,28 @@ O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepExit(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepExit(PlanControl& control) {
 	_subStates.wideExit(control);
 	_headState.deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepDestruct(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepDestruct(PlanControl& control) {
 	_subStates.wideDestruct(control);
 	_headState.deepDestruct(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepForwardActive(Control& control,
-											 const Request::Type request)
+O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
+										 const Request::Type request)
 {
 	HFSM_ASSERT(control._registry.isActive(HEAD_ID));
 
@@ -192,10 +192,10 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepForwardRequest(Control& control,
-											  const Request::Type request)
+O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
+										  const Request::Type request)
 {
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 
@@ -207,10 +207,10 @@ O_<TN_, TA_, TH_, TS_...>::deepForwardRequest(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequest(Control& control,
-									   const Request::Type request)
+O_<TN, TA, TH, TS...>::deepRequest(Control& control,
+								   const Request::Type request)
 {
 	switch (request) {
 	case Request::REMAIN:
@@ -244,57 +244,57 @@ O_<TN_, TA_, TH_, TS_...>::deepRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestChange(Control& control) {
+O_<TN, TA, TH, TS...>::deepRequestChange(Control& control) {
 	_subStates.wideRequestChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestRemain(Registry& registry) {
+O_<TN, TA, TH, TS...>::deepRequestRemain(Registry& registry) {
 	_subStates.wideRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestRestart(Registry& registry) {
+O_<TN, TA, TH, TS...>::deepRequestRestart(Registry& registry) {
 	_subStates.wideRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestResume(Registry& registry) {
+O_<TN, TA, TH, TS...>::deepRequestResume(Registry& registry) {
 	_subStates.wideRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestUtilize(Control& control) {
+O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
 	_subStates.wideRequestUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestRandomize(Control& control) {
+O_<TN, TA, TH, TS...>::deepRequestRandomize(Control& control) {
 	_subStates.wideRequestRandomize(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-typename TA_::UP
-O_<TN_, TA_, TH_, TS_...>::deepReportChange(Control& control) {
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::UP
+O_<TN, TA, TH, TS...>::deepReportChange(Control& control) {
 	const UP	  h = _headState.deepReportChange(control);
 	const Utility s = _subStates.wideReportChange(control);
 
@@ -310,9 +310,9 @@ O_<TN_, TA_, TH_, TS_...>::deepReportChange(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-typename TA_::UP
-O_<TN_, TA_, TH_, TS_...>::deepReportUtilize(Control& control) {
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::UP
+O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 	const UP	  h = _headState.deepReportUtilize(control);
 	const Utility s = _subStates.wideReportUtilize(control);
 
@@ -328,17 +328,17 @@ O_<TN_, TA_, TH_, TS_...>::deepReportUtilize(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-typename TA_::Rank
-O_<TN_, TA_, TH_, TS_...>::deepReportRank(Control& control) {
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::Rank
+O_<TN, TA, TH, TS...>::deepReportRank(Control& control) {
 	return _headState.wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
-typename TA_::Utility
-O_<TN_, TA_, TH_, TS_...>::deepReportRandomize(Control& control) {
+template <typename TN, typename TA, typename TH, typename... TS>
+typename TA::Utility
+O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
 	const Utility h = _headState.wrapUtility(control);
 	const Utility s = _subStates.wideReportRandomize(control);
 
@@ -351,9 +351,9 @@ O_<TN_, TA_, TH_, TS_...>::deepReportRandomize(Control& control) {
 
 //------------------------------------------------------------------------------
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
+O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	_subStates.wideChangeToRequested(control);
 }
 
@@ -361,15 +361,15 @@ O_<TN_, TA_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepGetNames(const LongIndex parent,
-										const RegionType region,
-										const ShortIndex depth,
-										StructureStateInfos& _stateInfos) const
+O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+									const RegionType region,
+									const ShortIndex depth,
+									StructureStateInfos& stateInfos) const
 {
-	_headState.deepGetNames(parent, region,			 depth,		_stateInfos);
-	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
+	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
+	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
 }
 
 #endif
@@ -378,40 +378,40 @@ O_<TN_, TA_, TH_, TS_...>::deepGetNames(const LongIndex parent,
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepSaveActive(const Registry& registry,
-										  WriteStream& stream) const
+O_<TN, TA, TH, TS...>::deepSaveActive(const Registry& registry,
+									  WriteStream& stream) const
 {
 	_subStates.wideSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
-											 WriteStream& stream) const
+O_<TN, TA, TH, TS...>::deepSaveResumable(const Registry& registry,
+										 WriteStream& stream) const
 {
 	_subStates.wideSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepLoadRequested(Registry& registry,
-											 ReadStream& stream) const
+O_<TN, TA, TH, TS...>::deepLoadRequested(Registry& registry,
+										 ReadStream& stream) const
 {
 	_subStates.wideLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_, typename TA_, typename TH_, typename... TS_>
+template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN_, TA_, TH_, TS_...>::deepLoadResumable(Registry& registry,
-											 ReadStream& stream) const
+O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
+										 ReadStream& stream) const
 {
 	_subStates.wideLoadResumable(registry, stream);
 }

@@ -5,17 +5,17 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBitCapacity>
+template <LongIndex NBC>
 void
-StreamBuffer<NBitCapacity>::clear() {
+StreamBuffer<NBC>::clear() {
 	bitSize = 0;
 	fill(payload, 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBitCapacity>
-BitWriteStream<NBitCapacity>::BitWriteStream(Buffer& buffer)
+template <LongIndex NBC>
+BitWriteStream<NBC>::BitWriteStream(Buffer& buffer)
 	: _buffer{buffer}
 {
 	_buffer.clear();
@@ -23,10 +23,10 @@ BitWriteStream<NBitCapacity>::BitWriteStream(Buffer& buffer)
 
 //------------------------------------------------------------------------------
 
-template <LongIndex NBitCapacity>
+template <LongIndex NBC>
 template <ShortIndex NBitWidth>
 void
-BitWriteStream<NBitCapacity>::write(const UnsignedBitWidth<NBitWidth> item) {
+BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
 	constexpr ShortIndex BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
@@ -54,10 +54,10 @@ BitWriteStream<NBitCapacity>::write(const UnsignedBitWidth<NBitWidth> item) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBitCapacity>
+template <LongIndex NBC>
 template <ShortIndex NBitWidth>
 UnsignedBitWidth<NBitWidth>
-BitReadStream<NBitCapacity>::read() {
+BitReadStream<NBC>::read() {
 	constexpr ShortIndex BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 

@@ -14,21 +14,21 @@ using Action = bool;
 #define S(s) struct s
 
 using FSM = M::OrthogonalPeerRoot<
-				M::Composite<S(A),
-					S(A_1),
-					M::Composite<S(A_2),
-						S(A_2_1),
-						S(A_2_2)
+				M::Composite<S(C1),
+					S(C1_S1),
+					M::OrthogonalPeers<
+						S(C1_O2_S1),
+						S(C1_O2_S2)
 					>
 				>,
-				M::Orthogonal<S(B),
-					M::Composite<S(B_1),
-						S(B_1_1),
-						S(B_1_2)
+				M::Orthogonal<S(O2),
+					M::Composite<S(O2_C1),
+						S(O2_C1_S1),
+						S(O2_C1_S2)
 					>,
-					M::Composite<S(B_2),
-						S(B_2_1),
-						S(B_2_2)
+					M::Composite<S(O2_C2),
+						S(O2_C2_S1),
+						S(O2_C2_S2)
 					>
 				>
 			>;
@@ -37,63 +37,59 @@ using FSM = M::OrthogonalPeerRoot<
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::regionId<A  >()	==  1, "");
-static_assert(FSM::regionId<A_2>()	==  2, "");
-static_assert(FSM::regionId<B  >()	==  3, "");
-static_assert(FSM::regionId<B_1>()	==  4, "");
-static_assert(FSM::regionId<B_2>()	==  5, "");
+static_assert(FSM::regionId<C1   >()   ==  1, "");
+static_assert(FSM::regionId<O2   >()   ==  3, "");
+static_assert(FSM::regionId<O2_C1>()   ==  4, "");
+static_assert(FSM::regionId<O2_C2>()   ==  5, "");
 
-static_assert(FSM::stateId<A    >() ==  1, "");
-static_assert(FSM::stateId<A_1  >() ==  2, "");
-static_assert(FSM::stateId<A_2  >() ==  3, "");
-static_assert(FSM::stateId<A_2_1>() ==  4, "");
-static_assert(FSM::stateId<A_2_2>() ==  5, "");
-static_assert(FSM::stateId<B    >() ==  6, "");
-static_assert(FSM::stateId<B_1  >() ==  7, "");
-static_assert(FSM::stateId<B_1_1>() ==  8, "");
-static_assert(FSM::stateId<B_1_2>() ==  9, "");
-static_assert(FSM::stateId<B_2  >() == 10, "");
-static_assert(FSM::stateId<B_2_1>() == 11, "");
-static_assert(FSM::stateId<B_2_2>() == 12, "");
+static_assert(FSM::stateId<C1      >() ==  1, "");
+static_assert(FSM::stateId<C1_S1   >() ==  2, "");
+static_assert(FSM::stateId<C1_O2_S1>() ==  4, "");
+static_assert(FSM::stateId<C1_O2_S2>() ==  5, "");
+static_assert(FSM::stateId<O2      >() ==  6, "");
+static_assert(FSM::stateId<O2_C1   >() ==  7, "");
+static_assert(FSM::stateId<O2_C1_S1>() ==  8, "");
+static_assert(FSM::stateId<O2_C1_S2>() ==  9, "");
+static_assert(FSM::stateId<O2_C2   >() == 10, "");
+static_assert(FSM::stateId<O2_C2_S1>() == 11, "");
+static_assert(FSM::stateId<O2_C2_S2>() == 12, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct A	 : FSM::State {};
-struct A_1	 : FSM::State {};
-struct A_2	 : FSM::State {};
-struct A_2_1 : FSM::State {};
-struct A_2_2 : FSM::State {};
-struct B	 : FSM::State {};
-struct B_1	 : FSM::State {};
-struct B_1_1 : FSM::State {};
-struct B_1_2 : FSM::State {};
-struct B_2	 : FSM::State {};
-struct B_2_1 : FSM::State {};
-struct B_2_2 : FSM::State {};
+struct C1		: FSM::State {};
+struct C1_S1	: FSM::State {};
+struct C1_O2_S1 : FSM::State {};
+struct C1_O2_S2 : FSM::State {};
+struct O2		: FSM::State {};
+struct O2_C1	: FSM::State {};
+struct O2_C1_S1 : FSM::State {};
+struct O2_C1_S2 : FSM::State {};
+struct O2_C2	: FSM::State {};
+struct O2_C2_S1 : FSM::State {};
+struct O2_C2_S2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 13, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS ==  4, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  ==  8, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS ==  2, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   ==  2, "ORTHO_UNITS");
+static_assert(FSM::Instance::STATE_COUNT   == 13, "");
+static_assert(FSM::Instance::COMPO_REGIONS ==  3, "");
+static_assert(FSM::Instance::COMPO_PRONGS  ==  6, "");
+static_assert(FSM::Instance::ORTHO_REGIONS ==  3, "");
+static_assert(FSM::Instance::ORTHO_UNITS   ==  3, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
 const Types all = {
-	FSM::stateId<A    >(),
-	FSM::stateId<A_1  >(),
-	FSM::stateId<A_2  >(),
-	FSM::stateId<A_2_1>(),
-	FSM::stateId<A_2_2>(),
-	FSM::stateId<B    >(),
-	FSM::stateId<B_1  >(),
-	FSM::stateId<B_1_1>(),
-	FSM::stateId<B_1_2>(),
-	FSM::stateId<B_2  >(),
-	FSM::stateId<B_2_1>(),
-	FSM::stateId<B_2_2>(),
+	FSM::stateId<C1      >(),
+	FSM::stateId<C1_S1   >(),
+	FSM::stateId<C1_O2_S1>(),
+	FSM::stateId<C1_O2_S2>(),
+	FSM::stateId<O2      >(),
+	FSM::stateId<O2_C1   >(),
+	FSM::stateId<O2_C1_S1>(),
+	FSM::stateId<O2_C1_S2>(),
+	FSM::stateId<O2_C2   >(),
+	FSM::stateId<O2_C2_S1>(),
+	FSM::stateId<O2_C2_S2>(),
 };
 
 //------------------------------------------------------------------------------
@@ -108,42 +104,42 @@ TEST_CASE("FSM.Orthogonal Root", "[machine]") {
 		FSM::Instance machine{_, &logger};
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::ENTRY_GUARD },
-				{ FSM::stateId<A    >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<A_1  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B    >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_1  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_1_1>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_2  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_2_1>(), Event::ENTRY_GUARD },
+				{ hfsm2::StateID{0},		Event::ENTRY_GUARD },
+				{ FSM::stateId<C1      >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<C1_S1   >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<O2      >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<O2_C1   >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<O2_C1_S1>(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<O2_C2   >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<O2_C2_S1>(),	Event::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0},	 Event::CONSTRUCT },
-				{ FSM::stateId<A    >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_1  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B    >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_1  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_1_1>(), Event::CONSTRUCT },
-				{ FSM::stateId<B_2  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_2_1>(), Event::CONSTRUCT },
+				{ hfsm2::StateID{0},		Event::CONSTRUCT },
+				{ FSM::stateId<C1      >(),	Event::CONSTRUCT },
+				{ FSM::stateId<C1_S1   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<O2      >(),	Event::CONSTRUCT },
+				{ FSM::stateId<O2_C1   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<O2_C1_S1>(),	Event::CONSTRUCT },
+				{ FSM::stateId<O2_C2   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<O2_C2_S1>(),	Event::CONSTRUCT },
 
-				{ hfsm2::StateID{0},	 Event::ENTER },
-				{ FSM::stateId<A    >(), Event::ENTER },
-				{ FSM::stateId<A_1  >(), Event::ENTER },
-				{ FSM::stateId<B    >(), Event::ENTER },
-				{ FSM::stateId<B_1  >(), Event::ENTER },
-				{ FSM::stateId<B_1_1>(), Event::ENTER },
-				{ FSM::stateId<B_2  >(), Event::ENTER },
-				{ FSM::stateId<B_2_1>(), Event::ENTER },
+				{ hfsm2::StateID{0},		Event::ENTER },
+				{ FSM::stateId<C1      >(),	Event::ENTER },
+				{ FSM::stateId<C1_S1   >(),	Event::ENTER },
+				{ FSM::stateId<O2      >(),	Event::ENTER },
+				{ FSM::stateId<O2_C1   >(),	Event::ENTER },
+				{ FSM::stateId<O2_C1_S1>(),	Event::ENTER },
+				{ FSM::stateId<O2_C2   >(),	Event::ENTER },
+				{ FSM::stateId<O2_C2_S1>(),	Event::ENTER },
 			});
 
 			assertActive(machine, all, {
-				FSM::stateId<A    >(),
-				FSM::stateId<A_1  >(),
-				FSM::stateId<B    >(),
-				FSM::stateId<B_1  >(),
-				FSM::stateId<B_1_1>(),
-				FSM::stateId<B_2  >(),
-				FSM::stateId<B_2_1>(),
+				FSM::stateId<C1      >(),
+				FSM::stateId<C1_S1   >(),
+				FSM::stateId<O2      >(),
+				FSM::stateId<O2_C1   >(),
+				FSM::stateId<O2_C1_S1>(),
+				FSM::stateId<O2_C2   >(),
+				FSM::stateId<O2_C2_S1>(),
 			});
 
 			assertResumable(machine, all, {});
@@ -153,23 +149,23 @@ TEST_CASE("FSM.Orthogonal Root", "[machine]") {
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId<A_1  >(), Event::EXIT },
-		{ FSM::stateId<A    >(), Event::EXIT },
-		{ FSM::stateId<B_1_1>(), Event::EXIT },
-		{ FSM::stateId<B_1  >(), Event::EXIT },
-		{ FSM::stateId<B_2_1>(), Event::EXIT },
-		{ FSM::stateId<B_2  >(), Event::EXIT },
-		{ FSM::stateId<B    >(), Event::EXIT },
-		{ hfsm2::StateID{0},	 Event::EXIT },
+		{ FSM::stateId<C1_S1   >(),	Event::EXIT },
+		{ FSM::stateId<C1      >(),	Event::EXIT },
+		{ FSM::stateId<O2_C1_S1>(),	Event::EXIT },
+		{ FSM::stateId<O2_C1   >(),	Event::EXIT },
+		{ FSM::stateId<O2_C2_S1>(),	Event::EXIT },
+		{ FSM::stateId<O2_C2   >(),	Event::EXIT },
+		{ FSM::stateId<O2      >(),	Event::EXIT },
+		{ hfsm2::StateID{0},		Event::EXIT },
 
-		{ FSM::stateId<A_1  >(), Event::DESTRUCT },
-		{ FSM::stateId<A    >(), Event::DESTRUCT },
-		{ FSM::stateId<B_1_1>(), Event::DESTRUCT },
-		{ FSM::stateId<B_1  >(), Event::DESTRUCT },
-		{ FSM::stateId<B_2_1>(), Event::DESTRUCT },
-		{ FSM::stateId<B_2  >(), Event::DESTRUCT },
-		{ FSM::stateId<B    >(), Event::DESTRUCT },
-		{ hfsm2::StateID{0},	 Event::DESTRUCT },
+		{ FSM::stateId<C1_S1   >(),	Event::DESTRUCT },
+		{ FSM::stateId<C1      >(),	Event::DESTRUCT },
+		{ FSM::stateId<O2_C1_S1>(),	Event::DESTRUCT },
+		{ FSM::stateId<O2_C1   >(),	Event::DESTRUCT },
+		{ FSM::stateId<O2_C2_S1>(),	Event::DESTRUCT },
+		{ FSM::stateId<O2_C2   >(),	Event::DESTRUCT },
+		{ FSM::stateId<O2      >(),	Event::DESTRUCT },
+		{ hfsm2::StateID{0},		Event::DESTRUCT },
 	});
 }
 

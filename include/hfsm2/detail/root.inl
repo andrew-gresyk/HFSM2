@@ -3,10 +3,10 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TG_, typename TA_>
-R_<TG_, TA_>::R_(Context& context,
-				 RNG& rng
-				 HFSM_IF_LOGGER(, Logger* const logger))
+template <typename TG, typename TA>
+R_<TG, TA>::R_(Context& context,
+			   RNG& rng
+			   HFSM_IF_LOGGER(, Logger* const logger))
 	: _context{context}
 	, _rng{rng}
 	HFSM_IF_LOGGER(, _logger{logger})
@@ -20,8 +20,8 @@ R_<TG_, TA_>::R_(Context& context,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
-R_<TG_, TA_>::~R_() {
+template <typename TG, typename TA>
+R_<TG, TA>::~R_() {
 	PlanControl control{_context,
 						_rng,
 						_registry,
@@ -36,15 +36,16 @@ R_<TG_, TA_>::~R_() {
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::update() {
+R_<TG, TA>::update() {
 	FullControl control(_context,
 						_rng,
 						_registry,
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr));
+
 	_apex.deepUpdate(control);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -57,16 +58,17 @@ R_<TG_, TA_>::update() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 template <typename TEvent>
 void
-R_<TG_, TA_>::react(const TEvent& event) {
+R_<TG, TA>::react(const TEvent& event) {
 	FullControl control{_context,
 						_rng,
 						_registry,
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr)};
+
 	_apex.deepReact(control, event);
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
@@ -79,9 +81,9 @@ R_<TG_, TA_>::react(const TEvent& event) {
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::changeTo(const StateID stateId) {
+R_<TG, TA>::changeTo(const StateID stateId) {
 	_requests.append(Request{Request::Type::CHANGE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
@@ -89,9 +91,9 @@ R_<TG_, TA_>::changeTo(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::restart(const StateID stateId) {
+R_<TG, TA>::restart(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESTART, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
@@ -99,9 +101,9 @@ R_<TG_, TA_>::restart(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::resume(const StateID stateId) {
+R_<TG, TA>::resume(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESUME, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
@@ -109,9 +111,9 @@ R_<TG_, TA_>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::utilize(const StateID stateId) {
+R_<TG, TA>::utilize(const StateID stateId) {
 	_requests.append(Request{Request::Type::UTILIZE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
@@ -119,9 +121,9 @@ R_<TG_, TA_>::utilize(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::randomize(const StateID stateId) {
+R_<TG, TA>::randomize(const StateID stateId) {
 	_requests.append(Request{Request::Type::RANDOMIZE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
@@ -129,9 +131,9 @@ R_<TG_, TA_>::randomize(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::schedule(const StateID stateId) {
+R_<TG, TA>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
@@ -141,10 +143,10 @@ R_<TG_, TA_>::schedule(const StateID stateId) {
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
-								const uint64_t count)
+R_<TG, TA>::replayTransitions(const Transition* const transitions,
+							  const uint64_t count)
 {
 	if (HFSM_CHECKED(transitions && count)) {
 		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
@@ -171,9 +173,9 @@ R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::reset() {
+R_<TG, TA>::reset() {
 	PlanControl control{_context,
 						_rng,
 						_registry,
@@ -194,9 +196,9 @@ R_<TG_, TA_>::reset() {
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::save(SerialBuffer& _buffer) const {
+R_<TG, TA>::save(SerialBuffer& _buffer) const {
 	WriteStream stream{_buffer};
 
 	_apex.deepSaveActive(_registry, stream);
@@ -204,9 +206,9 @@ R_<TG_, TA_>::save(SerialBuffer& _buffer) const {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::load(const SerialBuffer& buffer) {
+R_<TG, TA>::load(const SerialBuffer& buffer) {
 	PlanControl control{_context,
 						_rng,
 						_registry,
@@ -227,9 +229,9 @@ R_<TG_, TA_>::load(const SerialBuffer& buffer) {
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::initialEnter() {
+R_<TG, TA>::initialEnter() {
 	HFSM_ASSERT(_requests.count() == 0);
 	HFSM_IF_TRANSITION_HISTORY(HFSM_ASSERT(_transitionHistory.count() == 0));
 
@@ -280,9 +282,9 @@ R_<TG_, TA_>::initialEnter() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::processTransitions() {
+R_<TG, TA>::processTransitions() {
 	HFSM_ASSERT(_requests.count());
 
 	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
@@ -333,9 +335,11 @@ R_<TG_, TA_>::processTransitions() {
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::applyRequest(Control& control, const Request& request) {
+R_<TG, TA>::applyRequest(Control& control,
+						 const Request& request)
+{
 	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.append(Transition{request, Method::NONE}));
 
 	switch (request.type) {
@@ -365,9 +369,9 @@ R_<TG_, TA_>::applyRequest(Control& control, const Request& request) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::applyRequests(Control& control) {
+R_<TG, TA>::applyRequests(Control& control) {
 	bool changesMade = false;
 
 	for (const Request& request : _requests)
@@ -380,11 +384,11 @@ R_<TG_, TA_>::applyRequests(Control& control) {
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::applyRequests(Control& control,
-							const Transition* const transitions,
-							const uint64_t count)
+R_<TG, TA>::applyRequests(Control& control,
+						  const Transition* const transitions,
+						  const uint64_t count)
 {
 	if (HFSM_CHECKED(transitions && count)) {
 		bool changesMade = false;
@@ -401,16 +405,16 @@ R_<TG_, TA_>::applyRequests(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::cancelledByEntryGuards(const Requests& pendingRequests) {
+R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context,
 							  _rng,
 							  _registry,
 							  _planData,
 							  _requests,
 							  pendingRequests,
-		HFSM_LOGGER_OR(_logger, nullptr)};
+							  HFSM_LOGGER_OR(_logger, nullptr)};
 
 	if (_apex.deepEntryGuard(guardControl)) {
 		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
@@ -422,9 +426,9 @@ R_<TG_, TA_>::cancelledByEntryGuards(const Requests& pendingRequests) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 bool
-R_<TG_, TA_>::cancelledByGuards(const Requests& pendingRequests) {
+R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context,
 							  _rng,
 							  _registry,
@@ -449,9 +453,9 @@ R_<TG_, TA_>::cancelledByGuards(const Requests& pendingRequests) {
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::getStateNames() {
+R_<TG, TA>::getStateNames() {
 	_stateInfos.clear();
 	_apex.deepGetNames((LongIndex) -1, StructureStateInfo::COMPOSITE, 0, _stateInfos);
 
@@ -527,9 +531,9 @@ R_<TG_, TA_>::getStateNames() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::udpateActivity() {
+R_<TG, TA>::udpateActivity() {
 	for (LongIndex s = 0, i = 0; s < _stateInfos.count(); ++s)
 		if (_stateInfos[s].name[0] != L'\0') {
 			_structure[i].isActive = isActive(s);
@@ -558,9 +562,9 @@ R_<TG_, TA_>::udpateActivity() {
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
-template <typename TG_, typename TA_>
+template <typename TG, typename TA>
 void
-R_<TG_, TA_>::recordRequestsAs(const Method method) {
+R_<TG, TA>::recordRequestsAs(const Method method) {
 	for (const auto& request : _requests)
 		_transitionHistory.append(Transition{request, method});
 }
