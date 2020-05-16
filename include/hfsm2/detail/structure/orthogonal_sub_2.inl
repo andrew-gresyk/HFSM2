@@ -5,10 +5,10 @@ namespace detail {
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRegister(StateRegistry& stateRegistry,
+OS_<TN_, TA_, NI_, TI_>::wideRegister(Registry& registry,
 									  const ForkID forkId)
 {
-	initial.deepRegister(stateRegistry, Parent{forkId, PRONG_INDEX});
+	initial.deepRegister(registry, Parent{forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
@@ -164,24 +164,24 @@ OS_<TN_, TA_, NI_, TI_>::wideRequestChange(Control& control) {
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestRemain(StateRegistry& stateRegistry) {
-	initial.deepRequestRemain(stateRegistry);
+OS_<TN_, TA_, NI_, TI_>::wideRequestRemain(Registry& registry) {
+	initial.deepRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestRestart(StateRegistry& stateRegistry) {
-	initial.deepRequestRestart(stateRegistry);
+OS_<TN_, TA_, NI_, TI_>::wideRequestRestart(Registry& registry) {
+	initial.deepRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
 void
-OS_<TN_, TA_, NI_, TI_>::wideRequestResume(StateRegistry& stateRegistry) {
-	initial.deepRequestResume(stateRegistry);
+OS_<TN_, TA_, NI_, TI_>::wideRequestResume(Registry& registry) {
+	initial.deepRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -249,6 +249,50 @@ OS_<TN_, TA_, NI_, TI_>::wideGetNames(const LongIndex parent,
 									  StructureStateInfos& _stateInfos) const
 {
 	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+void
+OS_<TN_, TA_, NI_, TI_>::wideSaveActive(const Registry& registry,
+										WriteStream& stream) const
+{
+	initial.deepSaveActive(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+void
+OS_<TN_, TA_, NI_, TI_>::wideSaveResumable(const Registry& registry,
+										   WriteStream& stream) const
+{
+	initial.deepSaveResumable(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+void
+OS_<TN_, TA_, NI_, TI_>::wideLoadRequested(Registry& registry,
+										   ReadStream& stream) const
+{
+	initial.deepLoadRequested(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_>
+void
+OS_<TN_, TA_, NI_, TI_>::wideLoadResumable(Registry& registry,
+										   ReadStream& stream) const
+{
+	initial.deepLoadResumable(registry, stream);
 }
 
 #endif

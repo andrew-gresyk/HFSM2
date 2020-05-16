@@ -16,8 +16,8 @@ struct S_ final {
 	using Logger		= typename TArgs::Logger;
 
 	using Control		= ControlT<TArgs>;
-	using StateRegistry	= StateRegistryT<TArgs>;
-	using StateParents	= typename StateRegistry::StateParents;
+	using Registry		= RegistryT<TArgs>;
+	using StateParents	= typename Registry::StateParents;
 
 	using PlanControl	= PlanControlT<TArgs>;
 	using ScopedOrigin	= typename PlanControl::Origin;
@@ -31,7 +31,6 @@ struct S_ final {
 	//----------------------------------------------------------------------
 
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
 #ifdef __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wnull-dereference"
@@ -47,29 +46,24 @@ struct S_ final {
 	#pragma clang diagnostic pop
 #endif
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	template <>
 	struct Accessor<Head> {
 		HFSM_INLINE static		 Head& get(		 S_& s)			{ return s._headBox.get();								}
 		HFSM_INLINE static const Head& get(const S_& s)			{ return s._headBox.get();								}
 	};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	template <typename T>
 	HFSM_INLINE		  T& access()								{ return Accessor<T>::get(*this);						}
 
 	template <typename T>
 	HFSM_INLINE const T& access() const							{ return Accessor<T>::get(*this);						}
-
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._stateRegistry.stateParents[STATE_ID]; }
+	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._registry.stateParents[STATE_ID];		}
 
-	HFSM_INLINE void	deepRegister		 (StateRegistry& stateRegistry, const Parent parent);
+	HFSM_INLINE void	deepRegister		 (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -108,9 +102,9 @@ struct S_ final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepRequestChange	 (Control&)											{}
-	HFSM_INLINE void	deepRequestRemain	 (StateRegistry&)									{}
-	HFSM_INLINE void	deepRequestRestart	 (StateRegistry&)									{}
-	HFSM_INLINE void	deepRequestResume	 (StateRegistry&)									{}
+	HFSM_INLINE void	deepRequestRemain	 (Registry&)										{}
+	HFSM_INLINE void	deepRequestRestart	 (Registry&)										{}
+	HFSM_INLINE void	deepRequestResume	 (Registry&)										{}
 	HFSM_INLINE void	deepRequestUtilize	 (Control&)											{}
 	HFSM_INLINE void	deepRequestRandomize (Control&)											{}
 
@@ -123,7 +117,7 @@ struct S_ final {
 
 	HFSM_INLINE void	deepChangeToRequested(Control&)											{}
 
-	//----------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
 #if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 
@@ -134,7 +128,6 @@ struct S_ final {
 	//----------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
 	using StructureStateInfos = typename TArgs::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
@@ -144,7 +137,19 @@ struct S_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
+#endif
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename TArgs::WriteStream;
+	using ReadStream	= typename TArgs::ReadStream;
+
+	HFSM_INLINE void	deepSaveActive	 (const Registry&, WriteStream&) const					{}
+	HFSM_INLINE void	deepSaveResumable(const Registry&, WriteStream&) const					{}
+
+	HFSM_INLINE void	deepLoadRequested(		Registry&, ReadStream& ) const					{}
+	HFSM_INLINE void	deepLoadResumable(		Registry&, ReadStream& ) const					{}
 #endif
 
 	//----------------------------------------------------------------------

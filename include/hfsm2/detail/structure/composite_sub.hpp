@@ -29,8 +29,8 @@ struct CS_ final {
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
-	using StateRegistry	= StateRegistryT<Args>;
-	using StateParents	= typename StateRegistry::StateParents;
+	using Registry		= RegistryT<Args>;
+	using StateParents	= typename Registry::StateParents;
 
 	using Control		= ControlT	   <Args>;
 	using PlanControl	= PlanControlT <Args>;
@@ -65,18 +65,16 @@ struct CS_ final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
 	template <typename T>
 	HFSM_INLINE		  T& access();
 
 	template <typename T>
 	HFSM_INLINE const T& access() const;
-
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRegister				  (StateRegistry& stateRegistry, const Parent parent);
+	HFSM_INLINE void	wideRegister				  (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -129,9 +127,9 @@ struct CS_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRequestRemain			  (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestRestart			  (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestResume			  (StateRegistry& stateRegistry,						const ShortIndex prong);
+	HFSM_INLINE void	wideRequestRemain			  (Registry& registry);
+	HFSM_INLINE void	wideRequestRestart			  (Registry& registry);
+	HFSM_INLINE void	wideRequestResume			  (Registry& registry,									const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -150,6 +148,8 @@ struct CS_ final {
 
 	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control, const ShortIndex prong);
 
+	//----------------------------------------------------------------------
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
@@ -162,11 +162,26 @@ struct CS_ final {
 					  StructureStateInfos& stateInfos) const;
 #endif
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
+
+	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
+#endif
+
+	//----------------------------------------------------------------------
+
 	LHalf lHalf;
 	RHalf rHalf;
 };
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename TIndices,
 		  typename TArgs,
@@ -192,8 +207,8 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
-	using StateRegistry	= StateRegistryT<Args>;
-	using StateParents	= typename StateRegistry::StateParents;
+	using Registry	= RegistryT<Args>;
+	using StateParents	= typename Registry::StateParents;
 
 	using Control		= ControlT	   <Args>;
 	using PlanControl	= PlanControlT <Args>;
@@ -210,18 +225,16 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
 	template <typename T>
 	HFSM_INLINE		  T& access()					  { return state.template access<T>();	}
 
 	template <typename T>
 	HFSM_INLINE const T& access() const				  { return state.template access<T>();	}
-
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRegister				  (StateRegistry& stateRegistry, const Parent parent);
+	HFSM_INLINE void	wideRegister				  (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -257,9 +270,9 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRequestRemain			  (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestRestart			  (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestResume			  (StateRegistry& stateRegistry,						const ShortIndex prong);
+	HFSM_INLINE void	wideRequestRemain			  (Registry& registry);
+	HFSM_INLINE void	wideRequestRestart			  (Registry& registry);
+	HFSM_INLINE void	wideRequestResume			  (Registry& registry,									const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -278,6 +291,8 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control,								const ShortIndex prong);
 
+	//----------------------------------------------------------------------
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
@@ -289,6 +304,21 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
+
+	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
+#endif
+
+	//----------------------------------------------------------------------
 
 	State state;
 };

@@ -14,8 +14,8 @@ class R_ {
 	using Logger				= typename Config_::Logger;
 
 	using Apex					= TApex;
-
 	using ApexInfo				= WrapInfo<Apex>;
+
 	using Info					= RF_<Config_, Apex>;
 	using StateList				= typename Info::StateList;
 	using RegionList			= typename Info::RegionList;
@@ -30,6 +30,9 @@ public:
 	static constexpr ShortIndex ORTHO_REGIONS	  = ApexInfo::ORTHO_REGIONS;
 	static constexpr ShortIndex ORTHO_UNITS		  = ApexInfo::ORTHO_UNITS;
 
+	static constexpr LongIndex  ACTIVE_BITS		  = ApexInfo::ACTIVE_BITS;
+	static constexpr LongIndex  RESUMABLE_BITS	  = ApexInfo::RESUMABLE_BITS;
+
 	static constexpr LongIndex  STATE_COUNT		  = ApexInfo::STATE_COUNT;
 	static constexpr LongIndex  REGION_COUNT	  = ApexInfo::REGION_COUNT;
 
@@ -39,9 +42,9 @@ public:
 private:
 	using Args					= typename Info::Args;
 
-	using StateRegistry			= StateRegistryT<Args>;
-	using CompoForks			= typename StateRegistry::CompoForks;
-	using AllForks				= typename StateRegistry::AllForks;
+	using Registry				= RegistryT<Args>;
+	using CompoForks			= typename Registry::CompoForks;
+	using RegistryBackUp		= typename Registry::BackUp;
 
 	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
 
@@ -55,23 +58,26 @@ private:
 
 	using GuardControl			= GuardControlT<Args>;
 
-public:
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using StructureStateInfos	= typename Args::StructureStateInfos;
-
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
 
 	using Prefix				= StaticArray<wchar_t, REVERSE_DEPTH * 2 + 2>;
 	using Prefixes				= StaticArray<Prefix, STATE_COUNT>;
 
-	using Structure				= Array<StructureEntry, NAME_COUNT>;
-	using ActivityHistory		= Array<char,			NAME_COUNT>;
+	using StructureStateInfos	= typename Args::StructureStateInfos;
 #endif
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream			= typename Args::WriteStream;
+	using ReadStream			= typename Args::ReadStream;
+#endif
+
+public:
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using Structure				= Array<StructureEntry, NAME_COUNT>;
+	using ActivityHistory		= Array<char,			NAME_COUNT>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -86,10 +92,10 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename T>
-	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()				{ return			StateList ::template index<T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<T>();	}
 
 	//----------------------------------------------------------------------
 
@@ -109,8 +115,8 @@ public:
 
 	template <typename T>
 	struct Accessor<T, true> {
-		HFSM_INLINE static		 T& get(	  MaterialApex& apex)	{ return apex.template access<T>();			}
-		HFSM_INLINE static const T& get(const MaterialApex& apex)	{ return apex.template access<T>();			}
+		HFSM_INLINE static		 T& get(	  MaterialApex& apex)	{ return apex.template access<T>();		}
+		HFSM_INLINE static const T& get(const MaterialApex& apex)	{ return apex.template access<T>();		}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -122,20 +128,20 @@ public:
 	// .. you're trying to access() a type that is not present in the state machine hierarchy
 
 	template <typename T>
-	HFSM_INLINE		  T& access()									{ return Accessor<T>::get(_apex);			}
+	HFSM_INLINE		  T& access()									{ return Accessor<T>::get(_apex);		}
 
 	template <typename T>
-	HFSM_INLINE const T& access() const								{ return Accessor<T>::get(_apex);			}
+	HFSM_INLINE const T& access() const								{ return Accessor<T>::get(_apex);		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #else
 
 	template <typename T>
-	HFSM_INLINE		  T& access()						{ return Accessor<T,	   MaterialApex>{_apex}.get();	}
+	HFSM_INLINE		  T& access()					{ return Accessor<T,	   MaterialApex>{_apex}.get();	}
 
 	template <typename T>
-	HFSM_INLINE const T& access() const					{ return Accessor<T, const MaterialApex>{_apex}.get();	}
+	HFSM_INLINE const T& access() const				{ return Accessor<T, const MaterialApex>{_apex}.get();	}
 
 #endif
 
@@ -148,19 +154,19 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _stateRegistry.isActive   (stateId);	}
-	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _stateRegistry.isResumable(stateId);	}
+	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _registry.isActive   (stateId);	}
+	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _registry.isResumable(stateId);	}
 
-	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);					}
-
-	template <typename TState>
-	HFSM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());		}
+	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);				}
 
 	template <typename TState>
-	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());		}
+	HFSM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());	}
 
 	template <typename TState>
-	HFSM_INLINE bool isScheduled() const						{ return isResumable<TState>();					}
+	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
+
+	template <typename TState>
+	HFSM_INLINE bool isScheduled() const						{ return isResumable<TState>();				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -174,42 +180,58 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TState>
-	HFSM_INLINE void changeTo ()								{ changeTo (stateId<TState>());					}
+	HFSM_INLINE void changeTo ()								{ changeTo (stateId<TState>());				}
 
 	template <typename TState>
-	HFSM_INLINE void restart  ()								{ restart  (stateId<TState>());					}
+	HFSM_INLINE void restart  ()								{ restart  (stateId<TState>());				}
 
 	template <typename TState>
-	HFSM_INLINE void resume	  ()								{ resume   (stateId<TState>());					}
+	HFSM_INLINE void resume	  ()								{ resume   (stateId<TState>());				}
 
 	template <typename TState>
-	HFSM_INLINE void utilize  ()								{ utilize  (stateId<TState>());					}
+	HFSM_INLINE void utilize  ()								{ utilize  (stateId<TState>());				}
 
 	template <typename TState>
-	HFSM_INLINE void randomize()								{ randomize(stateId<TState>());					}
+	HFSM_INLINE void randomize()								{ randomize(stateId<TState>());				}
 
 	template <typename TState>
-	HFSM_INLINE void schedule ()								{ schedule (stateId<TState>());					}
+	HFSM_INLINE void schedule ()								{ schedule (stateId<TState>());				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void clearResumable()							{ _stateRegistry.resumable.clear();				}
-	HFSM_INLINE void clearRequests()							{ _stateRegistry.requested.clear();				}
-
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const Structure&	   structure()		 const				{ return _structure;							}
-	const ActivityHistory& activityHistory() const				{ return _activityHistory;						}
+	const Structure&	   structure()		 const				{ return _structure;						}
+	const ActivityHistory& activityHistory() const				{ return _activityHistory;					}
 #endif
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
-	const TransitionHistory& transitionHistory() const			{ return _transitionHistory;					}
+	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
 
-	void replayTransition (const Transition& transition)		{ replayTransitions(&transition, 1);			}
+	const TransitionHistory& transitionHistory() const			{ return _transitionHistory;				}
+
+	void replayTransition (const Transition& transition)		{ replayTransitions(&transition, 1);		}
 	void replayTransitions(const Transition* const transitions, const uint64_t count);
 #endif
 
+	void reset();
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	// Buffer for serialization
+	//  Members:
+	//   bitSize - Number of payload bits used
+	//   payload - Serialized data
+	//  See https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization
+	using SerialBuffer			= typename Args::SerialBuffer;
+
+	// Serialize the structural configuration into 'buffer'
+	void save(		SerialBuffer& buffer) const;
+
+	// De-serialize the configuration and initialize the instance
+	void load(const SerialBuffer& buffer);
+#endif
+
 #if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	void attachLogger(Logger* const logger)						{ _logger = logger;								}
+	void attachLogger(Logger* const logger)						{ _logger = logger;							}
 #endif
 
 private:
@@ -239,7 +261,7 @@ private:
 	Context& _context;
 	RNG& _rng;
 
-	StateRegistry _stateRegistry;
+	Registry _registry;
 	PlanData _planData;
 
 	Requests _requests;

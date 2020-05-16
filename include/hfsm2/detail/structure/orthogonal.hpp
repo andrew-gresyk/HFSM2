@@ -31,9 +31,9 @@ struct O_ final {
 	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
 	static constexpr ShortIndex ORTHO_UNITS	= Info::ORTHO_UNITS;
 
-	using StateRegistry	= StateRegistryT<Args>;
-	using StateParents	= typename StateRegistry::StateParents;
-	using OrthoForks	= typename StateRegistry::AllForks::Ortho;
+	using Registry		= RegistryT<Args>;
+	using StateParents	= typename Registry::StateParents;
+	using OrthoForks	= typename Registry::OrthoForks;
 	using ProngBits		= typename OrthoForks::Bits;
 	using ProngConstBits= typename OrthoForks::ConstBits;
 
@@ -61,40 +61,34 @@ struct O_ final {
 	//----------------------------------------------------------------------
 
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
 	template <typename T>
 	struct Accessor {
-		HFSM_INLINE static		 T&	   get(		 O_& o)									{ return o._subStates.template access<T>();		}
-		HFSM_INLINE static const T&	   get(const O_& o)									{ return o._subStates.template access<T>();		}
+		HFSM_INLINE static		 T&	   get(		 O_& o)							{ return o._subStates.template access<T>();	}
+		HFSM_INLINE static const T&	   get(const O_& o)							{ return o._subStates.template access<T>();	}
 	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 O_& o)									{ return o._headState._headBox.get();			}
-		HFSM_INLINE static const Head& get(const O_& o)									{ return o._headState._headBox.get();			}
+		HFSM_INLINE static		 Head& get(		 O_& o)							{ return o._headState._headBox.get();		}
+		HFSM_INLINE static const Head& get(const O_& o)							{ return o._headState._headBox.get();		}
 	};
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	template <typename T>
+	HFSM_INLINE		  T&	access()											{ return Accessor<T>::get(*this);			}
 
 	template <typename T>
-	HFSM_INLINE		  T&	access()													{ return Accessor<T>::get(*this);				}
-
-	template <typename T>
-	HFSM_INLINE const T&	access() const												{ return Accessor<T>::get(*this);				}
-
+	HFSM_INLINE const T&	access() const										{ return Accessor<T>::get(*this);			}
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM_INLINE ProngBits	   orthoRequested(		StateRegistry& stateRegistry)		{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM_INLINE ProngConstBits orthoRequested(const StateRegistry& stateRegistry) const	{ return stateRegistry.requested.ortho.template bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM_INLINE ProngBits	   orthoRequested(		Registry& registry)			{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM_INLINE ProngConstBits orthoRequested(const Registry& registry) const	{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM_INLINE ProngBits	   orthoRequested(		Control& control)					{ return orthoRequested(control._stateRegistry);							}
-	HFSM_INLINE ProngConstBits orthoRequested(const Control& control) const				{ return orthoRequested(control._stateRegistry);							}
+	HFSM_INLINE ProngBits	   orthoRequested(		Control& control)			{ return orthoRequested(control._registry);								}
+	HFSM_INLINE ProngConstBits orthoRequested(const Control& control) const		{ return orthoRequested(control._registry);								}
 
-	HFSM_INLINE void	deepRegister		 (StateRegistry& stateRegistry, const Parent parent);
+	HFSM_INLINE void	deepRegister		 (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -128,9 +122,9 @@ struct O_ final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepRequestChange	 (Control& control);
-	HFSM_INLINE void	deepRequestRemain	 (StateRegistry& stateRegistry);
-	HFSM_INLINE void	deepRequestRestart	 (StateRegistry& stateRegistry);
-	HFSM_INLINE void	deepRequestResume	 (StateRegistry& stateRegistry);
+	HFSM_INLINE void	deepRequestRemain	 (Registry& registry);
+	HFSM_INLINE void	deepRequestRestart	 (Registry& registry);
+	HFSM_INLINE void	deepRequestResume	 (Registry& registry);
 	HFSM_INLINE void	deepRequestUtilize	 (Control& control);
 	HFSM_INLINE void	deepRequestRandomize (Control& control);
 
@@ -143,7 +137,7 @@ struct O_ final {
 
 	HFSM_INLINE void	deepChangeToRequested(PlanControl& control);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -156,6 +150,21 @@ struct O_ final {
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
+	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
+
+	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
+	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	//----------------------------------------------------------------------
 
 	HeadState _headState;
 	SubStates _subStates;

@@ -7,6 +7,7 @@ template <typename TIndex, ShortIndex NCapacity>
 BitArray<TIndex, NCapacity>::Bits::operator bool() const {
 	const ShortIndex fullUnits = _width / (sizeof(Unit) * 8);
 
+	// TODO: cover this case
 	for (Index i = 0; i < fullUnits; ++i)
 		if (_storage[i])
 			return true;

@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="snippets-gcc-tdm" Version="10.0.0" InternalType="Console">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+  </Plugins>
   <VirtualDirectory Name="source">
+    <File Name="../../../examples/snippets/docs_serialization.cpp"/>
     <File Name="../../../examples/snippets/wiki_utility-theory.cpp"/>
     <File Name="../../../examples/snippets/wiki_tutorial.cpp"/>
     <File Name="../../../examples/snippets/wiki_transitions-within-hierarchy.cpp"/>
     <File Name="../../../examples/snippets/wiki_plans.cpp"/>
     <File Name="../../../examples/snippets/main.cpp"/>
   </VirtualDirectory>
-  <Plugins>
-    <Plugin Name="qmake">
-      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
-    </Plugin>
-  </Plugins>
   <Description/>
   <Dependencies/>
   <Dependencies Name="Debug"/>

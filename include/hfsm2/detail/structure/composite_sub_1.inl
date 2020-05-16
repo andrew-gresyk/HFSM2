@@ -31,11 +31,11 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::access() const {
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRegister(StateRegistry& stateRegistry,
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRegister(Registry& registry,
 											  const Parent parent)
 {
-	lHalf.wideRegister(stateRegistry, Parent{parent.forkId, L_PRONG});
-	rHalf.wideRegister(stateRegistry, Parent{parent.forkId, R_PRONG});
+	lHalf.wideRegister(registry, Parent{parent.forkId, L_PRONG});
+	rHalf.wideRegister(registry, Parent{parent.forkId, R_PRONG});
 }
 
 //------------------------------------------------------------------------------
@@ -262,31 +262,31 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestChangeResumable(Control& control,
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestRemain(StateRegistry& stateRegistry) {
-	lHalf.wideRequestRemain(stateRegistry);
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestRemain(Registry& registry) {
+	lHalf.wideRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestRestart(StateRegistry& stateRegistry) {
-	lHalf.wideRequestRestart(stateRegistry);
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestRestart(Registry& registry) {
+	lHalf.wideRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
 void
-CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestResume(StateRegistry& stateRegistry,
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideRequestResume(Registry& registry,
 												   const ShortIndex prong)
 {
 	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
-		lHalf.wideRequestResume(stateRegistry, prong);
+		lHalf.wideRequestResume(registry, prong);
 	else
-		rHalf.wideRequestResume(stateRegistry, prong);
+		rHalf.wideRequestResume(registry, prong);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -414,6 +414,70 @@ CS_<TN_, TA_, TG_, NI_, TS_...>::wideGetNames(const LongIndex parent,
 {
 	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+void
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideSaveActive(const Registry& registry,
+												WriteStream& stream,
+												const ShortIndex prong) const
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG) {
+		lHalf.wideSaveActive   (registry, stream, prong);
+		rHalf.wideSaveResumable(registry, stream);
+	} else {
+		lHalf.wideSaveResumable(registry, stream);
+		rHalf.wideSaveActive   (registry, stream, prong);
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+void
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideSaveResumable(const Registry& registry,
+												   WriteStream& stream) const
+{
+	lHalf.wideSaveResumable(registry, stream);
+	rHalf.wideSaveResumable(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+void
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideLoadRequested(Registry& registry,
+												   ReadStream& stream,
+												   const ShortIndex prong) const
+{
+	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+
+	if (prong < R_PRONG) {
+		lHalf.wideLoadRequested(registry, stream, prong);
+		rHalf.wideLoadResumable(registry, stream);
+	} else {
+		lHalf.wideLoadResumable(registry, stream);
+		rHalf.wideLoadRequested(registry, stream, prong);
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename... TS_>
+void
+CS_<TN_, TA_, TG_, NI_, TS_...>::wideLoadResumable(Registry& registry,
+												   ReadStream& stream) const
+{
+	lHalf.wideLoadResumable(registry, stream);
+	rHalf.wideLoadResumable(registry, stream);
 }
 
 #endif

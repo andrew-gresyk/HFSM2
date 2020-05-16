@@ -1,4 +1,4 @@
-// HFSM (hierarchical state machine for games and interactive applications)
+// HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
 #define HFSM_ENABLE_LOG_INTERFACE

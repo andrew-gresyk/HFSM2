@@ -90,6 +90,12 @@
     <ClCompile Include="..\..\test\test_replication.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\shared\test_bit_stream.cpp">
+      <Filter>test\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_serialization.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
@@ -164,11 +170,14 @@
     <ClInclude Include="..\..\include\hfsm2\detail\root\state_access.hpp">
       <Filter>hfsm\detail\root</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\root\state_registry.hpp">
-      <Filter>hfsm\detail\root</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\root.hpp">
       <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_stream.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\root\registry.hpp">
+      <Filter>hfsm\detail\root</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -226,11 +235,14 @@
     <None Include="..\..\include\hfsm2\detail\root\plan_data.inl">
       <Filter>hfsm\detail\root</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\root\state_registry.inl">
-      <Filter>hfsm\detail\root</Filter>
-    </None>
     <None Include="..\..\include\hfsm2\detail\root.inl">
       <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\shared\bit_stream.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root\registry.inl">
+      <Filter>hfsm\detail\root</Filter>
     </None>
   </ItemGroup>
 </Project>

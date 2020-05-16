@@ -12,7 +12,7 @@ public:
 	static constexpr LongIndex DUMMY	= INVALID_LONG_INDEX;
 
 	using Item  = T;
-	using Index = Unsigned<CAPACITY>;
+	using Index = UnsignedCapacity<CAPACITY>;
 
 public:
 	HFSM_INLINE StaticArray() = default;
@@ -24,6 +24,7 @@ public:
 	HFSM_INLINE LongIndex count() const						{ return CAPACITY;									}
 
 	HFSM_INLINE void fill(const Item filler);
+	HFSM_INLINE void clear()								{ fill(INVALID_SHORT_INDEX);						}
 
 	HFSM_INLINE Iterator<	   StaticArray>  begin()		{ return Iterator<		StaticArray>(*this, 0);		}
 	HFSM_INLINE Iterator<const StaticArray>  begin() const	{ return Iterator<const StaticArray>(*this, 0);		}

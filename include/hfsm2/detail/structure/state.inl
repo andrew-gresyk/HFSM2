@@ -37,11 +37,11 @@ struct RegisterT<NS, TA_, StaticEmptyT<TA_>> {
 
 template <typename TN_, typename TA_, typename TH_>
 void
-S_<TN_, TA_, TH_>::deepRegister(StateRegistry& stateRegistry,
+S_<TN_, TA_, TH_>::deepRegister(Registry& registry,
 								const Parent parent)
 {
 	using Register = RegisterT<STATE_ID, TA_, Head>;
-	Register::execute(stateRegistry.stateParents, parent);
+	Register::execute(registry.stateParents, parent);
 }
 
 //------------------------------------------------------------------------------

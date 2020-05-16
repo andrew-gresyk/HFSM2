@@ -124,6 +124,14 @@
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_SERIALIZATION
+	#define HFSM_IF_SERIALIZATION(...)								  __VA_ARGS__
+#else
+	#define HFSM_IF_SERIALIZATION(...)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
 	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 #endif
@@ -198,7 +206,7 @@ min(const T t1, const T t2) { return t1 < t2 ? t1 : t2; }
 //------------------------------------------------------------------------------
 
 template <unsigned NCapacity>
-struct UnsignedT {
+struct UnsignedCapacityT {
 	static constexpr LongIndex CAPACITY = NCapacity;
 
 	using Type = typename std::conditional<CAPACITY <= UINT8_MAX,  uint8_t,
@@ -210,7 +218,24 @@ struct UnsignedT {
 };
 
 template <unsigned NCapacity>
-using Unsigned = typename UnsignedT<NCapacity>::Type;
+using UnsignedCapacity = typename UnsignedCapacityT<NCapacity>::Type;
+
+//------------------------------------------------------------------------------
+
+template <unsigned NBitWidth>
+struct UnsignedBitWidthT {
+	static constexpr ShortIndex BIT_WIDTH = NBitWidth;
+
+	using Type = typename std::conditional<BIT_WIDTH <= 8,  uint8_t,
+				 typename std::conditional<BIT_WIDTH <= 16, uint16_t,
+				 typename std::conditional<BIT_WIDTH <= 32, uint32_t,
+															uint64_t>::type>::type>::type;
+
+	static_assert(BIT_WIDTH <= 64, "STATIC ASSERT");
+};
+
+template <unsigned NCapacity>
+using UnsignedBitWidth = typename UnsignedBitWidthT<NCapacity>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -227,14 +252,39 @@ roundUp(const LongIndex x,
 constexpr
 ShortIndex
 bitWidth(const ShortIndex x) {
-	return x <   2 ? 1 :
-		   x <   4 ? 2 :
-		   x <   8 ? 3 :
-		   x <  16 ? 4 :
-		   x <  32 ? 5 :
-		   x <  64 ? 6 :
-		   x < 128 ? 7 :
-					 8 ;
+	return x <=   2 ? 1 :
+		   x <=   4 ? 2 :
+		   x <=   8 ? 3 :
+		   x <=  16 ? 4 :
+		   x <=  32 ? 5 :
+		   x <=  64 ? 6 :
+		   x <= 128 ? 7 :
+					  8 ;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TTo, typename TFrom>
+void
+overwrite(TTo& to, const TFrom& from) {
+	static_assert(sizeof(TTo) == sizeof(TFrom), "STATIC ASSERT");
+
+#if defined(__GNUC__) || defined(__GNUG__)
+	memcpy  (&to,			  &from, sizeof(from));
+#else
+	memcpy_s(&to, sizeof(to), &from, sizeof(from));
+#endif
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TO, typename TI>
+TO convert(const TI& in) {
+	TO out;
+
+	overwrite(out, in);
+
+	return out;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

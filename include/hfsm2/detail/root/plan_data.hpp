@@ -41,6 +41,7 @@ template <typename,
 		  LongIndex,
 		  LongIndex,
 		  LongIndex,
+		  LongIndex,
 		  LongIndex>
 struct ArgsT;
 
@@ -56,6 +57,7 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
+		  LongIndex NSerialBits,
 		  LongIndex NTaskCapacity>
 struct PlanDataT<ArgsT<TContext,
 					   TConfig,
@@ -64,6 +66,7 @@ struct PlanDataT<ArgsT<TContext,
 					   NCompoCount,
 					   NOrthoCount,
 					   NOrthoUnits,
+					   NSerialBits,
 					   NTaskCapacity>>
 {
 	using StateList		= TStateList;
@@ -105,6 +108,7 @@ struct PlanDataT<ArgsT<TContext,
 					   0,
 					   NOrthoCount,
 					   NOrthoUnits,
+					   0,
 					   NTaskCapacity>>
 {
 #ifdef HFSM_ENABLE_ASSERT

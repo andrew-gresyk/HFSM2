@@ -5,10 +5,10 @@ namespace detail {
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRegister(StateRegistry& stateRegistry,
+CS_<TN_, TA_, TG_, NI_, T>::wideRegister(Registry& registry,
 										 const Parent parent)
 {
-	state.deepRegister(stateRegistry, Parent{parent.forkId, PRONG_INDEX});
+	state.deepRegister(registry, Parent{parent.forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
@@ -195,28 +195,28 @@ CS_<TN_, TA_, TG_, NI_, T>::wideRequestChangeResumable(Control& control,
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRequestRemain(StateRegistry& stateRegistry) {
-	state.deepRequestRemain(stateRegistry);
+CS_<TN_, TA_, TG_, NI_, T>::wideRequestRemain(Registry& registry) {
+	state.deepRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRequestRestart(StateRegistry& stateRegistry) {
-	state.deepRequestRestart(stateRegistry);
+CS_<TN_, TA_, TG_, NI_, T>::wideRequestRestart(Registry& registry) {
+	state.deepRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
 void
-CS_<TN_, TA_, TG_, NI_, T>::wideRequestResume(StateRegistry& stateRegistry,
+CS_<TN_, TA_, TG_, NI_, T>::wideRequestResume(Registry& registry,
 											  const ShortIndex HFSM_IF_ASSERT(prong))
 {
 	HFSM_ASSERT(prong == PRONG_INDEX);
 
-	state.deepRequestResume(stateRegistry);
+	state.deepRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -327,6 +327,56 @@ CS_<TN_, TA_, TG_, NI_, T>::wideGetNames(const LongIndex parent,
 										 StructureStateInfos& _stateInfos) const
 {
 	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+void
+CS_<TN_, TA_, TG_, NI_, T>::wideSaveActive(const Registry& registry,
+										   WriteStream& stream,
+										   const ShortIndex HFSM_IF_ASSERT(prong)) const
+{
+	HFSM_ASSERT(prong == PRONG_INDEX);
+
+	state.deepSaveActive(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+void
+CS_<TN_, TA_, TG_, NI_, T>::wideSaveResumable(const Registry& registry,
+											  WriteStream& stream) const
+{
+	state.deepSaveResumable(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+void
+CS_<TN_, TA_, TG_, NI_, T>::wideLoadRequested(Registry& registry,
+											  ReadStream& stream,
+											  const ShortIndex HFSM_IF_ASSERT(prong)) const
+{
+	HFSM_ASSERT(prong == PRONG_INDEX);
+
+	state.deepLoadRequested(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Strategy TG_, ShortIndex NI_, typename T>
+void
+CS_<TN_, TA_, TG_, NI_, T>::wideLoadResumable(Registry& registry,
+											  ReadStream& stream) const
+{
+	state.deepLoadResumable(registry, stream);
 }
 
 #endif

@@ -28,7 +28,7 @@ protected:
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
-	using StateRegistry	= StateRegistryT<Args>;
+	using Registry		= RegistryT<Args>;
 	using PlanData		= PlanDataT<Args>;
 	using ConstPlan		= ConstPlanT<Args>;
 
@@ -48,12 +48,12 @@ protected:
 
 	HFSM_INLINE ControlT(Context& context,
 						 RNG& rng,
-						 StateRegistry& stateRegistry,
+						 Registry& registry,
 						 PlanData& planData,
 						 Logger* const HFSM_IF_LOGGER(logger))
 		: _context{context}
 		, _rng{rng}
-		, _stateRegistry{stateRegistry}
+		, _registry{registry}
 		, _planData{planData}
 		HFSM_IF_LOGGER(, _logger{logger})
 	{}
@@ -74,8 +74,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID id) const	{ return _stateRegistry.isActive   (id);			}
-	HFSM_INLINE bool isResumable(const StateID id) const	{ return _stateRegistry.isResumable(id);			}
+	HFSM_INLINE bool isActive   (const StateID id) const	{ return _registry.isActive   (id);					}
+	HFSM_INLINE bool isResumable(const StateID id) const	{ return _registry.isResumable(id);					}
 
 	HFSM_INLINE bool isScheduled(const StateID id) const	{ return isResumable(id);							}
 
@@ -107,7 +107,7 @@ protected:
 protected:
 	Context& _context;
 	RNG& _rng;
-	StateRegistry& _stateRegistry;
+	Registry& _registry;
 	PlanData& _planData;
 	RegionID _regionId = 0;
 	HFSM_IF_LOGGER(Logger* _logger);
@@ -252,7 +252,7 @@ protected:
 	using typename PlanControl::Plan;
 	using typename PlanControl::Origin;
 
-	using StateRegistry	= StateRegistryT<Args>;
+	using Registry		= RegistryT<Args>;
 	using Requests		= RequestsT<Args::COMPO_REGIONS>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -268,11 +268,11 @@ protected:
 
 	HFSM_INLINE FullControlT(Context& context,
 							 RNG& rng,
-							 StateRegistry& stateRegistry,
+							 Registry& registry,
 							 PlanData& planData,
 							 Requests& requests,
 							 Logger* const logger)
-		: PlanControl{context, rng, stateRegistry, planData, logger}
+		: PlanControl{context, rng, registry, planData, logger}
 		, _requests{requests}
 	{}
 
@@ -368,7 +368,7 @@ class GuardControlT final
 	using typename FullControl::RegionList;
 	using typename FullControl::PlanData;
 
-	using typename FullControl::StateRegistry;
+	using typename FullControl::Registry;
 
 protected:
 	using Requests		= RequestsT<Args::COMPO_REGIONS>;
@@ -378,12 +378,12 @@ protected:
 private:
 	HFSM_INLINE GuardControlT(Context& context,
 							  RNG& rng,
-							  StateRegistry& stateRegistry,
+							  Registry& registry,
 							  PlanData& planData,
 							  Requests& requests,
 							  const Requests& pendingChanges,
 							  Logger* const logger)
-		: FullControl{context, rng, stateRegistry, planData, requests, logger}
+		: FullControl{context, rng, registry, planData, requests, logger}
 		, _pending{pendingChanges}
 	{}
 
@@ -413,9 +413,9 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isPendingChange(const StateID id) const	{ return _stateRegistry.isPendingChange(id);	}
-	HFSM_INLINE bool isPendingEnter	(const StateID id) const	{ return _stateRegistry.isPendingEnter (id);	}
-	HFSM_INLINE bool isPendingExit	(const StateID id) const	{ return _stateRegistry.isPendingExit  (id);	}
+	HFSM_INLINE bool isPendingChange(const StateID id) const	{ return _registry.isPendingChange(id);	}
+	HFSM_INLINE bool isPendingEnter	(const StateID id) const	{ return _registry.isPendingEnter (id);	}
+	HFSM_INLINE bool isPendingExit	(const StateID id) const	{ return _registry.isPendingExit  (id);	}
 
 	template <typename TState>
 	HFSM_INLINE bool isPendingChange()		{ return isPendingChange(FullControl::template stateId<TState>());	}
@@ -435,7 +435,7 @@ public:
 private:
 	HFSM_IF_LOGGER(using FullControl::_logger);
 
-	using FullControl::_stateRegistry;
+	using FullControl::_registry;
 	using FullControl::_originId;
 
 	bool _cancelled = false;

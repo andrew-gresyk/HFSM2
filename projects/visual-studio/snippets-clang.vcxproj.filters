@@ -14,5 +14,6 @@
     <ClCompile Include="..\..\examples\snippets\wiki_tutorial.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_utility-theory.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_plans.cpp" />
+    <ClCompile Include="..\..\examples\snippets\docs_serialization.cpp" />
   </ItemGroup>
 </Project>

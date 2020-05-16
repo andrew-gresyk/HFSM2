@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
+    <ClCompile Include="..\..\test\shared\test_bit_stream.cpp" />
     <ClCompile Include="..\..\test\shared\test_list.cpp" />
     <ClCompile Include="..\..\test\shared\test_random.cpp" />
     <ClCompile Include="..\..\test\test_access.cpp" />
@@ -37,6 +38,7 @@
     <ClCompile Include="..\..\test\test_replication.cpp" />
     <ClCompile Include="..\..\test\test_resume.cpp" />
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
+    <ClCompile Include="..\..\test\test_serialization.cpp" />
     <ClCompile Include="..\..\test\test_stress.cpp" />
     <ClCompile Include="..\..\test\test_utilize.cpp" />
     <ClCompile Include="..\..\test\test_utility_regions.cpp" />
@@ -49,10 +51,11 @@
     <ClInclude Include="..\..\include\hfsm2\detail\root\control.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\plan.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\plan_data.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\root\registry.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\state_access.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\root\state_registry.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\array.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_stream.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp" />
@@ -74,9 +77,10 @@
     <None Include="..\..\include\hfsm2\detail\root\control.inl" />
     <None Include="..\..\include\hfsm2\detail\root\plan.inl" />
     <None Include="..\..\include\hfsm2\detail\root\plan_data.inl" />
-    <None Include="..\..\include\hfsm2\detail\root\state_registry.inl" />
+    <None Include="..\..\include\hfsm2\detail\root\registry.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl" />
+    <None Include="..\..\include\hfsm2\detail\shared\bit_stream.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\iterator.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\list.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\random.inl" />

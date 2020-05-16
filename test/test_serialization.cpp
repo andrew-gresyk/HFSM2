@@ -1,7 +1,8 @@
-#define HFSM_ENABLE_TRANSITION_HISTORY
+#define HFSM_ENABLE_SERIALIZATION
+#define HFSM_ENABLE_VERBOSE_DEBUG_LOG
 #include "shared.hpp"
 
-namespace test_replication {
+namespace test_serialization {
 
 //------------------------------------------------------------------------------
 
@@ -62,15 +63,7 @@ struct C1		: FSM::State {};
 struct C1_S1	: FSM::State {};
 struct C1_C2	: FSM::State {};
 struct C1_C2_S1	: FSM::State {};
-
-struct C1_C2_S2
-	: FSM::State
-{
-	void entryGuard(GuardControl& control) {
-		control.cancelPendingTransitions();
-	}
-};
-
+struct C1_C2_S2 : FSM::State {};
 struct O2		: FSM::State {};
 struct O2_C1	: FSM::State {};
 struct O2_C1_S1	: FSM::State {};
@@ -81,11 +74,13 @@ struct O2_C2_S2	: FSM::State {};
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::Instance::STATE_COUNT   == 13, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS ==  5, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::STATE_COUNT	== 13, "");
+static_assert(FSM::Instance::COMPO_REGIONS	==  5, "");
+static_assert(FSM::Instance::COMPO_PRONGS	== 10, "");
+static_assert(FSM::Instance::ORTHO_REGIONS	==  1, "");
+static_assert(FSM::Instance::ORTHO_UNITS	==  1, "");
+static_assert(FSM::Instance::ACTIVE_BITS	==  3, "");
+static_assert(FSM::Instance::RESUMABLE_BITS	== 10, "");
 
 //------------------------------------------------------------------------------
 
@@ -172,11 +167,13 @@ struct O2_C2_S2	: FSM::State {};
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::Instance::STATE_COUNT   == 13, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS ==  5, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::STATE_COUNT	== 13, "");
+static_assert(FSM::Instance::COMPO_REGIONS	==  5, "");
+static_assert(FSM::Instance::COMPO_PRONGS	== 10, "");
+static_assert(FSM::Instance::ORTHO_REGIONS	==  1, "");
+static_assert(FSM::Instance::ORTHO_UNITS	==  1, "");
+static_assert(FSM::Instance::ACTIVE_BITS	==  3, "");
+static_assert(FSM::Instance::RESUMABLE_BITS	== 10, "");
 
 //------------------------------------------------------------------------------
 
@@ -199,23 +196,41 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-static_assert(server::FSM::Instance::STATE_COUNT   == client::FSM::Instance::STATE_COUNT  , "STATE_COUNT");
-static_assert(server::FSM::Instance::COMPO_REGIONS == client::FSM::Instance::COMPO_REGIONS, "COMPO_REGIONS");
-static_assert(server::FSM::Instance::COMPO_PRONGS  == client::FSM::Instance::COMPO_PRONGS , "COMPO_PRONGS");
-static_assert(server::FSM::Instance::ORTHO_REGIONS == client::FSM::Instance::ORTHO_REGIONS, "ORTHO_REGIONS");
-static_assert(server::FSM::Instance::ORTHO_UNITS   == client::FSM::Instance::ORTHO_UNITS  , "ORTHO_UNITS");
+static_assert(server::FSM::Instance::STATE_COUNT	== client::FSM::Instance::STATE_COUNT	, "");
+static_assert(server::FSM::Instance::COMPO_REGIONS	== client::FSM::Instance::COMPO_REGIONS	, "");
+static_assert(server::FSM::Instance::COMPO_PRONGS	== client::FSM::Instance::COMPO_PRONGS	, "");
+static_assert(server::FSM::Instance::ORTHO_REGIONS	== client::FSM::Instance::ORTHO_REGIONS	, "");
+static_assert(server::FSM::Instance::ORTHO_UNITS	== client::FSM::Instance::ORTHO_UNITS	, "");
+static_assert(server::FSM::Instance::ACTIVE_BITS	== client::FSM::Instance::ACTIVE_BITS	, "");
+static_assert(server::FSM::Instance::RESUMABLE_BITS	== client::FSM::Instance::RESUMABLE_BITS, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("FSM.Replication", "[machine]") {
+TEST_CASE("FSM.Serialization", "[machine]") {
 	Logger logger;
+
+	server::FSM::Instance::SerialBuffer buffer;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		server::FSM::Instance authority {&logger};
+		server::FSM::Instance authority;
 		client::FSM::Instance replicated{&logger};
 		{
+			logger.assertSequence({
+				{ hfsm2::StateID{0},						Event::ENTRY_GUARD },
+				{ client::FSM::stateId<client::C1      >(),	Event::ENTRY_GUARD },
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::ENTRY_GUARD },
+
+				{ hfsm2::StateID{0},						Event::CONSTRUCT },
+				{ client::FSM::stateId<client::C1      >(),	Event::CONSTRUCT },
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::CONSTRUCT },
+
+				{ hfsm2::StateID{0}, 						Event::ENTER },
+				{ client::FSM::stateId<client::C1      >(),	Event::ENTER },
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::ENTER },
+			});
+
 			assertActive(authority,  server::all, {
 				server::FSM::stateId<server::C1      >(),
 				server::FSM::stateId<server::C1_S1   >(),
@@ -248,17 +263,35 @@ TEST_CASE("FSM.Replication", "[machine]") {
 				server::FSM::stateId<server::C1      >(),
 				server::FSM::stateId<server::C1_S1   >(),
 			});
-
-			const auto& transitionHistory = authority.transitionHistory();
-			REQUIRE(transitionHistory.count() == 1);
-
-			REQUIRE(transitionHistory[0] == hfsm2::Transition{server::FSM::stateId<server::O2_C1_S2>(),
-															  hfsm2::Method::NONE,
-															  hfsm2::TransitionType::CHANGE});
 		}
+		authority.save(buffer);
 
-		replicated.replayTransition(authority.transitionHistory()[0]);
+		replicated.load(buffer);
 		{
+			logger.assertSequence({
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::EXIT },
+				{ client::FSM::stateId<client::C1      >(),	Event::EXIT },
+				{ hfsm2::StateID{0},						Event::EXIT },
+
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::DESTRUCT },
+				{ client::FSM::stateId<client::C1      >(),	Event::DESTRUCT },
+				{ hfsm2::StateID{0},						Event::DESTRUCT },
+
+				{ hfsm2::StateID{0}, 						Event::CONSTRUCT },
+				{ client::FSM::stateId<client::O2      >(),	Event::CONSTRUCT },
+				{ client::FSM::stateId<client::O2_C1   >(),	Event::CONSTRUCT },
+				{ client::FSM::stateId<client::O2_C1_S2>(),	Event::CONSTRUCT },
+				{ client::FSM::stateId<client::O2_C2   >(),	Event::CONSTRUCT },
+				{ client::FSM::stateId<client::O2_C2_S1>(),	Event::CONSTRUCT },
+
+				{ hfsm2::StateID{0}, 						Event::ENTER },
+				{ client::FSM::stateId<client::O2      >(),	Event::ENTER },
+				{ client::FSM::stateId<client::O2_C1   >(),	Event::ENTER },
+				{ client::FSM::stateId<client::O2_C1_S2>(),	Event::ENTER },
+				{ client::FSM::stateId<client::O2_C2   >(),	Event::ENTER },
+				{ client::FSM::stateId<client::O2_C2_S1>(),	Event::ENTER },
+			});
+
 			assertActive(replicated, client::all, {
 				client::FSM::stateId<client::O2      >(),
 				client::FSM::stateId<client::O2_C1   >(),
@@ -272,78 +305,6 @@ TEST_CASE("FSM.Replication", "[machine]") {
 				client::FSM::stateId<client::C1_S1   >(),
 			});
 		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		authority.changeTo<server::O2_C1_S1>();
-		authority.changeTo<server::O2_C2_S2>();
-		authority.update();
-		{
-			assertActive(authority,  server::all, {
-				server::FSM::stateId<server::O2      >(),
-				server::FSM::stateId<server::O2_C1   >(),
-				server::FSM::stateId<server::O2_C1_S1>(),
-				server::FSM::stateId<server::O2_C2   >(),
-				server::FSM::stateId<server::O2_C2_S2>(),
-			});
-
-			assertResumable(authority, server::all, {
-				server::FSM::stateId<server::C1      >(),
-				server::FSM::stateId<server::C1_S1   >(),
-				server::FSM::stateId<server::O2_C1_S2>(),
-				server::FSM::stateId<server::O2_C2_S1>(),
-			});
-		}
-
-		{
-			const auto& transitionHistory = authority.transitionHistory();
-			REQUIRE(transitionHistory.count() == 2);
-
-			REQUIRE(transitionHistory[0] == hfsm2::Transition{server::FSM::stateId<server::O2_C1_S1>(),
-															  hfsm2::Method::NONE,
-															  hfsm2::TransitionType::CHANGE});
-
-			REQUIRE(transitionHistory[1] == hfsm2::Transition{server::FSM::stateId<server::O2_C2_S2>(),
-															  hfsm2::Method::NONE,
-															  hfsm2::TransitionType::CHANGE});
-		}
-
-		replicated.replayTransitions(&authority.transitionHistory()[0],
-									  authority.transitionHistory().count());
-		{
-			assertActive(replicated, client::all, {
-				client::FSM::stateId<client::O2      >(),
-				client::FSM::stateId<client::O2_C1   >(),
-				client::FSM::stateId<client::O2_C1_S1>(),
-				client::FSM::stateId<client::O2_C2   >(),
-				client::FSM::stateId<client::O2_C2_S2>(),
-			});
-
-			assertResumable(replicated, client::all, {
-				client::FSM::stateId<client::C1      >(),
-				client::FSM::stateId<client::C1_S1   >(),
-				client::FSM::stateId<client::O2_C1_S2>(),
-				client::FSM::stateId<client::O2_C2_S1>(),
-			});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		replicated.reset();
-		{
-			assertActive(replicated, client::all, {
-				client::FSM::stateId<client::C1      >(),
-				client::FSM::stateId<client::C1_S1   >(),
-			});
-
-			assertResumable(replicated, client::all, {});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		authority.changeTo<server::C1_C2_S2>();
-		authority.update();
-		REQUIRE(authority.transitionHistory().count() == 0);
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	}

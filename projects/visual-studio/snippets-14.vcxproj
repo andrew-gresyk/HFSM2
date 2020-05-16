@@ -22,6 +22,7 @@
     <Text Include="..\..\examples\snippets\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\examples\snippets\docs_serialization.cpp" />
     <ClCompile Include="..\..\examples\snippets\main.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_plans.cpp" />
     <ClCompile Include="..\..\examples\snippets\wiki_transitions-within-hierarchy.cpp" />

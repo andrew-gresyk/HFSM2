@@ -4,23 +4,6 @@ namespace hfsm2 {
 
 namespace detail {
 
-template <typename TO, typename TI>
-TO convert(const TI& in) {
-	static_assert(sizeof(TI) == sizeof(TO), "");
-
-	TO out;
-	
-#if defined(__GNUC__) || defined(__GNUG__)
-	memcpy  (&out,				&in, sizeof(in));
-#else
-	memcpy_s(&out, sizeof(out), &in, sizeof(in));
-#endif
-
-	return out;
-}
-
-//------------------------------------------------------------------------------
-
 inline
 float
 uniformReal(const uint32_t uint) {

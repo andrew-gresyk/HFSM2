@@ -1,4 +1,4 @@
-// HFSM (hierarchical state machine for games and interactive applications)
+// HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 //
 // Licensed under the MIT License;
@@ -68,6 +68,7 @@ struct EmptyPayload {};
 #include "detail/shared/iterator.hpp"
 #include "detail/shared/array.hpp"
 #include "detail/shared/bit_array.hpp"
+#include "detail/shared/bit_stream.hpp"
 #include "detail/shared/list.hpp"
 #include "detail/shared/random.hpp"
 #include "detail/shared/type_list.hpp"
@@ -77,7 +78,7 @@ struct EmptyPayload {};
 
 #include "detail/root/plan_data.hpp"
 #include "detail/root/plan.hpp"
-#include "detail/root/state_registry.hpp"
+#include "detail/root/registry.hpp"
 #include "detail/root/control.hpp"
 #include "detail/debug/structure_report.hpp"
 

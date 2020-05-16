@@ -31,11 +31,11 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::access() const {
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRegister(StateRegistry& stateRegistry,
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideRegister(Registry& registry,
 											  const ForkID forkId)
 {
-	initial  .deepRegister(stateRegistry, Parent{forkId, PRONG_INDEX});
-	remaining.wideRegister(stateRegistry, forkId);
+	initial  .deepRegister(registry, Parent{forkId, PRONG_INDEX});
+	remaining.wideRegister(registry, forkId);
 }
 
 //------------------------------------------------------------------------------
@@ -221,27 +221,27 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestChange(Control& control) {
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestRemain(StateRegistry& stateRegistry) {
-	initial	 .deepRequestRemain(stateRegistry);
-	remaining.wideRequestRemain(stateRegistry);
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestRemain(Registry& registry) {
+	initial	 .deepRequestRemain(registry);
+	remaining.wideRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestRestart(StateRegistry& stateRegistry) {
-	initial	 .deepRequestRestart(stateRegistry);
-	remaining.wideRequestRestart(stateRegistry);
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestRestart(Registry& registry) {
+	initial	 .deepRequestRestart(registry);
+	remaining.wideRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
 void
-OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestResume(StateRegistry& stateRegistry) {
-	initial	 .deepRequestResume(stateRegistry);
-	remaining.wideRequestResume(stateRegistry);
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideRequestResume(Registry& registry) {
+	initial	 .deepRequestResume(registry);
+	remaining.wideRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -316,6 +316,54 @@ OS_<TN_, TA_, NI_, TI_, TR_...>::wideGetNames(const LongIndex parent,
 {
 	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
 	remaining.wideGetNames(parent,								   depth, _stateInfos);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+void
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideSaveActive(const Registry& registry,
+												WriteStream& stream) const
+{
+	initial	 .deepSaveActive(registry, stream);
+	remaining.wideSaveActive(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+void
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideSaveResumable(const Registry& registry,
+												   WriteStream& stream) const
+{
+	initial	 .deepSaveResumable(registry, stream);
+	remaining.wideSaveResumable(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+void
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideLoadRequested(Registry& registry,
+												   ReadStream& stream) const
+{
+	initial	 .deepLoadRequested(registry, stream);
+	remaining.wideLoadRequested(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, ShortIndex NI_, typename TI_, typename... TR_>
+void
+OS_<TN_, TA_, NI_, TI_, TR_...>::wideLoadResumable(Registry& registry,
+												   ReadStream& stream) const
+{
+	initial	 .deepLoadResumable(registry, stream);
+	remaining.wideLoadResumable(registry, stream);
 }
 
 #endif

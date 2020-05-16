@@ -5,14 +5,14 @@ namespace detail {
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRegister(StateRegistry& stateRegistry,
+O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
 										const Parent parent)
 {
-	stateRegistry.orthoParents[ORTHO_INDEX] = parent;
-	stateRegistry.orthoUnits[ORTHO_INDEX] = Units{ORTHO_UNIT, WIDTH};
+	registry.orthoParents[ORTHO_INDEX] = parent;
+	registry.orthoUnits[ORTHO_INDEX] = Units{ORTHO_UNIT, WIDTH};
 
-	_headState.deepRegister(stateRegistry, parent);
-	_subStates.wideRegister(stateRegistry, ORTHO_ID);
+	_headState.deepRegister(registry, parent);
+	_subStates.wideRegister(registry, ORTHO_ID);
 }
 
 //------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ void
 O_<TN_, TA_, TH_, TS_...>::deepForwardActive(Control& control,
 											 const Request::Type request)
 {
-	HFSM_ASSERT(control._stateRegistry.isActive(HEAD_ID));
+	HFSM_ASSERT(control._registry.isActive(HEAD_ID));
 
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 	HFSM_ASSERT(!!requested);
@@ -214,7 +214,7 @@ O_<TN_, TA_, TH_, TS_...>::deepRequest(Control& control,
 {
 	switch (request) {
 	case Request::REMAIN:
-		deepRequestRemain (control._stateRegistry);
+		deepRequestRemain (control._registry);
 		break;
 
 	case Request::CHANGE:
@@ -222,11 +222,11 @@ O_<TN_, TA_, TH_, TS_...>::deepRequest(Control& control,
 		break;
 
 	case Request::RESTART:
-		deepRequestRestart(control._stateRegistry);
+		deepRequestRestart(control._registry);
 		break;
 
 	case Request::RESUME:
-		deepRequestResume (control._stateRegistry);
+		deepRequestResume (control._registry);
 		break;
 
 	case Request::UTILIZE:
@@ -254,24 +254,24 @@ O_<TN_, TA_, TH_, TS_...>::deepRequestChange(Control& control) {
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestRemain(StateRegistry& stateRegistry) {
-	_subStates.wideRequestRemain(stateRegistry);
+O_<TN_, TA_, TH_, TS_...>::deepRequestRemain(Registry& registry) {
+	_subStates.wideRequestRemain(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestRestart(StateRegistry& stateRegistry) {
-	_subStates.wideRequestRestart(stateRegistry);
+O_<TN_, TA_, TH_, TS_...>::deepRequestRestart(Registry& registry) {
+	_subStates.wideRequestRestart(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
 void
-O_<TN_, TA_, TH_, TS_...>::deepRequestResume(StateRegistry& stateRegistry) {
-	_subStates.wideRequestResume(stateRegistry);
+O_<TN_, TA_, TH_, TS_...>::deepRequestResume(Registry& registry) {
+	_subStates.wideRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -370,6 +370,50 @@ O_<TN_, TA_, TH_, TS_...>::deepGetNames(const LongIndex parent,
 {
 	_headState.deepGetNames(parent, region,			 depth,		_stateInfos);
 	_subStates.wideGetNames(_stateInfos.count() - 1, depth + 1, _stateInfos);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+void
+O_<TN_, TA_, TH_, TS_...>::deepSaveActive(const Registry& registry,
+										  WriteStream& stream) const
+{
+	_subStates.wideSaveActive(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+void
+O_<TN_, TA_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
+											 WriteStream& stream) const
+{
+	_subStates.wideSaveResumable(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+void
+O_<TN_, TA_, TH_, TS_...>::deepLoadRequested(Registry& registry,
+											 ReadStream& stream) const
+{
+	_subStates.wideLoadRequested(registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
+void
+O_<TN_, TA_, TH_, TS_...>::deepLoadResumable(Registry& registry,
+											 ReadStream& stream) const
+{
+	_subStates.wideLoadResumable(registry, stream);
 }
 
 #endif

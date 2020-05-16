@@ -27,9 +27,9 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 
-	using StateRegistry	= StateRegistryT<Args>;
-	using StateParents	= typename StateRegistry::StateParents;
-	using OrthoForks	= typename StateRegistry::AllForks::Ortho;
+	using Registry		= RegistryT<Args>;
+	using StateParents	= typename Registry::StateParents;
+	using OrthoForks	= typename Registry::OrthoForks;
 	using ProngBits		= typename OrthoForks::Bits;
 	using ProngConstBits= typename OrthoForks::ConstBits;
 
@@ -61,18 +61,16 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
 	template <typename T>
 	HFSM_INLINE		  T& access();
 
 	template <typename T>
 	HFSM_INLINE const T& access() const;
-
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
+	HFSM_INLINE void	wideRegister		 (Registry& registry, const ForkID forkId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -106,9 +104,9 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRequestChange	 (Control& control);
-	HFSM_INLINE void	wideRequestRemain	 (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestRestart	 (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestResume	 (StateRegistry& stateRegistry);
+	HFSM_INLINE void	wideRequestRemain	 (Registry& registry);
+	HFSM_INLINE void	wideRequestRestart	 (Registry& registry);
+	HFSM_INLINE void	wideRequestResume	 (Registry& registry);
 	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
 	HFSM_INLINE void	wideRequestRandomize (Control& control);
 
@@ -120,6 +118,8 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
+	//----------------------------------------------------------------------
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
@@ -130,11 +130,26 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 					  StructureStateInfos& stateInfos) const;
 #endif
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream) const;
+	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream) const;
+
+	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream) const;
+	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	//----------------------------------------------------------------------
+
 	Initial initial;
 	Remaining remaining;
 };
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename TIndices,
 		  typename TArgs,
@@ -154,9 +169,9 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
 
-	using StateRegistry	= StateRegistryT<Args>;
-	using StateParents	= typename StateRegistry::StateParents;
-	using OrthoForks	= typename StateRegistry::AllForks::Ortho;
+	using Registry		= RegistryT<Args>;
+	using StateParents	= typename Registry::StateParents;
+	using OrthoForks	= typename Registry::OrthoForks;
 	using ProngBits		= typename OrthoForks::Bits;
 	using ProngConstBits= typename OrthoForks::ConstBits;
 
@@ -177,18 +192,16 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
 	template <typename T>
 	HFSM_INLINE		  T& access()			 { return initial.template access<T>();	}
 
 	template <typename T>
 	HFSM_INLINE const T& access() const		 { return initial.template access<T>();	}
-
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRegister		 (StateRegistry& stateRegistry, const ForkID forkId);
+	HFSM_INLINE void	wideRegister		 (Registry& registry, const ForkID forkId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -222,9 +235,9 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideRequestChange	 (Control& control);
-	HFSM_INLINE void	wideRequestRemain	 (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestRestart	 (StateRegistry& stateRegistry);
-	HFSM_INLINE void	wideRequestResume	 (StateRegistry& stateRegistry);
+	HFSM_INLINE void	wideRequestRemain	 (Registry& registry);
+	HFSM_INLINE void	wideRequestRestart	 (Registry& registry);
+	HFSM_INLINE void	wideRequestResume	 (Registry& registry);
 	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
 	HFSM_INLINE void	wideRequestRandomize (Control& control);
 
@@ -236,6 +249,8 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
+	//----------------------------------------------------------------------
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
@@ -245,6 +260,21 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream) const;
+	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream) const;
+
+	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream) const;
+	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	//----------------------------------------------------------------------
 
 	Initial initial;
 };

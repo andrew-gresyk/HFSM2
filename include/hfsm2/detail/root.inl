@@ -11,7 +11,7 @@ R_<TG_, TA_>::R_(Context& context,
 	, _rng{rng}
 	HFSM_IF_LOGGER(, _logger{logger})
 {
-	_apex.deepRegister(_stateRegistry, Parent{});
+	_apex.deepRegister(_registry, Parent{});
 
 	HFSM_IF_STRUCTURE(getStateNames());
 
@@ -24,7 +24,7 @@ template <typename TG_, typename TA_>
 R_<TG_, TA_>::~R_() {
 	PlanControl control{_context,
 						_rng,
-						_stateRegistry,
+						_registry,
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
 
@@ -41,7 +41,7 @@ void
 R_<TG_, TA_>::update() {
 	FullControl control(_context,
 						_rng,
-						_stateRegistry,
+						_registry,
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr));
@@ -63,7 +63,7 @@ void
 R_<TG_, TA_>::react(const TEvent& event) {
 	FullControl control{_context,
 						_rng,
-						_stateRegistry,
+						_registry,
 						_planData,
 						_requests,
 						HFSM_LOGGER_OR(_logger, nullptr)};
@@ -151,14 +151,14 @@ R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
 
 		PlanControl control{_context,
 							_rng,
-							_stateRegistry,
+							_registry,
 							_planData,
 							HFSM_LOGGER_OR(_logger, nullptr)};
 
 		if (applyRequests(control, transitions, count)) {
 			_apex.deepChangeToRequested(control);
 
-			_stateRegistry.clearRequests();
+			_registry.clearRequests();
 
 			HFSM_IF_ASSERT(_planData.verifyPlans());
 		}
@@ -173,19 +173,74 @@ R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
 
 template <typename TG_, typename TA_>
 void
+R_<TG_, TA_>::reset() {
+	PlanControl control{_context,
+						_rng,
+						_registry,
+						_planData,
+						HFSM_LOGGER_OR(_logger, nullptr)};
+
+	_apex.deepExit	   (control);
+	_apex.deepDestruct (control);
+
+	_registry.reset();
+
+	_apex.deepRequestChange(control);
+	_apex.deepConstruct(control);
+	_apex.deepEnter	   (control);
+}
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+
+template <typename TG_, typename TA_>
+void
+R_<TG_, TA_>::save(SerialBuffer& _buffer) const {
+	WriteStream stream{_buffer};
+
+	_apex.deepSaveActive(_registry, stream);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG_, typename TA_>
+void
+R_<TG_, TA_>::load(const SerialBuffer& buffer) {
+	PlanControl control{_context,
+						_rng,
+						_registry,
+						_planData,
+						HFSM_LOGGER_OR(_logger, nullptr)};
+
+	_apex.deepExit	   (control);
+	_apex.deepDestruct (control);
+
+	ReadStream stream{buffer};
+	_apex.deepLoadRequested(_registry, stream);
+
+	_apex.deepConstruct(control);
+	_apex.deepEnter	   (control);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+template <typename TG_, typename TA_>
+void
 R_<TG_, TA_>::initialEnter() {
 	HFSM_ASSERT(_requests.count() == 0);
 	HFSM_IF_TRANSITION_HISTORY(HFSM_ASSERT(_transitionHistory.count() == 0));
 
-	CompoForks undoResumable;
-	AllForks   undoRequested;
+	RegistryBackUp undo;
 	HFSM_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
 
 	Requests lastRequests;
 
 	PlanControl control{_context,
 						_rng,
-						_stateRegistry,
+						_registry,
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
 
@@ -197,8 +252,7 @@ R_<TG_, TA_>::initialEnter() {
 		 i < SUBSTITUTION_LIMIT && _requests.count();
 		 ++i)
 	{
-		undoResumable = _stateRegistry.resumable;
-		undoRequested = _stateRegistry.requested;
+		backup(_registry, undo);
 		HFSM_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
 
 		if (applyRequests(control)) {
@@ -206,8 +260,7 @@ R_<TG_, TA_>::initialEnter() {
 			_requests.clear();
 
 			if (cancelledByEntryGuards(lastRequests)) {
-				_stateRegistry.resumable = undoResumable;
-				_stateRegistry.requested = undoRequested;
+				restore(_registry, undo);
 				HFSM_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
 			}
 		} else
@@ -218,7 +271,7 @@ R_<TG_, TA_>::initialEnter() {
 	_apex.deepConstruct(control);
 	_apex.deepEnter	   (control);
 
-	_stateRegistry.clearRequests();
+	_registry.clearRequests();
 
 	HFSM_IF_ASSERT(_planData.verifyPlans());
 
@@ -234,15 +287,14 @@ R_<TG_, TA_>::processTransitions() {
 
 	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
 
-	CompoForks undoResumable;
-	AllForks   undoRequested;
+	RegistryBackUp undo;
 	HFSM_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
 
 	Requests lastRequests;
 
 	PlanControl control{_context,
 						_rng,
-						_stateRegistry,
+						_registry,
 						_planData,
 						HFSM_LOGGER_OR(_logger, nullptr)};
 
@@ -252,8 +304,7 @@ R_<TG_, TA_>::processTransitions() {
 		i < SUBSTITUTION_LIMIT && _requests.count();
 		++i)
 	{
-		undoResumable = _stateRegistry.resumable;
-		undoRequested = _stateRegistry.requested;
+		backup(_registry, undo);
 		HFSM_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
 
 		if (applyRequests(control)) {
@@ -261,8 +312,7 @@ R_<TG_, TA_>::processTransitions() {
 			_requests.clear();
 
 			if (cancelledByGuards(lastRequests)) {
-				_stateRegistry.resumable = undoResumable;
-				_stateRegistry.requested = undoRequested;
+				restore(_registry, undo);
 				HFSM_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
 			} else
 				changesMade = true;
@@ -273,7 +323,7 @@ R_<TG_, TA_>::processTransitions() {
 	if (changesMade) {
 		_apex.deepChangeToRequested(control);
 
-		_stateRegistry.clearRequests();
+		_registry.clearRequests();
 
 		HFSM_IF_ASSERT(_planData.verifyPlans());
 	}
@@ -294,7 +344,7 @@ R_<TG_, TA_>::applyRequest(Control& control, const Request& request) {
 	case Request::RESUME:
 	case Request::UTILIZE:
 	case Request::RANDOMIZE:
-		if (_stateRegistry.requestImmediate(request))
+		if (_registry.requestImmediate(request))
 			_apex.deepForwardActive(control, request.type);
 		else
 			_apex.deepRequest	   (control, request.type);
@@ -302,7 +352,7 @@ R_<TG_, TA_>::applyRequest(Control& control, const Request& request) {
 		return true;
 
 	case Request::SCHEDULE:
-		_stateRegistry.requestScheduled(request.stateId);
+		_registry.requestScheduled(request.stateId);
 
 		return false;
 
@@ -356,7 +406,7 @@ bool
 R_<TG_, TA_>::cancelledByEntryGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context,
 							  _rng,
-							  _stateRegistry,
+							  _registry,
 							  _planData,
 							  _requests,
 							  pendingRequests,
@@ -377,7 +427,7 @@ bool
 R_<TG_, TA_>::cancelledByGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context,
 							  _rng,
-							  _stateRegistry,
+							  _registry,
 							  _planData,
 							  _requests,
 							  pendingRequests,
@@ -504,7 +554,7 @@ R_<TG_, TA_>::udpateActivity() {
 
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 

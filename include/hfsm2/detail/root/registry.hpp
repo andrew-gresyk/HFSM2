@@ -74,19 +74,14 @@ using RequestsT = Array<Request, NCount>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NCompoCount, LongIndex NOrthoCount, LongIndex NOrthoUnits>
-struct AllForksT {
-	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
-	static constexpr ShortIndex ORTHO_REGIONS = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
+template <typename TRegistry>
+struct BackUpT {
+	using CompoForks = typename TRegistry::CompoForks;
+	using OrthoForks = typename TRegistry::OrthoForks;
 
-	using Compo = StaticArray<ShortIndex, COMPO_REGIONS>;
-	using Ortho = BitArray	 <ShortIndex, ORTHO_UNITS>;
-
-	Compo compo{INVALID_SHORT_INDEX};
-	Ortho ortho;
-
-	HFSM_INLINE void clear();
+	CompoForks compoRequested;
+	OrthoForks orthoRequested;
+	CompoForks compoResumable;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,11 +93,12 @@ template <typename,
 		  LongIndex,
 		  LongIndex,
 		  LongIndex,
+		  LongIndex,
 		  LongIndex>
 struct ArgsT;
 
 template <typename>
-struct StateRegistryT;
+struct RegistryT;
 
 //------------------------------------------------------------------------------
 
@@ -113,23 +109,25 @@ template <typename TContext,
 		  LongIndex NCompoCount,
 		  LongIndex NOrthoCount,
 		  LongIndex NOrthoUnits,
+		  LongIndex NSerialBits,
 		  LongIndex NTaskCapacity>
-struct StateRegistryT<ArgsT<TContext,
-							TConfig,
-							TStateList,
-							TRegionList,
-							NCompoCount,
-							NOrthoCount,
-							NOrthoUnits,
-							NTaskCapacity>>
+struct RegistryT<ArgsT<TContext,
+					   TConfig,
+					   TStateList,
+					   TRegionList,
+					   NCompoCount,
+					   NOrthoCount,
+					   NOrthoUnits,
+					   NSerialBits,
+					   NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
-	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
-	static constexpr ShortIndex ORTHO_REGIONS = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
+	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
+	static constexpr ShortIndex COMPO_REGIONS	= NCompoCount;
+	static constexpr ShortIndex ORTHO_REGIONS	= NOrthoCount;
+	static constexpr ShortIndex ORTHO_UNITS		= NOrthoUnits;
 
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
 
@@ -138,10 +136,11 @@ struct StateRegistryT<ArgsT<TContext,
 	using OrthoUnits	= StaticArray<Units,  ORTHO_UNITS>;
 
 	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
-	using AllForks		= AllForksT<COMPO_REGIONS, ORTHO_REGIONS, ORTHO_UNITS>;
-	using OrthoBits		= typename AllForks::Ortho::Bits;
+	using OrthoForks	= BitArray	 <ShortIndex, ORTHO_UNITS>;
+	using OrthoBits		= typename OrthoForks::Bits;
+	using CompoRemains	= BitArray	 <ShortIndex, COMPO_REGIONS>;
 
-	using CompoRemains	= BitArray<ShortIndex, COMPO_REGIONS>;
+	using BackUp		= BackUpT<RegistryT>;
 
 	bool isActive		(const StateID stateId) const;
 	bool isResumable	(const StateID stateId) const;
@@ -158,16 +157,18 @@ struct StateRegistryT<ArgsT<TContext,
 	void requestScheduled(const StateID stateId);
 
 	void clearRequests();
+	void reset();
 
 	StateParents stateParents;
 	CompoParents compoParents;
 	OrthoParents orthoParents;
 	OrthoUnits orthoUnits;
 
-	CompoForks compoActive{INVALID_SHORT_INDEX};
-	CompoForks resumable  {INVALID_SHORT_INDEX};
+	CompoForks compoRequested{INVALID_SHORT_INDEX};
+	OrthoForks orthoRequested;
+	CompoForks compoActive	 {INVALID_SHORT_INDEX};
+	CompoForks compoResumable{INVALID_SHORT_INDEX};
 
-	AllForks requested;
 	CompoRemains compoRemains;
 };
 
@@ -178,28 +179,32 @@ template <typename TContext,
 		  typename TStateList,
 		  typename TRegionList,
 		  LongIndex NCompoCount,
+		  LongIndex NSerialBits,
 		  LongIndex NTaskCapacity>
-struct StateRegistryT<ArgsT<TContext,
-							TConfig,
-							TStateList,
-							TRegionList,
-							NCompoCount,
-							0,
-							0,
-							NTaskCapacity>>
+struct RegistryT<ArgsT<TContext,
+					   TConfig,
+					   TStateList,
+					   TRegionList,
+					   NCompoCount,
+					   0,
+					   0,
+					   NSerialBits,
+					   NTaskCapacity>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr LongIndex  STATE_COUNT = StateList::SIZE;
-	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
+	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
+	static constexpr ShortIndex COMPO_REGIONS	= NCompoCount;
 
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
 	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
 
 	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
-	using AllForks		= AllForksT<COMPO_REGIONS, 0, 0>;
-	using CompoRemains	= BitArray<ShortIndex, COMPO_REGIONS>;
+	using OrthoForks	= BitArray	 <ShortIndex, 0>;
+	using CompoRemains	= BitArray	 <ShortIndex, COMPO_REGIONS>;
+
+	using BackUp		= BackUpT<RegistryT>;
 
 	bool isActive		(const StateID stateId) const;
 	bool isResumable	(const StateID stateId) const;
@@ -214,20 +219,42 @@ struct StateRegistryT<ArgsT<TContext,
 	void requestScheduled(const StateID stateId);
 
 	void clearRequests();
+	void reset();
 
 	StateParents stateParents;
 	CompoParents compoParents;
 
-	CompoForks compoActive{INVALID_SHORT_INDEX};
-	CompoForks resumable  {INVALID_SHORT_INDEX};
+	CompoForks compoRequested{INVALID_SHORT_INDEX};
+	OrthoForks orthoRequested;
+	CompoForks compoActive	 {INVALID_SHORT_INDEX};
+	CompoForks compoResumable{INVALID_SHORT_INDEX};
 
-	AllForks requested;
 	CompoRemains compoRemains;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TRegistry>
+void
+backup(const TRegistry& registry, BackUpT<TRegistry>& copy) {
+	overwrite(copy.compoRequested, registry.compoRequested);
+	overwrite(copy.orthoRequested, registry.orthoRequested);
+	overwrite(copy.compoResumable, registry.compoResumable);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TRegistry>
+void
+restore(TRegistry& registry, const BackUpT<TRegistry>& copy) {
+	overwrite(registry.compoRequested, copy.compoRequested);
+	overwrite(registry.orthoRequested, copy.orthoRequested);
+	overwrite(registry.compoResumable, copy.compoResumable);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 }
 }
 
-#include "state_registry.inl"
+#include "registry.inl"
