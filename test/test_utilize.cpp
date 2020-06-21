@@ -1,3 +1,4 @@
+#define HFSM_ENABLE_UTILITY_THEORY
 #define HFSM_ENABLE_VERBOSE_DEBUG_LOG
 #include "shared.hpp"
 

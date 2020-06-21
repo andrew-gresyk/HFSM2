@@ -1,3 +1,4 @@
+#define HFSM_ENABLE_UTILITY_THEORY
 #include "../shared.hpp"
 
 namespace test_random {

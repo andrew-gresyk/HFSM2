@@ -1,4 +1,4 @@
-#pragma once
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
 namespace hfsm2 {
 
@@ -99,5 +99,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+
+#endif
 
 #include "random.inl"

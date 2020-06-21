@@ -23,9 +23,12 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
 
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
@@ -107,30 +110,21 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	HFSM_INLINE void	wideRequestRemain	 (Registry& registry);
 	HFSM_INLINE void	wideRequestRestart	 (Registry& registry);
 	HFSM_INLINE void	wideRequestResume	 (Registry& registry);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
 	HFSM_INLINE void	wideRequestRandomize (Control& control);
 
 	HFSM_INLINE Utility	wideReportChange	 (Control& control);
 	HFSM_INLINE Utility	wideReportUtilize	 (Control& control);
 	HFSM_INLINE Utility	wideReportRandomize	 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using StructureStateInfos = typename Args::StructureStateInfos;
-
-	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
-
-	void wideGetNames(const LongIndex parent,
-					  const ShortIndex depth,
-					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 	using WriteStream	= typename Args::WriteStream;
@@ -141,6 +135,18 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream) const;
 	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
+	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
+
+	void wideGetNames(const LongIndex parent,
+					  const ShortIndex depth,
+					  StructureStateInfos& stateInfos) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -165,9 +171,12 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
 
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
@@ -238,30 +247,21 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	HFSM_INLINE void	wideRequestRemain	 (Registry& registry);
 	HFSM_INLINE void	wideRequestRestart	 (Registry& registry);
 	HFSM_INLINE void	wideRequestResume	 (Registry& registry);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
 	HFSM_INLINE void	wideRequestRandomize (Control& control);
 
 	HFSM_INLINE Utility	wideReportChange	 (Control& control);
 	HFSM_INLINE Utility	wideReportUtilize	 (Control& control);
 	HFSM_INLINE Utility	wideReportRandomize	 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using StructureStateInfos = typename Args::StructureStateInfos;
-
-	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
-
-	void wideGetNames(const LongIndex parent,
-					  const ShortIndex depth,
-					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 	using WriteStream	= typename Args::WriteStream;
@@ -272,6 +272,18 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream) const;
 	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
+	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
+
+	void wideGetNames(const LongIndex parent,
+					  const ShortIndex depth,
+					  StructureStateInfos& stateInfos) const;
 #endif
 
 	//----------------------------------------------------------------------

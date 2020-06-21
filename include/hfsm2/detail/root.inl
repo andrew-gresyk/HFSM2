@@ -4,12 +4,12 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TG, typename TA>
-R_<TG, TA>::R_(Context& context,
-			   RNG& rng
-			   HFSM_IF_LOGGER(, Logger* const logger))
+R_<TG, TA>::R_(Context& context
+			   HFSM_IF_UTILITY_THEORY(, RNG& rng)
+			   HFSM_IF_LOG_INTERFACE(, Logger* const logger))
 	: _context{context}
-	, _rng{rng}
-	HFSM_IF_LOGGER(, _logger{logger})
+	HFSM_IF_UTILITY_THEORY(, _rng{rng})
+	HFSM_IF_LOG_INTERFACE(, _logger{logger})
 {
 	_apex.deepRegister(_registry, Parent{});
 
@@ -22,11 +22,11 @@ R_<TG, TA>::R_(Context& context,
 
 template <typename TG, typename TA>
 R_<TG, TA>::~R_() {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	  (control);
 	_apex.deepDestruct(control);
@@ -39,12 +39,12 @@ R_<TG, TA>::~R_() {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::update() {
-	FullControl control(_context,
-						_rng,
-						_registry,
-						_planData,
-						_requests,
-						HFSM_LOGGER_OR(_logger, nullptr));
+	FullControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						, _requests
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepUpdate(control);
 
@@ -62,12 +62,12 @@ template <typename TG, typename TA>
 template <typename TEvent>
 void
 R_<TG, TA>::react(const TEvent& event) {
-	FullControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						_requests,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	FullControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						, _requests
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepReact(control, event);
 
@@ -111,6 +111,8 @@ R_<TG, TA>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TG, typename TA>
 void
 R_<TG, TA>::utilize(const StateID stateId) {
@@ -129,6 +131,8 @@ R_<TG, TA>::randomize(const StateID stateId) {
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
+#endif
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
@@ -141,46 +145,14 @@ R_<TG, TA>::schedule(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-
-template <typename TG, typename TA>
-void
-R_<TG, TA>::replayTransitions(const Transition* const transitions,
-							  const uint64_t count)
-{
-	if (HFSM_CHECKED(transitions && count)) {
-		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
-
-		PlanControl control{_context,
-							_rng,
-							_registry,
-							_planData,
-							HFSM_LOGGER_OR(_logger, nullptr)};
-
-		if (applyRequests(control, transitions, count)) {
-			_apex.deepChangeToRequested(control);
-
-			_registry.clearRequests();
-
-			HFSM_IF_ASSERT(_planData.verifyPlans());
-		}
-
-		HFSM_IF_STRUCTURE(udpateActivity());
-	}
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
 template <typename TG, typename TA>
 void
 R_<TG, TA>::reset() {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
 	_apex.deepDestruct (control);
@@ -209,11 +181,11 @@ R_<TG, TA>::save(SerialBuffer& _buffer) const {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::load(const SerialBuffer& buffer) {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
 	_apex.deepDestruct (control);
@@ -223,6 +195,38 @@ R_<TG, TA>::load(const SerialBuffer& buffer) {
 
 	_apex.deepConstruct(control);
 	_apex.deepEnter	   (control);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+template <typename TG, typename TA>
+void
+R_<TG, TA>::replayTransitions(const Transition* const transitions,
+							  const uint64_t count)
+{
+	if (HFSM_CHECKED(transitions && count)) {
+		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
+
+		PlanControl control{_context
+							HFSM_IF_UTILITY_THEORY(, _rng)
+							, _registry
+							, _planData
+							HFSM_IF_LOG_INTERFACE(, _logger)};
+
+		if (applyRequests(control, transitions, count)) {
+			_apex.deepChangeToRequested(control);
+
+			_registry.clearRequests();
+
+			HFSM_IF_ASSERT(_planData.verifyPlans());
+		}
+
+		HFSM_IF_STRUCTURE(udpateActivity());
+	}
 }
 
 #endif
@@ -240,11 +244,11 @@ R_<TG, TA>::initialEnter() {
 
 	Requests lastRequests;
 
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepRequestChange(control);
 
@@ -294,11 +298,11 @@ R_<TG, TA>::processTransitions() {
 
 	Requests lastRequests;
 
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	bool changesMade = false;
 
@@ -346,8 +350,12 @@ R_<TG, TA>::applyRequest(Control& control,
 	case Request::CHANGE:
 	case Request::RESTART:
 	case Request::RESUME:
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	case Request::UTILIZE:
 	case Request::RANDOMIZE:
+#endif
+
 		if (_registry.requestImmediate(request))
 			_apex.deepForwardActive(control, request.type);
 		else
@@ -380,7 +388,53 @@ R_<TG, TA>::applyRequests(Control& control) {
 	return changesMade;
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TG, typename TA>
+bool
+R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
+	GuardControl guardControl{_context
+							  HFSM_IF_UTILITY_THEORY(, _rng)
+							  , _registry
+							  , _planData
+							  , _requests
+							  , pendingRequests
+							  HFSM_IF_LOG_INTERFACE(, _logger)};
+
+	if (_apex.deepEntryGuard(guardControl)) {
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
+
+		return true;
+	} else
+		return false;
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+bool
+R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
+	GuardControl guardControl{_context
+							  HFSM_IF_UTILITY_THEORY(, _rng)
+							  , _registry
+							  , _planData
+							  , _requests
+							  , pendingRequests
+							  HFSM_IF_LOG_INTERFACE(, _logger)};
+
+	if (_apex.deepForwardExitGuard(guardControl)) {
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::EXIT_GUARD));
+
+		return true;
+	} else if (_apex.deepForwardEntryGuard(guardControl)) {
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
+
+		return true;
+	} else
+		return false;
+}
+
+//------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
@@ -401,53 +455,16 @@ R_<TG, TA>::applyRequests(Control& control,
 		return false;
 }
 
-#endif
-
-//------------------------------------------------------------------------------
-
-template <typename TG, typename TA>
-bool
-R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
-	GuardControl guardControl{_context,
-							  _rng,
-							  _registry,
-							  _planData,
-							  _requests,
-							  pendingRequests,
-							  HFSM_LOGGER_OR(_logger, nullptr)};
-
-	if (_apex.deepEntryGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
-
-		return true;
-	} else
-		return false;
-}
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
-bool
-R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
-	GuardControl guardControl{_context,
-							  _rng,
-							  _registry,
-							  _planData,
-							  _requests,
-							  pendingRequests,
-							  HFSM_LOGGER_OR(_logger, nullptr)};
-
-	if (_apex.deepForwardExitGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::EXIT_GUARD));
-
-		return true;
-	} else if (_apex.deepForwardEntryGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
-
-		return true;
-	} else
-		return false;
+void
+R_<TG, TA>::recordRequestsAs(const Method method) {
+	for (const auto& request : _requests)
+		_transitionHistory.append(Transition{request, method});
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -554,19 +571,6 @@ R_<TG, TA>::udpateActivity() {
 
 			++i;
 		}
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-
-template <typename TG, typename TA>
-void
-R_<TG, TA>::recordRequestsAs(const Method method) {
-	for (const auto& request : _requests)
-		_transitionHistory.append(Transition{request, method});
 }
 
 #endif

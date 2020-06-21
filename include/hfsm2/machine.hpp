@@ -40,30 +40,23 @@
 	#include <intrin.h>		// __debugbreak()
 #endif
 
-#define HFSM_INLINE														  //inline
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 
-namespace hfsm2 {
-
-struct EmptyContext {};
-struct EmptyPayload {};
-
-}
-
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
 #ifdef __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
 #endif
+
 #if defined(__GNUC__) || defined(__GNUG__)
 	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic" // error: extra ‘;’
+	#pragma GCC diagnostic ignored "-Wpedantic" // error : extra ';'
 #endif
 
+////////////////////////////////////////////////////////////////////////////////
+
+#define HFSM_INLINE														//inline
 
 //------------------------------------------------------------------------------
 
@@ -109,13 +102,53 @@ struct EmptyPayload {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
+	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#endif
 
-	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
+//------------------------------------------------------------------------------
 
-	#define HFSM_LOGGER_OR(Y, N)												Y
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+	#define HFSM_IF_UTILITY_THEORY(...)								 __VA_ARGS__
+#else
+	#define HFSM_IF_UTILITY_THEORY(...)
+#endif
 
-	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		\
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	#define HFSM_IF_SERIALIZATION(...)								 __VA_ARGS__
+#else
+	#define HFSM_IF_SERIALIZATION(...)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+	#define HFSM_IF_TRANSITION_HISTORY(...)							 __VA_ARGS__
+#else
+	#define HFSM_IF_TRANSITION_HISTORY(...)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	#define HFSM_IF_STRUCTURE(...)									 __VA_ARGS__
+#else
+	#define HFSM_IF_STRUCTURE(...)
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_VERBOSE_DEBUG_LOG
+	#define HFSM_ENABLE_LOG_INTERFACE
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+
+	#define HFSM_IF_LOG_INTERFACE(...)								 __VA_ARGS__
+
+	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)				\
 		if (_logger)															\
 			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
 
@@ -131,6 +164,8 @@ struct EmptyPayload {};
 		if (_logger)															\
 			_logger->recordCancelledPending(CONTEXT, ORIGIN)
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	#define HFSM_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
 		if (auto* const logger = control.logger())								\
 			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
@@ -139,23 +174,27 @@ struct EmptyPayload {};
 		if (auto* const logger = control.logger())								\
 			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
+#endif
+
 #else
 
-	#define HFSM_IF_LOGGER(...)
-	#define HFSM_LOGGER_OR(Y, N)												N
+	#define HFSM_IF_LOG_INTERFACE(...)
 
 	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)
 	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)
 	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)
 	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	#define HFSM_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
 	#define HFSM_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
+#endif
 
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+#ifdef HFSM_ENABLE_VERBOSE_DEBUG_LOG
 
 	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)					\
 		if (auto* const logger = control.logger())								\
@@ -171,39 +210,14 @@ struct EmptyPayload {};
 	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	#define HFSM_IF_STRUCTURE(...)									  __VA_ARGS__
-#else
-	#define HFSM_IF_STRUCTURE(...)
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-	#define HFSM_IF_TRANSITION_HISTORY(...)							  __VA_ARGS__
-#else
-	#define HFSM_IF_TRANSITION_HISTORY(...)
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	#define HFSM_IF_SERIALIZATION(...)								  __VA_ARGS__
-#else
-	#define HFSM_IF_SERIALIZATION(...)
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
-	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+////////////////////////////////////////////////////////////////////////////////
 
 namespace hfsm2 {
+
+//------------------------------------------------------------------------------
+
+struct EmptyContext {};
+struct EmptyPayload {};
 
 //------------------------------------------------------------------------------
 
@@ -237,7 +251,7 @@ fill(T& a, const char value) {
 	memset(&a, (int) value, sizeof(a));
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 template <typename T, unsigned NCount>
 constexpr
@@ -372,7 +386,6 @@ struct StaticAssertEquality<V1, V1> {};
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -494,7 +507,6 @@ Iterator<const T>::operator ++() {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -588,7 +600,17 @@ private:
 
 private:
 	LongIndex _count = 0;
-	Item _items[CAPACITY];
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	Item _items[CAPACITY]; // warning 4324 triggers for 'StructureStateInfo'
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -681,7 +703,6 @@ Array<T, NC>::operator[] (const N i) const {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -1131,7 +1152,6 @@ BitArray<TI, NC>::bits(const Units& units) const {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -1201,7 +1221,6 @@ private:
 
 }
 }
-
 
 namespace hfsm2 {
 namespace detail {
@@ -1295,7 +1314,6 @@ BitReadStream<NBC>::read() {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -1532,6 +1550,7 @@ List<T, NC>::verifyStructure(const Index occupied) const {
 
 }
 }
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
 namespace hfsm2 {
 
@@ -1632,6 +1651,10 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+
+#endif
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
 namespace hfsm2 {
 
@@ -1931,6 +1954,7 @@ XoShiRo128Plus::raw() {
 
 }
 
+#endif
 namespace hfsm2 {
 namespace detail {
 
@@ -2097,7 +2121,6 @@ using SplitR = typename GreaterT<sizeof...(Ts) / 2, 0, Ts...>::Type;
 }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace hfsm2 {
@@ -2105,8 +2128,11 @@ namespace hfsm2 {
 enum class Method : uint8_t {
 	NONE,
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	RANK,
 	UTILITY,
+#endif
+
 	ENTRY_GUARD,
 	CONSTRUCT,
 	ENTER,
@@ -2126,8 +2152,12 @@ enum class TransitionType : uint8_t {
 	CHANGE,
 	RESTART,
 	RESUME,
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	UTILIZE,
 	RANDOMIZE,
+#endif
+
 	SCHEDULE,
 
 	COUNT
@@ -2172,8 +2202,12 @@ static inline
 const char*
 methodName(const Method method) {
 	switch (method) {
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	case Method::RANK:			 return "rank";
 	case Method::UTILITY:		 return "utility";
+#endif
+
 	case Method::ENTRY_GUARD:	 return "entryGuard";
 	case Method::ENTER:			 return "enter";
 	case Method::CONSTRUCT:		 return "construct";
@@ -2201,8 +2235,12 @@ transitionName(const TransitionType transitionType) {
 	case TransitionType::CHANGE:	return "changeTo";
 	case TransitionType::RESTART:	return "restart";
 	case TransitionType::RESUME:	return "resume";
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	case TransitionType::UTILIZE:	return "utilize";
 	case TransitionType::RANDOMIZE:	return "randomize";
+#endif
+
 	case TransitionType::SCHEDULE:	return "schedule";
 
 	default:
@@ -2214,18 +2252,25 @@ transitionName(const TransitionType transitionType) {
 ////////////////////////////////////////////////////////////////////////////////
 
 }
-
 namespace hfsm2 {
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+#ifdef HFSM_ENABLE_LOG_INTERFACE
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext = EmptyContext,
-		  typename TUtilty = float>
+template <typename TContext = EmptyContext
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+		, typename TUtilty = float
+#endif
+
+		  >
 struct LoggerInterfaceT {
 	using Context		 = TContext;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Utilty		 = TUtilty;
+#endif
 
 	using Method		 = ::hfsm2::Method;
 	using StateID		 = ::hfsm2::StateID;
@@ -2259,6 +2304,8 @@ struct LoggerInterfaceT {
 										const StateID /*origin*/)
 	{}
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	virtual void recordUtilityResolution(Context& /*context*/,
 										 const StateID /*head*/,
 										 const StateID /*prong*/,
@@ -2270,6 +2317,8 @@ struct LoggerInterfaceT {
 										const StateID /*prong*/,
 										const Utilty /*utilty*/)
 	{}
+
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2494,7 +2543,7 @@ struct Status {
 	inline Status(const Result result_ = NONE,
 				  const bool outerTransition_ = false);
 
-	inline explicit operator bool() const { return result || outerTransition; }
+	inline explicit operator bool() const										{ return result || outerTransition;									}
 
 	inline void clear();
 };
@@ -2547,8 +2596,8 @@ public:
 
 		HFSM_INLINE void operator ++();
 
-		HFSM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
-		HFSM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE const TaskLink& operator  *() const							{ return  _plan._planData.taskLinks[_curr];							}
+		HFSM_INLINE const TaskLink* operator ->() const							{ return &_plan._planData.taskLinks[_curr];							}
 
 		HFSM_INLINE LongIndex next() const;
 
@@ -2564,15 +2613,15 @@ private:
 						   const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()											{ return			StateList ::template index<T>();				}
 
 	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()										{ return (RegionID) RegionList::template index<T>();				}
 
 public:
 	HFSM_INLINE explicit operator bool() const;
 
-	HFSM_INLINE Iterator first()			{ return Iterator{*this};								}
+	HFSM_INLINE Iterator first()												{ return Iterator{*this};											}
 
 private:
 	const PlanData& _planData;
@@ -2613,11 +2662,11 @@ public:
 
 		HFSM_INLINE void operator ++();
 
-		HFSM_INLINE		  TaskLink& operator  *()	    { return  _plan._planData.taskLinks[_curr];	}
-		HFSM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE		  TaskLink& operator  *()								{ return  _plan._planData.taskLinks[_curr];							}
+		HFSM_INLINE const TaskLink& operator  *() const							{ return  _plan._planData.taskLinks[_curr];							}
 
-		HFSM_INLINE		  TaskLink* operator ->()	    { return &_plan._planData.taskLinks[_curr];	}
-		HFSM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
+		HFSM_INLINE		  TaskLink* operator ->()								{ return &_plan._planData.taskLinks[_curr];							}
+		HFSM_INLINE const TaskLink* operator ->() const							{ return &_plan._planData.taskLinks[_curr];							}
 
 		HFSM_INLINE void remove();
 
@@ -2635,10 +2684,10 @@ private:
 					  const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()											{ return			StateList ::template index<T>();				}
 
 	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()										{ return (RegionID) RegionList::template index<T>();				}
 
 	bool append(const TransitionType transitionType,
 				const StateID origin,
@@ -2647,60 +2696,191 @@ private:
 public:
 	HFSM_INLINE explicit operator bool() const;
 
+	/// @brief Clear all tasks from the plan
 	HFSM_INLINE void clear();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(TransitionType::CHANGE,	   origin, destination); }
-	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(TransitionType::RESTART,   origin, destination); }
-	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(TransitionType::RESUME,	   origin, destination); }
-	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(TransitionType::UTILIZE,   origin, destination); }
-	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(TransitionType::RANDOMIZE, origin, destination); }
-	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(TransitionType::SCHEDULE,  origin, destination); }
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, acts depending on the region type)
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(TransitionType::CHANGE,	   origin, destination);	}
+
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the initial state)
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(TransitionType::RESTART,   origin, destination);	}
+
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state that was active previously)
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(TransitionType::RESUME,	   origin, destination);	}
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM_ENABLE_UTILITY_THEORY
+	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(TransitionType::UTILIZE,   origin, destination);	}
+
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM_ENABLE_UTILITY_THEORY
+	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(TransitionType::RANDOMIZE, origin, destination);	}
+
+#endif
+
+	/// @brief Append a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(TransitionType::SCHEDULE,  origin, destination);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, acts depending on the region type)
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM_INLINE bool change   (const StateID destination)					{ return change   (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool change   (const StateID destination)						{ return change   (stateId<TOrigin>(), destination);				}
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the initial state)
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM_INLINE bool restart  (const StateID destination)					{ return restart  (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool restart  (const StateID destination)						{ return restart  (stateId<TOrigin>(), destination);				}
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state that was active previously)
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM_INLINE bool resume   (const StateID destination)					{ return resume   (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool resume   (const StateID destination)						{ return resume   (stateId<TOrigin>(), destination);				}
 
-	template <typename TOrigin>
-	HFSM_INLINE bool utilize  (const StateID destination)					{ return utilize  (stateId<TOrigin>(), destination);				}
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM_ENABLE_UTILITY_THEORY
 	template <typename TOrigin>
-	HFSM_INLINE bool randomize(const StateID destination)					{ return randomize(stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool utilize  (const StateID destination)						{ return utilize  (stateId<TOrigin>(), destination);				}
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM_ENABLE_UTILITY_THEORY
 	template <typename TOrigin>
-	HFSM_INLINE bool schedule (const StateID destination)					{ return schedule (stateId<TOrigin>(), destination);				}
+	HFSM_INLINE bool randomize(const StateID destination)						{ return randomize(stateId<TOrigin>(), destination);				}
+
+#endif
+
+	/// @brief Append a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM_INLINE bool schedule (const StateID destination)						{ return schedule (stateId<TOrigin>(), destination);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, acts depending on the region type)
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool change   ()											{ return change   (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool change   ()												{ return change   (stateId<TOrigin>(), stateId<TDestination>());	}
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the initial state)
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool restart  ()											{ return restart  (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool restart  ()												{ return restart  (stateId<TOrigin>(), stateId<TDestination>());	}
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state that was active previously)
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool resume   ()											{ return resume   (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool resume   ()												{ return resume   (stateId<TOrigin>(), stateId<TDestination>());	}
 
-	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool utilize  ()											{ return utilize  (stateId<TOrigin>(), stateId<TDestination>());	}
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM_ENABLE_UTILITY_THEORY
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool randomize()											{ return randomize(stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool utilize  ()												{ return utilize  (stateId<TOrigin>(), stateId<TDestination>());	}
 
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM_ENABLE_UTILITY_THEORY
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool schedule ()											{ return schedule (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM_INLINE bool randomize()												{ return randomize(stateId<TOrigin>(), stateId<TDestination>());	}
+
+#endif
+
+	/// @brief Append a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM_INLINE bool schedule ()												{ return schedule (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE Iterator first()			{ return Iterator{*this};								}
+	/// @brief Begin iteration over plan tasks for the current region
+	/// @return
+	HFSM_INLINE Iterator first()												{ return Iterator{*this};											}
 
 private:
 	void remove(const LongIndex task);
@@ -2891,26 +3071,27 @@ PlanT<TArgs>::append(const TransitionType transitionType,
 	const TaskIndex index = _planData.taskLinks.emplace(transitionType, origin, destination);
 	if (index == TaskLinks::INVALID)
 		return false;
+	else {
+		if (_bounds.first < TaskLinks::CAPACITY) {
+			HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
 
-	if (_bounds.first < TaskLinks::CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
+			auto& last  = _planData.taskLinks[_bounds.last];
+			last.next = index;
 
-		auto& last  = _planData.taskLinks[_bounds.last];
-		last.next = index;
+			auto& next = _planData.taskLinks[index];
+			next.prev  = _bounds.last;
 
-		auto& next = _planData.taskLinks[index];
-		next.prev  = _bounds.last;
+			_bounds.last = index;
+		} else {
+			HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
+						_bounds.last  == INVALID_LONG_INDEX);
 
-		_bounds.last = index;
-	} else {
-		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
-					_bounds.last  == INVALID_LONG_INDEX);
+			_bounds.first = index;
+			_bounds.last  = index;
+		}
 
-		_bounds.first = index;
-		_bounds.last  = index;
+		return true;
 	}
-
-	return true;
 }
 
 //------------------------------------------------------------------------------
@@ -2982,7 +3163,6 @@ PlanT<TArgs>::remove(const LongIndex task) {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -2991,8 +3171,11 @@ namespace detail {
 enum Strategy {
 	Composite,
 	Resumable,
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	Utilitarian,
 	RandomUtil,
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3031,8 +3214,12 @@ struct Request {
 		CHANGE,
 		RESTART,
 		RESUME,
+
+	#ifdef HFSM_ENABLE_UTILITY_THEORY
 		UTILIZE,
 		RANDOMIZE,
+	#endif
+
 		SCHEDULE,
 
 		COUNT
@@ -3239,7 +3426,6 @@ restore(TRegistry& registry, const BackUpT<TRegistry>& copy) {
 
 }
 }
-
 
 namespace hfsm2 {
 namespace detail {
@@ -3624,7 +3810,6 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::reset() {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -3648,8 +3833,15 @@ class ControlT {
 
 protected:
 	using Context		= typename Args::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using RNG			= typename Args::RNG;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
 	using Logger		= typename Args::Logger;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -3671,16 +3863,16 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE ControlT(Context& context,
-						 RNG& rng,
-						 Registry& registry,
-						 PlanData& planData,
-						 Logger* const HFSM_IF_LOGGER(logger))
+	HFSM_INLINE ControlT(Context& context
+						 HFSM_IF_UTILITY_THEORY(, RNG& rng)
+						 , Registry& registry
+						 , PlanData& planData
+						 HFSM_IF_LOG_INTERFACE(, Logger* const logger))
 		: _context{context}
-		, _rng{rng}
+		HFSM_IF_UTILITY_THEORY(, _rng{rng})
 		, _registry{registry}
 		, _planData{planData}
-		HFSM_IF_LOGGER(, _logger{logger})
+		HFSM_IF_LOG_INTERFACE(, _logger{logger})
 	{}
 
 
@@ -3688,54 +3880,99 @@ protected:
 	HFSM_INLINE void resetRegion(const RegionID id);
 
 public:
-	template <typename T>
-	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
-	template <typename T>
-	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
+	/// @brief Get state identifier for a state type
+	/// @tparam TState State type
+	/// @return Numeric state identifier
+	template <typename TState>
+	static constexpr StateID  stateId()					{ return			StateList ::template index<TState>();	}
 
-	HFSM_INLINE Context& _()								{ return _context;									}
-	HFSM_INLINE Context& context()							{ return _context;									}
+	/// @brief Get region identifier for a region type
+	/// @tparam TState Region head state type
+	/// @return Numeric region identifier
+	template <typename TState>
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<TState>();	}
+
+	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
+	/// @return context
+	/// @see Control::context()
+	HFSM_INLINE Context& _()									{ return _context;									}
+
+	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
+	/// @return context
+	/// @see Control::_()
+	HFSM_INLINE Context& context()								{ return _context;									}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID id) const	{ return _registry.isActive   (id);					}
-	HFSM_INLINE bool isResumable(const StateID id) const	{ return _registry.isResumable(id);					}
+	/// @brief Check if a state is active
+	/// @param stateId State identifier
+	/// @return State active status
+	HFSM_INLINE bool isActive   (const StateID id) const		{ return _registry.isActive   (id);					}
 
-	HFSM_INLINE bool isScheduled(const StateID id) const	{ return isResumable(id);							}
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @param stateId State identifier
+	/// @return State resumable status
+	HFSM_INLINE bool isResumable(const StateID id) const		{ return _registry.isResumable(id);					}
 
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @param stateId State identifier
+	/// @return State scheduled status
+	HFSM_INLINE bool isScheduled(const StateID id) const		{ return isResumable(id);							}
+
+	/// @brief Check if a state is active
+	/// @tparam TState State type
+	/// @return State active status
 	template <typename TState>
-	HFSM_INLINE bool isActive() const						{ return isActive	(stateId<TState>());			}
+	HFSM_INLINE bool isActive() const							{ return isActive	(stateId<TState>());			}
 
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @tparam TState State type
+	/// @return State resumable status
 	template <typename TState>
-	HFSM_INLINE bool isResumable() const					{ return isResumable(stateId<TState>());			}
+	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
 
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @tparam TState State type
+	/// @return State scheduled status
 	template <typename TState>
-	HFSM_INLINE bool isScheduled() const					{ return isResumable(stateId<TState>());			}
+	HFSM_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE ConstPlan plan() const						{ return ConstPlan{_planData, _regionId};			}
-	HFSM_INLINE ConstPlan plan(const RegionID id) const		{ return ConstPlan{_planData, id};					}
+	/// @brief Access read-only plan for the current region
+	/// @return Plan for the current region
+	HFSM_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};			}
 
-	template <typename TRegion>
-	HFSM_INLINE ConstPlan plan()							{ return ConstPlan{_planData, regionId<TRegion>()};	}
+	/// @brief Access read-only plan for a region
+	/// @param regionId Region identifier
+	/// @return Read-only plan for the region
+	HFSM_INLINE ConstPlan plan(const RegionID regionId) const	{ return ConstPlan{_planData, regionId};			}
 
+	/// @brief Access read-only plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Read-only plan for the region
 	template <typename TRegion>
-	HFSM_INLINE ConstPlan plan() const						{ return ConstPlan{_planData, regionId<TRegion>()};	}
+	HFSM_INLINE ConstPlan plan()								{ return ConstPlan{_planData, regionId<TRegion>()};	}
+
+	/// @brief Access read-only plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Read-only Plan for the region
+	template <typename TRegion>
+	HFSM_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, regionId<TRegion>()};	}
 
 protected:
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	HFSM_INLINE Logger* logger()							{ return _logger;									}
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	HFSM_INLINE Logger* logger()								{ return _logger;									}
 #endif
 
 protected:
 	Context& _context;
-	RNG& _rng;
+	HFSM_IF_UTILITY_THEORY(RNG& _rng);
 	Registry& _registry;
 	PlanData& _planData;
 	RegionID _regionId = 0;
-	HFSM_IF_LOGGER(Logger* _logger);
+	HFSM_IF_LOG_INTERFACE(Logger* _logger);
 };
 
 //------------------------------------------------------------------------------
@@ -3819,24 +4056,42 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE		 Plan plan()							{ return	  Plan{_planData, _regionId};			}
-	HFSM_INLINE ConstPlan plan() const						{ return ConstPlan{_planData, _regionId};			}
+	/// @brief Access plan for the current region
+	/// @return Plan for the current region
+	HFSM_INLINE		 Plan plan()								{ return	  Plan{_planData, _regionId};			}
 
-	HFSM_INLINE		 Plan plan(const RegionID id)			{ return	  Plan{_planData, id};					}
-	HFSM_INLINE ConstPlan plan(const RegionID id) const		{ return ConstPlan{_planData, id};					}
+	/// @brief Access plan for the current region
+	/// @return Plan for the current region
+	HFSM_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};			}
 
+	/// @brief Access plan for a region
+	/// @param regionId
+	/// @return Plan for the region
+	HFSM_INLINE		 Plan plan(const RegionID regionId)			{ return	  Plan{_planData, regionId};			}
+
+	/// @brief Access plan for a region
+	/// @param regionId
+	/// @return Plan for the region
+	HFSM_INLINE ConstPlan plan(const RegionID regionId) const	{ return ConstPlan{_planData, regionId};			}
+
+	/// @brief Access plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Plan for the region
 	template <typename TRegion>
-	HFSM_INLINE		 Plan plan()		{ return	  Plan{_planData, Control::template regionId<TRegion>()};	}
+	HFSM_INLINE		 Plan plan()			{ return	  Plan{_planData, Control::template regionId<TRegion>()};	}
 
+	/// @brief Access plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Plan for the region
 	template <typename TRegion>
-	HFSM_INLINE ConstPlan plan() const	{ return ConstPlan{_planData, Control::template regionId<TRegion>()};	}
+	HFSM_INLINE ConstPlan plan() const		{ return ConstPlan{_planData, Control::template regionId<TRegion>()};	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
 	using Control::_planData;
 	using Control::_regionId;
-	HFSM_IF_LOGGER(using Control::_logger);
+	HFSM_IF_LOG_INTERFACE(using Control::_logger);
 
 	StateID _originId = 0;
 	StateID _regionIndex = 0;
@@ -3868,8 +4123,15 @@ protected:
 	using PlanControl	= PlanControlT<Args>;
 
 	using typename PlanControl::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using typename PlanControl::RNG;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
 	using typename PlanControl::Logger;
+#endif
+
 	using typename PlanControl::StateList;
 	using typename PlanControl::RegionList;
 	using typename PlanControl::PlanData;
@@ -3891,13 +4153,13 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE FullControlT(Context& context,
-							 RNG& rng,
-							 Registry& registry,
-							 PlanData& planData,
-							 Requests& requests,
-							 Logger* const logger)
-		: PlanControl{context, rng, registry, planData, logger}
+	HFSM_INLINE FullControlT(Context& context
+							 HFSM_IF_UTILITY_THEORY(, RNG& rng)
+							 , Registry& registry
+							 , PlanData& planData
+							 , Requests& requests
+							 HFSM_IF_LOG_INTERFACE(, Logger* const logger))
+		: PlanControl{context HFSM_IF_UTILITY_THEORY(,rng), registry, planData HFSM_IF_LOG_INTERFACE(, logger)}
 		, _requests{requests}
 	{}
 
@@ -3922,37 +4184,85 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void changeTo (const StateID id);
-	HFSM_INLINE void restart  (const StateID id);
-	HFSM_INLINE void resume	  (const StateID id);
-	HFSM_INLINE void utilize  (const StateID id);
-	HFSM_INLINE void randomize(const StateID id);
-	HFSM_INLINE void schedule (const StateID id);
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @param stateId State identifier
+	HFSM_INLINE void changeTo (const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @param stateId State identifier
+	HFSM_INLINE void restart  (const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @param stateId State identifier
+	HFSM_INLINE void resume	  (const StateID stateId);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM_ENABLE_UTILITY_THEORY
+	HFSM_INLINE void utilize  (const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM_ENABLE_UTILITY_THEORY
+	HFSM_INLINE void randomize(const StateID stateId);
+
+#endif
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @param stateId State identifier
+	HFSM_INLINE void schedule (const StateID stateId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	// Clang trips over 'stateId<>()', so give it a hint it comes from ControlT<>
+	// Clang trips over 'stateId<>()', so give it a hint it comes from PlanControl
 
-	template <typename T>
-	HFSM_INLINE void changeTo ()							{ changeTo (PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM_INLINE void changeTo ()							{ changeTo (PlanControl::template stateId<TState>());	}
 
-	template <typename T>
-	HFSM_INLINE void restart  ()							{ restart  (PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM_INLINE void restart  ()							{ restart  (PlanControl::template stateId<TState>());	}
 
-	template <typename T>
-	HFSM_INLINE void resume   ()							{ resume   (PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM_INLINE void resume   ()							{ resume   (PlanControl::template stateId<TState>());	}
 
-	template <typename T>
-	HFSM_INLINE void utilize  ()							{ utilize  (PlanControl::template stateId<T>());	}
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
-	template <typename T>
-	HFSM_INLINE void randomize()							{ randomize(PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///   with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TState State type
+	/// @see HFSM_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM_INLINE void utilize  ()							{ utilize  (PlanControl::template stateId<TState>());	}
 
-	template <typename T>
-	HFSM_INLINE void schedule ()							{ schedule (PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///   proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TState State type
+	/// @see HFSM_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM_INLINE void randomize()							{ randomize(PlanControl::template stateId<TState>());	}
+
+#endif
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM_INLINE void schedule ()							{ schedule (PlanControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Succeed a plan task for the current state
 	HFSM_INLINE void succeed();
+
+	/// @brief Fail a plan task for the current state
 	HFSM_INLINE void fail();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -3960,7 +4270,7 @@ public:
 protected:
 	using PlanControl::_planData;
 	using PlanControl::_regionId;
-	HFSM_IF_LOGGER(using PlanControl::_logger);
+	HFSM_IF_LOG_INTERFACE(using PlanControl::_logger);
 
 	using PlanControl::_originId;
 	using PlanControl::_regionIndex;
@@ -3987,8 +4297,15 @@ class GuardControlT final
 	using FullControl	= FullControlT<Args>;
 
 	using typename FullControl::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using typename FullControl::RNG;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
 	using typename FullControl::Logger;
+#endif
+
 	using typename FullControl::StateList;
 	using typename FullControl::RegionList;
 	using typename FullControl::PlanData;
@@ -4001,14 +4318,14 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HFSM_INLINE GuardControlT(Context& context,
-							  RNG& rng,
-							  Registry& registry,
-							  PlanData& planData,
-							  Requests& requests,
-							  const Requests& pendingChanges,
-							  Logger* const logger)
-		: FullControl{context, rng, registry, planData, requests, logger}
+	HFSM_INLINE GuardControlT(Context& context
+							  HFSM_IF_UTILITY_THEORY(, RNG& rng)
+							  , Registry& registry
+							  , PlanData& planData
+							  , Requests& requests
+							  , const Requests& pendingChanges
+							  HFSM_IF_LOG_INTERFACE(, Logger* const logger))
+		: FullControl{context HFSM_IF_UTILITY_THEORY(, rng), registry, planData, requests HFSM_IF_LOG_INTERFACE(, logger)}
 		, _pending{pendingChanges}
 	{}
 
@@ -4030,35 +4347,63 @@ public:
 	using FullControl::changeTo;
 	using FullControl::restart;
 	using FullControl::resume;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using FullControl::utilize;
 	using FullControl::randomize;
+#endif
+
 	using FullControl::schedule;
 	using FullControl::succeed;
 	using FullControl::fail;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isPendingChange(const StateID id) const	{ return _registry.isPendingChange(id);	}
-	HFSM_INLINE bool isPendingEnter	(const StateID id) const	{ return _registry.isPendingEnter (id);	}
-	HFSM_INLINE bool isPendingExit	(const StateID id) const	{ return _registry.isPendingExit  (id);	}
+	/// @brief Check if a state is going to be activated or deactivated
+	/// @param stateId State identifier
+	/// @return State pending activation/deactivation status
+	HFSM_INLINE bool isPendingChange(const StateID stateId) const	{ return _registry.isPendingChange(stateId);	}
 
-	template <typename TState>
-	HFSM_INLINE bool isPendingChange()		{ return isPendingChange(FullControl::template stateId<TState>());	}
+	/// @brief Check if a state is going to be activated
+	/// @param stateId State identifier
+	/// @return State pending activation status
+	HFSM_INLINE bool isPendingEnter	(const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
 
-	template <typename TState>
-	HFSM_INLINE bool isPendingEnter()		{ return isPendingEnter (FullControl::template stateId<TState>());	}
+	/// @brief Check if a state is going to be deactivated
+	/// @param stateId State identifier
+	/// @return State pending deactivation status
+	HFSM_INLINE bool isPendingExit	(const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
 
+	/// @brief Check if a state is going to be activated or deactivated
+	/// @tparam TState State type
+	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM_INLINE bool isPendingExit()		{ return isPendingExit  (FullControl::template stateId<TState>());	}
+	HFSM_INLINE bool isPendingChange()			{ return isPendingChange(FullControl::template stateId<TState>());	}
+
+	/// @brief Check if a state is going to be activated
+	/// @tparam TState State type
+	/// @return State pending activation status
+	template <typename TState>
+	HFSM_INLINE bool isPendingEnter()			{ return isPendingEnter (FullControl::template stateId<TState>());	}
+
+	/// @brief Check if a state is going to be deactivated
+	/// @tparam TState State type
+	/// @return State pending deactivation status
+	template <typename TState>
+	HFSM_INLINE bool isPendingExit()			{ return isPendingExit  (FullControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Cancel pending transition requests
+	///		(can be used to substitute a transition into the current state with a different one)
 	HFSM_INLINE void cancelPendingTransitions();
 
-	HFSM_INLINE const Requests& pendingTransitions() const		{ return _pending;								}
+	/// @brief Get pending transition requests
+	/// @return Array of pending transition requests
+	HFSM_INLINE const Requests& pendingTransitions() const			{ return _pending;								}
 
 private:
-	HFSM_IF_LOGGER(using FullControl::_logger);
+	HFSM_IF_LOG_INTERFACE(using FullControl::_logger);
 
 	using FullControl::_registry;
 	using FullControl::_originId;
@@ -4213,7 +4558,7 @@ PlanControlT<TArgs>::resetRegion(const RegionID id, //-V524
 
 template <typename TArgs>
 FullControlT<TArgs>::Lock::Lock(FullControlT& control_)
-	: control(!control_._locked ? &control_ : nullptr)
+	: control{!control_._locked ? &control_ : nullptr}
 {
 	if (control)
 		control->_locked = true;
@@ -4354,6 +4699,8 @@ FullControlT<TArgs>::resume(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TArgs>
 void
 FullControlT<TArgs>::utilize(const StateID stateId) {
@@ -4381,6 +4728,8 @@ FullControlT<TArgs>::randomize(const StateID stateId) {
 		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
 	}
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -4444,7 +4793,6 @@ GuardControlT<TArgs>::cancelPendingTransitions() {
 
 }
 }
-
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
@@ -4459,43 +4807,7 @@ struct StructureEntry {
 
 #endif
 
-//------------------------------------------------------------------------------
-
 namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-#pragma pack(push, 1)
-
-struct alignas(alignof(void*)) StructureStateInfo {
-	enum RegionType : ShortIndex {
-		COMPOSITE,
-		ORTHOGONAL,
-	};
-
-	StructureStateInfo() = default;
-
-	HFSM_INLINE StructureStateInfo(const LongIndex parent_,
-								   const RegionType region_,
-								   const ShortIndex depth_,
-								   const char* const name_)
-		: name{name_}
-		, parent{parent_}
-		, region{region_}
-		, depth{depth_}
-	{}
-
-	const char* name;
-	LongIndex parent;
-	RegionType region;
-	ShortIndex depth;
-};
-
-#pragma pack(pop)
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -4513,11 +4825,15 @@ HFSM_INLINE convert(const Request::Type type) {
 		case Request::RESUME:
 			return TransitionType::RESUME;
 
+	#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 		case Request::UTILIZE:
 			return TransitionType::UTILIZE;
 
 		case Request::RANDOMIZE:
 			return TransitionType::RANDOMIZE;
+
+	#endif
 
 		case Request::SCHEDULE:
 			return TransitionType::SCHEDULE;
@@ -4528,7 +4844,7 @@ HFSM_INLINE convert(const Request::Type type) {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 Request::Type
 HFSM_INLINE convert(const TransitionType type) {
@@ -4542,11 +4858,15 @@ HFSM_INLINE convert(const TransitionType type) {
 	case TransitionType::RESUME:
 		return Request::RESUME;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	case TransitionType::UTILIZE:
 		return Request::UTILIZE;
 
 	case TransitionType::RANDOMIZE:
 		return Request::RANDOMIZE;
+
+#endif
 
 	case TransitionType::SCHEDULE:
 		return Request::SCHEDULE;
@@ -4559,9 +4879,56 @@ HFSM_INLINE convert(const TransitionType type) {
 
 #endif
 
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+#pragma pack(push, 1)
+
+struct alignas(alignof(void*)) StructureStateInfo {
+	enum RegionType : ShortIndex {
+		COMPOSITE,
+		ORTHOGONAL,
+	};
+
+	StructureStateInfo() = default;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE StructureStateInfo(const LongIndex parent_,
+								   const RegionType region_,
+								   const ShortIndex depth_,
+								   const char* const name_)
+		: name{name_}
+		, parent{parent_}
+		, region{region_}
+		, depth{depth_}
+	{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	const char* name;
+	LongIndex parent;
+	RegionType region;
+	ShortIndex depth;
+};
+
+#pragma pack(pop)
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
+#endif
+
 }
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
@@ -4569,6 +4936,8 @@ HFSM_INLINE convert(const TransitionType type) {
 
 struct alignas(4) Transition {
 	HFSM_INLINE Transition() = default;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE Transition(const detail::Request request,
 						   const Method method_)
@@ -4578,6 +4947,8 @@ struct alignas(4) Transition {
 	{
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE Transition(const StateID stateId_,
 						   const Method method_,
@@ -4589,6 +4960,8 @@ struct alignas(4) Transition {
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	detail::Request request() const		{ return detail::Request{detail::convert(transitionType), stateId};	}
 
 	StateID stateId = INVALID_STATE_ID;
@@ -4598,7 +4971,7 @@ struct alignas(4) Transition {
 
 #pragma pack(pop)
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 bool operator == (const Transition& l, const Transition& r) {
 	return l.stateId		== r.stateId
@@ -4612,7 +4985,6 @@ bool operator == (const Transition& l, const Transition& r) {
 
 }
 
-
 namespace hfsm2 {
 namespace detail {
 
@@ -4625,8 +4997,12 @@ class InjectionT {
 
 protected:
 	using Context		= typename TArgs::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
+#endif
+
 	using StateList		= typename TArgs::StateList;
 	using RegionList	= typename TArgs::RegionList;
 
@@ -4674,8 +5050,12 @@ struct B_<TFirst, TRest...>
 	, B_<TRest...>
 {
 	using typename TFirst::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
+#endif
+
 	using typename TFirst::StateList;
 	using typename TFirst::RegionList;
 
@@ -4711,8 +5091,12 @@ struct B_<TFirst>
 	: TFirst
 {
 	using typename TFirst::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
+#endif
+
 	using typename TFirst::StateList;
 	using typename TFirst::RegionList;
 
@@ -4725,9 +5109,11 @@ struct B_<TFirst>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
 
 	HFSM_INLINE Utility utility			 (const Control&)			{ return Utility{1.0f};	}
+#endif
 
 	HFSM_INLINE void	entryGuard		 (GuardControl&)			{}
 
@@ -4931,7 +5317,6 @@ B_<TF>::widePostExit(Context& context) {
 
 }
 }
-
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
@@ -5068,10 +5453,16 @@ struct S_ final {
 	static constexpr auto STATE_ID	 = TIndices::STATE_ID;
 
 	using Context		= typename TArgs::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
 	using UP			= typename TArgs::UP;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
 	using Logger		= typename TArgs::Logger;
+#endif
 
 	using Control		= ControlT<TArgs>;
 	using Registry		= RegistryT<TArgs>;
@@ -5149,8 +5540,11 @@ struct S_ final {
 
 	HFSM_INLINE void	wrapPlanSucceeded	 (FullControl&	control);
 	HFSM_INLINE void	wrapPlanFailed		 (FullControl&	control);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE Rank	wrapRank			 (Control& control);
 	HFSM_INLINE Utility	wrapUtility			 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -5163,6 +5557,8 @@ struct S_ final {
 	HFSM_INLINE void	deepRequestRemain	 (Registry&)										{}
 	HFSM_INLINE void	deepRequestRestart	 (Registry&)										{}
 	HFSM_INLINE void	deepRequestResume	 (Registry&)										{}
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	deepRequestUtilize	 (Control&)											{}
 	HFSM_INLINE void	deepRequestRandomize (Control&)											{}
 
@@ -5170,20 +5566,26 @@ struct S_ final {
 	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
 	HFSM_INLINE Rank	deepReportRank		 (Control& control);
 	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepChangeToRequested(Control&)											{}
 
-	//------------------------------------------------------------------------------
+	//----------------------------------------------------------------------
 
-#if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename TArgs::WriteStream;
+	using ReadStream	= typename TArgs::ReadStream;
 
-	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
+	HFSM_INLINE void	deepSaveActive	 (const Registry&, WriteStream&) const					{}
+	HFSM_INLINE void	deepSaveResumable(const Registry&, WriteStream&) const					{}
 
+	HFSM_INLINE void	deepLoadRequested(		Registry&, ReadStream& ) const					{}
+	HFSM_INLINE void	deepLoadResumable(		Registry&, ReadStream& ) const					{}
 #endif
 
-	//----------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename TArgs::StructureStateInfos;
@@ -5199,18 +5601,13 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename TArgs::WriteStream;
-	using ReadStream	= typename TArgs::ReadStream;
+#if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 
-	HFSM_INLINE void	deepSaveActive	 (const Registry&, WriteStream&) const					{}
-	HFSM_INLINE void	deepSaveResumable(const Registry&, WriteStream&) const					{}
+	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
 
-	HFSM_INLINE void	deepLoadRequested(		Registry&, ReadStream& ) const					{}
-	HFSM_INLINE void	deepLoadResumable(		Registry&, ReadStream& ) const					{}
 #endif
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 
@@ -5346,7 +5743,7 @@ S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
+S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM_IF_LOG_INTERFACE(control)) {
 	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
@@ -5515,6 +5912,8 @@ S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Rank
 S_<TN_, TA, TH>::wrapRank(Control& control) {
@@ -5576,6 +5975,8 @@ S_<TN_, TA, TH>::deepReportRandomize(Control& control) {
 	return wrapUtility(control);
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
@@ -5632,7 +6033,6 @@ S_<TN_, TA, TH>::deepGetNames(const LongIndex parent,
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -5851,12 +6251,16 @@ template <typename TContext,
 struct ArgsT final {
 	using Context	 = TContext;
 
-	using Config_	 = TConfig;
-	using Rank		 = typename Config_::Rank;
-	using Utility	 = typename Config_::Utility;
-	using RNG		 = typename Config_::RNG;
-	using UP		 = typename Config_::UP;
-	using Logger	 = typename Config_::Logger;
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+	using Rank		 = typename TConfig::Rank;
+	using Utility	 = typename TConfig::Utility;
+	using RNG		 = typename TConfig::RNG;
+	using UP		 = typename TConfig::UP;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	using Logger	 = typename TConfig::Logger;
+#endif
 
 	using StateList	 = TStateList;
 	using RegionList = TRegionList;
@@ -5949,16 +6353,15 @@ using Material = typename MaterialT<TN, TS...>::Type;
 template <typename TConfig,
 		  typename TApex>
 struct RF_ final {
-	using Config_		= TConfig;
-	using Context		= typename Config_::Context;
+	using Context		= typename TConfig::Context;
 	using Apex			= TApex;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT= Config_::SUBSTITUTION_LIMIT;
+	static constexpr LongIndex SUBSTITUTION_LIMIT= TConfig::SUBSTITUTION_LIMIT;
 
-	static constexpr LongIndex TASK_CAPACITY	 = Config_::TASK_CAPACITY != INVALID_LONG_INDEX ?
-													   Config_::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
+	static constexpr LongIndex TASK_CAPACITY	 = TConfig::TASK_CAPACITY != INVALID_LONG_INDEX ?
+													   TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
 
 	static constexpr ShortIndex COMPO_REGIONS	 = Apex::COMPO_REGIONS;
 	static constexpr ShortIndex ORTHO_REGIONS	 = Apex::ORTHO_REGIONS;
@@ -5971,7 +6374,7 @@ struct RF_ final {
 	using RegionList	= typename Apex::RegionList;
 
 	using Args			= ArgsT<Context,
-								Config_,
+								TConfig,
 								StateList,
 								RegionList,
 								COMPO_REGIONS,
@@ -5982,7 +6385,7 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using Instance		= RW_<Config_, Apex>;
+	using Instance		= RW_<TConfig, Apex>;
 
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;
@@ -6092,9 +6495,13 @@ struct CS_ final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -6202,6 +6609,8 @@ struct CS_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	HFSM_INLINE UP		wideReportChangeComposite	  (Control& control);
 	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,									const ShortIndex prong);
 	HFSM_INLINE UP		wideReportChangeUtilitarian	  (Control& control);
@@ -6213,11 +6622,26 @@ struct CS_ final {
 	HFSM_INLINE Rank	wideReportRank				  (Control& control,	 Rank*	  const ranks);
 	HFSM_INLINE Utility	wideReportRandomize			  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control, const ShortIndex prong);
 
 	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
+
+	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -6229,19 +6653,6 @@ struct CS_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
-
-	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -6270,13 +6681,17 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
-	using Registry	= RegistryT<Args>;
+	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
 
 	using Control		= ControlT	   <Args>;
@@ -6345,6 +6760,8 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	HFSM_INLINE UP		wideReportChangeComposite	  (Control& control);
 	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,									const ShortIndex prong);
 	HFSM_INLINE UP		wideReportChangeUtilitarian	  (Control& control);
@@ -6356,11 +6773,26 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	HFSM_INLINE Rank	wideReportRank				  (Control& control,	 Rank*	  const ranks);
 	HFSM_INLINE Utility	wideReportRandomize			  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control,								const ShortIndex prong);
 
 	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
+
+	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -6372,19 +6804,6 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
-
-	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -6690,6 +7109,8 @@ CS_<TN, TA, SG, NI, TS...>::wideRequestResume(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 typename TA::UP
 CS_<TN, TA, SG, NI, TS...>::wideReportUtilize(Control& control) {
@@ -6785,6 +7206,8 @@ CS_<TN, TA, SG, NI, TS...>::wideReportChangeRandom(Control& control,
 	return { l + r };
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
@@ -6799,23 +7222,6 @@ CS_<TN, TA, SG, NI, TS...>::wideChangeToRequested(PlanControl& control,
 	else
 		rHalf.wideChangeToRequested(control, prong);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
-void
-CS_<TN, TA, SG, NI, TS...>::wideGetNames(const LongIndex parent,
-										 const RegionType /*region*/,
-										 const ShortIndex depth,
-										 StructureStateInfos& _stateInfos) const
-{
-	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -6877,6 +7283,23 @@ CS_<TN, TA, SG, NI, TS...>::wideLoadResumable(Registry& registry,
 {
 	lHalf.wideLoadResumable(registry, stream);
 	rHalf.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+void
+CS_<TN, TA, SG, NI, TS...>::wideGetNames(const LongIndex parent,
+										 const RegionType /*region*/,
+										 const ShortIndex depth,
+										 StructureStateInfos& _stateInfos) const
+{
+	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
 
 #endif
@@ -7108,6 +7531,8 @@ CS_<TN, TA, SG, NI, T>::wideRequestResume(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 typename TA::UP
 CS_<TN, TA, SG, NI, T>::wideReportUtilize(Control& control) {
@@ -7190,6 +7615,8 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeRandom(Control& control,
 	return *options;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
@@ -7201,22 +7628,6 @@ CS_<TN, TA, SG, NI, T>::wideChangeToRequested(PlanControl& control,
 
 	state.deepChangeToRequested(control);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
-void
-CS_<TN, TA, SG, NI, T>::wideGetNames(const LongIndex parent,
-									 const RegionType /*region*/,
-									 const ShortIndex depth,
-									 StructureStateInfos& _stateInfos) const
-{
-	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -7268,6 +7679,22 @@ CS_<TN, TA, SG, NI, T>::wideLoadResumable(Registry& registry,
 
 #endif
 
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+void
+CS_<TN, TA, SG, NI, T>::wideGetNames(const LongIndex parent,
+									 const RegionType /*region*/,
+									 const ShortIndex depth,
+									 StructureStateInfos& _stateInfos) const
+{
+	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+}
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -7295,9 +7722,13 @@ struct C_ final {
 	static constexpr ForkID		COMPO_ID	= COMPO_INDEX + 1;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -7376,9 +7807,11 @@ struct C_ final {
 	HFSM_INLINE		  ShortIndex& compoResumable(	   Control& control) const		{ return compoResumable(control._registry);		}
 	HFSM_INLINE const ShortIndex& compoResumable(const Control& control) const		{ return compoResumable(control._registry);		}
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE		  ShortIndex  resolveRandom (Control& control,
 												 const Utility(& options)[Info::WIDTH], const Utility sum,
 												 const Rank	  (& ranks)  [Info::WIDTH], const Rank	  top) const;
+#endif
 
 	HFSM_INLINE bool	compoRemain					  (Control& control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
 
@@ -7426,11 +7859,15 @@ struct C_ final {
 	template <>
 	HFSM_INLINE void	deepRequestChange<Resumable>  (Control& control, const ShortIndex)	{ deepRequestChangeResumable  (control); }
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	template <>
 	HFSM_INLINE void	deepRequestChange<Utilitarian>(Control& control, const ShortIndex)	{ deepRequestChangeUtilitarian(control); }
 
 	template <>
 	HFSM_INLINE void	deepRequestChange<RandomUtil> (Control& control, const ShortIndex)	{ deepRequestChangeRandom	  (control); }
+
+#endif
 
 #else
 
@@ -7440,19 +7877,26 @@ struct C_ final {
 
 	HFSM_INLINE void	deepRequestChangeComposite	  (Control& control);
 	HFSM_INLINE void	deepRequestChangeResumable	  (Control& control);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	deepRequestChangeUtilitarian  (Control& control);
 	HFSM_INLINE void	deepRequestChangeRandom		  (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepRequestRemain			  (Registry& registry);
 	HFSM_INLINE void	deepRequestRestart			  (Registry& registry);
 	HFSM_INLINE void	deepRequestResume			  (Registry& registry);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	deepRequestUtilize			  (Control& control);
 	HFSM_INLINE void	deepRequestRandomize		  (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
@@ -7487,11 +7931,26 @@ struct C_ final {
 	HFSM_INLINE Rank	deepReportRank				  (Control& control);
 	HFSM_INLINE Utility	deepReportRandomize			  (Control& control);
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepChangeToRequested		  (PlanControl& control);
 
 	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
+	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
+
+	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
+	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -7503,19 +7962,6 @@ struct C_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
-	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
-
-	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
-	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -7535,6 +7981,8 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 ShortIndex
@@ -7565,6 +8013,8 @@ C_<TN, TA, SG, TH, TS...>::resolveRandom(Control& control,
 	HFSM_BREAK();
 	return INVALID_SHORT_INDEX;
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -7858,6 +8308,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
 		deepRequestResume	(control._registry);
 		break;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	case Request::UTILIZE:
 		deepRequestUtilize	(control);
 		break;
@@ -7865,6 +8317,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
 	case Request::RANDOMIZE:
 		deepRequestRandomize(control);
 		break;
+
+#endif
 
 	default:
 		HFSM_BREAK();
@@ -7888,6 +8342,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control)
 		deepRequestChangeResumable  (control);
 		break;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	case Strategy::Utilitarian:
 		deepRequestChangeUtilitarian(control);
 		break;
@@ -7895,6 +8351,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control)
 	case Strategy::RandomUtil:
 		deepRequestChangeRandom		(control);
 		break;
+
+#endif
 
 	default:
 		HFSM_BREAK();
@@ -7931,6 +8389,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
@@ -7958,6 +8418,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control) {
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
 	HFSM_ASSERT(requested < Info::WIDTH);
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -8001,6 +8463,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control) {
@@ -8028,8 +8492,11 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control) {
 	HFSM_ASSERT(requested < Info::WIDTH);
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 #ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
@@ -8182,6 +8649,8 @@ C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) {
 	return h * options[requested];
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
@@ -8221,23 +8690,6 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 		_subStates.wideReenter	(control, active);
 	}
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-void
-C_<TN, TA, SG, TH, TS...>::deepGetNames(const LongIndex parent,
-										const RegionType region,
-										const ShortIndex depth,
-										StructureStateInfos& _stateInfos) const
-{
-	_headState.deepGetNames(parent,					 region,						depth,	   _stateInfos);
-	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -8322,6 +8774,23 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 #endif
 
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+void
+C_<TN, TA, SG, TH, TS...>::deepGetNames(const LongIndex parent,
+										const RegionType region,
+										const ShortIndex depth,
+										StructureStateInfos& _stateInfos) const
+{
+	_headState.deepGetNames(parent,					 region,						depth,	   _stateInfos);
+	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
+}
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -8351,9 +8820,12 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
 
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
@@ -8435,30 +8907,21 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	HFSM_INLINE void	wideRequestRemain	 (Registry& registry);
 	HFSM_INLINE void	wideRequestRestart	 (Registry& registry);
 	HFSM_INLINE void	wideRequestResume	 (Registry& registry);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
 	HFSM_INLINE void	wideRequestRandomize (Control& control);
 
 	HFSM_INLINE Utility	wideReportChange	 (Control& control);
 	HFSM_INLINE Utility	wideReportUtilize	 (Control& control);
 	HFSM_INLINE Utility	wideReportRandomize	 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using StructureStateInfos = typename Args::StructureStateInfos;
-
-	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
-
-	void wideGetNames(const LongIndex parent,
-					  const ShortIndex depth,
-					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 	using WriteStream	= typename Args::WriteStream;
@@ -8469,6 +8932,18 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream) const;
 	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
+	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
+
+	void wideGetNames(const LongIndex parent,
+					  const ShortIndex depth,
+					  StructureStateInfos& stateInfos) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -8493,9 +8968,12 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
 
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
@@ -8566,30 +9044,21 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	HFSM_INLINE void	wideRequestRemain	 (Registry& registry);
 	HFSM_INLINE void	wideRequestRestart	 (Registry& registry);
 	HFSM_INLINE void	wideRequestResume	 (Registry& registry);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
 	HFSM_INLINE void	wideRequestRandomize (Control& control);
 
 	HFSM_INLINE Utility	wideReportChange	 (Control& control);
 	HFSM_INLINE Utility	wideReportUtilize	 (Control& control);
 	HFSM_INLINE Utility	wideReportRandomize	 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using StructureStateInfos = typename Args::StructureStateInfos;
-
-	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
-
-	void wideGetNames(const LongIndex parent,
-					  const ShortIndex depth,
-					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_SERIALIZATION
 	using WriteStream	= typename Args::WriteStream;
@@ -8600,6 +9069,18 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream) const;
 	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+	using StructureStateInfos = typename Args::StructureStateInfos;
+
+	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
+
+	void wideGetNames(const LongIndex parent,
+					  const ShortIndex depth,
+					  StructureStateInfos& stateInfos) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -8860,6 +9341,8 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 OS_<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
@@ -8909,6 +9392,8 @@ OS_<TN, TA, NI, TI, TR...>::wideReportRandomize(Control& control) {
 	return i + r;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
@@ -8917,22 +9402,6 @@ OS_<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
 	initial	 .deepChangeToRequested(control);
 	remaining.wideChangeToRequested(control);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
-void
-OS_<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
-										 const ShortIndex depth,
-										 StructureStateInfos& stateInfos) const
-{
-	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
-	remaining.wideGetNames(parent,								   depth, stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -8978,6 +9447,22 @@ OS_<TN, TA, NI, TI, TR...>::wideLoadResumable(Registry& registry,
 {
 	initial	 .deepLoadResumable(registry, stream);
 	remaining.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
+void
+OS_<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
+										 const ShortIndex depth,
+										 StructureStateInfos& stateInfos) const
+{
+	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
+	remaining.wideGetNames(parent,								   depth, stateInfos);
 }
 
 #endif
@@ -9174,6 +9659,8 @@ OS_<TN, TA, NI, TI>::wideRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
 OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
@@ -9218,6 +9705,8 @@ OS_<TN, TA, NI, TI>::wideReportRandomize(Control& control) {
 	return i;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
@@ -9225,21 +9714,6 @@ void
 OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 	initial.deepChangeToRequested(control);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, ShortIndex NI, typename TI>
-void
-OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
-								  const ShortIndex depth,
-								  StructureStateInfos& _stateInfos) const
-{
-	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -9285,6 +9759,21 @@ OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 
 #endif
 
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+void
+OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
+								  const ShortIndex depth,
+								  StructureStateInfos& _stateInfos) const
+{
+	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
+}
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -9309,9 +9798,13 @@ struct O_ final {
 	static constexpr ForkID		ORTHO_ID	= (ForkID) -ORTHO_INDEX - 1;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -9416,19 +9909,36 @@ struct O_ final {
 	HFSM_INLINE void	deepRequestRemain	 (Registry& registry);
 	HFSM_INLINE void	deepRequestRestart	 (Registry& registry);
 	HFSM_INLINE void	deepRequestResume	 (Registry& registry);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	deepRequestUtilize	 (Control& control);
 	HFSM_INLINE void	deepRequestRandomize (Control& control);
 
 	HFSM_INLINE UP		deepReportChange	 (Control& control);
+
 	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
 	HFSM_INLINE Rank	deepReportRank		 (Control& control);
 	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
+	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
+
+	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
+	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -9440,19 +9950,6 @@ struct O_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
-	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
-
-	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
-	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -9697,6 +10194,8 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 		deepRequestResume (control._registry);
 		break;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	case Request::UTILIZE:
 		deepRequestUtilize(control);
 		break;
@@ -9704,6 +10203,8 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 	case Request::RANDOMIZE:
 		deepRequestRandomize(control);
 		break;
+
+#endif
 
 	default:
 		HFSM_BREAK();
@@ -9743,6 +10244,8 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Registry& registry) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
@@ -9817,6 +10320,8 @@ O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
 	return h * sub;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, typename TH, typename... TS>
@@ -9824,23 +10329,6 @@ void
 O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	_subStates.wideChangeToRequested(control);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, typename TH, typename... TS>
-void
-O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
-									const RegionType region,
-									const ShortIndex depth,
-									StructureStateInfos& stateInfos) const
-{
-	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
-	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -9882,6 +10370,23 @@ O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 										 ReadStream& stream) const
 {
 	_subStates.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, typename TH, typename... TS>
+void
+O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+									const RegionType region,
+									const ShortIndex depth,
+									StructureStateInfos& stateInfos) const
+{
+	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
+	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
 }
 
 #endif
@@ -10237,42 +10742,74 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-template <typename TC_ = EmptyContext,
-		  typename TN_ = char,
-		  typename TU_ = float,
-		  typename TG_ = ::hfsm2::RandomT<TU_>,
-		  LongIndex NS = 4,
-		  LongIndex NT = INVALID_LONG_INDEX>
+/// @brief Type configuration for MachineT<>
+/// @tparam TContext Context type for data shared between states and/or data interface between FSM and external code
+/// @tparam TRank Rank type for 'TRank State::rank() const' method
+/// @tparam TUtility Utility type for 'TUtility State::utility() const' method
+/// @tparam TRNG RNG type used in 'Random' regions
+/// @tparam NSubstitutionLimit Maximum number times 'guard()' methods can substitute their states for others
+/// @tparam NTaskCapacity Maximum number of tasks across all plans
+template <typename TContext = EmptyContext,
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+		  typename TRank    = char,
+		  typename TUtility = float,
+		  typename TRNG     = ::hfsm2::RandomT<TUtility>,
+#endif
+		  LongIndex NSubstitutionLimit = 4,
+		  LongIndex NTaskCapacity      = INVALID_LONG_INDEX>
 struct ConfigT {
-	using Context = TC_;
+	using Context = TContext;
 
-	using Rank	  = TN_;
-	using Utility = TU_;
-	using RNG	  = TG_;
-	using Logger  = LoggerInterfaceT<Context, Utility>;
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+	using Rank	  = TRank;
+	using Utility = TUtility;
+	using RNG	  = TRNG;
+#endif
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
-	static constexpr LongIndex TASK_CAPACITY	  = NT;
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	using Logger  = LoggerInterfaceT<Context HFSM_IF_UTILITY_THEORY(, Utility)>;
+#endif
 
+	static constexpr LongIndex SUBSTITUTION_LIMIT = NSubstitutionLimit;
+	static constexpr LongIndex TASK_CAPACITY	  = NTaskCapacity;
+
+	/// @brief Set Context type
+	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = ConfigT<  T, TN_, TU_, TG_, NS, NT>;
+	using ContextT			 = ConfigT<      T, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,) SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
+	/// @brief Set Rank type
+	/// @tparam T Rank type for 'TRank State::rank() const' method
 	template <typename T>
-	using RankT				 = ConfigT<TC_,   T, TU_, TG_, NS, NT>;
+	using RankT				 = ConfigT<Context,                           T, Utility, RNG,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+	/// @brief Set Utility type
+	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using UtilityT			 = ConfigT<TC_, TN_,   T, TG_, NS, NT>;
+	using UtilityT			 = ConfigT<Context,                        Rank,       T, RNG,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+	/// @brief Set RNG type
+	/// @tparam T RNG type used in 'Random' regions
 	template <typename T>
-	using RandomT			 = ConfigT<TC_, TN_, TU_,   T, NS, NT>;
+	using RandomT			 = ConfigT<Context,                        Rank, Utility,   T,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+#endif
+
+	/// @brief Set Substitution limit
+	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
 	template <LongIndex N>
-	using SubstitutionLimitN = ConfigT<TC_, TN_, TU_, TG_,  N, NS>;
+	using SubstitutionLimitN = ConfigT<Context, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,)                  N, TASK_CAPACITY>;
 
+	/// @brief Set Task capacity
+	/// @tparam N Maximum number of tasks across all plans
 	template <LongIndex N>
-	using TaskCapacityN		 = ConfigT<TC_, TN_, TU_, TG_, NT,  N>;
+	using TaskCapacityN		 = ConfigT<Context, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,) SUBSTITUTION_LIMIT,             N>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
 	struct UP {
 		HFSM_INLINE UP(const Utility utility_  = Utility{1.0f},
@@ -10285,11 +10822,14 @@ struct ConfigT {
 		ShortIndex prong;
 	};
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
 //------------------------------------------------------------------------------
 
+/// @brief Type configuration for MachineT<>
 using Config = ConfigT<>;
 
 namespace detail {
@@ -10297,88 +10837,156 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TConfig>
-struct M_ {
-	using Config_ = TConfig;
+struct M_;
+
+template <typename TContext,
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+		  typename TRank,
+		  typename TUtility,
+		  typename TRNG,
+#endif
+		  LongIndex NSubstitutionLimit,
+		  LongIndex NTaskCapacity>
+struct M_	   <ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>> {
+	using Cfg = ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>;
 
 	//----------------------------------------------------------------------
 
+	/// @brief Composite region ('changeTo<>()' into the region acts as 'restart<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Composite			 = CI_<Strategy::Composite,	   THead, TSubStates...>;
 
+	/// @brief Headless composite region ('changeTo<>()' into the region acts as 'restart<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using CompositePeers	 = CI_<Strategy::Composite,    void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Resumable region ('changeTo<>()' into the region acts as 'resume<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Resumable			  = CI_<Strategy::Resumable,   THead, TSubStates...>;
 
+	/// @brief Headless resumable region ('changeTo<>()' into the region acts as 'resume<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using ResumablePeers	  = CI_<Strategy::Resumable,   void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
+	/// @brief Utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Utilitarian		  = CI_<Strategy::Utilitarian, THead, TSubStates...>;
 
+	/// @brief Headless utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using UtilitarianPeers	  = CI_<Strategy::Utilitarian, void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Random region ('changeTo<>()' into the region acts as 'randomize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Random			  = CI_<Strategy::RandomUtil,  THead, TSubStates...>;
 
+	/// @brief Headless random region ('changeTo<>()' into the region acts as 'randomize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using RandomPeers		  = CI_<Strategy::RandomUtil,  void,  TSubStates...>;
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Orthogonal region (when activated, activates all sub-states)
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Orthogonal		  = OI_<THead, TSubStates...>;
 
+	/// @brief Headless orthogonal region (when activated, activates all sub-states)
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
 
 	//----------------------------------------------------------------------
 
+	/// @brief Root ('changeTo<>()' into the root region acts as 'restart<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using Root				  = RF_<Config_, Composite  <THead, TSubStates...>>;
+	using Root				  = RF_<Cfg, Composite  <THead, TSubStates...>>;
 
+	/// @brief Headless root ('changeTo<>()' into the root region acts as 'restart<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using PeerRoot			  = RF_<Config_, CompositePeers  <  TSubStates...>>;
+	using PeerRoot			  = RF_<Cfg, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Resumable root ('changeTo<>()' into the root region acts as 'resume<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		  = RF_<Config_, Resumable  <THead, TSubStates...>>;
+	using ResumableRoot		  = RF_<Cfg, Resumable  <THead, TSubStates...>>;
 
+	/// @brief Headless resumable root ('changeTo<>()' into the root region acts as 'resume<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	  = RF_<Config_, ResumablePeers  <  TSubStates...>>;
+	using ResumablePeerRoot	  = RF_<Cfg, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename THead, typename... TSubStates>
-	using UtilitarianRoot	  = RF_<Config_, Utilitarian<THead, TSubStates...>>;
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
+	/// @brief Utilitarian root ('changeTo<>()' into the root region acts as 'utilize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
+	template <typename THead, typename... TSubStates>
+	using UtilitarianRoot	  = RF_<Cfg, Utilitarian<THead, TSubStates...>>;
+
+	/// @brief Headless utilitarian root ('changeTo<>()' into the root region acts as 'utilize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using UtilitarianPeerRoot = RF_<Config_, UtilitarianPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = RF_<Cfg, UtilitarianPeers<  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Random root ('changeTo<>()' into the root region acts as 'randomize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using RandomRoot		  = RF_<Config_, Random		<THead, TSubStates...>>;
+	using RandomRoot		  = RF_<Cfg, Random		<THead, TSubStates...>>;
 
+	/// @brief Headless random root ('changeTo<>()' into the root region acts as 'randomize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using RandomPeerRoot	  = RF_<Config_, RandomPeers	 <  TSubStates...>>;
+	using RandomPeerRoot	  = RF_<Cfg, RandomPeers	 <  TSubStates...>>;
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Orthogonal root (all sub-states are active at all times)
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	  = RF_<Config_, Orthogonal <THead, TSubStates...>>;
+	using OrthogonalRoot	  = RF_<Cfg, Orthogonal <THead, TSubStates...>>;
 
+	/// @brief Headless orthogonal root (all sub-states are active at all times)
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot  = RF_<Config_, OrthogonalPeers <  TSubStates...>>;
+	using OrthogonalPeerRoot  = RF_<Cfg, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -10387,8 +10995,12 @@ struct M_ {
 
 }
 
+/// @brief 'Template namespace' for FSM classes parametrized with default types
 using Machine = detail::M_<Config>;
 
+/// @brief 'Template namespace' for FSM classes
+/// @tparam TConfig 'ConfigT<>' type configuration for MachineT<>
+/// @see ConfigT<>
 template <typename TConfig>
 using MachineT = detail::M_<TConfig>;
 
@@ -10401,20 +11013,28 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief FSM Root
+/// @tparam Cfg Type configuration
+/// @tparam TApex Root region type
 template <typename TConfig,
 		  typename TApex>
 class R_ {
-	using Config_				= TConfig;
-	using Context				= typename Config_::Context;
-	using Rank					= typename Config_::Rank;
-	using Utility				= typename Config_::Utility;
-	using RNG					= typename Config_::RNG;
-	using Logger				= typename Config_::Logger;
+	using Context				= typename TConfig::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+	using Rank					= typename TConfig::Rank;
+	using Utility				= typename TConfig::Utility;
+	using RNG					= typename TConfig::RNG;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	using Logger				= typename TConfig::Logger;
+#endif
 
 	using Apex					= TApex;
 	using ApexInfo				= WrapInfo<Apex>;
 
-	using Info					= RF_<Config_, Apex>;
+	using Info					= RF_<TConfig, Apex>;
 	using StateList				= typename Info::StateList;
 	using RegionList			= typename Info::RegionList;
 
@@ -10456,6 +11076,11 @@ private:
 
 	using GuardControl			= GuardControlT<Args>;
 
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream			= typename Args::WriteStream;
+	using ReadStream			= typename Args::ReadStream;
+#endif
+
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
 
@@ -10465,172 +11090,343 @@ private:
 	using StructureStateInfos	= typename Args::StructureStateInfos;
 #endif
 
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream			= typename Args::WriteStream;
-	using ReadStream			= typename Args::ReadStream;
-#endif
-
+	//----------------------------------------------------------------------
 public:
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using Structure				= Array<StructureEntry, NAME_COUNT>;
-	using ActivityHistory		= Array<char,			NAME_COUNT>;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-public:
-	explicit R_(Context& context,
-				RNG& rng
-				HFSM_IF_LOGGER(, Logger* const logger = nullptr));
+	explicit R_(Context& context
+				HFSM_IF_UTILITY_THEORY(, RNG& rng)
+				HFSM_IF_LOG_INTERFACE(, Logger* const logger = nullptr));
 
 	~R_();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename T>
-	static constexpr StateID  stateId()				{ return			StateList ::template index<T>();	}
+	/// @brief Get state identifier for a state type
+	/// @tparam TState State type
+	/// @return Numeric state identifier
+	template <typename TState>
+	static constexpr StateID  stateId()					{ return			StateList ::template index<TState>();	}
 
-	template <typename T>
-	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<T>();	}
+	/// @brief Get region identifier for a region type
+	/// @tparam TState Region head state type
+	/// @return Numeric region identifier
+	template <typename TState>
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<TState>();	}
 
 	//----------------------------------------------------------------------
-
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+private:
 
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable: 4348) // redefinition of default parameter: parameter 2
 #endif
 
-	template <typename T, bool = StateList::template contains<T>()>
+	template <typename TState, bool = StateList::template contains<TState>()>
 	struct Accessor;
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
 #endif
 
-	template <typename T>
-	struct Accessor<T, true> {
-		HFSM_INLINE static		 T& get(	  MaterialApex& apex)	{ return apex.template access<T>();		}
-		HFSM_INLINE static const T& get(const MaterialApex& apex)	{ return apex.template access<T>();		}
+	template <typename TState>
+	struct Accessor<TState, true> {
+		HFSM_INLINE static		 TState& get(	   MaterialApex& apex)	{ return apex.template access<TState>();	}
+		HFSM_INLINE static const TState& get(const MaterialApex& apex)	{ return apex.template access<TState>();	}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+public:
 
 	// if you see..
-	// VS	 - error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<T,false>'
+	// VS	 - error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<TState,false>'
 	// Clang - error : implicit instantiation of undefined template 'hfsm2::detail::R_<..>::Accessor<*, false>'
 	//
 	// .. you're trying to access() a type that is not present in the state machine hierarchy
 
-	template <typename T>
-	HFSM_INLINE		  T& access()									{ return Accessor<T>::get(_apex);		}
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
+	template <typename TState>
+	HFSM_INLINE		  TState& access()										{ return Accessor<TState>::get(_apex);	}
 
-	template <typename T>
-	HFSM_INLINE const T& access() const								{ return Accessor<T>::get(_apex);		}
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
+	template <typename TState>
+	HFSM_INLINE const TState& access() const								{ return Accessor<TState>::get(_apex);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #else
 
-	template <typename T>
-	HFSM_INLINE		  T& access()					{ return Accessor<T,	   MaterialApex>{_apex}.get();	}
+public:
 
-	template <typename T>
-	HFSM_INLINE const T& access() const				{ return Accessor<T, const MaterialApex>{_apex}.get();	}
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
+	template <typename TState>
+	HFSM_INLINE		  TState& access()					{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
+
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
+	template <typename TState>
+	HFSM_INLINE const TState& access() const			{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
 
 #endif
 
 	//----------------------------------------------------------------------
 
+	/// @brief Trigger FSM update cycle (recursively call 'update()' on all active states, then process requested transitions)
 	void update();
 
+	/// @brief Have FSM react to an event (recursively call matching 'react<>()' on all active states, then process requested transitions)
+	/// @tparam TEvent Event type
+	/// @param event Event to react to
 	template <typename TEvent>
 	HFSM_INLINE void react(const TEvent& event);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _registry.isActive   (stateId);	}
-	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _registry.isResumable(stateId);	}
+	/// @brief Check if a state is active
+	/// @param stateId State identifier
+	/// @return State active status
+	HFSM_INLINE bool isActive   (const StateID stateId) const		{ return _registry.isActive   (stateId);		}
 
-	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);				}
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @param stateId State identifier
+	/// @return State resumable status
+	HFSM_INLINE bool isResumable(const StateID stateId) const		{ return _registry.isResumable(stateId);		}
 
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @param stateId State identifier
+	/// @return State scheduled status
+	HFSM_INLINE bool isScheduled(const StateID stateId) const		{ return isResumable(stateId);					}
+
+	/// @brief Check if a state is active
+	/// @tparam TState State type
+	/// @return State active status
 	template <typename TState>
-	HFSM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());	}
+	HFSM_INLINE bool isActive   () const							{ return isActive	(stateId<TState>());		}
 
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @tparam TState State type
+	/// @return State resumable status
 	template <typename TState>
-	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
+	HFSM_INLINE bool isResumable() const							{ return isResumable(stateId<TState>());		}
 
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @tparam TState State type
+	/// @return State scheduled status
 	template <typename TState>
-	HFSM_INLINE bool isScheduled() const						{ return isResumable<TState>();				}
+	HFSM_INLINE bool isScheduled() const							{ return isResumable<TState>();					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void changeTo (const StateID stateId);
-	HFSM_INLINE void restart  (const StateID stateId);
-	HFSM_INLINE void resume	  (const StateID stateId);
-	HFSM_INLINE void utilize  (const StateID stateId);
-	HFSM_INLINE void randomize(const StateID stateId);
-	HFSM_INLINE void schedule (const StateID stateId);
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @param stateId State identifier
+	HFSM_INLINE void changeTo	(const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @param stateId State identifier
+	HFSM_INLINE void restart	(const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @param stateId State identifier
+	HFSM_INLINE void resume		(const StateID stateId);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM_ENABLE_UTILITY_THEORY
+	HFSM_INLINE void utilize	(const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM_ENABLE_UTILITY_THEORY
+	HFSM_INLINE void randomize	(const StateID stateId);
+
+#endif
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @param stateId State identifier
+	HFSM_INLINE void schedule	(const StateID stateId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @tparam TState State type
 	template <typename TState>
-	HFSM_INLINE void changeTo ()								{ changeTo (stateId<TState>());				}
+	HFSM_INLINE void changeTo	()									{ changeTo (stateId<TState>());					}
 
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @tparam TState State type
 	template <typename TState>
-	HFSM_INLINE void restart  ()								{ restart  (stateId<TState>());				}
+	HFSM_INLINE void restart	()									{ restart  (stateId<TState>());					}
 
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @tparam TState State type
 	template <typename TState>
-	HFSM_INLINE void resume	  ()								{ resume   (stateId<TState>());				}
+	HFSM_INLINE void resume		()									{ resume   (stateId<TState>());					}
 
-	template <typename TState>
-	HFSM_INLINE void utilize  ()								{ utilize  (stateId<TState>());				}
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///   with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TState State type
+	/// @see HFSM_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM_INLINE void randomize()								{ randomize(stateId<TState>());				}
+	HFSM_INLINE void utilize	()									{ utilize  (stateId<TState>());					}
 
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///   proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TState State type
+	/// @see HFSM_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM_INLINE void schedule ()								{ schedule (stateId<TState>());				}
+	HFSM_INLINE void randomize	()									{ randomize(stateId<TState>());					}
+
+#endif
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM_INLINE void schedule	()									{ schedule (stateId<TState>());					}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Check if a state is going to be activated or deactivated
+	/// @param stateId State identifier
+	/// @return State pending activation/deactivation status
+	HFSM_INLINE bool isPendingChange(const StateID stateId) const	{ return _registry.isPendingChange(stateId);	}
+
+	/// @brief Check if a state is going to be activated
+	/// @param stateId State identifier
+	/// @return State pending activation status
+	HFSM_INLINE bool isPendingEnter	(const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
+
+	/// @brief Check if a state is going to be deactivated
+	/// @param stateId State identifier
+	/// @return State pending deactivation status
+	HFSM_INLINE bool isPendingExit	(const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
+
+	/// @brief Check if a state is going to be activated or deactivated
+	/// @tparam TState State type
+	/// @return State pending activation/deactivation status
+	template <typename TState>
+	HFSM_INLINE bool isPendingChange()								{ return isPendingChange(stateId<TState>());	}
+
+	/// @brief Check if a state is going to be activated
+	/// @tparam TState State type
+	/// @return State pending activation status
+	template <typename TState>
+	HFSM_INLINE bool isPendingEnter()								{ return isPendingEnter (stateId<TState>());	}
+
+	/// @brief Check if a state is going to be deactivated
+	/// @tparam TState State type
+	/// @return State pending deactivation status
+	template <typename TState>
+	HFSM_INLINE bool isPendingExit()								{ return isPendingExit  (stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Reset FSM to initial state (recursively 'exit()' currently active states, 'enter()' initial states)
+	void reset();
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+
+	/// @brief Buffer for serialization
+	/// @see https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization
+	/// @see HFSM_ENABLE_SERIALIZATION
+	using SerialBuffer			= typename Args::SerialBuffer;
+
+	/// @brief Serialize FSM into 'buffer'
+	/// @param buffer 'SerialBuffer' to serialize to
+	/// @see HFSM_ENABLE_SERIALIZATION
+	void save(		SerialBuffer& buffer) const;
+
+	/// @brief De-serialize FSM from 'buffer'
+	/// @param buffer 'SerialBuffer' to de-serialize from
+	/// @see HFSM_ENABLE_SERIALIZATION
+	void load(const SerialBuffer& buffer);
+
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+	/// @brief Array of last recorded transitions
+	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
+
+	/// @brief Get the list of transitions recorded during last 'update()'
+	/// @return Array of last recorded transitions
+	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	const TransitionHistory& transitionHistory() const				{ return _transitionHistory;					}
+
+	/// @brief Force process transitions (skips 'guard()' calls)
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions Array of 'Transition' to replay
+	/// @param count Number of transitions
+	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	void replayTransitions(const Transition* const transitions, const uint64_t count);
+
+	/// @brief Force process transitions (skips 'guard()' calls)
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions Array of 'Transition' to replay
+	/// @param count Number of transitions
+	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	void replayTransitions(const TransitionHistory& transitions)	{ replayTransitions(transitions, 1);			}
+
+	/// @brief Force process a transition (skips 'guard()' calls)
+	///   Can be used to synchronize multiple FSMs
+	/// @param transition 'Transition' to replay
+	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	void replayTransition (const Transition& transition)			{ replayTransitions(&transition, 1);			}
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const Structure&	   structure()		 const				{ return _structure;						}
-	const ActivityHistory& activityHistory() const				{ return _activityHistory;					}
+
+	/// @brief Array of 'StructureEntry' representing FSM structure
+	/// @see HFSM_ENABLE_STRUCTURE_REPORT
+	using Structure				= Array<StructureEntry, NAME_COUNT>;
+
+	/// @brief Array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
+	/// @see HFSM_ENABLE_STRUCTURE_REPORT
+	using ActivityHistory		= Array<char,			NAME_COUNT>;
+
+	/// @brief Get the array of 'StructureEntry' representing FSM structure
+	/// @return FSM structure
+	/// @see HFSM_ENABLE_STRUCTURE_REPORT
+	const Structure&	   structure()		 const					{ return _structure;							}
+
+	/// @brief Get the array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
+	/// @return FSM activation history
+	/// @see HFSM_ENABLE_STRUCTURE_REPORT
+	const ActivityHistory& activityHistory() const					{ return _activityHistory;						}
+
 #endif
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	const TransitionHistory& transitionHistory() const			{ return _transitionHistory;				}
+#ifdef HFSM_ENABLE_LOG_INTERFACE
 
-	void replayTransition (const Transition& transition)		{ replayTransitions(&transition, 1);		}
-	void replayTransitions(const Transition* const transitions, const uint64_t count);
+	/// @brief Attach logger
+	/// @param logger A logger implementing 'hfsm2::LoggerInterfaceT<TContext>' interface
+	/// @see HFSM_ENABLE_LOG_INTERFACE
+	void attachLogger(Logger* const logger)							{ _logger = logger;								}
+
 #endif
 
-	void reset();
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	// Buffer for serialization
-	//  Members:
-	//   bitSize - Number of payload bits used
-	//   payload - Serialized data
-	//  See https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization
-	using SerialBuffer			= typename Args::SerialBuffer;
-
-	// Serialize the structural configuration into 'buffer'
-	void save(		SerialBuffer& buffer) const;
-
-	// De-serialize the configuration and initialize the instance
-	void load(const SerialBuffer& buffer);
-#endif
-
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	void attachLogger(Logger* const logger)						{ _logger = logger;							}
-#endif
+	//----------------------------------------------------------------------
 
 private:
 	void initialEnter();
@@ -10639,25 +11435,33 @@ private:
 	bool applyRequest (Control& control, const Request& request);
 	bool applyRequests(Control& control);
 
+	bool cancelledByEntryGuards(const Requests& pendingChanges);
+	bool cancelledByGuards(const Requests& pendingChanges);
+
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 	bool applyRequests(Control& control,
 					   const Transition* const transitions,
 					   const uint64_t count);
-#endif
 
-	bool cancelledByEntryGuards(const Requests& pendingChanges);
-	bool cancelledByGuards(const Requests& pendingChanges);
+	void recordRequestsAs(const Method method);
+
+	TransitionHistory _transitionHistory;
+#endif
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	void getStateNames();
 	void udpateActivity();
-#endif
 
-	HFSM_IF_TRANSITION_HISTORY(void recordRequestsAs(const Method method));
+	Prefixes _prefixes;
+	StructureStateInfos _stateInfos;
+
+	Structure _structure;
+	ActivityHistory _activityHistory;
+#endif
 
 private:
 	Context& _context;
-	RNG& _rng;
+	HFSM_IF_UTILITY_THEORY(RNG& _rng);
 
 	Registry _registry;
 	PlanData _planData;
@@ -10666,21 +11470,14 @@ private:
 
 	MaterialApex _apex;
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	Prefixes _prefixes;
-	StructureStateInfos _stateInfos;
-
-	Structure _structure;
-	ActivityHistory _activityHistory;
-#endif
-
-	HFSM_IF_TRANSITION_HISTORY(TransitionHistory _transitionHistory);
-
-	HFSM_IF_LOGGER(Logger* _logger);
+	HFSM_IF_LOG_INTERFACE(Logger* _logger);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief FSM Root
+/// @tparam Cfg Type configuration
+/// @tparam TApex Root region type
 template <typename TConfig,
 		  typename TApex>
 class RW_ final
@@ -10692,88 +11489,134 @@ public:
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_,
-		  typename TU_,
-		  typename TR_,
-		  LongIndex NS,
-		  LongIndex NT,
+template <
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+		  typename TRank,
+		  typename TUtility,
+		  typename TRNG,
+#endif
+		  LongIndex NSubstitutionLimit,
+		  LongIndex NTaskCapacity,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex>
 	, ::hfsm2::EmptyContext
 {
-	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>;
-	using Context	= typename Config_::Context;
-	using RNG		= typename Config_::RNG;
-	using Logger	= typename Config_::Logger;
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+	using RNG		= TRNG;
+#endif
 
-	using R			= R_<Config_, TApex>;
+	using Context	= ::hfsm2::EmptyContext;
+	using Cfg		= ::hfsm2::ConfigT<Context, HFSM_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using R			= R_<Cfg, TApex>;
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	using Logger	= typename Cfg::Logger;
+#endif
 
 public:
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	explicit HFSM_INLINE RW_(RNG& rng
-							 HFSM_IF_LOGGER(, Logger* const logger = nullptr))
+							 HFSM_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
 			rng
-			HFSM_IF_LOGGER(, logger)}
+			HFSM_IF_LOG_INTERFACE(, logger)}
 	{}
+
+#else
+
+	explicit HFSM_INLINE RW_(HFSM_IF_LOG_INTERFACE(Logger* const logger = nullptr))
+		: R{static_cast<Context&>(*this)
+			HFSM_IF_LOG_INTERFACE(, logger)}
+	{}
+
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC_,
-		  typename TN_,
-		  typename TU_,
-		  LongIndex NS,
-		  LongIndex NT,
+template <typename TContext,
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+		  typename TRank,
+		  typename TUtility,
+#endif
+		  LongIndex NSubstitutionLimit,
+		  LongIndex NTaskCapacity,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex>
-	, ::hfsm2::RandomT<TU_>
+class RW_	   <::hfsm2::ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex> final
+	: public R_<::hfsm2::ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex>
+	HFSM_IF_UTILITY_THEORY(, ::hfsm2::RandomT<TUtility>)
 {
-	using Config_	= ::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>;
-	using Context	= typename Config_::Context;
-	using RNG		= typename Config_::RNG;
-	using Logger	= typename Config_::Logger;
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+	using RNG		= ::hfsm2::RandomT<TUtility>;
+#endif
 
-	using R			= R_<Config_, TApex>;
+	using Context	= TContext;
+	using Cfg		= ::hfsm2::ConfigT<Context, HFSM_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using R			= R_<Cfg, TApex>;
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	using Logger	= typename Cfg::Logger;
+#endif
+
 
 public:
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	explicit HFSM_INLINE RW_(Context& context
-							 HFSM_IF_LOGGER(, Logger* const logger = nullptr))
+							 HFSM_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{context,
 			static_cast<RNG&>(*this)
-			HFSM_IF_LOGGER(, logger)}
+			HFSM_IF_LOG_INTERFACE(, logger)}
 		, RNG{0}
 	{}
+
+#else
+
+	explicit HFSM_INLINE RW_(Context& context
+							 HFSM_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+		: R{context
+			HFSM_IF_LOG_INTERFACE(, logger)}
+	{}
+
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_,
-		  typename TU_,
-		  LongIndex NS,
-		  LongIndex NT,
-		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex>
-	, ::hfsm2::EmptyContext
-	, ::hfsm2::RandomT<TU_>
-{
-	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>;
-	using Context	= typename Config_::Context;
-	using RNG		= typename Config_::RNG;
-	using Logger	= typename Config_::Logger;
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
-	using R			= R_<Config_, TApex>;
+template <typename TRank,
+		  typename TUtility,
+		  LongIndex NSubstitutionLimit,
+		  LongIndex NTaskCapacity,
+		  typename TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit, NTaskCapacity>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit, NTaskCapacity>, TApex>
+	, ::hfsm2::EmptyContext
+	, ::hfsm2::RandomT<TUtility>
+{
+	using Context	= ::hfsm2::EmptyContext;
+	using RNG		= ::hfsm2::RandomT<TUtility>;
+	using Cfg		= ::hfsm2::ConfigT<Context, TRank, TUtility, RNG, NSubstitutionLimit, NTaskCapacity>;
+	using R			= R_<Cfg, TApex>;
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	using Logger	= typename Cfg::Logger;
+#endif
 
 public:
-	explicit HFSM_INLINE RW_(HFSM_IF_LOGGER(Logger* const logger = nullptr))
+	explicit HFSM_INLINE RW_(HFSM_IF_LOG_INTERFACE(Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
 			static_cast<RNG&>(*this)
-			HFSM_IF_LOGGER(, logger)}
+			HFSM_IF_LOG_INTERFACE(, logger)}
 		, RNG{0}
 	{}
 };
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -10786,12 +11629,12 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TG, typename TA>
-R_<TG, TA>::R_(Context& context,
-			   RNG& rng
-			   HFSM_IF_LOGGER(, Logger* const logger))
+R_<TG, TA>::R_(Context& context
+			   HFSM_IF_UTILITY_THEORY(, RNG& rng)
+			   HFSM_IF_LOG_INTERFACE(, Logger* const logger))
 	: _context{context}
-	, _rng{rng}
-	HFSM_IF_LOGGER(, _logger{logger})
+	HFSM_IF_UTILITY_THEORY(, _rng{rng})
+	HFSM_IF_LOG_INTERFACE(, _logger{logger})
 {
 	_apex.deepRegister(_registry, Parent{});
 
@@ -10804,11 +11647,11 @@ R_<TG, TA>::R_(Context& context,
 
 template <typename TG, typename TA>
 R_<TG, TA>::~R_() {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	  (control);
 	_apex.deepDestruct(control);
@@ -10821,12 +11664,12 @@ R_<TG, TA>::~R_() {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::update() {
-	FullControl control(_context,
-						_rng,
-						_registry,
-						_planData,
-						_requests,
-						HFSM_LOGGER_OR(_logger, nullptr));
+	FullControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						, _requests
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepUpdate(control);
 
@@ -10844,12 +11687,12 @@ template <typename TG, typename TA>
 template <typename TEvent>
 void
 R_<TG, TA>::react(const TEvent& event) {
-	FullControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						_requests,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	FullControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						, _requests
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepReact(control, event);
 
@@ -10893,6 +11736,8 @@ R_<TG, TA>::resume(const StateID stateId) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TG, typename TA>
 void
 R_<TG, TA>::utilize(const StateID stateId) {
@@ -10911,6 +11756,8 @@ R_<TG, TA>::randomize(const StateID stateId) {
 	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
+#endif
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
@@ -10923,46 +11770,14 @@ R_<TG, TA>::schedule(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-
-template <typename TG, typename TA>
-void
-R_<TG, TA>::replayTransitions(const Transition* const transitions,
-							  const uint64_t count)
-{
-	if (HFSM_CHECKED(transitions && count)) {
-		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
-
-		PlanControl control{_context,
-							_rng,
-							_registry,
-							_planData,
-							HFSM_LOGGER_OR(_logger, nullptr)};
-
-		if (applyRequests(control, transitions, count)) {
-			_apex.deepChangeToRequested(control);
-
-			_registry.clearRequests();
-
-			HFSM_IF_ASSERT(_planData.verifyPlans());
-		}
-
-		HFSM_IF_STRUCTURE(udpateActivity());
-	}
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
 template <typename TG, typename TA>
 void
 R_<TG, TA>::reset() {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
 	_apex.deepDestruct (control);
@@ -10991,11 +11806,11 @@ R_<TG, TA>::save(SerialBuffer& _buffer) const {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::load(const SerialBuffer& buffer) {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
 	_apex.deepDestruct (control);
@@ -11005,6 +11820,38 @@ R_<TG, TA>::load(const SerialBuffer& buffer) {
 
 	_apex.deepConstruct(control);
 	_apex.deepEnter	   (control);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+
+template <typename TG, typename TA>
+void
+R_<TG, TA>::replayTransitions(const Transition* const transitions,
+							  const uint64_t count)
+{
+	if (HFSM_CHECKED(transitions && count)) {
+		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
+
+		PlanControl control{_context
+							HFSM_IF_UTILITY_THEORY(, _rng)
+							, _registry
+							, _planData
+							HFSM_IF_LOG_INTERFACE(, _logger)};
+
+		if (applyRequests(control, transitions, count)) {
+			_apex.deepChangeToRequested(control);
+
+			_registry.clearRequests();
+
+			HFSM_IF_ASSERT(_planData.verifyPlans());
+		}
+
+		HFSM_IF_STRUCTURE(udpateActivity());
+	}
 }
 
 #endif
@@ -11022,11 +11869,11 @@ R_<TG, TA>::initialEnter() {
 
 	Requests lastRequests;
 
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepRequestChange(control);
 
@@ -11076,11 +11923,11 @@ R_<TG, TA>::processTransitions() {
 
 	Requests lastRequests;
 
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM_IF_LOG_INTERFACE(, _logger)};
 
 	bool changesMade = false;
 
@@ -11128,8 +11975,12 @@ R_<TG, TA>::applyRequest(Control& control,
 	case Request::CHANGE:
 	case Request::RESTART:
 	case Request::RESUME:
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	case Request::UTILIZE:
 	case Request::RANDOMIZE:
+#endif
+
 		if (_registry.requestImmediate(request))
 			_apex.deepForwardActive(control, request.type);
 		else
@@ -11162,7 +12013,53 @@ R_<TG, TA>::applyRequests(Control& control) {
 	return changesMade;
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TG, typename TA>
+bool
+R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
+	GuardControl guardControl{_context
+							  HFSM_IF_UTILITY_THEORY(, _rng)
+							  , _registry
+							  , _planData
+							  , _requests
+							  , pendingRequests
+							  HFSM_IF_LOG_INTERFACE(, _logger)};
+
+	if (_apex.deepEntryGuard(guardControl)) {
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
+
+		return true;
+	} else
+		return false;
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+bool
+R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
+	GuardControl guardControl{_context
+							  HFSM_IF_UTILITY_THEORY(, _rng)
+							  , _registry
+							  , _planData
+							  , _requests
+							  , pendingRequests
+							  HFSM_IF_LOG_INTERFACE(, _logger)};
+
+	if (_apex.deepForwardExitGuard(guardControl)) {
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::EXIT_GUARD));
+
+		return true;
+	} else if (_apex.deepForwardEntryGuard(guardControl)) {
+		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
+
+		return true;
+	} else
+		return false;
+}
+
+//------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
@@ -11183,53 +12080,16 @@ R_<TG, TA>::applyRequests(Control& control,
 		return false;
 }
 
-#endif
-
-//------------------------------------------------------------------------------
-
-template <typename TG, typename TA>
-bool
-R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
-	GuardControl guardControl{_context,
-							  _rng,
-							  _registry,
-							  _planData,
-							  _requests,
-							  pendingRequests,
-							  HFSM_LOGGER_OR(_logger, nullptr)};
-
-	if (_apex.deepEntryGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
-
-		return true;
-	} else
-		return false;
-}
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
-bool
-R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
-	GuardControl guardControl{_context,
-							  _rng,
-							  _registry,
-							  _planData,
-							  _requests,
-							  pendingRequests,
-							  HFSM_LOGGER_OR(_logger, nullptr)};
-
-	if (_apex.deepForwardExitGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::EXIT_GUARD));
-
-		return true;
-	} else if (_apex.deepForwardEntryGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
-
-		return true;
-	} else
-		return false;
+void
+R_<TG, TA>::recordRequestsAs(const Method method) {
+	for (const auto& request : _requests)
+		_transitionHistory.append(Transition{request, method});
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -11340,36 +12200,51 @@ R_<TG, TA>::udpateActivity() {
 
 #endif
 
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-
-template <typename TG, typename TA>
-void
-R_<TG, TA>::recordRequestsAs(const Method method) {
-	for (const auto& request : _requests)
-		_transitionHistory.append(Transition{request, method});
-}
-
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 
 }
 }
 
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
-#ifdef __clang__
-	#pragma clang diagnostic pop
-#endif
+////////////////////////////////////////////////////////////////////////////////
+
+#undef HFSM_INLINE
+
+#undef HFSM_64BIT_OR_32BIT
+
+//#undef HFSM_BREAK
+
+#undef HFSM_IF_DEBUG
+#undef HFSM_UNLESS_DEBUG
+#undef HFSM_DEBUG_OR
+
+#undef HFSM_IF_ASSERT
+#undef HFSM_CHECKED
+#undef HFSM_ASSERT
+#undef HFSM_ASSERT_OR
+
+#undef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+
+#undef HFSM_IF_UTILITY_THEORY
+#undef HFSM_IF_SERIALIZATION
+#undef HFSM_IF_TRANSITION_HISTORY
+#undef HFSM_IF_STRUCTURE
+
+#undef HFSM_IF_LOG_INTERFACE
+#undef HFSM_LOG_TRANSITION
+#undef HFSM_LOG_TASK_STATUS
+#undef HFSM_LOG_PLAN_STATUS
+#undef HFSM_LOG_CANCELLED_PENDING
+
+#undef HFSM_LOG_STATE_METHOD
+
+////////////////////////////////////////////////////////////////////////////////
+
 #if defined(__GNUC__) || defined(__GNUG__)
 	#pragma GCC diagnostic pop
 #endif
 
-#undef HFSM_INLINE
-#undef HFSM_IF_LOGGER
-#undef HFSM_LOGGER_OR
-#undef HFSM_LOG_STATE_METHOD
-#undef HFSM_IF_STRUCTURE
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+
+//------------------------------------------------------------------------------

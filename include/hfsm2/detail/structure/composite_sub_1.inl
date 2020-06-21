@@ -291,6 +291,8 @@ CS_<TN, TA, SG, NI, TS...>::wideRequestResume(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 typename TA::UP
 CS_<TN, TA, SG, NI, TS...>::wideReportUtilize(Control& control) {
@@ -386,6 +388,8 @@ CS_<TN, TA, SG, NI, TS...>::wideReportChangeRandom(Control& control,
 	return { l + r };
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
@@ -400,23 +404,6 @@ CS_<TN, TA, SG, NI, TS...>::wideChangeToRequested(PlanControl& control,
 	else
 		rHalf.wideChangeToRequested(control, prong);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
-void
-CS_<TN, TA, SG, NI, TS...>::wideGetNames(const LongIndex parent,
-										 const RegionType /*region*/,
-										 const ShortIndex depth,
-										 StructureStateInfos& _stateInfos) const
-{
-	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -478,6 +465,23 @@ CS_<TN, TA, SG, NI, TS...>::wideLoadResumable(Registry& registry,
 {
 	lHalf.wideLoadResumable(registry, stream);
 	rHalf.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+void
+CS_<TN, TA, SG, NI, TS...>::wideGetNames(const LongIndex parent,
+										 const RegionType /*region*/,
+										 const ShortIndex depth,
+										 StructureStateInfos& _stateInfos) const
+{
+	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
 
 #endif

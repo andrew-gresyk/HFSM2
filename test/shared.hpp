@@ -12,8 +12,12 @@
 
 struct Event {
 	enum Enum {
+
+	#ifdef HFSM_ENABLE_UTILITY_THEORY
 		RANK,
 		UTILITY,
+	#endif
+
 		ENTRY_GUARD,
 		CONSTRUCT,
 		ENTER,
@@ -24,8 +28,10 @@ struct Event {
 		EXIT,
 		DESTRUCT,
 
+	#ifdef HFSM_ENABLE_UTILITY_THEORY
 		UTILITY_RESOLUTION,
 		RANDOM_RESOLUTION,
+	#endif
 
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
@@ -38,8 +44,12 @@ struct Event {
 		CHANGE,
 		RESTART,
 		RESUME,
+
+	#ifdef HFSM_ENABLE_UTILITY_THEORY
 		UTILIZE,
 		RANDOMIZE,
+	#endif
+
 		SCHEDULE,
 		CANCEL_PENDING,
 
@@ -81,7 +91,10 @@ struct LoggerT
 	using Context		  = TContext;
 	using Interface		  = hfsm2::LoggerInterfaceT<Context>;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Utilty		  = typename Interface::Utilty;
+#endif
+
 	using Method		  = typename Interface::Method;
 	using StateID		  = typename Interface::StateID;
 	using RegionID		  = typename Interface::RegionID;
@@ -109,6 +122,8 @@ struct LoggerT
 	void recordCancelledPending(Context& context,
 								const StateID origin) override;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	void recordUtilityResolution(Context& context,
 								 const StateID head,
 								 const StateID prong,
@@ -118,6 +133,8 @@ struct LoggerT
 								const StateID head,
 								const StateID prong,
 								const Utilty utilty) override;
+
+#endif
 
 	void assertSequence(const Events& reference);
 

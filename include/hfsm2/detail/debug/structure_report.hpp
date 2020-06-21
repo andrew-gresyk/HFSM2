@@ -1,5 +1,3 @@
-#pragma once
-
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
@@ -14,43 +12,7 @@ struct StructureEntry {
 
 #endif
 
-//------------------------------------------------------------------------------
-
 namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-#pragma pack(push, 1)
-
-struct alignas(alignof(void*)) StructureStateInfo {
-	enum RegionType : ShortIndex {
-		COMPOSITE,
-		ORTHOGONAL,
-	};
-
-	StructureStateInfo() = default;
-
-	HFSM_INLINE StructureStateInfo(const LongIndex parent_,
-								   const RegionType region_,
-								   const ShortIndex depth_,
-								   const char* const name_)
-		: name{name_}
-		, parent{parent_}
-		, region{region_}
-		, depth{depth_}
-	{}
-
-	const char* name;
-	LongIndex parent;
-	RegionType region;
-	ShortIndex depth;
-};
-
-#pragma pack(pop)
-
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -68,11 +30,15 @@ HFSM_INLINE convert(const Request::Type type) {
 		case Request::RESUME:
 			return TransitionType::RESUME;
 
+	#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 		case Request::UTILIZE:
 			return TransitionType::UTILIZE;
 
 		case Request::RANDOMIZE:
 			return TransitionType::RANDOMIZE;
+
+	#endif
 
 		case Request::SCHEDULE:
 			return TransitionType::SCHEDULE;
@@ -83,7 +49,7 @@ HFSM_INLINE convert(const Request::Type type) {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 Request::Type
 HFSM_INLINE convert(const TransitionType type) {
@@ -97,11 +63,15 @@ HFSM_INLINE convert(const TransitionType type) {
 	case TransitionType::RESUME:
 		return Request::RESUME;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	case TransitionType::UTILIZE:
 		return Request::UTILIZE;
 
 	case TransitionType::RANDOMIZE:
 		return Request::RANDOMIZE;
+
+#endif
 
 	case TransitionType::SCHEDULE:
 		return Request::SCHEDULE;
@@ -114,9 +84,56 @@ HFSM_INLINE convert(const TransitionType type) {
 
 #endif
 
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+#pragma pack(push, 1)
+
+struct alignas(alignof(void*)) StructureStateInfo {
+	enum RegionType : ShortIndex {
+		COMPOSITE,
+		ORTHOGONAL,
+	};
+
+	StructureStateInfo() = default;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM_INLINE StructureStateInfo(const LongIndex parent_,
+								   const RegionType region_,
+								   const ShortIndex depth_,
+								   const char* const name_)
+		: name{name_}
+		, parent{parent_}
+		, region{region_}
+		, depth{depth_}
+	{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	const char* name;
+	LongIndex parent;
+	RegionType region;
+	ShortIndex depth;
+};
+
+#pragma pack(pop)
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
+#endif
+
 }
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef HFSM_ENABLE_TRANSITION_HISTORY
 
@@ -124,6 +141,8 @@ HFSM_INLINE convert(const TransitionType type) {
 
 struct alignas(4) Transition {
 	HFSM_INLINE Transition() = default;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE Transition(const detail::Request request,
 						   const Method method_)
@@ -133,6 +152,8 @@ struct alignas(4) Transition {
 	{
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE Transition(const StateID stateId_,
 						   const Method method_,
@@ -144,6 +165,8 @@ struct alignas(4) Transition {
 		HFSM_ASSERT(method_ < Method::COUNT);
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	detail::Request request() const		{ return detail::Request{detail::convert(transitionType), stateId};	}
 
 	StateID stateId = INVALID_STATE_ID;
@@ -153,7 +176,7 @@ struct alignas(4) Transition {
 
 #pragma pack(pop)
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 bool operator == (const Transition& l, const Transition& r) {
 	return l.stateId		== r.stateId

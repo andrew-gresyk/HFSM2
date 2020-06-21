@@ -186,6 +186,8 @@ OS_<TN, TA, NI, TI>::wideRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
 OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
@@ -230,6 +232,8 @@ OS_<TN, TA, NI, TI>::wideReportRandomize(Control& control) {
 	return i;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
@@ -237,21 +241,6 @@ void
 OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 	initial.deepChangeToRequested(control);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, ShortIndex NI, typename TI>
-void
-OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
-								  const ShortIndex depth,
-								  StructureStateInfos& _stateInfos) const
-{
-	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -293,6 +282,21 @@ OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 									   ReadStream& stream) const
 {
 	initial.deepLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+void
+OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
+								  const ShortIndex depth,
+								  StructureStateInfos& _stateInfos) const
+{
+	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
 }
 
 #endif

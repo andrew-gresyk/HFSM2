@@ -10,10 +10,16 @@ struct S_ final {
 	static constexpr auto STATE_ID	 = TIndices::STATE_ID;
 
 	using Context		= typename TArgs::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
 	using UP			= typename TArgs::UP;
+#endif
+
+#ifdef HFSM_ENABLE_LOG_INTERFACE
 	using Logger		= typename TArgs::Logger;
+#endif
 
 	using Control		= ControlT<TArgs>;
 	using Registry		= RegistryT<TArgs>;
@@ -91,8 +97,11 @@ struct S_ final {
 
 	HFSM_INLINE void	wrapPlanSucceeded	 (FullControl&	control);
 	HFSM_INLINE void	wrapPlanFailed		 (FullControl&	control);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE Rank	wrapRank			 (Control& control);
 	HFSM_INLINE Utility	wrapUtility			 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -105,6 +114,8 @@ struct S_ final {
 	HFSM_INLINE void	deepRequestRemain	 (Registry&)										{}
 	HFSM_INLINE void	deepRequestRestart	 (Registry&)										{}
 	HFSM_INLINE void	deepRequestResume	 (Registry&)										{}
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	deepRequestUtilize	 (Control&)											{}
 	HFSM_INLINE void	deepRequestRandomize (Control&)											{}
 
@@ -112,20 +123,26 @@ struct S_ final {
 	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
 	HFSM_INLINE Rank	deepReportRank		 (Control& control);
 	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepChangeToRequested(Control&)											{}
 
-	//------------------------------------------------------------------------------
+	//----------------------------------------------------------------------
 
-#if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename TArgs::WriteStream;
+	using ReadStream	= typename TArgs::ReadStream;
 
-	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
+	HFSM_INLINE void	deepSaveActive	 (const Registry&, WriteStream&) const					{}
+	HFSM_INLINE void	deepSaveResumable(const Registry&, WriteStream&) const					{}
 
+	HFSM_INLINE void	deepLoadRequested(		Registry&, ReadStream& ) const					{}
+	HFSM_INLINE void	deepLoadResumable(		Registry&, ReadStream& ) const					{}
 #endif
 
-	//----------------------------------------------------------------------
+	//------------------------------------------------------------------------------
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename TArgs::StructureStateInfos;
@@ -141,18 +158,13 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename TArgs::WriteStream;
-	using ReadStream	= typename TArgs::ReadStream;
+#if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
 
-	HFSM_INLINE void	deepSaveActive	 (const Registry&, WriteStream&) const					{}
-	HFSM_INLINE void	deepSaveResumable(const Registry&, WriteStream&) const					{}
+	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
 
-	HFSM_INLINE void	deepLoadRequested(		Registry&, ReadStream& ) const					{}
-	HFSM_INLINE void	deepLoadResumable(		Registry&, ReadStream& ) const					{}
 #endif
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_LOG_INTERFACE
 

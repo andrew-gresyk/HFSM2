@@ -1,5 +1,3 @@
-#pragma once
-
 namespace hfsm2 {
 namespace detail {
 
@@ -93,7 +91,17 @@ private:
 
 private:
 	LongIndex _count = 0;
-	Item _items[CAPACITY];
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	Item _items[CAPACITY]; // warning 4324 triggers for 'StructureStateInfo'
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

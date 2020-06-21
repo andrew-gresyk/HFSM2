@@ -66,7 +66,7 @@ S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
+S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM_IF_LOG_INTERFACE(control)) {
 	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
@@ -235,6 +235,8 @@ S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Rank
 S_<TN_, TA, TH>::wrapRank(Control& control) {
@@ -295,6 +297,8 @@ typename S_<TN_, TA, TH>::Utility
 S_<TN_, TA, TH>::deepReportRandomize(Control& control) {
 	return wrapUtility(control);
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 

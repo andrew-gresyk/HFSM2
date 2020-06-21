@@ -1,5 +1,3 @@
-#pragma once
-
 namespace hfsm2 {
 namespace detail {
 
@@ -8,8 +6,11 @@ namespace detail {
 enum Strategy {
 	Composite,
 	Resumable,
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	Utilitarian,
 	RandomUtil,
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,8 +49,12 @@ struct Request {
 		CHANGE,
 		RESTART,
 		RESUME,
+
+	#ifdef HFSM_ENABLE_UTILITY_THEORY
 		UTILIZE,
 		RANDOMIZE,
+	#endif
+
 		SCHEDULE,
 
 		COUNT

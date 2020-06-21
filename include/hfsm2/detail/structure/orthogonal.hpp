@@ -18,9 +18,13 @@ struct O_ final {
 	static constexpr ForkID		ORTHO_ID	= (ForkID) -ORTHO_INDEX - 1;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -125,19 +129,36 @@ struct O_ final {
 	HFSM_INLINE void	deepRequestRemain	 (Registry& registry);
 	HFSM_INLINE void	deepRequestRestart	 (Registry& registry);
 	HFSM_INLINE void	deepRequestResume	 (Registry& registry);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	deepRequestUtilize	 (Control& control);
 	HFSM_INLINE void	deepRequestRandomize (Control& control);
 
 	HFSM_INLINE UP		deepReportChange	 (Control& control);
+
 	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
 	HFSM_INLINE Rank	deepReportRank		 (Control& control);
 	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
+	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
+
+	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
+	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -149,19 +170,6 @@ struct O_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
-	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
-
-	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
-	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
 #endif
 
 	//----------------------------------------------------------------------

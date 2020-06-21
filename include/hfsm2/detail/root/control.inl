@@ -139,7 +139,7 @@ PlanControlT<TArgs>::resetRegion(const RegionID id, //-V524
 
 template <typename TArgs>
 FullControlT<TArgs>::Lock::Lock(FullControlT& control_)
-	: control(!control_._locked ? &control_ : nullptr)
+	: control{!control_._locked ? &control_ : nullptr}
 {
 	if (control)
 		control->_locked = true;
@@ -280,6 +280,8 @@ FullControlT<TArgs>::resume(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TArgs>
 void
 FullControlT<TArgs>::utilize(const StateID stateId) {
@@ -307,6 +309,8 @@ FullControlT<TArgs>::randomize(const StateID stateId) {
 		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
 	}
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 

@@ -1,6 +1,4 @@
-﻿#pragma once
-
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -12,8 +10,12 @@ class InjectionT {
 
 protected:
 	using Context		= typename TArgs::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
+#endif
+
 	using StateList		= typename TArgs::StateList;
 	using RegionList	= typename TArgs::RegionList;
 
@@ -61,8 +63,12 @@ struct B_<TFirst, TRest...>
 	, B_<TRest...>
 {
 	using typename TFirst::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
+#endif
+
 	using typename TFirst::StateList;
 	using typename TFirst::RegionList;
 
@@ -98,8 +104,12 @@ struct B_<TFirst>
 	: TFirst
 {
 	using typename TFirst::Context;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
+#endif
+
 	using typename TFirst::StateList;
 	using typename TFirst::RegionList;
 
@@ -112,9 +122,11 @@ struct B_<TFirst>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
 
 	HFSM_INLINE Utility utility			 (const Control&)			{ return Utility{1.0f};	}
+#endif
 
 	HFSM_INLINE void	entryGuard		 (GuardControl&)			{}
 

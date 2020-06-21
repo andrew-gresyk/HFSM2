@@ -21,9 +21,13 @@ struct C_ final {
 	static constexpr ForkID		COMPO_ID	= COMPO_INDEX + 1;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -102,9 +106,11 @@ struct C_ final {
 	HFSM_INLINE		  ShortIndex& compoResumable(	   Control& control) const		{ return compoResumable(control._registry);		}
 	HFSM_INLINE const ShortIndex& compoResumable(const Control& control) const		{ return compoResumable(control._registry);		}
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE		  ShortIndex  resolveRandom (Control& control,
 												 const Utility(& options)[Info::WIDTH], const Utility sum,
 												 const Rank	  (& ranks)  [Info::WIDTH], const Rank	  top) const;
+#endif
 
 	HFSM_INLINE bool	compoRemain					  (Control& control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
 
@@ -152,11 +158,15 @@ struct C_ final {
 	template <>
 	HFSM_INLINE void	deepRequestChange<Resumable>  (Control& control, const ShortIndex)	{ deepRequestChangeResumable  (control); }
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	template <>
 	HFSM_INLINE void	deepRequestChange<Utilitarian>(Control& control, const ShortIndex)	{ deepRequestChangeUtilitarian(control); }
 
 	template <>
 	HFSM_INLINE void	deepRequestChange<RandomUtil> (Control& control, const ShortIndex)	{ deepRequestChangeRandom	  (control); }
+
+#endif
 
 #else
 
@@ -166,19 +176,26 @@ struct C_ final {
 
 	HFSM_INLINE void	deepRequestChangeComposite	  (Control& control);
 	HFSM_INLINE void	deepRequestChangeResumable	  (Control& control);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	deepRequestChangeUtilitarian  (Control& control);
 	HFSM_INLINE void	deepRequestChangeRandom		  (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepRequestRemain			  (Registry& registry);
 	HFSM_INLINE void	deepRequestRestart			  (Registry& registry);
 	HFSM_INLINE void	deepRequestResume			  (Registry& registry);
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	HFSM_INLINE void	deepRequestUtilize			  (Control& control);
 	HFSM_INLINE void	deepRequestRandomize		  (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 #ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
@@ -213,11 +230,26 @@ struct C_ final {
 	HFSM_INLINE Rank	deepReportRank				  (Control& control);
 	HFSM_INLINE Utility	deepReportRandomize			  (Control& control);
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	deepChangeToRequested		  (PlanControl& control);
 
 	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
+	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
+
+	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
+	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -229,19 +261,6 @@ struct C_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
-	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
-
-	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
-	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
 #endif
 
 	//----------------------------------------------------------------------

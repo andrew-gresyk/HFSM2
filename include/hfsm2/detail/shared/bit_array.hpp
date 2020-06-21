@@ -1,5 +1,3 @@
-#pragma once
-
 namespace hfsm2 {
 namespace detail {
 

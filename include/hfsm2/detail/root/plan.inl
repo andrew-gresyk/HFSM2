@@ -173,26 +173,27 @@ PlanT<TArgs>::append(const TransitionType transitionType,
 	const TaskIndex index = _planData.taskLinks.emplace(transitionType, origin, destination);
 	if (index == TaskLinks::INVALID)
 		return false;
+	else {
+		if (_bounds.first < TaskLinks::CAPACITY) {
+			HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
 
-	if (_bounds.first < TaskLinks::CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
+			auto& last  = _planData.taskLinks[_bounds.last];
+			last.next = index;
 
-		auto& last  = _planData.taskLinks[_bounds.last];
-		last.next = index;
+			auto& next = _planData.taskLinks[index];
+			next.prev  = _bounds.last;
 
-		auto& next = _planData.taskLinks[index];
-		next.prev  = _bounds.last;
+			_bounds.last = index;
+		} else {
+			HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
+						_bounds.last  == INVALID_LONG_INDEX);
 
-		_bounds.last = index;
-	} else {
-		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
-					_bounds.last  == INVALID_LONG_INDEX);
+			_bounds.first = index;
+			_bounds.last  = index;
+		}
 
-		_bounds.first = index;
-		_bounds.last  = index;
+		return true;
 	}
-
-	return true;
 }
 
 //------------------------------------------------------------------------------

@@ -6,6 +6,7 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="hfsm2">
+    <File Name="../../../include/hfsm2/machine_dev.hpp"/>
     <VirtualDirectory Name="detail">
       <File Name="../../../include/hfsm2/detail/root.inl"/>
       <File Name="../../../include/hfsm2/detail/root.hpp"/>
@@ -25,30 +26,33 @@
         <File Name="../../../include/hfsm2/detail/structure/state_box.hpp"/>
         <File Name="../../../include/hfsm2/detail/structure/state.inl"/>
         <File Name="../../../include/hfsm2/detail/structure/state.hpp"/>
-        <File Name="../../../include/hfsm2/detail/structure/root.inl"/>
-        <File Name="../../../include/hfsm2/detail/structure/root.hpp"/>
         <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub_2.inl"/>
         <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub_1.inl"/>
         <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub.hpp"/>
         <File Name="../../../include/hfsm2/detail/structure/orthogonal.inl"/>
         <File Name="../../../include/hfsm2/detail/structure/orthogonal.hpp"/>
+        <File Name="../../../include/hfsm2/detail/structure/injections.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/injections.hpp"/>
         <File Name="../../../include/hfsm2/detail/structure/forward.hpp"/>
-        <File Name="../../../include/hfsm2/detail/structure/composite_sub.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/composite_sub_2.inl"/>
+        <File Name="../../../include/hfsm2/detail/structure/composite_sub_1.inl"/>
         <File Name="../../../include/hfsm2/detail/structure/composite_sub.hpp"/>
         <File Name="../../../include/hfsm2/detail/structure/composite.inl"/>
         <File Name="../../../include/hfsm2/detail/structure/composite.hpp"/>
       </VirtualDirectory>
       <VirtualDirectory Name="shared">
-        <File Name="../../../include/hfsm2/detail/shared/bit_stream.inl"/>
-        <File Name="../../../include/hfsm2/detail/shared/bit_stream.hpp"/>
-        <File Name="../../../include/hfsm2/detail/shared/random.inl"/>
-        <File Name="../../../include/hfsm2/detail/shared/random.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/utility.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/type_list.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/random.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/random.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/macros_on.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/macros_off.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/list.inl"/>
         <File Name="../../../include/hfsm2/detail/shared/list.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/iterator.inl"/>
         <File Name="../../../include/hfsm2/detail/shared/iterator.hpp"/>
+        <File Name="../../../include/hfsm2/detail/shared/bit_stream.inl"/>
+        <File Name="../../../include/hfsm2/detail/shared/bit_stream.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/bit_array.inl"/>
         <File Name="../../../include/hfsm2/detail/shared/bit_array.hpp"/>
         <File Name="../../../include/hfsm2/detail/shared/array.inl"/>
@@ -60,24 +64,24 @@
         <File Name="../../../include/hfsm2/detail/debug/logger_interface.hpp"/>
       </VirtualDirectory>
     </VirtualDirectory>
-    <File Name="../../../include/hfsm2/machine_dev.hpp"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="test">
-    <File Name="../../../test/test_serialization.cpp"/>
-    <File Name="../../../test/test_replication.cpp"/>
-    <File Name="../../../test/test_dynamic.cpp"/>
-    <File Name="../../../test/test_guards.cpp"/>
     <File Name="../../../test/test_utilize.cpp"/>
     <File Name="../../../test/test_utility_regions.cpp"/>
     <File Name="../../../test/test_stress.cpp"/>
+    <File Name="../../../test/test_serialization.cpp"/>
     <File Name="../../../test/test_self_transitions.cpp"/>
     <File Name="../../../test/test_resume.cpp"/>
+    <File Name="../../../test/test_replication.cpp"/>
     <File Name="../../../test/test_randomize.cpp"/>
     <File Name="../../../test/test_plans.cpp"/>
+    <File Name="../../../test/test_orthogonal_root.cpp"/>
     <File Name="../../../test/test_ortho_units.cpp"/>
     <File Name="../../../test/test_internal_transitions.cpp"/>
+    <File Name="../../../test/test_guards.cpp"/>
+    <File Name="../../../test/test_dynamic.cpp"/>
     <File Name="../../../test/test_delayed_teardown.cpp"/>
     <File Name="../../../test/test_debug.cpp"/>
     <File Name="../../../test/test_composite_bst.cpp"/>
@@ -86,9 +90,9 @@
     <File Name="../../../test/shared.hpp"/>
     <File Name="../../../test/main.cpp"/>
     <VirtualDirectory Name="shared">
-      <File Name="../../../test/shared/test_bit_stream.cpp"/>
       <File Name="../../../test/shared/test_random.cpp"/>
       <File Name="../../../test/shared/test_list.cpp"/>
+      <File Name="../../../test/shared/test_bit_stream.cpp"/>
       <File Name="../../../test/shared/test_bit_array.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>

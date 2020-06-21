@@ -1,5 +1,3 @@
-#pragma once
-
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace hfsm2 {
@@ -7,8 +5,11 @@ namespace hfsm2 {
 enum class Method : uint8_t {
 	NONE,
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	RANK,
 	UTILITY,
+#endif
+
 	ENTRY_GUARD,
 	CONSTRUCT,
 	ENTER,
@@ -28,8 +29,12 @@ enum class TransitionType : uint8_t {
 	CHANGE,
 	RESTART,
 	RESUME,
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	UTILIZE,
 	RANDOMIZE,
+#endif
+
 	SCHEDULE,
 
 	COUNT
@@ -74,8 +79,12 @@ static inline
 const char*
 methodName(const Method method) {
 	switch (method) {
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	case Method::RANK:			 return "rank";
 	case Method::UTILITY:		 return "utility";
+#endif
+
 	case Method::ENTRY_GUARD:	 return "entryGuard";
 	case Method::ENTER:			 return "enter";
 	case Method::CONSTRUCT:		 return "construct";
@@ -103,8 +112,12 @@ transitionName(const TransitionType transitionType) {
 	case TransitionType::CHANGE:	return "changeTo";
 	case TransitionType::RESTART:	return "restart";
 	case TransitionType::RESUME:	return "resume";
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	case TransitionType::UTILIZE:	return "utilize";
 	case TransitionType::RANDOMIZE:	return "randomize";
+#endif
+
 	case TransitionType::SCHEDULE:	return "schedule";
 
 	default:

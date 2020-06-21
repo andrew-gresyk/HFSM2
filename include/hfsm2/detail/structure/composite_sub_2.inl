@@ -221,6 +221,8 @@ CS_<TN, TA, SG, NI, T>::wideRequestResume(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 typename TA::UP
 CS_<TN, TA, SG, NI, T>::wideReportUtilize(Control& control) {
@@ -303,6 +305,8 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeRandom(Control& control,
 	return *options;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
@@ -314,22 +318,6 @@ CS_<TN, TA, SG, NI, T>::wideChangeToRequested(PlanControl& control,
 
 	state.deepChangeToRequested(control);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
-void
-CS_<TN, TA, SG, NI, T>::wideGetNames(const LongIndex parent,
-									 const RegionType /*region*/,
-									 const ShortIndex depth,
-									 StructureStateInfos& _stateInfos) const
-{
-	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -377,6 +365,22 @@ CS_<TN, TA, SG, NI, T>::wideLoadResumable(Registry& registry,
 										  ReadStream& stream) const
 {
 	state.deepLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+void
+CS_<TN, TA, SG, NI, T>::wideGetNames(const LongIndex parent,
+									 const RegionType /*region*/,
+									 const ShortIndex depth,
+									 StructureStateInfos& _stateInfos) const
+{
+	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
 
 #endif

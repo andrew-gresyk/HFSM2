@@ -23,9 +23,13 @@ struct CS_ final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -133,6 +137,8 @@ struct CS_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	HFSM_INLINE UP		wideReportChangeComposite	  (Control& control);
 	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,									const ShortIndex prong);
 	HFSM_INLINE UP		wideReportChangeUtilitarian	  (Control& control);
@@ -144,11 +150,26 @@ struct CS_ final {
 	HFSM_INLINE Rank	wideReportRank				  (Control& control,	 Rank*	  const ranks);
 	HFSM_INLINE Utility	wideReportRandomize			  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control, const ShortIndex prong);
 
 	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
+
+	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -160,19 +181,6 @@ struct CS_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
-
-	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -201,13 +209,17 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
-	using Registry	= RegistryT<Args>;
+	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
 
 	using Control		= ControlT	   <Args>;
@@ -276,6 +288,8 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	HFSM_INLINE UP		wideReportChangeComposite	  (Control& control);
 	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,									const ShortIndex prong);
 	HFSM_INLINE UP		wideReportChangeUtilitarian	  (Control& control);
@@ -287,11 +301,26 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	HFSM_INLINE Rank	wideReportRank				  (Control& control,	 Rank*	  const ranks);
 	HFSM_INLINE Utility	wideReportRandomize			  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control,								const ShortIndex prong);
 
 	//----------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
+
+	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
+	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
@@ -303,19 +332,6 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
-
-	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
 #endif
 
 	//----------------------------------------------------------------------

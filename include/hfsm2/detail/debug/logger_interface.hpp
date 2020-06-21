@@ -1,16 +1,22 @@
-#pragma once
-
 namespace hfsm2 {
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+#ifdef HFSM_ENABLE_LOG_INTERFACE
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext = EmptyContext,
-		  typename TUtilty = float>
+template <typename TContext = EmptyContext
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+		, typename TUtilty = float
+#endif
+
+		  >
 struct LoggerInterfaceT {
 	using Context		 = TContext;
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 	using Utilty		 = TUtilty;
+#endif
 
 	using Method		 = ::hfsm2::Method;
 	using StateID		 = ::hfsm2::StateID;
@@ -44,6 +50,8 @@ struct LoggerInterfaceT {
 										const StateID /*origin*/)
 	{}
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	virtual void recordUtilityResolution(Context& /*context*/,
 										 const StateID /*head*/,
 										 const StateID /*prong*/,
@@ -55,6 +63,8 @@ struct LoggerInterfaceT {
 										const StateID /*prong*/,
 										const Utilty /*utilty*/)
 	{}
+
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////

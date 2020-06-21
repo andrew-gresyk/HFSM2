@@ -229,6 +229,8 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 		deepRequestResume (control._registry);
 		break;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
 	case Request::UTILIZE:
 		deepRequestUtilize(control);
 		break;
@@ -236,6 +238,8 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 	case Request::RANDOMIZE:
 		deepRequestRandomize(control);
 		break;
+
+#endif
 
 	default:
 		HFSM_BREAK();
@@ -275,6 +279,8 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Registry& registry) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
@@ -349,6 +355,8 @@ O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
 	return h * sub;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, typename TH, typename... TS>
@@ -356,23 +364,6 @@ void
 O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	_subStates.wideChangeToRequested(control);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, typename TH, typename... TS>
-void
-O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
-									const RegionType region,
-									const ShortIndex depth,
-									StructureStateInfos& stateInfos) const
-{
-	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
-	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -414,6 +405,23 @@ O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 										 ReadStream& stream) const
 {
 	_subStates.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, typename TH, typename... TS>
+void
+O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+									const RegionType region,
+									const ShortIndex depth,
+									StructureStateInfos& stateInfos) const
+{
+	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
+	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
 }
 
 #endif

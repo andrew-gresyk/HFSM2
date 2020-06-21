@@ -40,29 +40,9 @@
 	#include <intrin.h>		// __debugbreak()
 #endif
 
-#define HFSM_INLINE														  //inline
-
 //------------------------------------------------------------------------------
 
-namespace hfsm2 {
-
-struct EmptyContext {};
-struct EmptyPayload {};
-
-}
-
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
-#ifdef __clang__
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
-#endif
-#if defined(__GNUC__) || defined(__GNUG__)
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic" // error: extra ‘;’
-#endif
+#include "detail/shared/macros_on.hpp"
 
 #include "detail/shared/utility.hpp"
 #include "detail/shared/iterator.hpp"
@@ -96,42 +76,74 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-template <typename TC_ = EmptyContext,
-		  typename TN_ = char,
-		  typename TU_ = float,
-		  typename TG_ = ::hfsm2::RandomT<TU_>,
-		  LongIndex NS = 4,
-		  LongIndex NT = INVALID_LONG_INDEX>
+/// @brief Type configuration for MachineT<>
+/// @tparam TContext Context type for data shared between states and/or data interface between FSM and external code
+/// @tparam TRank Rank type for 'TRank State::rank() const' method
+/// @tparam TUtility Utility type for 'TUtility State::utility() const' method
+/// @tparam TRNG RNG type used in 'Random' regions
+/// @tparam NSubstitutionLimit Maximum number times 'guard()' methods can substitute their states for others
+/// @tparam NTaskCapacity Maximum number of tasks across all plans
+template <typename TContext = EmptyContext,
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+		  typename TRank    = char,
+		  typename TUtility = float,
+		  typename TRNG     = ::hfsm2::RandomT<TUtility>,
+#endif
+		  LongIndex NSubstitutionLimit = 4,
+		  LongIndex NTaskCapacity      = INVALID_LONG_INDEX>
 struct ConfigT {
-	using Context = TC_;
+	using Context = TContext;
 
-	using Rank	  = TN_;
-	using Utility = TU_;
-	using RNG	  = TG_;
-	using Logger  = LoggerInterfaceT<Context, Utility>;
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+	using Rank	  = TRank;
+	using Utility = TUtility;
+	using RNG	  = TRNG;
+#endif
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
-	static constexpr LongIndex TASK_CAPACITY	  = NT;
+#ifdef HFSM_ENABLE_LOG_INTERFACE
+	using Logger  = LoggerInterfaceT<Context HFSM_IF_UTILITY_THEORY(, Utility)>;
+#endif
 
+	static constexpr LongIndex SUBSTITUTION_LIMIT = NSubstitutionLimit;
+	static constexpr LongIndex TASK_CAPACITY	  = NTaskCapacity;
+
+	/// @brief Set Context type
+	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = ConfigT<  T, TN_, TU_, TG_, NS, NT>;
+	using ContextT			 = ConfigT<      T, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,) SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
+	/// @brief Set Rank type
+	/// @tparam T Rank type for 'TRank State::rank() const' method
 	template <typename T>
-	using RankT				 = ConfigT<TC_,   T, TU_, TG_, NS, NT>;
+	using RankT				 = ConfigT<Context,                           T, Utility, RNG,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+	/// @brief Set Utility type
+	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using UtilityT			 = ConfigT<TC_, TN_,   T, TG_, NS, NT>;
+	using UtilityT			 = ConfigT<Context,                        Rank,       T, RNG,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+	/// @brief Set RNG type
+	/// @tparam T RNG type used in 'Random' regions
 	template <typename T>
-	using RandomT			 = ConfigT<TC_, TN_, TU_,   T, NS, NT>;
+	using RandomT			 = ConfigT<Context,                        Rank, Utility,   T,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+#endif
+
+	/// @brief Set Substitution limit
+	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
 	template <LongIndex N>
-	using SubstitutionLimitN = ConfigT<TC_, TN_, TU_, TG_,  N, NS>;
+	using SubstitutionLimitN = ConfigT<Context, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,)                  N, TASK_CAPACITY>;
 
+	/// @brief Set Task capacity
+	/// @tparam N Maximum number of tasks across all plans
 	template <LongIndex N>
-	using TaskCapacityN		 = ConfigT<TC_, TN_, TU_, TG_, NT,  N>;
+	using TaskCapacityN		 = ConfigT<Context, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,) SUBSTITUTION_LIMIT,             N>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
 	struct UP {
 		HFSM_INLINE UP(const Utility utility_  = Utility{1.0f},
@@ -144,11 +156,14 @@ struct ConfigT {
 		ShortIndex prong;
 	};
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
 //------------------------------------------------------------------------------
 
+/// @brief Type configuration for MachineT<>
 using Config = ConfigT<>;
 
 namespace detail {
@@ -156,88 +171,156 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TConfig>
-struct M_ {
-	using Config_ = TConfig;
+struct M_;
+
+template <typename TContext,
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+		  typename TRank,
+		  typename TUtility,
+		  typename TRNG,
+#endif
+		  LongIndex NSubstitutionLimit,
+		  LongIndex NTaskCapacity>
+struct M_	   <ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>> {
+	using Cfg = ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>;
 
 	//----------------------------------------------------------------------
 
+	/// @brief Composite region ('changeTo<>()' into the region acts as 'restart<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Composite			 = CI_<Strategy::Composite,	   THead, TSubStates...>;
 
+	/// @brief Headless composite region ('changeTo<>()' into the region acts as 'restart<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using CompositePeers	 = CI_<Strategy::Composite,    void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Resumable region ('changeTo<>()' into the region acts as 'resume<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Resumable			  = CI_<Strategy::Resumable,   THead, TSubStates...>;
 
+	/// @brief Headless resumable region ('changeTo<>()' into the region acts as 'resume<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using ResumablePeers	  = CI_<Strategy::Resumable,   void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM_ENABLE_UTILITY_THEORY
+
+	/// @brief Utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Utilitarian		  = CI_<Strategy::Utilitarian, THead, TSubStates...>;
 
+	/// @brief Headless utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using UtilitarianPeers	  = CI_<Strategy::Utilitarian, void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Random region ('changeTo<>()' into the region acts as 'randomize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Random			  = CI_<Strategy::RandomUtil,  THead, TSubStates...>;
 
+	/// @brief Headless random region ('changeTo<>()' into the region acts as 'randomize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using RandomPeers		  = CI_<Strategy::RandomUtil,  void,  TSubStates...>;
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Orthogonal region (when activated, activates all sub-states)
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Orthogonal		  = OI_<THead, TSubStates...>;
 
+	/// @brief Headless orthogonal region (when activated, activates all sub-states)
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
 
 	//----------------------------------------------------------------------
 
+	/// @brief Root ('changeTo<>()' into the root region acts as 'restart<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using Root				  = RF_<Config_, Composite  <THead, TSubStates...>>;
+	using Root				  = RF_<Cfg, Composite  <THead, TSubStates...>>;
 
+	/// @brief Headless root ('changeTo<>()' into the root region acts as 'restart<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using PeerRoot			  = RF_<Config_, CompositePeers  <  TSubStates...>>;
+	using PeerRoot			  = RF_<Cfg, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Resumable root ('changeTo<>()' into the root region acts as 'resume<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		  = RF_<Config_, Resumable  <THead, TSubStates...>>;
+	using ResumableRoot		  = RF_<Cfg, Resumable  <THead, TSubStates...>>;
 
+	/// @brief Headless resumable root ('changeTo<>()' into the root region acts as 'resume<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	  = RF_<Config_, ResumablePeers  <  TSubStates...>>;
+	using ResumablePeerRoot	  = RF_<Cfg, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename THead, typename... TSubStates>
-	using UtilitarianRoot	  = RF_<Config_, Utilitarian<THead, TSubStates...>>;
+#ifdef HFSM_ENABLE_UTILITY_THEORY
 
+	/// @brief Utilitarian root ('changeTo<>()' into the root region acts as 'utilize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
+	template <typename THead, typename... TSubStates>
+	using UtilitarianRoot	  = RF_<Cfg, Utilitarian<THead, TSubStates...>>;
+
+	/// @brief Headless utilitarian root ('changeTo<>()' into the root region acts as 'utilize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using UtilitarianPeerRoot = RF_<Config_, UtilitarianPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = RF_<Cfg, UtilitarianPeers<  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Random root ('changeTo<>()' into the root region acts as 'randomize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using RandomRoot		  = RF_<Config_, Random		<THead, TSubStates...>>;
+	using RandomRoot		  = RF_<Cfg, Random		<THead, TSubStates...>>;
 
+	/// @brief Headless random root ('changeTo<>()' into the root region acts as 'randomize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using RandomPeerRoot	  = RF_<Config_, RandomPeers	 <  TSubStates...>>;
+	using RandomPeerRoot	  = RF_<Cfg, RandomPeers	 <  TSubStates...>>;
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Orthogonal root (all sub-states are active at all times)
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	  = RF_<Config_, Orthogonal <THead, TSubStates...>>;
+	using OrthogonalRoot	  = RF_<Cfg, Orthogonal <THead, TSubStates...>>;
 
+	/// @brief Headless orthogonal root (all sub-states are active at all times)
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot  = RF_<Config_, OrthogonalPeers <  TSubStates...>>;
+	using OrthogonalPeerRoot  = RF_<Cfg, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -246,8 +329,12 @@ struct M_ {
 
 }
 
+/// @brief 'Template namespace' for FSM classes parametrized with default types
 using Machine = detail::M_<Config>;
 
+/// @brief 'Template namespace' for FSM classes
+/// @tparam TConfig 'ConfigT<>' type configuration for MachineT<>
+/// @see ConfigT<>
 template <typename TConfig>
 using MachineT = detail::M_<TConfig>;
 
@@ -257,18 +344,4 @@ using MachineT = detail::M_<TConfig>;
 
 #include "detail/root.hpp"
 
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
-#ifdef __clang__
-	#pragma clang diagnostic pop
-#endif
-#if defined(__GNUC__) || defined(__GNUG__)
-	#pragma GCC diagnostic pop
-#endif
-
-#undef HFSM_INLINE
-#undef HFSM_IF_LOGGER
-#undef HFSM_LOGGER_OR
-#undef HFSM_LOG_STATE_METHOD
-#undef HFSM_IF_STRUCTURE
+#include "detail/shared/macros_off.hpp"
