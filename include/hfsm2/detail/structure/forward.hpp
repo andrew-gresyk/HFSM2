@@ -1,6 +1,4 @@
-﻿#pragma once
-
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -218,12 +216,16 @@ template <typename TContext,
 struct ArgsT final {
 	using Context	 = TContext;
 
-	using Config_	 = TConfig;
-	using Rank		 = typename Config_::Rank;
-	using Utility	 = typename Config_::Utility;
-	using RNG		 = typename Config_::RNG;
-	using UP		 = typename Config_::UP;
-	using Logger	 = typename Config_::Logger;
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using Rank		 = typename TConfig::Rank;
+	using Utility	 = typename TConfig::Utility;
+	using RNG		 = typename TConfig::RNG;
+	using UP		 = typename TConfig::UP;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	 = typename TConfig::Logger;
+#endif
 
 	using StateList	 = TStateList;
 	using RegionList = TRegionList;
@@ -236,13 +238,13 @@ struct ArgsT final {
 
 	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer			= StreamBuffer	<SERIAL_BITS>;
 	using WriteStream			= BitWriteStream<SERIAL_BITS>;
 	using ReadStream			= BitReadStream	<SERIAL_BITS>;
 #endif
 
-	HFSM_IF_STRUCTURE(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
+	HFSM2_IF_STRUCTURE_REPORT(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
 };
 
 //------------------------------------------------------------------------------
@@ -316,16 +318,15 @@ using Material = typename MaterialT<TN, TS...>::Type;
 template <typename TConfig,
 		  typename TApex>
 struct RF_ final {
-	using Config_		= TConfig;
-	using Context		= typename Config_::Context;
+	using Context		= typename TConfig::Context;
 	using Apex			= TApex;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT= Config_::SUBSTITUTION_LIMIT;
+	static constexpr LongIndex SUBSTITUTION_LIMIT= TConfig::SUBSTITUTION_LIMIT;
 
-	static constexpr LongIndex TASK_CAPACITY	 = Config_::TASK_CAPACITY != INVALID_LONG_INDEX ?
-													   Config_::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
+	static constexpr LongIndex TASK_CAPACITY	 = TConfig::TASK_CAPACITY != INVALID_LONG_INDEX ?
+													   TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
 
 	static constexpr ShortIndex COMPO_REGIONS	 = Apex::COMPO_REGIONS;
 	static constexpr ShortIndex ORTHO_REGIONS	 = Apex::ORTHO_REGIONS;
@@ -338,7 +339,7 @@ struct RF_ final {
 	using RegionList	= typename Apex::RegionList;
 
 	using Args			= ArgsT<Context,
-								Config_,
+								TConfig,
 								StateList,
 								RegionList,
 								COMPO_REGIONS,
@@ -349,7 +350,7 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using Instance		= RW_<Config_, Apex>;
+	using Instance		= RW_<TConfig, Apex>;
 
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;

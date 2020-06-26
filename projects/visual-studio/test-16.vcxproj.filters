@@ -128,9 +128,6 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp">
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\shared.hpp">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp">
       <Filter>hfsm\detail\structure</Filter>
     </ClInclude>
@@ -179,6 +176,15 @@
     <ClInclude Include="..\..\include\hfsm2\detail\root\registry.hpp">
       <Filter>hfsm\detail\root</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_off.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_on.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\test\tools.hpp">
+      <Filter>test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\shared\array.inl">
@@ -217,9 +223,6 @@
     <None Include="..\..\include\hfsm2\detail\shared\random.inl">
       <Filter>hfsm\detail\shared</Filter>
     </None>
-    <None Include="..\..\test\shared.inl">
-      <Filter>test</Filter>
-    </None>
     <None Include="..\..\include\hfsm2\detail\structure\state_box.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
@@ -243,6 +246,9 @@
     </None>
     <None Include="..\..\include\hfsm2\detail\root\registry.inl">
       <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\test\tools.inl">
+      <Filter>test</Filter>
     </None>
   </ItemGroup>
 </Project>

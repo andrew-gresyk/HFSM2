@@ -1,6 +1,4 @@
-﻿#pragma once
-
-namespace hfsm2 {
+﻿namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -12,8 +10,12 @@ class InjectionT {
 
 protected:
 	using Context		= typename TArgs::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
+#endif
+
 	using StateList		= typename TArgs::StateList;
 	using RegionList	= typename TArgs::RegionList;
 
@@ -26,20 +28,20 @@ protected:
 	using GuardControl	= GuardControlT<TArgs>;
 
 public:
-	HFSM_INLINE void preEntryGuard(Context&)		{}
+	HFSM2_INLINE void preEntryGuard(Context&)		{}
 
-	HFSM_INLINE void preEnter	  (Context&)		{}
-	HFSM_INLINE void preReenter	  (Context&)		{}
+	HFSM2_INLINE void preEnter	   (Context&)		{}
+	HFSM2_INLINE void preReenter   (Context&)		{}
 
-	HFSM_INLINE void preUpdate	  (Context&)		{}
+	HFSM2_INLINE void preUpdate	   (Context&)		{}
 
 	template <typename TEvent>
-	HFSM_INLINE void preReact	  (const TEvent&,
-								   Context&)		{}
+	HFSM2_INLINE void preReact	   (const TEvent&,
+									Context&)		{}
 
-	HFSM_INLINE void preExitGuard (Context&)		{}
+	HFSM2_INLINE void preExitGuard (Context&)		{}
 
-	HFSM_INLINE void postExit	  (Context&)		{}
+	HFSM2_INLINE void postExit	   (Context&)		{}
 
 	template <typename T>
 	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
@@ -61,8 +63,12 @@ struct B_<TFirst, TRest...>
 	, B_<TRest...>
 {
 	using typename TFirst::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
+#endif
+
 	using typename TFirst::StateList;
 	using typename TFirst::RegionList;
 
@@ -75,20 +81,20 @@ struct B_<TFirst, TRest...>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
-	HFSM_INLINE void widePreEntryGuard(Context& context);
+	HFSM2_INLINE void widePreEntryGuard(Context& context);
 
-	HFSM_INLINE void widePreEnter	  (Context& context);
-	HFSM_INLINE void widePreReenter	  (Context& context);
+	HFSM2_INLINE void widePreEnter	   (Context& context);
+	HFSM2_INLINE void widePreReenter   (Context& context);
 
-	HFSM_INLINE void widePreUpdate	  (Context& context);
+	HFSM2_INLINE void widePreUpdate	   (Context& context);
 
 	template <typename TEvent>
-	HFSM_INLINE void widePreReact	  (const TEvent& event,
-									   Context& context);
+	HFSM2_INLINE void widePreReact	   (const TEvent& event,
+										Context& context);
 
-	HFSM_INLINE void widePreExitGuard (Context& context);
+	HFSM2_INLINE void widePreExitGuard (Context& context);
 
-	HFSM_INLINE void widePostExit	  (Context& context);
+	HFSM2_INLINE void widePostExit	   (Context& context);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -98,8 +104,12 @@ struct B_<TFirst>
 	: TFirst
 {
 	using typename TFirst::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
+#endif
+
 	using typename TFirst::StateList;
 	using typename TFirst::RegionList;
 
@@ -112,42 +122,44 @@ struct B_<TFirst>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
-	HFSM_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
 
-	HFSM_INLINE Utility utility			 (const Control&)			{ return Utility{1.0f};	}
+	HFSM2_INLINE Utility utility		 (const Control&)			{ return Utility{1.0f};	}
+#endif
 
-	HFSM_INLINE void	entryGuard		 (GuardControl&)			{}
+	HFSM2_INLINE void	entryGuard		 (GuardControl&)			{}
 
-	HFSM_INLINE void	enter			 (PlanControl&)				{}
-	HFSM_INLINE void	reenter			 (PlanControl&)				{}
+	HFSM2_INLINE void	enter			 (PlanControl&)				{}
+	HFSM2_INLINE void	reenter			 (PlanControl&)				{}
 
-	HFSM_INLINE void	update			 (FullControl&)				{}
+	HFSM2_INLINE void	update			 (FullControl&)				{}
 
 	template <typename TEvent>
-	HFSM_INLINE void	react			 (const TEvent&,
+	HFSM2_INLINE void	react			 (const TEvent&,
 										  FullControl&)				{}
 
-	HFSM_INLINE void	exitGuard		 (GuardControl&)			{}
+	HFSM2_INLINE void	exitGuard		 (GuardControl&)			{}
 
-	HFSM_INLINE void	exit			 (PlanControl&)				{}
+	HFSM2_INLINE void	exit			 (PlanControl&)				{}
 
-	HFSM_INLINE void	planSucceeded	 (FullControl& control)		{ control.succeed();	}
-	HFSM_INLINE void	planFailed		 (FullControl& control)		{ control.fail();		}
+	HFSM2_INLINE void	planSucceeded	 (FullControl& control)		{ control.succeed();	}
+	HFSM2_INLINE void	planFailed		 (FullControl& control)		{ control.fail();		}
 
-	HFSM_INLINE void	widePreEntryGuard(Context& context);
+	HFSM2_INLINE void	widePreEntryGuard(Context& context);
 
-	HFSM_INLINE void	widePreEnter	 (Context& context);
-	HFSM_INLINE void	widePreReenter   (Context& context);
+	HFSM2_INLINE void	widePreEnter	 (Context& context);
+	HFSM2_INLINE void	widePreReenter   (Context& context);
 
-	HFSM_INLINE void	widePreUpdate	 (Context& context);
+	HFSM2_INLINE void	widePreUpdate	 (Context& context);
 
 	template <typename TEvent>
-	HFSM_INLINE void	widePreReact	 (const TEvent& event,
+	HFSM2_INLINE void	widePreReact	 (const TEvent& event,
 					 					  Context& context);
 
-	HFSM_INLINE void	widePreExitGuard (Context& context);
+	HFSM2_INLINE void	widePreExitGuard (Context& context);
 
-	HFSM_INLINE void	widePostExit	 (Context& context);
+	HFSM2_INLINE void	widePostExit	 (Context& context);
 };
 
 //------------------------------------------------------------------------------

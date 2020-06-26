@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <conio.h>
-#include <cmath>
 
 
 #define DEBUG 1

@@ -6,9 +6,9 @@ namespace detail {
 #pragma pack(push, 2)
 
 struct TaskLink {
-	HFSM_INLINE TaskLink(const TransitionType transitionType_,
-						 const StateID origin_,
-						 const StateID destination_)
+	HFSM2_INLINE TaskLink(const TransitionType transitionType_,
+						  const StateID origin_,
+						  const StateID destination_)
 		: transitionType{transitionType_}
 		, origin{origin_}
 		, destination{destination_}
@@ -86,7 +86,7 @@ struct PlanDataT<ArgsT<TContext,
 	TasksBits tasksFailures;
 	RegionBits planExists;
 
-#ifdef HFSM_ENABLE_ASSERT
+#ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans() const;
 	LongIndex verifyPlan(const RegionID stateId) const;
 #endif
@@ -111,7 +111,7 @@ struct PlanDataT<ArgsT<TContext,
 					   0,
 					   NTaskCapacity>>
 {
-#ifdef HFSM_ENABLE_ASSERT
+#ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans() const													{}
 	LongIndex verifyPlan(const RegionID) const					{ return 0;		}
 #endif

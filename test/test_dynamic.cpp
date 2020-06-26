@@ -1,5 +1,5 @@
-#define HFSM_ENABLE_VERBOSE_DEBUG_LOG
-#include "shared.hpp"
+#define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
+#include "tools.hpp"
 
 namespace test_dynamic {
 

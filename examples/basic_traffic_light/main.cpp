@@ -33,7 +33,7 @@
 // Off
 
 // optional: enable FSM structure report in debugger
-#define HFSM_ENABLE_STRUCTURE_REPORT
+#define HFSM2_ENABLE_STRUCTURE_REPORT
 #include <hfsm2/machine.hpp>
 
 #include <iostream>
@@ -48,6 +48,31 @@ struct Context {
 // convenience typedef
 using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
 
+#if 0
+
+// states need to be forward declared to be used in FSM struct declaration
+struct On;
+struct Red;
+struct YellowDownwards;
+struct YellowUpwards;
+struct Green;
+struct Off;
+
+using FSM = M::PeerRoot<
+				// sub-machine ..
+				M::Composite<On,
+					// .. with 4 sub-states
+					Red,
+					YellowDownwards,
+					YellowUpwards,
+					Green
+				>,
+				Off
+			>;
+
+#else
+
+// alternatively, some macro magic can be invoked to simplify FSM structure declaration
 #define S(s) struct s
 
 // state machine structure
@@ -64,6 +89,8 @@ using FSM = M::PeerRoot<
 			>;
 
 #undef S
+
+#endif
 
 //------------------------------------------------------------------------------
 

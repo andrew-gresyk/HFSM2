@@ -62,6 +62,8 @@
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_stream.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_off.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_on.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp" />
@@ -74,7 +76,7 @@
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state_box.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
-    <ClInclude Include="..\..\test\shared.hpp" />
+    <ClInclude Include="..\..\test\tools.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\root.inl" />
@@ -97,7 +99,7 @@
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state_box.inl" />
-    <None Include="..\..\test\shared.inl" />
+    <None Include="..\..\test\tools.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

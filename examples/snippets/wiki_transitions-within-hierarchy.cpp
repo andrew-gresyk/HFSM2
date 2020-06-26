@@ -1,6 +1,7 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
+#define HFSM2_ENABLE_UTILITY_THEORY
 #include <hfsm2/machine.hpp>
 
 #include <catch2/catch.hpp>

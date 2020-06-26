@@ -24,7 +24,7 @@ ControlT<TArgs>::Region::~Region() {
 template <typename TArgs>
 void
 ControlT<TArgs>::setRegion(const RegionID id) {
-	HFSM_ASSERT(_regionId <= id && id < RegionList::SIZE);
+	HFSM2_ASSERT(_regionId <= id && id < RegionList::SIZE);
 
 	_regionId = id;
 }
@@ -34,7 +34,7 @@ ControlT<TArgs>::setRegion(const RegionID id) {
 template <typename TArgs>
 void
 ControlT<TArgs>::resetRegion(const RegionID id) { //-V524
-	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
+	HFSM2_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
 
 	_regionId = id;
 }
@@ -86,8 +86,8 @@ PlanControlT<TArgs>::Region::~Region() {
 template <typename TArgs>
 void
 PlanControlT<TArgs>::setOrigin(const StateID id) {
-	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
-	HFSM_ASSERT(_originId <= id && id < StateList::SIZE);
+	HFSM2_ASSERT(_regionId + _regionSize <= StateList::SIZE);
+	HFSM2_ASSERT(_originId <= id && id < StateList::SIZE);
 
 	_originId = id;
 }
@@ -97,8 +97,8 @@ PlanControlT<TArgs>::setOrigin(const StateID id) {
 template <typename TArgs>
 void
 PlanControlT<TArgs>::resetOrigin(const StateID id) { //-V524
-	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
-	HFSM_ASSERT(id <= _originId && _originId < StateList::SIZE);
+	HFSM2_ASSERT(_regionId + _regionSize <= StateList::SIZE);
+	HFSM2_ASSERT(id <= _originId && _originId < StateList::SIZE);
 
 	_originId = id;
 }
@@ -111,8 +111,8 @@ PlanControlT<TArgs>::setRegion(const RegionID id,
 							   const StateID index,
 							   const LongIndex size)
 {
-	HFSM_ASSERT(_regionId <= id && id <  RegionList::SIZE);
-	HFSM_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
+	HFSM2_ASSERT(_regionId <= id && id <  RegionList::SIZE);
+	HFSM2_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
 
 	_regionId	 = id;
 	_regionIndex = index;
@@ -127,8 +127,8 @@ PlanControlT<TArgs>::resetRegion(const RegionID id, //-V524
 								 const StateID index,
 								 const LongIndex size)
 {
-	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
-	HFSM_ASSERT(index <= _regionIndex && _regionIndex + _regionSize <= index + size);
+	HFSM2_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
+	HFSM2_ASSERT(index <= _regionIndex && _regionIndex + _regionSize <= index + size);
 
 	_regionId	 = id;
 	_regionIndex = index;
@@ -139,7 +139,7 @@ PlanControlT<TArgs>::resetRegion(const RegionID id, //-V524
 
 template <typename TArgs>
 FullControlT<TArgs>::Lock::Lock(FullControlT& control_)
-	: control(!control_._locked ? &control_ : nullptr)
+	: control{!control_._locked ? &control_ : nullptr}
 {
 	if (control)
 		control->_locked = true;
@@ -164,7 +164,7 @@ FullControlT<TArgs>::updatePlan(TState& headState,
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
 
-	HFSM_ASSERT(subStatus);
+	HFSM2_ASSERT(subStatus);
 
 	if (subStatus.result == Status::FAILURE) {
 		_status.result = Status::FAILURE;
@@ -211,23 +211,23 @@ FullControlT<TArgs>::buildPlanStatus() {
 
 	switch (_status.result) {
 	case Status::NONE:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		break;
 
 	case Status::SUCCESS:
 		_planData.tasksSuccesses.template set<STATE_ID>();
 
-		HFSM_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
+		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
 		break;
 
 	case Status::FAILURE:
 		_planData.tasksFailures.template set<STATE_ID>();
 
-		HFSM_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
+		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
 		break;
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 	}
 
 	return {_status.result};
@@ -244,7 +244,7 @@ FullControlT<TArgs>::changeTo(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
 	}
 }
 
@@ -259,7 +259,7 @@ FullControlT<TArgs>::restart(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
 	}
 }
 
@@ -274,11 +274,13 @@ FullControlT<TArgs>::resume(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
 	}
 }
 
 //------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TArgs>
 void
@@ -289,7 +291,7 @@ FullControlT<TArgs>::utilize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
 	}
 }
 
@@ -304,9 +306,11 @@ FullControlT<TArgs>::randomize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
 	}
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -315,7 +319,7 @@ void
 FullControlT<TArgs>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
-	HFSM_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -329,12 +333,12 @@ FullControlT<TArgs>::succeed() {
 
 	// TODO: promote taskSuccess all the way up for all regions without plans
 	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
-		HFSM_ASSERT(_regionIndex < StateList::SIZE);
+		HFSM2_ASSERT(_regionIndex < StateList::SIZE);
 
 		_planData.tasksSuccesses.set(_regionIndex);
 	}
 
-	HFSM_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::SUCCEEDED);
+	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::SUCCEEDED);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -348,12 +352,12 @@ FullControlT<TArgs>::fail() {
 
 	// TODO: promote taskFailure all the way up for all regions without plans
 	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
-		HFSM_ASSERT(_regionIndex < StateList::SIZE);
+		HFSM2_ASSERT(_regionIndex < StateList::SIZE);
 
 		_planData.tasksFailures.set(_regionIndex);
 	}
 
-	HFSM_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
+	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +367,7 @@ void
 GuardControlT<TArgs>::cancelPendingTransitions() {
 	_cancelled = true;
 
-	HFSM_LOG_CANCELLED_PENDING(context(), _originId);
+	HFSM2_LOG_CANCELLED_PENDING(context(), _originId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

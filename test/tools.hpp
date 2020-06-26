@@ -1,7 +1,7 @@
 #pragma once
 
-#define HFSM_ENABLE_LOG_INTERFACE
-#define HFSM_ENABLE_ASSERT
+#define HFSM2_ENABLE_LOG_INTERFACE
+#define HFSM2_ENABLE_ASSERT
 #include <hfsm2/machine.hpp>
 
 #include <catch2/catch.hpp>
@@ -12,8 +12,12 @@
 
 struct Event {
 	enum Enum {
+
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		RANK,
 		UTILITY,
+	//#endif
+
 		ENTRY_GUARD,
 		CONSTRUCT,
 		ENTER,
@@ -24,8 +28,10 @@ struct Event {
 		EXIT,
 		DESTRUCT,
 
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		UTILITY_RESOLUTION,
 		RANDOM_RESOLUTION,
+	//#endif
 
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
@@ -38,8 +44,12 @@ struct Event {
 		CHANGE,
 		RESTART,
 		RESUME,
+
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		UTILIZE,
 		RANDOMIZE,
+	//#endif
+
 		SCHEDULE,
 		CANCEL_PENDING,
 
@@ -74,14 +84,18 @@ using Events = std::vector<Event>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext = hfsm2::EmptyContext>
+template <typename TContext = hfsm2::EmptyContext,
+		  hfsm2::FeatureTag NFeatureTag = hfsm2::HFSM2_FEATURE_TAG>
 struct LoggerT
 	: hfsm2::LoggerInterfaceT<TContext>
 {
 	using Context		  = TContext;
 	using Interface		  = hfsm2::LoggerInterfaceT<Context>;
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Utilty		  = typename Interface::Utilty;
+#endif
+
 	using Method		  = typename Interface::Method;
 	using StateID		  = typename Interface::StateID;
 	using RegionID		  = typename Interface::RegionID;
@@ -109,6 +123,8 @@ struct LoggerT
 	void recordCancelledPending(Context& context,
 								const StateID origin) override;
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 	void recordUtilityResolution(Context& context,
 								 const StateID head,
 								 const StateID prong,
@@ -118,6 +134,8 @@ struct LoggerT
 								const StateID head,
 								const StateID prong,
 								const Utilty utilty) override;
+
+#endif
 
 	void assertSequence(const Events& reference);
 
@@ -141,4 +159,4 @@ void assertResumable(TMachine& machine,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "shared.inl"
+#include "tools.inl"

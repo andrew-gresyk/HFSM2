@@ -1,4 +1,4 @@
-#include "shared.hpp"
+#include "tools.hpp"
 
 namespace test_internal_transitions {
 

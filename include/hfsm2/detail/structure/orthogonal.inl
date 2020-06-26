@@ -182,10 +182,10 @@ void
 O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 										 const Request::Type request)
 {
-	HFSM_ASSERT(control._registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
 
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
-	HFSM_ASSERT(!!requested);
+	HFSM2_ASSERT(!!requested);
 
 	_subStates.wideForwardActive(control, request, requested);
 }
@@ -229,6 +229,8 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 		deepRequestResume (control._registry);
 		break;
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 	case Request::UTILIZE:
 		deepRequestUtilize(control);
 		break;
@@ -237,8 +239,10 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 		deepRequestRandomize(control);
 		break;
 
+#endif
+
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 	}
 }
 
@@ -276,6 +280,8 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
@@ -300,7 +306,7 @@ O_<TN, TA, TH, TS...>::deepReportChange(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
 		h.utility * sub,
@@ -318,7 +324,7 @@ O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
 		h.utility * sub,
@@ -344,10 +350,12 @@ O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return h * sub;
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -359,24 +367,7 @@ O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, typename TH, typename... TS>
-void
-O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
-									const RegionType region,
-									const ShortIndex depth,
-									StructureStateInfos& stateInfos) const
-{
-	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
-	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
@@ -414,6 +405,23 @@ O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 										 ReadStream& stream) const
 {
 	_subStates.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, typename TH, typename... TS>
+void
+O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+									const RegionType region,
+									const ShortIndex depth,
+									StructureStateInfos& stateInfos) const
+{
+	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
+	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
 }
 
 #endif

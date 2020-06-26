@@ -10,10 +10,16 @@ struct S_ final {
 	static constexpr auto STATE_ID	 = TIndices::STATE_ID;
 
 	using Context		= typename TArgs::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
 	using UP			= typename TArgs::UP;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using Logger		= typename TArgs::Logger;
+#endif
 
 	using Control		= ControlT<TArgs>;
 	using Registry		= RegistryT<TArgs>;
@@ -30,7 +36,7 @@ struct S_ final {
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 #ifdef __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wnull-dereference"
@@ -38,8 +44,8 @@ struct S_ final {
 
 	template <typename T>
 	struct Accessor {
-		HFSM_INLINE static		 T&	   get(		 S_&  )			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);		}
-		HFSM_INLINE static const T&	   get(const S_&  )			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);		}
+		HFSM2_INLINE static		  T&	   get(		 S_&  )			{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);		}
+		HFSM2_INLINE static const T&	   get(const S_&  )			{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);		}
 	};
 
 #ifdef __clang__
@@ -48,86 +54,97 @@ struct S_ final {
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 S_& s)			{ return s._headBox.get();								}
-		HFSM_INLINE static const Head& get(const S_& s)			{ return s._headBox.get();								}
+		HFSM2_INLINE static		  Head& get(	  S_& s)			{ return s._headBox.get();								}
+		HFSM2_INLINE static const Head& get(const S_& s)			{ return s._headBox.get();								}
 	};
 
 	template <typename T>
-	HFSM_INLINE		  T& access()								{ return Accessor<T>::get(*this);						}
+	HFSM2_INLINE	   T& access()									{ return Accessor<T>::get(*this);						}
 
 	template <typename T>
-	HFSM_INLINE const T& access() const							{ return Accessor<T>::get(*this);						}
+	HFSM2_INLINE const T& access() const							{ return Accessor<T>::get(*this);						}
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._registry.stateParents[STATE_ID];		}
+	HFSM2_INLINE Parent	 stateParent		  (Control& control)	{ return control._registry.stateParents[STATE_ID];		}
 
-	HFSM_INLINE void	deepRegister		 (Registry& registry, const Parent parent);
+	HFSM2_INLINE void	 deepRegister		  (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&)					{ return false;	}
-	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 deepForwardEntryGuard(GuardControl&)												{ return false;	}
+	HFSM2_INLINE bool	 deepEntryGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	deepConstruct		 (PlanControl&  control);
+	HFSM2_INLINE void	 deepConstruct		  (PlanControl&  control);
 
-	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
-	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
+	HFSM2_INLINE void	 deepEnter			  (PlanControl&  control);
+	HFSM2_INLINE void	 deepReenter		  (PlanControl&  control);
 
-	HFSM_INLINE Status	deepUpdate			 (FullControl&	control);
+	HFSM2_INLINE Status	 deepUpdate			  (FullControl&  control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	deepReact			 (FullControl&	control, const TEvent& event);
+	HFSM2_INLINE Status	 deepReact			  (FullControl&	 control, const TEvent& event);
 
-	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&)					{ return false; }
-	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 deepForwardExitGuard (GuardControl&)												{ return false; }
+	HFSM2_INLINE bool	 deepExitGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	deepExit			 (PlanControl&	control);
+	HFSM2_INLINE void	 deepExit			  (PlanControl&	 control);
 
-	HFSM_INLINE void	deepDestruct		 (PlanControl&  control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	wrapPlanSucceeded	 (FullControl&	control);
-	HFSM_INLINE void	wrapPlanFailed		 (FullControl&	control);
-	HFSM_INLINE Rank	wrapRank			 (Control& control);
-	HFSM_INLINE Utility	wrapUtility			 (Control& control);
+	HFSM2_INLINE void	 deepDestruct		  (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepForwardActive	 (Control&, const Request::Type)					{}
-	HFSM_INLINE void	deepForwardRequest	 (Control&, const Request::Type)					{}
+	HFSM2_INLINE void	 wrapPlanSucceeded	  (FullControl&	control);
+	HFSM2_INLINE void	 wrapPlanFailed		  (FullControl&	control);
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE Rank	 wrapRank			  (Control& control);
+	HFSM2_INLINE Utility wrapUtility		  (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepRequestChange	 (Control&)											{}
-	HFSM_INLINE void	deepRequestRemain	 (Registry&)										{}
-	HFSM_INLINE void	deepRequestRestart	 (Registry&)										{}
-	HFSM_INLINE void	deepRequestResume	 (Registry&)										{}
-	HFSM_INLINE void	deepRequestUtilize	 (Control&)											{}
-	HFSM_INLINE void	deepRequestRandomize (Control&)											{}
-
-	HFSM_INLINE UP		deepReportChange	 (Control& control);
-	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
-	HFSM_INLINE Rank	deepReportRank		 (Control& control);
-	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
+	HFSM2_INLINE void	 deepForwardActive	  (Control&, const Request::Type)												{}
+	HFSM2_INLINE void	 deepForwardRequest	  (Control&, const Request::Type)												{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepChangeToRequested(Control&)											{}
+	HFSM2_INLINE void	 deepRequestChange	  (Control&)																	{}
+	HFSM2_INLINE void	 deepRequestRemain	  (Registry&)																	{}
+	HFSM2_INLINE void	 deepRequestRestart	  (Registry&)																	{}
+	HFSM2_INLINE void	 deepRequestResume	  (Registry&)																	{}
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void	 deepRequestUtilize	  (Control&)																	{}
+	HFSM2_INLINE void	 deepRequestRandomize (Control&)																	{}
+
+	HFSM2_INLINE UP		 deepReportChange	  (Control& control);
+	HFSM2_INLINE UP		 deepReportUtilize	  (Control& control);
+	HFSM2_INLINE Rank	 deepReportRank		  (Control& control);
+	HFSM2_INLINE Utility deepReportRandomize  (Control& control);
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE void	deepChangeToRequested(Control&)																		{}
+
+	//----------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream	= typename TArgs::WriteStream;
+	using ReadStream	= typename TArgs::ReadStream;
+
+	HFSM2_INLINE void	 deepSaveActive	  (const Registry&, WriteStream&) const												{}
+	HFSM2_INLINE void	 deepSaveResumable(const Registry&, WriteStream&) const												{}
+
+	HFSM2_INLINE void	 deepLoadRequested(		 Registry&, ReadStream& ) const												{}
+	HFSM2_INLINE void	 deepLoadResumable(		 Registry&, ReadStream& ) const												{}
+#endif
 
 	//------------------------------------------------------------------------------
 
-#if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
-
-	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
-
-#endif
-
-	//----------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename TArgs::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
@@ -141,20 +158,15 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename TArgs::WriteStream;
-	using ReadStream	= typename TArgs::ReadStream;
+#if defined _DEBUG || defined HFSM2_ENABLE_STRUCTURE_REPORT || defined HFSM2_ENABLE_LOG_INTERFACE
 
-	HFSM_INLINE void	deepSaveActive	 (const Registry&, WriteStream&) const					{}
-	HFSM_INLINE void	deepSaveResumable(const Registry&, WriteStream&) const					{}
+	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
 
-	HFSM_INLINE void	deepLoadRequested(		Registry&, ReadStream& ) const					{}
-	HFSM_INLINE void	deepLoadResumable(		Registry&, ReadStream& ) const					{}
 #endif
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 
 	template <typename>
 	struct Traits_;

@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_ENABLE_ASSERT
+#ifdef HFSM2_ENABLE_ASSERT
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 void
@@ -12,7 +12,7 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlans() const
 	for (RegionID id = 0; id < REGION_COUNT; ++id)
 		planCount += verifyPlan(id);
 
-	HFSM_ASSERT(taskLinks.count() == planCount);
+	HFSM2_ASSERT(taskLinks.count() == planCount);
 }
 
 //------------------------------------------------------------------------------
@@ -24,14 +24,14 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlan(const Re
 	const Bounds& bounds = tasksBounds[regionId];
 
 	if (bounds.first != INVALID_LONG_INDEX) {
-		HFSM_ASSERT(bounds.last != INVALID_LONG_INDEX);
+		HFSM2_ASSERT(bounds.last != INVALID_LONG_INDEX);
 
 		for (auto slow = bounds.first, fast = slow; ; ) {
 			++length;
 			const TaskLink& task = taskLinks[slow];
 
 			if (slow != bounds.last) {
-				HFSM_ASSERT(task.next != INVALID_LONG_INDEX);
+				HFSM2_ASSERT(task.next != INVALID_LONG_INDEX);
 				slow = task.next;
 
 				// loop check
@@ -42,16 +42,16 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlan(const Re
 						fast = taskLinks[fast].next;
 					}
 
-					HFSM_ASSERT(fast == INVALID_LONG_INDEX || slow != fast);
+					HFSM2_ASSERT(fast == INVALID_LONG_INDEX || slow != fast);
 				}
 			} else {
-				HFSM_ASSERT(task.next == INVALID_LONG_INDEX);
+				HFSM2_ASSERT(task.next == INVALID_LONG_INDEX);
 
 				break;
 			}
 		};
 	} else
-		HFSM_ASSERT(bounds.last == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(bounds.last == INVALID_LONG_INDEX);
 
 	return length;
 }

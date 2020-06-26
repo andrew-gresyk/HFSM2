@@ -1,5 +1,3 @@
-#pragma once
-
 namespace hfsm2 {
 namespace detail {
 
@@ -30,7 +28,7 @@ private:
 		Item item;
 		Links links;
 
-		HFSM_INLINE Cell()
+		HFSM2_INLINE Cell()
 			: links{}
 		{}
 	};
@@ -43,13 +41,13 @@ public:
 
 	void remove(const Index i);
 
-	HFSM_INLINE		  Item& operator[] (const Index i);
-	HFSM_INLINE const Item& operator[] (const Index i) const;
+	HFSM2_INLINE	   Item& operator[] (const Index i);
+	HFSM2_INLINE const Item& operator[] (const Index i) const;
 
-	HFSM_INLINE Index count() const							{ return _count;	}
+	HFSM2_INLINE Index count() const						{ return _count;	}
 
 private:
-	HFSM_IF_ASSERT(void verifyStructure(const Index occupied = INVALID) const);
+	HFSM2_IF_ASSERT(void verifyStructure(const Index occupied = INVALID) const);
 
 private:
 	Cell _cells[CAPACITY];

@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename T>
@@ -246,6 +246,8 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 OS_<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
@@ -295,6 +297,8 @@ OS_<TN, TA, NI, TI, TR...>::wideReportRandomize(Control& control) {
 	return i + r;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
@@ -306,23 +310,7 @@ OS_<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
-void
-OS_<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
-										 const ShortIndex depth,
-										 StructureStateInfos& stateInfos) const
-{
-	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
-	remaining.wideGetNames(parent,								   depth, stateInfos);
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
@@ -364,6 +352,22 @@ OS_<TN, TA, NI, TI, TR...>::wideLoadResumable(Registry& registry,
 {
 	initial	 .deepLoadResumable(registry, stream);
 	remaining.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
+void
+OS_<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
+										 const ShortIndex depth,
+										 StructureStateInfos& stateInfos) const
+{
+	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
+	remaining.wideGetNames(parent,								   depth, stateInfos);
 }
 
 #endif

@@ -39,7 +39,7 @@
 //	---------- done! ---------
 
 // enable logger functionality
-#define HFSM_ENABLE_LOG_INTERFACE
+#define HFSM2_ENABLE_LOG_INTERFACE
 #include <hfsm2/machine.hpp>
 
 #include <iostream>
@@ -49,6 +49,21 @@
 // convenience typedef
 using M = hfsm2::Machine;
 
+#if 0
+
+// states need to be forward declared to be used in FSM struct declaration
+struct Top;
+struct From;
+struct To;
+
+using FSM = M::Root<Top,
+				From,
+				To
+			>;
+
+#else
+
+// alternatively, some macro magic can be invoked to simplify FSM structure declaration
 #define S(s) struct s
 
 using FSM = M::Root<S(Top),
@@ -57,6 +72,8 @@ using FSM = M::Root<S(Top),
 			>;
 
 #undef S
+
+#endif
 
 //------------------------------------------------------------------------------
 

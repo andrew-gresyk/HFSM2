@@ -1,4 +1,4 @@
-#pragma once
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 namespace hfsm2 {
 
@@ -89,15 +89,17 @@ class RandomT;
 
 template <>
 class RandomT<float>
-	: public HFSM_64BIT_OR_32BIT(XoShiRo256Plus, XoShiRo128Plus)
+	: public HFSM2_64BIT_OR_32BIT(XoShiRo256Plus, XoShiRo128Plus)
 {
 public:
-	using HFSM_64BIT_OR_32BIT(XoShiRo256Plus::XoShiRo256Plus,
-							  XoShiRo128Plus::XoShiRo128Plus);
+	using HFSM2_64BIT_OR_32BIT(XoShiRo256Plus::XoShiRo256Plus,
+							   XoShiRo128Plus::XoShiRo128Plus);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+
+#endif
 
 #include "random.inl"

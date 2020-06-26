@@ -1,10 +1,9 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
-#define HFSM_ENABLE_SERIALIZATION
+#define HFSM2_ENABLE_SERIALIZATION
 
-//#include <hfsm2/machine.hpp>
-#include <hfsm2/machine_dev.hpp>
+#include <hfsm2/machine.hpp>
 
 #include <catch2/catch.hpp>
 #undef assert

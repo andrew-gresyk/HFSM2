@@ -4,8 +4,8 @@
 // An HFSM2 port of https://gist.github.com/martinmoene/797b1923f9c6c1ae355bb2d6870be25e
 // by Martin Moene (see https://twitter.com/MartinMoene/status/1118453128834232320)
 
-#define HFSM_ENABLE_LOG_INTERFACE
-#define HFSM_ENABLE_STRUCTURE_REPORT
+#define HFSM2_ENABLE_LOG_INTERFACE
+#define HFSM2_ENABLE_STRUCTURE_REPORT
 #include <hfsm2/machine.hpp>
 
 #include <assert.h>
@@ -25,14 +25,33 @@ struct Stop   {};
 using Context = std::string;
 using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
 
-// fsm structure
+#if 0
+
+// states need to be forward declared to be used in FSM struct declaration
+struct Idle;
+struct Playing;
+struct Paused;
+
+using FSM = M::PeerRoot<
+				Idle,
+				Playing,
+				Paused
+			>;
+
+#else
+
+// alternatively, some macro magic can be invoked to simplify FSM structure declaration
 #define S(s) struct s
+
 using FSM = M::PeerRoot<
 				S(Idle),
 				S(Playing),
 				S(Paused)
 			>;
+
 #undef S
+
+#endif
 
 //------------------------------------------------------------------------------
 

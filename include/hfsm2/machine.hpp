@@ -40,170 +40,218 @@
 	#include <intrin.h>		// __debugbreak()
 #endif
 
-#define HFSM_INLINE														  //inline
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 
-namespace hfsm2 {
-
-struct EmptyContext {};
-struct EmptyPayload {};
-
-}
-
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
 #ifdef __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
 #endif
+
 #if defined(__GNUC__) || defined(__GNUG__)
 	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic" // error: extra ‘;’
+	#pragma GCC diagnostic ignored "-Wpedantic" // error : extra ';'
 #endif
 
+////////////////////////////////////////////////////////////////////////////////
+
+#define HFSM2_INLINE													//inline
 
 //------------------------------------------------------------------------------
 
 #if INTPTR_MAX == INT64_MAX
-	#define HFSM_64BIT_OR_32BIT(p64, p32)		p64
+	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p64
 #else
-	#define HFSM_64BIT_OR_32BIT(p64, p32)		p32
+	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p32
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if defined _DEBUG && defined _MSC_VER
-	#define HFSM_BREAK()						__debugbreak()
+	#define HFSM2_BREAK()										  __debugbreak()
 #else
-	#define HFSM_BREAK()						((void) 0)
+	#define HFSM2_BREAK()											  ((void) 0)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef _DEBUG
-	#define HFSM_IF_DEBUG(...)					__VA_ARGS__
-	#define HFSM_UNLESS_DEBUG(...)
-	#define HFSM_DEBUG_OR(y, n)					y
+	#define HFSM2_IF_DEBUG(...)										 __VA_ARGS__
+	#define HFSM2_UNLESS_DEBUG(...)
+	#define HFSM2_DEBUG_OR(y, n)											   y
 #else
-	#define HFSM_IF_DEBUG(...)
-	#define HFSM_UNLESS_DEBUG(...)				__VA_ARGS__
-	#define HFSM_DEBUG_OR(y, n)					n
+	#define HFSM2_IF_DEBUG(...)
+	#define HFSM2_UNLESS_DEBUG(...)									 __VA_ARGS__
+	#define HFSM2_DEBUG_OR(y, n)											   n
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_ASSERT
-	#define HFSM_IF_ASSERT(...)					__VA_ARGS__
-	#define HFSM_CHECKED(x)						(!!(x) || (HFSM_BREAK(), 0))
-	#define HFSM_ASSERT(x)						(!!(x) || (HFSM_BREAK(), 0))
-	#define HFSM_ASSERT_OR(y, n)				y
+#ifdef HFSM2_ENABLE_ASSERT
+	#define HFSM2_IF_ASSERT(...)									 __VA_ARGS__
+	#define HFSM2_CHECKED(x)					   (!!(x) || (HFSM2_BREAK(), 0))
+	#define HFSM2_ASSERT(x)						   (!!(x) || (HFSM2_BREAK(), 0))
+	#define HFSM2_ASSERT_OR(y, n)											   y
 #else
-	#define HFSM_IF_ASSERT(...)
-	#define HFSM_CHECKED(x)						x
-	#define HFSM_ASSERT(x)						((void) 0)
-	#define HFSM_ASSERT_OR(y, n)				n
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-
-	#define HFSM_IF_LOGGER(...)										  __VA_ARGS__
-
-	#define HFSM_LOGGER_OR(Y, N)												Y
-
-	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		\
-		if (_logger)															\
-			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
-
-	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)				\
-		if (_logger)															\
-			_logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
-
-	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)						\
-		if (_logger)															\
-			_logger->recordPlanStatus(CONTEXT, REGION, STATUS)
-
-	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)							\
-		if (_logger)															\
-			_logger->recordCancelledPending(CONTEXT, ORIGIN)
-
-	#define HFSM_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
-		if (auto* const logger = control.logger())								\
-			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
-
-	#define HFSM_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
-		if (auto* const logger = control.logger())								\
-			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
-
-#else
-
-	#define HFSM_IF_LOGGER(...)
-	#define HFSM_LOGGER_OR(Y, N)												N
-
-	#define HFSM_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)
-	#define HFSM_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)
-	#define HFSM_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)
-	#define HFSM_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
-	#define HFSM_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
-	#define HFSM_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
-
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#if defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-
-	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)					\
-		if (auto* const logger = control.logger())								\
-			logger->recordMethod(CONTEXT, STATE_ID, METHOD_ID)
-
-#elif defined HFSM_ENABLE_LOG_INTERFACE
-
-	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)					\
-		if (auto* const logger = control.logger())								\
-			log<decltype(METHOD)>(*logger, CONTEXT, METHOD_ID)
-
-#else
-	#define HFSM_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	#define HFSM_IF_STRUCTURE(...)									  __VA_ARGS__
-#else
-	#define HFSM_IF_STRUCTURE(...)
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-	#define HFSM_IF_TRANSITION_HISTORY(...)							  __VA_ARGS__
-#else
-	#define HFSM_IF_TRANSITION_HISTORY(...)
-#endif
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	#define HFSM_IF_SERIALIZATION(...)								  __VA_ARGS__
-#else
-	#define HFSM_IF_SERIALIZATION(...)
+	#define HFSM2_IF_ASSERT(...)
+	#define HFSM2_CHECKED(x)												   x
+	#define HFSM2_ASSERT(x)											  ((void) 0)
+	#define HFSM2_ASSERT_OR(y, n)											   n
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if defined _MSC_VER || defined __clang_major__ && __clang_major__ >= 7
-	#define HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+	#define HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	#define HFSM2_IF_UTILITY_THEORY(...)							 __VA_ARGS__
+	#define HFSM2_UTILITY_THEORY_MASK									(1 << 0)
+#else
+	#define HFSM2_IF_UTILITY_THEORY(...)
+	#define HFSM2_UTILITY_THEORY_MASK									(0 << 0)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	#define HFSM2_IF_SERIALIZATION(...)								 __VA_ARGS__
+	#define HFSM2_SERIALIZATION_MASK									(1 << 1)
+#else
+	#define HFSM2_IF_SERIALIZATION(...)
+	#define HFSM2_SERIALIZATION_MASK									(0 << 1)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	#define HFSM2_IF_TRANSITION_HISTORY(...)						 __VA_ARGS__
+	#define HFSM2_TRANSITION_HISTORY_MASK								(1 << 2)
+#else
+	#define HFSM2_IF_TRANSITION_HISTORY(...)
+	#define HFSM2_TRANSITION_HISTORY_MASK								(0 << 2)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+	#define HFSM2_IF_STRUCTURE_REPORT(...)							 __VA_ARGS__
+	#define HFSM2_STRUCTURE_REPORT_MASK									(1 << 3)
+#else
+	#define HFSM2_IF_STRUCTURE_REPORT(...)
+	#define HFSM2_STRUCTURE_REPORT_MASK									(0 << 3)
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
+	#define HFSM2_ENABLE_LOG_INTERFACE
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+
+	#define HFSM2_IF_LOG_INTERFACE(...)								 __VA_ARGS__
+	#define HFSM2_LOG_INTERFACE_MASK									(1 << 4)
+
+	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		   \
+		if (_logger)														   \
+			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
+
+	#define HFSM2_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)			   \
+		if (_logger)														   \
+			_logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
+
+	#define HFSM2_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)					   \
+		if (_logger)														   \
+			_logger->recordPlanStatus(CONTEXT, REGION, STATUS)
+
+	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)					   \
+		if (_logger)														   \
+			_logger->recordCancelledPending(CONTEXT, ORIGIN)
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)		   \
+		if (auto* const logger = control.logger())							   \
+			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
+
+	#define HFSM2_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)		   \
+		if (auto* const logger = control.logger())							   \
+			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
+
+#endif
+
+#else
+
+	#define HFSM2_IF_LOG_INTERFACE(...)
+	#define HFSM2_LOG_INTERFACE_MASK									(0 << 4)
+
+	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)
+	#define HFSM2_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)
+	#define HFSM2_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)
+	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
+	#define HFSM2_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
+#endif
+
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
+
+	#define HFSM2_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)				   \
+		if (auto* const logger = control.logger())							   \
+			logger->recordMethod(CONTEXT, STATE_ID, METHOD_ID)
+
+#elif defined HFSM2_ENABLE_LOG_INTERFACE
+
+	#define HFSM2_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)				   \
+		if (auto* const logger = control.logger())							   \
+			log<decltype(METHOD)>(*logger, CONTEXT, METHOD_ID)
+
+#else
+
+	#define HFSM2_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)
+
+#endif
+
+//------------------------------------------------------------------------------
+
 namespace hfsm2 {
+
+using FeatureTag = uint8_t;
+
+constexpr FeatureTag HFSM2_FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK	   |
+										 HFSM2_SERIALIZATION_MASK	   |
+										 HFSM2_TRANSITION_HISTORY_MASK |
+										 HFSM2_STRUCTURE_REPORT_MASK   |
+										 HFSM2_LOG_INTERFACE_MASK;
+
+}
+
+//------------------------------------------------------------------------------
+
+#undef HFSM2_UTILITY_THEORY_MASK
+#undef HFSM2_SERIALIZATION_MASK
+#undef HFSM2_TRANSITION_HISTORY_MASK
+#undef HFSM2_STRUCTURE_REPORT_MASK
+#undef HFSM2_LOG_INTERFACE_MASK
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace hfsm2 {
+
+//------------------------------------------------------------------------------
+
+struct EmptyContext {};
+struct EmptyPayload {};
 
 //------------------------------------------------------------------------------
 
@@ -231,13 +279,13 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-HFSM_INLINE
+HFSM2_INLINE
 void
 fill(T& a, const char value) {
 	memset(&a, (int) value, sizeof(a));
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 template <typename T, unsigned NCount>
 constexpr
@@ -372,7 +420,6 @@ struct StaticAssertEquality<V1, V1> {};
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -382,27 +429,28 @@ template <typename TContainer>
 class Iterator {
 public:
 	using Container = TContainer;
-	using Item = typename Container::Item;
+	using Item		= typename Container::Item;
 
 	template <typename T, LongIndex NCapacity>
 	friend class Array;
 
 private:
-	HFSM_INLINE Iterator(Container& container, const LongIndex cursor)
-		: _container(container)
-		, _cursor(cursor)
+	HFSM2_INLINE Iterator(Container& container,
+						  const LongIndex cursor)
+		: _container{container}
+		, _cursor{cursor}
 	{}
 
 public:
-	HFSM_INLINE bool operator != (const Iterator<Container>& dummy) const;
+	HFSM2_INLINE bool operator != (const Iterator<Container>& dummy) const;
 
-	HFSM_INLINE Iterator& operator ++();
+	HFSM2_INLINE Iterator& operator ++();
 
-	HFSM_INLINE		  Item& operator *()	   { return  _container[_cursor]; }
-	HFSM_INLINE const Item& operator *() const { return  _container[_cursor]; }
+	HFSM2_INLINE	   Item& operator *()		{ return  _container[_cursor]; }
+	HFSM2_INLINE const Item& operator *() const { return  _container[_cursor]; }
 
-	HFSM_INLINE		  Item* operator->()	   { return &_container[_cursor]; }
-	HFSM_INLINE const Item* operator->() const { return &_container[_cursor]; }
+	HFSM2_INLINE	   Item* operator->()		{ return &_container[_cursor]; }
+	HFSM2_INLINE const Item* operator->() const { return &_container[_cursor]; }
 
 private:
 	Container& _container;
@@ -422,19 +470,20 @@ public:
 	friend class Array;
 
 private:
-	HFSM_INLINE Iterator(const Container& container, const LongIndex cursor)
-		: _container(container)
-		, _cursor(cursor)
+	HFSM2_INLINE Iterator(const Container& container,
+						  const LongIndex cursor)
+		: _container{container}
+		, _cursor{cursor}
 	{}
 
 public:
-	HFSM_INLINE bool operator != (const Iterator<const Container>& dummy) const;
+	HFSM2_INLINE bool operator != (const Iterator<const Container>& dummy) const;
 
-	HFSM_INLINE Iterator& operator ++();
+	HFSM2_INLINE Iterator& operator ++();
 
-	HFSM_INLINE const Item& operator *() const { return _container[_cursor]; }
+	HFSM2_INLINE const Item& operator *() const { return _container[_cursor]; }
 
-	HFSM_INLINE const Item* operator->() const { return &operator *();		 }
+	HFSM2_INLINE const Item* operator->() const { return &operator *();		 }
 
 private:
 	const Container& _container;
@@ -454,8 +503,8 @@ namespace detail {
 
 template <typename T>
 bool
-Iterator<T>::operator != (const Iterator<T>& HFSM_IF_ASSERT(dummy)) const {
-	HFSM_ASSERT(&_container == &dummy._container);
+Iterator<T>::operator != (const Iterator<T>& HFSM2_IF_ASSERT(dummy)) const {
+	HFSM2_ASSERT(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
 }
@@ -474,8 +523,8 @@ Iterator<T>::operator ++() {
 
 template <typename T>
 bool
-Iterator<const T>::operator != (const Iterator<const T>& HFSM_IF_ASSERT(dummy)) const {
-	HFSM_ASSERT(&_container == &dummy._container);
+Iterator<const T>::operator != (const Iterator<const T>& HFSM2_IF_ASSERT(dummy)) const {
+	HFSM2_ASSERT(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
 }
@@ -494,7 +543,6 @@ Iterator<const T>::operator ++() {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -510,27 +558,27 @@ public:
 	using Index = UnsignedCapacity<CAPACITY>;
 
 public:
-	HFSM_INLINE StaticArray() = default;
-	HFSM_INLINE StaticArray(const Item filler);
+	HFSM2_INLINE StaticArray() = default;
+	HFSM2_INLINE StaticArray(const Item filler);
 
 	template <typename N>
-	HFSM_INLINE		  Item& operator[] (const N i);
+	HFSM2_INLINE	   Item& operator[] (const N i);
 
 	template <typename N>
-	HFSM_INLINE const Item& operator[] (const N i) const;
+	HFSM2_INLINE const Item& operator[] (const N i) const;
 
-	HFSM_INLINE LongIndex count() const						{ return CAPACITY;									}
+	HFSM2_INLINE LongIndex count() const					{ return CAPACITY;									}
 
-	HFSM_INLINE void fill(const Item filler);
-	HFSM_INLINE void clear()								{ fill(INVALID_SHORT_INDEX);						}
+	HFSM2_INLINE void fill(const Item filler);
+	HFSM2_INLINE void clear()								{ fill(INVALID_SHORT_INDEX);						}
 
-	HFSM_INLINE Iterator<	   StaticArray>  begin()		{ return Iterator<		StaticArray>(*this, 0);		}
-	HFSM_INLINE Iterator<const StaticArray>  begin() const	{ return Iterator<const StaticArray>(*this, 0);		}
-	HFSM_INLINE Iterator<const StaticArray> cbegin() const	{ return Iterator<const StaticArray>(*this, 0);		}
+	HFSM2_INLINE Iterator<      StaticArray>  begin()		{ return Iterator<      StaticArray>(*this,     0); }
+	HFSM2_INLINE Iterator<const	StaticArray>  begin() const	{ return Iterator<const StaticArray>(*this,     0); }
+	HFSM2_INLINE Iterator<const	StaticArray> cbegin() const	{ return Iterator<const StaticArray>(*this,     0); }
 
-	HFSM_INLINE Iterator<	   StaticArray>	 end()			{ return Iterator<		StaticArray>(*this, DUMMY);	}
-	HFSM_INLINE Iterator<const StaticArray>	 end() const	{ return Iterator<const StaticArray>(*this, DUMMY);	}
-	HFSM_INLINE Iterator<const StaticArray> cend() const	{ return Iterator<const StaticArray>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<      StaticArray>    end()		{ return Iterator<      StaticArray>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<const	StaticArray>    end() const	{ return Iterator<const StaticArray>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<const	StaticArray>   cend() const	{ return Iterator<const StaticArray>(*this, DUMMY);	}
 
 private:
 	Item _items[CAPACITY];
@@ -542,8 +590,8 @@ template <typename T>
 struct StaticArray<T, 0> {
 	using Item  = T;
 
-	HFSM_INLINE StaticArray() = default;
-	HFSM_INLINE StaticArray(const Item)											{}
+	HFSM2_INLINE StaticArray() = default;
+	HFSM2_INLINE StaticArray(const Item)											{}
 };
 
 //------------------------------------------------------------------------------
@@ -561,34 +609,44 @@ public:
 	using Index = UnsignedCapacity<CAPACITY>;
 
 public:
-	HFSM_INLINE void clear()														{ _count = 0;		}
+	HFSM2_INLINE void clear()														{ _count = 0;		}
 
 	template <typename TValue>
-	HFSM_INLINE LongIndex append(TValue&& value);
+	HFSM2_INLINE LongIndex append(TValue&& value);
 
 	template <typename N>
-	HFSM_INLINE		  Item& operator[] (const N i);
+	HFSM2_INLINE		  Item& operator[] (const N i);
 
 	template <typename N>
-	HFSM_INLINE const Item& operator[] (const N i) const;
+	HFSM2_INLINE const Item& operator[] (const N i) const;
 
-	HFSM_INLINE LongIndex count() const												{ return _count;	}
+	HFSM2_INLINE LongIndex count() const											{ return _count;	}
 
-	HFSM_INLINE Iterator<	   Array>  begin()			{ return Iterator<		Array>(*this, 0);		}
-	HFSM_INLINE Iterator<const Array>  begin() const	{ return Iterator<const Array>(*this, 0);		}
-	HFSM_INLINE Iterator<const Array> cbegin() const	{ return Iterator<const Array>(*this, 0);		}
+	HFSM2_INLINE Iterator<      Array>  begin()			{ return Iterator<		Array>(*this,     0);	}
+	HFSM2_INLINE Iterator<const Array>  begin() const	{ return Iterator<const Array>(*this,     0);	}
+	HFSM2_INLINE Iterator<const Array> cbegin() const	{ return Iterator<const Array>(*this,     0);	}
 
-	HFSM_INLINE Iterator<	   Array>	 end()			{ return Iterator<		Array>(*this, DUMMY);	}
-	HFSM_INLINE Iterator<const Array>	 end() const	{ return Iterator<const Array>(*this, DUMMY);	}
-	HFSM_INLINE Iterator<const Array>   cend() const	{ return Iterator<const Array>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<      Array>	  end()			{ return Iterator<		Array>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<const Array>	  end() const	{ return Iterator<const Array>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<const Array>   cend() const	{ return Iterator<const Array>(*this, DUMMY);	}
 
 private:
-	HFSM_INLINE LongIndex next(const LongIndex i) const								{ return i + 1;		}
-	HFSM_INLINE LongIndex limit() const												{ return _count;	}
+	HFSM2_INLINE LongIndex next(const LongIndex i) const							{ return i + 1;		}
+	HFSM2_INLINE LongIndex limit() const											{ return _count;	}
 
 private:
 	LongIndex _count = 0;
-	Item _items[CAPACITY];
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	Item _items[CAPACITY]; // warning 4324 triggers for 'StructureStateInfo'
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -617,7 +675,7 @@ template <typename T, LongIndex NC>
 template <typename N>
 T&
 StaticArray<T, NC>::operator[] (const N i) {
-	HFSM_ASSERT(0 <= i && i < CAPACITY);
+	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
 }
@@ -628,7 +686,7 @@ template <typename T, LongIndex NC>
 template <typename N>
 const T&
 StaticArray<T, NC>::operator[] (const N i) const {
-	HFSM_ASSERT(0 <= i && i < CAPACITY);
+	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
 }
@@ -648,7 +706,7 @@ template <typename T, LongIndex NC>
 template <typename TValue>
 LongIndex
 Array<T, NC>::append(TValue&& value) {
-	HFSM_ASSERT(_count < CAPACITY);
+	HFSM2_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{std::move(value)};
 
@@ -661,7 +719,7 @@ template <typename T, LongIndex NC>
 template <typename N>
 T&
 Array<T, NC>::operator[] (const N i) {
-	HFSM_ASSERT(0 <= i && i < CAPACITY);
+	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
 }
@@ -672,7 +730,7 @@ template <typename T, LongIndex NC>
 template <typename N>
 const T&
 Array<T, NC>::operator[] (const N i) const {
-	HFSM_ASSERT(0 <= i && i < CAPACITY);
+	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
 }
@@ -681,7 +739,6 @@ Array<T, NC>::operator[] (const N i) const {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -709,29 +766,29 @@ public:
 		friend class BitArray;
 
 	private:
-		HFSM_INLINE explicit Bits(Unit* const storage,
-								  const Index width)
+		HFSM2_INLINE explicit Bits(Unit* const storage,
+								   const Index width)
 			: _storage{storage}
 			, _width{width}
 		{}
 
 	public:
-		HFSM_INLINE explicit operator bool() const;
+		HFSM2_INLINE explicit operator bool() const;
 
-		HFSM_INLINE void clear();
-
-		template <ShortIndex NIndex>
-		HFSM_INLINE bool get() const;
+		HFSM2_INLINE void clear();
 
 		template <ShortIndex NIndex>
-		HFSM_INLINE void set();
+		HFSM2_INLINE bool get() const;
 
 		template <ShortIndex NIndex>
-		HFSM_INLINE void reset();
+		HFSM2_INLINE void set();
 
-		HFSM_INLINE bool get  (const Index index) const;
-		HFSM_INLINE void set  (const Index index);
-		HFSM_INLINE void reset(const Index index);
+		template <ShortIndex NIndex>
+		HFSM2_INLINE void reset();
+
+		HFSM2_INLINE bool get  (const Index index) const;
+		HFSM2_INLINE void set  (const Index index);
+		HFSM2_INLINE void reset(const Index index);
 
 	private:
 		Unit* const _storage;
@@ -745,19 +802,19 @@ public:
 		friend class BitArray;
 
 	private:
-		HFSM_INLINE explicit ConstBits(const Unit* const storage,
-									   const Index width)
+		HFSM2_INLINE explicit ConstBits(const Unit* const storage,
+										const Index width)
 			: _storage{storage}
 			, _width{width}
 		{}
 
 	public:
-		HFSM_INLINE explicit operator bool() const;
+		HFSM2_INLINE explicit operator bool() const;
 
 		template <ShortIndex NIndex>
-		HFSM_INLINE bool get() const;
+		HFSM2_INLINE bool get() const;
 
-		HFSM_INLINE bool get(const Index index) const;
+		HFSM2_INLINE bool get(const Index index) const;
 
 	private:
 		const Unit* const _storage;
@@ -771,30 +828,30 @@ public:
 		clear();
 	}
 
-	HFSM_INLINE void clear();
+	HFSM2_INLINE void clear();
 
 	template <ShortIndex NIndex>
-	HFSM_INLINE bool get() const;
+	HFSM2_INLINE bool get() const;
 
 	template <ShortIndex NIndex>
-	HFSM_INLINE void set();
+	HFSM2_INLINE void set();
 
 	template <ShortIndex NIndex>
-	HFSM_INLINE void reset();
+	HFSM2_INLINE void reset();
 
-	HFSM_INLINE bool get  (const Index index) const;
-	HFSM_INLINE void set  (const Index index);
-	//HFSM_INLINE void reset(const Index index);
+	HFSM2_INLINE bool get  (const Index index) const;
+	HFSM2_INLINE void set  (const Index index);
+	//HFSM2_INLINE void reset(const Index index);
 
 	template <ShortIndex NUnit, ShortIndex NWidth>
-	HFSM_INLINE		 Bits bits();
+	HFSM2_INLINE	  Bits bits();
 
 	template <ShortIndex NUnit, ShortIndex NWidth>
-	HFSM_INLINE ConstBits bits() const;
+	HFSM2_INLINE ConstBits bits() const;
 
 
-	HFSM_INLINE		 Bits bits(const Units& units);
-	HFSM_INLINE ConstBits bits(const Units& units) const;
+	HFSM2_INLINE	  Bits bits(const Units& units);
+	HFSM2_INLINE ConstBits bits(const Units& units) const;
 
 private:
 	Unit _storage[CAPACITY];
@@ -805,7 +862,7 @@ private:
 template <typename TIndex>
 class BitArray<TIndex, 0> final {
 public:
-	HFSM_INLINE void clear() {}
+	HFSM2_INLINE void clear() {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -852,7 +909,7 @@ template <ShortIndex NIndex>
 bool
 BitArray<TI, NC>::Bits::get() const {
 	constexpr Index INDEX = NIndex;
-	HFSM_ASSERT(INDEX < _width);
+	HFSM2_ASSERT(INDEX < _width);
 
 	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
 	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
@@ -868,7 +925,7 @@ template <ShortIndex NIndex>
 void
 BitArray<TI, NC>::Bits::set() {
 	constexpr Index INDEX = NIndex;
-	HFSM_ASSERT(INDEX < _width);
+	HFSM2_ASSERT(INDEX < _width);
 
 	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
 	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
@@ -884,7 +941,7 @@ template <ShortIndex NIndex>
 void
 BitArray<TI, NC>::Bits::reset() {
 	constexpr Index INDEX = NIndex;
-	HFSM_ASSERT(INDEX < _width);
+	HFSM2_ASSERT(INDEX < _width);
 
 	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
 	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
@@ -898,7 +955,7 @@ BitArray<TI, NC>::Bits::reset() {
 template <typename TI, ShortIndex NC>
 bool
 BitArray<TI, NC>::Bits::get(const Index index) const {
-	HFSM_ASSERT(index < _width);
+	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
 	const Index bit  = index % (sizeof(Unit) * 8);
@@ -912,7 +969,7 @@ BitArray<TI, NC>::Bits::get(const Index index) const {
 template <typename TI, ShortIndex NC>
 void
 BitArray<TI, NC>::Bits::set(const Index index) {
-	HFSM_ASSERT(index < _width);
+	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
 	const Index bit  = index % (sizeof(Unit) * 8);
@@ -926,7 +983,7 @@ BitArray<TI, NC>::Bits::set(const Index index) {
 template <typename TI, ShortIndex NC>
 void
 BitArray<TI, NC>::Bits::reset(const Index index) {
-	HFSM_ASSERT(index < _width);
+	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
 	const Index bit  = index % (sizeof(Unit) * 8);
@@ -973,7 +1030,7 @@ BitArray<TI, NC>::ConstBits::get() const {
 template <typename TI, ShortIndex NC>
 bool
 BitArray<TI, NC>::ConstBits::get(const Index index) const {
-	HFSM_ASSERT(index < _width);
+	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
 	const Index bit  = index % (sizeof(Unit) * 8);
@@ -1044,7 +1101,7 @@ BitArray<TI, NC>::reset() {
 template <typename TI, ShortIndex NC>
 bool
 BitArray<TI, NC>::get(const Index index) const {
-	HFSM_ASSERT(index < CAPACITY);
+	HFSM2_ASSERT(index < CAPACITY);
 
 	const Index unit = index / (sizeof(Unit) * 8);
 	const Index bit  = index % (sizeof(Unit) * 8);
@@ -1058,7 +1115,7 @@ BitArray<TI, NC>::get(const Index index) const {
 template <typename TI, ShortIndex NC>
 void
 BitArray<TI, NC>::set(const Index index) {
-	HFSM_ASSERT(index < CAPACITY);
+	HFSM2_ASSERT(index < CAPACITY);
 
 	const Index unit = index / (sizeof(Unit) * 8);
 	const Index bit  = index % (sizeof(Unit) * 8);
@@ -1072,7 +1129,7 @@ BitArray<TI, NC>::set(const Index index) {
 //template <typename TI, ShortIndex NC>
 //void
 //BitArray<TI, NC>::reset(const Index index) {
-//	HFSM_ASSERT(index < CAPACITY);
+//	HFSM2_ASSERT(index < CAPACITY);
 //
 //	const Index unit = index / (sizeof(Unit) * 8);
 //	const Index bit  = index % (sizeof(Unit) * 8);
@@ -1112,7 +1169,7 @@ BitArray<TI, NC>::bits() const {
 template <typename TI, ShortIndex NC>
 typename BitArray<TI, NC>::Bits
 BitArray<TI, NC>::bits(const Units& units) {
-	HFSM_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
+	HFSM2_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
 
 	return Bits{_storage + units.unit, units.width};
 }
@@ -1122,7 +1179,7 @@ BitArray<TI, NC>::bits(const Units& units) {
 template <typename TI, ShortIndex NC>
 typename BitArray<TI, NC>::ConstBits
 BitArray<TI, NC>::bits(const Units& units) const {
-	HFSM_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
+	HFSM2_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
 
 	return ConstBits{_storage + units.unit, units.width};
 }
@@ -1131,7 +1188,6 @@ BitArray<TI, NC>::bits(const Units& units) const {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -1202,7 +1258,6 @@ private:
 }
 }
 
-
 namespace hfsm2 {
 namespace detail {
 
@@ -1233,7 +1288,7 @@ BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
 	constexpr ShortIndex BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
-	HFSM_ASSERT(_buffer.bitSize + BIT_WIDTH < BIT_CAPACITY);
+	HFSM2_ASSERT(_buffer.bitSize + BIT_WIDTH < BIT_CAPACITY);
 
 	using Item = UnsignedBitWidth<BIT_WIDTH>;
 
@@ -1270,7 +1325,7 @@ BitReadStream<NBC>::read() {
 	ShortIndex itemCursor = 0;
 
 	for (ShortIndex itemWidth = BIT_WIDTH; itemWidth; )
-		if (HFSM_CHECKED(_cursor + itemWidth <= _buffer.bitSize)) {
+		if (HFSM2_CHECKED(_cursor + itemWidth <= _buffer.bitSize)) {
 			const LongIndex	 byteIndex		= _cursor >> 3;
 			const uint8_t& byte = _buffer.payload[byteIndex];
 
@@ -1295,7 +1350,6 @@ BitReadStream<NBC>::read() {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -1326,7 +1380,7 @@ private:
 		Item item;
 		Links links;
 
-		HFSM_INLINE Cell()
+		HFSM2_INLINE Cell()
 			: links{}
 		{}
 	};
@@ -1339,13 +1393,13 @@ public:
 
 	void remove(const Index i);
 
-	HFSM_INLINE		  Item& operator[] (const Index i);
-	HFSM_INLINE const Item& operator[] (const Index i) const;
+	HFSM2_INLINE	   Item& operator[] (const Index i);
+	HFSM2_INLINE const Item& operator[] (const Index i) const;
 
-	HFSM_INLINE Index count() const							{ return _count;	}
+	HFSM2_INLINE Index count() const						{ return _count;	}
 
 private:
-	HFSM_IF_ASSERT(void verifyStructure(const Index occupied = INVALID) const);
+	HFSM2_IF_ASSERT(void verifyStructure(const Index occupied = INVALID) const);
 
 private:
 	Cell _cells[CAPACITY];
@@ -1375,8 +1429,8 @@ template <typename... TA>
 LongIndex
 List<T, NC>::emplace(TA... args) {
 	if (_count < CAPACITY) {
-		HFSM_ASSERT(_vacantHead < CAPACITY);
-		HFSM_ASSERT(_vacantTail < CAPACITY);
+		HFSM2_ASSERT(_vacantHead < CAPACITY);
+		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
 		const Index result = _vacantHead;
 		auto& cell = _cells[result];
@@ -1384,13 +1438,13 @@ List<T, NC>::emplace(TA... args) {
 
 		if (_vacantHead != _vacantTail) {
 			// recycle
-			HFSM_ASSERT(cell.links.prev == INVALID);
-			HFSM_ASSERT(cell.links.next != INVALID);
+			HFSM2_ASSERT(cell.links.prev == INVALID);
+			HFSM2_ASSERT(cell.links.next != INVALID);
 
 			_vacantHead = cell.links.next;
 
 			auto& head = _cells[_vacantHead];
-			HFSM_ASSERT(head.links.prev == result);
+			HFSM2_ASSERT(head.links.prev == result);
 			head.links.prev = INVALID;
 		} else if (_last < CAPACITY) {
 			// grow
@@ -1402,23 +1456,23 @@ List<T, NC>::emplace(TA... args) {
 			nextVacant.links.prev = INVALID;
 			nextVacant.links.next = INVALID;
 		} else {
-			HFSM_ASSERT(_count == CAPACITY);
+			HFSM2_ASSERT(_count == CAPACITY);
 
 			_vacantHead = INVALID;
 			_vacantTail = INVALID;
 		}
 
-		HFSM_IF_ASSERT(verifyStructure());
+		HFSM2_IF_ASSERT(verifyStructure());
 
 		new (&cell.item) Item{std::forward<TA>(args)...};
 
 		return result;
 	} else {
 		// full
-		HFSM_ASSERT(_vacantHead == INVALID);
-		HFSM_ASSERT(_vacantTail == INVALID);
-		HFSM_ASSERT(_count == CAPACITY);
-		HFSM_BREAK();
+		HFSM2_ASSERT(_vacantHead == INVALID);
+		HFSM2_ASSERT(_vacantTail == INVALID);
+		HFSM2_ASSERT(_count		 == CAPACITY);
+		HFSM2_BREAK();
 
 		return INVALID;
 	}
@@ -1429,13 +1483,13 @@ List<T, NC>::emplace(TA... args) {
 template <typename T, LongIndex NC>
 void
 List<T, NC>::remove(const Index i) {
-	HFSM_ASSERT(i < CAPACITY && _count);
+	HFSM2_ASSERT(i < CAPACITY && _count);
 
 	auto& fresh = _cells[i];
 
 	if (_count < CAPACITY) {
-		HFSM_ASSERT(_vacantHead < CAPACITY);
-		HFSM_ASSERT(_vacantTail < CAPACITY);
+		HFSM2_ASSERT(_vacantHead < CAPACITY);
+		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
 		fresh.links.prev = INVALID;
 		fresh.links.next = _vacantHead;
@@ -1446,9 +1500,9 @@ List<T, NC>::remove(const Index i) {
 		_vacantHead = i;
 	} else {
 		// 0 -> 1
-		HFSM_ASSERT(_count == CAPACITY);
-		HFSM_ASSERT(_vacantHead == INVALID);
-		HFSM_ASSERT(_vacantTail == INVALID);
+		HFSM2_ASSERT(_count		 == CAPACITY);
+		HFSM2_ASSERT(_vacantHead == INVALID);
+		HFSM2_ASSERT(_vacantTail == INVALID);
 
 		fresh.links.prev = INVALID;
 		fresh.links.next = INVALID;
@@ -1459,7 +1513,7 @@ List<T, NC>::remove(const Index i) {
 
 	--_count;
 
-	HFSM_IF_ASSERT(verifyStructure());
+	HFSM2_IF_ASSERT(verifyStructure());
 }
 
 //------------------------------------------------------------------------------
@@ -1467,7 +1521,7 @@ List<T, NC>::remove(const Index i) {
 template <typename T, LongIndex NC>
 T&
 List<T, NC>::operator[] (const Index i) {
-	HFSM_IF_ASSERT(verifyStructure());
+	HFSM2_IF_ASSERT(verifyStructure());
 
 	return _cells[i].item;
 }
@@ -1477,29 +1531,29 @@ List<T, NC>::operator[] (const Index i) {
 template <typename T, LongIndex NC>
 const T&
 List<T, NC>::operator[] (const Index i) const {
-	HFSM_IF_ASSERT(verifyStructure());
+	HFSM2_IF_ASSERT(verifyStructure());
 
 	return _cells[i].item;
 }
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_ASSERT
+#ifdef HFSM2_ENABLE_ASSERT
 
 template <typename T, LongIndex NC>
 void
 List<T, NC>::verifyStructure(const Index occupied) const {
 	if (_count < CAPACITY) {
-		HFSM_ASSERT(_vacantHead < CAPACITY);
-		HFSM_ASSERT(_vacantTail < CAPACITY);
+		HFSM2_ASSERT(_vacantHead < CAPACITY);
+		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
-		HFSM_ASSERT(_cells[_vacantHead].links.prev == INVALID);
-		HFSM_ASSERT(_cells[_vacantTail].links.next == INVALID);
+		HFSM2_ASSERT(_cells[_vacantHead].links.prev == INVALID);
+		HFSM2_ASSERT(_cells[_vacantTail].links.next == INVALID);
 
 		auto emptyCount = 1;
 
 		for (auto c = _vacantHead; c != _vacantTail; ) {
-			HFSM_ASSERT(occupied != c);
+			HFSM2_ASSERT(occupied != c);
 
 			const auto& current = _cells[c];
 
@@ -1508,21 +1562,21 @@ List<T, NC>::verifyStructure(const Index occupied) const {
 				// next
 				const auto& following = _cells[f];
 
-				HFSM_ASSERT(following.links.prev == c);
+				HFSM2_ASSERT(following.links.prev == c);
 
 				c = f;
 				continue;
 			} else {
 				// end
-				HFSM_ASSERT(_vacantTail == c);
-				HFSM_ASSERT(_count == CAPACITY - emptyCount);
+				HFSM2_ASSERT(_vacantTail == c);
+				HFSM2_ASSERT(_count		 == CAPACITY - emptyCount);
 
 				break;
 			}
 		}
 	} else {
-		HFSM_ASSERT(_vacantHead == INVALID);
-		HFSM_ASSERT(_vacantTail == INVALID);
+		HFSM2_ASSERT(_vacantHead == INVALID);
+		HFSM2_ASSERT(_vacantTail == INVALID);
 	}
 }
 
@@ -1532,6 +1586,7 @@ List<T, NC>::verifyStructure(const Index occupied) const {
 
 }
 }
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 namespace hfsm2 {
 
@@ -1622,16 +1677,20 @@ class RandomT;
 
 template <>
 class RandomT<float>
-	: public HFSM_64BIT_OR_32BIT(XoShiRo256Plus, XoShiRo128Plus)
+	: public HFSM2_64BIT_OR_32BIT(XoShiRo256Plus, XoShiRo128Plus)
 {
 public:
-	using HFSM_64BIT_OR_32BIT(XoShiRo256Plus::XoShiRo256Plus,
-							  XoShiRo128Plus::XoShiRo128Plus);
+	using HFSM2_64BIT_OR_32BIT(XoShiRo256Plus::XoShiRo256Plus,
+							   XoShiRo128Plus::XoShiRo128Plus);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+
+#endif
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 namespace hfsm2 {
 
@@ -1931,6 +1990,7 @@ XoShiRo128Plus::raw() {
 
 }
 
+#endif
 namespace hfsm2 {
 namespace detail {
 
@@ -2097,7 +2157,6 @@ using SplitR = typename GreaterT<sizeof...(Ts) / 2, 0, Ts...>::Type;
 }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace hfsm2 {
@@ -2105,8 +2164,11 @@ namespace hfsm2 {
 enum class Method : uint8_t {
 	NONE,
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	RANK,
 	UTILITY,
+#endif
+
 	ENTRY_GUARD,
 	CONSTRUCT,
 	ENTER,
@@ -2126,8 +2188,12 @@ enum class TransitionType : uint8_t {
 	CHANGE,
 	RESTART,
 	RESUME,
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	UTILIZE,
 	RANDOMIZE,
+#endif
+
 	SCHEDULE,
 
 	COUNT
@@ -2172,8 +2238,12 @@ static inline
 const char*
 methodName(const Method method) {
 	switch (method) {
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	case Method::RANK:			 return "rank";
 	case Method::UTILITY:		 return "utility";
+#endif
+
 	case Method::ENTRY_GUARD:	 return "entryGuard";
 	case Method::ENTER:			 return "enter";
 	case Method::CONSTRUCT:		 return "construct";
@@ -2187,7 +2257,7 @@ methodName(const Method method) {
 	case Method::PLAN_FAILED:	 return "planFailed";
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		return nullptr;
 	}
 }
@@ -2201,12 +2271,16 @@ transitionName(const TransitionType transitionType) {
 	case TransitionType::CHANGE:	return "changeTo";
 	case TransitionType::RESTART:	return "restart";
 	case TransitionType::RESUME:	return "resume";
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	case TransitionType::UTILIZE:	return "utilize";
 	case TransitionType::RANDOMIZE:	return "randomize";
+#endif
+
 	case TransitionType::SCHEDULE:	return "schedule";
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		return nullptr;
 	}
 }
@@ -2214,18 +2288,25 @@ transitionName(const TransitionType transitionType) {
 ////////////////////////////////////////////////////////////////////////////////
 
 }
-
 namespace hfsm2 {
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext = EmptyContext,
-		  typename TUtilty = float>
+template <typename TContext = EmptyContext
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TUtilty = float
+#endif
+
+		  >
 struct LoggerInterfaceT {
 	using Context		 = TContext;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Utilty		 = TUtilty;
+#endif
 
 	using Method		 = ::hfsm2::Method;
 	using StateID		 = ::hfsm2::StateID;
@@ -2259,6 +2340,8 @@ struct LoggerInterfaceT {
 										const StateID /*origin*/)
 	{}
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 	virtual void recordUtilityResolution(Context& /*context*/,
 										 const StateID /*head*/,
 										 const StateID /*prong*/,
@@ -2270,6 +2353,8 @@ struct LoggerInterfaceT {
 										const StateID /*prong*/,
 										const Utilty /*utilty*/)
 	{}
+
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2294,9 +2379,9 @@ namespace detail {
 #pragma pack(push, 2)
 
 struct TaskLink {
-	HFSM_INLINE TaskLink(const TransitionType transitionType_,
-						 const StateID origin_,
-						 const StateID destination_)
+	HFSM2_INLINE TaskLink(const TransitionType transitionType_,
+						  const StateID origin_,
+						  const StateID destination_)
 		: transitionType{transitionType_}
 		, origin{origin_}
 		, destination{destination_}
@@ -2374,7 +2459,7 @@ struct PlanDataT<ArgsT<TContext,
 	TasksBits tasksFailures;
 	RegionBits planExists;
 
-#ifdef HFSM_ENABLE_ASSERT
+#ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans() const;
 	LongIndex verifyPlan(const RegionID stateId) const;
 #endif
@@ -2399,7 +2484,7 @@ struct PlanDataT<ArgsT<TContext,
 					   0,
 					   NTaskCapacity>>
 {
-#ifdef HFSM_ENABLE_ASSERT
+#ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans() const													{}
 	LongIndex verifyPlan(const RegionID) const					{ return 0;		}
 #endif
@@ -2415,7 +2500,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_ENABLE_ASSERT
+#ifdef HFSM2_ENABLE_ASSERT
 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 void
@@ -2424,7 +2509,7 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlans() const
 	for (RegionID id = 0; id < REGION_COUNT; ++id)
 		planCount += verifyPlan(id);
 
-	HFSM_ASSERT(taskLinks.count() == planCount);
+	HFSM2_ASSERT(taskLinks.count() == planCount);
 }
 
 //------------------------------------------------------------------------------
@@ -2436,14 +2521,14 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlan(const Re
 	const Bounds& bounds = tasksBounds[regionId];
 
 	if (bounds.first != INVALID_LONG_INDEX) {
-		HFSM_ASSERT(bounds.last != INVALID_LONG_INDEX);
+		HFSM2_ASSERT(bounds.last != INVALID_LONG_INDEX);
 
 		for (auto slow = bounds.first, fast = slow; ; ) {
 			++length;
 			const TaskLink& task = taskLinks[slow];
 
 			if (slow != bounds.last) {
-				HFSM_ASSERT(task.next != INVALID_LONG_INDEX);
+				HFSM2_ASSERT(task.next != INVALID_LONG_INDEX);
 				slow = task.next;
 
 				// loop check
@@ -2454,16 +2539,16 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlan(const Re
 						fast = taskLinks[fast].next;
 					}
 
-					HFSM_ASSERT(fast == INVALID_LONG_INDEX || slow != fast);
+					HFSM2_ASSERT(fast == INVALID_LONG_INDEX || slow != fast);
 				}
 			} else {
-				HFSM_ASSERT(task.next == INVALID_LONG_INDEX);
+				HFSM2_ASSERT(task.next == INVALID_LONG_INDEX);
 
 				break;
 			}
 		};
 	} else
-		HFSM_ASSERT(bounds.last == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(bounds.last == INVALID_LONG_INDEX);
 
 	return length;
 }
@@ -2494,7 +2579,7 @@ struct Status {
 	inline Status(const Result result_ = NONE,
 				  const bool outerTransition_ = false);
 
-	inline explicit operator bool() const { return result || outerTransition; }
+	inline explicit operator bool() const											{ return result || outerTransition;									}
 
 	inline void clear();
 };
@@ -2541,16 +2626,16 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Iterator {
-		HFSM_INLINE Iterator(const ConstPlanT& plan);
+		HFSM2_INLINE Iterator(const ConstPlanT& plan);
 
-		HFSM_INLINE explicit operator bool() const;
+		HFSM2_INLINE explicit operator bool() const;
 
-		HFSM_INLINE void operator ++();
+		HFSM2_INLINE void operator ++();
 
-		HFSM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
-		HFSM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
+		HFSM2_INLINE const TaskLink& operator  *() const							{ return  _plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE const TaskLink* operator ->() const							{ return &_plan._planData.taskLinks[_curr];							}
 
-		HFSM_INLINE LongIndex next() const;
+		HFSM2_INLINE LongIndex next() const;
 
 		const ConstPlanT& _plan;
 		LongIndex _curr;
@@ -2560,19 +2645,19 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HFSM_INLINE ConstPlanT(const PlanData& planData,
+	HFSM2_INLINE ConstPlanT(const PlanData& planData,
 						   const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
 
 	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()											{ return (RegionID) RegionList::template index<T>();				}
 
 public:
-	HFSM_INLINE explicit operator bool() const;
+	HFSM2_INLINE explicit operator bool() const;
 
-	HFSM_INLINE Iterator first()			{ return Iterator{*this};								}
+	HFSM2_INLINE Iterator first()													{ return Iterator{*this};											}
 
 private:
 	const PlanData& _planData;
@@ -2607,21 +2692,21 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Iterator {
-		HFSM_INLINE Iterator(PlanT& plan);
+		HFSM2_INLINE Iterator(PlanT& plan);
 
-		HFSM_INLINE explicit operator bool() const;
+		HFSM2_INLINE explicit operator bool() const;
 
-		HFSM_INLINE void operator ++();
+		HFSM2_INLINE void operator ++();
 
-		HFSM_INLINE		  TaskLink& operator  *()	    { return  _plan._planData.taskLinks[_curr];	}
-		HFSM_INLINE const TaskLink& operator  *() const { return  _plan._planData.taskLinks[_curr];	}
+		HFSM2_INLINE	   TaskLink& operator  *()									{ return  _plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE const TaskLink& operator  *() const							{ return  _plan._planData.taskLinks[_curr];							}
 
-		HFSM_INLINE		  TaskLink* operator ->()	    { return &_plan._planData.taskLinks[_curr];	}
-		HFSM_INLINE const TaskLink* operator ->() const { return &_plan._planData.taskLinks[_curr];	}
+		HFSM2_INLINE	   TaskLink* operator ->()									{ return &_plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE const TaskLink* operator ->() const							{ return &_plan._planData.taskLinks[_curr];							}
 
-		HFSM_INLINE void remove();
+		HFSM2_INLINE void remove();
 
-		HFSM_INLINE LongIndex next() const;
+		HFSM2_INLINE LongIndex next() const;
 
 		PlanT& _plan;
 		LongIndex _curr;
@@ -2631,76 +2716,207 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HFSM_INLINE PlanT(PlanData& planData,
-					  const RegionID regionId);
+	HFSM2_INLINE PlanT(PlanData& planData,
+					   const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
 
 	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()											{ return (RegionID) RegionList::template index<T>();				}
 
 	bool append(const TransitionType transitionType,
 				const StateID origin,
 				const StateID destination);
 
 public:
-	HFSM_INLINE explicit operator bool() const;
+	HFSM2_INLINE explicit operator bool() const;
 
-	HFSM_INLINE void clear();
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(TransitionType::CHANGE,	   origin, destination); }
-	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(TransitionType::RESTART,   origin, destination); }
-	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(TransitionType::RESUME,	   origin, destination); }
-	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(TransitionType::UTILIZE,   origin, destination); }
-	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(TransitionType::RANDOMIZE, origin, destination); }
-	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(TransitionType::SCHEDULE,  origin, destination); }
+	/// @brief Clear all tasks from the plan
+	HFSM2_INLINE void clear();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TOrigin>
-	HFSM_INLINE bool change   (const StateID destination)					{ return change   (stateId<TOrigin>(), destination);				}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, acts depending on the region type)
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM2_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(TransitionType::CHANGE,	   origin, destination);	}
 
-	template <typename TOrigin>
-	HFSM_INLINE bool restart  (const StateID destination)					{ return restart  (stateId<TOrigin>(), destination);				}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the initial state)
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM2_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(TransitionType::RESTART,   origin, destination);	}
 
-	template <typename TOrigin>
-	HFSM_INLINE bool resume   (const StateID destination)					{ return resume   (stateId<TOrigin>(), destination);				}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state that was active previously)
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM2_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(TransitionType::RESUME,	   origin, destination);	}
 
-	template <typename TOrigin>
-	HFSM_INLINE bool utilize  (const StateID destination)					{ return utilize  (stateId<TOrigin>(), destination);				}
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	template <typename TOrigin>
-	HFSM_INLINE bool randomize(const StateID destination)					{ return randomize(stateId<TOrigin>(), destination);				}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(TransitionType::UTILIZE,   origin, destination);	}
 
-	template <typename TOrigin>
-	HFSM_INLINE bool schedule (const StateID destination)					{ return schedule (stateId<TOrigin>(), destination);				}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(TransitionType::RANDOMIZE, origin, destination);	}
+
+#endif
+
+	/// @brief Append a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
+	/// @param origin Transition origin state identifier
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM2_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(TransitionType::SCHEDULE,  origin, destination);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool change   ()											{ return change   (stateId<TOrigin>(), stateId<TDestination>());	}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, acts depending on the region type)
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_INLINE bool change   (const StateID destination)							{ return change   (stateId<TOrigin>(), destination);				}
 
-	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool restart  ()											{ return restart  (stateId<TOrigin>(), stateId<TDestination>());	}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the initial state)
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_INLINE bool restart  (const StateID destination)							{ return restart  (stateId<TOrigin>(), destination);				}
 
-	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool resume   ()											{ return resume   (stateId<TOrigin>(), stateId<TDestination>());	}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state that was active previously)
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_INLINE bool resume   (const StateID destination)							{ return resume   (stateId<TOrigin>(), destination);				}
 
-	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool utilize  ()											{ return utilize  (stateId<TOrigin>(), stateId<TDestination>());	}
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool randomize()											{ return randomize(stateId<TOrigin>(), stateId<TDestination>());	}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TOrigin>
+	HFSM2_INLINE bool utilize  (const StateID destination)							{ return utilize  (stateId<TOrigin>(), destination);				}
 
-	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool schedule ()											{ return schedule (stateId<TOrigin>(), stateId<TDestination>());	}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TOrigin>
+	HFSM2_INLINE bool randomize(const StateID destination)							{ return randomize(stateId<TOrigin>(), destination);				}
+
+#endif
+
+	/// @brief Append a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
+	/// @tparam TOrigin Transition origin state type
+	/// @param destination Transition destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_INLINE bool schedule (const StateID destination)							{ return schedule (stateId<TOrigin>(), destination);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE Iterator first()			{ return Iterator{*this};								}
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, acts depending on the region type)
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_INLINE bool change   ()													{ return change   (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the initial state)
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_INLINE bool restart  ()													{ return restart  (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state that was active previously)
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_INLINE bool resume   ()													{ return resume   (stateId<TOrigin>(), stateId<TDestination>());	}
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TOrigin, typename TDestination>
+	HFSM2_INLINE bool utilize  ()													{ return utilize  (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TOrigin, typename TDestination>
+	HFSM2_INLINE bool randomize()													{ return randomize(stateId<TOrigin>(), stateId<TDestination>());	}
+
+#endif
+
+	/// @brief Append a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
+	/// @tparam TOrigin Transition origin state type
+	/// @tparam TDestination Transition destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_INLINE bool schedule ()													{ return schedule (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Begin iteration over plan tasks for the current region
+	/// @return
+	HFSM2_INLINE Iterator first()													{ return Iterator{*this};											}
 
 private:
 	void remove(const LongIndex task);
@@ -2749,7 +2965,7 @@ ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
 
 template <typename TArgs>
 ConstPlanT<TArgs>::Iterator::operator bool() const {
-	HFSM_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
+	HFSM2_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
 
 	return _curr < ConstPlanT::TASK_CAPACITY;
 }
@@ -2773,7 +2989,7 @@ ConstPlanT<TArgs>::Iterator::next() const {
 
 		return task.next;
 	} else {
-		HFSM_ASSERT(_curr == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_curr == INVALID_LONG_INDEX);
 
 		return INVALID_LONG_INDEX;
 	}
@@ -2794,10 +3010,10 @@ ConstPlanT<TArgs>::ConstPlanT(const PlanData& planData,
 template <typename TArgs>
 ConstPlanT<TArgs>::operator bool() const {
 	if (_bounds.first < TASK_CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TASK_CAPACITY);
+		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
 	} else {
-		HFSM_ASSERT(_bounds.last == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.last == INVALID_LONG_INDEX);
 		return false;
 	}
 }
@@ -2816,7 +3032,7 @@ PlanT<TArgs>::Iterator::Iterator(PlanT& plan)
 
 template <typename TArgs>
 PlanT<TArgs>::Iterator::operator bool() const {
-	HFSM_ASSERT(_curr < PlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
+	HFSM2_ASSERT(_curr < PlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
 
 	return _curr < PlanT::TASK_CAPACITY;
 }
@@ -2848,7 +3064,7 @@ PlanT<TArgs>::Iterator::next() const {
 
 		return task.next;
 	} else {
-		HFSM_ASSERT(_curr == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_curr == INVALID_LONG_INDEX);
 
 		return INVALID_LONG_INDEX;
 	}
@@ -2870,10 +3086,10 @@ PlanT<TArgs>::PlanT(PlanData& planData,
 template <typename TArgs>
 PlanT<TArgs>::operator bool() const {
 	if (_bounds.first < TASK_CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TASK_CAPACITY);
+		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
 	} else {
-		HFSM_ASSERT(_bounds.last == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.last == INVALID_LONG_INDEX);
 		return false;
 	}
 }
@@ -2891,26 +3107,27 @@ PlanT<TArgs>::append(const TransitionType transitionType,
 	const TaskIndex index = _planData.taskLinks.emplace(transitionType, origin, destination);
 	if (index == TaskLinks::INVALID)
 		return false;
+	else {
+		if (_bounds.first < TaskLinks::CAPACITY) {
+			HFSM2_ASSERT(_bounds.last < TaskLinks::CAPACITY);
 
-	if (_bounds.first < TaskLinks::CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
+			auto& last  = _planData.taskLinks[_bounds.last];
+			last.next = index;
 
-		auto& last  = _planData.taskLinks[_bounds.last];
-		last.next = index;
+			auto& next = _planData.taskLinks[index];
+			next.prev  = _bounds.last;
 
-		auto& next = _planData.taskLinks[index];
-		next.prev  = _bounds.last;
+			_bounds.last = index;
+		} else {
+			HFSM2_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
+						 _bounds.last  == INVALID_LONG_INDEX);
 
-		_bounds.last = index;
-	} else {
-		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
-					_bounds.last  == INVALID_LONG_INDEX);
+			_bounds.first = index;
+			_bounds.last  = index;
+		}
 
-		_bounds.first = index;
-		_bounds.last  = index;
+		return true;
 	}
-
-	return true;
 }
 
 //------------------------------------------------------------------------------
@@ -2919,18 +3136,18 @@ template <typename TArgs>
 void
 PlanT<TArgs>::clear() {
 	if (_bounds.first < TaskLinks::CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
+		HFSM2_ASSERT(_bounds.last < TaskLinks::CAPACITY);
 
 		for (LongIndex index = _bounds.first;
 			 index != INVALID_LONG_INDEX;
 			 )
 		{
-			HFSM_ASSERT(index < TaskLinks::CAPACITY);
+			HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
 			const auto& task = _planData.taskLinks[index];
-			HFSM_ASSERT(index == _bounds.first ?
-				   task.prev == INVALID_LONG_INDEX :
-				   task.prev <  TaskLinks::CAPACITY);
+			HFSM2_ASSERT(index == _bounds.first ?
+							 task.prev == INVALID_LONG_INDEX :
+							 task.prev <  TaskLinks::CAPACITY);
 
 			const LongIndex next = task.next;
 
@@ -2942,8 +3159,8 @@ PlanT<TArgs>::clear() {
 		_bounds.first = INVALID_LONG_INDEX;
 		_bounds.last  = INVALID_LONG_INDEX;
 	} else
-		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
-			   _bounds.last  == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
+					 _bounds.last  == INVALID_LONG_INDEX);
 }
 
 //------------------------------------------------------------------------------
@@ -2951,11 +3168,11 @@ PlanT<TArgs>::clear() {
 template <typename TArgs>
 void
 PlanT<TArgs>::remove(const LongIndex task) {
-	HFSM_ASSERT(_planData.planExists.get(_regionId) &&
-				_bounds.first < TaskLinks::CAPACITY &&
-				_bounds.last  < TaskLinks::CAPACITY);
+	HFSM2_ASSERT(_planData.planExists.get(_regionId) &&
+				 _bounds.first < TaskLinks::CAPACITY &&
+				 _bounds.last  < TaskLinks::CAPACITY);
 
-	HFSM_ASSERT(task < TaskLinks::CAPACITY);
+	HFSM2_ASSERT(task < TaskLinks::CAPACITY);
 
 	const TaskLink& curr = _planData.taskLinks[task];
 
@@ -2963,7 +3180,7 @@ PlanT<TArgs>::remove(const LongIndex task) {
 		TaskLink& prev = _planData.taskLinks[curr.prev];
 		prev.next = curr.next;
 	} else {
-		HFSM_ASSERT(_bounds.first == task);
+		HFSM2_ASSERT(_bounds.first == task);
 		_bounds.first = curr.next;
 	}
 
@@ -2971,7 +3188,7 @@ PlanT<TArgs>::remove(const LongIndex task) {
 		TaskLink& next = _planData.taskLinks[curr.next];
 		next.prev = curr.prev;
 	} else {
-		HFSM_ASSERT(_bounds.last == task);
+		HFSM2_ASSERT(_bounds.last == task);
 		_bounds.last = curr.prev;
 	}
 
@@ -2982,7 +3199,6 @@ PlanT<TArgs>::remove(const LongIndex task) {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -2991,8 +3207,11 @@ namespace detail {
 enum Strategy {
 	Composite,
 	Resumable,
+
+//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	Utilitarian,
 	RandomUtil,
+//#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3000,19 +3219,19 @@ enum Strategy {
 #pragma pack(push, 1)
 
 struct alignas(2 * sizeof(ShortIndex)) Parent {
-	HFSM_INLINE Parent() = default;
+	HFSM2_INLINE Parent() = default;
 
-	HFSM_INLINE Parent(const ForkID forkId_)
+	HFSM2_INLINE Parent(const ForkID forkId_)
 		: forkId{forkId_}
 	{}
 
-	HFSM_INLINE Parent(const ForkID forkId_,
-					   const ShortIndex prong_)
+	HFSM2_INLINE Parent(const ForkID forkId_,
+						const ShortIndex prong_)
 		: forkId{forkId_}
 		, prong{prong_}
 	{}
 
-	HFSM_INLINE explicit operator bool() const {
+	HFSM2_INLINE explicit operator bool() const {
 		return forkId != INVALID_FORK_ID &&
 			   prong  != INVALID_SHORT_INDEX;
 	}
@@ -3031,21 +3250,25 @@ struct Request {
 		CHANGE,
 		RESTART,
 		RESUME,
+
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		UTILIZE,
 		RANDOMIZE,
+	//#endif
+
 		SCHEDULE,
 
 		COUNT
 	};
 
-	HFSM_INLINE Request() = default;
+	HFSM2_INLINE Request() = default;
 
-	HFSM_INLINE Request(const Type type_,
-						const StateID stateId_)
+	HFSM2_INLINE Request(const Type type_,
+						 const StateID stateId_)
 		: type{type_}
 		, stateId{stateId_}
 	{
-		HFSM_ASSERT(type_ < Type::COUNT);
+		HFSM2_ASSERT(type_ < Type::COUNT);
 	}
 
 	Type type = CHANGE;
@@ -3132,9 +3355,9 @@ struct RegistryT<ArgsT<TContext,
 	bool isPendingEnter	(const StateID stateId) const;
 	bool isPendingExit	(const StateID stateId) const;
 
-	HFSM_INLINE const Parent&	  forkParent(const ForkID forkId) const;
+	HFSM2_INLINE const Parent&	   forkParent(const ForkID forkId) const;
 
-	HFSM_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
+	HFSM2_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
 
 	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
@@ -3196,7 +3419,7 @@ struct RegistryT<ArgsT<TContext,
 	bool isPendingEnter	(const StateID stateId) const;
 	bool isPendingExit	(const StateID stateId) const;
 
-	HFSM_INLINE const Parent& forkParent(const ForkID forkId) const;
+	HFSM2_INLINE const Parent& forkParent(const ForkID forkId) const;
 
 	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
@@ -3240,7 +3463,6 @@ restore(TRegistry& registry, const BackUpT<TRegistry>& copy) {
 }
 }
 
-
 namespace hfsm2 {
 namespace detail {
 
@@ -3249,12 +3471,12 @@ namespace detail {
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isActive(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return parent.prong == compoActive[parent.forkId - 1];
@@ -3268,12 +3490,12 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isActive(const Stat
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isResumable(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return parent.prong == compoResumable[parent.forkId - 1];
@@ -3287,12 +3509,12 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isResumable(const S
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingChange(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return compoRequested[parent.forkId - 1] !=
@@ -3307,12 +3529,12 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingChange(con
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingEnter(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return parent.prong != compoActive	 [parent.forkId - 1] &&
@@ -3327,12 +3549,12 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingEnter(cons
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingExit(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return parent.prong == compoActive	 [parent.forkId - 1] &&
@@ -3347,7 +3569,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingExit(const
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 const Parent&
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::forkParent(const ForkID forkId) const {
-	HFSM_ASSERT(forkId != 0);
+	HFSM2_ASSERT(forkId != 0);
 
 	return forkId > 0 ?
 		compoParents[ forkId - 1] :
@@ -3359,7 +3581,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::forkParent(const Fo
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 typename RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::OrthoBits
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestedOrthoFork(const ForkID forkId) {
-	HFSM_ASSERT(forkId < 0);
+	HFSM2_ASSERT(forkId < 0);
 	const Units& units = orthoUnits[-forkId - 1];
 
 	return orthoRequested.bits(units);
@@ -3372,7 +3594,7 @@ bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(const Request request) {
 	if (request.stateId == 0)
 		return false;
-	else if (HFSM_CHECKED(request.stateId < STATE_COUNT)) {
+	else if (HFSM2_CHECKED(request.stateId < STATE_COUNT)) {
 		Parent parent;
 
 		for (parent = stateParents[request.stateId];
@@ -3387,7 +3609,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 			} else if (parent.forkId < 0)
 				requestedOrthoFork(parent.forkId).set(parent.prong);
 			else
-				HFSM_BREAK();
+				HFSM2_BREAK();
 		}
 
 		for (; parent; parent = forkParent(parent.forkId)) {
@@ -3403,7 +3625,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 			} else if (parent.forkId < 0)
 				requestedOrthoFork(parent.forkId).set(parent.prong);
 			else
-				HFSM_BREAK();
+				HFSM2_BREAK();
 		}
 
 		for (; parent; parent = forkParent(parent.forkId)) {
@@ -3412,7 +3634,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 			else if (parent.forkId < 0)
 				requestedOrthoFork(parent.forkId).set(parent.prong);
 			else
-				HFSM_BREAK();
+				HFSM2_BREAK();
 		}
 	}
 
@@ -3424,10 +3646,10 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestScheduled(const StateID stateId) {
-	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
-		HFSM_ASSERT(parent.forkId != 0);
+		HFSM2_ASSERT(parent.forkId != 0);
 		if (parent.forkId > 0)
 			compoResumable[parent.forkId - 1] = parent.prong;
 	}
@@ -3460,9 +3682,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::reset() {
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isActive(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong == compoActive[parent.forkId - 1];
 		} else
@@ -3477,9 +3699,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isActive(const StateID 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isResumable(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong == compoResumable[parent.forkId - 1];
 		}
@@ -3492,9 +3714,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isResumable(const State
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingChange(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return compoRequested[parent.forkId - 1] !=
 				   compoActive	 [parent.forkId - 1];
@@ -3508,9 +3730,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingChange(const S
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingEnter(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong != compoActive	 [parent.forkId - 1] &&
 				   parent.prong == compoRequested[parent.forkId - 1];
@@ -3524,9 +3746,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingEnter(const St
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingExit(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong == compoActive	 [parent.forkId - 1] &&
 				   parent.prong != compoRequested[parent.forkId - 1];
@@ -3540,7 +3762,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingExit(const Sta
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 const Parent&
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::forkParent(const ForkID forkId) const {
-	HFSM_ASSERT(forkId > 0);
+	HFSM2_ASSERT(forkId > 0);
 
 	return compoParents[forkId - 1];
 }
@@ -3552,11 +3774,11 @@ bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const Request request) {
 	if (request.stateId == 0)
 		return false;
-	else if (HFSM_CHECKED(request.stateId < STATE_COUNT)) {
+	else if (HFSM2_CHECKED(request.stateId < STATE_COUNT)) {
 		Parent parent = stateParents[request.stateId];
 
-		if (HFSM_CHECKED(parent)) {
-			HFSM_ASSERT(parent.forkId > 0);
+		if (HFSM2_CHECKED(parent)) {
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			compoRequested[parent.forkId - 1] = parent.prong;
 
@@ -3564,7 +3786,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 				 parent;
 				 parent = forkParent(parent.forkId))
 			{
-				HFSM_ASSERT(parent.forkId > 0);
+				HFSM2_ASSERT(parent.forkId > 0);
 				compoRemains.set(parent.forkId - 1);
 
 				if (compoActive	  [parent.forkId - 1] != parent.prong)
@@ -3576,7 +3798,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 			}
 
 			for (; parent; parent = forkParent(parent.forkId)) {
-				HFSM_ASSERT(parent.forkId > 0);
+				HFSM2_ASSERT(parent.forkId > 0);
 				compoRemains.set(parent.forkId - 1);
 			}
 		}
@@ -3590,10 +3812,10 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestScheduled(const StateID stateId) {
-	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
-		HFSM_ASSERT(parent.forkId > 0);
+		HFSM2_ASSERT(parent.forkId > 0);
 		compoResumable[parent.forkId - 1] = parent.prong;
 	}
 }
@@ -3624,7 +3846,6 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::reset() {
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -3648,8 +3869,15 @@ class ControlT {
 
 protected:
 	using Context		= typename Args::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using RNG			= typename Args::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using Logger		= typename Args::Logger;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -3660,10 +3888,10 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Region {
-		HFSM_INLINE Region(ControlT& control,
-						   const RegionID id);
+		HFSM2_INLINE Region(ControlT& control,
+							const RegionID id);
 
-		HFSM_INLINE ~Region();
+		HFSM2_INLINE ~Region();
 
 		ControlT& control;
 		const RegionID prevId;
@@ -3671,71 +3899,116 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE ControlT(Context& context,
-						 RNG& rng,
-						 Registry& registry,
-						 PlanData& planData,
-						 Logger* const HFSM_IF_LOGGER(logger))
+	HFSM2_INLINE ControlT(Context& context
+						HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+						, Registry& registry
+						, PlanData& planData
+						HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
 		: _context{context}
-		, _rng{rng}
+		HFSM2_IF_UTILITY_THEORY(, _rng{rng})
 		, _registry{registry}
 		, _planData{planData}
-		HFSM_IF_LOGGER(, _logger{logger})
+		HFSM2_IF_LOG_INTERFACE(, _logger{logger})
 	{}
 
 
-	HFSM_INLINE void setRegion(const RegionID id);
-	HFSM_INLINE void resetRegion(const RegionID id);
+	HFSM2_INLINE void setRegion(const RegionID id);
+	HFSM2_INLINE void resetRegion(const RegionID id);
 
 public:
-	template <typename T>
-	static constexpr StateID  stateId()					{ return			StateList ::template index<T>();	}
 
-	template <typename T>
-	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<T>();	}
+	/// @brief Get state identifier for a state type
+	/// @tparam TState State type
+	/// @return Numeric state identifier
+	template <typename TState>
+	static constexpr StateID  stateId()					{ return			StateList ::template index<TState>();	}
 
-	HFSM_INLINE Context& _()								{ return _context;									}
-	HFSM_INLINE Context& context()							{ return _context;									}
+	/// @brief Get region identifier for a region type
+	/// @tparam TState Region head state type
+	/// @return Numeric region identifier
+	template <typename TState>
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<TState>();	}
+
+	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
+	/// @return context
+	/// @see Control::context()
+	HFSM2_INLINE Context& _()									{ return _context;									}
+
+	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
+	/// @return context
+	/// @see Control::_()
+	HFSM2_INLINE Context& context()								{ return _context;									}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID id) const	{ return _registry.isActive   (id);					}
-	HFSM_INLINE bool isResumable(const StateID id) const	{ return _registry.isResumable(id);					}
+	/// @brief Check if a state is active
+	/// @param stateId State identifier
+	/// @return State active status
+	HFSM2_INLINE bool isActive   (const StateID id) const		{ return _registry.isActive   (id);					}
 
-	HFSM_INLINE bool isScheduled(const StateID id) const	{ return isResumable(id);							}
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @param stateId State identifier
+	/// @return State resumable status
+	HFSM2_INLINE bool isResumable(const StateID id) const		{ return _registry.isResumable(id);					}
 
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @param stateId State identifier
+	/// @return State scheduled status
+	HFSM2_INLINE bool isScheduled(const StateID id) const		{ return isResumable(id);							}
+
+	/// @brief Check if a state is active
+	/// @tparam TState State type
+	/// @return State active status
 	template <typename TState>
-	HFSM_INLINE bool isActive() const						{ return isActive	(stateId<TState>());			}
+	HFSM2_INLINE bool isActive() const							{ return isActive	(stateId<TState>());			}
 
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @tparam TState State type
+	/// @return State resumable status
 	template <typename TState>
-	HFSM_INLINE bool isResumable() const					{ return isResumable(stateId<TState>());			}
+	HFSM2_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
 
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @tparam TState State type
+	/// @return State scheduled status
 	template <typename TState>
-	HFSM_INLINE bool isScheduled() const					{ return isResumable(stateId<TState>());			}
+	HFSM2_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE ConstPlan plan() const						{ return ConstPlan{_planData, _regionId};			}
-	HFSM_INLINE ConstPlan plan(const RegionID id) const		{ return ConstPlan{_planData, id};					}
+	/// @brief Access read-only plan for the current region
+	/// @return Plan for the current region
+	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};			}
 
-	template <typename TRegion>
-	HFSM_INLINE ConstPlan plan()							{ return ConstPlan{_planData, regionId<TRegion>()};	}
+	/// @brief Access read-only plan for a region
+	/// @param regionId Region identifier
+	/// @return Read-only plan for the region
+	HFSM2_INLINE ConstPlan plan(const RegionID regionId) const	{ return ConstPlan{_planData, regionId};			}
 
+	/// @brief Access read-only plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Read-only plan for the region
 	template <typename TRegion>
-	HFSM_INLINE ConstPlan plan() const						{ return ConstPlan{_planData, regionId<TRegion>()};	}
+	HFSM2_INLINE ConstPlan plan()								{ return ConstPlan{_planData, regionId<TRegion>()};	}
+
+	/// @brief Access read-only plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Read-only Plan for the region
+	template <typename TRegion>
+	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, regionId<TRegion>()};	}
 
 protected:
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	HFSM_INLINE Logger* logger()							{ return _logger;									}
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	HFSM2_INLINE Logger* logger()								{ return _logger;									}
 #endif
 
 protected:
 	Context& _context;
-	RNG& _rng;
+	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 	Registry& _registry;
 	PlanData& _planData;
 	RegionID _regionId = 0;
-	HFSM_IF_LOGGER(Logger* _logger);
+	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
 
 //------------------------------------------------------------------------------
@@ -3771,10 +4044,10 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Origin {
-		HFSM_INLINE Origin(PlanControlT& control_,
-						   const StateID id);
+		HFSM2_INLINE Origin(PlanControlT& control_,
+							const StateID id);
 
-		HFSM_INLINE ~Origin();
+		HFSM2_INLINE ~Origin();
 
 		PlanControlT& control;
 		const StateID prevId;
@@ -3783,12 +4056,12 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Region {
-		HFSM_INLINE Region(PlanControlT& control,
-						   const RegionID id,
-						   const StateID index,
-						   const LongIndex size);
+		HFSM2_INLINE Region(PlanControlT& control,
+							const RegionID id,
+							const StateID index,
+							const LongIndex size);
 
-		HFSM_INLINE ~Region();
+		HFSM2_INLINE ~Region();
 
 		PlanControlT& control;
 		const RegionID prevId;
@@ -3800,11 +4073,11 @@ protected:
 
 	using Control::Control;
 
-	HFSM_INLINE void setOrigin  (const StateID id);
-	HFSM_INLINE void resetOrigin(const StateID id);
+	HFSM2_INLINE void setOrigin  (const StateID id);
+	HFSM2_INLINE void resetOrigin(const StateID id);
 
-	HFSM_INLINE void setRegion  (const RegionID id, const StateID index, const LongIndex size);
-	HFSM_INLINE void resetRegion(const RegionID id, const StateID index, const LongIndex size);
+	HFSM2_INLINE void setRegion  (const RegionID id, const StateID index, const LongIndex size);
+	HFSM2_INLINE void resetRegion(const RegionID id, const StateID index, const LongIndex size);
 
 public:
 	using Control::stateId;
@@ -3819,24 +4092,42 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE		 Plan plan()							{ return	  Plan{_planData, _regionId};			}
-	HFSM_INLINE ConstPlan plan() const						{ return ConstPlan{_planData, _regionId};			}
+	/// @brief Access plan for the current region
+	/// @return Plan for the current region
+	HFSM2_INLINE	  Plan plan()								{ return	  Plan{_planData, _regionId};			}
 
-	HFSM_INLINE		 Plan plan(const RegionID id)			{ return	  Plan{_planData, id};					}
-	HFSM_INLINE ConstPlan plan(const RegionID id) const		{ return ConstPlan{_planData, id};					}
+	/// @brief Access plan for the current region
+	/// @return Plan for the current region
+	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};			}
 
+	/// @brief Access plan for a region
+	/// @param regionId
+	/// @return Plan for the region
+	HFSM2_INLINE	  Plan plan(const RegionID regionId)		{ return	  Plan{_planData, regionId};			}
+
+	/// @brief Access plan for a region
+	/// @param regionId
+	/// @return Plan for the region
+	HFSM2_INLINE ConstPlan plan(const RegionID regionId) const	{ return ConstPlan{_planData, regionId};			}
+
+	/// @brief Access plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Plan for the region
 	template <typename TRegion>
-	HFSM_INLINE		 Plan plan()		{ return	  Plan{_planData, Control::template regionId<TRegion>()};	}
+	HFSM2_INLINE	  Plan plan()			{ return	  Plan{_planData, Control::template regionId<TRegion>()};	}
 
+	/// @brief Access plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Plan for the region
 	template <typename TRegion>
-	HFSM_INLINE ConstPlan plan() const	{ return ConstPlan{_planData, Control::template regionId<TRegion>()};	}
+	HFSM2_INLINE ConstPlan plan() const		{ return ConstPlan{_planData, Control::template regionId<TRegion>()};	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
 	using Control::_planData;
 	using Control::_regionId;
-	HFSM_IF_LOGGER(using Control::_logger);
+	HFSM2_IF_LOG_INTERFACE(using Control::_logger);
 
 	StateID _originId = 0;
 	StateID _regionIndex = 0;
@@ -3868,8 +4159,15 @@ protected:
 	using PlanControl	= PlanControlT<Args>;
 
 	using typename PlanControl::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename PlanControl::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using typename PlanControl::Logger;
+#endif
+
 	using typename PlanControl::StateList;
 	using typename PlanControl::RegionList;
 	using typename PlanControl::PlanData;
@@ -3883,21 +4181,21 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Lock {
-		HFSM_INLINE Lock(FullControlT& control_);
-		HFSM_INLINE ~Lock();
+		HFSM2_INLINE Lock(FullControlT& control_);
+		HFSM2_INLINE ~Lock();
 
 		FullControlT* const control;
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE FullControlT(Context& context,
-							 RNG& rng,
-							 Registry& registry,
-							 PlanData& planData,
-							 Requests& requests,
-							 Logger* const logger)
-		: PlanControl{context, rng, registry, planData, logger}
+	HFSM2_INLINE FullControlT(Context& context
+							HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							, Registry& registry
+							, PlanData& planData
+							, Requests& requests
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+		: PlanControl{context HFSM2_IF_UTILITY_THEORY(,rng), registry, planData HFSM2_IF_LOG_INTERFACE(, logger)}
 		, _requests{requests}
 	{}
 
@@ -3922,45 +4220,93 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void changeTo (const StateID id);
-	HFSM_INLINE void restart  (const StateID id);
-	HFSM_INLINE void resume	  (const StateID id);
-	HFSM_INLINE void utilize  (const StateID id);
-	HFSM_INLINE void randomize(const StateID id);
-	HFSM_INLINE void schedule (const StateID id);
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @param stateId State identifier
+	HFSM2_INLINE void changeTo (const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @param stateId State identifier
+	HFSM2_INLINE void restart  (const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @param stateId State identifier
+	HFSM2_INLINE void resume   (const StateID stateId);
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void utilize  (const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void randomize(const StateID stateId);
+
+#endif
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @param stateId State identifier
+	HFSM2_INLINE void schedule (const StateID stateId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	// Clang trips over 'stateId<>()', so give it a hint it comes from ControlT<>
+	// Clang trips over 'stateId<>()', so give it a hint it comes from PlanControl
 
-	template <typename T>
-	HFSM_INLINE void changeTo ()							{ changeTo (PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void changeTo ()							{ changeTo (PlanControl::template stateId<TState>());	}
 
-	template <typename T>
-	HFSM_INLINE void restart  ()							{ restart  (PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void restart  ()							{ restart  (PlanControl::template stateId<TState>());	}
 
-	template <typename T>
-	HFSM_INLINE void resume   ()							{ resume   (PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void resume   ()							{ resume   (PlanControl::template stateId<TState>());	}
 
-	template <typename T>
-	HFSM_INLINE void utilize  ()							{ utilize  (PlanControl::template stateId<T>());	}
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	template <typename T>
-	HFSM_INLINE void randomize()							{ randomize(PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///   with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TState State type
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM2_INLINE void utilize  ()							{ utilize  (PlanControl::template stateId<TState>());	}
 
-	template <typename T>
-	HFSM_INLINE void schedule ()							{ schedule (PlanControl::template stateId<T>());	}
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///   proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TState State type
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM2_INLINE void randomize()							{ randomize(PlanControl::template stateId<TState>());	}
+
+#endif
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void schedule ()							{ schedule (PlanControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void succeed();
-	HFSM_INLINE void fail();
+	/// @brief Succeed a plan task for the current state
+	HFSM2_INLINE void succeed();
+
+	/// @brief Fail a plan task for the current state
+	HFSM2_INLINE void fail();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
 	using PlanControl::_planData;
 	using PlanControl::_regionId;
-	HFSM_IF_LOGGER(using PlanControl::_logger);
+	HFSM2_IF_LOG_INTERFACE(using PlanControl::_logger);
 
 	using PlanControl::_originId;
 	using PlanControl::_regionIndex;
@@ -3987,8 +4333,15 @@ class GuardControlT final
 	using FullControl	= FullControlT<Args>;
 
 	using typename FullControl::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename FullControl::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using typename FullControl::Logger;
+#endif
+
 	using typename FullControl::StateList;
 	using typename FullControl::RegionList;
 	using typename FullControl::PlanData;
@@ -4001,14 +4354,14 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HFSM_INLINE GuardControlT(Context& context,
-							  RNG& rng,
-							  Registry& registry,
-							  PlanData& planData,
-							  Requests& requests,
-							  const Requests& pendingChanges,
-							  Logger* const logger)
-		: FullControl{context, rng, registry, planData, requests, logger}
+	HFSM2_INLINE GuardControlT(Context& context
+							 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							 , Registry& registry
+							 , PlanData& planData
+							 , Requests& requests
+							 , const Requests& pendingChanges
+							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+		: FullControl{context HFSM2_IF_UTILITY_THEORY(, rng), registry, planData, requests HFSM2_IF_LOG_INTERFACE(, logger)}
 		, _pending{pendingChanges}
 	{}
 
@@ -4030,35 +4383,63 @@ public:
 	using FullControl::changeTo;
 	using FullControl::restart;
 	using FullControl::resume;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using FullControl::utilize;
 	using FullControl::randomize;
+#endif
+
 	using FullControl::schedule;
 	using FullControl::succeed;
 	using FullControl::fail;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isPendingChange(const StateID id) const	{ return _registry.isPendingChange(id);	}
-	HFSM_INLINE bool isPendingEnter	(const StateID id) const	{ return _registry.isPendingEnter (id);	}
-	HFSM_INLINE bool isPendingExit	(const StateID id) const	{ return _registry.isPendingExit  (id);	}
+	/// @brief Check if a state is going to be activated or deactivated
+	/// @param stateId State identifier
+	/// @return State pending activation/deactivation status
+	HFSM2_INLINE bool isPendingChange(const StateID stateId) const	{ return _registry.isPendingChange(stateId);	}
 
-	template <typename TState>
-	HFSM_INLINE bool isPendingChange()		{ return isPendingChange(FullControl::template stateId<TState>());	}
+	/// @brief Check if a state is going to be activated
+	/// @param stateId State identifier
+	/// @return State pending activation status
+	HFSM2_INLINE bool isPendingEnter (const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
 
-	template <typename TState>
-	HFSM_INLINE bool isPendingEnter()		{ return isPendingEnter (FullControl::template stateId<TState>());	}
+	/// @brief Check if a state is going to be deactivated
+	/// @param stateId State identifier
+	/// @return State pending deactivation status
+	HFSM2_INLINE bool isPendingExit	 (const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
 
+	/// @brief Check if a state is going to be activated or deactivated
+	/// @tparam TState State type
+	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM_INLINE bool isPendingExit()		{ return isPendingExit  (FullControl::template stateId<TState>());	}
+	HFSM2_INLINE bool isPendingChange()			{ return isPendingChange(FullControl::template stateId<TState>());	}
+
+	/// @brief Check if a state is going to be activated
+	/// @tparam TState State type
+	/// @return State pending activation status
+	template <typename TState>
+	HFSM2_INLINE bool isPendingEnter ()			{ return isPendingEnter (FullControl::template stateId<TState>());	}
+
+	/// @brief Check if a state is going to be deactivated
+	/// @tparam TState State type
+	/// @return State pending deactivation status
+	template <typename TState>
+	HFSM2_INLINE bool isPendingExit  ()			{ return isPendingExit  (FullControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void cancelPendingTransitions();
+	/// @brief Cancel pending transition requests
+	///		(can be used to substitute a transition into the current state with a different one)
+	HFSM2_INLINE void cancelPendingTransitions();
 
-	HFSM_INLINE const Requests& pendingTransitions() const		{ return _pending;								}
+	/// @brief Get pending transition requests
+	/// @return Array of pending transition requests
+	HFSM2_INLINE const Requests& pendingTransitions() const			{ return _pending;								}
 
 private:
-	HFSM_IF_LOGGER(using FullControl::_logger);
+	HFSM2_IF_LOG_INTERFACE(using FullControl::_logger);
 
 	using FullControl::_registry;
 	using FullControl::_originId;
@@ -4098,7 +4479,7 @@ ControlT<TArgs>::Region::~Region() {
 template <typename TArgs>
 void
 ControlT<TArgs>::setRegion(const RegionID id) {
-	HFSM_ASSERT(_regionId <= id && id < RegionList::SIZE);
+	HFSM2_ASSERT(_regionId <= id && id < RegionList::SIZE);
 
 	_regionId = id;
 }
@@ -4108,7 +4489,7 @@ ControlT<TArgs>::setRegion(const RegionID id) {
 template <typename TArgs>
 void
 ControlT<TArgs>::resetRegion(const RegionID id) { //-V524
-	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
+	HFSM2_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
 
 	_regionId = id;
 }
@@ -4160,8 +4541,8 @@ PlanControlT<TArgs>::Region::~Region() {
 template <typename TArgs>
 void
 PlanControlT<TArgs>::setOrigin(const StateID id) {
-	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
-	HFSM_ASSERT(_originId <= id && id < StateList::SIZE);
+	HFSM2_ASSERT(_regionId + _regionSize <= StateList::SIZE);
+	HFSM2_ASSERT(_originId <= id && id < StateList::SIZE);
 
 	_originId = id;
 }
@@ -4171,8 +4552,8 @@ PlanControlT<TArgs>::setOrigin(const StateID id) {
 template <typename TArgs>
 void
 PlanControlT<TArgs>::resetOrigin(const StateID id) { //-V524
-	HFSM_ASSERT(_regionId + _regionSize <= StateList::SIZE);
-	HFSM_ASSERT(id <= _originId && _originId < StateList::SIZE);
+	HFSM2_ASSERT(_regionId + _regionSize <= StateList::SIZE);
+	HFSM2_ASSERT(id <= _originId && _originId < StateList::SIZE);
 
 	_originId = id;
 }
@@ -4185,8 +4566,8 @@ PlanControlT<TArgs>::setRegion(const RegionID id,
 							   const StateID index,
 							   const LongIndex size)
 {
-	HFSM_ASSERT(_regionId <= id && id <  RegionList::SIZE);
-	HFSM_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
+	HFSM2_ASSERT(_regionId <= id && id <  RegionList::SIZE);
+	HFSM2_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
 
 	_regionId	 = id;
 	_regionIndex = index;
@@ -4201,8 +4582,8 @@ PlanControlT<TArgs>::resetRegion(const RegionID id, //-V524
 								 const StateID index,
 								 const LongIndex size)
 {
-	HFSM_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
-	HFSM_ASSERT(index <= _regionIndex && _regionIndex + _regionSize <= index + size);
+	HFSM2_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
+	HFSM2_ASSERT(index <= _regionIndex && _regionIndex + _regionSize <= index + size);
 
 	_regionId	 = id;
 	_regionIndex = index;
@@ -4213,7 +4594,7 @@ PlanControlT<TArgs>::resetRegion(const RegionID id, //-V524
 
 template <typename TArgs>
 FullControlT<TArgs>::Lock::Lock(FullControlT& control_)
-	: control(!control_._locked ? &control_ : nullptr)
+	: control{!control_._locked ? &control_ : nullptr}
 {
 	if (control)
 		control->_locked = true;
@@ -4238,7 +4619,7 @@ FullControlT<TArgs>::updatePlan(TState& headState,
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
 
-	HFSM_ASSERT(subStatus);
+	HFSM2_ASSERT(subStatus);
 
 	if (subStatus.result == Status::FAILURE) {
 		_status.result = Status::FAILURE;
@@ -4285,23 +4666,23 @@ FullControlT<TArgs>::buildPlanStatus() {
 
 	switch (_status.result) {
 	case Status::NONE:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		break;
 
 	case Status::SUCCESS:
 		_planData.tasksSuccesses.template set<STATE_ID>();
 
-		HFSM_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
+		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
 		break;
 
 	case Status::FAILURE:
 		_planData.tasksFailures.template set<STATE_ID>();
 
-		HFSM_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
+		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
 		break;
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 	}
 
 	return {_status.result};
@@ -4318,7 +4699,7 @@ FullControlT<TArgs>::changeTo(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
 	}
 }
 
@@ -4333,7 +4714,7 @@ FullControlT<TArgs>::restart(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
 	}
 }
 
@@ -4348,11 +4729,13 @@ FullControlT<TArgs>::resume(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
 	}
 }
 
 //------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TArgs>
 void
@@ -4363,7 +4746,7 @@ FullControlT<TArgs>::utilize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
 	}
 }
 
@@ -4378,9 +4761,11 @@ FullControlT<TArgs>::randomize(const StateID stateId) {
 		if (_regionIndex + _regionSize <= stateId || stateId < _regionIndex)
 			_status.outerTransition = true;
 
-		HFSM_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
 	}
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -4389,7 +4774,7 @@ void
 FullControlT<TArgs>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
-	HFSM_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -4403,12 +4788,12 @@ FullControlT<TArgs>::succeed() {
 
 	// TODO: promote taskSuccess all the way up for all regions without plans
 	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
-		HFSM_ASSERT(_regionIndex < StateList::SIZE);
+		HFSM2_ASSERT(_regionIndex < StateList::SIZE);
 
 		_planData.tasksSuccesses.set(_regionIndex);
 	}
 
-	HFSM_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::SUCCEEDED);
+	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::SUCCEEDED);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4422,12 +4807,12 @@ FullControlT<TArgs>::fail() {
 
 	// TODO: promote taskFailure all the way up for all regions without plans
 	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
-		HFSM_ASSERT(_regionIndex < StateList::SIZE);
+		HFSM2_ASSERT(_regionIndex < StateList::SIZE);
 
 		_planData.tasksFailures.set(_regionIndex);
 	}
 
-	HFSM_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
+	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4437,19 +4822,18 @@ void
 GuardControlT<TArgs>::cancelPendingTransitions() {
 	_cancelled = true;
 
-	HFSM_LOG_CANCELLED_PENDING(context(), _originId);
+	HFSM2_LOG_CANCELLED_PENDING(context(), _originId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 }
 }
-
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 struct StructureEntry {
 	bool isActive;
@@ -4459,13 +4843,88 @@ struct StructureEntry {
 
 #endif
 
-//------------------------------------------------------------------------------
-
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+TransitionType
+HFSM2_INLINE
+convert(const Request::Type type) {
+	switch (type) {
+		case Request::CHANGE:
+			return TransitionType::CHANGE;
+
+		case Request::RESTART:
+			return TransitionType::RESTART;
+
+		case Request::RESUME:
+			return TransitionType::RESUME;
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+		case Request::UTILIZE:
+			return TransitionType::UTILIZE;
+
+		case Request::RANDOMIZE:
+			return TransitionType::RANDOMIZE;
+
+	#endif
+
+		case Request::SCHEDULE:
+			return TransitionType::SCHEDULE;
+
+		default:
+			HFSM2_BREAK();
+			return TransitionType::CHANGE;
+	}
+}
+
+//------------------------------------------------------------------------------
+
+Request::Type
+HFSM2_INLINE
+convert(const TransitionType type) {
+	switch (type) {
+	case TransitionType::CHANGE:
+		return Request::CHANGE;
+
+	case TransitionType::RESTART:
+		return Request::RESTART;
+
+	case TransitionType::RESUME:
+		return Request::RESUME;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	case TransitionType::UTILIZE:
+		return Request::UTILIZE;
+
+	case TransitionType::RANDOMIZE:
+		return Request::RANDOMIZE;
+
+#endif
+
+	case TransitionType::SCHEDULE:
+		return Request::SCHEDULE;
+
+	default:
+		HFSM2_BREAK();
+		return Request::CHANGE;
+	}
+}
+
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
 
 #pragma pack(push, 1)
 
@@ -4477,15 +4936,19 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 	StructureStateInfo() = default;
 
-	HFSM_INLINE StructureStateInfo(const LongIndex parent_,
-								   const RegionType region_,
-								   const ShortIndex depth_,
-								   const char* const name_)
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE StructureStateInfo(const LongIndex parent_,
+									const RegionType region_,
+									const ShortIndex depth_,
+									const char* const name_)
 		: name{name_}
 		, parent{parent_}
 		, region{region_}
 		, depth{depth_}
 	{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	const char* name;
 	LongIndex parent;
@@ -4495,99 +4958,47 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 #pragma pack(pop)
 
+#ifdef _MSC_VER
+	#pragma warning(pop)
 #endif
+
+#endif
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-
-TransitionType
-HFSM_INLINE convert(const Request::Type type) {
-	switch (type) {
-		case Request::CHANGE:
-			return TransitionType::CHANGE;
-
-		case Request::RESTART:
-			return TransitionType::RESTART;
-
-		case Request::RESUME:
-			return TransitionType::RESUME;
-
-		case Request::UTILIZE:
-			return TransitionType::UTILIZE;
-
-		case Request::RANDOMIZE:
-			return TransitionType::RANDOMIZE;
-
-		case Request::SCHEDULE:
-			return TransitionType::SCHEDULE;
-
-		default:
-			HFSM_BREAK();
-			return TransitionType::CHANGE;
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-Request::Type
-HFSM_INLINE convert(const TransitionType type) {
-	switch (type) {
-	case TransitionType::CHANGE:
-		return Request::CHANGE;
-
-	case TransitionType::RESTART:
-		return Request::RESTART;
-
-	case TransitionType::RESUME:
-		return Request::RESUME;
-
-	case TransitionType::UTILIZE:
-		return Request::UTILIZE;
-
-	case TransitionType::RANDOMIZE:
-		return Request::RANDOMIZE;
-
-	case TransitionType::SCHEDULE:
-		return Request::SCHEDULE;
-
-	default:
-		HFSM_BREAK();
-		return Request::CHANGE;
-	}
-}
-
-#endif
-
-}
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
 #pragma pack(push, 1)
 
 struct alignas(4) Transition {
-	HFSM_INLINE Transition() = default;
+	HFSM2_INLINE Transition() = default;
 
-	HFSM_INLINE Transition(const detail::Request request,
-						   const Method method_)
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE Transition(const detail::Request request,
+							const Method method_)
 		: stateId{request.stateId}
 		, method{method_}
 		, transitionType{detail::convert(request.type)}
 	{
-		HFSM_ASSERT(method_ < Method::COUNT);
+		HFSM2_ASSERT(method_ < Method::COUNT);
 	}
 
-	HFSM_INLINE Transition(const StateID stateId_,
-						   const Method method_,
-						   const TransitionType transitionType_)
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE Transition(const StateID stateId_,
+							const Method method_,
+							const TransitionType transitionType_)
 		: stateId{stateId_}
 		, method{method_}
 		, transitionType{transitionType_}
 	{
-		HFSM_ASSERT(method_ < Method::COUNT);
+		HFSM2_ASSERT(method_ < Method::COUNT);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	detail::Request request() const		{ return detail::Request{detail::convert(transitionType), stateId};	}
 
@@ -4598,7 +5009,7 @@ struct alignas(4) Transition {
 
 #pragma pack(pop)
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 bool operator == (const Transition& l, const Transition& r) {
 	return l.stateId		== r.stateId
@@ -4612,7 +5023,6 @@ bool operator == (const Transition& l, const Transition& r) {
 
 }
 
-
 namespace hfsm2 {
 namespace detail {
 
@@ -4625,8 +5035,12 @@ class InjectionT {
 
 protected:
 	using Context		= typename TArgs::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
+#endif
+
 	using StateList		= typename TArgs::StateList;
 	using RegionList	= typename TArgs::RegionList;
 
@@ -4639,20 +5053,20 @@ protected:
 	using GuardControl	= GuardControlT<TArgs>;
 
 public:
-	HFSM_INLINE void preEntryGuard(Context&)		{}
+	HFSM2_INLINE void preEntryGuard(Context&)		{}
 
-	HFSM_INLINE void preEnter	  (Context&)		{}
-	HFSM_INLINE void preReenter	  (Context&)		{}
+	HFSM2_INLINE void preEnter	   (Context&)		{}
+	HFSM2_INLINE void preReenter   (Context&)		{}
 
-	HFSM_INLINE void preUpdate	  (Context&)		{}
+	HFSM2_INLINE void preUpdate	   (Context&)		{}
 
 	template <typename TEvent>
-	HFSM_INLINE void preReact	  (const TEvent&,
-								   Context&)		{}
+	HFSM2_INLINE void preReact	   (const TEvent&,
+									Context&)		{}
 
-	HFSM_INLINE void preExitGuard (Context&)		{}
+	HFSM2_INLINE void preExitGuard (Context&)		{}
 
-	HFSM_INLINE void postExit	  (Context&)		{}
+	HFSM2_INLINE void postExit	   (Context&)		{}
 
 	template <typename T>
 	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
@@ -4674,8 +5088,12 @@ struct B_<TFirst, TRest...>
 	, B_<TRest...>
 {
 	using typename TFirst::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
+#endif
+
 	using typename TFirst::StateList;
 	using typename TFirst::RegionList;
 
@@ -4688,20 +5106,20 @@ struct B_<TFirst, TRest...>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
-	HFSM_INLINE void widePreEntryGuard(Context& context);
+	HFSM2_INLINE void widePreEntryGuard(Context& context);
 
-	HFSM_INLINE void widePreEnter	  (Context& context);
-	HFSM_INLINE void widePreReenter	  (Context& context);
+	HFSM2_INLINE void widePreEnter	   (Context& context);
+	HFSM2_INLINE void widePreReenter   (Context& context);
 
-	HFSM_INLINE void widePreUpdate	  (Context& context);
+	HFSM2_INLINE void widePreUpdate	   (Context& context);
 
 	template <typename TEvent>
-	HFSM_INLINE void widePreReact	  (const TEvent& event,
-									   Context& context);
+	HFSM2_INLINE void widePreReact	   (const TEvent& event,
+										Context& context);
 
-	HFSM_INLINE void widePreExitGuard (Context& context);
+	HFSM2_INLINE void widePreExitGuard (Context& context);
 
-	HFSM_INLINE void widePostExit	  (Context& context);
+	HFSM2_INLINE void widePostExit	   (Context& context);
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -4711,8 +5129,12 @@ struct B_<TFirst>
 	: TFirst
 {
 	using typename TFirst::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
+#endif
+
 	using typename TFirst::StateList;
 	using typename TFirst::RegionList;
 
@@ -4725,42 +5147,44 @@ struct B_<TFirst>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
-	HFSM_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
 
-	HFSM_INLINE Utility utility			 (const Control&)			{ return Utility{1.0f};	}
+	HFSM2_INLINE Utility utility		 (const Control&)			{ return Utility{1.0f};	}
+#endif
 
-	HFSM_INLINE void	entryGuard		 (GuardControl&)			{}
+	HFSM2_INLINE void	entryGuard		 (GuardControl&)			{}
 
-	HFSM_INLINE void	enter			 (PlanControl&)				{}
-	HFSM_INLINE void	reenter			 (PlanControl&)				{}
+	HFSM2_INLINE void	enter			 (PlanControl&)				{}
+	HFSM2_INLINE void	reenter			 (PlanControl&)				{}
 
-	HFSM_INLINE void	update			 (FullControl&)				{}
+	HFSM2_INLINE void	update			 (FullControl&)				{}
 
 	template <typename TEvent>
-	HFSM_INLINE void	react			 (const TEvent&,
+	HFSM2_INLINE void	react			 (const TEvent&,
 										  FullControl&)				{}
 
-	HFSM_INLINE void	exitGuard		 (GuardControl&)			{}
+	HFSM2_INLINE void	exitGuard		 (GuardControl&)			{}
 
-	HFSM_INLINE void	exit			 (PlanControl&)				{}
+	HFSM2_INLINE void	exit			 (PlanControl&)				{}
 
-	HFSM_INLINE void	planSucceeded	 (FullControl& control)		{ control.succeed();	}
-	HFSM_INLINE void	planFailed		 (FullControl& control)		{ control.fail();		}
+	HFSM2_INLINE void	planSucceeded	 (FullControl& control)		{ control.succeed();	}
+	HFSM2_INLINE void	planFailed		 (FullControl& control)		{ control.fail();		}
 
-	HFSM_INLINE void	widePreEntryGuard(Context& context);
+	HFSM2_INLINE void	widePreEntryGuard(Context& context);
 
-	HFSM_INLINE void	widePreEnter	 (Context& context);
-	HFSM_INLINE void	widePreReenter   (Context& context);
+	HFSM2_INLINE void	widePreEnter	 (Context& context);
+	HFSM2_INLINE void	widePreReenter   (Context& context);
 
-	HFSM_INLINE void	widePreUpdate	 (Context& context);
+	HFSM2_INLINE void	widePreUpdate	 (Context& context);
 
 	template <typename TEvent>
-	HFSM_INLINE void	widePreReact	 (const TEvent& event,
+	HFSM2_INLINE void	widePreReact	 (const TEvent& event,
 					 					  Context& context);
 
-	HFSM_INLINE void	widePreExitGuard (Context& context);
+	HFSM2_INLINE void	widePreExitGuard (Context& context);
 
-	HFSM_INLINE void	widePostExit	 (Context& context);
+	HFSM2_INLINE void	widePostExit	 (Context& context);
 };
 
 //------------------------------------------------------------------------------
@@ -4931,7 +5355,6 @@ B_<TF>::widePostExit(Context& context) {
 
 }
 }
-
 namespace hfsm2 {
 
 //------------------------------------------------------------------------------
@@ -4948,7 +5371,7 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
-HFSM_IF_DEBUG(struct None {});
+HFSM2_IF_DEBUG(struct None {});
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -4960,20 +5383,20 @@ struct DBox final {
 		T t_;
 	};
 
-	HFSM_INLINE  DBox() {}
-	HFSM_INLINE ~DBox() {}
+	HFSM2_INLINE  DBox() {}
+	HFSM2_INLINE ~DBox() {}
 
-	HFSM_INLINE void guard(GuardControlT<TArgs>& control)		{ Guard<T>::execute(control);	}
+	HFSM2_INLINE void guard(GuardControlT<TArgs>& control)		{ Guard<T>::execute(control);	}
 
-	HFSM_INLINE void construct();
-	HFSM_INLINE void destruct();
+	HFSM2_INLINE void construct();
+	HFSM2_INLINE void destruct();
 
-	HFSM_INLINE		  T& get()							{ HFSM_ASSERT(initialized_); return t_;	}
-	HFSM_INLINE const T& get() const					{ HFSM_ASSERT(initialized_); return t_;	}
+	HFSM2_INLINE	   T& get()						{ HFSM2_ASSERT(initialized_); return t_;	}
+	HFSM2_INLINE const T& get() const				{ HFSM2_ASSERT(initialized_); return t_;	}
 
-	HFSM_IF_ASSERT(bool initialized_ = false);
+	HFSM2_IF_ASSERT(bool initialized_ = false);
 
-	HFSM_IF_DEBUG(const std::type_index TYPE = typeid(T));
+	HFSM2_IF_DEBUG(const std::type_index TYPE = typeid(T));
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4984,15 +5407,15 @@ struct SBox final {
 
 	T t_;
 
-	HFSM_INLINE void guard(GuardControlT<TArgs>& control);
+	HFSM2_INLINE void guard(GuardControlT<TArgs>& control);
 
-	HFSM_INLINE void construct()																{}
-	HFSM_INLINE void destruct()																	{}
+	HFSM2_INLINE void construct()																{}
+	HFSM2_INLINE void destruct()																{}
 
-	HFSM_INLINE		  T& get()									{ return t_;					}
-	HFSM_INLINE const T& get() const							{ return t_;					}
+	HFSM2_INLINE	   T& get()									{ return t_;					}
+	HFSM2_INLINE const T& get() const							{ return t_;					}
 
-	HFSM_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(T));
+	HFSM2_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(T));
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -5024,11 +5447,11 @@ namespace detail {
 template <typename T, typename TA>
 void
 DBox<T, TA>::construct() {
-	HFSM_ASSERT(!initialized_);
+	HFSM2_ASSERT(!initialized_);
 
 	new(&t_) T{};
 
-	HFSM_IF_ASSERT(initialized_ = true);
+	HFSM2_IF_ASSERT(initialized_ = true);
 }
 
 //------------------------------------------------------------------------------
@@ -5036,11 +5459,11 @@ DBox<T, TA>::construct() {
 template <typename T, typename TA>
 void
 DBox<T, TA>::destruct() {
-	HFSM_ASSERT(initialized_);
+	HFSM2_ASSERT(initialized_);
 
 	t_.~T();
 
-	HFSM_IF_ASSERT(initialized_ = false);
+	HFSM2_IF_ASSERT(initialized_ = false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -5068,10 +5491,16 @@ struct S_ final {
 	static constexpr auto STATE_ID	 = TIndices::STATE_ID;
 
 	using Context		= typename TArgs::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
 	using UP			= typename TArgs::UP;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using Logger		= typename TArgs::Logger;
+#endif
 
 	using Control		= ControlT<TArgs>;
 	using Registry		= RegistryT<TArgs>;
@@ -5088,7 +5517,7 @@ struct S_ final {
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 #ifdef __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wnull-dereference"
@@ -5096,8 +5525,8 @@ struct S_ final {
 
 	template <typename T>
 	struct Accessor {
-		HFSM_INLINE static		 T&	   get(		 S_&  )			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);		}
-		HFSM_INLINE static const T&	   get(const S_&  )			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);		}
+		HFSM2_INLINE static		  T&	   get(		 S_&  )			{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);		}
+		HFSM2_INLINE static const T&	   get(const S_&  )			{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);		}
 	};
 
 #ifdef __clang__
@@ -5106,86 +5535,97 @@ struct S_ final {
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 S_& s)			{ return s._headBox.get();								}
-		HFSM_INLINE static const Head& get(const S_& s)			{ return s._headBox.get();								}
+		HFSM2_INLINE static		  Head& get(	  S_& s)			{ return s._headBox.get();								}
+		HFSM2_INLINE static const Head& get(const S_& s)			{ return s._headBox.get();								}
 	};
 
 	template <typename T>
-	HFSM_INLINE		  T& access()								{ return Accessor<T>::get(*this);						}
+	HFSM2_INLINE	   T& access()									{ return Accessor<T>::get(*this);						}
 
 	template <typename T>
-	HFSM_INLINE const T& access() const							{ return Accessor<T>::get(*this);						}
+	HFSM2_INLINE const T& access() const							{ return Accessor<T>::get(*this);						}
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM_INLINE Parent	stateParent			 (Control& control)	{ return control._registry.stateParents[STATE_ID];		}
+	HFSM2_INLINE Parent	 stateParent		  (Control& control)	{ return control._registry.stateParents[STATE_ID];		}
 
-	HFSM_INLINE void	deepRegister		 (Registry& registry, const Parent parent);
+	HFSM2_INLINE void	 deepRegister		  (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&)					{ return false;	}
-	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 deepForwardEntryGuard(GuardControl&)												{ return false;	}
+	HFSM2_INLINE bool	 deepEntryGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	deepConstruct		 (PlanControl&  control);
+	HFSM2_INLINE void	 deepConstruct		  (PlanControl&  control);
 
-	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
-	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
+	HFSM2_INLINE void	 deepEnter			  (PlanControl&  control);
+	HFSM2_INLINE void	 deepReenter		  (PlanControl&  control);
 
-	HFSM_INLINE Status	deepUpdate			 (FullControl&	control);
+	HFSM2_INLINE Status	 deepUpdate			  (FullControl&  control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	deepReact			 (FullControl&	control, const TEvent& event);
+	HFSM2_INLINE Status	 deepReact			  (FullControl&	 control, const TEvent& event);
 
-	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&)					{ return false; }
-	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 deepForwardExitGuard (GuardControl&)												{ return false; }
+	HFSM2_INLINE bool	 deepExitGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	deepExit			 (PlanControl&	control);
+	HFSM2_INLINE void	 deepExit			  (PlanControl&	 control);
 
-	HFSM_INLINE void	deepDestruct		 (PlanControl&  control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	wrapPlanSucceeded	 (FullControl&	control);
-	HFSM_INLINE void	wrapPlanFailed		 (FullControl&	control);
-	HFSM_INLINE Rank	wrapRank			 (Control& control);
-	HFSM_INLINE Utility	wrapUtility			 (Control& control);
+	HFSM2_INLINE void	 deepDestruct		  (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepForwardActive	 (Control&, const Request::Type)					{}
-	HFSM_INLINE void	deepForwardRequest	 (Control&, const Request::Type)					{}
+	HFSM2_INLINE void	 wrapPlanSucceeded	  (FullControl&	control);
+	HFSM2_INLINE void	 wrapPlanFailed		  (FullControl&	control);
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE Rank	 wrapRank			  (Control& control);
+	HFSM2_INLINE Utility wrapUtility		  (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepRequestChange	 (Control&)											{}
-	HFSM_INLINE void	deepRequestRemain	 (Registry&)										{}
-	HFSM_INLINE void	deepRequestRestart	 (Registry&)										{}
-	HFSM_INLINE void	deepRequestResume	 (Registry&)										{}
-	HFSM_INLINE void	deepRequestUtilize	 (Control&)											{}
-	HFSM_INLINE void	deepRequestRandomize (Control&)											{}
-
-	HFSM_INLINE UP		deepReportChange	 (Control& control);
-	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
-	HFSM_INLINE Rank	deepReportRank		 (Control& control);
-	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
+	HFSM2_INLINE void	 deepForwardActive	  (Control&, const Request::Type)												{}
+	HFSM2_INLINE void	 deepForwardRequest	  (Control&, const Request::Type)												{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepChangeToRequested(Control&)											{}
+	HFSM2_INLINE void	 deepRequestChange	  (Control&)																	{}
+	HFSM2_INLINE void	 deepRequestRemain	  (Registry&)																	{}
+	HFSM2_INLINE void	 deepRequestRestart	  (Registry&)																	{}
+	HFSM2_INLINE void	 deepRequestResume	  (Registry&)																	{}
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void	 deepRequestUtilize	  (Control&)																	{}
+	HFSM2_INLINE void	 deepRequestRandomize (Control&)																	{}
+
+	HFSM2_INLINE UP		 deepReportChange	  (Control& control);
+	HFSM2_INLINE UP		 deepReportUtilize	  (Control& control);
+	HFSM2_INLINE Rank	 deepReportRank		  (Control& control);
+	HFSM2_INLINE Utility deepReportRandomize  (Control& control);
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE void	deepChangeToRequested(Control&)																		{}
+
+	//----------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream	= typename TArgs::WriteStream;
+	using ReadStream	= typename TArgs::ReadStream;
+
+	HFSM2_INLINE void	 deepSaveActive	  (const Registry&, WriteStream&) const												{}
+	HFSM2_INLINE void	 deepSaveResumable(const Registry&, WriteStream&) const												{}
+
+	HFSM2_INLINE void	 deepLoadRequested(		 Registry&, ReadStream& ) const												{}
+	HFSM2_INLINE void	 deepLoadResumable(		 Registry&, ReadStream& ) const												{}
+#endif
 
 	//------------------------------------------------------------------------------
 
-#if defined _DEBUG || defined HFSM_ENABLE_STRUCTURE_REPORT || defined HFSM_ENABLE_LOG_INTERFACE
-
-	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
-
-#endif
-
-	//----------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename TArgs::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
@@ -5199,20 +5639,15 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename TArgs::WriteStream;
-	using ReadStream	= typename TArgs::ReadStream;
+#if defined _DEBUG || defined HFSM2_ENABLE_STRUCTURE_REPORT || defined HFSM2_ENABLE_LOG_INTERFACE
 
-	HFSM_INLINE void	deepSaveActive	 (const Registry&, WriteStream&) const					{}
-	HFSM_INLINE void	deepSaveResumable(const Registry&, WriteStream&) const					{}
+	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
 
-	HFSM_INLINE void	deepLoadRequested(		Registry&, ReadStream& ) const					{}
-	HFSM_INLINE void	deepLoadResumable(		Registry&, ReadStream& ) const					{}
 #endif
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 
 	template <typename>
 	struct Traits_;
@@ -5290,7 +5725,7 @@ struct RegisterT {
 
 	static constexpr StateID STATE_ID = NS;
 
-	static HFSM_INLINE
+	static HFSM2_INLINE
 	void
 	execute(StateParents& stateParents,
 			const Parent parent)
@@ -5308,7 +5743,7 @@ template <StateID NS, typename TA>
 struct RegisterT<NS, TA, StaticEmptyT<TA>> {
 	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
 
-	static HFSM_INLINE
+	static HFSM2_INLINE
 	void
 	execute(StateParents&, const Parent) {}
 };
@@ -5329,9 +5764,9 @@ S_<TN_, TA, TH>::deepRegister(Registry& registry,
 template <typename TN_, typename TA, typename TH>
 bool
 S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::entryGuard,
-						  control.context(),
-						  Method::ENTRY_GUARD);
+	HFSM2_LOG_STATE_METHOD(&Head::entryGuard,
+						   control.context(),
+						   Method::ENTRY_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5346,13 +5781,13 @@ S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
-	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
-	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
+S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM2_IF_LOG_INTERFACE(control)) {
+	HFSM2_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
+	HFSM2_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
-	HFSM_LOG_STATE_METHOD(&Head::enter,
-						  control.context(),
-						  Method::CONSTRUCT);
+	HFSM2_LOG_STATE_METHOD(&Head::enter,
+						   control.context(),
+						   Method::CONSTRUCT);
 
 	_headBox.construct();
 }
@@ -5362,9 +5797,9 @@ S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM_IF_LOGGER(control)) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::enter,
-						  control.context(),
-						  Method::ENTER);
+	HFSM2_LOG_STATE_METHOD(&Head::enter,
+						   control.context(),
+						   Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5377,12 +5812,12 @@ S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
-	HFSM_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
-	HFSM_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
+	HFSM2_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
+	HFSM2_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
 
-	HFSM_LOG_STATE_METHOD(&Head::reenter,
-						  control.context(),
-						  Method::REENTER);
+	HFSM2_LOG_STATE_METHOD(&Head::reenter,
+						   control.context(),
+						   Method::REENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5398,9 +5833,9 @@ S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
 template <typename TN_, typename TA, typename TH>
 Status
 S_<TN_, TA, TH>::deepUpdate(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::update,
-						  control.context(),
-						  Method::UPDATE);
+	HFSM2_LOG_STATE_METHOD(&Head::update,
+						   control.context(),
+						   Method::UPDATE);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5419,9 +5854,9 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 						   const TEvent& event)
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
-	HFSM_LOG_STATE_METHOD(reaction,
-						  control.context(),
-						  Method::REACT);
+	HFSM2_LOG_STATE_METHOD(reaction,
+						   control.context(),
+						   Method::REACT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5436,9 +5871,9 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 template <typename TN_, typename TA, typename TH>
 bool
 S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exitGuard,
-						  control.context(),
-						  Method::EXIT_GUARD);
+	HFSM2_LOG_STATE_METHOD(&Head::exitGuard,
+						   control.context(),
+						   Method::EXIT_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5455,9 +5890,9 @@ S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepExit(PlanControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exit,
-						  control.context(),
-						  Method::EXIT);
+	HFSM2_LOG_STATE_METHOD(&Head::exit,
+						   control.context(),
+						   Method::EXIT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5475,9 +5910,9 @@ S_<TN_, TA, TH>::deepExit(PlanControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepDestruct(PlanControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::exit,
-						  control.context(),
-						  Method::DESTRUCT);
+	HFSM2_LOG_STATE_METHOD(&Head::exit,
+						   control.context(),
+						   Method::DESTRUCT);
 
 	_headBox.destruct();
 
@@ -5490,9 +5925,9 @@ S_<TN_, TA, TH>::deepDestruct(PlanControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::planSucceeded,
-						  control.context(),
-						  Method::PLAN_SUCCEEDED);
+	HFSM2_LOG_STATE_METHOD(&Head::planSucceeded,
+						   control.context(),
+						   Method::PLAN_SUCCEEDED);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5504,9 +5939,9 @@ S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
-	HFSM_LOG_STATE_METHOD(&Head::planFailed,
-						  control.context(),
-						  Method::PLAN_FAILED);
+	HFSM2_LOG_STATE_METHOD(&Head::planFailed,
+						   control.context(),
+						   Method::PLAN_FAILED);
 
 	ScopedOrigin origin{control, STATE_ID};
 
@@ -5515,12 +5950,14 @@ S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Rank
 S_<TN_, TA, TH>::wrapRank(Control& control) {
-	HFSM_LOG_STATE_METHOD(&Head::rank,
-						  control.context(),
-						  Method::RANK);
+	HFSM2_LOG_STATE_METHOD(&Head::rank,
+						   control.context(),
+						   Method::RANK);
 
 	return _headBox.get().rank(static_cast<const Control&>(control));
 }
@@ -5530,9 +5967,9 @@ S_<TN_, TA, TH>::wrapRank(Control& control) {
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Utility
 S_<TN_, TA, TH>::wrapUtility(Control& control) {
-	HFSM_LOG_STATE_METHOD(&Head::utility,
-						  control.context(),
-						  Method::UTILITY);
+	HFSM2_LOG_STATE_METHOD(&Head::utility,
+						   control.context(),
+						   Method::UTILITY);
 
 	return _headBox.get().utility(static_cast<const Control&>(control));
 }
@@ -5576,9 +6013,11 @@ S_<TN_, TA, TH>::deepReportRandomize(Control& control) {
 	return wrapUtility(control);
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 template <typename TN_, typename TA, typename TH>
 const char*
@@ -5632,7 +6071,6 @@ S_<TN_, TA, TH>::deepGetNames(const LongIndex parent,
 
 }
 }
-
 namespace hfsm2 {
 namespace detail {
 
@@ -5851,12 +6289,16 @@ template <typename TContext,
 struct ArgsT final {
 	using Context	 = TContext;
 
-	using Config_	 = TConfig;
-	using Rank		 = typename Config_::Rank;
-	using Utility	 = typename Config_::Utility;
-	using RNG		 = typename Config_::RNG;
-	using UP		 = typename Config_::UP;
-	using Logger	 = typename Config_::Logger;
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using Rank		 = typename TConfig::Rank;
+	using Utility	 = typename TConfig::Utility;
+	using RNG		 = typename TConfig::RNG;
+	using UP		 = typename TConfig::UP;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	 = typename TConfig::Logger;
+#endif
 
 	using StateList	 = TStateList;
 	using RegionList = TRegionList;
@@ -5869,13 +6311,13 @@ struct ArgsT final {
 
 	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer			= StreamBuffer	<SERIAL_BITS>;
 	using WriteStream			= BitWriteStream<SERIAL_BITS>;
 	using ReadStream			= BitReadStream	<SERIAL_BITS>;
 #endif
 
-	HFSM_IF_STRUCTURE(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
+	HFSM2_IF_STRUCTURE_REPORT(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
 };
 
 //------------------------------------------------------------------------------
@@ -5949,16 +6391,15 @@ using Material = typename MaterialT<TN, TS...>::Type;
 template <typename TConfig,
 		  typename TApex>
 struct RF_ final {
-	using Config_		= TConfig;
-	using Context		= typename Config_::Context;
+	using Context		= typename TConfig::Context;
 	using Apex			= TApex;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT= Config_::SUBSTITUTION_LIMIT;
+	static constexpr LongIndex SUBSTITUTION_LIMIT= TConfig::SUBSTITUTION_LIMIT;
 
-	static constexpr LongIndex TASK_CAPACITY	 = Config_::TASK_CAPACITY != INVALID_LONG_INDEX ?
-													   Config_::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
+	static constexpr LongIndex TASK_CAPACITY	 = TConfig::TASK_CAPACITY != INVALID_LONG_INDEX ?
+													   TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
 
 	static constexpr ShortIndex COMPO_REGIONS	 = Apex::COMPO_REGIONS;
 	static constexpr ShortIndex ORTHO_REGIONS	 = Apex::ORTHO_REGIONS;
@@ -5971,7 +6412,7 @@ struct RF_ final {
 	using RegionList	= typename Apex::RegionList;
 
 	using Args			= ArgsT<Context,
-								Config_,
+								TConfig,
 								StateList,
 								RegionList,
 								COMPO_REGIONS,
@@ -5982,7 +6423,7 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using Instance		= RW_<Config_, Apex>;
+	using Instance		= RW_<TConfig, Apex>;
 
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;
@@ -6092,9 +6533,13 @@ struct CS_ final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -6133,93 +6578,110 @@ struct CS_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>
-	HFSM_INLINE		  T& access();
+	HFSM2_INLINE	   T& access();
 
 	template <typename T>
-	HFSM_INLINE const T& access() const;
+	HFSM2_INLINE const T& access() const;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRegister				  (Registry& registry, const Parent parent);
+	HFSM2_INLINE void	 wideRegister				 (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard		  (GuardControl& control,								const ShortIndex prong);
-	HFSM_INLINE bool	wideEntryGuard				  (GuardControl& control,								const ShortIndex prong);
+	HFSM2_INLINE bool	 wideForwardEntryGuard		 (GuardControl& control,								const ShortIndex prong);
+	HFSM2_INLINE bool	 wideEntryGuard				 (GuardControl& control,								const ShortIndex prong);
 
-	HFSM_INLINE void	wideConstruct				  (PlanControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideConstruct				 (PlanControl&  control,								const ShortIndex prong);
 
-	HFSM_INLINE void	wideEnter					  (PlanControl&  control,								const ShortIndex prong);
-	HFSM_INLINE void	wideReenter					  (PlanControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideEnter					 (PlanControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideReenter				 (PlanControl&  control,								const ShortIndex prong);
 
-	HFSM_INLINE Status	wideUpdate					  (FullControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE Status	 wideUpdate					 (FullControl&  control,								const ShortIndex prong);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact					  (FullControl&  control, const TEvent& event,			const ShortIndex prong);
+	HFSM2_INLINE Status	 wideReact					 (FullControl&  control, const TEvent& event,		const ShortIndex prong);
 
-	HFSM_INLINE bool	wideForwardExitGuard		  (GuardControl& control,								const ShortIndex prong);
-	HFSM_INLINE bool	wideExitGuard				  (GuardControl& control,								const ShortIndex prong);
+	HFSM2_INLINE bool	 wideForwardExitGuard		 (GuardControl& control,								const ShortIndex prong);
+	HFSM2_INLINE bool	 wideExitGuard				 (GuardControl& control,								const ShortIndex prong);
 
-	HFSM_INLINE void	wideExit					  (PlanControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideExit					 (PlanControl&  control,								const ShortIndex prong);
 
-	HFSM_INLINE void	wideDestruct				  (PlanControl&  control,								const ShortIndex prong);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	wideForwardActive			  (Control& control,	 const Request::Type request,	const ShortIndex prong);
-	HFSM_INLINE void	wideForwardRequest			  (Control& control,	 const Request::Type request,	const ShortIndex prong);
+	HFSM2_INLINE void	 wideDestruct				 (PlanControl&  control,								const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+	HFSM2_INLINE void	 wideForwardActive			 (Control&  control, const Request::Type request,	const ShortIndex prong);
+	HFSM2_INLINE void	 wideForwardRequest			 (Control&  control, const Request::Type request,	const ShortIndex prong);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
-	HFSM_INLINE void	wideRequestChange			  (Control& control,									const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM2_INLINE void	 wideRequestChange			 (Control&  control,								const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
-	HFSM_INLINE void	wideRequestChange<Composite>  (Control& control,									const ShortIndex)		{ wideRequestChangeComposite(control);			}
+	HFSM2_INLINE void	 wideRequestChange<Composite>(Control&  control,								const ShortIndex)		{ wideRequestChangeComposite(control);			}
 
 	template <>
-	HFSM_INLINE	void	wideRequestChange<Resumable>  (Control& control,									const ShortIndex prong)	{ wideRequestChangeResumable(control, prong);	}
+	HFSM2_INLINE void	 wideRequestChange<Resumable>(Control&  control,								const ShortIndex prong)	{ wideRequestChangeResumable(control, prong);	}
 
 #else
 
-	HFSM_INLINE void	wideRequestChange			  (Control& control,									const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM2_INLINE void	 wideRequestChange			 (Control&  control,								const ShortIndex = INVALID_SHORT_INDEX);
 
 #endif
 
-	HFSM_INLINE void	wideRequestChangeComposite	  (Control& control);
-	HFSM_INLINE void	wideRequestChangeResumable	  (Control& control,									const ShortIndex prong);
+	HFSM2_INLINE void	 wideRequestChangeComposite	 (Control&  control);
+	HFSM2_INLINE void	 wideRequestChangeResumable	 (Control&  control,								const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRequestRemain			  (Registry& registry);
-	HFSM_INLINE void	wideRequestRestart			  (Registry& registry);
-	HFSM_INLINE void	wideRequestResume			  (Registry& registry,									const ShortIndex prong);
+	HFSM2_INLINE void	 wideRequestRemain			 (Registry& registry);
+	HFSM2_INLINE void	 wideRequestRestart			 (Registry& registry);
+	HFSM2_INLINE void	 wideRequestResume			 (Registry& registry,								const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE UP		wideReportChangeComposite	  (Control& control);
-	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,									const ShortIndex prong);
-	HFSM_INLINE UP		wideReportChangeUtilitarian	  (Control& control);
-	HFSM_INLINE Utility	wideReportChangeRandom		  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	HFSM2_INLINE UP		 wideReportChangeComposite	 (Control&  control);
+	HFSM2_INLINE UP		 wideReportChangeResumable	 (Control&  control,									const ShortIndex prong);
+	HFSM2_INLINE UP		 wideReportChangeUtilitarian (Control&  control);
+	HFSM2_INLINE Utility wideReportChangeRandom		 (Control&  control, Utility* const options, const Rank* const ranks, const Rank top);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE UP		wideReportUtilize			  (Control& control);
-	HFSM_INLINE Rank	wideReportRank				  (Control& control,	 Rank*	  const ranks);
-	HFSM_INLINE Utility	wideReportRandomize			  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
+	HFSM2_INLINE UP		 wideReportUtilize			 (Control&  control);
+	HFSM2_INLINE Rank	 wideReportRank				 (Control&  control, Rank*	  const ranks);
+	HFSM2_INLINE Utility wideReportRandomize		 (Control&  control, Utility* const options, const Rank* const ranks, const Rank top);
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control, const ShortIndex prong);
+	HFSM2_INLINE void	 wideChangeToRequested		 (PlanControl& control, const ShortIndex prong);
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM2_INLINE void	 wideSaveActive				 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
+	HFSM2_INLINE void	 wideSaveResumable			 (const Registry& registry, WriteStream& stream						   ) const;
+
+	HFSM2_INLINE void	 wideLoadRequested			 (      Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
+	HFSM2_INLINE void	 wideLoadResumable			 (      Registry& registry, ReadStream&  stream						   ) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
@@ -6229,19 +6691,6 @@ struct CS_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
-
-	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -6270,13 +6719,17 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
-	using Registry	= RegistryT<Args>;
+	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
 
 	using Control		= ControlT	   <Args>;
@@ -6293,76 +6746,93 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>
-	HFSM_INLINE		  T& access()					  { return state.template access<T>();	}
+	HFSM2_INLINE	   T& access()					 { return state.template access<T>();	}
 
 	template <typename T>
-	HFSM_INLINE const T& access() const				  { return state.template access<T>();	}
+	HFSM2_INLINE const T& access() const			 { return state.template access<T>();	}
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRegister				  (Registry& registry, const Parent parent);
+	HFSM2_INLINE void	 wideRegister				 (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard		  (GuardControl& control,								const ShortIndex prong);
-	HFSM_INLINE bool	wideEntryGuard				  (GuardControl& control,								const ShortIndex prong);
+	HFSM2_INLINE bool	 wideForwardEntryGuard		 (GuardControl& control,							const ShortIndex prong);
+	HFSM2_INLINE bool	 wideEntryGuard				 (GuardControl& control,							const ShortIndex prong);
 
-	HFSM_INLINE void	wideConstruct				  (PlanControl& control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideConstruct				 (PlanControl&  control,							const ShortIndex prong);
 
-	HFSM_INLINE void	wideEnter					  (PlanControl& control,								const ShortIndex prong);
-	HFSM_INLINE void	wideReenter					  (PlanControl& control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideEnter					 (PlanControl&  control,							const ShortIndex prong);
+	HFSM2_INLINE void	 wideReenter				 (PlanControl&  control,							const ShortIndex prong);
 
-	HFSM_INLINE Status	wideUpdate					  (FullControl& control,								const ShortIndex prong);
+	HFSM2_INLINE Status	 wideUpdate					 (FullControl&  control,							const ShortIndex prong);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact					  (FullControl& control, const TEvent& event,			const ShortIndex prong);
+	HFSM2_INLINE Status	 wideReact					 (FullControl&  control, const TEvent& event,		const ShortIndex prong);
 
-	HFSM_INLINE bool	wideForwardExitGuard		  (GuardControl& control,								const ShortIndex prong);
-	HFSM_INLINE bool	wideExitGuard				  (GuardControl& control,								const ShortIndex prong);
+	HFSM2_INLINE bool	 wideForwardExitGuard		 (GuardControl& control,							const ShortIndex prong);
+	HFSM2_INLINE bool	 wideExitGuard				 (GuardControl& control,							const ShortIndex prong);
 
-	HFSM_INLINE void	wideExit					  (PlanControl& control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideExit					 (PlanControl&  control,							const ShortIndex prong);
 
-	HFSM_INLINE void	wideDestruct				  (PlanControl& control,								const ShortIndex prong);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	wideForwardActive			  (Control& control,	 const Request::Type request,	const ShortIndex prong);
-	HFSM_INLINE void	wideForwardRequest			  (Control& control,	 const Request::Type request,	const ShortIndex prong);
+	HFSM2_INLINE void	 wideDestruct				 (PlanControl&  control,							const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRequestChangeComposite	  (Control& control);
-	HFSM_INLINE void	wideRequestChangeResumable	  (Control& control,	 								const ShortIndex prong);
+	HFSM2_INLINE void	 wideForwardActive			 (Control&  control, const Request::Type request,	const ShortIndex prong);
+	HFSM2_INLINE void	 wideForwardRequest			 (Control&  control, const Request::Type request,	const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRequestRemain			  (Registry& registry);
-	HFSM_INLINE void	wideRequestRestart			  (Registry& registry);
-	HFSM_INLINE void	wideRequestResume			  (Registry& registry,									const ShortIndex prong);
+	HFSM2_INLINE void	 wideRequestChangeComposite	 (Control&  control);
+	HFSM2_INLINE void	 wideRequestChangeResumable	 (Control&  control,	 								const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE UP		wideReportChangeComposite	  (Control& control);
-	HFSM_INLINE UP		wideReportChangeResumable	  (Control& control,									const ShortIndex prong);
-	HFSM_INLINE UP		wideReportChangeUtilitarian	  (Control& control);
-	HFSM_INLINE Utility	wideReportChangeRandom		  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
+	HFSM2_INLINE void	 wideRequestRemain			 (Registry& registry);
+	HFSM2_INLINE void	 wideRequestRestart			 (Registry& registry);
+	HFSM2_INLINE void	 wideRequestResume			 (Registry& registry,								const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE UP		wideReportUtilize			  (Control& control);
-	HFSM_INLINE Rank	wideReportRank				  (Control& control,	 Rank*	  const ranks);
-	HFSM_INLINE Utility	wideReportRandomize			  (Control& control,	 Utility* const options, const Rank* const ranks, const Rank top);
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	HFSM2_INLINE UP		 wideReportChangeComposite	 (Control&  control);
+	HFSM2_INLINE UP		 wideReportChangeResumable	 (Control&  control,								const ShortIndex prong);
+	HFSM2_INLINE UP		 wideReportChangeUtilitarian (Control&  control);
+	HFSM2_INLINE Utility wideReportChangeRandom		 (Control&  control,	 Utility* const options, const Rank* const ranks, const Rank top);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -  - - - - - - -
+
+	HFSM2_INLINE UP		 wideReportUtilize			 (Control&  control);
+	HFSM2_INLINE Rank	 wideReportRank				 (Control&  control,	 Rank*	  const ranks);
+	HFSM2_INLINE Utility wideReportRandomize		 (Control&  control,	 Utility* const options, const Rank* const ranks, const Rank top);
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideChangeToRequested		  (PlanControl& control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideChangeToRequested		 (PlanControl& control,								const ShortIndex prong);
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM2_INLINE void	wideSaveActive				 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
+	HFSM2_INLINE void	wideSaveResumable			 (const Registry& registry, WriteStream& stream						   ) const;
+
+	HFSM2_INLINE void	wideLoadRequested			 (		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
+	HFSM2_INLINE void	wideLoadResumable			 (		Registry& registry, ReadStream&  stream						   ) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
@@ -6372,19 +6842,6 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream						   ) const;
-
-	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
-	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream						   ) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -6402,7 +6859,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 template <typename T>
@@ -6444,7 +6901,7 @@ bool
 CS_<TN, TA, SG, NI, TS...>::wideForwardEntryGuard(GuardControl& control,
 												  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideForwardEntryGuard(control, prong);
@@ -6459,7 +6916,7 @@ bool
 CS_<TN, TA, SG, NI, TS...>::wideEntryGuard(GuardControl& control,
 										   const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideEntryGuard(control, prong);
@@ -6474,7 +6931,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideConstruct(PlanControl& control,
 										  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideConstruct(control, prong);
@@ -6489,7 +6946,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideEnter(PlanControl& control,
 									  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideEnter(control, prong);
@@ -6504,7 +6961,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideReenter(PlanControl& control,
 										const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideReenter(control, prong);
@@ -6519,7 +6976,7 @@ Status
 CS_<TN, TA, SG, NI, TS...>::wideUpdate(FullControl& control,
 									   const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	return prong < R_PRONG ?
 		lHalf.wideUpdate(control, prong) :
@@ -6535,7 +6992,7 @@ CS_<TN, TA, SG, NI, TS...>::wideReact(FullControl& control,
 									  const TEvent& event,
 									  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	return prong < R_PRONG ?
 		lHalf.wideReact(control, event, prong) :
@@ -6549,7 +7006,7 @@ bool
 CS_<TN, TA, SG, NI, TS...>::wideForwardExitGuard(GuardControl& control,
 												 const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideForwardExitGuard(control, prong);
@@ -6564,7 +7021,7 @@ bool
 CS_<TN, TA, SG, NI, TS...>::wideExitGuard(GuardControl& control,
 										  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideExitGuard(control, prong);
@@ -6579,7 +7036,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideExit(PlanControl& control,
 									 const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideExit(control, prong);
@@ -6594,7 +7051,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideDestruct(PlanControl& control,
 										 const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideDestruct(control, prong);
@@ -6610,7 +7067,7 @@ CS_<TN, TA, SG, NI, TS...>::wideForwardActive(Control& control,
 											  const Request::Type request,
 											  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideForwardActive(control, request, prong);
@@ -6626,7 +7083,7 @@ CS_<TN, TA, SG, NI, TS...>::wideForwardRequest(Control& control,
 											   const Request::Type request,
 											   const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideForwardRequest(control, request, prong);
@@ -6649,7 +7106,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideRequestChangeResumable(Control& control,
 													   const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideRequestChangeResumable(control, prong);
@@ -6680,7 +7137,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideRequestResume(Registry& registry,
 											  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideRequestResume(registry, prong);
@@ -6689,6 +7146,8 @@ CS_<TN, TA, SG, NI, TS...>::wideRequestResume(Registry& registry,
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 typename TA::UP
@@ -6707,7 +7166,7 @@ typename TA::Rank
 CS_<TN, TA, SG, NI, TS...>::wideReportRank(Control& control,
 										   Rank* const ranks)
 {
-	HFSM_ASSERT(ranks);
+	HFSM2_ASSERT(ranks);
 
 	const Rank l = lHalf.wideReportRank(control, ranks);
 	const Rank r = rHalf.wideReportRank(control, ranks + LStates::SIZE);
@@ -6725,7 +7184,7 @@ CS_<TN, TA, SG, NI, TS...>::wideReportRandomize(Control& control,
 												const Rank* const ranks,
 												const Rank top)
 {
-	HFSM_ASSERT(options && ranks);
+	HFSM2_ASSERT(options && ranks);
 
 	const Utility l = lHalf.wideReportRandomize(control, options,				  ranks,				 top);
 	const Utility r = rHalf.wideReportRandomize(control, options + LStates::SIZE, ranks + LStates::SIZE, top);
@@ -6748,7 +7207,7 @@ typename TA::UP
 CS_<TN, TA, SG, NI, TS...>::wideReportChangeResumable(Control& control,
 													  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideReportChangeResumable(control, prong);
@@ -6777,13 +7236,15 @@ CS_<TN, TA, SG, NI, TS...>::wideReportChangeRandom(Control& control,
 												   const Rank* const ranks,
 												   const Rank top)
 {
-	HFSM_ASSERT(options && ranks);
+	HFSM2_ASSERT(options && ranks);
 
 	const Utility l = lHalf.wideReportChangeRandom(control, options,				 ranks,					top);
 	const Utility r = rHalf.wideReportChangeRandom(control, options + LStates::SIZE, ranks + LStates::SIZE, top);
 
 	return { l + r };
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -6792,7 +7253,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideChangeToRequested(PlanControl& control,
 												  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideChangeToRequested(control, prong);
@@ -6802,24 +7263,7 @@ CS_<TN, TA, SG, NI, TS...>::wideChangeToRequested(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
-void
-CS_<TN, TA, SG, NI, TS...>::wideGetNames(const LongIndex parent,
-										 const RegionType /*region*/,
-										 const ShortIndex depth,
-										 StructureStateInfos& _stateInfos) const
-{
-	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
@@ -6827,7 +7271,7 @@ CS_<TN, TA, SG, NI, TS...>::wideSaveActive(const Registry& registry,
 										   WriteStream& stream,
 										   const ShortIndex prong) const
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG) {
 		lHalf.wideSaveActive   (registry, stream, prong);
@@ -6857,7 +7301,7 @@ CS_<TN, TA, SG, NI, TS...>::wideLoadRequested(Registry& registry,
 											  ReadStream& stream,
 											  const ShortIndex prong) const
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG) {
 		lHalf.wideLoadRequested(registry, stream, prong);
@@ -6877,6 +7321,23 @@ CS_<TN, TA, SG, NI, TS...>::wideLoadResumable(Registry& registry,
 {
 	lHalf.wideLoadResumable(registry, stream);
 	rHalf.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+void
+CS_<TN, TA, SG, NI, TS...>::wideGetNames(const LongIndex parent,
+										 const RegionType /*region*/,
+										 const ShortIndex depth,
+										 StructureStateInfos& _stateInfos) const
+{
+	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
 
 #endif
@@ -6903,9 +7364,9 @@ CS_<TN, TA, SG, NI, T>::wideRegister(Registry& registry,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 bool
 CS_<TN, TA, SG, NI, T>::wideForwardEntryGuard(GuardControl& control,
-											  const ShortIndex HFSM_IF_ASSERT(prong))
+											  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	return state.deepForwardEntryGuard(control);
 }
@@ -6915,9 +7376,9 @@ CS_<TN, TA, SG, NI, T>::wideForwardEntryGuard(GuardControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 bool
 CS_<TN, TA, SG, NI, T>::wideEntryGuard(GuardControl& control,
-									   const ShortIndex HFSM_IF_ASSERT(prong))
+									   const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	return state.deepEntryGuard(control);
 }
@@ -6927,9 +7388,9 @@ CS_<TN, TA, SG, NI, T>::wideEntryGuard(GuardControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideConstruct(PlanControl& control,
-									  const ShortIndex HFSM_IF_ASSERT(prong))
+									  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepConstruct(control);
 }
@@ -6939,9 +7400,9 @@ CS_<TN, TA, SG, NI, T>::wideConstruct(PlanControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideEnter(PlanControl& control,
-								  const ShortIndex HFSM_IF_ASSERT(prong))
+								  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepEnter(control);
 }
@@ -6951,9 +7412,9 @@ CS_<TN, TA, SG, NI, T>::wideEnter(PlanControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideReenter(PlanControl& control,
-									const ShortIndex HFSM_IF_ASSERT(prong))
+									const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepReenter(control);
 }
@@ -6963,9 +7424,9 @@ CS_<TN, TA, SG, NI, T>::wideReenter(PlanControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 Status
 CS_<TN, TA, SG, NI, T>::wideUpdate(FullControl& control,
-								   const ShortIndex HFSM_IF_ASSERT(prong))
+								   const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	return state.deepUpdate(control);
 }
@@ -6977,9 +7438,9 @@ template <typename TEvent>
 Status
 CS_<TN, TA, SG, NI, T>::wideReact(FullControl& control,
 								  const TEvent& event,
-								  const ShortIndex HFSM_IF_ASSERT(prong))
+								  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	return state.deepReact(control, event);
 }
@@ -6989,9 +7450,9 @@ CS_<TN, TA, SG, NI, T>::wideReact(FullControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 bool
 CS_<TN, TA, SG, NI, T>::wideForwardExitGuard(GuardControl& control,
-											 const ShortIndex HFSM_IF_ASSERT(prong))
+											 const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	return state.deepForwardExitGuard(control);
 }
@@ -7001,9 +7462,9 @@ CS_<TN, TA, SG, NI, T>::wideForwardExitGuard(GuardControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 bool
 CS_<TN, TA, SG, NI, T>::wideExitGuard(GuardControl& control,
-									  const ShortIndex HFSM_IF_ASSERT(prong))
+									  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	return state.deepExitGuard(control);
 }
@@ -7013,9 +7474,9 @@ CS_<TN, TA, SG, NI, T>::wideExitGuard(GuardControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideExit(PlanControl& control,
-								 const ShortIndex HFSM_IF_ASSERT(prong))
+								 const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepExit(control);
 }
@@ -7025,9 +7486,9 @@ CS_<TN, TA, SG, NI, T>::wideExit(PlanControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideDestruct(PlanControl& control,
-									 const ShortIndex HFSM_IF_ASSERT(prong))
+									 const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepDestruct(control);
 }
@@ -7038,9 +7499,9 @@ template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideForwardActive(Control& control,
 										  const Request::Type request,
-										  const ShortIndex HFSM_IF_ASSERT(prong))
+										  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepForwardActive(control, request);
 }
@@ -7051,9 +7512,9 @@ template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideForwardRequest(Control& control,
 										   const Request::Type request,
-										   const ShortIndex HFSM_IF_ASSERT(prong))
+										   const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepForwardRequest(control, request);
 }
@@ -7071,9 +7532,9 @@ CS_<TN, TA, SG, NI, T>::wideRequestChangeComposite(Control& control) {
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideRequestChangeResumable(Control& control,
-												   const ShortIndex HFSM_IF_ASSERT(prong))
+												   const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepRequestChange(control);
 }
@@ -7099,14 +7560,16 @@ CS_<TN, TA, SG, NI, T>::wideRequestRestart(Registry& registry) {
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideRequestResume(Registry& registry,
-										  const ShortIndex HFSM_IF_ASSERT(prong))
+										  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepRequestResume(registry);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 typename TA::UP
@@ -7121,7 +7584,7 @@ typename TA::Rank
 CS_<TN, TA, SG, NI, T>::wideReportRank(Control& control,
 									   Rank* const ranks)
 {
-	HFSM_ASSERT(ranks);
+	HFSM2_ASSERT(ranks);
 
 	*ranks = state.deepReportRank(control);
 
@@ -7137,7 +7600,7 @@ CS_<TN, TA, SG, NI, T>::wideReportRandomize(Control& control,
 											const Rank* const ranks,
 											const Rank top)
 {
-	HFSM_ASSERT(options && ranks);
+	HFSM2_ASSERT(options && ranks);
 
 	*options = (*ranks == top) ?
 		state.deepReportRandomize(control) : Utility{0.0f};
@@ -7158,9 +7621,9 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeComposite(Control& control) {
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 typename TA::UP
 CS_<TN, TA, SG, NI, T>::wideReportChangeResumable(Control& control,
-												  const ShortIndex HFSM_IF_ASSERT(prong))
+												  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	return state.deepReportChange(control);
 }
@@ -7182,7 +7645,7 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeRandom(Control& control,
 											   const Rank* const ranks,
 											   const Rank top)
 {
-	HFSM_ASSERT(options && ranks);
+	HFSM2_ASSERT(options && ranks);
 
 	*options = (*ranks == top) ?
 		state.deepReportChange(control).utility : Utility{0.0f};
@@ -7190,45 +7653,31 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeRandom(Control& control,
 	return *options;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideChangeToRequested(PlanControl& control,
-											  const ShortIndex HFSM_IF_ASSERT(prong))
+											  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
-void
-CS_<TN, TA, SG, NI, T>::wideGetNames(const LongIndex parent,
-									 const RegionType /*region*/,
-									 const ShortIndex depth,
-									 StructureStateInfos& _stateInfos) const
-{
-	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideSaveActive(const Registry& registry,
 									   WriteStream& stream,
-									   const ShortIndex HFSM_IF_ASSERT(prong)) const
+									   const ShortIndex HFSM2_IF_ASSERT(prong)) const
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepSaveActive(registry, stream);
 }
@@ -7249,9 +7698,9 @@ template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideLoadRequested(Registry& registry,
 										  ReadStream& stream,
-										  const ShortIndex HFSM_IF_ASSERT(prong)) const
+										  const ShortIndex HFSM2_IF_ASSERT(prong)) const
 {
-	HFSM_ASSERT(prong == PRONG_INDEX);
+	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	state.deepLoadRequested(registry, stream);
 }
@@ -7264,6 +7713,22 @@ CS_<TN, TA, SG, NI, T>::wideLoadResumable(Registry& registry,
 										  ReadStream& stream) const
 {
 	state.deepLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+void
+CS_<TN, TA, SG, NI, T>::wideGetNames(const LongIndex parent,
+									 const RegionType /*region*/,
+									 const ShortIndex depth,
+									 StructureStateInfos& _stateInfos) const
+{
+	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
 }
 
 #endif
@@ -7295,9 +7760,13 @@ struct C_ final {
 	static constexpr ForkID		COMPO_ID	= COMPO_INDEX + 1;
 
 	using Args			= TArgs;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -7336,164 +7805,192 @@ struct C_ final {
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>
 	struct Accessor {
-		HFSM_INLINE static		 T&	   get(		 C_& c)								{ return c._subStates.template access<T>();		}
-		HFSM_INLINE static const T&	   get(const C_& c)								{ return c._subStates.template access<T>();		}
+		HFSM2_INLINE static		  T&	get(	  C_& c)							{ return c._subStates.template access<T>();		}
+		HFSM2_INLINE static const T&	get(const C_& c)							{ return c._subStates.template access<T>();		}
 	};
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 C_& c)								{ return c._headState._headBox.get();			}
-		HFSM_INLINE static const Head& get(const C_& c)								{ return c._headState._headBox.get();			}
+		HFSM2_INLINE static		  Head& get(	  C_& c)							{ return c._headState._headBox.get();			}
+		HFSM2_INLINE static const Head& get(const C_& c)							{ return c._headState._headBox.get();			}
 	};
 
 	template <typename T>
-	HFSM_INLINE		  T&	access()												{ return Accessor<T>::get(*this);				}
+	HFSM2_INLINE	   T&	access()												{ return Accessor<T>::get(*this);				}
 
 	template <typename T>
-	HFSM_INLINE const T&	access() const											{ return Accessor<T>::get(*this);				}
+	HFSM2_INLINE const T&	access() const											{ return Accessor<T>::get(*this);				}
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM_INLINE		  ShortIndex& compoRequested(	   Registry& registry) const	{ return registry.compoRequested[COMPO_INDEX];	}
-	HFSM_INLINE const ShortIndex& compoRequested(const Registry& registry) const	{ return registry.compoRequested[COMPO_INDEX];	}
+	HFSM2_INLINE	   ShortIndex& compoRequested(		Registry& registry) const	{ return registry.compoRequested[COMPO_INDEX];	}
+	HFSM2_INLINE const ShortIndex& compoRequested(const Registry& registry) const	{ return registry.compoRequested[COMPO_INDEX];	}
 
-	HFSM_INLINE		  ShortIndex& compoActive   (	   Registry& registry) const	{ return registry.compoActive	[COMPO_INDEX];	}
-	HFSM_INLINE const ShortIndex& compoActive   (const Registry& registry) const	{ return registry.compoActive	[COMPO_INDEX];	}
+	HFSM2_INLINE	   ShortIndex& compoActive   (		Registry& registry) const	{ return registry.compoActive	[COMPO_INDEX];	}
+	HFSM2_INLINE const ShortIndex& compoActive   (const Registry& registry) const	{ return registry.compoActive	[COMPO_INDEX];	}
 
-	HFSM_INLINE		  ShortIndex& compoResumable(	   Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
-	HFSM_INLINE const ShortIndex& compoResumable(const Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
+	HFSM2_INLINE	   ShortIndex& compoResumable(		Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
+	HFSM2_INLINE const ShortIndex& compoResumable(const Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
 
-	HFSM_INLINE		  ShortIndex& compoRequested(	   Control& control) const		{ return compoRequested(control._registry);		}
-	HFSM_INLINE const ShortIndex& compoRequested(const Control& control) const		{ return compoRequested(control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoRequested(		Control& control) const		{ return compoRequested(control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoRequested(const Control& control) const		{ return compoRequested(control._registry);		}
 
-	HFSM_INLINE		  ShortIndex& compoActive   (	   Control& control) const		{ return compoActive   (control._registry);		}
-	HFSM_INLINE const ShortIndex& compoActive   (const Control& control) const		{ return compoActive   (control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoActive   (		Control& control) const		{ return compoActive   (control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoActive   (const Control& control) const		{ return compoActive   (control._registry);		}
 
-	HFSM_INLINE		  ShortIndex& compoResumable(	   Control& control) const		{ return compoResumable(control._registry);		}
-	HFSM_INLINE const ShortIndex& compoResumable(const Control& control) const		{ return compoResumable(control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoResumable(		Control& control) const		{ return compoResumable(control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoResumable(const Control& control) const		{ return compoResumable(control._registry);		}
 
-	HFSM_INLINE		  ShortIndex  resolveRandom (Control& control,
-												 const Utility(& options)[Info::WIDTH], const Utility sum,
-												 const Rank	  (& ranks)  [Info::WIDTH], const Rank	  top) const;
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE		  ShortIndex  resolveRandom	   (Control& control,
+														const Utility(& options)[Info::WIDTH], const Utility sum,
+														const Rank	  (& ranks)  [Info::WIDTH], const Rank	  top) const;
+#endif
 
-	HFSM_INLINE bool	compoRemain					  (Control& control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
+	HFSM2_INLINE bool	 compoRemain				   (Control& control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
 
-	HFSM_INLINE void	deepRegister				  (Registry& registry, const Parent parent);
+	HFSM2_INLINE void	 deepRegister				   (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	deepForwardEntryGuard		  (GuardControl& control);
-	HFSM_INLINE bool	deepEntryGuard				  (GuardControl& control);
+	HFSM2_INLINE bool	 deepForwardEntryGuard		   (GuardControl& control);
+	HFSM2_INLINE bool	 deepEntryGuard				   (GuardControl& control);
 
-	HFSM_INLINE void	deepConstruct				  (PlanControl& control);
+	HFSM2_INLINE void	 deepConstruct				   (PlanControl& control);
 
-	HFSM_INLINE void	deepEnter					  (PlanControl&  control);
-	HFSM_INLINE void	deepReenter					  (PlanControl&  control);
+	HFSM2_INLINE void	 deepEnter					   (PlanControl&  control);
+	HFSM2_INLINE void	 deepReenter				   (PlanControl&  control);
 
-	HFSM_INLINE Status	deepUpdate					  (FullControl&  control);
+	HFSM2_INLINE Status	 deepUpdate					   (FullControl&  control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	deepReact					  (FullControl&  control, const TEvent& event);
+	HFSM2_INLINE Status	 deepReact					   (FullControl&  control, const TEvent& event);
 
-	HFSM_INLINE bool	deepForwardExitGuard		  (GuardControl& control);
-	HFSM_INLINE bool	deepExitGuard				  (GuardControl& control);
+	HFSM2_INLINE bool	 deepForwardExitGuard		   (GuardControl& control);
+	HFSM2_INLINE bool	 deepExitGuard				   (GuardControl& control);
 
-	HFSM_INLINE void	deepExit					  (PlanControl&  control);
+	HFSM2_INLINE void	 deepExit					   (PlanControl&  control);
 
-	HFSM_INLINE void	deepDestruct				  (PlanControl&  control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	deepForwardActive			  (Control& control, const Request::Type request);
-	HFSM_INLINE void	deepForwardRequest			  (Control& control, const Request::Type request);
-
-	HFSM_INLINE void	deepRequest					  (Control& control, const Request::Type request);
+	HFSM2_INLINE void	 deepDestruct				   (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+	HFSM2_INLINE void	 deepForwardActive			   (Control& control, const Request::Type request);
+	HFSM2_INLINE void	 deepForwardRequest			   (Control& control, const Request::Type request);
+
+	HFSM2_INLINE void	 deepRequest				   (Control& control, const Request::Type request);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
-	HFSM_INLINE void	deepRequestChange			  (Control& control, const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM2_INLINE void	 deepRequestChange			   (Control& control, const ShortIndex = INVALID_SHORT_INDEX);
 
 	template <>
-	HFSM_INLINE void	deepRequestChange<Composite>  (Control& control, const ShortIndex)	{ deepRequestChangeComposite  (control); }
+	HFSM2_INLINE void	 deepRequestChange<Composite>  (Control& control, const ShortIndex)	{ deepRequestChangeComposite  (control); }
 
 	template <>
-	HFSM_INLINE void	deepRequestChange<Resumable>  (Control& control, const ShortIndex)	{ deepRequestChangeResumable  (control); }
+	HFSM2_INLINE void	 deepRequestChange<Resumable>  (Control& control, const ShortIndex)	{ deepRequestChangeResumable  (control); }
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	template <>
-	HFSM_INLINE void	deepRequestChange<Utilitarian>(Control& control, const ShortIndex)	{ deepRequestChangeUtilitarian(control); }
+	HFSM2_INLINE void	 deepRequestChange<Utilitarian>(Control& control, const ShortIndex)	{ deepRequestChangeUtilitarian(control); }
 
 	template <>
-	HFSM_INLINE void	deepRequestChange<RandomUtil> (Control& control, const ShortIndex)	{ deepRequestChangeRandom	  (control); }
-
-#else
-
-	HFSM_INLINE void	deepRequestChange			  (Control& control);
+	HFSM2_INLINE void	 deepRequestChange<RandomUtil> (Control& control, const ShortIndex)	{ deepRequestChangeRandom	  (control); }
 
 #endif
 
-	HFSM_INLINE void	deepRequestChangeComposite	  (Control& control);
-	HFSM_INLINE void	deepRequestChangeResumable	  (Control& control);
-	HFSM_INLINE void	deepRequestChangeUtilitarian  (Control& control);
-	HFSM_INLINE void	deepRequestChangeRandom		  (Control& control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	deepRequestRemain			  (Registry& registry);
-	HFSM_INLINE void	deepRequestRestart			  (Registry& registry);
-	HFSM_INLINE void	deepRequestResume			  (Registry& registry);
-	HFSM_INLINE void	deepRequestUtilize			  (Control& control);
-	HFSM_INLINE void	deepRequestRandomize		  (Control& control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
-
-	template <Strategy = STRATEGY>
-	HFSM_INLINE UP		deepReportChange			  (Control& control);
-
-	template <>
-	HFSM_INLINE UP		deepReportChange<Composite>   (Control& control)	{ return deepReportChangeComposite  (control); }
-
-	template <>
-	HFSM_INLINE UP		deepReportChange<Resumable>   (Control& control)	{ return deepReportChangeResumable  (control); }
-
-	template <>
-	HFSM_INLINE UP		deepReportChange<Utilitarian> (Control& control)	{ return deepReportChangeUtilitarian(control); }
-
-	template <>
-	HFSM_INLINE UP		deepReportChange<RandomUtil>  (Control& control)	{ return deepReportChangeRandom		(control); }
-
 #else
 
-	HFSM_INLINE UP		deepReportChange			  (Control& control);
+	HFSM2_INLINE void	 deepRequestChange			  (Control& control);
 
 #endif
 
-	HFSM_INLINE UP		deepReportChangeComposite	  (Control& control);
-	HFSM_INLINE UP		deepReportChangeResumable	  (Control& control);
-	HFSM_INLINE UP		deepReportChangeUtilitarian   (Control& control);
-	HFSM_INLINE UP		deepReportChangeRandom		  (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeComposite	  (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeResumable	  (Control& control);
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void	 deepRequestChangeUtilitarian (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeRandom	  (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE UP		deepReportUtilize			  (Control& control);
-	HFSM_INLINE Rank	deepReportRank				  (Control& control);
-	HFSM_INLINE Utility	deepReportRandomize			  (Control& control);
+	HFSM2_INLINE void	 deepRequestRemain			  (Registry& registry);
+	HFSM2_INLINE void	 deepRequestRestart			  (Registry& registry);
+	HFSM2_INLINE void	 deepRequestResume			  (Registry& registry);
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void	 deepRequestUtilize			  (Control& control);
+	HFSM2_INLINE void	 deepRequestRandomize		  (Control& control);
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepChangeToRequested		  (PlanControl& control);
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
+
+	template <Strategy = STRATEGY>
+	HFSM2_INLINE UP		 deepReportChange			  (Control& control);
+
+	template <>
+	HFSM2_INLINE UP		 deepReportChange<Composite>  (Control& control)	{ return deepReportChangeComposite  (control); }
+
+	template <>
+	HFSM2_INLINE UP		 deepReportChange<Resumable>  (Control& control)	{ return deepReportChangeResumable  (control); }
+
+	template <>
+	HFSM2_INLINE UP		 deepReportChange<Utilitarian>(Control& control)	{ return deepReportChangeUtilitarian(control); }
+
+	template <>
+	HFSM2_INLINE UP		 deepReportChange<RandomUtil> (Control& control)	{ return deepReportChangeRandom		(control); }
+
+#else
+
+	HFSM2_INLINE UP		 deepReportChange			  (Control& control);
+
+#endif
+
+	HFSM2_INLINE UP		 deepReportChangeComposite	  (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeResumable	  (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeUtilitarian  (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeRandom		  (Control& control);
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE UP		 deepReportUtilize			  (Control& control);
+	HFSM2_INLINE Rank	 deepReportRank				  (Control& control);
+	HFSM2_INLINE Utility deepReportRandomize		  (Control& control);
+
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE void	deepChangeToRequested		  (PlanControl& control);
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM2_INLINE void	 deepSaveActive				  (const Registry& registry, WriteStream& stream) const;
+	HFSM2_INLINE void	 deepSaveResumable			  (const Registry& registry, WriteStream& stream) const;
+
+	HFSM2_INLINE void	 deepLoadRequested			  (		 Registry& registry, ReadStream&  stream) const;
+	HFSM2_INLINE void	 deepLoadResumable			  (		 Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
@@ -7505,25 +8002,12 @@ struct C_ final {
 					  StructureStateInfos& stateInfos) const;
 #endif
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
-	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
-
-	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
-	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
-#endif
-
 	//----------------------------------------------------------------------
 
 	HeadState _headState;
 	SubStates _subStates;
 
-	HFSM_IF_DEBUG(static constexpr Info _info = Info{});
+	HFSM2_IF_DEBUG(static constexpr Info _info = Info{});
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -7536,6 +8020,8 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 ShortIndex
 C_<TN, TA, SG, TH, TS...>::resolveRandom(Control& control,
@@ -7545,26 +8031,28 @@ C_<TN, TA, SG, TH, TS...>::resolveRandom(Control& control,
 										 const Rank top) const
 {
 	const Utility random = control._rng.next();
-	HFSM_ASSERT(0.0f <= random && random < 1.0f);
+	HFSM2_ASSERT(0.0f <= random && random < 1.0f);
 
 	Utility cursor = random * sum;
 
 	for (ShortIndex i = 0; i < count(ranks); ++i)
 		if (ranks[i] == top) {
-			HFSM_ASSERT(options[i] >= 0.0f);
+			HFSM2_ASSERT(options[i] >= 0.0f);
 
 			if (cursor >= options[i])
 				cursor -= options[i];
 			else {
-				HFSM_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, i, random);
+				HFSM2_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, i, random);
 
 				return i;
 			}
 		}
 
-	HFSM_BREAK();
+	HFSM2_BREAK();
 	return INVALID_SHORT_INDEX;
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -7587,7 +8075,7 @@ C_<TN, TA, SG, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
 	const ShortIndex active	   = compoActive   (control);
 	const ShortIndex requested = compoRequested(control);
 
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -7603,7 +8091,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
 C_<TN, TA, SG, TH, TS...>::deepEntryGuard(GuardControl& control) {
 	const ShortIndex requested = compoRequested(control);
-	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(requested != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -7620,8 +8108,8 @@ C_<TN, TA, SG, TH, TS...>::deepConstruct(PlanControl& control) {
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
 
-	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX);
-	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active	   == INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(requested != INVALID_SHORT_INDEX);
 
 	active	  = requested;
 
@@ -7656,8 +8144,8 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) {
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
 
-	HFSM_ASSERT(active	  != INVALID_SHORT_INDEX &&
-				requested != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active	   != INVALID_SHORT_INDEX &&
+				 requested != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -7685,7 +8173,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 Status
 C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) {
 	const ShortIndex active = compoActive(control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -7716,7 +8204,7 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 									 const TEvent& event)
 {
 	const ShortIndex active = compoActive(control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -7744,7 +8232,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
 C_<TN, TA, SG, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
 	const ShortIndex active = compoActive(control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -7760,7 +8248,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
 C_<TN, TA, SG, TH, TS...>::deepExitGuard(GuardControl& control) {
 	const ShortIndex active = compoActive(control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -7774,7 +8262,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	_subStates.wideExit(control, active);
 	_headState.deepExit(control);
@@ -7788,7 +8276,7 @@ C_<TN, TA, SG, TH, TS...>::deepDestruct(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	_subStates.wideDestruct(control, active);
 	_headState.deepDestruct(control);
@@ -7807,7 +8295,7 @@ void
 C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
 											 const Request::Type request)
 {
-	HFSM_ASSERT(control._registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
 
 	const ShortIndex requested = compoRequested(control);
 
@@ -7858,6 +8346,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
 		deepRequestResume	(control._registry);
 		break;
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 	case Request::UTILIZE:
 		deepRequestUtilize	(control);
 		break;
@@ -7866,14 +8356,16 @@ C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
 		deepRequestRandomize(control);
 		break;
 
+#endif
+
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 	}
 }
 
 //------------------------------------------------------------------------------
 
-#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifndef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
@@ -7888,6 +8380,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control)
 		deepRequestChangeResumable  (control);
 		break;
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 	case Strategy::Utilitarian:
 		deepRequestChangeUtilitarian(control);
 		break;
@@ -7896,8 +8390,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control)
 		deepRequestChangeRandom		(control);
 		break;
 
+#endif
+
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 	}
 }
 
@@ -7931,16 +8427,18 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	const UP s = _subStates.wideReportChangeUtilitarian(control);
-	HFSM_ASSERT(s.prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(s.prong != INVALID_SHORT_INDEX);
 
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7956,8 +8454,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control) {
 
 	ShortIndex& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
-	HFSM_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < Info::WIDTH);
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -8001,6 +8501,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control) {
@@ -8009,7 +8511,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8025,12 +8527,15 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control) {
 
 	ShortIndex& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum, ranks, top);
-	HFSM_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < Info::WIDTH);
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
-#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#ifndef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 typename TA::UP
@@ -8049,7 +8554,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportChange(Control& control) {
 		return deepReportChangeRandom	  (control);
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		return {};
 	}
 }
@@ -8104,7 +8609,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 
 	return {
 		h.utility * s.utility,
@@ -8127,7 +8632,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeRandom(Control& control) {
 
 	ShortIndex& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
-	HFSM_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < Info::WIDTH);
 
 	return {
 		h.utility * options[requested],
@@ -8146,7 +8651,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportUtilize(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 
 	return {
 		h.utility * s.utility,
@@ -8177,10 +8682,12 @@ C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) {
 
 	ShortIndex& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum, ranks, top);
-	HFSM_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < Info::WIDTH);
 
 	return h * options[requested];
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -8191,7 +8698,7 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
 
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	if (requested == INVALID_SHORT_INDEX)
 		_subStates.wideChangeToRequested(control, active);
@@ -8224,24 +8731,7 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-void
-C_<TN, TA, SG, TH, TS...>::deepGetNames(const LongIndex parent,
-										const RegionType region,
-										const ShortIndex depth,
-										StructureStateInfos& _stateInfos) const
-{
-	_headState.deepGetNames(parent,					 region,						depth,	   _stateInfos);
-	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
@@ -8291,11 +8781,11 @@ C_<TN, TA, SG, TH, TS...>::deepLoadRequested(Registry& registry,
 	ShortIndex& requested = compoRequested(registry);
 
 	requested = stream.template read<WIDTH_BITS>();
-	HFSM_ASSERT(requested < WIDTH);
+	HFSM2_ASSERT(requested < WIDTH);
 
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
-		HFSM_ASSERT(resumable < WIDTH);
+		HFSM2_ASSERT(resumable < WIDTH);
 	} else
 		resumable = INVALID_SHORT_INDEX;
 
@@ -8313,11 +8803,28 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
-		HFSM_ASSERT(resumable < WIDTH);
+		HFSM2_ASSERT(resumable < WIDTH);
 	} else
 		resumable = INVALID_SHORT_INDEX;
 
 	_subStates.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+void
+C_<TN, TA, SG, TH, TS...>::deepGetNames(const LongIndex parent,
+										const RegionType region,
+										const ShortIndex depth,
+										StructureStateInfos& _stateInfos) const
+{
+	_headState.deepGetNames(parent,					 region,						depth,	   _stateInfos);
+	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
 }
 
 #endif
@@ -8351,9 +8858,12 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
 
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
@@ -8388,67 +8898,83 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>
-	HFSM_INLINE		  T& access();
+	HFSM2_INLINE	   T& access();
 
 	template <typename T>
-	HFSM_INLINE const T& access() const;
+	HFSM2_INLINE const T& access() const;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRegister		 (Registry& registry, const ForkID forkId);
+	HFSM2_INLINE void	 wideRegister		  (Registry& registry, const ForkID forkId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control,							const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control);
-	HFSM_INLINE bool	wideEntryGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,							const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
+	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	wideConstruct		 (PlanControl&	control);
+	HFSM2_INLINE void	 wideConstruct		  (PlanControl&	 control);
 
-	HFSM_INLINE void	wideEnter			 (PlanControl&	control);
-	HFSM_INLINE void	wideReenter			 (PlanControl&	control);
+	HFSM2_INLINE void	 wideEnter			  (PlanControl&	 control);
+	HFSM2_INLINE void	 wideReenter		  (PlanControl&	 control);
 
-	HFSM_INLINE Status	wideUpdate			 (FullControl&	control);
+	HFSM2_INLINE Status	 wideUpdate			  (FullControl&	 control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact			 (FullControl&	control, const TEvent& event);
+	HFSM2_INLINE Status	 wideReact			  (FullControl&	 control, const TEvent& event);
 
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control,							const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control);
-	HFSM_INLINE bool	wideExitGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,							const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
+	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	wideExit			 (PlanControl&	control);
+	HFSM2_INLINE void	 wideExit			  (PlanControl&	 control);
 
-	HFSM_INLINE void	wideDestruct		 (PlanControl&  control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	wideForwardActive	 (Control& control, const Request::Type request,	const ProngConstBits prongs);
-	HFSM_INLINE void	wideForwardRequest	 (Control& control, const Request::Type request,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideDestruct		  (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRequestChange	 (Control& control);
-	HFSM_INLINE void	wideRequestRemain	 (Registry& registry);
-	HFSM_INLINE void	wideRequestRestart	 (Registry& registry);
-	HFSM_INLINE void	wideRequestResume	 (Registry& registry);
-	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
-	HFSM_INLINE void	wideRequestRandomize (Control& control);
-
-	HFSM_INLINE Utility	wideReportChange	 (Control& control);
-	HFSM_INLINE Utility	wideReportUtilize	 (Control& control);
-	HFSM_INLINE Utility	wideReportRandomize	 (Control& control);
+	HFSM2_INLINE void	 wideForwardActive	  (Control&  control, const Request::Type request,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardRequest	  (Control&  control, const Request::Type request,	const ProngConstBits prongs);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
+	HFSM2_INLINE void	 wideRequestChange	  (Control&  control);
+	HFSM2_INLINE void	 wideRequestRemain	  (Registry& registry);
+	HFSM2_INLINE void	 wideRequestRestart	  (Registry& registry);
+	HFSM2_INLINE void	 wideRequestResume	  (Registry& registry);
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void	 wideRequestUtilize	  (Control&  control);
+	HFSM2_INLINE void	 wideRequestRandomize (Control&  control);
+
+	HFSM2_INLINE Utility wideReportChange	  (Control&  control);
+	HFSM2_INLINE Utility wideReportUtilize	  (Control&  control);
+	HFSM2_INLINE Utility wideReportRandomize  (Control&  control);
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE void	 wideChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM2_INLINE void	 wideSaveActive		  (const Registry& registry, WriteStream& stream) const;
+	HFSM2_INLINE void	 wideSaveResumable	  (const Registry& registry, WriteStream& stream) const;
+
+	HFSM2_INLINE void	 wideLoadRequested	  (		 Registry& registry, ReadStream&  stream) const;
+	HFSM2_INLINE void	 wideLoadResumable	  (		 Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
@@ -8456,19 +8982,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	void wideGetNames(const LongIndex parent,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream) const;
-	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream) const;
-
-	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream) const;
-	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -8493,9 +9006,12 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	static constexpr ShortIndex PRONG_INDEX	= NIndex;
 
 	using Args			= TArgs;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
 
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
@@ -8519,67 +9035,83 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>
-	HFSM_INLINE		  T& access()			 { return initial.template access<T>();	}
+	HFSM2_INLINE	   T& access()			  { return initial.template access<T>();	}
 
 	template <typename T>
-	HFSM_INLINE const T& access() const		 { return initial.template access<T>();	}
+	HFSM2_INLINE const T& access() const	  { return initial.template access<T>();	}
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRegister		 (Registry& registry, const ForkID forkId);
+	HFSM2_INLINE void	 wideRegister		  (Registry& registry, const ForkID forkId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control,							const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardEntryGuard(GuardControl&	control);
-	HFSM_INLINE bool	wideEntryGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,							const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
+	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	wideConstruct		 (PlanControl&	control);
+	HFSM2_INLINE void	 wideConstruct		  (PlanControl&  control);
 
-	HFSM_INLINE void	wideEnter			 (PlanControl&	control);
-	HFSM_INLINE void	wideReenter			 (PlanControl&	control);
+	HFSM2_INLINE void	 wideEnter			  (PlanControl&  control);
+	HFSM2_INLINE void	 wideReenter		  (PlanControl&  control);
 
-	HFSM_INLINE Status	wideUpdate			 (FullControl&	control);
+	HFSM2_INLINE Status	 wideUpdate			  (FullControl&  control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	wideReact			 (FullControl&	control, const TEvent& event);
+	HFSM2_INLINE Status	 wideReact			  (FullControl&  control, const TEvent& event);
 
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control,							const ProngConstBits prongs);
-	HFSM_INLINE bool	wideForwardExitGuard (GuardControl&	control);
-	HFSM_INLINE bool	wideExitGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,							const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
+	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	wideExit			 (PlanControl&	control);
+	HFSM2_INLINE void	 wideExit			  (PlanControl&  control);
 
-	HFSM_INLINE void	wideDestruct		 (PlanControl&  control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	wideForwardActive	 (Control& control, const Request::Type request,	const ProngConstBits prongs);
-	HFSM_INLINE void	wideForwardRequest	 (Control& control, const Request::Type request,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideDestruct		  (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideRequestChange	 (Control& control);
-	HFSM_INLINE void	wideRequestRemain	 (Registry& registry);
-	HFSM_INLINE void	wideRequestRestart	 (Registry& registry);
-	HFSM_INLINE void	wideRequestResume	 (Registry& registry);
-	HFSM_INLINE void	wideRequestUtilize	 (Control& control);
-	HFSM_INLINE void	wideRequestRandomize (Control& control);
-
-	HFSM_INLINE Utility	wideReportChange	 (Control& control);
-	HFSM_INLINE Utility	wideReportUtilize	 (Control& control);
-	HFSM_INLINE Utility	wideReportRandomize	 (Control& control);
+	HFSM2_INLINE void	 wideForwardActive	  (Control&  control, const Request::Type request,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardRequest	  (Control&  control, const Request::Type request,	const ProngConstBits prongs);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	wideChangeToRequested(PlanControl& control);
+	HFSM2_INLINE void	 wideRequestChange	  (Control&  control);
+	HFSM2_INLINE void	 wideRequestRemain	  (Registry& registry);
+	HFSM2_INLINE void	 wideRequestRestart	  (Registry& registry);
+	HFSM2_INLINE void	 wideRequestResume	  (Registry& registry);
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void	 wideRequestUtilize	  (Control& control);
+	HFSM2_INLINE void	 wideRequestRandomize (Control& control);
+
+	HFSM2_INLINE Utility wideReportChange	  (Control& control);
+	HFSM2_INLINE Utility wideReportUtilize	  (Control& control);
+	HFSM2_INLINE Utility wideReportRandomize  (Control& control);
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE void	 wideChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM2_INLINE void	 wideSaveActive		  (const Registry& registry, WriteStream& stream) const;
+	HFSM2_INLINE void	 wideSaveResumable	  (const Registry& registry, WriteStream& stream) const;
+
+	HFSM2_INLINE void	 wideLoadRequested	  (		 Registry& registry, ReadStream&  stream) const;
+	HFSM2_INLINE void	 wideLoadResumable	  (		 Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
 	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
@@ -8587,19 +9119,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	void wideGetNames(const LongIndex parent,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	wideSaveActive	 (const Registry& registry, WriteStream& stream) const;
-	HFSM_INLINE void	wideSaveResumable(const Registry& registry, WriteStream& stream) const;
-
-	HFSM_INLINE void	wideLoadRequested(		Registry& registry, ReadStream&  stream) const;
-	HFSM_INLINE void	wideLoadResumable(		Registry& registry, ReadStream&  stream) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -8617,7 +9136,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 template <typename T>
@@ -8860,6 +9379,8 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 OS_<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control) {
@@ -8909,6 +9430,8 @@ OS_<TN, TA, NI, TI, TR...>::wideReportRandomize(Control& control) {
 	return i + r;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
@@ -8920,23 +9443,7 @@ OS_<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
-void
-OS_<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
-										 const ShortIndex depth,
-										 StructureStateInfos& stateInfos) const
-{
-	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
-	remaining.wideGetNames(parent,								   depth, stateInfos);
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
@@ -8978,6 +9485,22 @@ OS_<TN, TA, NI, TI, TR...>::wideLoadResumable(Registry& registry,
 {
 	initial	 .deepLoadResumable(registry, stream);
 	remaining.wideLoadResumable(registry, stream);
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
+void
+OS_<TN, TA, NI, TI, TR...>::wideGetNames(const LongIndex parent,
+										 const ShortIndex depth,
+										 StructureStateInfos& stateInfos) const
+{
+	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
+	remaining.wideGetNames(parent,								   depth, stateInfos);
 }
 
 #endif
@@ -9174,6 +9697,8 @@ OS_<TN, TA, NI, TI>::wideRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
 OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control) {
@@ -9218,6 +9743,8 @@ OS_<TN, TA, NI, TI>::wideReportRandomize(Control& control) {
 	return i;
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
@@ -9228,22 +9755,7 @@ OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, ShortIndex NI, typename TI>
-void
-OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
-								  const ShortIndex depth,
-								  StructureStateInfos& _stateInfos) const
-{
-	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
@@ -9285,6 +9797,21 @@ OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 
 #endif
 
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, ShortIndex NI, typename TI>
+void
+OS_<TN, TA, NI, TI>::wideGetNames(const LongIndex parent,
+								  const ShortIndex depth,
+								  StructureStateInfos& _stateInfos) const
+{
+	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
+}
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -9309,9 +9836,13 @@ struct O_ final {
 	static constexpr ForkID		ORTHO_ID	= (ForkID) -ORTHO_INDEX - 1;
 
 	using Args			= TArgs;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
+#endif
+
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -9351,86 +9882,103 @@ struct O_ final {
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>
 	struct Accessor {
-		HFSM_INLINE static		 T&	   get(		 O_& o)							{ return o._subStates.template access<T>();	}
-		HFSM_INLINE static const T&	   get(const O_& o)							{ return o._subStates.template access<T>();	}
+		HFSM2_INLINE static		  T&    get(	  O_& o)						{ return o._subStates.template access<T>();	}
+		HFSM2_INLINE static const T&    get(const O_& o)						{ return o._subStates.template access<T>();	}
 	};
 
 	template <>
 	struct Accessor<Head> {
-		HFSM_INLINE static		 Head& get(		 O_& o)							{ return o._headState._headBox.get();		}
-		HFSM_INLINE static const Head& get(const O_& o)							{ return o._headState._headBox.get();		}
+		HFSM2_INLINE static		  Head& get(	  O_& o)						{ return o._headState._headBox.get();		}
+		HFSM2_INLINE static const Head& get(const O_& o)						{ return o._headState._headBox.get();		}
 	};
 
 	template <typename T>
-	HFSM_INLINE		  T&	access()											{ return Accessor<T>::get(*this);			}
+	HFSM2_INLINE	   T&	access()											{ return Accessor<T>::get(*this);			}
 
 	template <typename T>
-	HFSM_INLINE const T&	access() const										{ return Accessor<T>::get(*this);			}
+	HFSM2_INLINE const T&	access() const										{ return Accessor<T>::get(*this);			}
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM_INLINE ProngBits	   orthoRequested(		Registry& registry)			{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM_INLINE ProngConstBits orthoRequested(const Registry& registry) const	{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_INLINE ProngBits		orthoRequested(		 Registry& registry)		{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_INLINE ProngConstBits orthoRequested(const Registry& registry) const	{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM_INLINE ProngBits	   orthoRequested(		Control& control)			{ return orthoRequested(control._registry);								}
-	HFSM_INLINE ProngConstBits orthoRequested(const Control& control) const		{ return orthoRequested(control._registry);								}
+	HFSM2_INLINE ProngBits		orthoRequested(		 Control& control)			{ return orthoRequested(control._registry);								}
+	HFSM2_INLINE ProngConstBits orthoRequested(const Control& control) const	{ return orthoRequested(control._registry);								}
 
-	HFSM_INLINE void	deepRegister		 (Registry& registry, const Parent parent);
+	HFSM2_INLINE void	 deepRegister		  (Registry& registry, const Parent parent);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool	deepForwardEntryGuard(GuardControl&	control);
-	HFSM_INLINE bool	deepEntryGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 deepForwardEntryGuard(GuardControl& control);
+	HFSM2_INLINE bool	 deepEntryGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	deepConstruct		 (PlanControl&	control);
+	HFSM2_INLINE void	 deepConstruct		  (PlanControl&	 control);
 
-	HFSM_INLINE void	deepEnter			 (PlanControl&	control);
-	HFSM_INLINE void	deepReenter			 (PlanControl&	control);
+	HFSM2_INLINE void	 deepEnter			  (PlanControl&	 control);
+	HFSM2_INLINE void	 deepReenter		  (PlanControl&	 control);
 
-	HFSM_INLINE Status	deepUpdate			 (FullControl&	control);
+	HFSM2_INLINE Status	 deepUpdate			  (FullControl&	 control);
 
 	template <typename TEvent>
-	HFSM_INLINE Status	deepReact			 (FullControl&	control, const TEvent& event);
+	HFSM2_INLINE Status	 deepReact			  (FullControl&	 control, const TEvent& event);
 
-	HFSM_INLINE bool	deepForwardExitGuard (GuardControl&	control);
-	HFSM_INLINE bool	deepExitGuard		 (GuardControl&	control);
+	HFSM2_INLINE bool	 deepForwardExitGuard (GuardControl& control);
+	HFSM2_INLINE bool	 deepExitGuard		  (GuardControl& control);
 
-	HFSM_INLINE void	deepExit			 (PlanControl&	control);
+	HFSM2_INLINE void	 deepExit			  (PlanControl&	 control);
 
-	HFSM_INLINE void	deepDestruct		 (PlanControl&  control);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM_INLINE void	deepForwardActive	 (Control& control, const Request::Type request);
-	HFSM_INLINE void	deepForwardRequest	 (Control& control, const Request::Type request);
-
-	HFSM_INLINE void	deepRequest			 (Control& control, const Request::Type request);
+	HFSM2_INLINE void	 deepDestruct		  (PlanControl&  control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepRequestChange	 (Control& control);
-	HFSM_INLINE void	deepRequestRemain	 (Registry& registry);
-	HFSM_INLINE void	deepRequestRestart	 (Registry& registry);
-	HFSM_INLINE void	deepRequestResume	 (Registry& registry);
-	HFSM_INLINE void	deepRequestUtilize	 (Control& control);
-	HFSM_INLINE void	deepRequestRandomize (Control& control);
+	HFSM2_INLINE void	 deepForwardActive	  (Control&  control, const Request::Type request);
+	HFSM2_INLINE void	 deepForwardRequest	  (Control&  control, const Request::Type request);
 
-	HFSM_INLINE UP		deepReportChange	 (Control& control);
-	HFSM_INLINE UP		deepReportUtilize	 (Control& control);
-	HFSM_INLINE Rank	deepReportRank		 (Control& control);
-	HFSM_INLINE Utility	deepReportRandomize	 (Control& control);
+	HFSM2_INLINE void	 deepRequest		  (Control&  control, const Request::Type request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void	deepChangeToRequested(PlanControl& control);
+	HFSM2_INLINE void	 deepRequestChange	  (Control&  control);
+	HFSM2_INLINE void	 deepRequestRemain	  (Registry& registry);
+	HFSM2_INLINE void	 deepRequestRestart	  (Registry& registry);
+	HFSM2_INLINE void	 deepRequestResume	  (Registry& registry);
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void	 deepRequestUtilize	  (Control&  control);
+	HFSM2_INLINE void	 deepRequestRandomize (Control&  control);
+
+	HFSM2_INLINE UP		 deepReportChange	  (Control&  control);
+
+	HFSM2_INLINE UP		 deepReportUtilize	  (Control&  control);
+	HFSM2_INLINE Rank	 deepReportRank		  (Control&  control);
+	HFSM2_INLINE Utility deepReportRandomize  (Control&  control);
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE void	deepChangeToRequested (PlanControl& control);
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream	= typename Args::WriteStream;
+	using ReadStream	= typename Args::ReadStream;
+
+	HFSM2_INLINE void	 deepSaveActive		  (const Registry& registry, WriteStream& stream) const;
+	HFSM2_INLINE void	 deepSaveResumable	  (const Registry& registry, WriteStream& stream) const;
+
+	HFSM2_INLINE void	 deepLoadRequested	  (		 Registry& registry, ReadStream&  stream) const;
+	HFSM2_INLINE void	 deepLoadResumable	  (		 Registry& registry, ReadStream&  stream) const;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
@@ -9440,19 +9988,6 @@ struct O_ final {
 					  const RegionType region,
 					  const ShortIndex depth,
 					  StructureStateInfos& stateInfos) const;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream	= typename Args::WriteStream;
-	using ReadStream	= typename Args::ReadStream;
-
-	HFSM_INLINE void	deepSaveActive	 (const Registry& registry, WriteStream& stream) const;
-	HFSM_INLINE void	deepSaveResumable(const Registry& registry, WriteStream& stream) const;
-
-	HFSM_INLINE void	deepLoadRequested(		Registry& registry, ReadStream&  stream) const;
-	HFSM_INLINE void	deepLoadResumable(		Registry& registry, ReadStream&  stream) const;
 #endif
 
 	//----------------------------------------------------------------------
@@ -9650,10 +10185,10 @@ void
 O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 										 const Request::Type request)
 {
-	HFSM_ASSERT(control._registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
 
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
-	HFSM_ASSERT(!!requested);
+	HFSM2_ASSERT(!!requested);
 
 	_subStates.wideForwardActive(control, request, requested);
 }
@@ -9697,6 +10232,8 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 		deepRequestResume (control._registry);
 		break;
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 	case Request::UTILIZE:
 		deepRequestUtilize(control);
 		break;
@@ -9705,8 +10242,10 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 		deepRequestRandomize(control);
 		break;
 
+#endif
+
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 	}
 }
 
@@ -9744,6 +10283,8 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
@@ -9768,7 +10309,7 @@ O_<TN, TA, TH, TS...>::deepReportChange(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
 		h.utility * sub,
@@ -9786,7 +10327,7 @@ O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return {
 		h.utility * sub,
@@ -9812,10 +10353,12 @@ O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) {
 
 	const Utility sub = s / WIDTH;
 
-	HFSM_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
 
 	return h * sub;
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -9827,24 +10370,7 @@ O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-
-template <typename TN, typename TA, typename TH, typename... TS>
-void
-O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
-									const RegionType region,
-									const ShortIndex depth,
-									StructureStateInfos& stateInfos) const
-{
-	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
-	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
@@ -9886,6 +10412,23 @@ O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 
 #endif
 
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TN, typename TA, typename TH, typename... TS>
+void
+O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+									const RegionType region,
+									const ShortIndex depth,
+									StructureStateInfos& stateInfos) const
+{
+	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
+	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
+}
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -9893,7 +10436,7 @@ O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 namespace hfsm2 {
 namespace detail {
 
-#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifndef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 //------------------------------------------------------------------------------
 
@@ -9911,7 +10454,7 @@ template <typename T,
 struct Accessor<T,		 C_<TN, TA, TG, TH, TS...>> {
 	using Host =		 C_<TN, TA, TG, TH, TS...>;
 
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
+	HFSM2_INLINE		  T& get()		{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
 
 	Host& host;
 };
@@ -9927,7 +10470,7 @@ template <typename T,
 struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> {
 	using Host =   const C_<TN, TA, TG, TH, TS...>;
 
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
+	HFSM2_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
 
 	Host& host;
 };
@@ -9942,7 +10485,7 @@ template <typename T,
 struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> {
 	using Host =		 C_<TN, TA, TG,  T, TS...>;
 
-	HFSM_INLINE		  T& get()			{ return host._headState._headBox.get();	}
+	HFSM2_INLINE	   T& get()		{ return host._headState._headBox.get();	}
 
 	Host& host;
 };
@@ -9957,7 +10500,7 @@ template <typename T,
 struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> {
 	using Host =   const C_<TN, TA, TG,  T, TS...>;
 
-	HFSM_INLINE const T& get() const	{ return host._headState._headBox.get();	}
+	HFSM2_INLINE const T& get() const	{ return host._headState._headBox.get();	}
 
 	Host& host;
 };
@@ -9973,7 +10516,7 @@ template <typename T,
 struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
 	using Host =		 CS_<TN, TA, TG, NI, TS...>;
 
-	HFSM_INLINE		  T& get()		 {
+	HFSM2_INLINE	   T& get()		 {
 		return Host::LHalfInfo::StateList::template contains<T>() ?
 			Accessor<T,		  typename Host::LHalf>{host.lHalf}.get() :
 			Accessor<T,		  typename Host::RHalf>{host.rHalf}.get();
@@ -9993,7 +10536,7 @@ template <typename T,
 struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
 	using Host =   const CS_<TN, TA, TG, NI, TS...>;
 
-	HFSM_INLINE const T& get() const {
+	HFSM2_INLINE const T& get() const {
 		return Host::LHalfInfo::StateList::template contains<T>() ?
 			Accessor<T, const typename Host::LHalf>{host.lHalf}.get() :
 			Accessor<T, const typename Host::RHalf>{host.rHalf}.get();
@@ -10013,7 +10556,7 @@ template <typename T,
 struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> {
 	using Host =		 CS_<TN, TA, TG, NI, TS>;
 
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::State>{host.state}.get();				}
+	HFSM2_INLINE	   T& get()			{ return Accessor<T,	   typename Host::State>{host.state}.get();				}
 
 	Host& host;
 };
@@ -10029,7 +10572,7 @@ template <typename T,
 struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> {
 	using Host =   const CS_<TN, TA, TG, NI, TS>;
 
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::State>{host.state}.get();				}
+	HFSM2_INLINE const T& get() const	{ return Accessor<T, const typename Host::State>{host.state}.get();				}
 
 	Host& host;
 };
@@ -10044,7 +10587,7 @@ template <typename T,
 struct Accessor<T,		 O_<TN, TA, TH, TS...>> {
 	using Host =		 O_<TN, TA, TH, TS...>;
 
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
+	HFSM2_INLINE	   T& get()			{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
 
 	Host& host;
 };
@@ -10059,7 +10602,7 @@ template <typename T,
 struct Accessor<T, const O_<TN, TA, TH, TS...>> {
 	using Host =   const O_<TN, TA, TH, TS...>;
 
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
+	HFSM2_INLINE const T& get() const	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
 
 	Host& host;
 };
@@ -10073,7 +10616,7 @@ template <typename T,
 struct Accessor<T,		 O_<TN, TA,  T, TS...>> {
 	using Host =		 O_<TN, TA,  T, TS...>;
 
-	HFSM_INLINE		  T& get()			{ return host._headState._headBox.get();	}
+	HFSM2_INLINE	   T& get()			{ return host._headState._headBox.get();	}
 
 	Host& host;
 };
@@ -10087,7 +10630,7 @@ template <typename T,
 struct Accessor<T, const O_<TN, TA,  T, TS...>> {
 	using Host =   const O_<TN, TA,  T, TS...>;
 
-	HFSM_INLINE const T& get() const	{ return host._headState._headBox.get();	}
+	HFSM2_INLINE const T& get() const	{ return host._headState._headBox.get();	}
 
 	Host& host;
 };
@@ -10102,7 +10645,7 @@ template <typename T,
 struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
 	using Host =		 OS_<TN, TA, NI, TS...>;
 
-	HFSM_INLINE		  T& get()		 {
+	HFSM2_INLINE	   T& get()		 {
 		return Host::InitialStates::template contains<T>() ?
 			Accessor<T,		  typename Host::Initial  >{host.initial  }.get() :
 			Accessor<T,		  typename Host::Remaining>{host.remaining}.get();
@@ -10121,7 +10664,7 @@ template <typename T,
 struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
 	using Host =   const OS_<TN, TA, NI, TS...>;
 
-	HFSM_INLINE const T& get() const {
+	HFSM2_INLINE const T& get() const {
 		return Host::InitialStates::template contains<T>() ?
 			Accessor<T, const typename Host::Initial  >{host.initial  }.get() :
 			Accessor<T, const typename Host::Remaining>{host.remaining}.get();
@@ -10140,7 +10683,7 @@ template <typename T,
 struct Accessor<T,		 OS_<TN, TA, NI, TS>> {
 	using Host =		 OS_<TN, TA, NI, TS>;
 
-	HFSM_INLINE		  T& get()			{ return Accessor<T,	   typename Host::Initial>{host.initial  }.get();	}
+	HFSM2_INLINE	   T& get()			{ return Accessor<T,	   typename Host::Initial>{host.initial  }.get();	}
 
 	Host& host;
 };
@@ -10155,12 +10698,10 @@ template <typename T,
 struct Accessor<T, const OS_<TN, TA, NI, TS>> {
 	using Host =   const OS_<TN, TA, NI, TS>;
 
-	HFSM_INLINE const T& get() const	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
+	HFSM2_INLINE const T& get() const	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
 
 	Host& host;
 };
-
-////////////////////////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -10177,7 +10718,7 @@ template <typename T,
 struct Accessor<T,		 S_<TN, TA, TH>> {
 	using Host =		 S_<TN, TA, TH>;
 
-	HFSM_INLINE		  T& get()			{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+	HFSM2_INLINE	   T& get()			{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 
 	Host& host;
 };
@@ -10191,7 +10732,7 @@ template <typename T,
 struct Accessor<T, const S_<TN, TA, TH>> {
 	using Host =   const S_<TN, TA, TH>;
 
-	HFSM_INLINE const T& get() const	{ HFSM_BREAK(); return *reinterpret_cast<T*>(0);	}
+	HFSM2_INLINE const T& get() const	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 
 	Host& host;
 };
@@ -10208,7 +10749,7 @@ template <typename T,
 struct Accessor<T,		 S_<TN, TA,  T>> {
 	using Host =		 S_<TN, TA,  T>;
 
-	HFSM_INLINE		  T& get()			{ return host._headBox.get();			}
+	HFSM2_INLINE	   T& get()			{ return host._headBox.get();			}
 
 	Host& host;
 };
@@ -10221,7 +10762,7 @@ template <typename T,
 struct Accessor<T, const S_<TN, TA,  T>> {
 	using Host =   const S_<TN, TA,  T>;
 
-	HFSM_INLINE const T& get() const	{ return host._headBox.get();			}
+	HFSM2_INLINE const T& get() const	{ return host._headBox.get();			}
 
 	Host& host;
 };
@@ -10234,48 +10775,79 @@ struct Accessor<T, const S_<TN, TA,  T>> {
 }
 
 namespace hfsm2 {
+namespace detail {
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC_ = EmptyContext,
-		  typename TN_ = char,
-		  typename TU_ = float,
-		  typename TG_ = ::hfsm2::RandomT<TU_>,
-		  LongIndex NS = 4,
-		  LongIndex NT = INVALID_LONG_INDEX>
-struct ConfigT {
-	using Context = TC_;
+template <FeatureTag NFeatureTag
+		, typename TContext
 
-	using Rank	  = TN_;
-	using Utility = TU_;
-	using RNG	  = TG_;
-	using Logger  = LoggerInterfaceT<Context, Utility>;
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT = NS;
-	static constexpr LongIndex TASK_CAPACITY	  = NT;
+		, LongIndex NSubstitutionLimit
+		, LongIndex NTaskCapacity>
+struct G_ {
+	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
 
+	using Context = TContext;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using Rank	  = TRank;
+	using Utility = TUtility;
+	using RNG	  = TRNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger  = LoggerInterfaceT<Context HFSM2_IF_UTILITY_THEORY(, Utility)>;
+#endif
+
+	static constexpr LongIndex SUBSTITUTION_LIMIT = NSubstitutionLimit;
+	static constexpr LongIndex TASK_CAPACITY	  = NTaskCapacity;
+
+	/// @brief Set Context type
+	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = ConfigT<  T, TN_, TU_, TG_, NS, NT>;
+	using ContextT			 = G_<FEATURE_TAG,       T HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	/// @brief Set Rank type
+	/// @tparam T Rank type for 'TRank State::rank() const' method
 	template <typename T>
-	using RankT				 = ConfigT<TC_,   T, TU_, TG_, NS, NT>;
+	using RankT				 = G_<FEATURE_TAG, Context                        ,    T, Utility, RNG , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+	/// @brief Set Utility type
+	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using UtilityT			 = ConfigT<TC_, TN_,   T, TG_, NS, NT>;
+	using UtilityT			 = G_<FEATURE_TAG, Context                        , Rank,       T, RNG , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+	/// @brief Set RNG type
+	/// @tparam T RNG type used in 'Random' regions
 	template <typename T>
-	using RandomT			 = ConfigT<TC_, TN_, TU_,   T, NS, NT>;
+	using RandomT			 = G_<FEATURE_TAG, Context                        , Rank, Utility,   T , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
+#endif
+
+	/// @brief Set Substitution limit
+	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
 	template <LongIndex N>
-	using SubstitutionLimitN = ConfigT<TC_, TN_, TU_, TG_,  N, NS>;
+	using SubstitutionLimitN = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG),                  N, TASK_CAPACITY>;
 
+	/// @brief Set Task capacity
+	/// @tparam N Maximum number of tasks across all plans
 	template <LongIndex N>
-	using TaskCapacityN		 = ConfigT<TC_, TN_, TU_, TG_, NT,  N>;
+	using TaskCapacityN		 = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT,             N>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
 	struct UP {
-		HFSM_INLINE UP(const Utility utility_  = Utility{1.0f},
+		HFSM2_INLINE UP(const Utility utility_  = Utility{1.0f},
 					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
 			: utility{utility_}
 			, prong{prong_}
@@ -10285,100 +10857,169 @@ struct ConfigT {
 		ShortIndex prong;
 	};
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
-
-//------------------------------------------------------------------------------
-
-using Config = ConfigT<>;
-
-namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TConfig>
-struct M_ {
-	using Config_ = TConfig;
+struct M_;
+
+template <FeatureTag NFeatureTag
+		, typename TContext
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, LongIndex NSubstitutionLimit
+		, LongIndex NTaskCapacity>
+struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>> {
+	using Cfg = G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>;
+
+	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
 
 	//----------------------------------------------------------------------
 
+	/// @brief Composite region ('changeTo<>()' into the region acts as 'restart<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Composite			 = CI_<Strategy::Composite,	   THead, TSubStates...>;
 
+	/// @brief Headless composite region ('changeTo<>()' into the region acts as 'restart<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using CompositePeers	 = CI_<Strategy::Composite,    void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Resumable region ('changeTo<>()' into the region acts as 'resume<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Resumable			  = CI_<Strategy::Resumable,   THead, TSubStates...>;
 
+	/// @brief Headless resumable region ('changeTo<>()' into the region acts as 'resume<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using ResumablePeers	  = CI_<Strategy::Resumable,   void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	/// @brief Utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Utilitarian		  = CI_<Strategy::Utilitarian, THead, TSubStates...>;
 
+	/// @brief Headless utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using UtilitarianPeers	  = CI_<Strategy::Utilitarian, void,  TSubStates...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Random region ('changeTo<>()' into the region acts as 'randomize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Random			  = CI_<Strategy::RandomUtil,  THead, TSubStates...>;
 
+	/// @brief Headless random region ('changeTo<>()' into the region acts as 'randomize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using RandomPeers		  = CI_<Strategy::RandomUtil,  void,  TSubStates...>;
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Orthogonal region (when activated, activates all sub-states)
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
 	using Orthogonal		  = OI_<THead, TSubStates...>;
 
+	/// @brief Headless orthogonal region (when activated, activates all sub-states)
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
 
 	//----------------------------------------------------------------------
 
+	/// @brief Root ('changeTo<>()' into the root region acts as 'restart<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using Root				  = RF_<Config_, Composite  <THead, TSubStates...>>;
+	using Root				  = RF_<Cfg, Composite  <THead, TSubStates...>>;
 
+	/// @brief Headless root ('changeTo<>()' into the root region acts as 'restart<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using PeerRoot			  = RF_<Config_, CompositePeers  <  TSubStates...>>;
+	using PeerRoot			  = RF_<Cfg, CompositePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Resumable root ('changeTo<>()' into the root region acts as 'resume<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using ResumableRoot		  = RF_<Config_, Resumable  <THead, TSubStates...>>;
+	using ResumableRoot		  = RF_<Cfg, Resumable  <THead, TSubStates...>>;
 
+	/// @brief Headless resumable root ('changeTo<>()' into the root region acts as 'resume<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using ResumablePeerRoot	  = RF_<Config_, ResumablePeers  <  TSubStates...>>;
+	using ResumablePeerRoot	  = RF_<Cfg, ResumablePeers  <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename THead, typename... TSubStates>
-	using UtilitarianRoot	  = RF_<Config_, Utilitarian<THead, TSubStates...>>;
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
+	/// @brief Utilitarian root ('changeTo<>()' into the root region acts as 'utilize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
+	template <typename THead, typename... TSubStates>
+	using UtilitarianRoot	  = RF_<Cfg, Utilitarian<THead, TSubStates...>>;
+
+	/// @brief Headless utilitarian root ('changeTo<>()' into the root region acts as 'utilize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using UtilitarianPeerRoot = RF_<Config_, UtilitarianPeers<  TSubStates...>>;
+	using UtilitarianPeerRoot = RF_<Cfg, UtilitarianPeers<  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Random root ('changeTo<>()' into the root region acts as 'randomize<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using RandomRoot		  = RF_<Config_, Random		<THead, TSubStates...>>;
+	using RandomRoot		  = RF_<Cfg, Random		<THead, TSubStates...>>;
 
+	/// @brief Headless random root ('changeTo<>()' into the root region acts as 'randomize<>()')
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using RandomPeerRoot	  = RF_<Config_, RandomPeers	 <  TSubStates...>>;
+	using RandomPeerRoot	  = RF_<Cfg, RandomPeers	 <  TSubStates...>>;
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Orthogonal root (all sub-states are active at all times)
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
 	template <typename THead, typename... TSubStates>
-	using OrthogonalRoot	  = RF_<Config_, Orthogonal <THead, TSubStates...>>;
+	using OrthogonalRoot	  = RF_<Cfg, Orthogonal <THead, TSubStates...>>;
 
+	/// @brief Headless orthogonal root (all sub-states are active at all times)
+	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
-	using OrthogonalPeerRoot  = RF_<Config_, OrthogonalPeers <  TSubStates...>>;
+	using OrthogonalPeerRoot  = RF_<Cfg, OrthogonalPeers <  TSubStates...>>;
 
 	//----------------------------------------------------------------------
 };
@@ -10387,10 +11028,36 @@ struct M_ {
 
 }
 
-using Machine = detail::M_<Config>;
+/// @brief Type configuration for MachineT<>
+/// @tparam TContext Context type for data shared between states and/or data interface between FSM and external code
+/// @tparam TRank Rank type for 'TRank State::rank() const' method
+/// @tparam TUtility Utility type for 'TUtility State::utility() const' method
+/// @tparam TRNG RNG type used in 'Random' regions
+/// @tparam NSubstitutionLimit Maximum number times 'guard()' methods can substitute their states for others
+/// @tparam NTaskCapacity Maximum number of tasks across all plans
+template <typename TContext = EmptyContext
 
-template <typename TConfig>
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank    = char
+		, typename TUtility = float
+		, typename TRNG     = ::hfsm2::RandomT<TUtility>
+	#endif
+
+		, LongIndex NSubstitutionLimit = 4
+		, LongIndex NTaskCapacity      = INVALID_LONG_INDEX>
+using ConfigT = detail::G_<HFSM2_FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>;
+
+/// @brief Type configuration for MachineT<>
+using Config = ConfigT<>;
+
+/// @brief 'Template namespace' for FSM classes
+/// @tparam TConfig 'ConfigT<>' type configuration for MachineT<>
+/// @see ConfigT<>
+template <typename TConfig = Config>
 using MachineT = detail::M_<TConfig>;
+
+/// @brief 'Template namespace' for FSM classes parametrized with default types
+using Machine = MachineT<>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -10401,20 +11068,28 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief FSM Root
+/// @tparam Cfg Type configuration
+/// @tparam TApex Root region type
 template <typename TConfig,
 		  typename TApex>
 class R_ {
-	using Config_				= TConfig;
-	using Context				= typename Config_::Context;
-	using Rank					= typename Config_::Rank;
-	using Utility				= typename Config_::Utility;
-	using RNG					= typename Config_::RNG;
-	using Logger				= typename Config_::Logger;
+	using Context				= typename TConfig::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using Rank					= typename TConfig::Rank;
+	using Utility				= typename TConfig::Utility;
+	using RNG					= typename TConfig::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger				= typename TConfig::Logger;
+#endif
 
 	using Apex					= TApex;
 	using ApexInfo				= WrapInfo<Apex>;
 
-	using Info					= RF_<Config_, Apex>;
+	using Info					= RF_<TConfig, Apex>;
 	using StateList				= typename Info::StateList;
 	using RegionList			= typename Info::RegionList;
 
@@ -10456,7 +11131,12 @@ private:
 
 	using GuardControl			= GuardControlT<Args>;
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	using WriteStream			= typename Args::WriteStream;
+	using ReadStream			= typename Args::ReadStream;
+#endif
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
 
 	using Prefix				= StaticArray<wchar_t, REVERSE_DEPTH * 2 + 2>;
@@ -10465,172 +11145,343 @@ private:
 	using StructureStateInfos	= typename Args::StructureStateInfos;
 #endif
 
-#ifdef HFSM_ENABLE_SERIALIZATION
-	using WriteStream			= typename Args::WriteStream;
-	using ReadStream			= typename Args::ReadStream;
-#endif
-
+	//----------------------------------------------------------------------
 public:
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	using Structure				= Array<StructureEntry, NAME_COUNT>;
-	using ActivityHistory		= Array<char,			NAME_COUNT>;
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-public:
-	explicit R_(Context& context,
-				RNG& rng
-				HFSM_IF_LOGGER(, Logger* const logger = nullptr));
+	explicit R_(Context& context
+				HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+				HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr));
 
 	~R_();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename T>
-	static constexpr StateID  stateId()				{ return			StateList ::template index<T>();	}
+	/// @brief Get state identifier for a state type
+	/// @tparam TState State type
+	/// @return Numeric state identifier
+	template <typename TState>
+	static constexpr StateID  stateId()					{ return			StateList ::template index<TState>();	}
 
-	template <typename T>
-	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<T>();	}
+	/// @brief Get region identifier for a region type
+	/// @tparam TState Region head state type
+	/// @return Numeric region identifier
+	template <typename TState>
+	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<TState>();	}
 
 	//----------------------------------------------------------------------
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+private:
 
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable: 4348) // redefinition of default parameter: parameter 2
 #endif
 
-	template <typename T, bool = StateList::template contains<T>()>
+	template <typename TState, bool = StateList::template contains<TState>()>
 	struct Accessor;
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
 #endif
 
-	template <typename T>
-	struct Accessor<T, true> {
-		HFSM_INLINE static		 T& get(	  MaterialApex& apex)	{ return apex.template access<T>();		}
-		HFSM_INLINE static const T& get(const MaterialApex& apex)	{ return apex.template access<T>();		}
+	template <typename TState>
+	struct Accessor<TState, true> {
+		HFSM2_INLINE static		  TState& get(		MaterialApex& apex)	{ return apex.template access<TState>();	}
+		HFSM2_INLINE static const TState& get(const MaterialApex& apex)	{ return apex.template access<TState>();	}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+public:
 
 	// if you see..
-	// VS	 - error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<T,false>'
+	// VS	 - error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<TState,false>'
 	// Clang - error : implicit instantiation of undefined template 'hfsm2::detail::R_<..>::Accessor<*, false>'
 	//
 	// .. you're trying to access() a type that is not present in the state machine hierarchy
 
-	template <typename T>
-	HFSM_INLINE		  T& access()									{ return Accessor<T>::get(_apex);		}
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
+	template <typename TState>
+	HFSM2_INLINE	   TState& access()										{ return Accessor<TState>::get(_apex);	}
 
-	template <typename T>
-	HFSM_INLINE const T& access() const								{ return Accessor<T>::get(_apex);		}
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
+	template <typename TState>
+	HFSM2_INLINE const TState& access() const								{ return Accessor<TState>::get(_apex);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #else
 
-	template <typename T>
-	HFSM_INLINE		  T& access()					{ return Accessor<T,	   MaterialApex>{_apex}.get();	}
+public:
 
-	template <typename T>
-	HFSM_INLINE const T& access() const				{ return Accessor<T, const MaterialApex>{_apex}.get();	}
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
+	template <typename TState>
+	HFSM2_INLINE	   TState& access()					{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
+
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
+	template <typename TState>
+	HFSM2_INLINE const TState& access() const			{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
 
 #endif
 
 	//----------------------------------------------------------------------
 
+	/// @brief Trigger FSM update cycle (recursively call 'update()' on all active states, then process requested transitions)
 	void update();
 
+	/// @brief Have FSM react to an event (recursively call matching 'react<>()' on all active states, then process requested transitions)
+	/// @tparam TEvent Event type
+	/// @param event Event to react to
 	template <typename TEvent>
-	HFSM_INLINE void react(const TEvent& event);
+	HFSM2_INLINE void react(const TEvent& event);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE bool isActive   (const StateID stateId) const	{ return _registry.isActive   (stateId);	}
-	HFSM_INLINE bool isResumable(const StateID stateId) const	{ return _registry.isResumable(stateId);	}
+	/// @brief Check if a state is active
+	/// @param stateId State identifier
+	/// @return State active status
+	HFSM2_INLINE bool isActive   (const StateID stateId) const		{ return _registry.isActive   (stateId);		}
 
-	HFSM_INLINE bool isScheduled(const StateID stateId) const	{ return isResumable(stateId);				}
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @param stateId State identifier
+	/// @return State resumable status
+	HFSM2_INLINE bool isResumable(const StateID stateId) const		{ return _registry.isResumable(stateId);		}
 
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @param stateId State identifier
+	/// @return State scheduled status
+	HFSM2_INLINE bool isScheduled(const StateID stateId) const		{ return isResumable(stateId);					}
+
+	/// @brief Check if a state is active
+	/// @tparam TState State type
+	/// @return State active status
 	template <typename TState>
-	HFSM_INLINE bool isActive   () const						{ return isActive	(stateId<TState>());	}
+	HFSM2_INLINE bool isActive   () const							{ return isActive	(stateId<TState>());		}
 
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @tparam TState State type
+	/// @return State resumable status
 	template <typename TState>
-	HFSM_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());	}
+	HFSM2_INLINE bool isResumable() const							{ return isResumable(stateId<TState>());		}
 
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @tparam TState State type
+	/// @return State scheduled status
 	template <typename TState>
-	HFSM_INLINE bool isScheduled() const						{ return isResumable<TState>();				}
+	HFSM2_INLINE bool isScheduled() const							{ return isResumable<TState>();					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE void changeTo (const StateID stateId);
-	HFSM_INLINE void restart  (const StateID stateId);
-	HFSM_INLINE void resume	  (const StateID stateId);
-	HFSM_INLINE void utilize  (const StateID stateId);
-	HFSM_INLINE void randomize(const StateID stateId);
-	HFSM_INLINE void schedule (const StateID stateId);
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @param stateId State identifier
+	HFSM2_INLINE void changeTo	 (const StateID stateId);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @param stateId State identifier
+	HFSM2_INLINE void restart	 (const StateID stateId);
 
-	template <typename TState>
-	HFSM_INLINE void changeTo ()								{ changeTo (stateId<TState>());				}
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @param stateId State identifier
+	HFSM2_INLINE void resume	 (const StateID stateId);
 
-	template <typename TState>
-	HFSM_INLINE void restart  ()								{ restart  (stateId<TState>());				}
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	template <typename TState>
-	HFSM_INLINE void resume	  ()								{ resume   (stateId<TState>());				}
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void utilize	 (const StateID stateId);
 
-	template <typename TState>
-	HFSM_INLINE void utilize  ()								{ utilize  (stateId<TState>());				}
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void randomize	 (const StateID stateId);
 
-	template <typename TState>
-	HFSM_INLINE void randomize()								{ randomize(stateId<TState>());				}
-
-	template <typename TState>
-	HFSM_INLINE void schedule ()								{ schedule (stateId<TState>());				}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	const Structure&	   structure()		 const				{ return _structure;						}
-	const ActivityHistory& activityHistory() const				{ return _activityHistory;					}
 #endif
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @param stateId State identifier
+	HFSM2_INLINE void schedule	 (const StateID stateId);
 
-	const TransitionHistory& transitionHistory() const			{ return _transitionHistory;				}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	void replayTransition (const Transition& transition)		{ replayTransitions(&transition, 1);		}
-	void replayTransitions(const Transition* const transitions, const uint64_t count);
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void changeTo	 ()									{ changeTo (stateId<TState>());					}
+
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void restart	 ()									{ restart  (stateId<TState>());					}
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void resume	 ()									{ resume   (stateId<TState>());					}
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///   with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TState State type
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM2_INLINE void utilize	()									{ utilize  (stateId<TState>());					}
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///   proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TState State type
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM2_INLINE void randomize	()									{ randomize(stateId<TState>());					}
+
 #endif
 
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void schedule	()									{ schedule (stateId<TState>());					}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Check if a state is going to be activated or deactivated
+	/// @param stateId State identifier
+	/// @return State pending activation/deactivation status
+	HFSM2_INLINE bool isPendingChange(const StateID stateId) const	{ return _registry.isPendingChange(stateId);	}
+
+	/// @brief Check if a state is going to be activated
+	/// @param stateId State identifier
+	/// @return State pending activation status
+	HFSM2_INLINE bool isPendingEnter (const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
+
+	/// @brief Check if a state is going to be deactivated
+	/// @param stateId State identifier
+	/// @return State pending deactivation status
+	HFSM2_INLINE bool isPendingExit	 (const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
+
+	/// @brief Check if a state is going to be activated or deactivated
+	/// @tparam TState State type
+	/// @return State pending activation/deactivation status
+	template <typename TState>
+	HFSM2_INLINE bool isPendingChange()								{ return isPendingChange(stateId<TState>());	}
+
+	/// @brief Check if a state is going to be activated
+	/// @tparam TState State type
+	/// @return State pending activation status
+	template <typename TState>
+	HFSM2_INLINE bool isPendingEnter ()								{ return isPendingEnter (stateId<TState>());	}
+
+	/// @brief Check if a state is going to be deactivated
+	/// @tparam TState State type
+	/// @return State pending deactivation status
+	template <typename TState>
+	HFSM2_INLINE bool isPendingExit  ()								{ return isPendingExit  (stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Reset FSM to initial state (recursively 'exit()' currently active states, 'enter()' initial states)
 	void reset();
 
-#ifdef HFSM_ENABLE_SERIALIZATION
-	// Buffer for serialization
-	//  Members:
-	//   bitSize - Number of payload bits used
-	//   payload - Serialized data
-	//  See https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization
+#ifdef HFSM2_ENABLE_SERIALIZATION
+
+	/// @brief Buffer for serialization
+	/// @see https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization
+	/// @see HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer			= typename Args::SerialBuffer;
 
-	// Serialize the structural configuration into 'buffer'
+	/// @brief Serialize FSM into 'buffer'
+	/// @param buffer 'SerialBuffer' to serialize to
+	/// @see HFSM2_ENABLE_SERIALIZATION
 	void save(		SerialBuffer& buffer) const;
 
-	// De-serialize the configuration and initialize the instance
+	/// @brief De-serialize FSM from 'buffer'
+	/// @param buffer 'SerialBuffer' to de-serialize from
+	/// @see HFSM2_ENABLE_SERIALIZATION
 	void load(const SerialBuffer& buffer);
+
 #endif
 
-#if defined HFSM_ENABLE_LOG_INTERFACE || defined HFSM_ENABLE_VERBOSE_DEBUG_LOG
-	void attachLogger(Logger* const logger)						{ _logger = logger;							}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+	/// @brief Array of last recorded transitions
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
+	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
+
+	/// @brief Get the list of transitions recorded during last 'update()'
+	/// @return Array of last recorded transitions
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
+	const TransitionHistory& transitionHistory() const				{ return _transitionHistory;					}
+
+	/// @brief Force process transitions (skips 'guard()' calls)
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions Array of 'Transition' to replay
+	/// @param count Number of transitions
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
+	void replayTransitions(const Transition* const transitions, const uint64_t count);
+
+	/// @brief Force process transitions (skips 'guard()' calls)
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions Array of 'Transition' to replay
+	/// @param count Number of transitions
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
+	void replayTransitions(const TransitionHistory& transitions)	{ replayTransitions(transitions, 1);			}
+
+	/// @brief Force process a transition (skips 'guard()' calls)
+	///   Can be used to synchronize multiple FSMs
+	/// @param transition 'Transition' to replay
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
+	void replayTransition (const Transition& transition)			{ replayTransitions(&transition, 1);			}
+
 #endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+	/// @brief Array of 'StructureEntry' representing FSM structure
+	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
+	using Structure				= Array<StructureEntry, NAME_COUNT>;
+
+	/// @brief Array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
+	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
+	using ActivityHistory		= Array<char,			NAME_COUNT>;
+
+	/// @brief Get the array of 'StructureEntry' representing FSM structure
+	/// @return FSM structure
+	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
+	const Structure&	   structure()		 const					{ return _structure;							}
+
+	/// @brief Get the array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
+	/// @return FSM activation history
+	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
+	const ActivityHistory& activityHistory() const					{ return _activityHistory;						}
+
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+
+	/// @brief Attach logger
+	/// @param logger A logger implementing 'hfsm2::LoggerInterfaceT<TContext>' interface
+	/// @see HFSM2_ENABLE_LOG_INTERFACE
+	void attachLogger(Logger* const logger)							{ _logger = logger;								}
+
+#endif
+
+	//----------------------------------------------------------------------
 
 private:
 	void initialEnter();
@@ -10639,25 +11490,33 @@ private:
 	bool applyRequest (Control& control, const Request& request);
 	bool applyRequests(Control& control);
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-	bool applyRequests(Control& control,
-					   const Transition* const transitions,
-					   const uint64_t count);
-#endif
-
 	bool cancelledByEntryGuards(const Requests& pendingChanges);
 	bool cancelledByGuards(const Requests& pendingChanges);
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	void getStateNames();
-	void udpateActivity();
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	bool applyRequests(Control& control,
+					   const Transition* const transitions,
+					   const uint64_t count);
+
+	void recordRequestsAs(const Method method);
+
+	TransitionHistory _transitionHistory;
 #endif
 
-	HFSM_IF_TRANSITION_HISTORY(void recordRequestsAs(const Method method));
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+	void getStateNames();
+	void udpateActivity();
+
+	Prefixes _prefixes;
+	StructureStateInfos _stateInfos;
+
+	Structure _structure;
+	ActivityHistory _activityHistory;
+#endif
 
 private:
 	Context& _context;
-	RNG& _rng;
+	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 
 	Registry _registry;
 	PlanData _planData;
@@ -10666,21 +11525,14 @@ private:
 
 	MaterialApex _apex;
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
-	Prefixes _prefixes;
-	StructureStateInfos _stateInfos;
-
-	Structure _structure;
-	ActivityHistory _activityHistory;
-#endif
-
-	HFSM_IF_TRANSITION_HISTORY(TransitionHistory _transitionHistory);
-
-	HFSM_IF_LOGGER(Logger* _logger);
+	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/// @brief FSM Root
+/// @tparam Cfg Type configuration
+/// @tparam TApex Root region type
 template <typename TConfig,
 		  typename TApex>
 class RW_ final
@@ -10692,88 +11544,134 @@ public:
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_,
-		  typename TU_,
-		  typename TR_,
-		  LongIndex NS,
-		  LongIndex NT,
+template <
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		  typename TRank,
+		  typename TUtility,
+		  typename TRNG,
+#endif
+		  LongIndex NSubstitutionLimit,
+		  LongIndex NTaskCapacity,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex>
 	, ::hfsm2::EmptyContext
 {
-	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, TR_, NS, NT>;
-	using Context	= typename Config_::Context;
-	using RNG		= typename Config_::RNG;
-	using Logger	= typename Config_::Logger;
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using RNG		= TRNG;
+#endif
 
-	using R			= R_<Config_, TApex>;
+	using Context	= ::hfsm2::EmptyContext;
+	using Cfg		= ::hfsm2::ConfigT<Context, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using R			= R_<Cfg, TApex>;
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	= typename Cfg::Logger;
+#endif
 
 public:
-	explicit HFSM_INLINE RW_(RNG& rng
-							 HFSM_IF_LOGGER(, Logger* const logger = nullptr))
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	explicit HFSM2_INLINE RW_(RNG& rng
+							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
 			rng
-			HFSM_IF_LOGGER(, logger)}
+			HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
+
+#else
+
+	explicit HFSM2_INLINE RW_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))
+		: R{static_cast<Context&>(*this)
+			HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC_,
-		  typename TN_,
-		  typename TU_,
-		  LongIndex NS,
-		  LongIndex NT,
+template <typename TContext,
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		  typename TRank,
+		  typename TUtility,
+#endif
+		  LongIndex NSubstitutionLimit,
+		  LongIndex NTaskCapacity,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex>
-	, ::hfsm2::RandomT<TU_>
+class RW_	   <::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex> final
+	: public R_<::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex>
+	HFSM2_IF_UTILITY_THEORY(, ::hfsm2::RandomT<TUtility>)
 {
-	using Config_	= ::hfsm2::ConfigT<TC_, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>;
-	using Context	= typename Config_::Context;
-	using RNG		= typename Config_::RNG;
-	using Logger	= typename Config_::Logger;
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using RNG		= ::hfsm2::RandomT<TUtility>;
+#endif
 
-	using R			= R_<Config_, TApex>;
+	using Context	= TContext;
+	using Cfg		= ::hfsm2::ConfigT<Context, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using R			= R_<Cfg, TApex>;
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	= typename Cfg::Logger;
+#endif
+
 
 public:
-	explicit HFSM_INLINE RW_(Context& context
-							 HFSM_IF_LOGGER(, Logger* const logger = nullptr))
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	explicit HFSM2_INLINE RW_(Context& context
+							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{context,
 			static_cast<RNG&>(*this)
-			HFSM_IF_LOGGER(, logger)}
+			HFSM2_IF_LOG_INTERFACE(, logger)}
 		, RNG{0}
 	{}
+
+#else
+
+	explicit HFSM2_INLINE RW_(Context& context
+							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+		: R{context
+			HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN_,
-		  typename TU_,
-		  LongIndex NS,
-		  LongIndex NT,
-		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>, TApex>
-	, ::hfsm2::EmptyContext
-	, ::hfsm2::RandomT<TU_>
-{
-	using Config_	= ::hfsm2::ConfigT<::hfsm2::EmptyContext, TN_, TU_, ::hfsm2::RandomT<TU_>, NS, NT>;
-	using Context	= typename Config_::Context;
-	using RNG		= typename Config_::RNG;
-	using Logger	= typename Config_::Logger;
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	using R			= R_<Config_, TApex>;
+template <typename TRank,
+		  typename TUtility,
+		  LongIndex NSubstitutionLimit,
+		  LongIndex NTaskCapacity,
+		  typename TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit, NTaskCapacity>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit, NTaskCapacity>, TApex>
+	, ::hfsm2::EmptyContext
+	, ::hfsm2::RandomT<TUtility>
+{
+	using Context	= ::hfsm2::EmptyContext;
+	using RNG		= ::hfsm2::RandomT<TUtility>;
+	using Cfg		= ::hfsm2::ConfigT<Context, TRank, TUtility, RNG, NSubstitutionLimit, NTaskCapacity>;
+	using R			= R_<Cfg, TApex>;
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	= typename Cfg::Logger;
+#endif
 
 public:
-	explicit HFSM_INLINE RW_(HFSM_IF_LOGGER(Logger* const logger = nullptr))
+	explicit HFSM2_INLINE RW_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
 			static_cast<RNG&>(*this)
-			HFSM_IF_LOGGER(, logger)}
+			HFSM2_IF_LOG_INTERFACE(, logger)}
 		, RNG{0}
 	{}
 };
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -10786,16 +11684,16 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TG, typename TA>
-R_<TG, TA>::R_(Context& context,
-			   RNG& rng
-			   HFSM_IF_LOGGER(, Logger* const logger))
+R_<TG, TA>::R_(Context& context
+			   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+			   HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
 	: _context{context}
-	, _rng{rng}
-	HFSM_IF_LOGGER(, _logger{logger})
+	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
+	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
 {
 	_apex.deepRegister(_registry, Parent{});
 
-	HFSM_IF_STRUCTURE(getStateNames());
+	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
 
 	initialEnter();
 }
@@ -10804,16 +11702,16 @@ R_<TG, TA>::R_(Context& context,
 
 template <typename TG, typename TA>
 R_<TG, TA>::~R_() {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM2_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	  (control);
 	_apex.deepDestruct(control);
 
-	HFSM_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_ASSERT(_planData.verifyPlans());
 }
 
 //------------------------------------------------------------------------------
@@ -10821,16 +11719,16 @@ R_<TG, TA>::~R_() {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::update() {
-	FullControl control(_context,
-						_rng,
-						_registry,
-						_planData,
-						_requests,
-						HFSM_LOGGER_OR(_logger, nullptr));
+	FullControl control{_context
+						HFSM2_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						, _requests
+						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepUpdate(control);
 
-	HFSM_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_ASSERT(_planData.verifyPlans());
 
 	if (_requests.count())
 		processTransitions();
@@ -10844,16 +11742,16 @@ template <typename TG, typename TA>
 template <typename TEvent>
 void
 R_<TG, TA>::react(const TEvent& event) {
-	FullControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						_requests,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	FullControl control{_context
+						HFSM2_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						, _requests
+						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepReact(control, event);
 
-	HFSM_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_ASSERT(_planData.verifyPlans());
 
 	if (_requests.count())
 		processTransitions();
@@ -10868,7 +11766,7 @@ void
 R_<TG, TA>::changeTo(const StateID stateId) {
 	_requests.append(Request{Request::Type::CHANGE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10878,7 +11776,7 @@ void
 R_<TG, TA>::restart(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESTART, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10888,17 +11786,19 @@ void
 R_<TG, TA>::resume(const StateID stateId) {
 	_requests.append(Request{Request::Type::RESUME, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TG, typename TA>
 void
 R_<TG, TA>::utilize(const StateID stateId) {
 	_requests.append(Request{Request::Type::UTILIZE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10908,8 +11808,10 @@ void
 R_<TG, TA>::randomize(const StateID stateId) {
 	_requests.append(Request{Request::Type::RANDOMIZE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
+
+#endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -10918,51 +11820,19 @@ void
 R_<TG, TA>::schedule(const StateID stateId) {
 	_requests.append(Request{Request::Type::SCHEDULE, stateId});
 
-	HFSM_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-
-template <typename TG, typename TA>
-void
-R_<TG, TA>::replayTransitions(const Transition* const transitions,
-							  const uint64_t count)
-{
-	if (HFSM_CHECKED(transitions && count)) {
-		HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
-
-		PlanControl control{_context,
-							_rng,
-							_registry,
-							_planData,
-							HFSM_LOGGER_OR(_logger, nullptr)};
-
-		if (applyRequests(control, transitions, count)) {
-			_apex.deepChangeToRequested(control);
-
-			_registry.clearRequests();
-
-			HFSM_IF_ASSERT(_planData.verifyPlans());
-		}
-
-		HFSM_IF_STRUCTURE(udpateActivity());
-	}
-}
-
-#endif
 
 //------------------------------------------------------------------------------
 
 template <typename TG, typename TA>
 void
 R_<TG, TA>::reset() {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM2_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
 	_apex.deepDestruct (control);
@@ -10976,7 +11846,7 @@ R_<TG, TA>::reset() {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TG, typename TA>
 void
@@ -10991,11 +11861,11 @@ R_<TG, TA>::save(SerialBuffer& _buffer) const {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::load(const SerialBuffer& buffer) {
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM2_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
 	_apex.deepDestruct (control);
@@ -11011,22 +11881,54 @@ R_<TG, TA>::load(const SerialBuffer& buffer) {
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+template <typename TG, typename TA>
+void
+R_<TG, TA>::replayTransitions(const Transition* const transitions,
+							  const uint64_t count)
+{
+	if (HFSM2_CHECKED(transitions && count)) {
+		HFSM2_IF_TRANSITION_HISTORY(_transitionHistory.clear());
+
+		PlanControl control{_context
+							HFSM2_IF_UTILITY_THEORY(, _rng)
+							, _registry
+							, _planData
+							HFSM2_IF_LOG_INTERFACE(, _logger)};
+
+		if (applyRequests(control, transitions, count)) {
+			_apex.deepChangeToRequested(control);
+
+			_registry.clearRequests();
+
+			HFSM2_IF_ASSERT(_planData.verifyPlans());
+		}
+
+		HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
+	}
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
 template <typename TG, typename TA>
 void
 R_<TG, TA>::initialEnter() {
-	HFSM_ASSERT(_requests.count() == 0);
-	HFSM_IF_TRANSITION_HISTORY(HFSM_ASSERT(_transitionHistory.count() == 0));
+	HFSM2_ASSERT(_requests.count() == 0);
+	HFSM2_IF_TRANSITION_HISTORY(HFSM2_ASSERT(_transitionHistory.count() == 0));
 
 	RegistryBackUp undo;
-	HFSM_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
+	HFSM2_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
 
 	Requests lastRequests;
 
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM2_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepRequestChange(control);
 
@@ -11037,7 +11939,7 @@ R_<TG, TA>::initialEnter() {
 		 ++i)
 	{
 		backup(_registry, undo);
-		HFSM_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
+		HFSM2_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
 
 		if (applyRequests(control)) {
 			lastRequests = _requests;
@@ -11045,21 +11947,21 @@ R_<TG, TA>::initialEnter() {
 
 			if (cancelledByEntryGuards(lastRequests)) {
 				restore(_registry, undo);
-				HFSM_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
+				HFSM2_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
 			}
 		} else
 			_requests.clear();
 	}
-	HFSM_ASSERT(_requests.count() == 0);
+	HFSM2_ASSERT(_requests.count() == 0);
 
 	_apex.deepConstruct(control);
 	_apex.deepEnter	   (control);
 
 	_registry.clearRequests();
 
-	HFSM_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_ASSERT(_planData.verifyPlans());
 
-	HFSM_IF_STRUCTURE(udpateActivity());
+	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11067,20 +11969,20 @@ R_<TG, TA>::initialEnter() {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::processTransitions() {
-	HFSM_ASSERT(_requests.count());
+	HFSM2_ASSERT(_requests.count());
 
-	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_transitionHistory.clear());
 
 	RegistryBackUp undo;
-	HFSM_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
+	HFSM2_IF_TRANSITION_HISTORY(TransitionHistory undoTransitionHistory);
 
 	Requests lastRequests;
 
-	PlanControl control{_context,
-						_rng,
-						_registry,
-						_planData,
-						HFSM_LOGGER_OR(_logger, nullptr)};
+	PlanControl control{_context
+						HFSM2_IF_UTILITY_THEORY(, _rng)
+						, _registry
+						, _planData
+						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	bool changesMade = false;
 
@@ -11089,7 +11991,7 @@ R_<TG, TA>::processTransitions() {
 		++i)
 	{
 		backup(_registry, undo);
-		HFSM_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
+		HFSM2_IF_TRANSITION_HISTORY(undoTransitionHistory = _transitionHistory);
 
 		if (applyRequests(control)) {
 			lastRequests = _requests;
@@ -11097,7 +11999,7 @@ R_<TG, TA>::processTransitions() {
 
 			if (cancelledByGuards(lastRequests)) {
 				restore(_registry, undo);
-				HFSM_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
+				HFSM2_IF_TRANSITION_HISTORY(_transitionHistory = undoTransitionHistory);
 			} else
 				changesMade = true;
 		} else
@@ -11109,10 +12011,10 @@ R_<TG, TA>::processTransitions() {
 
 		_registry.clearRequests();
 
-		HFSM_IF_ASSERT(_planData.verifyPlans());
+		HFSM2_IF_ASSERT(_planData.verifyPlans());
 	}
 
-	HFSM_IF_STRUCTURE(udpateActivity());
+	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
 //------------------------------------------------------------------------------
@@ -11122,14 +12024,18 @@ bool
 R_<TG, TA>::applyRequest(Control& control,
 						 const Request& request)
 {
-	HFSM_IF_TRANSITION_HISTORY(_transitionHistory.append(Transition{request, Method::NONE}));
+	HFSM2_IF_TRANSITION_HISTORY(_transitionHistory.append(Transition{request, Method::NONE}));
 
 	switch (request.type) {
 	case Request::CHANGE:
 	case Request::RESTART:
 	case Request::RESUME:
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	case Request::UTILIZE:
 	case Request::RANDOMIZE:
+#endif
+
 		if (_registry.requestImmediate(request))
 			_apex.deepForwardActive(control, request.type);
 		else
@@ -11143,7 +12049,7 @@ R_<TG, TA>::applyRequest(Control& control,
 		return false;
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 
 		return false;
 	}
@@ -11162,44 +12068,21 @@ R_<TG, TA>::applyRequests(Control& control) {
 	return changesMade;
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-
-template <typename TG, typename TA>
-bool
-R_<TG, TA>::applyRequests(Control& control,
-						  const Transition* const transitions,
-						  const uint64_t count)
-{
-	if (HFSM_CHECKED(transitions && count)) {
-		bool changesMade = false;
-
-		for (uint64_t i = 0; i < count; ++i)
-			changesMade |= applyRequest(control, transitions[i].request());
-
-		return changesMade;
-	} else
-		return false;
-}
-
-#endif
-
 //------------------------------------------------------------------------------
 
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
-	GuardControl guardControl{_context,
-							  _rng,
-							  _registry,
-							  _planData,
-							  _requests,
-							  pendingRequests,
-							  HFSM_LOGGER_OR(_logger, nullptr)};
+	GuardControl guardControl{_context
+							  HFSM2_IF_UTILITY_THEORY(, _rng)
+							  , _registry
+							  , _planData
+							  , _requests
+							  , pendingRequests
+							  HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	if (_apex.deepEntryGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
+		HFSM2_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
 
 		return true;
 	} else
@@ -11211,20 +12094,20 @@ R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
-	GuardControl guardControl{_context,
-							  _rng,
-							  _registry,
-							  _planData,
-							  _requests,
-							  pendingRequests,
-							  HFSM_LOGGER_OR(_logger, nullptr)};
+	GuardControl guardControl{_context
+							  HFSM2_IF_UTILITY_THEORY(, _rng)
+							  , _registry
+							  , _planData
+							  , _requests
+							  , pendingRequests
+							  HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	if (_apex.deepForwardExitGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::EXIT_GUARD));
+		HFSM2_IF_TRANSITION_HISTORY(recordRequestsAs(Method::EXIT_GUARD));
 
 		return true;
 	} else if (_apex.deepForwardEntryGuard(guardControl)) {
-		HFSM_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
+		HFSM2_IF_TRANSITION_HISTORY(recordRequestsAs(Method::ENTRY_GUARD));
 
 		return true;
 	} else
@@ -11233,7 +12116,39 @@ R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+template <typename TG, typename TA>
+bool
+R_<TG, TA>::applyRequests(Control& control,
+						  const Transition* const transitions,
+						  const uint64_t count)
+{
+	if (HFSM2_CHECKED(transitions && count)) {
+		bool changesMade = false;
+
+		for (uint64_t i = 0; i < count; ++i)
+			changesMade |= applyRequest(control, transitions[i].request());
+
+		return changesMade;
+	} else
+		return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+void
+R_<TG, TA>::recordRequestsAs(const Method method) {
+	for (const auto& request : _requests)
+		_transitionHistory.append(Transition{request, method});
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 template <typename TG, typename TA>
 void
@@ -11340,36 +12255,51 @@ R_<TG, TA>::udpateActivity() {
 
 #endif
 
-//------------------------------------------------------------------------------
-
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
-
-template <typename TG, typename TA>
-void
-R_<TG, TA>::recordRequestsAs(const Method method) {
-	for (const auto& request : _requests)
-		_transitionHistory.append(Transition{request, method});
-}
-
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 
 }
 }
 
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
-#ifdef __clang__
-	#pragma clang diagnostic pop
-#endif
+////////////////////////////////////////////////////////////////////////////////
+
+#undef HFSM2_INLINE
+
+#undef HFSM2_64BIT_OR_32BIT
+
+//#undef HFSM2_BREAK
+
+#undef HFSM2_IF_DEBUG
+#undef HFSM2_UNLESS_DEBUG
+#undef HFSM2_DEBUG_OR
+
+#undef HFSM2_IF_ASSERT
+#undef HFSM2_CHECKED
+#undef HFSM2_ASSERT
+#undef HFSM2_ASSERT_OR
+
+#undef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
+
+#undef HFSM2_IF_UTILITY_THEORY
+#undef HFSM2_IF_SERIALIZATION
+#undef HFSM2_IF_TRANSITION_HISTORY
+#undef HFSM2_IF_STRUCTURE_REPORT
+#undef HFSM2_IF_LOG_INTERFACE
+
+#undef HFSM2_LOG_TRANSITION
+#undef HFSM2_LOG_TASK_STATUS
+#undef HFSM2_LOG_PLAN_STATUS
+#undef HFSM2_LOG_CANCELLED_PENDING
+
+#undef HFSM2_LOG_STATE_METHOD
+
+////////////////////////////////////////////////////////////////////////////////
+
 #if defined(__GNUC__) || defined(__GNUG__)
 	#pragma GCC diagnostic pop
 #endif
 
-#undef HFSM_INLINE
-#undef HFSM_IF_LOGGER
-#undef HFSM_LOGGER_OR
-#undef HFSM_LOG_STATE_METHOD
-#undef HFSM_IF_STRUCTURE
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+
+//------------------------------------------------------------------------------

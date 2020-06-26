@@ -31,7 +31,7 @@ ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
 
 template <typename TArgs>
 ConstPlanT<TArgs>::Iterator::operator bool() const {
-	HFSM_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
+	HFSM2_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
 
 	return _curr < ConstPlanT::TASK_CAPACITY;
 }
@@ -55,7 +55,7 @@ ConstPlanT<TArgs>::Iterator::next() const {
 
 		return task.next;
 	} else {
-		HFSM_ASSERT(_curr == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_curr == INVALID_LONG_INDEX);
 
 		return INVALID_LONG_INDEX;
 	}
@@ -76,10 +76,10 @@ ConstPlanT<TArgs>::ConstPlanT(const PlanData& planData,
 template <typename TArgs>
 ConstPlanT<TArgs>::operator bool() const {
 	if (_bounds.first < TASK_CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TASK_CAPACITY);
+		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
 	} else {
-		HFSM_ASSERT(_bounds.last == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.last == INVALID_LONG_INDEX);
 		return false;
 	}
 }
@@ -98,7 +98,7 @@ PlanT<TArgs>::Iterator::Iterator(PlanT& plan)
 
 template <typename TArgs>
 PlanT<TArgs>::Iterator::operator bool() const {
-	HFSM_ASSERT(_curr < PlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
+	HFSM2_ASSERT(_curr < PlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
 
 	return _curr < PlanT::TASK_CAPACITY;
 }
@@ -130,7 +130,7 @@ PlanT<TArgs>::Iterator::next() const {
 
 		return task.next;
 	} else {
-		HFSM_ASSERT(_curr == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_curr == INVALID_LONG_INDEX);
 
 		return INVALID_LONG_INDEX;
 	}
@@ -152,10 +152,10 @@ PlanT<TArgs>::PlanT(PlanData& planData,
 template <typename TArgs>
 PlanT<TArgs>::operator bool() const {
 	if (_bounds.first < TASK_CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TASK_CAPACITY);
+		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
 	} else {
-		HFSM_ASSERT(_bounds.last == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.last == INVALID_LONG_INDEX);
 		return false;
 	}
 }
@@ -173,26 +173,27 @@ PlanT<TArgs>::append(const TransitionType transitionType,
 	const TaskIndex index = _planData.taskLinks.emplace(transitionType, origin, destination);
 	if (index == TaskLinks::INVALID)
 		return false;
+	else {
+		if (_bounds.first < TaskLinks::CAPACITY) {
+			HFSM2_ASSERT(_bounds.last < TaskLinks::CAPACITY);
 
-	if (_bounds.first < TaskLinks::CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
+			auto& last  = _planData.taskLinks[_bounds.last];
+			last.next = index;
 
-		auto& last  = _planData.taskLinks[_bounds.last];
-		last.next = index;
+			auto& next = _planData.taskLinks[index];
+			next.prev  = _bounds.last;
 
-		auto& next = _planData.taskLinks[index];
-		next.prev  = _bounds.last;
+			_bounds.last = index;
+		} else {
+			HFSM2_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
+						 _bounds.last  == INVALID_LONG_INDEX);
 
-		_bounds.last = index;
-	} else {
-		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
-					_bounds.last  == INVALID_LONG_INDEX);
+			_bounds.first = index;
+			_bounds.last  = index;
+		}
 
-		_bounds.first = index;
-		_bounds.last  = index;
+		return true;
 	}
-
-	return true;
 }
 
 //------------------------------------------------------------------------------
@@ -201,18 +202,18 @@ template <typename TArgs>
 void
 PlanT<TArgs>::clear() {
 	if (_bounds.first < TaskLinks::CAPACITY) {
-		HFSM_ASSERT(_bounds.last < TaskLinks::CAPACITY);
+		HFSM2_ASSERT(_bounds.last < TaskLinks::CAPACITY);
 
 		for (LongIndex index = _bounds.first;
 			 index != INVALID_LONG_INDEX;
 			 )
 		{
-			HFSM_ASSERT(index < TaskLinks::CAPACITY);
+			HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
 			const auto& task = _planData.taskLinks[index];
-			HFSM_ASSERT(index == _bounds.first ?
-				   task.prev == INVALID_LONG_INDEX :
-				   task.prev <  TaskLinks::CAPACITY);
+			HFSM2_ASSERT(index == _bounds.first ?
+							 task.prev == INVALID_LONG_INDEX :
+							 task.prev <  TaskLinks::CAPACITY);
 
 			const LongIndex next = task.next;
 
@@ -224,8 +225,8 @@ PlanT<TArgs>::clear() {
 		_bounds.first = INVALID_LONG_INDEX;
 		_bounds.last  = INVALID_LONG_INDEX;
 	} else
-		HFSM_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
-			   _bounds.last  == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.first == INVALID_LONG_INDEX &&
+					 _bounds.last  == INVALID_LONG_INDEX);
 }
 
 //------------------------------------------------------------------------------
@@ -233,11 +234,11 @@ PlanT<TArgs>::clear() {
 template <typename TArgs>
 void
 PlanT<TArgs>::remove(const LongIndex task) {
-	HFSM_ASSERT(_planData.planExists.get(_regionId) &&
-				_bounds.first < TaskLinks::CAPACITY &&
-				_bounds.last  < TaskLinks::CAPACITY);
+	HFSM2_ASSERT(_planData.planExists.get(_regionId) &&
+				 _bounds.first < TaskLinks::CAPACITY &&
+				 _bounds.last  < TaskLinks::CAPACITY);
 
-	HFSM_ASSERT(task < TaskLinks::CAPACITY);
+	HFSM2_ASSERT(task < TaskLinks::CAPACITY);
 
 	const TaskLink& curr = _planData.taskLinks[task];
 
@@ -245,7 +246,7 @@ PlanT<TArgs>::remove(const LongIndex task) {
 		TaskLink& prev = _planData.taskLinks[curr.prev];
 		prev.next = curr.next;
 	} else {
-		HFSM_ASSERT(_bounds.first == task);
+		HFSM2_ASSERT(_bounds.first == task);
 		_bounds.first = curr.next;
 	}
 
@@ -253,7 +254,7 @@ PlanT<TArgs>::remove(const LongIndex task) {
 		TaskLink& next = _planData.taskLinks[curr.next];
 		next.prev = curr.prev;
 	} else {
-		HFSM_ASSERT(_bounds.last == task);
+		HFSM2_ASSERT(_bounds.last == task);
 		_bounds.last = curr.prev;
 	}
 
