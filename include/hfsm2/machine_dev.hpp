@@ -73,35 +73,34 @@
 #include "detail/root/state_access.hpp"
 
 namespace hfsm2 {
+namespace detail {
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Type configuration for MachineT<>
-/// @tparam TContext Context type for data shared between states and/or data interface between FSM and external code
-/// @tparam TRank Rank type for 'TRank State::rank() const' method
-/// @tparam TUtility Utility type for 'TUtility State::utility() const' method
-/// @tparam TRNG RNG type used in 'Random' regions
-/// @tparam NSubstitutionLimit Maximum number times 'guard()' methods can substitute their states for others
-/// @tparam NTaskCapacity Maximum number of tasks across all plans
-template <typename TContext = EmptyContext,
-#ifdef HFSM_ENABLE_UTILITY_THEORY
-		  typename TRank    = char,
-		  typename TUtility = float,
-		  typename TRNG     = ::hfsm2::RandomT<TUtility>,
-#endif
-		  LongIndex NSubstitutionLimit = 4,
-		  LongIndex NTaskCapacity      = INVALID_LONG_INDEX>
-struct ConfigT {
+template <FeatureTag NFeatureTag
+		, typename TContext
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, LongIndex NSubstitutionLimit
+		, LongIndex NTaskCapacity>
+struct G_ {
+	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
+
 	using Context = TContext;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank	  = TRank;
 	using Utility = TUtility;
 	using RNG	  = TRNG;
 #endif
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
-	using Logger  = LoggerInterfaceT<Context HFSM_IF_UTILITY_THEORY(, Utility)>;
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger  = LoggerInterfaceT<Context HFSM2_IF_UTILITY_THEORY(, Utility)>;
 #endif
 
 	static constexpr LongIndex SUBSTITUTION_LIMIT = NSubstitutionLimit;
@@ -110,43 +109,43 @@ struct ConfigT {
 	/// @brief Set Context type
 	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = ConfigT<      T, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,) SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using ContextT			 = G_<FEATURE_TAG,       T HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Set Rank type
 	/// @tparam T Rank type for 'TRank State::rank() const' method
 	template <typename T>
-	using RankT				 = ConfigT<Context,                           T, Utility, RNG,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using RankT				 = G_<FEATURE_TAG, Context                        ,    T, Utility, RNG , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
 	/// @brief Set Utility type
 	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using UtilityT			 = ConfigT<Context,                        Rank,       T, RNG,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using UtilityT			 = G_<FEATURE_TAG, Context                        , Rank,       T, RNG , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
 	/// @brief Set RNG type
 	/// @tparam T RNG type used in 'Random' regions
 	template <typename T>
-	using RandomT			 = ConfigT<Context,                        Rank, Utility,   T,  SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using RandomT			 = G_<FEATURE_TAG, Context                        , Rank, Utility,   T , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
 
 #endif
 
 	/// @brief Set Substitution limit
 	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
 	template <LongIndex N>
-	using SubstitutionLimitN = ConfigT<Context, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,)                  N, TASK_CAPACITY>;
+	using SubstitutionLimitN = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG),                  N, TASK_CAPACITY>;
 
 	/// @brief Set Task capacity
 	/// @tparam N Maximum number of tasks across all plans
 	template <LongIndex N>
-	using TaskCapacityN		 = ConfigT<Context, HFSM_IF_UTILITY_THEORY(Rank, Utility, RNG,) SUBSTITUTION_LIMIT,             N>;
+	using TaskCapacityN		 = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT,             N>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	struct UP {
-		HFSM_INLINE UP(const Utility utility_  = Utility{1.0f},
+		HFSM2_INLINE UP(const Utility utility_  = Utility{1.0f},
 					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
 			: utility{utility_}
 			, prong{prong_}
@@ -161,28 +160,26 @@ struct ConfigT {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
-//------------------------------------------------------------------------------
-
-/// @brief Type configuration for MachineT<>
-using Config = ConfigT<>;
-
-namespace detail {
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TConfig>
 struct M_;
 
-template <typename TContext,
-#ifdef HFSM_ENABLE_UTILITY_THEORY
-		  typename TRank,
-		  typename TUtility,
-		  typename TRNG,
-#endif
-		  LongIndex NSubstitutionLimit,
-		  LongIndex NTaskCapacity>
-struct M_	   <ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>> {
-	using Cfg = ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>;
+template <FeatureTag NFeatureTag
+		, typename TContext
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, LongIndex NSubstitutionLimit
+		, LongIndex NTaskCapacity>
+struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>> {
+	using Cfg = G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>;
+
+	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
 
 	//----------------------------------------------------------------------
 
@@ -212,7 +209,7 @@ struct M_	   <ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) N
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
 	/// @tparam THead Head state
@@ -281,7 +278,7 @@ struct M_	   <ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) N
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Utilitarian root ('changeTo<>()' into the root region acts as 'utilize<>()')
 	/// @tparam THead Head state
@@ -329,14 +326,36 @@ struct M_	   <ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) N
 
 }
 
-/// @brief 'Template namespace' for FSM classes parametrized with default types
-using Machine = detail::M_<Config>;
+/// @brief Type configuration for MachineT<>
+/// @tparam TContext Context type for data shared between states and/or data interface between FSM and external code
+/// @tparam TRank Rank type for 'TRank State::rank() const' method
+/// @tparam TUtility Utility type for 'TUtility State::utility() const' method
+/// @tparam TRNG RNG type used in 'Random' regions
+/// @tparam NSubstitutionLimit Maximum number times 'guard()' methods can substitute their states for others
+/// @tparam NTaskCapacity Maximum number of tasks across all plans
+template <typename TContext = EmptyContext
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank    = char
+		, typename TUtility = float
+		, typename TRNG     = ::hfsm2::RandomT<TUtility>
+	#endif
+
+		, LongIndex NSubstitutionLimit = 4
+		, LongIndex NTaskCapacity      = INVALID_LONG_INDEX>
+using ConfigT = detail::G_<HFSM2_FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>;
+
+/// @brief Type configuration for MachineT<>
+using Config = ConfigT<>;
 
 /// @brief 'Template namespace' for FSM classes
 /// @tparam TConfig 'ConfigT<>' type configuration for MachineT<>
 /// @see ConfigT<>
-template <typename TConfig>
+template <typename TConfig = Config>
 using MachineT = detail::M_<TConfig>;
+
+/// @brief 'Template namespace' for FSM classes parametrized with default types
+using Machine = MachineT<>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

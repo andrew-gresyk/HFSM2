@@ -1,7 +1,7 @@
-﻿#define HFSM_ENABLE_STRUCTURE_REPORT
-#define HFSM_ENABLE_UTILITY_THEORY
-#define HFSM_ENABLE_VERBOSE_DEBUG_LOG
-#include "shared.hpp"
+﻿#define HFSM2_ENABLE_STRUCTURE_REPORT
+#define HFSM2_ENABLE_UTILITY_THEORY
+#define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
+#include "tools.hpp"
 
 #include <algorithm>
 #include <vector>

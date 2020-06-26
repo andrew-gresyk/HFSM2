@@ -11,13 +11,13 @@ template <typename TConfig,
 class R_ {
 	using Context				= typename TConfig::Context;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank					= typename TConfig::Rank;
 	using Utility				= typename TConfig::Utility;
 	using RNG					= typename TConfig::RNG;
 #endif
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using Logger				= typename TConfig::Logger;
 #endif
 
@@ -66,12 +66,12 @@ private:
 
 	using GuardControl			= GuardControlT<Args>;
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	using WriteStream			= typename Args::WriteStream;
 	using ReadStream			= typename Args::ReadStream;
 #endif
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	static constexpr LongIndex NAME_COUNT	  = MaterialApex::NAME_COUNT;
 
 	using Prefix				= StaticArray<wchar_t, REVERSE_DEPTH * 2 + 2>;
@@ -84,8 +84,8 @@ private:
 public:
 
 	explicit R_(Context& context
-				HFSM_IF_UTILITY_THEORY(, RNG& rng)
-				HFSM_IF_LOG_INTERFACE(, Logger* const logger = nullptr));
+				HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+				HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr));
 
 	~R_();
 
@@ -104,7 +104,7 @@ public:
 	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<TState>();	}
 
 	//----------------------------------------------------------------------
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 private:
 
@@ -122,8 +122,8 @@ private:
 
 	template <typename TState>
 	struct Accessor<TState, true> {
-		HFSM_INLINE static		 TState& get(	   MaterialApex& apex)	{ return apex.template access<TState>();	}
-		HFSM_INLINE static const TState& get(const MaterialApex& apex)	{ return apex.template access<TState>();	}
+		HFSM2_INLINE static		  TState& get(		MaterialApex& apex)	{ return apex.template access<TState>();	}
+		HFSM2_INLINE static const TState& get(const MaterialApex& apex)	{ return apex.template access<TState>();	}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -139,13 +139,13 @@ public:
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM_INLINE		  TState& access()										{ return Accessor<TState>::get(_apex);	}
+	HFSM2_INLINE	   TState& access()										{ return Accessor<TState>::get(_apex);	}
 
 	/// @brief Access state instance
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM_INLINE const TState& access() const								{ return Accessor<TState>::get(_apex);	}
+	HFSM2_INLINE const TState& access() const								{ return Accessor<TState>::get(_apex);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -157,13 +157,13 @@ public:
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM_INLINE		  TState& access()					{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
+	HFSM2_INLINE	   TState& access()					{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
 
 	/// @brief Access state instance
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM_INLINE const TState& access() const			{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
+	HFSM2_INLINE const TState& access() const			{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
 
 #endif
 
@@ -176,242 +176,242 @@ public:
 	/// @tparam TEvent Event type
 	/// @param event Event to react to
 	template <typename TEvent>
-	HFSM_INLINE void react(const TEvent& event);
+	HFSM2_INLINE void react(const TEvent& event);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is active
 	/// @param stateId State identifier
 	/// @return State active status
-	HFSM_INLINE bool isActive   (const StateID stateId) const		{ return _registry.isActive   (stateId);		}
+	HFSM2_INLINE bool isActive   (const StateID stateId) const		{ return _registry.isActive   (stateId);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId State identifier
 	/// @return State resumable status
-	HFSM_INLINE bool isResumable(const StateID stateId) const		{ return _registry.isResumable(stateId);		}
+	HFSM2_INLINE bool isResumable(const StateID stateId) const		{ return _registry.isResumable(stateId);		}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId State identifier
 	/// @return State scheduled status
-	HFSM_INLINE bool isScheduled(const StateID stateId) const		{ return isResumable(stateId);					}
+	HFSM2_INLINE bool isScheduled(const StateID stateId) const		{ return isResumable(stateId);					}
 
 	/// @brief Check if a state is active
 	/// @tparam TState State type
 	/// @return State active status
 	template <typename TState>
-	HFSM_INLINE bool isActive   () const							{ return isActive	(stateId<TState>());		}
+	HFSM2_INLINE bool isActive   () const							{ return isActive	(stateId<TState>());		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState State type
 	/// @return State resumable status
 	template <typename TState>
-	HFSM_INLINE bool isResumable() const							{ return isResumable(stateId<TState>());		}
+	HFSM2_INLINE bool isResumable() const							{ return isResumable(stateId<TState>());		}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState State type
 	/// @return State scheduled status
 	template <typename TState>
-	HFSM_INLINE bool isScheduled() const							{ return isResumable<TState>();					}
+	HFSM2_INLINE bool isScheduled() const							{ return isResumable<TState>();					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId State identifier
-	HFSM_INLINE void changeTo	(const StateID stateId);
+	HFSM2_INLINE void changeTo	 (const StateID stateId);
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId State identifier
-	HFSM_INLINE void restart	(const StateID stateId);
+	HFSM2_INLINE void restart	 (const StateID stateId);
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId State identifier
-	HFSM_INLINE void resume		(const StateID stateId);
+	HFSM2_INLINE void resume	 (const StateID stateId);
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///		with the highest 'utility()' among those with the highest 'rank()')
 	/// @param stateId State identifier
-	/// @see HFSM_ENABLE_UTILITY_THEORY
-	HFSM_INLINE void utilize	(const StateID stateId);
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void utilize	 (const StateID stateId);
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///		proportional to 'utility()' among those with the highest 'rank()')
 	/// @param stateId State identifier
-	/// @see HFSM_ENABLE_UTILITY_THEORY
-	HFSM_INLINE void randomize	(const StateID stateId);
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void randomize	 (const StateID stateId);
 
 #endif
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId State identifier
-	HFSM_INLINE void schedule	(const StateID stateId);
+	HFSM2_INLINE void schedule	 (const StateID stateId);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState State type
 	template <typename TState>
-	HFSM_INLINE void changeTo	()									{ changeTo (stateId<TState>());					}
+	HFSM2_INLINE void changeTo	 ()									{ changeTo (stateId<TState>());					}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState State type
 	template <typename TState>
-	HFSM_INLINE void restart	()									{ restart  (stateId<TState>());					}
+	HFSM2_INLINE void restart	 ()									{ restart  (stateId<TState>());					}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState State type
 	template <typename TState>
-	HFSM_INLINE void resume		()									{ resume   (stateId<TState>());					}
+	HFSM2_INLINE void resume	 ()									{ resume   (stateId<TState>());					}
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///   with the highest 'utility()' among those with the highest 'rank()')
 	/// @tparam TState State type
-	/// @see HFSM_ENABLE_UTILITY_THEORY
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM_INLINE void utilize	()									{ utilize  (stateId<TState>());					}
+	HFSM2_INLINE void utilize	()									{ utilize  (stateId<TState>());					}
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///   proportional to 'utility()' among those with the highest 'rank()')
 	/// @tparam TState State type
-	/// @see HFSM_ENABLE_UTILITY_THEORY
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM_INLINE void randomize	()									{ randomize(stateId<TState>());					}
+	HFSM2_INLINE void randomize	()									{ randomize(stateId<TState>());					}
 
 #endif
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState State type
 	template <typename TState>
-	HFSM_INLINE void schedule	()									{ schedule (stateId<TState>());					}
+	HFSM2_INLINE void schedule	()									{ schedule (stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId State identifier
 	/// @return State pending activation/deactivation status
-	HFSM_INLINE bool isPendingChange(const StateID stateId) const	{ return _registry.isPendingChange(stateId);	}
+	HFSM2_INLINE bool isPendingChange(const StateID stateId) const	{ return _registry.isPendingChange(stateId);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @param stateId State identifier
 	/// @return State pending activation status
-	HFSM_INLINE bool isPendingEnter	(const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
+	HFSM2_INLINE bool isPendingEnter (const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId State identifier
 	/// @return State pending deactivation status
-	HFSM_INLINE bool isPendingExit	(const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
+	HFSM2_INLINE bool isPendingExit	 (const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState State type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM_INLINE bool isPendingChange()								{ return isPendingChange(stateId<TState>());	}
+	HFSM2_INLINE bool isPendingChange()								{ return isPendingChange(stateId<TState>());	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState State type
 	/// @return State pending activation status
 	template <typename TState>
-	HFSM_INLINE bool isPendingEnter()								{ return isPendingEnter (stateId<TState>());	}
+	HFSM2_INLINE bool isPendingEnter ()								{ return isPendingEnter (stateId<TState>());	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState State type
 	/// @return State pending deactivation status
 	template <typename TState>
-	HFSM_INLINE bool isPendingExit()								{ return isPendingExit  (stateId<TState>());	}
+	HFSM2_INLINE bool isPendingExit  ()								{ return isPendingExit  (stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Reset FSM to initial state (recursively 'exit()' currently active states, 'enter()' initial states)
 	void reset();
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 	/// @brief Buffer for serialization
 	/// @see https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization
-	/// @see HFSM_ENABLE_SERIALIZATION
+	/// @see HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer			= typename Args::SerialBuffer;
 
 	/// @brief Serialize FSM into 'buffer'
 	/// @param buffer 'SerialBuffer' to serialize to
-	/// @see HFSM_ENABLE_SERIALIZATION
+	/// @see HFSM2_ENABLE_SERIALIZATION
 	void save(		SerialBuffer& buffer) const;
 
 	/// @brief De-serialize FSM from 'buffer'
 	/// @param buffer 'SerialBuffer' to de-serialize from
-	/// @see HFSM_ENABLE_SERIALIZATION
+	/// @see HFSM2_ENABLE_SERIALIZATION
 	void load(const SerialBuffer& buffer);
 
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
 	/// @brief Array of last recorded transitions
-	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	using TransitionHistory		= Array<Transition, COMPO_REGIONS * 4>;
 
 	/// @brief Get the list of transitions recorded during last 'update()'
 	/// @return Array of last recorded transitions
-	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	const TransitionHistory& transitionHistory() const				{ return _transitionHistory;					}
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
 	/// @param transitions Array of 'Transition' to replay
 	/// @param count Number of transitions
-	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	void replayTransitions(const Transition* const transitions, const uint64_t count);
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
 	/// @param transitions Array of 'Transition' to replay
 	/// @param count Number of transitions
-	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	void replayTransitions(const TransitionHistory& transitions)	{ replayTransitions(transitions, 1);			}
 
 	/// @brief Force process a transition (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
 	/// @param transition 'Transition' to replay
-	/// @see HFSM_ENABLE_TRANSITION_HISTORY
+	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	void replayTransition (const Transition& transition)			{ replayTransitions(&transition, 1);			}
 
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 	/// @brief Array of 'StructureEntry' representing FSM structure
-	/// @see HFSM_ENABLE_STRUCTURE_REPORT
+	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
 	using Structure				= Array<StructureEntry, NAME_COUNT>;
 
 	/// @brief Array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
-	/// @see HFSM_ENABLE_STRUCTURE_REPORT
+	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
 	using ActivityHistory		= Array<char,			NAME_COUNT>;
 
 	/// @brief Get the array of 'StructureEntry' representing FSM structure
 	/// @return FSM structure
-	/// @see HFSM_ENABLE_STRUCTURE_REPORT
+	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
 	const Structure&	   structure()		 const					{ return _structure;							}
 
 	/// @brief Get the array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @return FSM activation history
-	/// @see HFSM_ENABLE_STRUCTURE_REPORT
+	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
 	const ActivityHistory& activityHistory() const					{ return _activityHistory;						}
 
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 
 	/// @brief Attach logger
 	/// @param logger A logger implementing 'hfsm2::LoggerInterfaceT<TContext>' interface
-	/// @see HFSM_ENABLE_LOG_INTERFACE
+	/// @see HFSM2_ENABLE_LOG_INTERFACE
 	void attachLogger(Logger* const logger)							{ _logger = logger;								}
 
 #endif
@@ -428,7 +428,7 @@ private:
 	bool cancelledByEntryGuards(const Requests& pendingChanges);
 	bool cancelledByGuards(const Requests& pendingChanges);
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	bool applyRequests(Control& control,
 					   const Transition* const transitions,
 					   const uint64_t count);
@@ -438,7 +438,7 @@ private:
 	TransitionHistory _transitionHistory;
 #endif
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	void getStateNames();
 	void udpateActivity();
 
@@ -451,7 +451,7 @@ private:
 
 private:
 	Context& _context;
-	HFSM_IF_UTILITY_THEORY(RNG& _rng);
+	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 
 	Registry _registry;
 	PlanData _planData;
@@ -460,7 +460,7 @@ private:
 
 	MaterialApex _apex;
 
-	HFSM_IF_LOG_INTERFACE(Logger* _logger);
+	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -480,7 +480,7 @@ public:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		  typename TRank,
 		  typename TUtility,
 		  typename TRNG,
@@ -488,38 +488,38 @@ template <
 		  LongIndex NSubstitutionLimit,
 		  LongIndex NTaskCapacity,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex>
 	, ::hfsm2::EmptyContext
 {
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using RNG		= TRNG;
 #endif
 
 	using Context	= ::hfsm2::EmptyContext;
-	using Cfg		= ::hfsm2::ConfigT<Context, HFSM_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using Cfg		= ::hfsm2::ConfigT<Context, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
 	using R			= R_<Cfg, TApex>;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using Logger	= typename Cfg::Logger;
 #endif
 
 public:
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	explicit HFSM_INLINE RW_(RNG& rng
-							 HFSM_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+	explicit HFSM2_INLINE RW_(RNG& rng
+							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
 			rng
-			HFSM_IF_LOG_INTERFACE(, logger)}
+			HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
 
 #else
 
-	explicit HFSM_INLINE RW_(HFSM_IF_LOG_INTERFACE(Logger* const logger = nullptr))
+	explicit HFSM2_INLINE RW_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this)
-			HFSM_IF_LOG_INTERFACE(, logger)}
+			HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
 
 #endif
@@ -528,47 +528,47 @@ public:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TContext,
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		  typename TRank,
 		  typename TUtility,
 #endif
 		  LongIndex NSubstitutionLimit,
 		  LongIndex NTaskCapacity,
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex> final
-	: public R_<::hfsm2::ConfigT<TContext, HFSM_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex>
-	HFSM_IF_UTILITY_THEORY(, ::hfsm2::RandomT<TUtility>)
+class RW_	   <::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex> final
+	: public R_<::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex>
+	HFSM2_IF_UTILITY_THEORY(, ::hfsm2::RandomT<TUtility>)
 {
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using RNG		= ::hfsm2::RandomT<TUtility>;
 #endif
 
 	using Context	= TContext;
-	using Cfg		= ::hfsm2::ConfigT<Context, HFSM_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using Cfg		= ::hfsm2::ConfigT<Context, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
 	using R			= R_<Cfg, TApex>;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using Logger	= typename Cfg::Logger;
 #endif
 
 
 public:
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	explicit HFSM_INLINE RW_(Context& context
-							 HFSM_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+	explicit HFSM2_INLINE RW_(Context& context
+							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{context,
 			static_cast<RNG&>(*this)
-			HFSM_IF_LOG_INTERFACE(, logger)}
+			HFSM2_IF_LOG_INTERFACE(, logger)}
 		, RNG{0}
 	{}
 
 #else
 
-	explicit HFSM_INLINE RW_(Context& context
-							 HFSM_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+	explicit HFSM2_INLINE RW_(Context& context
+							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{context
-			HFSM_IF_LOG_INTERFACE(, logger)}
+			HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
 
 #endif
@@ -576,7 +576,7 @@ public:
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TRank,
 		  typename TUtility,
@@ -593,15 +593,15 @@ class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::
 	using Cfg		= ::hfsm2::ConfigT<Context, TRank, TUtility, RNG, NSubstitutionLimit, NTaskCapacity>;
 	using R			= R_<Cfg, TApex>;
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using Logger	= typename Cfg::Logger;
 #endif
 
 public:
-	explicit HFSM_INLINE RW_(HFSM_IF_LOG_INTERFACE(Logger* const logger = nullptr))
+	explicit HFSM2_INLINE RW_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
 			static_cast<RNG&>(*this)
-			HFSM_IF_LOG_INTERFACE(, logger)}
+			HFSM2_IF_LOG_INTERFACE(, logger)}
 		, RNG{0}
 	{}
 };

@@ -1,16 +1,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext>
+template <typename TContext, hfsm2::FeatureTag NFeatureTag>
 void
-LoggerT<TContext>::recordMethod(Context& /*context*/,
-								const StateID origin,
-								const Method method)
+LoggerT<TContext, NFeatureTag>::recordMethod(Context& /*context*/,
+											 const StateID origin,
+											 const Method method)
 {
 	REQUIRE(hfsm2::methodName(method));
 
 	switch (method) {
 
-	#ifdef HFSM_ENABLE_UTILITY_THEORY
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 		case Method::RANK:
 			history.emplace_back(origin, Event::RANK);
@@ -67,18 +67,18 @@ LoggerT<TContext>::recordMethod(Context& /*context*/,
 			break;
 
 		default:
-			HFSM_BREAK();
+			HFSM2_BREAK();
 	}
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TContext>
+template <typename TContext, hfsm2::FeatureTag NFeatureTag>
 void
-LoggerT<TContext>::recordTransition(Context& /*context*/,
-									const StateID origin,
-									const TransitionType transitionType,
-									const StateID target)
+LoggerT<TContext, NFeatureTag>::recordTransition(Context& /*context*/,
+												 const StateID origin,
+												 const TransitionType transitionType,
+												 const StateID target)
 {
 	REQUIRE(hfsm2::transitionName(transitionType));
 
@@ -95,7 +95,7 @@ LoggerT<TContext>::recordTransition(Context& /*context*/,
 			history.emplace_back(origin, Event::RESUME,    target);
 			break;
 
-	#ifdef HFSM_ENABLE_UTILITY_THEORY
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 		case TransitionType::UTILIZE:
 			history.emplace_back(origin, Event::UTILIZE,   target);
@@ -112,18 +112,18 @@ LoggerT<TContext>::recordTransition(Context& /*context*/,
 			break;
 
 		default:
-			HFSM_BREAK();
+			HFSM2_BREAK();
 	}
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TContext>
+template <typename TContext, hfsm2::FeatureTag NFeatureTag>
 void
-LoggerT<TContext>::recordTaskStatus(Context& /*context*/,
-									const RegionID region,
-									const StateID origin,
-									const StatusEvent event)
+LoggerT<TContext, NFeatureTag>::recordTaskStatus(Context& /*context*/,
+												 const RegionID region,
+												 const StateID origin,
+												 const StatusEvent event)
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -135,17 +135,17 @@ LoggerT<TContext>::recordTaskStatus(Context& /*context*/,
 			break;
 
 		default:
-			HFSM_BREAK();
+			HFSM2_BREAK();
 	}
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TContext>
+template <typename TContext, hfsm2::FeatureTag NFeatureTag>
 void
-LoggerT<TContext>::recordPlanStatus(Context& /*context*/,
-									const RegionID region,
-									const StatusEvent event)
+LoggerT<TContext, NFeatureTag>::recordPlanStatus(Context& /*context*/,
+												 const RegionID region,
+												 const StatusEvent event)
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -157,32 +157,32 @@ LoggerT<TContext>::recordPlanStatus(Context& /*context*/,
 			break;
 
 		default:
-			HFSM_BREAK();
+			HFSM2_BREAK();
 	}
 }
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-template <typename TContext>
+template <typename TContext, hfsm2::FeatureTag NFeatureTag>
 void
-LoggerT<TContext>::recordUtilityResolution(Context& /*context*/,
-										   const StateID head,
-										   const StateID prong,
-										   const Utilty utilty)
+LoggerT<TContext, NFeatureTag>::recordUtilityResolution(Context& /*context*/,
+														const StateID head,
+														const StateID prong,
+														const Utilty utilty)
 {
 	history.emplace_back(head, Event::UTILITY_RESOLUTION, prong, utilty);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TContext>
+template <typename TContext, hfsm2::FeatureTag NFeatureTag>
 void
-LoggerT<TContext>::recordRandomResolution(Context& /*context*/,
-										  const StateID head,
-										  const StateID prong,
-										  const Utilty utilty)
+LoggerT<TContext, NFeatureTag>::recordRandomResolution(Context& /*context*/,
+													   const StateID head,
+													   const StateID prong,
+													   const Utilty utilty)
 {
 	history.emplace_back(head, Event::RANDOM_RESOLUTION, prong, utilty);
 }
@@ -191,19 +191,19 @@ LoggerT<TContext>::recordRandomResolution(Context& /*context*/,
 
 //------------------------------------------------------------------------------
 
-template <typename TContext>
+template <typename TContext, hfsm2::FeatureTag NFeatureTag>
 void
-LoggerT<TContext>::recordCancelledPending(Context& /*context*/,
-										  const StateID origin)
+LoggerT<TContext, NFeatureTag>::recordCancelledPending(Context& /*context*/,
+													   const StateID origin)
 {
 	history.emplace_back(origin, Event::CANCEL_PENDING);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TContext>
+template <typename TContext, hfsm2::FeatureTag NFeatureTag>
 void
-LoggerT<TContext>::assertSequence(const Events& reference) {
+LoggerT<TContext, NFeatureTag>::assertSequence(const Events& reference) {
 	const auto count = std::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {
@@ -225,9 +225,10 @@ LoggerT<TContext>::assertSequence(const Events& reference) {
 //------------------------------------------------------------------------------
 
 template <typename TMachine>
-void assertActive(TMachine& machine,
-				  const Types& all,
-				  const Types& toCheck)
+void
+assertActive(TMachine& machine,
+			 const Types& all,
+			 const Types& toCheck)
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
@@ -240,9 +241,10 @@ void assertActive(TMachine& machine,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TMachine>
-void assertResumable(TMachine& machine,
-					 const Types& all,
-					 const Types& toCheck)
+void
+assertResumable(TMachine& machine,
+				const Types& all,
+				const Types& toCheck)
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())

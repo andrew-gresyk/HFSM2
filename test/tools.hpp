@@ -1,7 +1,7 @@
 #pragma once
 
-#define HFSM_ENABLE_LOG_INTERFACE
-#define HFSM_ENABLE_ASSERT
+#define HFSM2_ENABLE_LOG_INTERFACE
+#define HFSM2_ENABLE_ASSERT
 #include <hfsm2/machine.hpp>
 
 #include <catch2/catch.hpp>
@@ -13,10 +13,10 @@
 struct Event {
 	enum Enum {
 
-	#ifdef HFSM_ENABLE_UTILITY_THEORY
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		RANK,
 		UTILITY,
-	#endif
+	//#endif
 
 		ENTRY_GUARD,
 		CONSTRUCT,
@@ -28,10 +28,10 @@ struct Event {
 		EXIT,
 		DESTRUCT,
 
-	#ifdef HFSM_ENABLE_UTILITY_THEORY
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		UTILITY_RESOLUTION,
 		RANDOM_RESOLUTION,
-	#endif
+	//#endif
 
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
@@ -45,10 +45,10 @@ struct Event {
 		RESTART,
 		RESUME,
 
-	#ifdef HFSM_ENABLE_UTILITY_THEORY
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		UTILIZE,
 		RANDOMIZE,
-	#endif
+	//#endif
 
 		SCHEDULE,
 		CANCEL_PENDING,
@@ -84,14 +84,15 @@ using Events = std::vector<Event>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext = hfsm2::EmptyContext>
+template <typename TContext = hfsm2::EmptyContext,
+		  hfsm2::FeatureTag NFeatureTag = hfsm2::HFSM2_FEATURE_TAG>
 struct LoggerT
 	: hfsm2::LoggerInterfaceT<TContext>
 {
 	using Context		  = TContext;
 	using Interface		  = hfsm2::LoggerInterfaceT<Context>;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Utilty		  = typename Interface::Utilty;
 #endif
 
@@ -122,7 +123,7 @@ struct LoggerT
 	void recordCancelledPending(Context& context,
 								const StateID origin) override;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	void recordUtilityResolution(Context& context,
 								 const StateID head,
@@ -158,4 +159,4 @@ void assertResumable(TMachine& machine,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "shared.inl"
+#include "tools.inl"

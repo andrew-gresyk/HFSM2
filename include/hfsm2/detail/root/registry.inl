@@ -6,12 +6,12 @@ namespace detail {
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isActive(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return parent.prong == compoActive[parent.forkId - 1];
@@ -25,12 +25,12 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isActive(const Stat
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isResumable(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return parent.prong == compoResumable[parent.forkId - 1];
@@ -44,12 +44,12 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isResumable(const S
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingChange(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return compoRequested[parent.forkId - 1] !=
@@ -64,12 +64,12 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingChange(con
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingEnter(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return parent.prong != compoActive	 [parent.forkId - 1] &&
@@ -84,12 +84,12 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingEnter(cons
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingExit(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
 		{
-			HFSM_ASSERT(parent.forkId != 0);
+			HFSM2_ASSERT(parent.forkId != 0);
 
 			if (parent.forkId > 0)
 				return parent.prong == compoActive	 [parent.forkId - 1] &&
@@ -104,7 +104,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingExit(const
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 const Parent&
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::forkParent(const ForkID forkId) const {
-	HFSM_ASSERT(forkId != 0);
+	HFSM2_ASSERT(forkId != 0);
 
 	return forkId > 0 ?
 		compoParents[ forkId - 1] :
@@ -116,7 +116,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::forkParent(const Fo
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 typename RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::OrthoBits
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestedOrthoFork(const ForkID forkId) {
-	HFSM_ASSERT(forkId < 0);
+	HFSM2_ASSERT(forkId < 0);
 	const Units& units = orthoUnits[-forkId - 1];
 
 	return orthoRequested.bits(units);
@@ -129,7 +129,7 @@ bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(const Request request) {
 	if (request.stateId == 0)
 		return false;
-	else if (HFSM_CHECKED(request.stateId < STATE_COUNT)) {
+	else if (HFSM2_CHECKED(request.stateId < STATE_COUNT)) {
 		Parent parent;
 
 		for (parent = stateParents[request.stateId];
@@ -144,7 +144,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 			} else if (parent.forkId < 0)
 				requestedOrthoFork(parent.forkId).set(parent.prong);
 			else
-				HFSM_BREAK();
+				HFSM2_BREAK();
 		}
 
 		for (; parent; parent = forkParent(parent.forkId)) {
@@ -160,7 +160,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 			} else if (parent.forkId < 0)
 				requestedOrthoFork(parent.forkId).set(parent.prong);
 			else
-				HFSM_BREAK();
+				HFSM2_BREAK();
 		}
 
 		for (; parent; parent = forkParent(parent.forkId)) {
@@ -169,7 +169,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 			else if (parent.forkId < 0)
 				requestedOrthoFork(parent.forkId).set(parent.prong);
 			else
-				HFSM_BREAK();
+				HFSM2_BREAK();
 		}
 	}
 
@@ -181,10 +181,10 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestScheduled(const StateID stateId) {
-	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
-		HFSM_ASSERT(parent.forkId != 0);
+		HFSM2_ASSERT(parent.forkId != 0);
 		if (parent.forkId > 0)
 			compoResumable[parent.forkId - 1] = parent.prong;
 	}
@@ -217,9 +217,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::reset() {
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isActive(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong == compoActive[parent.forkId - 1];
 		} else
@@ -234,9 +234,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isActive(const StateID 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isResumable(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong == compoResumable[parent.forkId - 1];
 		}
@@ -249,9 +249,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isResumable(const State
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingChange(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return compoRequested[parent.forkId - 1] !=
 				   compoActive	 [parent.forkId - 1];
@@ -265,9 +265,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingChange(const S
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingEnter(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong != compoActive	 [parent.forkId - 1] &&
 				   parent.prong == compoRequested[parent.forkId - 1];
@@ -281,9 +281,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingEnter(const St
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingExit(const StateID stateId) const {
-	if (HFSM_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
-			HFSM_ASSERT(parent.forkId > 0);
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong == compoActive	 [parent.forkId - 1] &&
 				   parent.prong != compoRequested[parent.forkId - 1];
@@ -297,7 +297,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingExit(const Sta
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 const Parent&
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::forkParent(const ForkID forkId) const {
-	HFSM_ASSERT(forkId > 0);
+	HFSM2_ASSERT(forkId > 0);
 
 	return compoParents[forkId - 1];
 }
@@ -309,11 +309,11 @@ bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const Request request) {
 	if (request.stateId == 0)
 		return false;
-	else if (HFSM_CHECKED(request.stateId < STATE_COUNT)) {
+	else if (HFSM2_CHECKED(request.stateId < STATE_COUNT)) {
 		Parent parent = stateParents[request.stateId];
 
-		if (HFSM_CHECKED(parent)) {
-			HFSM_ASSERT(parent.forkId > 0);
+		if (HFSM2_CHECKED(parent)) {
+			HFSM2_ASSERT(parent.forkId > 0);
 
 			compoRequested[parent.forkId - 1] = parent.prong;
 
@@ -321,7 +321,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 				 parent;
 				 parent = forkParent(parent.forkId))
 			{
-				HFSM_ASSERT(parent.forkId > 0);
+				HFSM2_ASSERT(parent.forkId > 0);
 				compoRemains.set(parent.forkId - 1);
 
 				if (compoActive	  [parent.forkId - 1] != parent.prong)
@@ -333,7 +333,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 			}
 
 			for (; parent; parent = forkParent(parent.forkId)) {
-				HFSM_ASSERT(parent.forkId > 0);
+				HFSM2_ASSERT(parent.forkId > 0);
 				compoRemains.set(parent.forkId - 1);
 			}
 		}
@@ -347,10 +347,10 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestScheduled(const StateID stateId) {
-	if (HFSM_CHECKED(stateId < STATE_COUNT)) {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
-		HFSM_ASSERT(parent.forkId > 0);
+		HFSM2_ASSERT(parent.forkId > 0);
 		compoResumable[parent.forkId - 1] = parent.prong;
 	}
 }

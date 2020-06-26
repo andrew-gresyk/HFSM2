@@ -1,5 +1,5 @@
-#define HFSM_ENABLE_UTILITY_THEORY
-#include "../shared.hpp"
+#define HFSM2_ENABLE_UTILITY_THEORY
+#include "../tools.hpp"
 
 namespace test_random {
 

@@ -186,7 +186,7 @@ OS_<TN, TA, NI, TI>::wideRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
@@ -244,7 +244,7 @@ OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void
@@ -288,7 +288,7 @@ OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 template <typename TN, typename TA, ShortIndex NI, typename TI>
 void

@@ -7,10 +7,10 @@ enum Strategy {
 	Composite,
 	Resumable,
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	Utilitarian,
 	RandomUtil,
-#endif
+//#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -18,19 +18,19 @@ enum Strategy {
 #pragma pack(push, 1)
 
 struct alignas(2 * sizeof(ShortIndex)) Parent {
-	HFSM_INLINE Parent() = default;
+	HFSM2_INLINE Parent() = default;
 
-	HFSM_INLINE Parent(const ForkID forkId_)
+	HFSM2_INLINE Parent(const ForkID forkId_)
 		: forkId{forkId_}
 	{}
 
-	HFSM_INLINE Parent(const ForkID forkId_,
-					   const ShortIndex prong_)
+	HFSM2_INLINE Parent(const ForkID forkId_,
+						const ShortIndex prong_)
 		: forkId{forkId_}
 		, prong{prong_}
 	{}
 
-	HFSM_INLINE explicit operator bool() const {
+	HFSM2_INLINE explicit operator bool() const {
 		return forkId != INVALID_FORK_ID &&
 			   prong  != INVALID_SHORT_INDEX;
 	}
@@ -50,24 +50,24 @@ struct Request {
 		RESTART,
 		RESUME,
 
-	#ifdef HFSM_ENABLE_UTILITY_THEORY
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		UTILIZE,
 		RANDOMIZE,
-	#endif
+	//#endif
 
 		SCHEDULE,
 
 		COUNT
 	};
 
-	HFSM_INLINE Request() = default;
+	HFSM2_INLINE Request() = default;
 
-	HFSM_INLINE Request(const Type type_,
-						const StateID stateId_)
+	HFSM2_INLINE Request(const Type type_,
+						 const StateID stateId_)
 		: type{type_}
 		, stateId{stateId_}
 	{
-		HFSM_ASSERT(type_ < Type::COUNT);
+		HFSM2_ASSERT(type_ < Type::COUNT);
 	}
 
 	Type type = CHANGE;
@@ -154,9 +154,9 @@ struct RegistryT<ArgsT<TContext,
 	bool isPendingEnter	(const StateID stateId) const;
 	bool isPendingExit	(const StateID stateId) const;
 
-	HFSM_INLINE const Parent&	  forkParent(const ForkID forkId) const;
+	HFSM2_INLINE const Parent&	   forkParent(const ForkID forkId) const;
 
-	HFSM_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
+	HFSM2_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
 
 	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);
@@ -218,7 +218,7 @@ struct RegistryT<ArgsT<TContext,
 	bool isPendingEnter	(const StateID stateId) const;
 	bool isPendingExit	(const StateID stateId) const;
 
-	HFSM_INLINE const Parent& forkParent(const ForkID forkId) const;
+	HFSM2_INLINE const Parent& forkParent(const ForkID forkId) const;
 
 	bool requestImmediate(const Request request);
 	void requestScheduled(const StateID stateId);

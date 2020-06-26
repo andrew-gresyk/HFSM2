@@ -18,7 +18,7 @@ struct Status {
 	inline Status(const Result result_ = NONE,
 				  const bool outerTransition_ = false);
 
-	inline explicit operator bool() const										{ return result || outerTransition;									}
+	inline explicit operator bool() const											{ return result || outerTransition;									}
 
 	inline void clear();
 };
@@ -65,16 +65,16 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Iterator {
-		HFSM_INLINE Iterator(const ConstPlanT& plan);
+		HFSM2_INLINE Iterator(const ConstPlanT& plan);
 
-		HFSM_INLINE explicit operator bool() const;
+		HFSM2_INLINE explicit operator bool() const;
 
-		HFSM_INLINE void operator ++();
+		HFSM2_INLINE void operator ++();
 
-		HFSM_INLINE const TaskLink& operator  *() const							{ return  _plan._planData.taskLinks[_curr];							}
-		HFSM_INLINE const TaskLink* operator ->() const							{ return &_plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE const TaskLink& operator  *() const							{ return  _plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE const TaskLink* operator ->() const							{ return &_plan._planData.taskLinks[_curr];							}
 
-		HFSM_INLINE LongIndex next() const;
+		HFSM2_INLINE LongIndex next() const;
 
 		const ConstPlanT& _plan;
 		LongIndex _curr;
@@ -84,19 +84,19 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HFSM_INLINE ConstPlanT(const PlanData& planData,
+	HFSM2_INLINE ConstPlanT(const PlanData& planData,
 						   const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()											{ return			StateList ::template index<T>();				}
+	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
 
 	template <typename T>
-	static constexpr RegionID regionId()										{ return (RegionID) RegionList::template index<T>();				}
+	static constexpr RegionID regionId()											{ return (RegionID) RegionList::template index<T>();				}
 
 public:
-	HFSM_INLINE explicit operator bool() const;
+	HFSM2_INLINE explicit operator bool() const;
 
-	HFSM_INLINE Iterator first()												{ return Iterator{*this};											}
+	HFSM2_INLINE Iterator first()													{ return Iterator{*this};											}
 
 private:
 	const PlanData& _planData;
@@ -131,21 +131,21 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Iterator {
-		HFSM_INLINE Iterator(PlanT& plan);
+		HFSM2_INLINE Iterator(PlanT& plan);
 
-		HFSM_INLINE explicit operator bool() const;
+		HFSM2_INLINE explicit operator bool() const;
 
-		HFSM_INLINE void operator ++();
+		HFSM2_INLINE void operator ++();
 
-		HFSM_INLINE		  TaskLink& operator  *()								{ return  _plan._planData.taskLinks[_curr];							}
-		HFSM_INLINE const TaskLink& operator  *() const							{ return  _plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE	   TaskLink& operator  *()									{ return  _plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE const TaskLink& operator  *() const							{ return  _plan._planData.taskLinks[_curr];							}
 
-		HFSM_INLINE		  TaskLink* operator ->()								{ return &_plan._planData.taskLinks[_curr];							}
-		HFSM_INLINE const TaskLink* operator ->() const							{ return &_plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE	   TaskLink* operator ->()									{ return &_plan._planData.taskLinks[_curr];							}
+		HFSM2_INLINE const TaskLink* operator ->() const							{ return &_plan._planData.taskLinks[_curr];							}
 
-		HFSM_INLINE void remove();
+		HFSM2_INLINE void remove();
 
-		HFSM_INLINE LongIndex next() const;
+		HFSM2_INLINE LongIndex next() const;
 
 		PlanT& _plan;
 		LongIndex _curr;
@@ -155,24 +155,24 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
-	HFSM_INLINE PlanT(PlanData& planData,
-					  const RegionID regionId);
+	HFSM2_INLINE PlanT(PlanData& planData,
+					   const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()											{ return			StateList ::template index<T>();				}
+	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
 
 	template <typename T>
-	static constexpr RegionID regionId()										{ return (RegionID) RegionList::template index<T>();				}
+	static constexpr RegionID regionId()											{ return (RegionID) RegionList::template index<T>();				}
 
 	bool append(const TransitionType transitionType,
 				const StateID origin,
 				const StateID destination);
 
 public:
-	HFSM_INLINE explicit operator bool() const;
+	HFSM2_INLINE explicit operator bool() const;
 
 	/// @brief Clear all tasks from the plan
-	HFSM_INLINE void clear();
+	HFSM2_INLINE void clear();
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -182,7 +182,7 @@ public:
 	/// @param destination Transition destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	HFSM_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(TransitionType::CHANGE,	   origin, destination);	}
+	HFSM2_INLINE bool change   (const StateID origin, const StateID destination)	{ return append(TransitionType::CHANGE,	   origin, destination);	}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the initial state)
@@ -190,7 +190,7 @@ public:
 	/// @param destination Transition destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	HFSM_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(TransitionType::RESTART,   origin, destination);	}
+	HFSM2_INLINE bool restart  (const StateID origin, const StateID destination)	{ return append(TransitionType::RESTART,   origin, destination);	}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the state that was active previously)
@@ -198,9 +198,9 @@ public:
 	/// @param destination Transition destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	HFSM_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(TransitionType::RESUME,	   origin, destination);	}
+	HFSM2_INLINE bool resume   (const StateID origin, const StateID destination)	{ return append(TransitionType::RESUME,	   origin, destination);	}
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
@@ -208,8 +208,8 @@ public:
 	/// @param destination Transition destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	/// @see HFSM_ENABLE_UTILITY_THEORY
-	HFSM_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(TransitionType::UTILIZE,   origin, destination);	}
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE bool utilize  (const StateID origin, const StateID destination)	{ return append(TransitionType::UTILIZE,   origin, destination);	}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
@@ -217,8 +217,8 @@ public:
 	/// @param destination Transition destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	/// @see HFSM_ENABLE_UTILITY_THEORY
-	HFSM_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(TransitionType::RANDOMIZE, origin, destination);	}
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE bool randomize(const StateID origin, const StateID destination)	{ return append(TransitionType::RANDOMIZE, origin, destination);	}
 
 #endif
 
@@ -227,7 +227,7 @@ public:
 	/// @param destination Transition destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	HFSM_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(TransitionType::SCHEDULE,  origin, destination);	}
+	HFSM2_INLINE bool schedule (const StateID origin, const StateID destination)	{ return append(TransitionType::SCHEDULE,  origin, destination);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -238,7 +238,7 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM_INLINE bool change   (const StateID destination)						{ return change   (stateId<TOrigin>(), destination);				}
+	HFSM2_INLINE bool change   (const StateID destination)							{ return change   (stateId<TOrigin>(), destination);				}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the initial state)
@@ -247,7 +247,7 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM_INLINE bool restart  (const StateID destination)						{ return restart  (stateId<TOrigin>(), destination);				}
+	HFSM2_INLINE bool restart  (const StateID destination)							{ return restart  (stateId<TOrigin>(), destination);				}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the state that was active previously)
@@ -256,9 +256,9 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM_INLINE bool resume   (const StateID destination)						{ return resume   (stateId<TOrigin>(), destination);				}
+	HFSM2_INLINE bool resume   (const StateID destination)							{ return resume   (stateId<TOrigin>(), destination);				}
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
@@ -266,9 +266,9 @@ public:
 	/// @param destination Transition destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	/// @see HFSM_ENABLE_UTILITY_THEORY
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TOrigin>
-	HFSM_INLINE bool utilize  (const StateID destination)						{ return utilize  (stateId<TOrigin>(), destination);				}
+	HFSM2_INLINE bool utilize  (const StateID destination)							{ return utilize  (stateId<TOrigin>(), destination);				}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
@@ -276,9 +276,9 @@ public:
 	/// @param destination Transition destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	/// @see HFSM_ENABLE_UTILITY_THEORY
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TOrigin>
-	HFSM_INLINE bool randomize(const StateID destination)						{ return randomize(stateId<TOrigin>(), destination);				}
+	HFSM2_INLINE bool randomize(const StateID destination)							{ return randomize(stateId<TOrigin>(), destination);				}
 
 #endif
 
@@ -288,7 +288,7 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM_INLINE bool schedule (const StateID destination)						{ return schedule (stateId<TOrigin>(), destination);				}
+	HFSM2_INLINE bool schedule (const StateID destination)							{ return schedule (stateId<TOrigin>(), destination);				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -299,7 +299,7 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool change   ()												{ return change   (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM2_INLINE bool change   ()													{ return change   (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the initial state)
@@ -308,7 +308,7 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool restart  ()												{ return restart  (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM2_INLINE bool restart  ()													{ return restart  (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the state that was active previously)
@@ -317,9 +317,9 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool resume   ()												{ return resume   (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM2_INLINE bool resume   ()													{ return resume   (stateId<TOrigin>(), stateId<TDestination>());	}
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
@@ -327,9 +327,9 @@ public:
 	/// @tparam TDestination Transition destination state type
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	/// @see HFSM_ENABLE_UTILITY_THEORY
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool utilize  ()												{ return utilize  (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM2_INLINE bool utilize  ()													{ return utilize  (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	/// @brief Append a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
 	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
@@ -337,9 +337,9 @@ public:
 	/// @tparam TDestination Transition destination state type
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	/// @see HFSM_ENABLE_UTILITY_THEORY
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool randomize()												{ return randomize(stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM2_INLINE bool randomize()													{ return randomize(stateId<TOrigin>(), stateId<TDestination>());	}
 
 #endif
 
@@ -349,13 +349,13 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM_INLINE bool schedule ()												{ return schedule (stateId<TOrigin>(), stateId<TDestination>());	}
+	HFSM2_INLINE bool schedule ()													{ return schedule (stateId<TOrigin>(), stateId<TDestination>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Begin iteration over plan tasks for the current region
 	/// @return
-	HFSM_INLINE Iterator first()												{ return Iterator{*this};											}
+	HFSM2_INLINE Iterator first()													{ return Iterator{*this};											}
 
 private:
 	void remove(const LongIndex task);

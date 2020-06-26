@@ -1,9 +1,9 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
-#define HFSM_ENABLE_LOG_INTERFACE
-#define HFSM_ENABLE_UTILITY_THEORY
-#define HFSM_ENABLE_VERBOSE_DEBUG_LOG
+#define HFSM2_ENABLE_LOG_INTERFACE
+#define HFSM2_ENABLE_UTILITY_THEORY
+#define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include <hfsm2/machine.hpp>
 
 #include <catch2/catch.hpp>
@@ -39,7 +39,7 @@ using Events = std::vector<Event>;
 //------------------------------------------------------------------------------
 
 struct Logger
-    : hfsm2::LoggerInterface    // requires HFSM_ENABLE_LOG_INTERFACE defined
+    : hfsm2::LoggerInterface    // requires HFSM2_ENABLE_LOG_INTERFACE defined
 {
     void recordMethod(Context& /*context*/,
                       const StateID state,
@@ -123,7 +123,7 @@ using FSM = M::PeerRoot<
             >;
 
 //------------------------------------------------------------------------------
-// with HFSM_ENABLE_VERBOSE_DEBUG_LOG inherited state methods will also be logged
+// with HFSM2_ENABLE_VERBOSE_DEBUG_LOG inherited state methods will also be logged
 
 struct Origin       : FSM::State {};
 

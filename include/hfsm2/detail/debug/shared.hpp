@@ -5,7 +5,7 @@ namespace hfsm2 {
 enum class Method : uint8_t {
 	NONE,
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	RANK,
 	UTILITY,
 #endif
@@ -30,7 +30,7 @@ enum class TransitionType : uint8_t {
 	RESTART,
 	RESUME,
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	UTILIZE,
 	RANDOMIZE,
 #endif
@@ -80,7 +80,7 @@ const char*
 methodName(const Method method) {
 	switch (method) {
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	case Method::RANK:			 return "rank";
 	case Method::UTILITY:		 return "utility";
 #endif
@@ -98,7 +98,7 @@ methodName(const Method method) {
 	case Method::PLAN_FAILED:	 return "planFailed";
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		return nullptr;
 	}
 }
@@ -113,7 +113,7 @@ transitionName(const TransitionType transitionType) {
 	case TransitionType::RESTART:	return "restart";
 	case TransitionType::RESUME:	return "resume";
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	case TransitionType::UTILIZE:	return "utilize";
 	case TransitionType::RANDOMIZE:	return "randomize";
 #endif
@@ -121,7 +121,7 @@ transitionName(const TransitionType transitionType) {
 	case TransitionType::SCHEDULE:	return "schedule";
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		return nullptr;
 	}
 }

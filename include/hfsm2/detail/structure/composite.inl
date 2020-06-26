@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 ShortIndex
@@ -14,24 +14,24 @@ C_<TN, TA, SG, TH, TS...>::resolveRandom(Control& control,
 										 const Rank top) const
 {
 	const Utility random = control._rng.next();
-	HFSM_ASSERT(0.0f <= random && random < 1.0f);
+	HFSM2_ASSERT(0.0f <= random && random < 1.0f);
 
 	Utility cursor = random * sum;
 
 	for (ShortIndex i = 0; i < count(ranks); ++i)
 		if (ranks[i] == top) {
-			HFSM_ASSERT(options[i] >= 0.0f);
+			HFSM2_ASSERT(options[i] >= 0.0f);
 
 			if (cursor >= options[i])
 				cursor -= options[i];
 			else {
-				HFSM_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, i, random);
+				HFSM2_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, i, random);
 
 				return i;
 			}
 		}
 
-	HFSM_BREAK();
+	HFSM2_BREAK();
 	return INVALID_SHORT_INDEX;
 }
 
@@ -58,7 +58,7 @@ C_<TN, TA, SG, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
 	const ShortIndex active	   = compoActive   (control);
 	const ShortIndex requested = compoRequested(control);
 
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -74,7 +74,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
 C_<TN, TA, SG, TH, TS...>::deepEntryGuard(GuardControl& control) {
 	const ShortIndex requested = compoRequested(control);
-	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(requested != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -91,8 +91,8 @@ C_<TN, TA, SG, TH, TS...>::deepConstruct(PlanControl& control) {
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
 
-	HFSM_ASSERT(active	  == INVALID_SHORT_INDEX);
-	HFSM_ASSERT(requested != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active	   == INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(requested != INVALID_SHORT_INDEX);
 
 	active	  = requested;
 
@@ -127,8 +127,8 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) {
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
 
-	HFSM_ASSERT(active	  != INVALID_SHORT_INDEX &&
-				requested != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active	   != INVALID_SHORT_INDEX &&
+				 requested != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -156,7 +156,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 Status
 C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) {
 	const ShortIndex active = compoActive(control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -187,7 +187,7 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 									 const TEvent& event)
 {
 	const ShortIndex active = compoActive(control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -215,7 +215,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
 C_<TN, TA, SG, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
 	const ShortIndex active = compoActive(control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -231,7 +231,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 bool
 C_<TN, TA, SG, TH, TS...>::deepExitGuard(GuardControl& control) {
 	const ShortIndex active = compoActive(control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -245,7 +245,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	_subStates.wideExit(control, active);
 	_headState.deepExit(control);
@@ -259,7 +259,7 @@ C_<TN, TA, SG, TH, TS...>::deepDestruct(PlanControl& control) {
 	ShortIndex& active	  = compoActive   (control);
 	ShortIndex& resumable = compoResumable(control);
 
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	_subStates.wideDestruct(control, active);
 	_headState.deepDestruct(control);
@@ -278,7 +278,7 @@ void
 C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
 											 const Request::Type request)
 {
-	HFSM_ASSERT(control._registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
 
 	const ShortIndex requested = compoRequested(control);
 
@@ -329,7 +329,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
 		deepRequestResume	(control._registry);
 		break;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	case Request::UTILIZE:
 		deepRequestUtilize	(control);
@@ -342,13 +342,13 @@ C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
 #endif
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 	}
 }
 
 //------------------------------------------------------------------------------
 
-#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifndef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
@@ -363,7 +363,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control)
 		deepRequestChangeResumable  (control);
 		break;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	case Strategy::Utilitarian:
 		deepRequestChangeUtilitarian(control);
@@ -376,7 +376,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control)
 #endif
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 	}
 }
 
@@ -410,18 +410,18 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeResumable(Control& control) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepRequestChangeUtilitarian(Control& control) {
 	const UP s = _subStates.wideReportChangeUtilitarian(control);
-	HFSM_ASSERT(s.prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(s.prong != INVALID_SHORT_INDEX);
 
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -437,7 +437,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control) {
 
 	ShortIndex& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
-	HFSM_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < Info::WIDTH);
 }
 
 #endif
@@ -484,7 +484,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestResume(Registry& registry) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
@@ -494,7 +494,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -510,15 +510,15 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control) {
 
 	ShortIndex& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum, ranks, top);
-	HFSM_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < Info::WIDTH);
 }
 
 #endif
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
-#ifndef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#ifndef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 typename TA::UP
@@ -537,7 +537,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportChange(Control& control) {
 		return deepReportChangeRandom	  (control);
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		return {};
 	}
 }
@@ -592,7 +592,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeUtilitarian(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 
 	return {
 		h.utility * s.utility,
@@ -615,7 +615,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeRandom(Control& control) {
 
 	ShortIndex& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
-	HFSM_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < Info::WIDTH);
 
 	return {
 		h.utility * options[requested],
@@ -634,7 +634,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportUtilize(Control& control) {
 	ShortIndex& requested = compoRequested(control);
 	requested = s.prong;
 
-	HFSM_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 
 	return {
 		h.utility * s.utility,
@@ -665,7 +665,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) {
 
 	ShortIndex& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum, ranks, top);
-	HFSM_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < Info::WIDTH);
 
 	return h * options[requested];
 }
@@ -681,7 +681,7 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	ShortIndex& resumable = compoResumable(control);
 	ShortIndex& requested = compoRequested(control);
 
-	HFSM_ASSERT(active != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(active != INVALID_SHORT_INDEX);
 
 	if (requested == INVALID_SHORT_INDEX)
 		_subStates.wideChangeToRequested(control, active);
@@ -714,7 +714,7 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
@@ -764,11 +764,11 @@ C_<TN, TA, SG, TH, TS...>::deepLoadRequested(Registry& registry,
 	ShortIndex& requested = compoRequested(registry);
 
 	requested = stream.template read<WIDTH_BITS>();
-	HFSM_ASSERT(requested < WIDTH);
+	HFSM2_ASSERT(requested < WIDTH);
 
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
-		HFSM_ASSERT(resumable < WIDTH);
+		HFSM2_ASSERT(resumable < WIDTH);
 	} else
 		resumable = INVALID_SHORT_INDEX;
 
@@ -786,7 +786,7 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
-		HFSM_ASSERT(resumable < WIDTH);
+		HFSM2_ASSERT(resumable < WIDTH);
 	} else
 		resumable = INVALID_SHORT_INDEX;
 
@@ -797,7 +797,7 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void

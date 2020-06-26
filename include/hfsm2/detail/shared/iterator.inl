@@ -5,8 +5,8 @@ namespace detail {
 
 template <typename T>
 bool
-Iterator<T>::operator != (const Iterator<T>& HFSM_IF_ASSERT(dummy)) const {
-	HFSM_ASSERT(&_container == &dummy._container);
+Iterator<T>::operator != (const Iterator<T>& HFSM2_IF_ASSERT(dummy)) const {
+	HFSM2_ASSERT(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
 }
@@ -25,8 +25,8 @@ Iterator<T>::operator ++() {
 
 template <typename T>
 bool
-Iterator<const T>::operator != (const Iterator<const T>& HFSM_IF_ASSERT(dummy)) const {
-	HFSM_ASSERT(&_container == &dummy._container);
+Iterator<const T>::operator != (const Iterator<const T>& HFSM2_IF_ASSERT(dummy)) const {
+	HFSM2_ASSERT(&_container == &dummy._container);
 
 	return _cursor != _container.limit();
 }

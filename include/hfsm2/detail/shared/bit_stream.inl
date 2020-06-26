@@ -28,7 +28,7 @@ BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
 	constexpr ShortIndex BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
-	HFSM_ASSERT(_buffer.bitSize + BIT_WIDTH < BIT_CAPACITY);
+	HFSM2_ASSERT(_buffer.bitSize + BIT_WIDTH < BIT_CAPACITY);
 
 	using Item = UnsignedBitWidth<BIT_WIDTH>;
 
@@ -65,7 +65,7 @@ BitReadStream<NBC>::read() {
 	ShortIndex itemCursor = 0;
 
 	for (ShortIndex itemWidth = BIT_WIDTH; itemWidth; )
-		if (HFSM_CHECKED(_cursor + itemWidth <= _buffer.bitSize)) {
+		if (HFSM2_CHECKED(_cursor + itemWidth <= _buffer.bitSize)) {
 			const LongIndex	 byteIndex		= _cursor >> 3;
 			const uint8_t& byte = _buffer.payload[byteIndex];
 

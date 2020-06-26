@@ -14,7 +14,7 @@ template <typename T, LongIndex NC>
 template <typename N>
 T&
 StaticArray<T, NC>::operator[] (const N i) {
-	HFSM_ASSERT(0 <= i && i < CAPACITY);
+	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
 }
@@ -25,7 +25,7 @@ template <typename T, LongIndex NC>
 template <typename N>
 const T&
 StaticArray<T, NC>::operator[] (const N i) const {
-	HFSM_ASSERT(0 <= i && i < CAPACITY);
+	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
 }
@@ -45,7 +45,7 @@ template <typename T, LongIndex NC>
 template <typename TValue>
 LongIndex
 Array<T, NC>::append(TValue&& value) {
-	HFSM_ASSERT(_count < CAPACITY);
+	HFSM2_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{std::move(value)};
 
@@ -58,7 +58,7 @@ template <typename T, LongIndex NC>
 template <typename N>
 T&
 Array<T, NC>::operator[] (const N i) {
-	HFSM_ASSERT(0 <= i && i < CAPACITY);
+	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
 }
@@ -69,7 +69,7 @@ template <typename T, LongIndex NC>
 template <typename N>
 const T&
 Array<T, NC>::operator[] (const N i) const {
-	HFSM_ASSERT(0 <= i && i < CAPACITY);
+	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
 }

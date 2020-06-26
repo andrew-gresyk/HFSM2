@@ -14,7 +14,7 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
-HFSM_IF_DEBUG(struct None {});
+HFSM2_IF_DEBUG(struct None {});
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -26,20 +26,20 @@ struct DBox final {
 		T t_;
 	};
 
-	HFSM_INLINE  DBox() {}
-	HFSM_INLINE ~DBox() {}
+	HFSM2_INLINE  DBox() {}
+	HFSM2_INLINE ~DBox() {}
 
-	HFSM_INLINE void guard(GuardControlT<TArgs>& control)		{ Guard<T>::execute(control);	}
+	HFSM2_INLINE void guard(GuardControlT<TArgs>& control)		{ Guard<T>::execute(control);	}
 
-	HFSM_INLINE void construct();
-	HFSM_INLINE void destruct();
+	HFSM2_INLINE void construct();
+	HFSM2_INLINE void destruct();
 
-	HFSM_INLINE		  T& get()							{ HFSM_ASSERT(initialized_); return t_;	}
-	HFSM_INLINE const T& get() const					{ HFSM_ASSERT(initialized_); return t_;	}
+	HFSM2_INLINE	   T& get()						{ HFSM2_ASSERT(initialized_); return t_;	}
+	HFSM2_INLINE const T& get() const				{ HFSM2_ASSERT(initialized_); return t_;	}
 
-	HFSM_IF_ASSERT(bool initialized_ = false);
+	HFSM2_IF_ASSERT(bool initialized_ = false);
 
-	HFSM_IF_DEBUG(const std::type_index TYPE = typeid(T));
+	HFSM2_IF_DEBUG(const std::type_index TYPE = typeid(T));
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,15 +50,15 @@ struct SBox final {
 
 	T t_;
 
-	HFSM_INLINE void guard(GuardControlT<TArgs>& control);
+	HFSM2_INLINE void guard(GuardControlT<TArgs>& control);
 
-	HFSM_INLINE void construct()																{}
-	HFSM_INLINE void destruct()																	{}
+	HFSM2_INLINE void construct()																{}
+	HFSM2_INLINE void destruct()																{}
 
-	HFSM_INLINE		  T& get()									{ return t_;					}
-	HFSM_INLINE const T& get() const							{ return t_;					}
+	HFSM2_INLINE	   T& get()									{ return t_;					}
+	HFSM2_INLINE const T& get() const							{ return t_;					}
 
-	HFSM_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(T));
+	HFSM2_IF_DEBUG(const std::type_index TYPE = isBare() ? typeid(None) : typeid(T));
 };
 
 ////////////////////////////////////////////////////////////////////////////////

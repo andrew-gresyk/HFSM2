@@ -1,12 +1,12 @@
 namespace hfsm2 {
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext = EmptyContext
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TUtilty = float
 #endif
 
@@ -14,7 +14,7 @@ template <typename TContext = EmptyContext
 struct LoggerInterfaceT {
 	using Context		 = TContext;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Utilty		 = TUtilty;
 #endif
 
@@ -50,7 +50,7 @@ struct LoggerInterfaceT {
 										const StateID /*origin*/)
 	{}
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	virtual void recordUtilityResolution(Context& /*context*/,
 										 const StateID /*head*/,

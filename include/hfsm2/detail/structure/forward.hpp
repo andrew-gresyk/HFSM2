@@ -216,14 +216,14 @@ template <typename TContext,
 struct ArgsT final {
 	using Context	 = TContext;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank		 = typename TConfig::Rank;
 	using Utility	 = typename TConfig::Utility;
 	using RNG		 = typename TConfig::RNG;
 	using UP		 = typename TConfig::UP;
 #endif
 
-#ifdef HFSM_ENABLE_LOG_INTERFACE
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using Logger	 = typename TConfig::Logger;
 #endif
 
@@ -238,13 +238,13 @@ struct ArgsT final {
 
 	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer			= StreamBuffer	<SERIAL_BITS>;
 	using WriteStream			= BitWriteStream<SERIAL_BITS>;
 	using ReadStream			= BitReadStream	<SERIAL_BITS>;
 #endif
 
-	HFSM_IF_STRUCTURE(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
+	HFSM2_IF_STRUCTURE_REPORT(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
 };
 
 //------------------------------------------------------------------------------

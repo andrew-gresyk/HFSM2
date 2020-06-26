@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_EXPLICIT_MEMBER_SPECIALIZATION
+#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 template <typename T>
@@ -45,7 +45,7 @@ bool
 CS_<TN, TA, SG, NI, TS...>::wideForwardEntryGuard(GuardControl& control,
 												  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideForwardEntryGuard(control, prong);
@@ -60,7 +60,7 @@ bool
 CS_<TN, TA, SG, NI, TS...>::wideEntryGuard(GuardControl& control,
 										   const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideEntryGuard(control, prong);
@@ -75,7 +75,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideConstruct(PlanControl& control,
 										  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideConstruct(control, prong);
@@ -90,7 +90,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideEnter(PlanControl& control,
 									  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideEnter(control, prong);
@@ -105,7 +105,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideReenter(PlanControl& control,
 										const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideReenter(control, prong);
@@ -120,7 +120,7 @@ Status
 CS_<TN, TA, SG, NI, TS...>::wideUpdate(FullControl& control,
 									   const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	return prong < R_PRONG ?
 		lHalf.wideUpdate(control, prong) :
@@ -136,7 +136,7 @@ CS_<TN, TA, SG, NI, TS...>::wideReact(FullControl& control,
 									  const TEvent& event,
 									  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	return prong < R_PRONG ?
 		lHalf.wideReact(control, event, prong) :
@@ -150,7 +150,7 @@ bool
 CS_<TN, TA, SG, NI, TS...>::wideForwardExitGuard(GuardControl& control,
 												 const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideForwardExitGuard(control, prong);
@@ -165,7 +165,7 @@ bool
 CS_<TN, TA, SG, NI, TS...>::wideExitGuard(GuardControl& control,
 										  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideExitGuard(control, prong);
@@ -180,7 +180,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideExit(PlanControl& control,
 									 const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideExit(control, prong);
@@ -195,7 +195,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideDestruct(PlanControl& control,
 										 const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideDestruct(control, prong);
@@ -211,7 +211,7 @@ CS_<TN, TA, SG, NI, TS...>::wideForwardActive(Control& control,
 											  const Request::Type request,
 											  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideForwardActive(control, request, prong);
@@ -227,7 +227,7 @@ CS_<TN, TA, SG, NI, TS...>::wideForwardRequest(Control& control,
 											   const Request::Type request,
 											   const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideForwardRequest(control, request, prong);
@@ -250,7 +250,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideRequestChangeResumable(Control& control,
 													   const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideRequestChangeResumable(control, prong);
@@ -281,7 +281,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideRequestResume(Registry& registry,
 											  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideRequestResume(registry, prong);
@@ -291,7 +291,7 @@ CS_<TN, TA, SG, NI, TS...>::wideRequestResume(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 typename TA::UP
@@ -310,7 +310,7 @@ typename TA::Rank
 CS_<TN, TA, SG, NI, TS...>::wideReportRank(Control& control,
 										   Rank* const ranks)
 {
-	HFSM_ASSERT(ranks);
+	HFSM2_ASSERT(ranks);
 
 	const Rank l = lHalf.wideReportRank(control, ranks);
 	const Rank r = rHalf.wideReportRank(control, ranks + LStates::SIZE);
@@ -328,7 +328,7 @@ CS_<TN, TA, SG, NI, TS...>::wideReportRandomize(Control& control,
 												const Rank* const ranks,
 												const Rank top)
 {
-	HFSM_ASSERT(options && ranks);
+	HFSM2_ASSERT(options && ranks);
 
 	const Utility l = lHalf.wideReportRandomize(control, options,				  ranks,				 top);
 	const Utility r = rHalf.wideReportRandomize(control, options + LStates::SIZE, ranks + LStates::SIZE, top);
@@ -351,7 +351,7 @@ typename TA::UP
 CS_<TN, TA, SG, NI, TS...>::wideReportChangeResumable(Control& control,
 													  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		return lHalf.wideReportChangeResumable(control, prong);
@@ -380,7 +380,7 @@ CS_<TN, TA, SG, NI, TS...>::wideReportChangeRandom(Control& control,
 												   const Rank* const ranks,
 												   const Rank top)
 {
-	HFSM_ASSERT(options && ranks);
+	HFSM2_ASSERT(options && ranks);
 
 	const Utility l = lHalf.wideReportChangeRandom(control, options,				 ranks,					top);
 	const Utility r = rHalf.wideReportChangeRandom(control, options + LStates::SIZE, ranks + LStates::SIZE, top);
@@ -397,7 +397,7 @@ void
 CS_<TN, TA, SG, NI, TS...>::wideChangeToRequested(PlanControl& control,
 												  const ShortIndex prong)
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
 		lHalf.wideChangeToRequested(control, prong);
@@ -407,7 +407,7 @@ CS_<TN, TA, SG, NI, TS...>::wideChangeToRequested(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_SERIALIZATION
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
@@ -415,7 +415,7 @@ CS_<TN, TA, SG, NI, TS...>::wideSaveActive(const Registry& registry,
 										   WriteStream& stream,
 										   const ShortIndex prong) const
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG) {
 		lHalf.wideSaveActive   (registry, stream, prong);
@@ -445,7 +445,7 @@ CS_<TN, TA, SG, NI, TS...>::wideLoadRequested(Registry& registry,
 											  ReadStream& stream,
 											  const ShortIndex prong) const
 {
-	HFSM_ASSERT(prong != INVALID_SHORT_INDEX);
+	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG) {
 		lHalf.wideLoadRequested(registry, stream, prong);
@@ -471,7 +471,7 @@ CS_<TN, TA, SG, NI, TS...>::wideLoadResumable(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void

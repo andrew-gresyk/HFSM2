@@ -22,7 +22,7 @@
 //	    changed to Target
 
 // optional: enable FSM structure report in debugger
-#define HFSM_ENABLE_STRUCTURE_REPORT
+#define HFSM2_ENABLE_STRUCTURE_REPORT
 #include <hfsm2/machine.hpp>
 
 #include <iostream>
@@ -38,6 +38,29 @@ using TransitionEvent = char;
 
 //------------------------------------------------------------------------------
 
+#if 0
+
+// states need to be forward declared to be used in FSM struct declaration
+class Reactive;
+class NonHandler;
+class ConcreteHandler;
+class TemplateHandler;
+class EnableIfHandler;
+class Target;
+
+using FSM = M::PeerRoot<
+				M::Orthogonal<Reactive,
+					NonHandler,
+					ConcreteHandler,
+					TemplateHandler,
+					EnableIfHandler
+				>,
+				Target
+			>;
+
+#else
+
+// alternatively, some macro magic can be invoked to simplify FSM structure declaration
 #define S(s) struct s
 
 using FSM = M::PeerRoot<
@@ -51,6 +74,8 @@ using FSM = M::PeerRoot<
 			>;
 
 #undef S
+
+#endif
 
 //------------------------------------------------------------------------------
 

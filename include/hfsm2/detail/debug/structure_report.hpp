@@ -2,7 +2,7 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 struct StructureEntry {
 	bool isActive;
@@ -16,10 +16,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
 TransitionType
-HFSM_INLINE convert(const Request::Type type) {
+HFSM2_INLINE
+convert(const Request::Type type) {
 	switch (type) {
 		case Request::CHANGE:
 			return TransitionType::CHANGE;
@@ -30,7 +31,7 @@ HFSM_INLINE convert(const Request::Type type) {
 		case Request::RESUME:
 			return TransitionType::RESUME;
 
-	#ifdef HFSM_ENABLE_UTILITY_THEORY
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 		case Request::UTILIZE:
 			return TransitionType::UTILIZE;
@@ -44,7 +45,7 @@ HFSM_INLINE convert(const Request::Type type) {
 			return TransitionType::SCHEDULE;
 
 		default:
-			HFSM_BREAK();
+			HFSM2_BREAK();
 			return TransitionType::CHANGE;
 	}
 }
@@ -52,7 +53,8 @@ HFSM_INLINE convert(const Request::Type type) {
 //------------------------------------------------------------------------------
 
 Request::Type
-HFSM_INLINE convert(const TransitionType type) {
+HFSM2_INLINE
+convert(const TransitionType type) {
 	switch (type) {
 	case TransitionType::CHANGE:
 		return Request::CHANGE;
@@ -63,7 +65,7 @@ HFSM_INLINE convert(const TransitionType type) {
 	case TransitionType::RESUME:
 		return Request::RESUME;
 
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	case TransitionType::UTILIZE:
 		return Request::UTILIZE;
@@ -77,7 +79,7 @@ HFSM_INLINE convert(const TransitionType type) {
 		return Request::SCHEDULE;
 
 	default:
-		HFSM_BREAK();
+		HFSM2_BREAK();
 		return Request::CHANGE;
 	}
 }
@@ -86,7 +88,7 @@ HFSM_INLINE convert(const TransitionType type) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_ENABLE_STRUCTURE_REPORT
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 #ifdef _MSC_VER
 	#pragma warning(push)
@@ -105,10 +107,10 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE StructureStateInfo(const LongIndex parent_,
-								   const RegionType region_,
-								   const ShortIndex depth_,
-								   const char* const name_)
+	HFSM2_INLINE StructureStateInfo(const LongIndex parent_,
+									const RegionType region_,
+									const ShortIndex depth_,
+									const char* const name_)
 		: name{name_}
 		, parent{parent_}
 		, region{region_}
@@ -135,34 +137,34 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM_ENABLE_TRANSITION_HISTORY
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
 #pragma pack(push, 1)
 
 struct alignas(4) Transition {
-	HFSM_INLINE Transition() = default;
+	HFSM2_INLINE Transition() = default;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE Transition(const detail::Request request,
-						   const Method method_)
+	HFSM2_INLINE Transition(const detail::Request request,
+							const Method method_)
 		: stateId{request.stateId}
 		, method{method_}
 		, transitionType{detail::convert(request.type)}
 	{
-		HFSM_ASSERT(method_ < Method::COUNT);
+		HFSM2_ASSERT(method_ < Method::COUNT);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM_INLINE Transition(const StateID stateId_,
-						   const Method method_,
-						   const TransitionType transitionType_)
+	HFSM2_INLINE Transition(const StateID stateId_,
+							const Method method_,
+							const TransitionType transitionType_)
 		: stateId{stateId_}
 		, method{method_}
 		, transitionType{transitionType_}
 	{
-		HFSM_ASSERT(method_ < Method::COUNT);
+		HFSM2_ASSERT(method_ < Method::COUNT);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

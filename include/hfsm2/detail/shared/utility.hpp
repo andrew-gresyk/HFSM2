@@ -31,7 +31,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-HFSM_INLINE
+HFSM2_INLINE
 void
 fill(T& a, const char value) {
 	memset(&a, (int) value, sizeof(a));

@@ -1,5 +1,5 @@
-#define HFSM_ENABLE_TRANSITION_HISTORY
-#include "shared.hpp"
+#define HFSM2_ENABLE_TRANSITION_HISTORY
+#include "tools.hpp"
 
 namespace test_replication {
 

@@ -1,4 +1,4 @@
-#ifdef HFSM_ENABLE_UTILITY_THEORY
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 namespace hfsm2 {
 
