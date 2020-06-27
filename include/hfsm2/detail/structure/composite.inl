@@ -173,8 +173,12 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) {
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
+	#ifdef HFSM2_ENABLE_PLANS
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
+	#else
+		return subStatus;
+	#endif
 	}
 }
 
@@ -204,8 +208,12 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
+	#ifdef HFSM2_ENABLE_PLANS
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
+	#else
+		return subStatus;
+	#endif
 	}
 }
 
@@ -267,8 +275,10 @@ C_<TN, TA, SG, TH, TS...>::deepDestruct(PlanControl& control) {
 	resumable = active;
 	active	  = INVALID_SHORT_INDEX;
 
+#ifdef HFSM2_ENABLE_PLANS
 	auto plan = control.plan(REGION_ID);
 	plan.clear();
+#endif
 }
 
 //------------------------------------------------------------------------------

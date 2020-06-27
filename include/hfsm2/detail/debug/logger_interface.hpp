@@ -5,12 +5,8 @@ namespace hfsm2 {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext = EmptyContext
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-		, typename TUtilty = float
-#endif
-
-		  >
+		  HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)
+		  , FeatureTag NFeatureTag = FEATURE_TAG>
 struct LoggerInterfaceT {
 	using Context		 = TContext;
 
@@ -22,7 +18,10 @@ struct LoggerInterfaceT {
 	using StateID		 = ::hfsm2::StateID;
 	using RegionID		 = ::hfsm2::RegionID;
 	using TransitionType = ::hfsm2::TransitionType;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using StatusEvent	 = ::hfsm2::StatusEvent;
+#endif
 
 	virtual void recordMethod(Context& /*context*/,
 							  const StateID /*origin*/,
@@ -35,6 +34,8 @@ struct LoggerInterfaceT {
 								  const StateID /*target*/)
 	{}
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	virtual void recordTaskStatus(Context& /*context*/,
 								  const RegionID /*region*/,
 								  const StateID /*origin*/,
@@ -45,6 +46,8 @@ struct LoggerInterfaceT {
 								  const RegionID /*region*/,
 								  const StatusEvent /*event*/)
 	{}
+
+#endif
 
 	virtual void recordCancelledPending(Context& /*context*/,
 										const StateID /*origin*/)
@@ -71,8 +74,9 @@ struct LoggerInterfaceT {
 
 #else
 
-template <typename TContext = EmptyContext,
-		  typename TUtilty = float>
+template <typename TContext = EmptyContext
+		  HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)
+		  , FeatureTag NFeatureTag = FEATURE_TAG>
 using LoggerInterfaceT = void;
 
 #endif

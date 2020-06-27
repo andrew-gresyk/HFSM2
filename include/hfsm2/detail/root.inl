@@ -25,13 +25,13 @@ R_<TG, TA>::~R_() {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	  (control);
 	_apex.deepDestruct(control);
 
-	HFSM2_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 }
 
 //------------------------------------------------------------------------------
@@ -42,13 +42,13 @@ R_<TG, TA>::update() {
 	FullControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						, _requests
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepUpdate(control);
 
-	HFSM2_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 
 	if (_requests.count())
 		processTransitions();
@@ -65,13 +65,13 @@ R_<TG, TA>::react(const TEvent& event) {
 	FullControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						, _requests
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepReact(control, event);
 
-	HFSM2_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 
 	if (_requests.count())
 		processTransitions();
@@ -151,7 +151,7 @@ R_<TG, TA>::reset() {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
@@ -184,7 +184,7 @@ R_<TG, TA>::load(const SerialBuffer& buffer) {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
@@ -214,7 +214,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 		PlanControl control{_context
 							HFSM2_IF_UTILITY_THEORY(, _rng)
 							, _registry
-							, _planData
+							HFSM2_IF_PLANS(, _planData)
 							HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 		if (applyRequests(control, transitions, count)) {
@@ -222,7 +222,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 
 			_registry.clearRequests();
 
-			HFSM2_IF_ASSERT(_planData.verifyPlans());
+			HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 		}
 
 		HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
@@ -247,7 +247,7 @@ R_<TG, TA>::initialEnter() {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepRequestChange(control);
@@ -279,7 +279,7 @@ R_<TG, TA>::initialEnter() {
 
 	_registry.clearRequests();
 
-	HFSM2_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
@@ -301,7 +301,7 @@ R_<TG, TA>::processTransitions() {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	bool changesMade = false;
@@ -331,7 +331,7 @@ R_<TG, TA>::processTransitions() {
 
 		_registry.clearRequests();
 
-		HFSM2_IF_ASSERT(_planData.verifyPlans());
+		HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 	}
 
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
@@ -396,7 +396,7 @@ R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context
 							  HFSM2_IF_UTILITY_THEORY(, _rng)
 							  , _registry
-							  , _planData
+							  HFSM2_IF_PLANS(, _planData)
 							  , _requests
 							  , pendingRequests
 							  HFSM2_IF_LOG_INTERFACE(, _logger)};
@@ -417,7 +417,7 @@ R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context
 							  HFSM2_IF_UTILITY_THEORY(, _rng)
 							  , _registry
-							  , _planData
+							  HFSM2_IF_PLANS(, _planData)
 							  , _requests
 							  , pendingRequests
 							  HFSM2_IF_LOG_INTERFACE(, _logger)};

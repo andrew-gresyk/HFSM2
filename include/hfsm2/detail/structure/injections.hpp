@@ -22,7 +22,10 @@ protected:
 	using Control		= ControlT<TArgs>;
 
 	using PlanControl	= PlanControlT<TArgs>;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using Plan			= PlanT<TArgs>;
+#endif
 
 	using FullControl	= FullControlT <TArgs>;
 	using GuardControl	= GuardControlT<TArgs>;
@@ -74,7 +77,11 @@ struct B_<TFirst, TRest...>
 
 	using typename TFirst::Control;
 	using typename TFirst::PlanControl;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using typename TFirst::Plan;
+#endif
+
 	using typename TFirst::FullControl;
 	using typename TFirst::GuardControl;
 
@@ -115,7 +122,11 @@ struct B_<TFirst>
 
 	using typename TFirst::Control;
 	using typename TFirst::PlanControl;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using typename TFirst::Plan;
+#endif
+
 	using typename TFirst::FullControl;
 	using typename TFirst::GuardControl;
 
@@ -123,43 +134,44 @@ struct B_<TFirst>
 	using TFirst::regionId;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
-
-	HFSM2_INLINE Utility utility		 (const Control&)			{ return Utility{1.0f};	}
+	HFSM2_INLINE Rank	 rank			  (const Control&)			{ return Rank	   {0};	}
+	HFSM2_INLINE Utility utility		  (const Control&)			{ return Utility{1.0f};	}
 #endif
 
-	HFSM2_INLINE void	entryGuard		 (GuardControl&)			{}
+	HFSM2_INLINE void	 entryGuard		  (GuardControl&)			{}
 
-	HFSM2_INLINE void	enter			 (PlanControl&)				{}
-	HFSM2_INLINE void	reenter			 (PlanControl&)				{}
+	HFSM2_INLINE void	 enter			  (PlanControl&)			{}
+	HFSM2_INLINE void	 reenter		  (PlanControl&)			{}
 
-	HFSM2_INLINE void	update			 (FullControl&)				{}
-
-	template <typename TEvent>
-	HFSM2_INLINE void	react			 (const TEvent&,
-										  FullControl&)				{}
-
-	HFSM2_INLINE void	exitGuard		 (GuardControl&)			{}
-
-	HFSM2_INLINE void	exit			 (PlanControl&)				{}
-
-	HFSM2_INLINE void	planSucceeded	 (FullControl& control)		{ control.succeed();	}
-	HFSM2_INLINE void	planFailed		 (FullControl& control)		{ control.fail();		}
-
-	HFSM2_INLINE void	widePreEntryGuard(Context& context);
-
-	HFSM2_INLINE void	widePreEnter	 (Context& context);
-	HFSM2_INLINE void	widePreReenter   (Context& context);
-
-	HFSM2_INLINE void	widePreUpdate	 (Context& context);
+	HFSM2_INLINE void	 update			  (FullControl&)			{}
 
 	template <typename TEvent>
-	HFSM2_INLINE void	widePreReact	 (const TEvent& event,
-					 					  Context& context);
+	HFSM2_INLINE void	 react			  (const TEvent&,
+						 				   FullControl&)			{}
 
-	HFSM2_INLINE void	widePreExitGuard (Context& context);
+	HFSM2_INLINE void	 exitGuard		  (GuardControl&)			{}
 
-	HFSM2_INLINE void	widePostExit	 (Context& context);
+	HFSM2_INLINE void	 exit			  (PlanControl&)			{}
+
+#ifdef HFSM2_ENABLE_PLANS
+	HFSM2_INLINE void	 planSucceeded	  (FullControl& control)	{ control.succeed();	}
+	HFSM2_INLINE void	 planFailed		  (FullControl& control)	{ control.fail();		}
+#endif
+
+	HFSM2_INLINE void	 widePreEntryGuard(Context& context);
+
+	HFSM2_INLINE void	 widePreEnter	  (Context& context);
+	HFSM2_INLINE void	 widePreReenter   (Context& context);
+
+	HFSM2_INLINE void	 widePreUpdate	  (Context& context);
+
+	template <typename TEvent>
+	HFSM2_INLINE void	 widePreReact	  (const TEvent& event,
+					 	 				   Context& context);
+
+	HFSM2_INLINE void	 widePreExitGuard (Context& context);
+
+	HFSM2_INLINE void	 widePostExit	  (Context& context);
 };
 
 //------------------------------------------------------------------------------

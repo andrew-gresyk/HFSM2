@@ -46,6 +46,34 @@ S_<TN_, TA, TH>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Rank
+S_<TN_, TA, TH>::wrapRank(Control& control) {
+	HFSM2_LOG_STATE_METHOD(&Head::rank,
+						   control.context(),
+						   Method::RANK);
+
+	return _headBox.get().rank(static_cast<const Control&>(control));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Utility
+S_<TN_, TA, TH>::wrapUtility(Control& control) {
+	HFSM2_LOG_STATE_METHOD(&Head::utility,
+						   control.context(),
+						   Method::UTILITY);
+
+	return _headBox.get().utility(static_cast<const Control&>(control));
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
 template <typename TN_, typename TA, typename TH>
 bool
 S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
@@ -67,8 +95,10 @@ S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM2_IF_LOG_INTERFACE(control)) {
+#ifdef HFSM2_ENABLE_PLANS
 	HFSM2_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM2_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
+#endif
 
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
 						   control.context(),
@@ -97,8 +127,10 @@ S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
+#ifdef HFSM2_ENABLE_PLANS
 	HFSM2_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM2_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
+#endif
 
 	HFSM2_LOG_STATE_METHOD(&Head::reenter,
 						   control.context(),
@@ -194,18 +226,27 @@ S_<TN_, TA, TH>::deepExit(PlanControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepDestruct(PlanControl& control) {
+S_<TN_, TA, TH>::deepDestruct(PlanControl&
+						  #if defined HFSM2_ENABLE_LOG_INTERFACE || defined HFSM2_ENABLE_PLANS
+							  control
+						  #endif
+							  )
+{
 	HFSM2_LOG_STATE_METHOD(&Head::exit,
 						   control.context(),
 						   Method::DESTRUCT);
 
 	_headBox.destruct();
 
+#ifdef HFSM2_ENABLE_PLANS
 	control._planData.tasksSuccesses.template reset<STATE_ID>();
 	control._planData.tasksFailures .template reset<STATE_ID>();
+#endif
 }
 
 //------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_PLANS
 
 template <typename TN_, typename TA, typename TH>
 void
@@ -233,33 +274,11 @@ S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 	_headBox.get().planFailed(control);
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-
-template <typename TN_, typename TA, typename TH>
-typename S_<TN_, TA, TH>::Rank
-S_<TN_, TA, TH>::wrapRank(Control& control) {
-	HFSM2_LOG_STATE_METHOD(&Head::rank,
-						   control.context(),
-						   Method::RANK);
-
-	return _headBox.get().rank(static_cast<const Control&>(control));
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA, typename TH>
-typename S_<TN_, TA, TH>::Utility
-S_<TN_, TA, TH>::wrapUtility(Control& control) {
-	HFSM2_LOG_STATE_METHOD(&Head::utility,
-						   control.context(),
-						   Method::UTILITY);
-
-	return _headBox.get().utility(static_cast<const Control&>(control));
-}
-
-//------------------------------------------------------------------------------
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::UP

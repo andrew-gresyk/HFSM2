@@ -204,15 +204,15 @@ struct OI_ final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TStateList,
-		  typename TRegionList,
-		  LongIndex NCompoCount,
-		  LongIndex NOrthoCount,
-		  LongIndex NOrthoUnits,
-		  LongIndex NSerialBits,
-		  LongIndex NTaskCapacity>
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, LongIndex NCompoCount
+		, LongIndex NOrthoCount
+		, LongIndex NOrthoUnits
+		, LongIndex NSerialBits
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
 struct ArgsT final {
 	using Context	 = TContext;
 
@@ -224,7 +224,7 @@ struct ArgsT final {
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	 = typename TConfig::Logger;
+	using Logger	 = typename TConfig::LoggerInterface;
 #endif
 
 	using StateList	 = TStateList;
@@ -236,7 +236,9 @@ struct ArgsT final {
 	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
 	static constexpr ShortIndex SERIAL_BITS	  = NSerialBits;
 
+#ifdef HFSM2_ENABLE_PLANS
 	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
+#endif
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer			= StreamBuffer	<SERIAL_BITS>;
@@ -325,8 +327,10 @@ struct RF_ final {
 
 	static constexpr LongIndex SUBSTITUTION_LIMIT= TConfig::SUBSTITUTION_LIMIT;
 
+#ifdef HFSM2_ENABLE_PLANS
 	static constexpr LongIndex TASK_CAPACITY	 = TConfig::TASK_CAPACITY != INVALID_LONG_INDEX ?
 													   TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
+#endif
 
 	static constexpr ShortIndex COMPO_REGIONS	 = Apex::COMPO_REGIONS;
 	static constexpr ShortIndex ORTHO_REGIONS	 = Apex::ORTHO_REGIONS;
@@ -338,15 +342,15 @@ struct RF_ final {
 	using StateList		= typename Apex::StateList;
 	using RegionList	= typename Apex::RegionList;
 
-	using Args			= ArgsT<Context,
-								TConfig,
-								StateList,
-								RegionList,
-								COMPO_REGIONS,
-								ORTHO_REGIONS,
-								ORTHO_UNITS,
-								ACTIVE_BITS + RESUMABLE_BITS,
-								TASK_CAPACITY>;
+	using Args			= ArgsT<Context
+							  , TConfig
+							  , StateList
+							  , RegionList
+							  , COMPO_REGIONS
+							  , ORTHO_REGIONS
+							  , ORTHO_UNITS
+							  , ACTIVE_BITS + RESUMABLE_BITS
+							  HFSM2_IF_PLANS(, TASK_CAPACITY)>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

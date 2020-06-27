@@ -73,6 +73,13 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE Rank	 wrapRank			  (Control&  control);
+	HFSM2_INLINE Utility wrapUtility		  (Control&  control);
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM2_INLINE bool	 deepForwardEntryGuard(GuardControl&)												{ return false;	}
 	HFSM2_INLINE bool	 deepEntryGuard		  (GuardControl& control);
 
@@ -95,12 +102,9 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
 	HFSM2_INLINE void	 wrapPlanSucceeded	  (FullControl&	control);
 	HFSM2_INLINE void	 wrapPlanFailed		  (FullControl&	control);
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE Rank	 wrapRank			  (Control& control);
-	HFSM2_INLINE Utility wrapUtility		  (Control& control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

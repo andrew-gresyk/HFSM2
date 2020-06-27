@@ -37,6 +37,8 @@ combine(const Status lhs, const Status rhs) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef HFSM2_ENABLE_PLANS
+
 template <typename TArgs>
 class ConstPlanT {
 	template <typename>
@@ -85,7 +87,7 @@ public:
 
 private:
 	HFSM2_INLINE ConstPlanT(const PlanData& planData,
-						   const RegionID regionId);
+							const RegionID regionId);
 
 	template <typename T>
 	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
@@ -365,6 +367,8 @@ private:
 	const RegionID _regionId;
 	Bounds& _bounds;
 };
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 

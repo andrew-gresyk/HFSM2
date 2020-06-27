@@ -98,8 +98,12 @@ O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) {
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
+	#ifdef HFSM2_ENABLE_PLANS
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
+	#else
+		return subStatus;
+	#endif
 	}
 }
 
@@ -126,8 +130,12 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
+	#ifdef HFSM2_ENABLE_PLANS
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
+	#else
+		return subStatus;
+	#endif
 	}
 }
 

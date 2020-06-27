@@ -108,6 +108,16 @@
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM2_ENABLE_ALL
+	#define HFSM2_ENABLE_UTILITY_THEORY
+	#define HFSM2_ENABLE_PLANS
+	#define HFSM2_ENABLE_SERIALIZATION
+	#define HFSM2_ENABLE_TRANSITION_HISTORY
+	#define HFSM2_ENABLE_STRUCTURE_REPORT
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 	#define HFSM2_IF_UTILITY_THEORY(...)							 __VA_ARGS__
 	#define HFSM2_UTILITY_THEORY_MASK									(1 << 0)
@@ -118,32 +128,42 @@
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
+	#define HFSM2_IF_PLANS(...)										 __VA_ARGS__
+	#define HFSM2_PLANS_MASK											(1 << 1)
+#else
+	#define HFSM2_IF_PLANS(...)
+	#define HFSM2_PLANS_MASK											(0 << 1)
+#endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #ifdef HFSM2_ENABLE_SERIALIZATION
 	#define HFSM2_IF_SERIALIZATION(...)								 __VA_ARGS__
-	#define HFSM2_SERIALIZATION_MASK									(1 << 1)
+	#define HFSM2_SERIALIZATION_MASK									(1 << 2)
 #else
 	#define HFSM2_IF_SERIALIZATION(...)
-	#define HFSM2_SERIALIZATION_MASK									(0 << 1)
+	#define HFSM2_SERIALIZATION_MASK									(0 << 2)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	#define HFSM2_IF_TRANSITION_HISTORY(...)						 __VA_ARGS__
-	#define HFSM2_TRANSITION_HISTORY_MASK								(1 << 2)
+	#define HFSM2_TRANSITION_HISTORY_MASK								(1 << 3)
 #else
 	#define HFSM2_IF_TRANSITION_HISTORY(...)
-	#define HFSM2_TRANSITION_HISTORY_MASK								(0 << 2)
+	#define HFSM2_TRANSITION_HISTORY_MASK								(0 << 3)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	#define HFSM2_IF_STRUCTURE_REPORT(...)							 __VA_ARGS__
-	#define HFSM2_STRUCTURE_REPORT_MASK									(1 << 3)
+	#define HFSM2_STRUCTURE_REPORT_MASK									(1 << 4)
 #else
 	#define HFSM2_IF_STRUCTURE_REPORT(...)
-	#define HFSM2_STRUCTURE_REPORT_MASK									(0 << 3)
+	#define HFSM2_STRUCTURE_REPORT_MASK									(0 << 4)
 #endif
 
 //------------------------------------------------------------------------------
@@ -155,11 +175,13 @@
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
 
 	#define HFSM2_IF_LOG_INTERFACE(...)								 __VA_ARGS__
-	#define HFSM2_LOG_INTERFACE_MASK									(1 << 4)
+	#define HFSM2_LOG_INTERFACE_MASK									(1 << 5)
 
 	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		   \
 		if (_logger)														   \
 			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
+
+#ifdef HFSM2_ENABLE_PLANS
 
 	#define HFSM2_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)			   \
 		if (_logger)														   \
@@ -168,6 +190,8 @@
 	#define HFSM2_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)					   \
 		if (_logger)														   \
 			_logger->recordPlanStatus(CONTEXT, REGION, STATUS)
+
+#endif
 
 	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)					   \
 		if (_logger)														   \
@@ -188,11 +212,15 @@
 #else
 
 	#define HFSM2_IF_LOG_INTERFACE(...)
-	#define HFSM2_LOG_INTERFACE_MASK									(0 << 4)
+	#define HFSM2_LOG_INTERFACE_MASK									(0 << 5)
 
 	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)
+
+#ifdef HFSM2_ENABLE_PLANS
 	#define HFSM2_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)
 	#define HFSM2_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)
+#endif
+
 	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -228,17 +256,19 @@ namespace hfsm2 {
 
 using FeatureTag = uint8_t;
 
-constexpr FeatureTag HFSM2_FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK	   |
-										 HFSM2_SERIALIZATION_MASK	   |
-										 HFSM2_TRANSITION_HISTORY_MASK |
-										 HFSM2_STRUCTURE_REPORT_MASK   |
-										 HFSM2_LOG_INTERFACE_MASK;
+constexpr FeatureTag FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK	 |
+								   HFSM2_PLANS_MASK			     |
+								   HFSM2_SERIALIZATION_MASK	     |
+								   HFSM2_TRANSITION_HISTORY_MASK |
+								   HFSM2_STRUCTURE_REPORT_MASK   |
+								   HFSM2_LOG_INTERFACE_MASK;
 
 }
 
 //------------------------------------------------------------------------------
 
 #undef HFSM2_UTILITY_THEORY_MASK
+#undef HFSM2_PLANS_MASK
 #undef HFSM2_SERIALIZATION_MASK
 #undef HFSM2_TRANSITION_HISTORY_MASK
 #undef HFSM2_STRUCTURE_REPORT_MASK
@@ -2178,8 +2208,11 @@ enum class Method : uint8_t {
 	EXIT_GUARD,
 	EXIT,
 	DESTRUCT,
+
+#ifdef HFSM2_ENABLE_PLANS
 	PLAN_SUCCEEDED,
 	PLAN_FAILED,
+#endif
 
 	COUNT
 };
@@ -2199,12 +2232,16 @@ enum class TransitionType : uint8_t {
 	COUNT
 };
 
+#ifdef HFSM2_ENABLE_PLANS
+
 enum class StatusEvent : uint8_t {
 	SUCCEEDED,
 	FAILED,
 
 	COUNT
 };
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -2253,8 +2290,11 @@ methodName(const Method method) {
 	case Method::EXIT_GUARD:	 return "exitGuard";
 	case Method::EXIT:			 return "exit";
 	case Method::DESTRUCT:		 return "destruct";
+
+#ifdef HFSM2_ENABLE_PLANS
 	case Method::PLAN_SUCCEEDED: return "planSucceeded";
 	case Method::PLAN_FAILED:	 return "planFailed";
+#endif
 
 	default:
 		HFSM2_BREAK();
@@ -2295,12 +2335,8 @@ namespace hfsm2 {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContext = EmptyContext
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-		, typename TUtilty = float
-#endif
-
-		  >
+		  HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)
+		  , FeatureTag NFeatureTag = FEATURE_TAG>
 struct LoggerInterfaceT {
 	using Context		 = TContext;
 
@@ -2312,7 +2348,10 @@ struct LoggerInterfaceT {
 	using StateID		 = ::hfsm2::StateID;
 	using RegionID		 = ::hfsm2::RegionID;
 	using TransitionType = ::hfsm2::TransitionType;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using StatusEvent	 = ::hfsm2::StatusEvent;
+#endif
 
 	virtual void recordMethod(Context& /*context*/,
 							  const StateID /*origin*/,
@@ -2325,6 +2364,8 @@ struct LoggerInterfaceT {
 								  const StateID /*target*/)
 	{}
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	virtual void recordTaskStatus(Context& /*context*/,
 								  const RegionID /*region*/,
 								  const StateID /*origin*/,
@@ -2335,6 +2376,8 @@ struct LoggerInterfaceT {
 								  const RegionID /*region*/,
 								  const StatusEvent /*event*/)
 	{}
+
+#endif
 
 	virtual void recordCancelledPending(Context& /*context*/,
 										const StateID /*origin*/)
@@ -2361,8 +2404,9 @@ struct LoggerInterfaceT {
 
 #else
 
-template <typename TContext = EmptyContext,
-		  typename TUtilty = float>
+template <typename TContext = EmptyContext
+		  HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)
+		  , FeatureTag NFeatureTag = FEATURE_TAG>
 using LoggerInterfaceT = void;
 
 #endif
@@ -2370,6 +2414,8 @@ using LoggerInterfaceT = void;
 using LoggerInterface = LoggerInterfaceT<>;
 
 }
+
+#ifdef HFSM2_ENABLE_PLANS
 
 namespace hfsm2 {
 namespace detail {
@@ -2495,6 +2541,8 @@ struct PlanDataT<ArgsT<TContext,
 }
 }
 
+#ifdef HFSM2_ENABLE_PLANS
+
 namespace hfsm2 {
 namespace detail {
 
@@ -2559,6 +2607,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlan(const Re
 
 }
 }
+
+#endif
+
+#endif
 namespace hfsm2 {
 namespace detail {
 
@@ -2597,6 +2649,8 @@ combine(const Status lhs, const Status rhs) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM2_ENABLE_PLANS
 
 template <typename TArgs>
 class ConstPlanT {
@@ -2646,7 +2700,7 @@ public:
 
 private:
 	HFSM2_INLINE ConstPlanT(const PlanData& planData,
-						   const RegionID regionId);
+							const RegionID regionId);
 
 	template <typename T>
 	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
@@ -2927,6 +2981,8 @@ private:
 	Bounds& _bounds;
 };
 
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -2952,6 +3008,8 @@ Status::clear() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#ifdef HFSM2_ENABLE_PLANS
 
 template <typename TArgs>
 ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
@@ -3195,6 +3253,8 @@ PlanT<TArgs>::remove(const LongIndex task) {
 	_planData.taskLinks.remove(task);
 }
 
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -3292,15 +3352,15 @@ struct BackUpT {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename,
-		  typename,
-		  typename,
-		  typename,
-		  LongIndex,
-		  LongIndex,
-		  LongIndex,
-		  LongIndex,
-		  LongIndex>
+template <typename
+		, typename
+		, typename
+		, typename
+		, LongIndex
+		, LongIndex
+		, LongIndex
+		, LongIndex
+		HFSM2_IF_PLANS(, LongIndex)>
 struct ArgsT;
 
 template <typename>
@@ -3308,24 +3368,24 @@ struct RegistryT;
 
 //------------------------------------------------------------------------------
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TStateList,
-		  typename TRegionList,
-		  LongIndex NCompoCount,
-		  LongIndex NOrthoCount,
-		  LongIndex NOrthoUnits,
-		  LongIndex NSerialBits,
-		  LongIndex NTaskCapacity>
-struct RegistryT<ArgsT<TContext,
-					   TConfig,
-					   TStateList,
-					   TRegionList,
-					   NCompoCount,
-					   NOrthoCount,
-					   NOrthoUnits,
-					   NSerialBits,
-					   NTaskCapacity>>
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, LongIndex NCompoCount
+		, LongIndex NOrthoCount
+		, LongIndex NOrthoUnits
+		, LongIndex NSerialBits
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+struct RegistryT<ArgsT<TContext
+					 , TConfig
+					 , TStateList
+					 , TRegionList
+					 , NCompoCount
+					 , NOrthoCount
+					 , NOrthoUnits
+					 , NSerialBits
+					 HFSM2_IF_PLANS(, NTaskCapacity)>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -3380,22 +3440,22 @@ struct RegistryT<ArgsT<TContext,
 
 //------------------------------------------------------------------------------
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TStateList,
-		  typename TRegionList,
-		  LongIndex NCompoCount,
-		  LongIndex NSerialBits,
-		  LongIndex NTaskCapacity>
-struct RegistryT<ArgsT<TContext,
-					   TConfig,
-					   TStateList,
-					   TRegionList,
-					   NCompoCount,
-					   0,
-					   0,
-					   NSerialBits,
-					   NTaskCapacity>>
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, LongIndex NCompoCount
+		, LongIndex NSerialBits
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+struct RegistryT<ArgsT<TContext
+					 , TConfig
+					 , TStateList
+					 , TRegionList
+					 , NCompoCount
+					 , 0
+					 , 0
+					 , NSerialBits
+					 HFSM2_IF_PLANS(, NTaskCapacity)>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -3468,9 +3528,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isActive(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isActive(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -3487,9 +3547,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isActive(const Stat
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isResumable(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isResumable(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -3506,9 +3566,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isResumable(const S
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingChange(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingChange(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -3526,9 +3586,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingChange(con
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingEnter(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingEnter(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -3546,9 +3606,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingEnter(cons
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingExit(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingExit(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -3566,9 +3626,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingExit(const
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 const Parent&
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::forkParent(const ForkID forkId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::forkParent(const ForkID forkId) const {
 	HFSM2_ASSERT(forkId != 0);
 
 	return forkId > 0 ?
@@ -3578,9 +3638,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::forkParent(const Fo
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
-typename RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::OrthoBits
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestedOrthoFork(const ForkID forkId) {
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
+typename RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::OrthoBits
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::requestedOrthoFork(const ForkID forkId) {
 	HFSM2_ASSERT(forkId < 0);
 	const Units& units = orthoUnits[-forkId - 1];
 
@@ -3589,9 +3649,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestedOrthoFork(
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(const Request request) {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::requestImmediate(const Request request) {
 	if (request.stateId == 0)
 		return false;
 	else if (HFSM2_CHECKED(request.stateId < STATE_COUNT)) {
@@ -3643,9 +3703,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestScheduled(const StateID stateId) {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::requestScheduled(const StateID stateId) {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
@@ -3657,9 +3717,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestScheduled(co
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::clearRequests() {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::clearRequests() {
 	compoRequested.clear();
 	orthoRequested.clear();
 	compoRemains  .clear();
@@ -3667,9 +3727,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::clearRequests() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::reset() {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::reset() {
 	compoRequested.clear();
 	orthoRequested.clear();
 	compoActive	  .clear();
@@ -3679,9 +3739,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::reset() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isActive(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isActive(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -3696,9 +3756,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isActive(const StateID 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isResumable(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isResumable(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -3711,9 +3771,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isResumable(const State
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingChange(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingChange(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -3727,9 +3787,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingChange(const S
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingEnter(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingEnter(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -3743,9 +3803,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingEnter(const St
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingExit(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingExit(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -3759,9 +3819,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingExit(const Sta
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 const Parent&
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::forkParent(const ForkID forkId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::forkParent(const ForkID forkId) const {
 	HFSM2_ASSERT(forkId > 0);
 
 	return compoParents[forkId - 1];
@@ -3769,9 +3829,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::forkParent(const ForkID
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const Request request) {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::requestImmediate(const Request request) {
 	if (request.stateId == 0)
 		return false;
 	else if (HFSM2_CHECKED(request.stateId < STATE_COUNT)) {
@@ -3809,9 +3869,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestScheduled(const StateID stateId) {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::requestScheduled(const StateID stateId) {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
@@ -3822,9 +3882,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestScheduled(const 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::clearRequests() {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::clearRequests() {
 	compoRequested.clear();
 	orthoRequested.clear();
 	compoRemains  .clear();
@@ -3832,9 +3892,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::clearRequests() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::reset() {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::reset() {
 	compoRequested.clear();
 	orthoRequested.clear();
 	compoActive	  .clear();
@@ -3882,8 +3942,11 @@ protected:
 	using RegionList	= typename Args::RegionList;
 
 	using Registry		= RegistryT<Args>;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using PlanData		= PlanDataT<Args>;
 	using ConstPlan		= ConstPlanT<Args>;
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -3900,14 +3963,14 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_INLINE ControlT(Context& context
-						HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-						, Registry& registry
-						, PlanData& planData
-						HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+						  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+						  , Registry& registry
+						  HFSM2_IF_PLANS(, PlanData& planData)
+						  HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
 		: _context{context}
 		HFSM2_IF_UTILITY_THEORY(, _rng{rng})
 		, _registry{registry}
-		, _planData{planData}
+		HFSM2_IF_PLANS(, _planData{planData})
 		HFSM2_IF_LOG_INTERFACE(, _logger{logger})
 	{}
 
@@ -3976,6 +4039,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	/// @brief Access read-only plan for the current region
 	/// @return Plan for the current region
 	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};			}
@@ -3997,6 +4062,8 @@ public:
 	template <typename TRegion>
 	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, regionId<TRegion>()};	}
 
+#endif
+
 protected:
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
 	HFSM2_INLINE Logger* logger()								{ return _logger;									}
@@ -4006,7 +4073,7 @@ protected:
 	Context& _context;
 	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 	Registry& _registry;
-	PlanData& _planData;
+	HFSM2_IF_PLANS(PlanData& _planData);
 	RegionID _regionId = 0;
 	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
@@ -4036,10 +4103,13 @@ protected:
 
 	using typename Control::StateList;
 	using typename Control::RegionList;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using typename Control::PlanData;
 	using typename Control::ConstPlan;
 
 	using Plan			= PlanT<Args>;
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4092,6 +4162,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	/// @brief Access plan for the current region
 	/// @return Plan for the current region
 	HFSM2_INLINE	  Plan plan()								{ return	  Plan{_planData, _regionId};			}
@@ -4122,10 +4194,12 @@ public:
 	template <typename TRegion>
 	HFSM2_INLINE ConstPlan plan() const		{ return ConstPlan{_planData, Control::template regionId<TRegion>()};	}
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	using Control::_planData;
+	HFSM2_IF_PLANS(using Control::_planData);
 	using Control::_regionId;
 	HFSM2_IF_LOG_INTERFACE(using Control::_logger);
 
@@ -4170,9 +4244,12 @@ protected:
 
 	using typename PlanControl::StateList;
 	using typename PlanControl::RegionList;
-	using typename PlanControl::PlanData;
 
+#ifdef HFSM2_ENABLE_PLANS
+	using typename PlanControl::PlanData;
 	using typename PlanControl::Plan;
+#endif
+
 	using typename PlanControl::Origin;
 
 	using Registry		= RegistryT<Args>;
@@ -4190,20 +4267,28 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_INLINE FullControlT(Context& context
-							HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-							, Registry& registry
-							, PlanData& planData
-							, Requests& requests
-							HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
-		: PlanControl{context HFSM2_IF_UTILITY_THEORY(,rng), registry, planData HFSM2_IF_LOG_INTERFACE(, logger)}
+							  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							  , Registry& registry
+							  HFSM2_IF_PLANS(, PlanData& planData)
+							  , Requests& requests
+							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+		: PlanControl{context
+					  HFSM2_IF_UTILITY_THEORY(, rng)
+					  , registry
+					  HFSM2_IF_PLANS(, planData)
+					  HFSM2_IF_LOG_INTERFACE(, logger)}
 		, _requests{requests}
 	{}
+
+#ifdef HFSM2_ENABLE_PLANS
 
 	template <typename TState>
 	Status updatePlan(TState& headState, const Status subStatus);
 
 	template <typename TState>
 	Status buildPlanStatus();
+
+#endif
 
 public:
 	using PlanControl::stateId;
@@ -4216,7 +4301,9 @@ public:
 	using PlanControl::isResumable;
 	using PlanControl::isScheduled;
 
+#ifdef HFSM2_ENABLE_PLANS
 	using PlanControl::plan;
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4295,16 +4382,20 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	/// @brief Succeed a plan task for the current state
 	HFSM2_INLINE void succeed();
 
 	/// @brief Fail a plan task for the current state
 	HFSM2_INLINE void fail();
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	using PlanControl::_planData;
+	HFSM2_IF_PLANS(using PlanControl::_planData);
 	using PlanControl::_regionId;
 	HFSM2_IF_LOG_INTERFACE(using PlanControl::_logger);
 
@@ -4344,7 +4435,10 @@ class GuardControlT final
 
 	using typename FullControl::StateList;
 	using typename FullControl::RegionList;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using typename FullControl::PlanData;
+#endif
 
 	using typename FullControl::Registry;
 
@@ -4355,13 +4449,18 @@ protected:
 
 private:
 	HFSM2_INLINE GuardControlT(Context& context
-							 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-							 , Registry& registry
-							 , PlanData& planData
-							 , Requests& requests
-							 , const Requests& pendingChanges
-							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
-		: FullControl{context HFSM2_IF_UTILITY_THEORY(, rng), registry, planData, requests HFSM2_IF_LOG_INTERFACE(, logger)}
+							   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							   , Registry& registry
+							   HFSM2_IF_PLANS(, PlanData& planData)
+							   , Requests& requests
+							   , const Requests& pendingChanges
+							   HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+		: FullControl{context
+					  HFSM2_IF_UTILITY_THEORY(, rng)
+					  , registry
+					  HFSM2_IF_PLANS(, planData)
+					  , requests
+					  HFSM2_IF_LOG_INTERFACE(, logger)}
 		, _pending{pendingChanges}
 	{}
 
@@ -4378,7 +4477,9 @@ public:
 	using FullControl::isResumable;
 	using FullControl::isScheduled;
 
+#ifdef HFSM2_ENABLE_PLANS
 	using FullControl::plan;
+#endif
 
 	using FullControl::changeTo;
 	using FullControl::restart;
@@ -4390,8 +4491,11 @@ public:
 #endif
 
 	using FullControl::schedule;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using FullControl::succeed;
 	using FullControl::fail;
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -4610,6 +4714,8 @@ FullControlT<TArgs>::Lock::~Lock() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef HFSM2_ENABLE_PLANS
+
 template <typename TArgs>
 template <typename TState>
 Status
@@ -4676,7 +4782,7 @@ FullControlT<TArgs>::buildPlanStatus() {
 		break;
 
 	case Status::FAILURE:
-		_planData.tasksFailures.template set<STATE_ID>();
+		_planData.tasksFailures .template set<STATE_ID>();
 
 		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
 		break;
@@ -4687,6 +4793,8 @@ FullControlT<TArgs>::buildPlanStatus() {
 
 	return {_status.result};
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -4779,6 +4887,8 @@ FullControlT<TArgs>::schedule(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM2_ENABLE_PLANS
+
 template <typename TArgs>
 void
 FullControlT<TArgs>::succeed() {
@@ -4815,6 +4925,8 @@ FullControlT<TArgs>::fail() {
 	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
 }
 
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
@@ -4850,7 +4962,7 @@ namespace detail {
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
 TransitionType
-HFSM2_INLINE
+inline
 convert(const Request::Type type) {
 	switch (type) {
 		case Request::CHANGE:
@@ -4884,7 +4996,7 @@ convert(const Request::Type type) {
 //------------------------------------------------------------------------------
 
 Request::Type
-HFSM2_INLINE
+inline
 convert(const TransitionType type) {
 	switch (type) {
 	case TransitionType::CHANGE:
@@ -5011,7 +5123,9 @@ struct alignas(4) Transition {
 
 //------------------------------------------------------------------------------
 
-bool operator == (const Transition& l, const Transition& r) {
+inline
+bool
+operator == (const Transition& l, const Transition& r) {
 	return l.stateId		== r.stateId
 		&& l.method			== r.method
 		&& l.transitionType	== r.transitionType;
@@ -5047,7 +5161,10 @@ protected:
 	using Control		= ControlT<TArgs>;
 
 	using PlanControl	= PlanControlT<TArgs>;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using Plan			= PlanT<TArgs>;
+#endif
 
 	using FullControl	= FullControlT <TArgs>;
 	using GuardControl	= GuardControlT<TArgs>;
@@ -5099,7 +5216,11 @@ struct B_<TFirst, TRest...>
 
 	using typename TFirst::Control;
 	using typename TFirst::PlanControl;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using typename TFirst::Plan;
+#endif
+
 	using typename TFirst::FullControl;
 	using typename TFirst::GuardControl;
 
@@ -5140,7 +5261,11 @@ struct B_<TFirst>
 
 	using typename TFirst::Control;
 	using typename TFirst::PlanControl;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using typename TFirst::Plan;
+#endif
+
 	using typename TFirst::FullControl;
 	using typename TFirst::GuardControl;
 
@@ -5148,43 +5273,44 @@ struct B_<TFirst>
 	using TFirst::regionId;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE Rank	rank			 (const Control&)			{ return Rank	   {0};	}
-
-	HFSM2_INLINE Utility utility		 (const Control&)			{ return Utility{1.0f};	}
+	HFSM2_INLINE Rank	 rank			  (const Control&)			{ return Rank	   {0};	}
+	HFSM2_INLINE Utility utility		  (const Control&)			{ return Utility{1.0f};	}
 #endif
 
-	HFSM2_INLINE void	entryGuard		 (GuardControl&)			{}
+	HFSM2_INLINE void	 entryGuard		  (GuardControl&)			{}
 
-	HFSM2_INLINE void	enter			 (PlanControl&)				{}
-	HFSM2_INLINE void	reenter			 (PlanControl&)				{}
+	HFSM2_INLINE void	 enter			  (PlanControl&)			{}
+	HFSM2_INLINE void	 reenter		  (PlanControl&)			{}
 
-	HFSM2_INLINE void	update			 (FullControl&)				{}
-
-	template <typename TEvent>
-	HFSM2_INLINE void	react			 (const TEvent&,
-										  FullControl&)				{}
-
-	HFSM2_INLINE void	exitGuard		 (GuardControl&)			{}
-
-	HFSM2_INLINE void	exit			 (PlanControl&)				{}
-
-	HFSM2_INLINE void	planSucceeded	 (FullControl& control)		{ control.succeed();	}
-	HFSM2_INLINE void	planFailed		 (FullControl& control)		{ control.fail();		}
-
-	HFSM2_INLINE void	widePreEntryGuard(Context& context);
-
-	HFSM2_INLINE void	widePreEnter	 (Context& context);
-	HFSM2_INLINE void	widePreReenter   (Context& context);
-
-	HFSM2_INLINE void	widePreUpdate	 (Context& context);
+	HFSM2_INLINE void	 update			  (FullControl&)			{}
 
 	template <typename TEvent>
-	HFSM2_INLINE void	widePreReact	 (const TEvent& event,
-					 					  Context& context);
+	HFSM2_INLINE void	 react			  (const TEvent&,
+						 				   FullControl&)			{}
 
-	HFSM2_INLINE void	widePreExitGuard (Context& context);
+	HFSM2_INLINE void	 exitGuard		  (GuardControl&)			{}
 
-	HFSM2_INLINE void	widePostExit	 (Context& context);
+	HFSM2_INLINE void	 exit			  (PlanControl&)			{}
+
+#ifdef HFSM2_ENABLE_PLANS
+	HFSM2_INLINE void	 planSucceeded	  (FullControl& control)	{ control.succeed();	}
+	HFSM2_INLINE void	 planFailed		  (FullControl& control)	{ control.fail();		}
+#endif
+
+	HFSM2_INLINE void	 widePreEntryGuard(Context& context);
+
+	HFSM2_INLINE void	 widePreEnter	  (Context& context);
+	HFSM2_INLINE void	 widePreReenter   (Context& context);
+
+	HFSM2_INLINE void	 widePreUpdate	  (Context& context);
+
+	template <typename TEvent>
+	HFSM2_INLINE void	 widePreReact	  (const TEvent& event,
+					 	 				   Context& context);
+
+	HFSM2_INLINE void	 widePreExitGuard (Context& context);
+
+	HFSM2_INLINE void	 widePostExit	  (Context& context);
 };
 
 //------------------------------------------------------------------------------
@@ -5554,6 +5680,13 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE Rank	 wrapRank			  (Control&  control);
+	HFSM2_INLINE Utility wrapUtility		  (Control&  control);
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM2_INLINE bool	 deepForwardEntryGuard(GuardControl&)												{ return false;	}
 	HFSM2_INLINE bool	 deepEntryGuard		  (GuardControl& control);
 
@@ -5576,12 +5709,9 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
 	HFSM2_INLINE void	 wrapPlanSucceeded	  (FullControl&	control);
 	HFSM2_INLINE void	 wrapPlanFailed		  (FullControl&	control);
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE Rank	 wrapRank			  (Control& control);
-	HFSM2_INLINE Utility wrapUtility		  (Control& control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5761,6 +5891,34 @@ S_<TN_, TA, TH>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Rank
+S_<TN_, TA, TH>::wrapRank(Control& control) {
+	HFSM2_LOG_STATE_METHOD(&Head::rank,
+						   control.context(),
+						   Method::RANK);
+
+	return _headBox.get().rank(static_cast<const Control&>(control));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+typename S_<TN_, TA, TH>::Utility
+S_<TN_, TA, TH>::wrapUtility(Control& control) {
+	HFSM2_LOG_STATE_METHOD(&Head::utility,
+						   control.context(),
+						   Method::UTILITY);
+
+	return _headBox.get().utility(static_cast<const Control&>(control));
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
 template <typename TN_, typename TA, typename TH>
 bool
 S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
@@ -5782,8 +5940,10 @@ S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM2_IF_LOG_INTERFACE(control)) {
+#ifdef HFSM2_ENABLE_PLANS
 	HFSM2_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM2_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
+#endif
 
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
 						   control.context(),
@@ -5812,8 +5972,10 @@ S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
+#ifdef HFSM2_ENABLE_PLANS
 	HFSM2_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
 	HFSM2_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
+#endif
 
 	HFSM2_LOG_STATE_METHOD(&Head::reenter,
 						   control.context(),
@@ -5909,18 +6071,27 @@ S_<TN_, TA, TH>::deepExit(PlanControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepDestruct(PlanControl& control) {
+S_<TN_, TA, TH>::deepDestruct(PlanControl&
+						  #if defined HFSM2_ENABLE_LOG_INTERFACE || defined HFSM2_ENABLE_PLANS
+							  control
+						  #endif
+							  )
+{
 	HFSM2_LOG_STATE_METHOD(&Head::exit,
 						   control.context(),
 						   Method::DESTRUCT);
 
 	_headBox.destruct();
 
+#ifdef HFSM2_ENABLE_PLANS
 	control._planData.tasksSuccesses.template reset<STATE_ID>();
 	control._planData.tasksFailures .template reset<STATE_ID>();
+#endif
 }
 
 //------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_PLANS
 
 template <typename TN_, typename TA, typename TH>
 void
@@ -5948,33 +6119,11 @@ S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 	_headBox.get().planFailed(control);
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-
-template <typename TN_, typename TA, typename TH>
-typename S_<TN_, TA, TH>::Rank
-S_<TN_, TA, TH>::wrapRank(Control& control) {
-	HFSM2_LOG_STATE_METHOD(&Head::rank,
-						   control.context(),
-						   Method::RANK);
-
-	return _headBox.get().rank(static_cast<const Control&>(control));
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA, typename TH>
-typename S_<TN_, TA, TH>::Utility
-S_<TN_, TA, TH>::wrapUtility(Control& control) {
-	HFSM2_LOG_STATE_METHOD(&Head::utility,
-						   control.context(),
-						   Method::UTILITY);
-
-	return _headBox.get().utility(static_cast<const Control&>(control));
-}
-
-//------------------------------------------------------------------------------
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::UP
@@ -6277,15 +6426,15 @@ struct OI_ final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TStateList,
-		  typename TRegionList,
-		  LongIndex NCompoCount,
-		  LongIndex NOrthoCount,
-		  LongIndex NOrthoUnits,
-		  LongIndex NSerialBits,
-		  LongIndex NTaskCapacity>
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, LongIndex NCompoCount
+		, LongIndex NOrthoCount
+		, LongIndex NOrthoUnits
+		, LongIndex NSerialBits
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
 struct ArgsT final {
 	using Context	 = TContext;
 
@@ -6297,7 +6446,7 @@ struct ArgsT final {
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	 = typename TConfig::Logger;
+	using Logger	 = typename TConfig::LoggerInterface;
 #endif
 
 	using StateList	 = TStateList;
@@ -6309,7 +6458,9 @@ struct ArgsT final {
 	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
 	static constexpr ShortIndex SERIAL_BITS	  = NSerialBits;
 
+#ifdef HFSM2_ENABLE_PLANS
 	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
+#endif
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer			= StreamBuffer	<SERIAL_BITS>;
@@ -6398,8 +6549,10 @@ struct RF_ final {
 
 	static constexpr LongIndex SUBSTITUTION_LIMIT= TConfig::SUBSTITUTION_LIMIT;
 
+#ifdef HFSM2_ENABLE_PLANS
 	static constexpr LongIndex TASK_CAPACITY	 = TConfig::TASK_CAPACITY != INVALID_LONG_INDEX ?
 													   TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
+#endif
 
 	static constexpr ShortIndex COMPO_REGIONS	 = Apex::COMPO_REGIONS;
 	static constexpr ShortIndex ORTHO_REGIONS	 = Apex::ORTHO_REGIONS;
@@ -6411,15 +6564,15 @@ struct RF_ final {
 	using StateList		= typename Apex::StateList;
 	using RegionList	= typename Apex::RegionList;
 
-	using Args			= ArgsT<Context,
-								TConfig,
-								StateList,
-								RegionList,
-								COMPO_REGIONS,
-								ORTHO_REGIONS,
-								ORTHO_UNITS,
-								ACTIVE_BITS + RESUMABLE_BITS,
-								TASK_CAPACITY>;
+	using Args			= ArgsT<Context
+							  , TConfig
+							  , StateList
+							  , RegionList
+							  , COMPO_REGIONS
+							  , ORTHO_REGIONS
+							  , ORTHO_UNITS
+							  , ACTIVE_BITS + RESUMABLE_BITS
+							  HFSM2_IF_PLANS(, TASK_CAPACITY)>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -6592,25 +6745,25 @@ struct CS_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard		 (GuardControl& control,								const ShortIndex prong);
-	HFSM2_INLINE bool	 wideEntryGuard				 (GuardControl& control,								const ShortIndex prong);
+	HFSM2_INLINE bool	 wideForwardEntryGuard		 (GuardControl& control,							const ShortIndex prong);
+	HFSM2_INLINE bool	 wideEntryGuard				 (GuardControl& control,							const ShortIndex prong);
 
-	HFSM2_INLINE void	 wideConstruct				 (PlanControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideConstruct				 (PlanControl&  control,							const ShortIndex prong);
 
-	HFSM2_INLINE void	 wideEnter					 (PlanControl&  control,								const ShortIndex prong);
-	HFSM2_INLINE void	 wideReenter				 (PlanControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideEnter					 (PlanControl&  control,							const ShortIndex prong);
+	HFSM2_INLINE void	 wideReenter				 (PlanControl&  control,							const ShortIndex prong);
 
-	HFSM2_INLINE Status	 wideUpdate					 (FullControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE Status	 wideUpdate					 (FullControl&  control,							const ShortIndex prong);
 
 	template <typename TEvent>
 	HFSM2_INLINE Status	 wideReact					 (FullControl&  control, const TEvent& event,		const ShortIndex prong);
 
-	HFSM2_INLINE bool	 wideForwardExitGuard		 (GuardControl& control,								const ShortIndex prong);
-	HFSM2_INLINE bool	 wideExitGuard				 (GuardControl& control,								const ShortIndex prong);
+	HFSM2_INLINE bool	 wideForwardExitGuard		 (GuardControl& control,							const ShortIndex prong);
+	HFSM2_INLINE bool	 wideExitGuard				 (GuardControl& control,							const ShortIndex prong);
 
-	HFSM2_INLINE void	 wideExit					 (PlanControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideExit					 (PlanControl&  control,							const ShortIndex prong);
 
-	HFSM2_INLINE void	 wideDestruct				 (PlanControl&  control,								const ShortIndex prong);
+	HFSM2_INLINE void	 wideDestruct				 (PlanControl&  control,							const ShortIndex prong);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -6650,7 +6803,7 @@ struct CS_ final {
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	HFSM2_INLINE UP		 wideReportChangeComposite	 (Control&  control);
-	HFSM2_INLINE UP		 wideReportChangeResumable	 (Control&  control,									const ShortIndex prong);
+	HFSM2_INLINE UP		 wideReportChangeResumable	 (Control&  control,								const ShortIndex prong);
 	HFSM2_INLINE UP		 wideReportChangeUtilitarian (Control&  control);
 	HFSM2_INLINE Utility wideReportChangeRandom		 (Control&  control, Utility* const options, const Rank* const ranks, const Rank top);
 
@@ -6672,11 +6825,11 @@ struct CS_ final {
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_INLINE void	 wideSaveActive				 (const Registry& registry, WriteStream& stream, const ShortIndex prong) const;
-	HFSM2_INLINE void	 wideSaveResumable			 (const Registry& registry, WriteStream& stream						   ) const;
+	HFSM2_INLINE void	 wideSaveActive				 (const Registry& registry, WriteStream& stream,	const ShortIndex prong) const;
+	HFSM2_INLINE void	 wideSaveResumable			 (const Registry& registry, WriteStream& stream							  ) const;
 
-	HFSM2_INLINE void	 wideLoadRequested			 (      Registry& registry, ReadStream&  stream, const ShortIndex prong) const;
-	HFSM2_INLINE void	 wideLoadResumable			 (      Registry& registry, ReadStream&  stream						   ) const;
+	HFSM2_INLINE void	 wideLoadRequested			 (      Registry& registry, ReadStream&  stream,	const ShortIndex prong) const;
+	HFSM2_INLINE void	 wideLoadResumable			 (      Registry& registry, ReadStream&  stream							  ) const;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7778,7 +7931,10 @@ struct C_ final {
 	using PlanControl	= PlanControlT<Args>;
 	using ScopedOrigin	= typename PlanControl::Origin;
 	using ScopedRegion	= typename PlanControl::Region;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using Plan			= PlanT<Args>;
+#endif
 
 	using FullControl	= FullControlT<Args>;
 	using ControlLock	= typename FullControl::Lock;
@@ -7836,22 +7992,22 @@ struct C_ final {
 	HFSM2_INLINE	   ShortIndex& compoResumable(		Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
 	HFSM2_INLINE const ShortIndex& compoResumable(const Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
 
-	HFSM2_INLINE	   ShortIndex& compoRequested(		Control& control) const		{ return compoRequested(control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoRequested(const Control& control) const		{ return compoRequested(control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoRequested(		Control&  control) const	{ return compoRequested(control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoRequested(const Control&  control) const	{ return compoRequested(control._registry);		}
 
-	HFSM2_INLINE	   ShortIndex& compoActive   (		Control& control) const		{ return compoActive   (control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoActive   (const Control& control) const		{ return compoActive   (control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoActive   (		Control&  control) const	{ return compoActive   (control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoActive   (const Control&  control) const	{ return compoActive   (control._registry);		}
 
-	HFSM2_INLINE	   ShortIndex& compoResumable(		Control& control) const		{ return compoResumable(control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoResumable(const Control& control) const		{ return compoResumable(control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoResumable(		Control&  control) const	{ return compoResumable(control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoResumable(const Control&  control) const	{ return compoResumable(control._registry);		}
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE		  ShortIndex  resolveRandom	   (Control& control,
+	HFSM2_INLINE		  ShortIndex  resolveRandom	   (Control&  control,
 														const Utility(& options)[Info::WIDTH], const Utility sum,
 														const Rank	  (& ranks)  [Info::WIDTH], const Rank	  top) const;
 #endif
 
-	HFSM2_INLINE bool	 compoRemain				   (Control& control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
+	HFSM2_INLINE bool	 compoRemain				   (Control&  control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
 
 	HFSM2_INLINE void	 deepRegister				   (Registry& registry, const Parent parent);
 
@@ -7860,7 +8016,7 @@ struct C_ final {
 	HFSM2_INLINE bool	 deepForwardEntryGuard		   (GuardControl& control);
 	HFSM2_INLINE bool	 deepEntryGuard				   (GuardControl& control);
 
-	HFSM2_INLINE void	 deepConstruct				   (PlanControl& control);
+	HFSM2_INLINE void	 deepConstruct				   (PlanControl&  control);
 
 	HFSM2_INLINE void	 deepEnter					   (PlanControl&  control);
 	HFSM2_INLINE void	 deepReenter				   (PlanControl&  control);
@@ -7909,27 +8065,27 @@ struct C_ final {
 
 #else
 
-	HFSM2_INLINE void	 deepRequestChange			  (Control& control);
+	HFSM2_INLINE void	 deepRequestChange			   (Control& control);
 
 #endif
 
-	HFSM2_INLINE void	 deepRequestChangeComposite	  (Control& control);
-	HFSM2_INLINE void	 deepRequestChangeResumable	  (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeComposite	   (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeResumable	   (Control& control);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestChangeUtilitarian (Control& control);
-	HFSM2_INLINE void	 deepRequestChangeRandom	  (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeUtilitarian  (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeRandom	   (Control& control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepRequestRemain			  (Registry& registry);
-	HFSM2_INLINE void	 deepRequestRestart			  (Registry& registry);
-	HFSM2_INLINE void	 deepRequestResume			  (Registry& registry);
+	HFSM2_INLINE void	 deepRequestRemain			   (Registry& registry);
+	HFSM2_INLINE void	 deepRequestRestart			   (Registry& registry);
+	HFSM2_INLINE void	 deepRequestResume			   (Registry& registry);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestUtilize			  (Control& control);
-	HFSM2_INLINE void	 deepRequestRandomize		  (Control& control);
+	HFSM2_INLINE void	 deepRequestUtilize			   (Control&  control);
+	HFSM2_INLINE void	 deepRequestRandomize		   (Control&  control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7938,42 +8094,42 @@ struct C_ final {
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
-	HFSM2_INLINE UP		 deepReportChange			  (Control& control);
+	HFSM2_INLINE UP		 deepReportChange			   (Control& control);
 
 	template <>
-	HFSM2_INLINE UP		 deepReportChange<Composite>  (Control& control)	{ return deepReportChangeComposite  (control); }
+	HFSM2_INLINE UP		 deepReportChange<Composite>   (Control& control)	{ return deepReportChangeComposite  (control); }
 
 	template <>
-	HFSM2_INLINE UP		 deepReportChange<Resumable>  (Control& control)	{ return deepReportChangeResumable  (control); }
+	HFSM2_INLINE UP		 deepReportChange<Resumable>   (Control& control)	{ return deepReportChangeResumable  (control); }
 
 	template <>
-	HFSM2_INLINE UP		 deepReportChange<Utilitarian>(Control& control)	{ return deepReportChangeUtilitarian(control); }
+	HFSM2_INLINE UP		 deepReportChange<Utilitarian> (Control& control)	{ return deepReportChangeUtilitarian(control); }
 
 	template <>
-	HFSM2_INLINE UP		 deepReportChange<RandomUtil> (Control& control)	{ return deepReportChangeRandom		(control); }
+	HFSM2_INLINE UP		 deepReportChange<RandomUtil>  (Control& control)	{ return deepReportChangeRandom		(control); }
 
 #else
 
-	HFSM2_INLINE UP		 deepReportChange			  (Control& control);
+	HFSM2_INLINE UP		 deepReportChange			   (Control& control);
 
 #endif
 
-	HFSM2_INLINE UP		 deepReportChangeComposite	  (Control& control);
-	HFSM2_INLINE UP		 deepReportChangeResumable	  (Control& control);
-	HFSM2_INLINE UP		 deepReportChangeUtilitarian  (Control& control);
-	HFSM2_INLINE UP		 deepReportChangeRandom		  (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeComposite	   (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeResumable	   (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeUtilitarian   (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeRandom		   (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE UP		 deepReportUtilize			  (Control& control);
-	HFSM2_INLINE Rank	 deepReportRank				  (Control& control);
-	HFSM2_INLINE Utility deepReportRandomize		  (Control& control);
+	HFSM2_INLINE UP		 deepReportUtilize			   (Control& control);
+	HFSM2_INLINE Rank	 deepReportRank				   (Control& control);
+	HFSM2_INLINE Utility deepReportRandomize		   (Control& control);
 
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	deepChangeToRequested		  (PlanControl& control);
+	HFSM2_INLINE void	 deepChangeToRequested		   (PlanControl& control);
 
 	//----------------------------------------------------------------------
 
@@ -7981,11 +8137,11 @@ struct C_ final {
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_INLINE void	 deepSaveActive				  (const Registry& registry, WriteStream& stream) const;
-	HFSM2_INLINE void	 deepSaveResumable			  (const Registry& registry, WriteStream& stream) const;
+	HFSM2_INLINE void	 deepSaveActive				   (const Registry& registry, WriteStream& stream) const;
+	HFSM2_INLINE void	 deepSaveResumable			   (const Registry& registry, WriteStream& stream) const;
 
-	HFSM2_INLINE void	 deepLoadRequested			  (		 Registry& registry, ReadStream&  stream) const;
-	HFSM2_INLINE void	 deepLoadResumable			  (		 Registry& registry, ReadStream&  stream) const;
+	HFSM2_INLINE void	 deepLoadRequested			   (	  Registry& registry, ReadStream&  stream) const;
+	HFSM2_INLINE void	 deepLoadResumable			   (	  Registry& registry, ReadStream&  stream) const;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8190,8 +8346,12 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) {
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
+	#ifdef HFSM2_ENABLE_PLANS
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
+	#else
+		return subStatus;
+	#endif
 	}
 }
 
@@ -8221,8 +8381,12 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
+	#ifdef HFSM2_ENABLE_PLANS
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
+	#else
+		return subStatus;
+	#endif
 	}
 }
 
@@ -8284,8 +8448,10 @@ C_<TN, TA, SG, TH, TS...>::deepDestruct(PlanControl& control) {
 	resumable = active;
 	active	  = INVALID_SHORT_INDEX;
 
+#ifdef HFSM2_ENABLE_PLANS
 	auto plan = control.plan(REGION_ID);
 	plan.clear();
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -9961,7 +10127,7 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	deepChangeToRequested (PlanControl& control);
+	HFSM2_INLINE void	 deepChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
 
@@ -10101,8 +10267,12 @@ O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) {
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
+	#ifdef HFSM2_ENABLE_PLANS
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
+	#else
+		return subStatus;
+	#endif
 	}
 }
 
@@ -10129,8 +10299,12 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
+	#ifdef HFSM2_ENABLE_PLANS
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
 			control.updatePlan(_headState, subStatus) : subStatus;
+	#else
+		return subStatus;
+	#endif
 	}
 }
 
@@ -10789,58 +10963,65 @@ template <FeatureTag NFeatureTag
 	#endif
 
 		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity>
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
 struct G_ {
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
 
-	using Context = TContext;
+	using Context			= TContext;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using Rank	  = TRank;
-	using Utility = TUtility;
-	using RNG	  = TRNG;
+	using Rank				= TRank;
+	using Utility			= TUtility;
+	using RNG				= TRNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger  = LoggerInterfaceT<Context HFSM2_IF_UTILITY_THEORY(, Utility)>;
+	using LoggerInterface	= LoggerInterfaceT<Context HFSM2_IF_UTILITY_THEORY(, Utility), FEATURE_TAG>;
 #endif
 
 	static constexpr LongIndex SUBSTITUTION_LIMIT = NSubstitutionLimit;
+
+#ifdef HFSM2_ENABLE_PLANS
 	static constexpr LongIndex TASK_CAPACITY	  = NTaskCapacity;
+#endif
 
 	/// @brief Set Context type
 	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = G_<FEATURE_TAG,       T HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using ContextT			 = G_<FEATURE_TAG,       T HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Set Rank type
 	/// @tparam T Rank type for 'TRank State::rank() const' method
 	template <typename T>
-	using RankT				 = G_<FEATURE_TAG, Context                        ,    T, Utility, RNG , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using RankT				 = G_<FEATURE_TAG, Context                         ,    T, Utility, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 	/// @brief Set Utility type
 	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using UtilityT			 = G_<FEATURE_TAG, Context                        , Rank,       T, RNG , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using UtilityT			 = G_<FEATURE_TAG, Context                         , Rank,       T, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 	/// @brief Set RNG type
 	/// @tparam T RNG type used in 'Random' regions
 	template <typename T>
-	using RandomT			 = G_<FEATURE_TAG, Context                        , Rank, Utility,   T , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using RandomT			 = G_<FEATURE_TAG, Context                         , Rank, Utility,   T , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 #endif
 
 	/// @brief Set Substitution limit
 	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
 	template <LongIndex N>
-	using SubstitutionLimitN = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG),                  N, TASK_CAPACITY>;
+	using SubstitutionLimitN = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG),                  N HFSM2_IF_PLANS(, NTaskCapacity)>;
+
+#ifdef HFSM2_ENABLE_PLANS
 
 	/// @brief Set Task capacity
 	/// @tparam N Maximum number of tasks across all plans
 	template <LongIndex N>
-	using TaskCapacityN		 = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT,             N>;
+	using TaskCapacityN		 = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT,                              N>;
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -10848,7 +11029,7 @@ struct G_ {
 
 	struct UP {
 		HFSM2_INLINE UP(const Utility utility_  = Utility{1.0f},
-					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
+						const ShortIndex prong_ = INVALID_SHORT_INDEX)
 			: utility{utility_}
 			, prong{prong_}
 		{}
@@ -10877,11 +11058,21 @@ template <FeatureTag NFeatureTag
 	#endif
 
 		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity>
-struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>> {
-	using Cfg = G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>;
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>> {
+	using Cfg = G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
+
+	using Context			= TContext;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using Utility			= TUtility;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using LoggerInterface	= typename Cfg::LoggerInterface;
+#endif
 
 	//----------------------------------------------------------------------
 
@@ -11044,8 +11235,8 @@ template <typename TContext = EmptyContext
 	#endif
 
 		, LongIndex NSubstitutionLimit = 4
-		, LongIndex NTaskCapacity      = INVALID_LONG_INDEX>
-using ConfigT = detail::G_<HFSM2_FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>;
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity = INVALID_LONG_INDEX)>
+using ConfigT = detail::G_<FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 /// @brief Type configuration for MachineT<>
 using Config = ConfigT<>;
@@ -11083,7 +11274,7 @@ class R_ {
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger				= typename TConfig::Logger;
+	using Logger				= typename TConfig::LoggerInterface;
 #endif
 
 	using Apex					= TApex;
@@ -11093,21 +11284,24 @@ class R_ {
 	using StateList				= typename Info::StateList;
 	using RegionList			= typename Info::RegionList;
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT = Info::SUBSTITUTION_LIMIT;
-	static constexpr LongIndex TASK_CAPACITY	  = Info::TASK_CAPACITY;
+	static constexpr LongIndex	SUBSTITUTION_LIMIT	= Info::SUBSTITUTION_LIMIT;
+
+#ifdef HFSM2_ENABLE_PLANS
+	static constexpr LongIndex	TASK_CAPACITY		= Info::TASK_CAPACITY;
+#endif
 
 public:
-	static constexpr LongIndex  REVERSE_DEPTH	  = ApexInfo::REVERSE_DEPTH;
-	static constexpr ShortIndex COMPO_REGIONS	  = ApexInfo::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	  = ApexInfo::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	  = ApexInfo::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		  = ApexInfo::ORTHO_UNITS;
+	static constexpr LongIndex  REVERSE_DEPTH		= ApexInfo::REVERSE_DEPTH;
+	static constexpr ShortIndex COMPO_REGIONS		= ApexInfo::COMPO_REGIONS;
+	static constexpr LongIndex  COMPO_PRONGS		= ApexInfo::COMPO_PRONGS;
+	static constexpr ShortIndex ORTHO_REGIONS		= ApexInfo::ORTHO_REGIONS;
+	static constexpr ShortIndex ORTHO_UNITS			= ApexInfo::ORTHO_UNITS;
 
-	static constexpr LongIndex  ACTIVE_BITS		  = ApexInfo::ACTIVE_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS	  = ApexInfo::RESUMABLE_BITS;
+	static constexpr LongIndex  ACTIVE_BITS			= ApexInfo::ACTIVE_BITS;
+	static constexpr LongIndex  RESUMABLE_BITS		= ApexInfo::RESUMABLE_BITS;
 
-	static constexpr LongIndex  STATE_COUNT		  = ApexInfo::STATE_COUNT;
-	static constexpr LongIndex  REGION_COUNT	  = ApexInfo::REGION_COUNT;
+	static constexpr LongIndex  STATE_COUNT			= ApexInfo::STATE_COUNT;
+	static constexpr LongIndex  REGION_COUNT		= ApexInfo::REGION_COUNT;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
@@ -11122,9 +11316,11 @@ private:
 	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
 
 	using Control				= ControlT<Args>;
-
 	using PlanControl			= PlanControlT<Args>;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using PlanData				= PlanDataT   <Args>;
+#endif
 
 	using FullControl			= FullControlT<Args>;
 	using Requests				= typename FullControl::Requests;
@@ -11519,7 +11715,7 @@ private:
 	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 
 	Registry _registry;
-	PlanData _planData;
+	HFSM2_IF_PLANS(PlanData _planData);
 
 	Requests _requests;
 
@@ -11551,10 +11747,14 @@ template <
 		  typename TRNG,
 #endif
 		  LongIndex NSubstitutionLimit,
+
+#ifdef HFSM2_ENABLE_PLANS
 		  LongIndex NTaskCapacity,
+#endif
+
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex>
 	, ::hfsm2::EmptyContext
 {
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -11562,11 +11762,11 @@ class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TR
 #endif
 
 	using Context	= ::hfsm2::EmptyContext;
-	using Cfg		= ::hfsm2::ConfigT<Context, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using Cfg		= ::hfsm2::ConfigT<Context HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 	using R			= R_<Cfg, TApex>;
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::Logger;
+	using Logger	= typename Cfg::LoggerInterface;
 #endif
 
 public:
@@ -11574,7 +11774,7 @@ public:
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	explicit HFSM2_INLINE RW_(RNG& rng
-							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
 			rng
 			HFSM2_IF_LOG_INTERFACE(, logger)}
@@ -11598,10 +11798,14 @@ template <typename TContext,
 		  typename TUtility,
 #endif
 		  LongIndex NSubstitutionLimit,
+
+#ifdef HFSM2_ENABLE_PLANS
 		  LongIndex NTaskCapacity,
+#endif
+
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex> final
-	: public R_<::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex>
+class RW_	   <::hfsm2::ConfigT<TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex> final
+	: public R_<::hfsm2::ConfigT<TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex>
 	HFSM2_IF_UTILITY_THEORY(, ::hfsm2::RandomT<TUtility>)
 {
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -11609,11 +11813,11 @@ class RW_	   <::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility
 #endif
 
 	using Context	= TContext;
-	using Cfg		= ::hfsm2::ConfigT<Context, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using Cfg		= ::hfsm2::ConfigT<Context HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 	using R			= R_<Cfg, TApex>;
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::Logger;
+	using Logger	= typename Cfg::LoggerInterface;
 #endif
 
 
@@ -11621,7 +11825,7 @@ public:
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	explicit HFSM2_INLINE RW_(Context& context
-							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{context,
 			static_cast<RNG&>(*this)
 			HFSM2_IF_LOG_INTERFACE(, logger)}
@@ -11631,7 +11835,7 @@ public:
 #else
 
 	explicit HFSM2_INLINE RW_(Context& context
-							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{context
 			HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
@@ -11646,20 +11850,24 @@ public:
 template <typename TRank,
 		  typename TUtility,
 		  LongIndex NSubstitutionLimit,
+
+#ifdef HFSM2_ENABLE_PLANS
 		  LongIndex NTaskCapacity,
+#endif
+
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit, NTaskCapacity>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit, NTaskCapacity>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex>
 	, ::hfsm2::EmptyContext
 	, ::hfsm2::RandomT<TUtility>
 {
 	using Context	= ::hfsm2::EmptyContext;
 	using RNG		= ::hfsm2::RandomT<TUtility>;
-	using Cfg		= ::hfsm2::ConfigT<Context, TRank, TUtility, RNG, NSubstitutionLimit, NTaskCapacity>;
+	using Cfg		= ::hfsm2::ConfigT<Context, TRank, TUtility, RNG, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 	using R			= R_<Cfg, TApex>;
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::Logger;
+	using Logger	= typename Cfg::LoggerInterface;
 #endif
 
 public:
@@ -11705,13 +11913,13 @@ R_<TG, TA>::~R_() {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	  (control);
 	_apex.deepDestruct(control);
 
-	HFSM2_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 }
 
 //------------------------------------------------------------------------------
@@ -11722,13 +11930,13 @@ R_<TG, TA>::update() {
 	FullControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						, _requests
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepUpdate(control);
 
-	HFSM2_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 
 	if (_requests.count())
 		processTransitions();
@@ -11745,13 +11953,13 @@ R_<TG, TA>::react(const TEvent& event) {
 	FullControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						, _requests
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepReact(control, event);
 
-	HFSM2_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 
 	if (_requests.count())
 		processTransitions();
@@ -11831,7 +12039,7 @@ R_<TG, TA>::reset() {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
@@ -11864,7 +12072,7 @@ R_<TG, TA>::load(const SerialBuffer& buffer) {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepExit	   (control);
@@ -11894,7 +12102,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 		PlanControl control{_context
 							HFSM2_IF_UTILITY_THEORY(, _rng)
 							, _registry
-							, _planData
+							HFSM2_IF_PLANS(, _planData)
 							HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 		if (applyRequests(control, transitions, count)) {
@@ -11902,7 +12110,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 
 			_registry.clearRequests();
 
-			HFSM2_IF_ASSERT(_planData.verifyPlans());
+			HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 		}
 
 		HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
@@ -11927,7 +12135,7 @@ R_<TG, TA>::initialEnter() {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepRequestChange(control);
@@ -11959,7 +12167,7 @@ R_<TG, TA>::initialEnter() {
 
 	_registry.clearRequests();
 
-	HFSM2_IF_ASSERT(_planData.verifyPlans());
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
@@ -11981,7 +12189,7 @@ R_<TG, TA>::processTransitions() {
 	PlanControl control{_context
 						HFSM2_IF_UTILITY_THEORY(, _rng)
 						, _registry
-						, _planData
+						HFSM2_IF_PLANS(, _planData)
 						HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	bool changesMade = false;
@@ -12011,7 +12219,7 @@ R_<TG, TA>::processTransitions() {
 
 		_registry.clearRequests();
 
-		HFSM2_IF_ASSERT(_planData.verifyPlans());
+		HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 	}
 
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
@@ -12076,7 +12284,7 @@ R_<TG, TA>::cancelledByEntryGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context
 							  HFSM2_IF_UTILITY_THEORY(, _rng)
 							  , _registry
-							  , _planData
+							  HFSM2_IF_PLANS(, _planData)
 							  , _requests
 							  , pendingRequests
 							  HFSM2_IF_LOG_INTERFACE(, _logger)};
@@ -12097,7 +12305,7 @@ R_<TG, TA>::cancelledByGuards(const Requests& pendingRequests) {
 	GuardControl guardControl{_context
 							  HFSM2_IF_UTILITY_THEORY(, _rng)
 							  , _registry
-							  , _planData
+							  HFSM2_IF_PLANS(, _planData)
 							  , _requests
 							  , pendingRequests
 							  HFSM2_IF_LOG_INTERFACE(, _logger)};
@@ -12280,6 +12488,7 @@ R_<TG, TA>::udpateActivity() {
 #undef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 #undef HFSM2_IF_UTILITY_THEORY
+#undef HFSM2_IF_PLANS
 #undef HFSM2_IF_SERIALIZATION
 #undef HFSM2_IF_TRANSITION_HISTORY
 #undef HFSM2_IF_STRUCTURE_REPORT

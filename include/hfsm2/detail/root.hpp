@@ -18,7 +18,7 @@ class R_ {
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger				= typename TConfig::Logger;
+	using Logger				= typename TConfig::LoggerInterface;
 #endif
 
 	using Apex					= TApex;
@@ -28,21 +28,24 @@ class R_ {
 	using StateList				= typename Info::StateList;
 	using RegionList			= typename Info::RegionList;
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT = Info::SUBSTITUTION_LIMIT;
-	static constexpr LongIndex TASK_CAPACITY	  = Info::TASK_CAPACITY;
+	static constexpr LongIndex	SUBSTITUTION_LIMIT	= Info::SUBSTITUTION_LIMIT;
+
+#ifdef HFSM2_ENABLE_PLANS
+	static constexpr LongIndex	TASK_CAPACITY		= Info::TASK_CAPACITY;
+#endif
 
 public:
-	static constexpr LongIndex  REVERSE_DEPTH	  = ApexInfo::REVERSE_DEPTH;
-	static constexpr ShortIndex COMPO_REGIONS	  = ApexInfo::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	  = ApexInfo::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	  = ApexInfo::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		  = ApexInfo::ORTHO_UNITS;
+	static constexpr LongIndex  REVERSE_DEPTH		= ApexInfo::REVERSE_DEPTH;
+	static constexpr ShortIndex COMPO_REGIONS		= ApexInfo::COMPO_REGIONS;
+	static constexpr LongIndex  COMPO_PRONGS		= ApexInfo::COMPO_PRONGS;
+	static constexpr ShortIndex ORTHO_REGIONS		= ApexInfo::ORTHO_REGIONS;
+	static constexpr ShortIndex ORTHO_UNITS			= ApexInfo::ORTHO_UNITS;
 
-	static constexpr LongIndex  ACTIVE_BITS		  = ApexInfo::ACTIVE_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS	  = ApexInfo::RESUMABLE_BITS;
+	static constexpr LongIndex  ACTIVE_BITS			= ApexInfo::ACTIVE_BITS;
+	static constexpr LongIndex  RESUMABLE_BITS		= ApexInfo::RESUMABLE_BITS;
 
-	static constexpr LongIndex  STATE_COUNT		  = ApexInfo::STATE_COUNT;
-	static constexpr LongIndex  REGION_COUNT	  = ApexInfo::REGION_COUNT;
+	static constexpr LongIndex  STATE_COUNT			= ApexInfo::STATE_COUNT;
+	static constexpr LongIndex  REGION_COUNT		= ApexInfo::REGION_COUNT;
 
 	static_assert(STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
 	static_assert(STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
@@ -57,9 +60,11 @@ private:
 	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
 
 	using Control				= ControlT<Args>;
-
 	using PlanControl			= PlanControlT<Args>;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using PlanData				= PlanDataT   <Args>;
+#endif
 
 	using FullControl			= FullControlT<Args>;
 	using Requests				= typename FullControl::Requests;
@@ -454,7 +459,7 @@ private:
 	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 
 	Registry _registry;
-	PlanData _planData;
+	HFSM2_IF_PLANS(PlanData _planData);
 
 	Requests _requests;
 
@@ -486,10 +491,14 @@ template <
 		  typename TRNG,
 #endif
 		  LongIndex NSubstitutionLimit,
+
+#ifdef HFSM2_ENABLE_PLANS
 		  LongIndex NTaskCapacity,
+#endif
+
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, TRNG,) NSubstitutionLimit, NTaskCapacity>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex>
 	, ::hfsm2::EmptyContext
 {
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -497,11 +506,11 @@ class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, HFSM2_IF_UTILITY_THEORY(TR
 #endif
 
 	using Context	= ::hfsm2::EmptyContext;
-	using Cfg		= ::hfsm2::ConfigT<Context, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using Cfg		= ::hfsm2::ConfigT<Context HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 	using R			= R_<Cfg, TApex>;
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::Logger;
+	using Logger	= typename Cfg::LoggerInterface;
 #endif
 
 public:
@@ -509,7 +518,7 @@ public:
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	explicit HFSM2_INLINE RW_(RNG& rng
-							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{static_cast<Context&>(*this),
 			rng
 			HFSM2_IF_LOG_INTERFACE(, logger)}
@@ -533,10 +542,14 @@ template <typename TContext,
 		  typename TUtility,
 #endif
 		  LongIndex NSubstitutionLimit,
+
+#ifdef HFSM2_ENABLE_PLANS
 		  LongIndex NTaskCapacity,
+#endif
+
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex> final
-	: public R_<::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, ::hfsm2::RandomT<TUtility>,) NSubstitutionLimit, NTaskCapacity>, TApex>
+class RW_	   <::hfsm2::ConfigT<TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex> final
+	: public R_<::hfsm2::ConfigT<TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex>
 	HFSM2_IF_UTILITY_THEORY(, ::hfsm2::RandomT<TUtility>)
 {
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -544,11 +557,11 @@ class RW_	   <::hfsm2::ConfigT<TContext, HFSM2_IF_UTILITY_THEORY(TRank, TUtility
 #endif
 
 	using Context	= TContext;
-	using Cfg		= ::hfsm2::ConfigT<Context, HFSM2_IF_UTILITY_THEORY(TRank, TUtility, RNG,) NSubstitutionLimit, NTaskCapacity>;
+	using Cfg		= ::hfsm2::ConfigT<Context HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 	using R			= R_<Cfg, TApex>;
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::Logger;
+	using Logger	= typename Cfg::LoggerInterface;
 #endif
 
 
@@ -556,7 +569,7 @@ public:
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	explicit HFSM2_INLINE RW_(Context& context
-							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{context,
 			static_cast<RNG&>(*this)
 			HFSM2_IF_LOG_INTERFACE(, logger)}
@@ -566,7 +579,7 @@ public:
 #else
 
 	explicit HFSM2_INLINE RW_(Context& context
-							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
 		: R{context
 			HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
@@ -581,20 +594,24 @@ public:
 template <typename TRank,
 		  typename TUtility,
 		  LongIndex NSubstitutionLimit,
+
+#ifdef HFSM2_ENABLE_PLANS
 		  LongIndex NTaskCapacity,
+#endif
+
 		  typename TApex>
-class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit, NTaskCapacity>, TApex> final
-	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit, NTaskCapacity>, TApex>
+class RW_	   <::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex> final
+	: public R_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>, TApex>
 	, ::hfsm2::EmptyContext
 	, ::hfsm2::RandomT<TUtility>
 {
 	using Context	= ::hfsm2::EmptyContext;
 	using RNG		= ::hfsm2::RandomT<TUtility>;
-	using Cfg		= ::hfsm2::ConfigT<Context, TRank, TUtility, RNG, NSubstitutionLimit, NTaskCapacity>;
+	using Cfg		= ::hfsm2::ConfigT<Context, TRank, TUtility, RNG, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 	using R			= R_<Cfg, TApex>;
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::Logger;
+	using Logger	= typename Cfg::LoggerInterface;
 #endif
 
 public:

@@ -1,3 +1,5 @@
+#ifdef HFSM2_ENABLE_PLANS
+
 namespace hfsm2 {
 namespace detail {
 
@@ -62,3 +64,5 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::verifyPlan(const Re
 
 }
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifdef HFSM2_ENABLE_PLANS
+
 namespace hfsm2 {
 namespace detail {
 
@@ -123,3 +125,5 @@ struct PlanDataT<ArgsT<TContext,
 }
 
 #include "plan_data.inl"
+
+#endif

@@ -10,6 +10,14 @@
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	#define IF_UTILITY_THEORY(...)									 __VA_ARGS__
+#else
+	#define IF_UTILITY_THEORY(...)
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+
 struct Event {
 	enum Enum {
 
@@ -33,6 +41,7 @@ struct Event {
 		RANDOM_RESOLUTION,
 	//#endif
 
+	//#ifdef HFSM2_ENABLE_PLANS
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
 
@@ -40,6 +49,7 @@ struct Event {
 		TASK_FAILURE,
 		PLAN_SUCCESS,
 		PLAN_FAILURE,
+	//#endif
 
 		CHANGE,
 		RESTART,
@@ -84,23 +94,30 @@ using Events = std::vector<Event>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext = hfsm2::EmptyContext,
-		  hfsm2::FeatureTag NFeatureTag = hfsm2::HFSM2_FEATURE_TAG>
+template <hfsm2::FeatureTag NFeatureTag = hfsm2::FEATURE_TAG
+		  IF_UTILITY_THEORY(, typename TUtilty = float)
+		  , typename TContext = hfsm2::EmptyContext>
 struct LoggerT
-	: hfsm2::LoggerInterfaceT<TContext>
+	: hfsm2::LoggerInterfaceT<TContext IF_UTILITY_THEORY(, TUtilty), NFeatureTag>
 {
+	static constexpr hfsm2::FeatureTag FEATURE_TAG = NFeatureTag;
+
 	using Context		  = TContext;
-	using Interface		  = hfsm2::LoggerInterfaceT<Context>;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using Utilty		  = typename Interface::Utilty;
+	using Utilty		  = TUtilty;
 #endif
+
+	using Interface		  = hfsm2::LoggerInterfaceT<Context IF_UTILITY_THEORY(, Utilty), FEATURE_TAG>;
 
 	using Method		  = typename Interface::Method;
 	using StateID		  = typename Interface::StateID;
 	using RegionID		  = typename Interface::RegionID;
 	using TransitionType  = typename Interface::TransitionType;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using StatusEvent	  = typename Interface::StatusEvent;
+#endif
 
 	void recordMethod(Context& context,
 					  const StateID origin,
@@ -111,6 +128,8 @@ struct LoggerT
 						  const TransitionType transitionType,
 						  const StateID target) override;
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	void recordTaskStatus(Context& context,
 						  const RegionID region,
 						  const StateID origin,
@@ -119,6 +138,8 @@ struct LoggerT
 	void recordPlanStatus(Context& context,
 						  const RegionID region,
 						  const StatusEvent event) override;
+
+#endif
 
 	void recordCancelledPending(Context& context,
 								const StateID origin) override;
@@ -160,3 +181,5 @@ void assertResumable(TMachine& machine,
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tools.inl"
+
+#undef IF_UTILITY_THEORY

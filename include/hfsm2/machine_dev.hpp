@@ -87,58 +87,65 @@ template <FeatureTag NFeatureTag
 	#endif
 
 		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity>
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
 struct G_ {
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
 
-	using Context = TContext;
+	using Context			= TContext;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using Rank	  = TRank;
-	using Utility = TUtility;
-	using RNG	  = TRNG;
+	using Rank				= TRank;
+	using Utility			= TUtility;
+	using RNG				= TRNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger  = LoggerInterfaceT<Context HFSM2_IF_UTILITY_THEORY(, Utility)>;
+	using LoggerInterface	= LoggerInterfaceT<Context HFSM2_IF_UTILITY_THEORY(, Utility), FEATURE_TAG>;
 #endif
 
 	static constexpr LongIndex SUBSTITUTION_LIMIT = NSubstitutionLimit;
+
+#ifdef HFSM2_ENABLE_PLANS
 	static constexpr LongIndex TASK_CAPACITY	  = NTaskCapacity;
+#endif
 
 	/// @brief Set Context type
 	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = G_<FEATURE_TAG,       T HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using ContextT			 = G_<FEATURE_TAG,       T HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Set Rank type
 	/// @tparam T Rank type for 'TRank State::rank() const' method
 	template <typename T>
-	using RankT				 = G_<FEATURE_TAG, Context                        ,    T, Utility, RNG , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using RankT				 = G_<FEATURE_TAG, Context                         ,    T, Utility, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 	/// @brief Set Utility type
 	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using UtilityT			 = G_<FEATURE_TAG, Context                        , Rank,       T, RNG , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using UtilityT			 = G_<FEATURE_TAG, Context                         , Rank,       T, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 	/// @brief Set RNG type
 	/// @tparam T RNG type used in 'Random' regions
 	template <typename T>
-	using RandomT			 = G_<FEATURE_TAG, Context                        , Rank, Utility,   T , SUBSTITUTION_LIMIT, TASK_CAPACITY>;
+	using RandomT			 = G_<FEATURE_TAG, Context                         , Rank, Utility,   T , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 #endif
 
 	/// @brief Set Substitution limit
 	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
 	template <LongIndex N>
-	using SubstitutionLimitN = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG),                  N, TASK_CAPACITY>;
+	using SubstitutionLimitN = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG),                  N HFSM2_IF_PLANS(, NTaskCapacity)>;
+
+#ifdef HFSM2_ENABLE_PLANS
 
 	/// @brief Set Task capacity
 	/// @tparam N Maximum number of tasks across all plans
 	template <LongIndex N>
-	using TaskCapacityN		 = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT,             N>;
+	using TaskCapacityN		 = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT,                              N>;
+
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -146,7 +153,7 @@ struct G_ {
 
 	struct UP {
 		HFSM2_INLINE UP(const Utility utility_  = Utility{1.0f},
-					   const ShortIndex prong_ = INVALID_SHORT_INDEX)
+						const ShortIndex prong_ = INVALID_SHORT_INDEX)
 			: utility{utility_}
 			, prong{prong_}
 		{}
@@ -175,11 +182,21 @@ template <FeatureTag NFeatureTag
 	#endif
 
 		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity>
-struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>> {
-	using Cfg = G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>;
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>> {
+	using Cfg = G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
+
+	using Context			= TContext;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using Utility			= TUtility;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using LoggerInterface	= typename Cfg::LoggerInterface;
+#endif
 
 	//----------------------------------------------------------------------
 
@@ -342,8 +359,8 @@ template <typename TContext = EmptyContext
 	#endif
 
 		, LongIndex NSubstitutionLimit = 4
-		, LongIndex NTaskCapacity      = INVALID_LONG_INDEX>
-using ConfigT = detail::G_<HFSM2_FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit, NTaskCapacity>;
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity = INVALID_LONG_INDEX)>
+using ConfigT = detail::G_<FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity)>;
 
 /// @brief Type configuration for MachineT<>
 using Config = ConfigT<>;

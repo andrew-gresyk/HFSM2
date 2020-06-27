@@ -19,7 +19,7 @@ namespace detail {
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
 TransitionType
-HFSM2_INLINE
+inline
 convert(const Request::Type type) {
 	switch (type) {
 		case Request::CHANGE:
@@ -53,7 +53,7 @@ convert(const Request::Type type) {
 //------------------------------------------------------------------------------
 
 Request::Type
-HFSM2_INLINE
+inline
 convert(const TransitionType type) {
 	switch (type) {
 	case TransitionType::CHANGE:
@@ -180,7 +180,9 @@ struct alignas(4) Transition {
 
 //------------------------------------------------------------------------------
 
-bool operator == (const Transition& l, const Transition& r) {
+inline
+bool
+operator == (const Transition& l, const Transition& r) {
 	return l.stateId		== r.stateId
 		&& l.method			== r.method
 		&& l.transitionType	== r.transitionType;

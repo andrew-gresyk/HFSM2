@@ -163,7 +163,7 @@ const Types all = {
 TEST_CASE("FSM.Debug", "[machine]") {
 	Empty context;
 	hfsm2::XoShiRo128Plus generator{0};
-	LoggerT<Empty> logger;
+	LoggerT<hfsm2::FEATURE_TAG, float, Empty> logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

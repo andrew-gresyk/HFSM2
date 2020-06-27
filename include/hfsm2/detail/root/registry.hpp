@@ -91,15 +91,15 @@ struct BackUpT {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename,
-		  typename,
-		  typename,
-		  typename,
-		  LongIndex,
-		  LongIndex,
-		  LongIndex,
-		  LongIndex,
-		  LongIndex>
+template <typename
+		, typename
+		, typename
+		, typename
+		, LongIndex
+		, LongIndex
+		, LongIndex
+		, LongIndex
+		HFSM2_IF_PLANS(, LongIndex)>
 struct ArgsT;
 
 template <typename>
@@ -107,24 +107,24 @@ struct RegistryT;
 
 //------------------------------------------------------------------------------
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TStateList,
-		  typename TRegionList,
-		  LongIndex NCompoCount,
-		  LongIndex NOrthoCount,
-		  LongIndex NOrthoUnits,
-		  LongIndex NSerialBits,
-		  LongIndex NTaskCapacity>
-struct RegistryT<ArgsT<TContext,
-					   TConfig,
-					   TStateList,
-					   TRegionList,
-					   NCompoCount,
-					   NOrthoCount,
-					   NOrthoUnits,
-					   NSerialBits,
-					   NTaskCapacity>>
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, LongIndex NCompoCount
+		, LongIndex NOrthoCount
+		, LongIndex NOrthoUnits
+		, LongIndex NSerialBits
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+struct RegistryT<ArgsT<TContext
+					 , TConfig
+					 , TStateList
+					 , TRegionList
+					 , NCompoCount
+					 , NOrthoCount
+					 , NOrthoUnits
+					 , NSerialBits
+					 HFSM2_IF_PLANS(, NTaskCapacity)>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -179,22 +179,22 @@ struct RegistryT<ArgsT<TContext,
 
 //------------------------------------------------------------------------------
 
-template <typename TContext,
-		  typename TConfig,
-		  typename TStateList,
-		  typename TRegionList,
-		  LongIndex NCompoCount,
-		  LongIndex NSerialBits,
-		  LongIndex NTaskCapacity>
-struct RegistryT<ArgsT<TContext,
-					   TConfig,
-					   TStateList,
-					   TRegionList,
-					   NCompoCount,
-					   0,
-					   0,
-					   NSerialBits,
-					   NTaskCapacity>>
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, LongIndex NCompoCount
+		, LongIndex NSerialBits
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+struct RegistryT<ArgsT<TContext
+					 , TConfig
+					 , TStateList
+					 , TRegionList
+					 , NCompoCount
+					 , 0
+					 , 0
+					 , NSerialBits
+					 HFSM2_IF_PLANS(, NTaskCapacity)>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;

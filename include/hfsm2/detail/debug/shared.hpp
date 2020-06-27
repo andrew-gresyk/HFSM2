@@ -19,8 +19,11 @@ enum class Method : uint8_t {
 	EXIT_GUARD,
 	EXIT,
 	DESTRUCT,
+
+#ifdef HFSM2_ENABLE_PLANS
 	PLAN_SUCCEEDED,
 	PLAN_FAILED,
+#endif
 
 	COUNT
 };
@@ -40,12 +43,16 @@ enum class TransitionType : uint8_t {
 	COUNT
 };
 
+#ifdef HFSM2_ENABLE_PLANS
+
 enum class StatusEvent : uint8_t {
 	SUCCEEDED,
 	FAILED,
 
 	COUNT
 };
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -94,8 +101,11 @@ methodName(const Method method) {
 	case Method::EXIT_GUARD:	 return "exitGuard";
 	case Method::EXIT:			 return "exit";
 	case Method::DESTRUCT:		 return "destruct";
+
+#ifdef HFSM2_ENABLE_PLANS
 	case Method::PLAN_SUCCEEDED: return "planSucceeded";
 	case Method::PLAN_FAILED:	 return "planFailed";
+#endif
 
 	default:
 		HFSM2_BREAK();
