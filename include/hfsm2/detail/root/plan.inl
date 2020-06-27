@@ -19,6 +19,8 @@ Status::clear() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef HFSM2_ENABLE_PLANS
+
 template <typename TArgs>
 ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
 	: _plan{plan}
@@ -260,6 +262,8 @@ PlanT<TArgs>::remove(const LongIndex task) {
 
 	_planData.taskLinks.remove(task);
 }
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 

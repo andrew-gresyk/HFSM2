@@ -1,3 +1,4 @@
+#define HFSM2_ENABLE_PLANS
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 

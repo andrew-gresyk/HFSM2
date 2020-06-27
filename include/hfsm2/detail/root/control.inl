@@ -155,6 +155,8 @@ FullControlT<TArgs>::Lock::~Lock() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef HFSM2_ENABLE_PLANS
+
 template <typename TArgs>
 template <typename TState>
 Status
@@ -221,7 +223,7 @@ FullControlT<TArgs>::buildPlanStatus() {
 		break;
 
 	case Status::FAILURE:
-		_planData.tasksFailures.template set<STATE_ID>();
+		_planData.tasksFailures .template set<STATE_ID>();
 
 		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
 		break;
@@ -232,6 +234,8 @@ FullControlT<TArgs>::buildPlanStatus() {
 
 	return {_status.result};
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -324,6 +328,8 @@ FullControlT<TArgs>::schedule(const StateID stateId) {
 
 //------------------------------------------------------------------------------
 
+#ifdef HFSM2_ENABLE_PLANS
+
 template <typename TArgs>
 void
 FullControlT<TArgs>::succeed() {
@@ -359,6 +365,8 @@ FullControlT<TArgs>::fail() {
 
 	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
 }
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 

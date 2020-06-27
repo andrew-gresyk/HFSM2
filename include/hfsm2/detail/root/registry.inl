@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isActive(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isActive(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -22,9 +22,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isActive(const Stat
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isResumable(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isResumable(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -41,9 +41,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isResumable(const S
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingChange(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingChange(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -61,9 +61,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingChange(con
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingEnter(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingEnter(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -81,9 +81,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingEnter(cons
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingExit(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingExit(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
 			 parent;
@@ -101,9 +101,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::isPendingExit(const
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 const Parent&
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::forkParent(const ForkID forkId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::forkParent(const ForkID forkId) const {
 	HFSM2_ASSERT(forkId != 0);
 
 	return forkId > 0 ?
@@ -113,9 +113,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::forkParent(const Fo
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
-typename RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::OrthoBits
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestedOrthoFork(const ForkID forkId) {
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
+typename RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::OrthoBits
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::requestedOrthoFork(const ForkID forkId) {
 	HFSM2_ASSERT(forkId < 0);
 	const Units& units = orthoUnits[-forkId - 1];
 
@@ -124,9 +124,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestedOrthoFork(
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(const Request request) {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::requestImmediate(const Request request) {
 	if (request.stateId == 0)
 		return false;
 	else if (HFSM2_CHECKED(request.stateId < STATE_COUNT)) {
@@ -178,9 +178,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestImmediate(co
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestScheduled(const StateID stateId) {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::requestScheduled(const StateID stateId) {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
@@ -192,9 +192,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::requestScheduled(co
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::clearRequests() {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::clearRequests() {
 	compoRequested.clear();
 	orthoRequested.clear();
 	compoRemains  .clear();
@@ -202,9 +202,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::clearRequests() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::reset() {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB HFSM2_IF_PLANS(, NTC)>>::reset() {
 	compoRequested.clear();
 	orthoRequested.clear();
 	compoActive	  .clear();
@@ -214,9 +214,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NTC>>::reset() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isActive(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isActive(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -231,9 +231,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isActive(const StateID 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isResumable(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isResumable(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -246,9 +246,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isResumable(const State
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingChange(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingChange(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -262,9 +262,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingChange(const S
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingEnter(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingEnter(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -278,9 +278,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingEnter(const St
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingExit(const StateID stateId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::isPendingExit(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
@@ -294,9 +294,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::isPendingExit(const Sta
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 const Parent&
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::forkParent(const ForkID forkId) const {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::forkParent(const ForkID forkId) const {
 	HFSM2_ASSERT(forkId > 0);
 
 	return compoParents[forkId - 1];
@@ -304,9 +304,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::forkParent(const ForkID
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 bool
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const Request request) {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::requestImmediate(const Request request) {
 	if (request.stateId == 0)
 		return false;
 	else if (HFSM2_CHECKED(request.stateId < STATE_COUNT)) {
@@ -344,9 +344,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestImmediate(const 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestScheduled(const StateID stateId) {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::requestScheduled(const StateID stateId) {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		const Parent parent = stateParents[stateId];
 
@@ -357,9 +357,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::requestScheduled(const 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::clearRequests() {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::clearRequests() {
 	compoRequested.clear();
 	orthoRequested.clear();
 	compoRemains  .clear();
@@ -367,9 +367,9 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::clearRequests() {
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NTC>
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB HFSM2_IF_PLANS(, LongIndex NTC)>
 void
-RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NTC>>::reset() {
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB HFSM2_IF_PLANS(, NTC)>>::reset() {
 	compoRequested.clear();
 	orthoRequested.clear();
 	compoActive	  .clear();

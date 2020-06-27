@@ -39,7 +39,10 @@ struct C_ final {
 	using PlanControl	= PlanControlT<Args>;
 	using ScopedOrigin	= typename PlanControl::Origin;
 	using ScopedRegion	= typename PlanControl::Region;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using Plan			= PlanT<Args>;
+#endif
 
 	using FullControl	= FullControlT<Args>;
 	using ControlLock	= typename FullControl::Lock;
@@ -97,22 +100,22 @@ struct C_ final {
 	HFSM2_INLINE	   ShortIndex& compoResumable(		Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
 	HFSM2_INLINE const ShortIndex& compoResumable(const Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
 
-	HFSM2_INLINE	   ShortIndex& compoRequested(		Control& control) const		{ return compoRequested(control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoRequested(const Control& control) const		{ return compoRequested(control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoRequested(		Control&  control) const	{ return compoRequested(control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoRequested(const Control&  control) const	{ return compoRequested(control._registry);		}
 
-	HFSM2_INLINE	   ShortIndex& compoActive   (		Control& control) const		{ return compoActive   (control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoActive   (const Control& control) const		{ return compoActive   (control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoActive   (		Control&  control) const	{ return compoActive   (control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoActive   (const Control&  control) const	{ return compoActive   (control._registry);		}
 
-	HFSM2_INLINE	   ShortIndex& compoResumable(		Control& control) const		{ return compoResumable(control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoResumable(const Control& control) const		{ return compoResumable(control._registry);		}
+	HFSM2_INLINE	   ShortIndex& compoResumable(		Control&  control) const	{ return compoResumable(control._registry);		}
+	HFSM2_INLINE const ShortIndex& compoResumable(const Control&  control) const	{ return compoResumable(control._registry);		}
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE		  ShortIndex  resolveRandom	   (Control& control,
+	HFSM2_INLINE		  ShortIndex  resolveRandom	   (Control&  control,
 														const Utility(& options)[Info::WIDTH], const Utility sum,
 														const Rank	  (& ranks)  [Info::WIDTH], const Rank	  top) const;
 #endif
 
-	HFSM2_INLINE bool	 compoRemain				   (Control& control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
+	HFSM2_INLINE bool	 compoRemain				   (Control&  control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
 
 	HFSM2_INLINE void	 deepRegister				   (Registry& registry, const Parent parent);
 
@@ -121,7 +124,7 @@ struct C_ final {
 	HFSM2_INLINE bool	 deepForwardEntryGuard		   (GuardControl& control);
 	HFSM2_INLINE bool	 deepEntryGuard				   (GuardControl& control);
 
-	HFSM2_INLINE void	 deepConstruct				   (PlanControl& control);
+	HFSM2_INLINE void	 deepConstruct				   (PlanControl&  control);
 
 	HFSM2_INLINE void	 deepEnter					   (PlanControl&  control);
 	HFSM2_INLINE void	 deepReenter				   (PlanControl&  control);
@@ -170,27 +173,27 @@ struct C_ final {
 
 #else
 
-	HFSM2_INLINE void	 deepRequestChange			  (Control& control);
+	HFSM2_INLINE void	 deepRequestChange			   (Control& control);
 
 #endif
 
-	HFSM2_INLINE void	 deepRequestChangeComposite	  (Control& control);
-	HFSM2_INLINE void	 deepRequestChangeResumable	  (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeComposite	   (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeResumable	   (Control& control);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestChangeUtilitarian (Control& control);
-	HFSM2_INLINE void	 deepRequestChangeRandom	  (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeUtilitarian  (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeRandom	   (Control& control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepRequestRemain			  (Registry& registry);
-	HFSM2_INLINE void	 deepRequestRestart			  (Registry& registry);
-	HFSM2_INLINE void	 deepRequestResume			  (Registry& registry);
+	HFSM2_INLINE void	 deepRequestRemain			   (Registry& registry);
+	HFSM2_INLINE void	 deepRequestRestart			   (Registry& registry);
+	HFSM2_INLINE void	 deepRequestResume			   (Registry& registry);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestUtilize			  (Control& control);
-	HFSM2_INLINE void	 deepRequestRandomize		  (Control& control);
+	HFSM2_INLINE void	 deepRequestUtilize			   (Control&  control);
+	HFSM2_INLINE void	 deepRequestRandomize		   (Control&  control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -199,42 +202,42 @@ struct C_ final {
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
-	HFSM2_INLINE UP		 deepReportChange			  (Control& control);
+	HFSM2_INLINE UP		 deepReportChange			   (Control& control);
 
 	template <>
-	HFSM2_INLINE UP		 deepReportChange<Composite>  (Control& control)	{ return deepReportChangeComposite  (control); }
+	HFSM2_INLINE UP		 deepReportChange<Composite>   (Control& control)	{ return deepReportChangeComposite  (control); }
 
 	template <>
-	HFSM2_INLINE UP		 deepReportChange<Resumable>  (Control& control)	{ return deepReportChangeResumable  (control); }
+	HFSM2_INLINE UP		 deepReportChange<Resumable>   (Control& control)	{ return deepReportChangeResumable  (control); }
 
 	template <>
-	HFSM2_INLINE UP		 deepReportChange<Utilitarian>(Control& control)	{ return deepReportChangeUtilitarian(control); }
+	HFSM2_INLINE UP		 deepReportChange<Utilitarian> (Control& control)	{ return deepReportChangeUtilitarian(control); }
 
 	template <>
-	HFSM2_INLINE UP		 deepReportChange<RandomUtil> (Control& control)	{ return deepReportChangeRandom		(control); }
+	HFSM2_INLINE UP		 deepReportChange<RandomUtil>  (Control& control)	{ return deepReportChangeRandom		(control); }
 
 #else
 
-	HFSM2_INLINE UP		 deepReportChange			  (Control& control);
+	HFSM2_INLINE UP		 deepReportChange			   (Control& control);
 
 #endif
 
-	HFSM2_INLINE UP		 deepReportChangeComposite	  (Control& control);
-	HFSM2_INLINE UP		 deepReportChangeResumable	  (Control& control);
-	HFSM2_INLINE UP		 deepReportChangeUtilitarian  (Control& control);
-	HFSM2_INLINE UP		 deepReportChangeRandom		  (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeComposite	   (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeResumable	   (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeUtilitarian   (Control& control);
+	HFSM2_INLINE UP		 deepReportChangeRandom		   (Control& control);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE UP		 deepReportUtilize			  (Control& control);
-	HFSM2_INLINE Rank	 deepReportRank				  (Control& control);
-	HFSM2_INLINE Utility deepReportRandomize		  (Control& control);
+	HFSM2_INLINE UP		 deepReportUtilize			   (Control& control);
+	HFSM2_INLINE Rank	 deepReportRank				   (Control& control);
+	HFSM2_INLINE Utility deepReportRandomize		   (Control& control);
 
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	deepChangeToRequested		  (PlanControl& control);
+	HFSM2_INLINE void	 deepChangeToRequested		   (PlanControl& control);
 
 	//----------------------------------------------------------------------
 
@@ -242,11 +245,11 @@ struct C_ final {
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_INLINE void	 deepSaveActive				  (const Registry& registry, WriteStream& stream) const;
-	HFSM2_INLINE void	 deepSaveResumable			  (const Registry& registry, WriteStream& stream) const;
+	HFSM2_INLINE void	 deepSaveActive				   (const Registry& registry, WriteStream& stream) const;
+	HFSM2_INLINE void	 deepSaveResumable			   (const Registry& registry, WriteStream& stream) const;
 
-	HFSM2_INLINE void	 deepLoadRequested			  (		 Registry& registry, ReadStream&  stream) const;
-	HFSM2_INLINE void	 deepLoadResumable			  (		 Registry& registry, ReadStream&  stream) const;
+	HFSM2_INLINE void	 deepLoadRequested			   (	  Registry& registry, ReadStream&  stream) const;
+	HFSM2_INLINE void	 deepLoadResumable			   (	  Registry& registry, ReadStream&  stream) const;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

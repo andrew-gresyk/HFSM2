@@ -34,8 +34,11 @@ protected:
 	using RegionList	= typename Args::RegionList;
 
 	using Registry		= RegistryT<Args>;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using PlanData		= PlanDataT<Args>;
 	using ConstPlan		= ConstPlanT<Args>;
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -52,14 +55,14 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_INLINE ControlT(Context& context
-						HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-						, Registry& registry
-						, PlanData& planData
-						HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+						  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+						  , Registry& registry
+						  HFSM2_IF_PLANS(, PlanData& planData)
+						  HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
 		: _context{context}
 		HFSM2_IF_UTILITY_THEORY(, _rng{rng})
 		, _registry{registry}
-		, _planData{planData}
+		HFSM2_IF_PLANS(, _planData{planData})
 		HFSM2_IF_LOG_INTERFACE(, _logger{logger})
 	{}
 
@@ -128,6 +131,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	/// @brief Access read-only plan for the current region
 	/// @return Plan for the current region
 	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};			}
@@ -149,6 +154,8 @@ public:
 	template <typename TRegion>
 	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, regionId<TRegion>()};	}
 
+#endif
+
 protected:
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
 	HFSM2_INLINE Logger* logger()								{ return _logger;									}
@@ -158,7 +165,7 @@ protected:
 	Context& _context;
 	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 	Registry& _registry;
-	PlanData& _planData;
+	HFSM2_IF_PLANS(PlanData& _planData);
 	RegionID _regionId = 0;
 	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
@@ -188,10 +195,13 @@ protected:
 
 	using typename Control::StateList;
 	using typename Control::RegionList;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using typename Control::PlanData;
 	using typename Control::ConstPlan;
 
 	using Plan			= PlanT<Args>;
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -244,6 +254,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	/// @brief Access plan for the current region
 	/// @return Plan for the current region
 	HFSM2_INLINE	  Plan plan()								{ return	  Plan{_planData, _regionId};			}
@@ -274,10 +286,12 @@ public:
 	template <typename TRegion>
 	HFSM2_INLINE ConstPlan plan() const		{ return ConstPlan{_planData, Control::template regionId<TRegion>()};	}
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	using Control::_planData;
+	HFSM2_IF_PLANS(using Control::_planData);
 	using Control::_regionId;
 	HFSM2_IF_LOG_INTERFACE(using Control::_logger);
 
@@ -322,9 +336,12 @@ protected:
 
 	using typename PlanControl::StateList;
 	using typename PlanControl::RegionList;
-	using typename PlanControl::PlanData;
 
+#ifdef HFSM2_ENABLE_PLANS
+	using typename PlanControl::PlanData;
 	using typename PlanControl::Plan;
+#endif
+
 	using typename PlanControl::Origin;
 
 	using Registry		= RegistryT<Args>;
@@ -342,20 +359,28 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_INLINE FullControlT(Context& context
-							HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-							, Registry& registry
-							, PlanData& planData
-							, Requests& requests
-							HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
-		: PlanControl{context HFSM2_IF_UTILITY_THEORY(,rng), registry, planData HFSM2_IF_LOG_INTERFACE(, logger)}
+							  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							  , Registry& registry
+							  HFSM2_IF_PLANS(, PlanData& planData)
+							  , Requests& requests
+							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+		: PlanControl{context
+					  HFSM2_IF_UTILITY_THEORY(, rng)
+					  , registry
+					  HFSM2_IF_PLANS(, planData)
+					  HFSM2_IF_LOG_INTERFACE(, logger)}
 		, _requests{requests}
 	{}
+
+#ifdef HFSM2_ENABLE_PLANS
 
 	template <typename TState>
 	Status updatePlan(TState& headState, const Status subStatus);
 
 	template <typename TState>
 	Status buildPlanStatus();
+
+#endif
 
 public:
 	using PlanControl::stateId;
@@ -368,7 +393,9 @@ public:
 	using PlanControl::isResumable;
 	using PlanControl::isScheduled;
 
+#ifdef HFSM2_ENABLE_PLANS
 	using PlanControl::plan;
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -447,16 +474,20 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef HFSM2_ENABLE_PLANS
+
 	/// @brief Succeed a plan task for the current state
 	HFSM2_INLINE void succeed();
 
 	/// @brief Fail a plan task for the current state
 	HFSM2_INLINE void fail();
 
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	using PlanControl::_planData;
+	HFSM2_IF_PLANS(using PlanControl::_planData);
 	using PlanControl::_regionId;
 	HFSM2_IF_LOG_INTERFACE(using PlanControl::_logger);
 
@@ -496,7 +527,10 @@ class GuardControlT final
 
 	using typename FullControl::StateList;
 	using typename FullControl::RegionList;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using typename FullControl::PlanData;
+#endif
 
 	using typename FullControl::Registry;
 
@@ -507,13 +541,18 @@ protected:
 
 private:
 	HFSM2_INLINE GuardControlT(Context& context
-							 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-							 , Registry& registry
-							 , PlanData& planData
-							 , Requests& requests
-							 , const Requests& pendingChanges
-							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
-		: FullControl{context HFSM2_IF_UTILITY_THEORY(, rng), registry, planData, requests HFSM2_IF_LOG_INTERFACE(, logger)}
+							   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							   , Registry& registry
+							   HFSM2_IF_PLANS(, PlanData& planData)
+							   , Requests& requests
+							   , const Requests& pendingChanges
+							   HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+		: FullControl{context
+					  HFSM2_IF_UTILITY_THEORY(, rng)
+					  , registry
+					  HFSM2_IF_PLANS(, planData)
+					  , requests
+					  HFSM2_IF_LOG_INTERFACE(, logger)}
 		, _pending{pendingChanges}
 	{}
 
@@ -530,7 +569,9 @@ public:
 	using FullControl::isResumable;
 	using FullControl::isScheduled;
 
+#ifdef HFSM2_ENABLE_PLANS
 	using FullControl::plan;
+#endif
 
 	using FullControl::changeTo;
 	using FullControl::restart;
@@ -542,8 +583,11 @@ public:
 #endif
 
 	using FullControl::schedule;
+
+#ifdef HFSM2_ENABLE_PLANS
 	using FullControl::succeed;
 	using FullControl::fail;
+#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

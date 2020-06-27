@@ -143,7 +143,7 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	deepChangeToRequested (PlanControl& control);
+	HFSM2_INLINE void	 deepChangeToRequested(PlanControl& control);
 
 	//----------------------------------------------------------------------
 

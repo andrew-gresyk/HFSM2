@@ -286,7 +286,7 @@ const Types all = {
 
 TEST_CASE("FSM.Internal Transition", "[machine]") {
 	float _ = 0.0f;
-	LoggerT<float> logger;
+	LoggerT<hfsm2::FEATURE_TAG, float> logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

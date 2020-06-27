@@ -62,7 +62,7 @@ static_assert(FSM::stateId<Paused>()  ==  3, "");
 
 // custom logger for recording all transitions
 struct Logger
-	: hfsm2::LoggerInterfaceT<Context>
+	: M::LoggerInterface
 {
 	static const char* stateName(const StateID stateId) {
 		switch (stateId) {
