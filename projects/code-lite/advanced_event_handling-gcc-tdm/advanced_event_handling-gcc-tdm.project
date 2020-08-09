@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="calculator-gcc-tdm" Version="11000" InternalType="Console">
+<CodeLite_Project Name="advanced_event_handling-gcc-tdm" Version="11000" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
@@ -15,7 +15,7 @@
     <Topleveldir>$(WorkspacePath)/../../test</Topleveldir>
   </Reconciliation>
   <VirtualDirectory Name="source">
-    <File Name="../../../examples/calculator/main.cpp"/>
+    <File Name="../../../examples/advanced_event_handling/main.cpp"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
