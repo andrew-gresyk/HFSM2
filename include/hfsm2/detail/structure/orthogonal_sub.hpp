@@ -77,7 +77,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,							const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,								const ProngConstBits prongs);
 	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
 	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
 
@@ -91,7 +91,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	template <typename TEvent>
 	HFSM2_INLINE Status	 wideReact			  (FullControl&	 control, const TEvent& event);
 
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,							const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,								const ProngConstBits prongs);
 	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
 	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
 
@@ -101,8 +101,8 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive	  (Control&  control, const Request::Type request,	const ProngConstBits prongs);
-	HFSM2_INLINE void	 wideForwardRequest	  (Control&  control, const Request::Type request,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardActive	  (Control&  control, const TransitionType requestType,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardRequest	  (Control&  control, const TransitionType requestType,	const ProngConstBits prongs);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -214,7 +214,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,							const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,								const ProngConstBits prongs);
 	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
 	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
 
@@ -228,7 +228,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	template <typename TEvent>
 	HFSM2_INLINE Status	 wideReact			  (FullControl&  control, const TEvent& event);
 
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,							const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,								const ProngConstBits prongs);
 	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
 	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
 
@@ -238,8 +238,8 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive	  (Control&  control, const Request::Type request,	const ProngConstBits prongs);
-	HFSM2_INLINE void	 wideForwardRequest	  (Control&  control, const Request::Type request,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardActive	  (Control&  control, const TransitionType requestType,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardRequest	  (Control&  control, const TransitionType requestType,	const ProngConstBits prongs);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

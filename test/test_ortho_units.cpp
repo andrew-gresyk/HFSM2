@@ -91,11 +91,12 @@ struct O3_05 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 19, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS ==  1, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  ==  3, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS ==  3, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   ==  3, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT   == 19, "STATE_COUNT");
+static_assert(FSM::Instance::Info::REGION_COUNT  ==  4, "REGION_COUNT");
+static_assert(FSM::Instance::Info::COMPO_REGIONS ==  1, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_PRONGS  ==  3, "COMPO_PRONGS");
+static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  3, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  3, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

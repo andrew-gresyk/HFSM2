@@ -43,42 +43,6 @@ struct alignas(2 * sizeof(ShortIndex)) Parent {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Request {
-	enum Type {
-		REMAIN,
-		CHANGE,
-		RESTART,
-		RESUME,
-
-	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
-		UTILIZE,
-		RANDOMIZE,
-	//#endif
-
-		SCHEDULE,
-
-		COUNT
-	};
-
-	HFSM2_INLINE Request() = default;
-
-	HFSM2_INLINE Request(const Type type_,
-						 const StateID stateId_)
-		: type{type_}
-		, stateId{stateId_}
-	{
-		HFSM2_ASSERT(type_ < Type::COUNT);
-	}
-
-	Type type = CHANGE;
-	StateID stateId = INVALID_STATE_ID;
-};
-
-template <ShortIndex NCount>
-using RequestsT = Array<Request, NCount>;
-
-////////////////////////////////////////////////////////////////////////////////
-
 template <typename TRegistry>
 struct BackUpT {
 	using CompoForks = typename TRegistry::CompoForks;
@@ -99,7 +63,9 @@ template <typename
 		, LongIndex
 		, LongIndex
 		, LongIndex
-		HFSM2_IF_PLANS(, LongIndex)>
+		, LongIndex
+		HFSM2_IF_PLANS(, LongIndex)
+		, typename>
 struct ArgsT;
 
 template <typename>
@@ -115,7 +81,9 @@ template <typename TContext
 		, LongIndex NOrthoCount
 		, LongIndex NOrthoUnits
 		, LongIndex NSerialBits
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+		, LongIndex NSubstitutionLimit
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, typename TPayload>
 struct RegistryT<ArgsT<TContext
 					 , TConfig
 					 , TStateList
@@ -124,7 +92,9 @@ struct RegistryT<ArgsT<TContext
 					 , NOrthoCount
 					 , NOrthoUnits
 					 , NSerialBits
-					 HFSM2_IF_PLANS(, NTaskCapacity)>>
+					 , NSubstitutionLimit
+					 HFSM2_IF_PLANS(, NTaskCapacity)
+					 , TPayload>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -133,6 +103,9 @@ struct RegistryT<ArgsT<TContext
 	static constexpr ShortIndex COMPO_REGIONS	= NCompoCount;
 	static constexpr ShortIndex ORTHO_REGIONS	= NOrthoCount;
 	static constexpr ShortIndex ORTHO_UNITS		= NOrthoUnits;
+
+	using Payload		= TPayload;
+	using Transition	= TransitionT<Payload>;
 
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
 
@@ -147,22 +120,22 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
-	bool isActive		(const StateID stateId) const;
-	bool isResumable	(const StateID stateId) const;
+	bool isActive		 (const StateID stateId) const;
+	bool isResumable	 (const StateID stateId) const;
 
-	bool isPendingChange(const StateID stateId) const;
-	bool isPendingEnter	(const StateID stateId) const;
-	bool isPendingExit	(const StateID stateId) const;
+	bool isPendingChange (const StateID stateId) const;
+	bool isPendingEnter	 (const StateID stateId) const;
+	bool isPendingExit	 (const StateID stateId) const;
 
 	HFSM2_INLINE const Parent&	   forkParent(const ForkID forkId) const;
 
 	HFSM2_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
 
-	bool requestImmediate(const Request request);
+	bool requestImmediate(const Transition& request);
 	void requestScheduled(const StateID stateId);
 
 	void clearRequests();
-	void reset();
+	void clear();
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -185,7 +158,9 @@ template <typename TContext
 		, typename TRegionList
 		, LongIndex NCompoCount
 		, LongIndex NSerialBits
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+		, LongIndex NSubstitutionLimit
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, typename TPayload>
 struct RegistryT<ArgsT<TContext
 					 , TConfig
 					 , TStateList
@@ -194,13 +169,18 @@ struct RegistryT<ArgsT<TContext
 					 , 0
 					 , 0
 					 , NSerialBits
-					 HFSM2_IF_PLANS(, NTaskCapacity)>>
+					 , NSubstitutionLimit
+					 HFSM2_IF_PLANS(, NTaskCapacity)
+					 , TPayload>>
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
 	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
 	static constexpr ShortIndex COMPO_REGIONS	= NCompoCount;
+
+	using Payload		= TPayload;
+	using Transition	= TransitionT<Payload>;
 
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
 	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
@@ -211,20 +191,20 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
-	bool isActive		(const StateID stateId) const;
-	bool isResumable	(const StateID stateId) const;
+	bool isActive		 (const StateID stateId) const;
+	bool isResumable	 (const StateID stateId) const;
 
-	bool isPendingChange(const StateID stateId) const;
-	bool isPendingEnter	(const StateID stateId) const;
-	bool isPendingExit	(const StateID stateId) const;
+	bool isPendingChange (const StateID stateId) const;
+	bool isPendingEnter	 (const StateID stateId) const;
+	bool isPendingExit	 (const StateID stateId) const;
 
 	HFSM2_INLINE const Parent& forkParent(const ForkID forkId) const;
 
-	bool requestImmediate(const Request request);
+	bool requestImmediate(const Transition& request);
 	void requestScheduled(const StateID stateId);
 
 	void clearRequests();
-	void reset();
+	void clear();
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -241,7 +221,9 @@ struct RegistryT<ArgsT<TContext
 
 template <typename TRegistry>
 void
-backup(const TRegistry& registry, BackUpT<TRegistry>& copy) {
+backup(const TRegistry& registry,
+	   BackUpT<TRegistry>& copy)
+{
 	overwrite(copy.compoRequested, registry.compoRequested);
 	overwrite(copy.orthoRequested, registry.orthoRequested);
 	overwrite(copy.compoResumable, registry.compoResumable);
@@ -251,7 +233,9 @@ backup(const TRegistry& registry, BackUpT<TRegistry>& copy) {
 
 template <typename TRegistry>
 void
-restore(TRegistry& registry, const BackUpT<TRegistry>& copy) {
+restore(TRegistry& registry,
+		const BackUpT<TRegistry>& copy)
+{
 	overwrite(registry.compoRequested, copy.compoRequested);
 	overwrite(registry.orthoRequested, copy.orthoRequested);
 	overwrite(registry.compoResumable, copy.compoResumable);
@@ -262,4 +246,5 @@ restore(TRegistry& registry, const BackUpT<TRegistry>& copy) {
 }
 }
 
-#include "registry.inl"
+#include "registry_1.inl"
+#include "registry_2.inl"

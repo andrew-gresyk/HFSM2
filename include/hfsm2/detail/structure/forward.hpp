@@ -212,38 +212,43 @@ template <typename TContext
 		, LongIndex NOrthoCount
 		, LongIndex NOrthoUnits
 		, LongIndex NSerialBits
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+		, LongIndex NSubstitutionLimit
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, typename TPayload>
 struct ArgsT final {
-	using Context	 = TContext;
+	using Context		= TContext;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using Rank		 = typename TConfig::Rank;
-	using Utility	 = typename TConfig::Utility;
-	using RNG		 = typename TConfig::RNG;
-	using UP		 = typename TConfig::UP;
+	using Rank			= typename TConfig::Rank;
+	using Utility		= typename TConfig::Utility;
+	using RNG			= typename TConfig::RNG;
+	using UP			= typename TConfig::UP;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	 = typename TConfig::LoggerInterface;
+	using Logger		= typename TConfig::LoggerInterface;
 #endif
 
-	using StateList	 = TStateList;
-	using RegionList = TRegionList;
+	using StateList		= TStateList;
+	using RegionList	= TRegionList;
 
-	static constexpr LongIndex  STATE_COUNT	  = StateList::SIZE;
-	static constexpr ShortIndex COMPO_REGIONS = NCompoCount;
-	static constexpr ShortIndex ORTHO_REGIONS = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS	  = NOrthoUnits;
-	static constexpr ShortIndex SERIAL_BITS	  = NSerialBits;
+	static constexpr LongIndex  STATE_COUNT		   = StateList::SIZE;
+	static constexpr ShortIndex COMPO_REGIONS	   = NCompoCount;
+	static constexpr ShortIndex ORTHO_REGIONS	   = NOrthoCount;
+	static constexpr ShortIndex ORTHO_UNITS		   = NOrthoUnits;
+	static constexpr ShortIndex SERIAL_BITS		   = NSerialBits;
+	static constexpr ShortIndex SUBSTITUTION_LIMIT = NSubstitutionLimit;
 
 #ifdef HFSM2_ENABLE_PLANS
-	static constexpr LongIndex  TASK_CAPACITY = NTaskCapacity;
+	static constexpr LongIndex  TASK_CAPACITY	   = NTaskCapacity;
 #endif
 
+	using Payload	= TPayload;
+
 #ifdef HFSM2_ENABLE_SERIALIZATION
-	using SerialBuffer			= StreamBuffer	<SERIAL_BITS>;
-	using WriteStream			= BitWriteStream<SERIAL_BITS>;
-	using ReadStream			= BitReadStream	<SERIAL_BITS>;
+	using SerialBuffer	= StreamBuffer	<SERIAL_BITS>;
+	using WriteStream	= BitWriteStream<SERIAL_BITS>;
+	using ReadStream	= BitReadStream	<SERIAL_BITS>;
 #endif
 
 	HFSM2_IF_STRUCTURE_REPORT(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
@@ -325,19 +330,21 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	static constexpr LongIndex SUBSTITUTION_LIMIT= TConfig::SUBSTITUTION_LIMIT;
+	static constexpr LongIndex  SUBSTITUTION_LIMIT	= TConfig::SUBSTITUTION_LIMIT;
 
 #ifdef HFSM2_ENABLE_PLANS
-	static constexpr LongIndex TASK_CAPACITY	 = TConfig::TASK_CAPACITY != INVALID_LONG_INDEX ?
-													   TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
+	static constexpr LongIndex  TASK_CAPACITY		= TConfig::TASK_CAPACITY != INVALID_LONG_INDEX ?
+														  TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
 #endif
 
-	static constexpr ShortIndex COMPO_REGIONS	 = Apex::COMPO_REGIONS;
-	static constexpr ShortIndex ORTHO_REGIONS	 = Apex::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		 = Apex::ORTHO_UNITS;
+	using Payload	= typename TConfig::Payload;
 
-	static constexpr LongIndex  ACTIVE_BITS		 = Apex::ACTIVE_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS	 = Apex::RESUMABLE_BITS;
+	static constexpr ShortIndex COMPO_REGIONS		= Apex::COMPO_REGIONS;
+	static constexpr ShortIndex ORTHO_REGIONS		= Apex::ORTHO_REGIONS;
+	static constexpr ShortIndex ORTHO_UNITS			= Apex::ORTHO_UNITS;
+
+	static constexpr LongIndex  ACTIVE_BITS			= Apex::ACTIVE_BITS;
+	static constexpr LongIndex  RESUMABLE_BITS		= Apex::RESUMABLE_BITS;
 
 	using StateList		= typename Apex::StateList;
 	using RegionList	= typename Apex::RegionList;
@@ -350,7 +357,9 @@ struct RF_ final {
 							  , ORTHO_REGIONS
 							  , ORTHO_UNITS
 							  , ACTIVE_BITS + RESUMABLE_BITS
-							  HFSM2_IF_PLANS(, TASK_CAPACITY)>;
+							  , SUBSTITUTION_LIMIT
+							  HFSM2_IF_PLANS(, TASK_CAPACITY)
+							  , Payload>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

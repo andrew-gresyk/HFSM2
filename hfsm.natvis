@@ -107,6 +107,14 @@
 		<Expand HideRawView="true" />
 	</Type>
 
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+
+	<Type Name="hfsm2::detail::TransitionBase">
+		<DisplayString Condition="origin == 0xFFFF">{type, en} (► {destination})</DisplayString>
+		<DisplayString>{type, en} ({origin} ► {destination})</DisplayString>
+		<Expand HideRawView="true" />
+	</Type>
+
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::ControlT&lt;*&gt;">
@@ -141,26 +149,33 @@
 
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
+	<Type Name="hfsm2::detail::Task">
+		<DisplayString>{origin} ► {destination}</DisplayString>
+	</Type>
+
 	<Type Name="hfsm2::detail::TaskLink">
-		<DisplayString>({origin} ► {destination})</DisplayString>
+		<DisplayString>{prev} ◄► {next}</DisplayString>
 	</Type>
 
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::PlanT&lt;*&gt;">
 		<DisplayString Condition="_bounds.first == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
-		<DisplayString Condition="_bounds.first != INVALID_LONG_INDEX">{_planData.taskLinks._cells[_bounds.first]}, ..</DisplayString>
 		<Expand HideRawView="true">
 			<CustomListItems MaxItemsPerView="100">
 				<Variable Name="i" InitialValue="_bounds.first" />
 
-				<If Condition="_bounds.first != INVALID_LONG_INDEX">
+				<If Condition="_bounds.first != INVALID_LONG_INDEX &amp;&amp; _bounds.first != _bounds.last">
 					<Loop>
-						<Item>_planData.taskLinks._cells[i]</Item>
-						<Exec>i = _planData.taskLinks._cells[i].item.next</Exec>
+						<Item>_planData.tasks._cells[i].item</Item>
+						<Exec>i = _planData.taskLinks[i].next</Exec>
 						<Break Condition="i == _bounds.last" />
 					</Loop>
-					<Item>_planData.taskLinks._cells[_bounds.last]</Item>
+					<Item>_planData.tasks._cells[_bounds.last].item</Item>
+				</If>
+
+				<If Condition="_bounds.first != INVALID_LONG_INDEX &amp;&amp; _bounds.first == _bounds.last">
+					<Item>_planData.tasks._cells[_bounds.last].item</Item>
 				</If>
 			</CustomListItems>
 		</Expand>
@@ -170,9 +185,9 @@
 
 	<Type Name="hfsm2::detail::PlanT&lt;*&gt;::Iterator">
 		<DisplayString Condition="_curr == INVALID_LONG_INDEX">&lt;Empty&gt;</DisplayString>
-		<DisplayString Condition="_curr != INVALID_LONG_INDEX">{_plan._planData.taskLinks._cells[_curr]}</DisplayString>
+		<DisplayString Condition="_curr != INVALID_LONG_INDEX">{_plan._planData.tasks._cells[_curr].item}</DisplayString>
 		<Expand HideRawView="true">
-			<ExpandedItem Condition="_curr != INVALID_LONG_INDEX">_plan._planData.taskLinks._cells[_curr]</ExpandedItem>
+			<ExpandedItem Condition="_curr != INVALID_LONG_INDEX">_plan._planData.tasks._cells[_curr].item</ExpandedItem>
 		</Expand>
 	</Type>
 

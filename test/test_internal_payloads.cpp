@@ -1,11 +1,11 @@
 #define HFSM2_ENABLE_TRANSITION_HISTORY
 #include "tools.hpp"
 
-namespace test_internal_transitions {
+namespace test_internal_payloads {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using Config = hfsm2::Config::ContextT<float>;
+using Config = hfsm2::Config::ContextT<float>::PayloadT<int>;
 
 using M = hfsm2::MachineT<Config>;
 
@@ -119,7 +119,7 @@ struct A_1
 	void enter(PlanControl&)													{}
 
 	void update(FullControl& control) {
-		control.changeTo<A_2>();
+		control.changeWith<A_2>(1);
 	}
 
 	void exit(PlanControl&)														{}
@@ -135,11 +135,11 @@ struct A_2
 	void update(FullControl& control) {
 		switch (entryCount()) {
 		case 1:
-			control.changeTo<B_2_2>();
+			control.changeWith<B_2_2>(2);
 			break;
 
 		case 2:
-			control.resume<B>();
+			control.resumeWith<B>(3);
 			break;
 		}
 	}
@@ -230,10 +230,11 @@ struct B_2_1
 		REQUIRE(pendingTransitions.count() == 1);
 		REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<B_2_2>(),
 													   FSM::stateId<B    >(),
-													   hfsm2::TransitionType::CHANGE});
+													   hfsm2::TransitionType::CHANGE,
+													   6});
 
 		control.cancelPendingTransitions();
-		control.resume<B_2_2>();
+		control.resumeWith<B_2_2>(4);
 	}
 
 	void enter(PlanControl&)													{}
@@ -251,16 +252,16 @@ struct B_2_2
 	void update(FullControl& control) {
 		switch (totalUpdateCount()) {
 		case 1:
-			control.resume<A>();
+			control.resumeWith<A>(5);
 			break;
 
 		case 2:
-			control.changeTo<B>();
+			control.changeWith<B>(6);
 			break;
 
 		case 3:
-			control.schedule<A_2_2>();
-			control.resume<A>();
+			control.scheduleWith<A_2_2>(7);
+			control.resumeWith<A>(8);
 			break;
 		}
 	}
@@ -296,7 +297,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Internal Transition", "[machine]") {
+TEST_CASE("FSM.Internal Payloads", "[machine]") {
 	float _ = 0.0f;
 	LoggerT<Config> logger;
 
@@ -379,7 +380,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions.count() == 1);
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<A_1  >(),
 															FSM::stateId<A_2  >(),
-															hfsm2::TransitionType::CHANGE});
+															hfsm2::TransitionType::CHANGE,
+															1});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -459,7 +461,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions.count() == 1);
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<A_2  >(),
 															FSM::stateId<B_2_2>(),
-															hfsm2::TransitionType::CHANGE});
+															hfsm2::TransitionType::CHANGE,
+															2});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -546,7 +549,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions.count() == 1);
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<B_2_2>(),
 															FSM::stateId<A    >(),
-															hfsm2::TransitionType::RESUME});
+															hfsm2::TransitionType::RESUME,
+															3});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -602,7 +606,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions.count() == 1);
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<A_2  >(),
 															FSM::stateId<B    >(),
-															hfsm2::TransitionType::RESUME});
+															hfsm2::TransitionType::RESUME,
+															4});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -649,7 +654,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions.count() == 1);
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<B_2_1>(),
 															FSM::stateId<B_2_2>(),
-															hfsm2::TransitionType::RESUME});
+															hfsm2::TransitionType::RESUME,
+															5});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -707,10 +713,12 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions.count() == 2);
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<B_2_2>(),
 															FSM::stateId<A_2_2>(),
-															hfsm2::TransitionType::SCHEDULE});
+															hfsm2::TransitionType::SCHEDULE,
+															6});
 			REQUIRE(previousTransitions[1] == M::Transition{FSM::stateId<B_2_2>(),
 															FSM::stateId<A    >(),
-															hfsm2::TransitionType::RESUME});
+															hfsm2::TransitionType::RESUME,
+															7});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -254,17 +254,17 @@ BitArray<TI, NC>::set(const Index index) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-//template <typename TI, ShortIndex NC>
-//void
-//BitArray<TI, NC>::reset(const Index index) {
-//	HFSM2_ASSERT(index < CAPACITY);
-//
-//	const Index unit = index / (sizeof(Unit) * 8);
-//	const Index bit  = index % (sizeof(Unit) * 8);
-//	const Unit mask = 1 << bit;
-//
-//	_storage[unit] &= ~mask;
-//}
+template <typename TI, ShortIndex NC>
+void
+BitArray<TI, NC>::reset(const Index index) {
+	HFSM2_ASSERT(index < CAPACITY);
+
+	const Index unit = index / (sizeof(Unit) * 8);
+	const Index bit  = index % (sizeof(Unit) * 8);
+	const Unit mask = 1 << bit;
+
+	_storage[unit] &= ~mask;
+}
 
 //------------------------------------------------------------------------------
 

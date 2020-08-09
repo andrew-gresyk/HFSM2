@@ -17,27 +17,30 @@ class ControlT {
 	template <typename, typename>
 	friend class R_;
 
-	using Args			= TArgs;
-
 protected:
-	using Context		= typename Args::Context;
+	using Context		= typename TArgs::Context;
+
+	using StateList		= typename TArgs::StateList;
+	using RegionList	= typename TArgs::RegionList;
+
+	using Registry		= RegistryT<TArgs>;
+
+	using Payload		= typename TArgs::Payload;
+	using Transition	= TransitionT<Payload>;
+	using Transitions	= Array<Transition, TArgs::COMPO_REGIONS>;
+	using TransitionSet	= Array<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG			= typename Args::RNG;
+	using RNG			= typename TArgs::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_PLANS
+	using PlanData		= PlanDataT<TArgs>;
+	using ConstPlan		= ConstPlanT<TArgs>;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger		= typename Args::Logger;
-#endif
-
-	using StateList		= typename Args::StateList;
-	using RegionList	= typename Args::RegionList;
-
-	using Registry		= RegistryT<Args>;
-
-#ifdef HFSM2_ENABLE_PLANS
-	using PlanData		= PlanDataT<Args>;
-	using ConstPlan		= ConstPlanT<Args>;
+	using Logger		= typename TArgs::Logger;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -55,17 +58,20 @@ protected:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_INLINE ControlT(Context& context
-						  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-						  , Registry& registry
-						  HFSM2_IF_PLANS(, PlanData& planData)
-						  HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+						, Registry& registry
+						, Transitions& requests
+						HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+						HFSM2_IF_PLANS(, PlanData& planData)
+						HFSM2_IF_TRANSITION_HISTORY(, const TransitionSet& previousTransitions)
+						HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
 		: _context{context}
-		HFSM2_IF_UTILITY_THEORY(, _rng{rng})
 		, _registry{registry}
+		, _requests{requests}
+		HFSM2_IF_UTILITY_THEORY(, _rng{rng})
 		HFSM2_IF_PLANS(, _planData{planData})
+		HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions{previousTransitions})
 		HFSM2_IF_LOG_INTERFACE(, _logger{logger})
 	{}
-
 
 	HFSM2_INLINE void setRegion(const RegionID id);
 	HFSM2_INLINE void resetRegion(const RegionID id);
@@ -76,97 +82,121 @@ public:
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID  stateId()					{ return			StateList ::template index<TState>();	}
+	static constexpr StateID stateId()				{ return			StateList ::template index<TState>();	}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<TState>();	}
+	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<TState>();	}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::context()
-	HFSM2_INLINE Context& _()									{ return _context;									}
+	HFSM2_INLINE Context& _()										{ return _context;							}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::_()
-	HFSM2_INLINE Context& context()								{ return _context;									}
+	HFSM2_INLINE Context& context()									{ return _context;							}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
+
+	/// @brief Inspect current transition requests
+	/// @return Array of transition requests
+	HFSM2_INLINE const Transitions& requests()						{ return _requests;							}
+
+	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active
 	/// @param stateId State identifier
 	/// @return State active status
-	HFSM2_INLINE bool isActive   (const StateID id) const		{ return _registry.isActive   (id);					}
-
-	/// @brief Check if a state is resumable (activated then deactivated previously)
-	/// @param stateId State identifier
-	/// @return State resumable status
-	HFSM2_INLINE bool isResumable(const StateID id) const		{ return _registry.isResumable(id);					}
-
-	/// @brief Check if a state is scheduled to activate on the next transition to parent region
-	/// @param stateId State identifier
-	/// @return State scheduled status
-	HFSM2_INLINE bool isScheduled(const StateID id) const		{ return isResumable(id);							}
+	HFSM2_INLINE bool isActive   (const StateID id) const			{ return _registry.isActive   (id);			}
 
 	/// @brief Check if a state is active
 	/// @tparam TState State type
 	/// @return State active status
 	template <typename TState>
-	HFSM2_INLINE bool isActive() const							{ return isActive	(stateId<TState>());			}
+	HFSM2_INLINE bool isActive() const								{ return isActive	(stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Check if a state is resumable (activated then deactivated previously)
+	/// @param stateId State identifier
+	/// @return State resumable status
+	HFSM2_INLINE bool isResumable(const StateID id) const			{ return _registry.isResumable(id);			}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState State type
 	/// @return State resumable status
 	template <typename TState>
-	HFSM2_INLINE bool isResumable() const						{ return isResumable(stateId<TState>());			}
+	HFSM2_INLINE bool isResumable() const							{ return isResumable(stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Check if a state is scheduled to activate on the next transition to parent region
+	/// @param stateId State identifier
+	/// @return State scheduled status
+	HFSM2_INLINE bool isScheduled(const StateID id) const			{ return isResumable(id);					}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState State type
 	/// @return State scheduled status
 	template <typename TState>
-	HFSM2_INLINE bool isScheduled() const						{ return isResumable(stateId<TState>());			}
+	HFSM2_INLINE bool isScheduled() const							{ return isResumable(stateId<TState>());	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_PLANS
 
 	/// @brief Access read-only plan for the current region
 	/// @return Plan for the current region
-	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};			}
+	HFSM2_INLINE ConstPlan plan() const								{ return ConstPlan{_planData, _regionId};	}
 
 	/// @brief Access read-only plan for a region
 	/// @param regionId Region identifier
 	/// @return Read-only plan for the region
-	HFSM2_INLINE ConstPlan plan(const RegionID regionId) const	{ return ConstPlan{_planData, regionId};			}
+	HFSM2_INLINE ConstPlan plan(const RegionID regionId) const		{ return ConstPlan{_planData, regionId};	}
 
 	/// @brief Access read-only plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Read-only plan for the region
 	template <typename TRegion>
-	HFSM2_INLINE ConstPlan plan()								{ return ConstPlan{_planData, regionId<TRegion>()};	}
+	HFSM2_INLINE ConstPlan plan()							{ return ConstPlan{_planData, regionId<TRegion>()};	}
 
 	/// @brief Access read-only plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Read-only Plan for the region
 	template <typename TRegion>
-	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, regionId<TRegion>()};	}
+	HFSM2_INLINE ConstPlan plan() const						{ return ConstPlan{_planData, regionId<TRegion>()};	}
 
 #endif
 
+	//----------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+	/// @brief Get transitions processed during last 'update()', 'react()' or 'replayTransitions()'
+	/// @return Array of last transition requests
+	HFSM2_INLINE const TransitionSet& previousTransitions() const	{ return _previousTransitions;						}
+
+#endif
+
+	//----------------------------------------------------------------------
+
 protected:
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	HFSM2_INLINE Logger* logger()								{ return _logger;									}
+	HFSM2_INLINE Logger* logger()									{ return _logger;									}
 #endif
 
 protected:
 	Context& _context;
-	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 	Registry& _registry;
-	HFSM2_IF_PLANS(PlanData& _planData);
+	Transitions& _requests;
 	RegionID _regionId = 0;
+	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
+	HFSM2_IF_PLANS(PlanData& _planData);
+	HFSM2_IF_TRANSITION_HISTORY(const TransitionSet& _previousTransitions);
 	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
 
@@ -188,19 +218,22 @@ class PlanControlT
 	template <typename, typename>
 	friend class R_;
 
-	using Args			= TArgs;
-
 protected:
-	using Control		= ControlT<Args>;
+	using Control		= ControlT<TArgs>;
 
 	using typename Control::StateList;
 	using typename Control::RegionList;
+
+	using typename Control::Payload;
+	using typename Control::Transition;
+	using typename Control::Transitions;
+	using typename Control::TransitionSet;
 
 #ifdef HFSM2_ENABLE_PLANS
 	using typename Control::PlanData;
 	using typename Control::ConstPlan;
 
-	using Plan			= PlanT<Args>;
+	using Plan			= PlanT<TArgs>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -252,47 +285,52 @@ public:
 	using Control::isResumable;
 	using Control::isScheduled;
 
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	using Control::previousTransitions;
+#endif
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_PLANS
 
 	/// @brief Access plan for the current region
 	/// @return Plan for the current region
-	HFSM2_INLINE	  Plan plan()								{ return	  Plan{_planData, _regionId};			}
+	HFSM2_INLINE	  Plan plan()								{ return	  Plan{_planData, _regionId};								}
+
+	/// @brief Access plan for a region
+	/// @param regionId
+	/// @return Plan for the region
+	HFSM2_INLINE	  Plan plan(const RegionID regionId)		{ return	  Plan{_planData, regionId};								}
+
+	/// @brief Access plan for a region
+	/// @tparam TRegion Region head state type
+	/// @return Plan for the region
+	template <typename TRegion>
+	HFSM2_INLINE	  Plan plan()								{ return	  Plan{_planData, Control::template regionId<TRegion>()};	}
 
 	/// @brief Access plan for the current region
 	/// @return Plan for the current region
-	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};			}
+	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, _regionId};								}
 
 	/// @brief Access plan for a region
 	/// @param regionId
 	/// @return Plan for the region
-	HFSM2_INLINE	  Plan plan(const RegionID regionId)		{ return	  Plan{_planData, regionId};			}
-
-	/// @brief Access plan for a region
-	/// @param regionId
-	/// @return Plan for the region
-	HFSM2_INLINE ConstPlan plan(const RegionID regionId) const	{ return ConstPlan{_planData, regionId};			}
+	HFSM2_INLINE ConstPlan plan(const RegionID regionId) const	{ return ConstPlan{_planData, regionId};								}
 
 	/// @brief Access plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Plan for the region
 	template <typename TRegion>
-	HFSM2_INLINE	  Plan plan()			{ return	  Plan{_planData, Control::template regionId<TRegion>()};	}
-
-	/// @brief Access plan for a region
-	/// @tparam TRegion Region head state type
-	/// @return Plan for the region
-	template <typename TRegion>
-	HFSM2_INLINE ConstPlan plan() const		{ return ConstPlan{_planData, Control::template regionId<TRegion>()};	}
+	HFSM2_INLINE ConstPlan plan() const							{ return ConstPlan{_planData, Control::template regionId<TRegion>()};	}
 
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HFSM2_IF_PLANS(using Control::_planData);
 	using Control::_regionId;
+	using Control::_requests;
+	HFSM2_IF_PLANS(using Control::_planData);
 	HFSM2_IF_LOG_INTERFACE(using Control::_logger);
 
 	StateID _originId = 0;
@@ -304,7 +342,7 @@ protected:
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-class FullControlT
+class FullControlBaseT
 	: public PlanControlT<TArgs>
 {
 	template <typename, typename, typename>
@@ -319,63 +357,51 @@ class FullControlT
 	template <typename, typename>
 	friend class R_;
 
-	using Args			= TArgs;
-
 protected:
-	using PlanControl	= PlanControlT<Args>;
+	using PlanControl	= PlanControlT<TArgs>;
 
 	using typename PlanControl::Context;
 
+	using typename PlanControl::StateList;
+	using typename PlanControl::RegionList;
+
+	using typename PlanControl::Origin;
+
+	using typename PlanControl::Registry;
+
+	using typename PlanControl::Payload;
+	using typename PlanControl::Transition;
+	using typename PlanControl::Transitions;
+	using typename PlanControl::TransitionSet;
+
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename PlanControl::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_PLANS
+	using typename PlanControl::PlanData;
+	using typename PlanControl::Plan;
+	using TasksBits		= BitArray<StateID, StateList::SIZE>;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using typename PlanControl::Logger;
 #endif
 
-	using typename PlanControl::StateList;
-	using typename PlanControl::RegionList;
-
-#ifdef HFSM2_ENABLE_PLANS
-	using typename PlanControl::PlanData;
-	using typename PlanControl::Plan;
-#endif
-
-	using typename PlanControl::Origin;
-
-	using Registry		= RegistryT<Args>;
-	using Requests		= RequestsT<Args::COMPO_REGIONS>;
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Lock {
-		HFSM2_INLINE Lock(FullControlT& control_);
+		HFSM2_INLINE Lock(FullControlBaseT& control_);
 		HFSM2_INLINE ~Lock();
 
-		FullControlT* const control;
+		FullControlBaseT* const control;
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE FullControlT(Context& context
-							  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-							  , Registry& registry
-							  HFSM2_IF_PLANS(, PlanData& planData)
-							  , Requests& requests
-							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
-		: PlanControl{context
-					  HFSM2_IF_UTILITY_THEORY(, rng)
-					  , registry
-					  HFSM2_IF_PLANS(, planData)
-					  HFSM2_IF_LOG_INTERFACE(, logger)}
-		, _requests{requests}
-	{}
+	using PlanControl::PlanControl;
 
 #ifdef HFSM2_ENABLE_PLANS
-
-	template <typename TState>
-	Status updatePlan(TState& headState, const Status subStatus);
 
 	template <typename TState>
 	Status buildPlanStatus();
@@ -386,30 +412,55 @@ public:
 	using PlanControl::stateId;
 	using PlanControl::regionId;
 
-	using PlanControl::_;
 	using PlanControl::context;
 
 	using PlanControl::isActive;
 	using PlanControl::isResumable;
 	using PlanControl::isScheduled;
 
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	using PlanControl::previousTransitions;
+#endif
+
 #ifdef HFSM2_ENABLE_PLANS
 	using PlanControl::plan;
 #endif
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
+	// Clang trips over 'stateId<>()', so give it a hint it comes from PlanControl
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId State identifier
 	HFSM2_INLINE void changeTo (const StateID stateId);
 
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void changeTo ()							{ changeTo (PlanControl::template stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId State identifier
 	HFSM2_INLINE void restart  (const StateID stateId);
 
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void restart  ()							{ restart  (PlanControl::template stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId State identifier
 	HFSM2_INLINE void resume   (const StateID stateId);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_INLINE void resume   ()							{ resume   (PlanControl::template stateId<TState>());	}
+
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
@@ -419,44 +470,20 @@ public:
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_INLINE void utilize  (const StateID stateId);
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
-	/// @param stateId State identifier
-	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void randomize(const StateID stateId);
-
-#endif
-
-	/// @brief Schedule a state to be activated when its parent region is activated
-	/// @param stateId State identifier
-	HFSM2_INLINE void schedule (const StateID stateId);
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	// Clang trips over 'stateId<>()', so give it a hint it comes from PlanControl
-
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
-	/// @tparam TState State type
-	template <typename TState>
-	HFSM2_INLINE void changeTo ()							{ changeTo (PlanControl::template stateId<TState>());	}
-
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
-	/// @tparam TState State type
-	template <typename TState>
-	HFSM2_INLINE void restart  ()							{ restart  (PlanControl::template stateId<TState>());	}
-
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
-	/// @tparam TState State type
-	template <typename TState>
-	HFSM2_INLINE void resume   ()							{ resume   (PlanControl::template stateId<TState>());	}
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///   with the highest 'utility()' among those with the highest 'rank()')
 	/// @tparam TState State type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
 	HFSM2_INLINE void utilize  ()							{ utilize  (PlanControl::template stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @param stateId State identifier
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void randomize(const StateID stateId);
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///   proportional to 'utility()' among those with the highest 'rank()')
@@ -466,6 +493,12 @@ public:
 	HFSM2_INLINE void randomize()							{ randomize(PlanControl::template stateId<TState>());	}
 
 #endif
+
+	//----------------------------------------------------------------------
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @param stateId State identifier
+	HFSM2_INLINE void schedule (const StateID stateId);
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState State type
@@ -487,8 +520,9 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
-	HFSM2_IF_PLANS(using PlanControl::_planData);
 	using PlanControl::_regionId;
+	using PlanControl::_requests;
+	HFSM2_IF_PLANS(using PlanControl::_planData);
 	HFSM2_IF_LOG_INTERFACE(using PlanControl::_logger);
 
 	using PlanControl::_originId;
@@ -496,8 +530,391 @@ protected:
 	using PlanControl::_regionSize;
 	using PlanControl::_status;
 
-	Requests& _requests;
 	bool _locked = false;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TArgs>
+class FullControlT;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, LongIndex NCompoCount
+		, LongIndex NOrthoCount
+		, LongIndex NOrthoUnits
+		, LongIndex NSerialBits
+		, LongIndex NSubstitutionLimit
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, typename TPayload>
+class FullControlT<ArgsT<TContext
+					   , TConfig
+					   , TStateList
+					   , TRegionList
+					   , NCompoCount
+					   , NOrthoCount
+					   , NOrthoUnits
+					   , NSerialBits
+					   , NSubstitutionLimit
+					   HFSM2_IF_PLANS(, NTaskCapacity)
+					   , TPayload>>
+	: public FullControlBaseT<ArgsT<TContext
+								  , TConfig
+								  , TStateList
+								  , TRegionList
+								  , NCompoCount
+								  , NOrthoCount
+								  , NOrthoUnits
+								  , NSerialBits
+								  , NSubstitutionLimit
+								  HFSM2_IF_PLANS(, NTaskCapacity)
+								  , TPayload>>
+{
+	template <typename, typename, typename>
+	friend struct S_;
+
+	template <typename, typename, Strategy, typename, typename...>
+	friend struct C_;
+
+	template <typename, typename, typename, typename...>
+	friend struct O_;
+
+	template <typename, typename>
+	friend class R_;
+
+	using Args = ArgsT<TContext
+					 , TConfig
+					 , TStateList
+					 , TRegionList
+					 , NCompoCount
+					 , NOrthoCount
+					 , NOrthoUnits
+					 , NSerialBits
+					 , NSubstitutionLimit
+					 HFSM2_IF_PLANS(, NTaskCapacity)
+					 , TPayload>;
+
+protected:
+	using FullControlBase = FullControlBaseT<Args>;
+
+	using typename FullControlBase::Payload;
+	using typename FullControlBase::Transition;
+
+	using typename FullControlBase::Origin;
+
+#ifdef HFSM2_ENABLE_PLANS
+	using typename FullControlBase::PlanData;
+	using typename FullControlBase::Plan;
+	using typename FullControlBase::TasksBits;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using FullControlBase::FullControlBase;
+
+#ifdef HFSM2_ENABLE_PLANS
+
+	template <typename TState>
+	Status updatePlan(TState& headState, const Status subStatus);
+
+#endif
+
+public:
+	using FullControlBase::context;
+
+	using FullControlBase::isActive;
+	using FullControlBase::changeTo;
+
+	HFSM2_IF_PLANS(using FullControlBase::plan);
+
+	//------------------------------------------------------------------------------
+
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_INLINE void changeWith   (const StateID  stateId,
+									const Payload& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_INLINE void changeWith   (const StateID  stateId,
+										 Payload&& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_INLINE void changeWith   (const Payload& payload)	{ changeWith   (FullControlBase::template stateId<TState>(),		   payload );	}
+
+	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_INLINE void changeWith   (	 Payload&& payload)	{ changeWith   (FullControlBase::template stateId<TState>(), std::move(payload));	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_INLINE void restartWith  (const StateID  stateId,
+									const Payload& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_INLINE void restartWith  (const StateID  stateId,
+										 Payload&& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_INLINE void restartWith  (const Payload& payload)	{ restartWith  (FullControlBase::template stateId<TState>(),		   payload );	}
+
+	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_INLINE void restartWith  (	 Payload&& payload)	{ restartWith  (FullControlBase::template stateId<TState>(), std::move(payload));	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_INLINE void resumeWith   (const StateID  stateId,
+									const Payload& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_INLINE void resumeWith   (const StateID  stateId,
+										 Payload&& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_INLINE void resumeWith   (const Payload& payload)	{ resumeWith   (FullControlBase::template stateId<TState>(),		   payload );	}
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_INLINE void resumeWith   (	 Payload&& payload)	{ resumeWith   (FullControlBase::template stateId<TState>(), std::move(payload));	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void utilizeWith  (const StateID  stateId,
+									const Payload& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void utilizeWith  (const StateID  stateId,
+										 Payload&& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM2_INLINE void utilizeWith  (const Payload& payload)	{ utilizeWith  (FullControlBase::template stateId<TState>(),		   payload );	}
+
+	/// @brief Transition into a state (if transitioning into a region, activates the state
+	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM2_INLINE void utilizeWith  (	 Payload&& payload)	{ utilizeWith  (FullControlBase::template stateId<TState>(), std::move(payload));	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void randomizeWith(const StateID  stateId,
+									const Payload& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE void randomizeWith(const StateID  stateId,
+										 Payload&& payload);
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM2_INLINE void randomizeWith(const Payload& payload)	{ randomizeWith(FullControlBase::template stateId<TState>(),		   payload );	}
+
+	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
+	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	/// @see HFSM2_ENABLE_UTILITY_THEORY
+	template <typename TState>
+	HFSM2_INLINE void randomizeWith(	 Payload&& payload)	{ randomizeWith(FullControlBase::template stateId<TState>(), std::move(payload));	}
+
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_INLINE void scheduleWith (const StateID  stateId,
+									const Payload& payload);
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_INLINE void scheduleWith (const StateID  stateId,
+										 Payload&& payload);
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_INLINE void scheduleWith (const Payload& payload)	{ scheduleWith (FullControlBase::template stateId<TState>(),		   payload );	}
+
+	/// @brief Schedule a state to be activated when its parent region is activated
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_INLINE void scheduleWith (	 Payload&& payload)	{ scheduleWith (FullControlBase::template stateId<TState>(), std::move(payload));	}
+
+	//------------------------------------------------------------------------------
+
+protected:
+	using FullControlBase::_regionId;
+	using FullControlBase::_requests;
+	HFSM2_IF_PLANS(using FullControlBase::_planData);
+	HFSM2_IF_LOG_INTERFACE(using FullControlBase::_logger);
+
+	using FullControlBase::_originId;
+	using FullControlBase::_regionIndex;
+	using FullControlBase::_regionSize;
+	using FullControlBase::_status;
+
+	using FullControlBase::_locked;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, LongIndex NCompoCount
+		, LongIndex NOrthoCount
+		, LongIndex NOrthoUnits
+		, LongIndex NSerialBits
+		, LongIndex NSubstitutionLimit
+		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+class FullControlT<ArgsT<TContext
+					   , TConfig
+					   , TStateList
+					   , TRegionList
+					   , NCompoCount
+					   , NOrthoCount
+					   , NOrthoUnits
+					   , NSerialBits
+					   , NSubstitutionLimit
+					   HFSM2_IF_PLANS(, NTaskCapacity)
+					   , void>>
+	: public FullControlBaseT<ArgsT<TContext
+								  , TConfig
+								  , TStateList
+								  , TRegionList
+								  , NCompoCount
+								  , NOrthoCount
+								  , NOrthoUnits
+								  , NSerialBits
+								  , NSubstitutionLimit
+								  HFSM2_IF_PLANS(, NTaskCapacity)
+								  , void>>
+{
+	template <typename, typename, typename>
+	friend struct S_;
+
+	template <typename, typename, Strategy, typename, typename...>
+	friend struct C_;
+
+	template <typename, typename, typename, typename...>
+	friend struct O_;
+
+	template <typename, typename>
+	friend class R_;
+
+	using Args = ArgsT<TContext
+					 , TConfig
+					 , TStateList
+					 , TRegionList
+					 , NCompoCount
+					 , NOrthoCount
+					 , NOrthoUnits
+					 , NSerialBits
+					 , NSubstitutionLimit
+					 HFSM2_IF_PLANS(, NTaskCapacity)
+					 , void>;
+
+protected:
+	using FullControlBase = FullControlBaseT<Args>;
+
+	using typename FullControlBase::Origin;
+
+#ifdef HFSM2_ENABLE_PLANS
+	using typename FullControlBase::PlanData;
+	using typename FullControlBase::Plan;
+	using typename FullControlBase::TasksBits;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	using FullControlBase::FullControlBase;
+
+#ifdef HFSM2_ENABLE_PLANS
+
+	template <typename TState>
+	Status updatePlan(TState& headState, const Status subStatus);
+
+#endif
+
+public:
+	using FullControlBase::isActive;
+	using FullControlBase::changeTo;
+
+	HFSM2_IF_PLANS(using FullControlBase::plan);
+
+protected:
+	using FullControlBase::_regionId;
+	HFSM2_IF_PLANS(using FullControlBase::_planData);
+
+	using FullControlBase::_status;
 };
 
 //------------------------------------------------------------------------------
@@ -512,48 +929,49 @@ class GuardControlT final
 	template <typename, typename>
 	friend class R_;
 
-	using Args			= TArgs;
-	using FullControl	= FullControlT<Args>;
+	using FullControl	= FullControlT<TArgs>;
 
 	using typename FullControl::Context;
 
+	using typename FullControl::StateList;
+	using typename FullControl::RegionList;
+
+	using typename FullControl::Registry;
+	using typename FullControl::Transitions;
+	using typename FullControl::TransitionSet;
+
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename FullControl::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_PLANS
+	using typename FullControl::PlanData;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
 	using typename FullControl::Logger;
 #endif
 
-	using typename FullControl::StateList;
-	using typename FullControl::RegionList;
-
-#ifdef HFSM2_ENABLE_PLANS
-	using typename FullControl::PlanData;
-#endif
-
-	using typename FullControl::Registry;
-
-protected:
-	using Requests		= RequestsT<Args::COMPO_REGIONS>;
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-private:
 	HFSM2_INLINE GuardControlT(Context& context
-							   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-							   , Registry& registry
-							   HFSM2_IF_PLANS(, PlanData& planData)
-							   , Requests& requests
-							   , const Requests& pendingChanges
-							   HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+							 , Registry& registry
+							 , Transitions& requests
+							 , const TransitionSet& currentTransitions
+							 , const Transitions& pendingTransitions
+							 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							 HFSM2_IF_PLANS(, PlanData& planData)
+							 HFSM2_IF_TRANSITION_HISTORY(, const TransitionSet& previousTransitions)
+							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
 		: FullControl{context
-					  HFSM2_IF_UTILITY_THEORY(, rng)
-					  , registry
-					  HFSM2_IF_PLANS(, planData)
-					  , requests
-					  HFSM2_IF_LOG_INTERFACE(, logger)}
-		, _pending{pendingChanges}
+					, registry
+					, requests
+					HFSM2_IF_UTILITY_THEORY(, rng)
+					HFSM2_IF_PLANS(, planData)
+					HFSM2_IF_TRANSITION_HISTORY(, previousTransitions)
+					HFSM2_IF_LOG_INTERFACE(, logger)}
+		, _currentTransitions{currentTransitions}
+		, _pendingTransitions{pendingTransitions}
 	{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -569,10 +987,6 @@ public:
 	using FullControl::isResumable;
 	using FullControl::isScheduled;
 
-#ifdef HFSM2_ENABLE_PLANS
-	using FullControl::plan;
-#endif
-
 	using FullControl::changeTo;
 	using FullControl::restart;
 	using FullControl::resume;
@@ -585,8 +999,13 @@ public:
 	using FullControl::schedule;
 
 #ifdef HFSM2_ENABLE_PLANS
+	using FullControl::plan;
 	using FullControl::succeed;
 	using FullControl::fail;
+#endif
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	using FullControl::previousTransitions;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -596,27 +1015,31 @@ public:
 	/// @return State pending activation/deactivation status
 	HFSM2_INLINE bool isPendingChange(const StateID stateId) const	{ return _registry.isPendingChange(stateId);	}
 
-	/// @brief Check if a state is going to be activated
-	/// @param stateId State identifier
-	/// @return State pending activation status
-	HFSM2_INLINE bool isPendingEnter (const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
-
-	/// @brief Check if a state is going to be deactivated
-	/// @param stateId State identifier
-	/// @return State pending deactivation status
-	HFSM2_INLINE bool isPendingExit	 (const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
-
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState State type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
 	HFSM2_INLINE bool isPendingChange()			{ return isPendingChange(FullControl::template stateId<TState>());	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Check if a state is going to be activated
+	/// @param stateId State identifier
+	/// @return State pending activation status
+	HFSM2_INLINE bool isPendingEnter (const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
+
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState State type
 	/// @return State pending activation status
 	template <typename TState>
 	HFSM2_INLINE bool isPendingEnter ()			{ return isPendingEnter (FullControl::template stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Check if a state is going to be deactivated
+	/// @param stateId State identifier
+	/// @return State pending deactivation status
+	HFSM2_INLINE bool isPendingExit	 (const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState State type
@@ -626,22 +1049,25 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	HFSM2_INLINE const TransitionSet& currentTransitions() const	{ return _currentTransitions;					}
+
+	/// @brief Get pending transition requests
+	/// @return Array of pending transition requests
+	HFSM2_INLINE const Transitions&	  pendingTransitions() const	{ return _pendingTransitions;					}
+
 	/// @brief Cancel pending transition requests
 	///		(can be used to substitute a transition into the current state with a different one)
 	HFSM2_INLINE void cancelPendingTransitions();
 
-	/// @brief Get pending transition requests
-	/// @return Array of pending transition requests
-	HFSM2_INLINE const Requests& pendingTransitions() const			{ return _pending;								}
-
 private:
-	HFSM2_IF_LOG_INTERFACE(using FullControl::_logger);
-
 	using FullControl::_registry;
 	using FullControl::_originId;
 
+	HFSM2_IF_LOG_INTERFACE(using FullControl::_logger);
+
+	const TransitionSet& _currentTransitions;
+	const Transitions&	 _pendingTransitions;
 	bool _cancelled = false;
-	const Requests& _pending;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

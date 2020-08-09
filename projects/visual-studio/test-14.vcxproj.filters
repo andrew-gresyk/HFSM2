@@ -10,9 +10,6 @@
     <Filter Include="hfsm\detail">
       <UniqueIdentifier>{409cd44f-e525-4937-95d7-98102445f768}</UniqueIdentifier>
     </Filter>
-    <Filter Include="hfsm\detail\debug">
-      <UniqueIdentifier>{d3014b61-cf18-4abf-afec-49032ecfeac4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="hfsm\detail\shared">
       <UniqueIdentifier>{d3de0d0e-a527-4b3d-beba-986d5b084081}</UniqueIdentifier>
     </Filter>
@@ -24,6 +21,9 @@
     </Filter>
     <Filter Include="hfsm\detail\root">
       <UniqueIdentifier>{6e05f3be-0022-4b21-8f00-73628be91819}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\features">
+      <UniqueIdentifier>{af1f22cf-6fbe-4957-8793-1a1393e63294}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -93,19 +93,16 @@
     <ClCompile Include="..\..\test\test_serialization.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_plan_payloads.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_internal_payloads.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
       <Filter>hfsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\logger_interface.hpp">
-      <Filter>hfsm\detail\debug</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\shared.hpp">
-      <Filter>hfsm\detail\debug</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\structure_report.hpp">
-      <Filter>hfsm\detail\debug</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\array.hpp">
       <Filter>hfsm\detail\shared</Filter>
@@ -182,6 +179,15 @@
     <ClInclude Include="..\..\test\tools.hpp">
       <Filter>test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\features\logger_interface.hpp">
+      <Filter>hfsm\detail\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\features\structure_report.hpp">
+      <Filter>hfsm\detail\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\features\common.hpp">
+      <Filter>hfsm\detail\features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\shared\array.inl">
@@ -241,11 +247,14 @@
     <None Include="..\..\include\hfsm2\detail\shared\bit_stream.inl">
       <Filter>hfsm\detail\shared</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\root\registry.inl">
-      <Filter>hfsm\detail\root</Filter>
-    </None>
     <None Include="..\..\test\tools.inl">
       <Filter>test</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root\registry_2.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root\registry_1.inl">
+      <Filter>hfsm\detail\root</Filter>
     </None>
   </ItemGroup>
 </Project>

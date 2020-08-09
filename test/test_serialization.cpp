@@ -74,13 +74,14 @@ struct O2_C2_S2	: FSM::State {};
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::Instance::STATE_COUNT	== 13, "");
-static_assert(FSM::Instance::COMPO_REGIONS	==  5, "");
-static_assert(FSM::Instance::COMPO_PRONGS	== 10, "");
-static_assert(FSM::Instance::ORTHO_REGIONS	==  1, "");
-static_assert(FSM::Instance::ORTHO_UNITS	==  1, "");
-static_assert(FSM::Instance::ACTIVE_BITS	==  3, "");
-static_assert(FSM::Instance::RESUMABLE_BITS	== 10, "");
+static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "STATE_COUNT");
+static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "REGION_COUNT");
+static_assert(FSM::Instance::Info::COMPO_REGIONS  ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "COMPO_PRONGS");
+static_assert(FSM::Instance::Info::ORTHO_REGIONS  ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "");
+static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "");
 
 //------------------------------------------------------------------------------
 
@@ -167,13 +168,14 @@ struct O2_C2_S2	: FSM::State {};
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::Instance::STATE_COUNT	== 13, "");
-static_assert(FSM::Instance::COMPO_REGIONS	==  5, "");
-static_assert(FSM::Instance::COMPO_PRONGS	== 10, "");
-static_assert(FSM::Instance::ORTHO_REGIONS	==  1, "");
-static_assert(FSM::Instance::ORTHO_UNITS	==  1, "");
-static_assert(FSM::Instance::ACTIVE_BITS	==  3, "");
-static_assert(FSM::Instance::RESUMABLE_BITS	== 10, "");
+static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "STATE_COUNT");
+static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "REGION_COUNT");
+static_assert(FSM::Instance::Info::COMPO_REGIONS  ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "COMPO_PRONGS");
+static_assert(FSM::Instance::Info::ORTHO_REGIONS  ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "");
+static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "");
 
 //------------------------------------------------------------------------------
 
@@ -196,13 +198,14 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-static_assert(server::FSM::Instance::STATE_COUNT	== client::FSM::Instance::STATE_COUNT	, "");
-static_assert(server::FSM::Instance::COMPO_REGIONS	== client::FSM::Instance::COMPO_REGIONS	, "");
-static_assert(server::FSM::Instance::COMPO_PRONGS	== client::FSM::Instance::COMPO_PRONGS	, "");
-static_assert(server::FSM::Instance::ORTHO_REGIONS	== client::FSM::Instance::ORTHO_REGIONS	, "");
-static_assert(server::FSM::Instance::ORTHO_UNITS	== client::FSM::Instance::ORTHO_UNITS	, "");
-static_assert(server::FSM::Instance::ACTIVE_BITS	== client::FSM::Instance::ACTIVE_BITS	, "");
-static_assert(server::FSM::Instance::RESUMABLE_BITS	== client::FSM::Instance::RESUMABLE_BITS, "");
+static_assert(server::FSM::Instance::Info::STATE_COUNT	  == client::FSM::Instance::Info::STATE_COUNT	, "STATE_COUNT");
+static_assert(server::FSM::Instance::Info::REGION_COUNT	  == client::FSM::Instance::Info::REGION_COUNT	, "REGION_COUNT");
+static_assert(server::FSM::Instance::Info::COMPO_REGIONS  == client::FSM::Instance::Info::COMPO_REGIONS	, "COMPO_REGIONS");
+static_assert(server::FSM::Instance::Info::COMPO_PRONGS	  == client::FSM::Instance::Info::COMPO_PRONGS	, "COMPO_PRONGS");
+static_assert(server::FSM::Instance::Info::ORTHO_REGIONS  == client::FSM::Instance::Info::ORTHO_REGIONS	, "ORTHO_REGIONS");
+static_assert(server::FSM::Instance::Info::ORTHO_UNITS	  == client::FSM::Instance::Info::ORTHO_UNITS	, "ORTHO_UNITS");
+static_assert(server::FSM::Instance::Info::ACTIVE_BITS	  == client::FSM::Instance::Info::ACTIVE_BITS	, "ACTIVE_BITS");
+static_assert(server::FSM::Instance::Info::RESUMABLE_BITS == client::FSM::Instance::Info::RESUMABLE_BITS, "RESUMABLE_BITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

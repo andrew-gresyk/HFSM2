@@ -1,19 +1,24 @@
-cmake_minimum_required(VERSION 2.8)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+cmake_minimum_required(VERSION 3.5)
 
 project(snippets)
-
-include_directories("${CMAKE_CURRENT_LIST_DIR}/../../external"
-					"${CMAKE_CURRENT_LIST_DIR}/../../include")
 
 file(GLOB SOURCE_FILES "*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-add_test(NAME snippets COMMAND snippets)
+target_include_directories(${PROJECT_NAME} PRIVATE
+	"${CMAKE_CURRENT_LIST_DIR}/../../external"
+	"${CMAKE_CURRENT_LIST_DIR}/../../include")
 
-add_custom_command(TARGET snippets
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+
+if(MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+else()
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror -pedantic)
+endif()
+
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+
+add_custom_command(TARGET ${PROJECT_NAME}
 				   POST_BUILD
-				   COMMAND snippets)
+				   COMMAND ${PROJECT_NAME})

@@ -14,7 +14,9 @@ namespace test_debug {
 
 struct Empty {};
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Empty>::RandomT<hfsm2::XoShiRo128Plus>>;
+using Config = hfsm2::Config::ContextT<Empty>::RandomT<hfsm2::XoShiRo128Plus>;
+
+using M = hfsm2::MachineT<Config>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -87,11 +89,12 @@ struct N_2	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 15, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS ==  5, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT   == 15, "STATE_COUNT");
+static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
+static_assert(FSM::Instance::Info::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
+static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -163,7 +166,7 @@ const Types all = {
 TEST_CASE("FSM.Debug", "[machine]") {
 	Empty context;
 	hfsm2::XoShiRo128Plus generator{0};
-	LoggerT<hfsm2::FEATURE_TAG, float, Empty> logger;
+	LoggerT<Config> logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

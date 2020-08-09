@@ -1,0 +1,174 @@
+namespace hfsm2 {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isActive(const StateID stateId) const {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
+		if (Parent parent = stateParents[stateId]) {
+			HFSM2_ASSERT(parent.forkId > 0);
+
+			return parent.prong == compoActive[parent.forkId - 1];
+		} else
+			return true;
+	}
+
+	return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isResumable(const StateID stateId) const {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM2_ASSERT(parent.forkId > 0);
+
+			return parent.prong == compoResumable[parent.forkId - 1];
+		}
+
+	return false;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isPendingChange(const StateID stateId) const {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM2_ASSERT(parent.forkId > 0);
+
+			return compoRequested[parent.forkId - 1] !=
+				   compoActive	 [parent.forkId - 1];
+		}
+
+	return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isPendingEnter(const StateID stateId) const {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM2_ASSERT(parent.forkId > 0);
+
+			return parent.prong != compoActive	 [parent.forkId - 1] &&
+				   parent.prong == compoRequested[parent.forkId - 1];
+		}
+
+	return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isPendingExit(const StateID stateId) const {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
+		if (Parent parent = stateParents[stateId]) {
+			HFSM2_ASSERT(parent.forkId > 0);
+
+			return parent.prong == compoActive	 [parent.forkId - 1] &&
+				   parent.prong != compoRequested[parent.forkId - 1];
+		}
+
+	return false;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+const Parent&
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::forkParent(const ForkID forkId) const {
+	HFSM2_ASSERT(forkId > 0);
+
+	return compoParents[forkId - 1];
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::requestImmediate(const Transition& request) {
+	// record request
+	// promote it to all children
+
+	if (request.destination == 0)
+		return false;
+	else if (HFSM2_CHECKED(request.destination < STATE_COUNT)) {
+		Parent parent = stateParents[request.destination];
+
+		if (HFSM2_CHECKED(parent)) {
+			HFSM2_ASSERT(parent.forkId > 0);
+
+			compoRequested[parent.forkId - 1] = parent.prong;
+
+			for (parent = forkParent(parent.forkId);
+				 parent;
+				 parent = forkParent(parent.forkId))
+			{
+				HFSM2_ASSERT(parent.forkId > 0);
+				compoRemains.set(parent.forkId - 1);
+
+				if (compoActive	  [parent.forkId - 1] != parent.prong)
+					compoRequested[parent.forkId - 1]  = parent.prong;
+				else {
+					parent = forkParent(parent.forkId);
+					break;
+				}
+			}
+
+			for (; parent; parent = forkParent(parent.forkId)) {
+				HFSM2_ASSERT(parent.forkId > 0);
+				compoRemains.set(parent.forkId - 1);
+			}
+		}
+	}
+
+	return true;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+void
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::requestScheduled(const StateID stateId) {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
+		const Parent parent = stateParents[stateId];
+
+		HFSM2_ASSERT(parent.forkId > 0);
+		compoResumable[parent.forkId - 1] = parent.prong;
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+void
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::clearRequests() {
+	compoRequested.clear();
+	orthoRequested.clear();
+	compoRemains  .clear();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+void
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::clear() {
+	clearRequests();
+
+	compoActive	  .clear();
+	compoResumable.clear();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}

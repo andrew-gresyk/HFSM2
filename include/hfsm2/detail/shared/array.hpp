@@ -66,16 +66,23 @@ public:
 public:
 	HFSM2_INLINE void clear()														{ _count = 0;		}
 
+	// TODO: replace with 'emplace<>()'?
+	template <typename TValue>
+	HFSM2_INLINE LongIndex append(const TValue& value);
+
 	template <typename TValue>
 	HFSM2_INLINE LongIndex append(TValue&& value);
 
 	template <typename N>
-	HFSM2_INLINE		  Item& operator[] (const N i);
+	HFSM2_INLINE	   Item& operator[] (const N i);
 
 	template <typename N>
 	HFSM2_INLINE const Item& operator[] (const N i) const;
 
 	HFSM2_INLINE LongIndex count() const											{ return _count;	}
+
+	template <LongIndex N>
+	Array& operator += (const Array<T, N>& other);
 
 	HFSM2_INLINE Iterator<      Array>  begin()			{ return Iterator<		Array>(*this,     0);	}
 	HFSM2_INLINE Iterator<const Array>  begin() const	{ return Iterator<const Array>(*this,     0);	}

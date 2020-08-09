@@ -188,14 +188,14 @@ O_<TN, TA, TH, TS...>::deepDestruct(PlanControl& control) {
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
-										 const Request::Type request)
+										 const TransitionType requestType)
 {
 	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
 
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 	HFSM2_ASSERT(!!requested);
 
-	_subStates.wideForwardActive(control, request, requested);
+	_subStates.wideForwardActive(control, requestType, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -203,14 +203,14 @@ O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
-										  const Request::Type request)
+										  const TransitionType requestType)
 {
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 
 	if (requested)
-		_subStates.wideForwardRequest(control, request, requested);
+		_subStates.wideForwardRequest(control, requestType, requested);
 	else
-		deepRequest					 (control, request);
+		deepRequest					 (control, requestType);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -218,32 +218,32 @@ O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepRequest(Control& control,
-								   const Request::Type request)
+								   const TransitionType request)
 {
 	switch (request) {
-	case Request::REMAIN:
+	case TransitionType::REMAIN:
 		deepRequestRemain (control._registry);
 		break;
 
-	case Request::CHANGE:
+	case TransitionType::CHANGE:
 		deepRequestChange (control);
 		break;
 
-	case Request::RESTART:
+	case TransitionType::RESTART:
 		deepRequestRestart(control._registry);
 		break;
 
-	case Request::RESUME:
+	case TransitionType::RESUME:
 		deepRequestResume (control._registry);
 		break;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	case Request::UTILIZE:
+	case TransitionType::UTILIZE:
 		deepRequestUtilize(control);
 		break;
 
-	case Request::RANDOMIZE:
+	case TransitionType::RANDOMIZE:
 		deepRequestRandomize(control);
 		break;
 

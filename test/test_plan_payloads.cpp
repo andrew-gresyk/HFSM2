@@ -3,11 +3,18 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
-namespace test_plans {
+namespace test_payloads {
 
 //------------------------------------------------------------------------------
 
-using M = hfsm2::Machine;
+struct Payload {
+	int i0;
+	int i1;
+};
+
+using Config = hfsm2::Config::PayloadT<Payload>;
+
+using M = hfsm2::MachineT<Config>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -89,8 +96,8 @@ struct Planned
 		auto plan = control.plan<Planned>();
 		REQUIRE(!plan); //-V521
 
-		REQUIRE(plan.change<Step1_BT, Hybrid>());
-		REQUIRE(plan.restart<Hybrid, Terminal>());
+		REQUIRE(plan.changeWith<Step1_BT, Hybrid>(Payload{1, 2}));
+		REQUIRE(plan.restartWith<Hybrid, Terminal>(Payload{2, 3}));
 	}
 
 	void planFailed(FullControl& control) {
@@ -107,7 +114,7 @@ struct Step1_BT
 		Plan plan = control.plan();
 		REQUIRE(!plan); //-V521
 
-		REQUIRE(plan.resume<Step1_2, Step1_3>());
+		REQUIRE(plan.resumeWith<Step1_2, Step1_3>(Payload{3, 4}));
 	}
 };
 
@@ -144,8 +151,8 @@ struct Hybrid
 		auto plan = control.plan();
 		REQUIRE(!plan); //-V521
 
-		REQUIRE(plan.utilize<Step2L_1, Step2L_2>());
-		REQUIRE(plan.randomize<Step2R_1, Step2R_2>());
+		REQUIRE(plan.utilizeWith<Step2L_1, Step2L_2>(Payload{4, 5}));
+		REQUIRE(plan.randomizeWith<Step2R_1, Step2R_2>(Payload{5, 6}));
 	}
 
 	void planFailed(FullControl& control) {
@@ -265,8 +272,8 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Plans", "[machine]") {
-	Logger logger;
+TEST_CASE("FSM.Plan payloads", "[machine]") {
+	LoggerT<Config> logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -1,20 +1,8 @@
 //------------------------------------------------------------------------------
 
-#ifdef __clang__
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
-#endif
-
-#if defined(__GNUC__) || defined(__GNUG__)
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic" // error : extra ';'
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
-
 #define HFSM2_INLINE													//inline
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 #if INTPTR_MAX == INT64_MAX
 	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p64
@@ -62,7 +50,7 @@
 	#define HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 #endif
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef HFSM2_ENABLE_ALL
 	#define HFSM2_ENABLE_UTILITY_THEORY
@@ -72,7 +60,7 @@
 	#define HFSM2_ENABLE_STRUCTURE_REPORT
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 	#define HFSM2_IF_UTILITY_THEORY(...)							 __VA_ARGS__
@@ -82,7 +70,7 @@
 	#define HFSM2_UTILITY_THEORY_MASK									(0 << 0)
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_PLANS
 	#define HFSM2_IF_PLANS(...)										 __VA_ARGS__
@@ -92,7 +80,7 @@
 	#define HFSM2_PLANS_MASK											(0 << 1)
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
 	#define HFSM2_IF_SERIALIZATION(...)								 __VA_ARGS__
@@ -102,7 +90,7 @@
 	#define HFSM2_SERIALIZATION_MASK									(0 << 2)
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	#define HFSM2_IF_TRANSITION_HISTORY(...)						 __VA_ARGS__
@@ -112,7 +100,7 @@
 	#define HFSM2_TRANSITION_HISTORY_MASK								(0 << 3)
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	#define HFSM2_IF_STRUCTURE_REPORT(...)							 __VA_ARGS__
@@ -122,11 +110,13 @@
 	#define HFSM2_STRUCTURE_REPORT_MASK									(0 << 4)
 #endif
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 	#define HFSM2_ENABLE_LOG_INTERFACE
 #endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
 
@@ -186,7 +176,7 @@
 
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 
@@ -206,17 +196,17 @@
 
 #endif
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 namespace hfsm2 {
 
 using FeatureTag = uint8_t;
 
-constexpr FeatureTag FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK	 |
-								   HFSM2_PLANS_MASK			     |
-								   HFSM2_SERIALIZATION_MASK	     |
-								   HFSM2_TRANSITION_HISTORY_MASK |
-								   HFSM2_STRUCTURE_REPORT_MASK   |
+constexpr FeatureTag FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK					|
+								   HFSM2_PLANS_MASK								|
+								   HFSM2_SERIALIZATION_MASK						|
+								   HFSM2_TRANSITION_HISTORY_MASK				|
+								   HFSM2_STRUCTURE_REPORT_MASK					|
 								   HFSM2_LOG_INTERFACE_MASK;
 
 }
@@ -231,3 +221,15 @@ constexpr FeatureTag FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK	 |
 #undef HFSM2_LOG_INTERFACE_MASK
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
+#endif
+
+#if defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic" // error : extra ';'
+#endif
+
+//------------------------------------------------------------------------------

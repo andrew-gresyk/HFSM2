@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="hfsm" Database="" Version="10.0.0">
   <VirtualDirectory Name="examples">
-    <Project Name="calculator-gcc-tdm" Path="calculator-gcc-tdm/calculator-gcc-tdm.project" Active="Yes"/>
-    <Project Name="snippets-gcc-tdm" Path="snippets-gcc-tdm/snippets-gcc-tdm.project"/>
+    <Project Name="snippets-gcc-tdm" Path="snippets-gcc-tdm/snippets-gcc-tdm.project" Active="No"/>
+    <Project Name="advanced_event_handling-gcc-tdm" Path="advanced_event_handling-gcc-tdm/advanced_event_handling-gcc-tdm.project"/>
   </VirtualDirectory>
   <VirtualDirectory Name="tests">
     <Project Name="test-gcc-tdm" Path="test-gcc-tdm/test-gcc-tdm.project" Active="Yes"/>
@@ -10,15 +10,15 @@
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
-      <Project Name="calculator-gcc-tdm" ConfigName="Debug"/>
       <Project Name="snippets-gcc-tdm" ConfigName="Debug"/>
       <Project Name="test-gcc-tdm" ConfigName="Debug"/>
+      <Project Name="advanced_event_handling-gcc-tdm" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="no">
+    <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
-      <Project Name="calculator-gcc-tdm" ConfigName="Release"/>
       <Project Name="snippets-gcc-tdm" ConfigName="Release"/>
       <Project Name="test-gcc-tdm" ConfigName="Release"/>
+      <Project Name="advanced_event_handling-gcc-tdm" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

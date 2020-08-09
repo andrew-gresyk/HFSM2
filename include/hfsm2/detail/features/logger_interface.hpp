@@ -4,9 +4,9 @@ namespace hfsm2 {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TContext = EmptyContext
-		  HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)
-		  , FeatureTag NFeatureTag = FEATURE_TAG>
+template <FeatureTag NFeatureTag = FEATURE_TAG
+		, typename TContext = EmptyContext
+		HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)>
 struct LoggerInterfaceT {
 	using Context		 = TContext;
 
@@ -74,9 +74,9 @@ struct LoggerInterfaceT {
 
 #else
 
-template <typename TContext = EmptyContext
-		  HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)
-		  , FeatureTag NFeatureTag = FEATURE_TAG>
+template <FeatureTag NFeatureTag = FEATURE_TAG
+		, typename TContext = EmptyContext
+		HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)>
 using LoggerInterfaceT = void;
 
 #endif
