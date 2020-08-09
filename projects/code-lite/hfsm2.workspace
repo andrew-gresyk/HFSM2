@@ -2,7 +2,6 @@
 <CodeLite_Workspace Name="hfsm" Database="" Version="10.0.0">
   <VirtualDirectory Name="examples">
     <Project Name="snippets-gcc-tdm" Path="snippets-gcc-tdm/snippets-gcc-tdm.project" Active="No"/>
-    <Project Name="calculator-gcc-tdm" Path="calculator-gcc-tdm/calculator-gcc-tdm.project"/>
   </VirtualDirectory>
   <VirtualDirectory Name="tests">
     <Project Name="test-gcc-tdm" Path="test-gcc-tdm/test-gcc-tdm.project" Active="Yes"/>
@@ -12,13 +11,11 @@
       <Environment/>
       <Project Name="snippets-gcc-tdm" ConfigName="Debug"/>
       <Project Name="test-gcc-tdm" ConfigName="Debug"/>
-      <Project Name="calculator-gcc-tdm" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
       <Project Name="snippets-gcc-tdm" ConfigName="Release"/>
       <Project Name="test-gcc-tdm" ConfigName="Release"/>
-      <Project Name="calculator-gcc-tdm" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

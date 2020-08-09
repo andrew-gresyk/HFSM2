@@ -5,6 +5,8 @@
 #include <hfsm2/machine.hpp>
 
 #include <catch2/catch.hpp>
+#undef assert
+#define assert(x) REQUIRE(x)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,19 +57,19 @@ TEST_CASE("Wiki.Plans.Traffic Light", "[Wiki]") {
 
     FSM::Instance fsm;
 
-    REQUIRE(fsm.isActive<Red>());
+    assert(fsm.isActive<Red>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<Yellow>());
+    assert(fsm.isActive<Yellow>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<Green>());
+    assert(fsm.isActive<Green>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<Yellow>());
+    assert(fsm.isActive<Yellow>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<Red>());
+    assert(fsm.isActive<Red>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,13 +185,13 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
             // parametrized version of PlanControl::plan() allows access to plans
             // hosted by any region
             auto plan = control.plan<PlanOwner>();
-            REQUIRE(plan);
+            assert(plan);
 
             // inspect the plan
             auto taskIterator = plan.first();
-            REQUIRE(taskIterator);
-            REQUIRE(taskIterator->origin == control.stateId<ReplanTask>());
-            REQUIRE(taskIterator->destination == control.stateId<End>());
+            assert(taskIterator);
+            assert(taskIterator->origin == control.stateId<ReplanTask>());
+            assert(taskIterator->destination == control.stateId<End>());
 
             // loop over plan task sequence
             for (auto it = plan.first(); it; ++it) {
@@ -199,7 +201,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
             }
 
             // when the plan is empty it is reported as 'invalid'
-            REQUIRE(!plan);
+            assert(!plan);
 
             // plan can be explicitly cleared too
             plan.clear();
@@ -261,35 +263,35 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
 
     FSM::Instance fsm;
 
-    REQUIRE(fsm.isActive<PlanOwner>());
-    REQUIRE(fsm.isActive<StateTask>());
+    assert(fsm.isActive<PlanOwner>());
+    assert(fsm.isActive<StateTask>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<CompositeTask>());
-    REQUIRE(fsm.isActive<CT_Initial>());
+    assert(fsm.isActive<CompositeTask>());
+    assert(fsm.isActive<CT_Initial>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<CompositeTask>());
-    REQUIRE(fsm.isActive<CT_Following>());
+    assert(fsm.isActive<CompositeTask>());
+    assert(fsm.isActive<CT_Following>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<OrthogonalTask>());
-    REQUIRE(fsm.isActive<OT_1>());
-    REQUIRE(fsm.isActive<OT_2>());
+    assert(fsm.isActive<OrthogonalTask>());
+    assert(fsm.isActive<OT_1>());
+    assert(fsm.isActive<OT_2>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<ReplanTask>());
+    assert(fsm.isActive<ReplanTask>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<SubPlanOwner>());
-    REQUIRE(fsm.isActive<SubTask_2>());
+    assert(fsm.isActive<SubPlanOwner>());
+    assert(fsm.isActive<SubTask_2>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<SubPlanOwner>());
-    REQUIRE(fsm.isActive<SubTask_1>());
+    assert(fsm.isActive<SubPlanOwner>());
+    assert(fsm.isActive<SubTask_1>());
 
     fsm.update();
-    REQUIRE(fsm.isActive<End>());
+    assert(fsm.isActive<End>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

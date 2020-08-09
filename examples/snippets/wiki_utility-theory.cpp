@@ -7,6 +7,8 @@
 #include <hfsm2/machine.hpp>
 
 #include <catch2/catch.hpp>
+#undef assert
+#define assert(x) REQUIRE(x)
 
 //#include <vector> // already included in catch.hpp
 
@@ -72,15 +74,15 @@ struct Logger
         const auto count = std::max(history.size(), reference.size());
 
         for (unsigned i = 0; i < count; ++i) {
-            REQUIRE(i < history.size()); //-V521
-            REQUIRE(i < reference.size()); //-V521
+            assert(i < history.size()); //-V521
+            assert(i < reference.size()); //-V521
 
             if (i < history.size() &&
                 i < reference.size())
             {
-                REQUIRE(history[i].state == reference[i].state); //-V521
-                REQUIRE(history[i].type  == reference[i].type); //-V521
-                REQUIRE(history[i].prong == reference[i].prong); //-V521
+                assert(history[i].state == reference[i].state); //-V521
+                assert(history[i].type  == reference[i].type); //-V521
+                assert(history[i].prong == reference[i].prong); //-V521
             }
         }
 
@@ -175,20 +177,20 @@ struct O_1          : FSM::State {};
 TEST_CASE("Wiki.Utility Theory", "[Wiki]") {
     Logger logger;
     FSM::Instance fsm{&logger};
-    REQUIRE(fsm.isActive<Origin>());        // Initial activation
+    assert(fsm.isActive<Origin>());        // Initial activation
 
     fsm.changeTo<R_Activated>();
     fsm.update();
-    REQUIRE(fsm.isActive<R_Activated>());   // Prepare resumable state
+    assert(fsm.isActive<R_Activated>());   // Prepare resumable state
 
     fsm.changeTo<Origin>();
     fsm.update();
-    REQUIRE(fsm.isActive<Origin>());        // Ready for the main test
+    assert(fsm.isActive<Origin>());        // Ready for the main test
 
     fsm.changeTo<Destination>();
     fsm.update();
-    REQUIRE(fsm.isActive<Destination>());
-    REQUIRE(fsm.isActive<S>());
+    assert(fsm.isActive<Destination>());
+    assert(fsm.isActive<S>());
 
     const Events reference = {
         { FSM::stateId<S>(),            Event::UTILITY },
