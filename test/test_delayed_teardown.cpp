@@ -1,4 +1,5 @@
 #define HFSM2_ENABLE_PLANS
+#define HFSM2_ENABLE_TRANSITION_HISTORY
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
@@ -62,11 +63,36 @@ struct Work
 {
 	void exitGuard(GuardControl& control) {
 		if (!control.isPendingEnter<Teardown>()) {
+			REQUIRE(control.currentTransitions().count() == 0);
+
+			const auto& pendingTransitions = control.pendingTransitions();
+			REQUIRE(pendingTransitions.count() == 1);
+			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2   >(),
+														   hfsm2::TransitionType::CHANGE});
+
+			const auto& requests = control.requests();
+			REQUIRE(requests.count() == 0);
+
 			for (const auto& transition : control.pendingTransitions())
-				REQUIRE(control.plan().change<Teardown>(transition.stateId));
+				REQUIRE(control.plan().change<Teardown>(transition.destination));
 
 			control.cancelPendingTransitions();
 			control.changeTo<Teardown>();
+
+			REQUIRE(requests.count() == 1);
+			REQUIRE(requests[0] == M::Transition{FSM::stateId<Work    >(),
+												 FSM::stateId<Teardown>(),
+												 hfsm2::TransitionType::CHANGE});
+		} else {
+			REQUIRE(control.currentTransitions().count() == 0);
+
+			const auto& pendingTransitions = control.pendingTransitions();
+			REQUIRE(pendingTransitions.count() == 1);
+			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Work    >(),
+														   FSM::stateId<Teardown>(),
+														   hfsm2::TransitionType::CHANGE});
+
+			REQUIRE(control.requests().count() == 0);
 		}
 	}
 };
@@ -85,11 +111,12 @@ struct Step2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 8, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS == 2, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  == 5, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS == 1, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   == 1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT   == 8, "STATE_COUNT");
+static_assert(FSM::Instance::Info::REGION_COUNT  == 3, "REGION_COUNT");
+static_assert(FSM::Instance::Info::COMPO_REGIONS == 2, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_PRONGS  == 5, "COMPO_PRONGS");
+static_assert(FSM::Instance::Info::ORTHO_REGIONS == 1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_UNITS   == 1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -142,6 +169,8 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 			});
 
 			assertResumable(machine, all, {});
+
+			REQUIRE(machine.previousTransitions().count() == 0);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -155,7 +184,7 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 				{ FSM::stateId<Step1_2>(),	Event::UPDATE },
 				{ FSM::stateId<Setup  >(),	Event::UPDATE },
 
-				{ FSM::stateId<Setup  >(),	Event::CHANGE,		FSM::stateId<Work>() },
+				{ FSM::stateId<Setup  >(),	Event::CHANGE,		FSM::stateId<Work   >() },
 
 				{ FSM::stateId<Setup  >(),	Event::EXIT_GUARD },
 				{ FSM::stateId<Work   >(),	Event::ENTRY_GUARD },
@@ -179,6 +208,12 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 			assertResumable(machine, all, {
 				FSM::stateId<Setup>()
 			});
+
+			const auto& previousTransitions = machine.previousTransitions();
+			REQUIRE(previousTransitions.count() == 1);
+			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<Setup  >(),
+															FSM::stateId<Work   >(),
+															hfsm2::TransitionType::CHANGE});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -226,6 +261,12 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 			assertResumable(machine, all, {
 				FSM::stateId<Work>()
 			});
+
+			const auto& previousTransitions = machine.previousTransitions();
+			REQUIRE(previousTransitions.count() == 1);
+			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<Work    >(),
+															FSM::stateId<Teardown>(),
+															hfsm2::TransitionType::CHANGE});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -274,6 +315,12 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 				FSM::stateId<Step1_2 >(),
 				FSM::stateId<Teardown>()
 			});
+
+			const auto& previousTransitions = machine.previousTransitions();
+			REQUIRE(previousTransitions.count() == 1);
+			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<Step1_2 >(),
+															FSM::stateId<Step2   >(),
+															hfsm2::TransitionType::CHANGE});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

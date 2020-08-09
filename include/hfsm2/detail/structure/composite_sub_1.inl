@@ -208,15 +208,15 @@ CS_<TN, TA, SG, NI, TS...>::wideDestruct(PlanControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
 CS_<TN, TA, SG, NI, TS...>::wideForwardActive(Control& control,
-											  const Request::Type request,
+											  const TransitionType requestType,
 											  const ShortIndex prong)
 {
 	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
-		lHalf.wideForwardActive(control, request, prong);
+		lHalf.wideForwardActive(control, requestType, prong);
 	else
-		rHalf.wideForwardActive(control, request, prong);
+		rHalf.wideForwardActive(control, requestType, prong);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -224,15 +224,15 @@ CS_<TN, TA, SG, NI, TS...>::wideForwardActive(Control& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
 void
 CS_<TN, TA, SG, NI, TS...>::wideForwardRequest(Control& control,
-											   const Request::Type request,
+											   const TransitionType requestType,
 											   const ShortIndex prong)
 {
 	HFSM2_ASSERT(prong != INVALID_SHORT_INDEX);
 
 	if (prong < R_PRONG)
-		lHalf.wideForwardRequest(control, request, prong);
+		lHalf.wideForwardRequest(control, requestType, prong);
 	else
-		rHalf.wideForwardRequest(control, request, prong);
+		rHalf.wideForwardRequest(control, requestType, prong);
 }
 
 //------------------------------------------------------------------------------

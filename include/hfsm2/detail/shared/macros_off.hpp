@@ -1,3 +1,13 @@
+//------------------------------------------------------------------------------
+
+#if defined(__GNUC__) || defined(__GNUG__)
+	#pragma GCC diagnostic pop
+#endif
+
+#ifdef __clang__
+	#pragma clang diagnostic pop
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #undef HFSM2_INLINE
@@ -32,13 +42,3 @@
 #undef HFSM2_LOG_STATE_METHOD
 
 ////////////////////////////////////////////////////////////////////////////////
-
-#if defined(__GNUC__) || defined(__GNUG__)
-	#pragma GCC diagnostic pop
-#endif
-
-#ifdef __clang__
-	#pragma clang diagnostic pop
-#endif
-
-//------------------------------------------------------------------------------

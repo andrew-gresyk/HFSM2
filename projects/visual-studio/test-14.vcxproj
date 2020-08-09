@@ -34,10 +34,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\test\test_guards.cpp" />
+    <ClCompile Include="..\..\test\test_internal_payloads.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_orthogonal_root.cpp" />
     <ClCompile Include="..\..\test\test_ortho_units.cpp" />
     <ClCompile Include="..\..\test\test_plans.cpp" />
+    <ClCompile Include="..\..\test\test_plan_payloads.cpp" />
     <ClCompile Include="..\..\test\test_randomize.cpp" />
     <ClCompile Include="..\..\test\test_replication.cpp" />
     <ClCompile Include="..\..\test\test_resume.cpp" />
@@ -48,9 +50,9 @@
     <ClCompile Include="..\..\test\test_utility_regions.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\logger_interface.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\shared.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\debug\structure_report.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\features\common.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\features\logger_interface.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\features\structure_report.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\control.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\plan.hpp" />
@@ -83,7 +85,8 @@
     <None Include="..\..\include\hfsm2\detail\root\control.inl" />
     <None Include="..\..\include\hfsm2\detail\root\plan.inl" />
     <None Include="..\..\include\hfsm2\detail\root\plan_data.inl" />
-    <None Include="..\..\include\hfsm2\detail\root\registry.inl" />
+    <None Include="..\..\include\hfsm2\detail\root\registry_1.inl" />
+    <None Include="..\..\include\hfsm2\detail\root\registry_2.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\bit_stream.inl" />

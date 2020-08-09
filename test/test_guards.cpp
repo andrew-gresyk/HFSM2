@@ -92,6 +92,32 @@ struct Step1
 	: FSM::StateT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
+		REQUIRE(control.currentTransitions().count() == 0);
+
+		const auto& pendingTransitions = control.pendingTransitions();
+
+		switch (exitGuardCount()) {
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+			REQUIRE(pendingTransitions.count() == 1);
+			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
+														   hfsm2::TransitionType::CHANGE});
+			break;
+
+		case 7:
+			REQUIRE(pendingTransitions.count() == 1);
+			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step3  >(),
+														   hfsm2::TransitionType::CHANGE});
+			break;
+
+		default:
+			HFSM2_BREAK();
+		}
+
 		if (exitGuardCount() == 1)
 			control.cancelPendingTransitions();
 	}
@@ -103,6 +129,31 @@ struct Step1_1
 	: FSM::StateT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
+		REQUIRE(control.currentTransitions().count() == 0);
+
+		const auto& pendingTransitions = control.pendingTransitions();
+
+		switch (exitGuardCount()) {
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+			REQUIRE(pendingTransitions.count() == 1);
+			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
+														   hfsm2::TransitionType::CHANGE});
+			break;
+
+		case 6:
+			REQUIRE(pendingTransitions.count() == 1);
+			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step3  >(),
+														   hfsm2::TransitionType::CHANGE});
+			break;
+
+		default:
+			HFSM2_BREAK();
+		}
+
 		if (exitGuardCount() == 1)
 			control.cancelPendingTransitions();
 	}
@@ -114,6 +165,31 @@ struct Step1_2
 	: FSM::StateT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
+		REQUIRE(control.currentTransitions().count() == 0);
+
+		const auto& pendingTransitions = control.pendingTransitions();
+
+		switch (exitGuardCount()) {
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+			REQUIRE(pendingTransitions.count() == 1);
+			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
+														   hfsm2::TransitionType::CHANGE});
+			break;
+
+		case 6:
+			REQUIRE(pendingTransitions.count() == 1);
+			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step3  >(),
+														   hfsm2::TransitionType::CHANGE});
+			break;
+
+		default:
+			HFSM2_BREAK();
+		}
+
 		if (exitGuardCount() == 2)
 			control.cancelPendingTransitions();
 	}
@@ -125,6 +201,13 @@ struct Step2
 	: FSM::StateT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
+		REQUIRE(control.currentTransitions().count() == 0);
+
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE(pendingTransitions.count() == 1);
+		REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
+													   hfsm2::TransitionType::CHANGE});
+
 		if (entryGuardCount() == 1)
 			control.cancelPendingTransitions();
 	}
@@ -136,6 +219,13 @@ struct Step2_1
 	: FSM::StateT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
+		REQUIRE(control.currentTransitions().count() == 0);
+
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE(pendingTransitions.count() == 1);
+		REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
+													   hfsm2::TransitionType::CHANGE});
+
 		if (entryGuardCount() == 1)
 			control.cancelPendingTransitions();
 	}
@@ -147,6 +237,13 @@ struct Step2_2
 	: FSM::StateT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
+		REQUIRE(control.currentTransitions().count() == 0);
+
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE(pendingTransitions.count() == 1);
+		REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
+													   hfsm2::TransitionType::CHANGE});
+
 		if (entryGuardCount() == 2)
 			control.cancelPendingTransitions();
 	}
@@ -158,11 +255,12 @@ struct Step3 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 8, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS == 1, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  == 3, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS == 2, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   == 2, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT   == 8, "STATE_COUNT");
+static_assert(FSM::Instance::Info::REGION_COUNT  == 3, "REGION_COUNT");
+static_assert(FSM::Instance::Info::COMPO_REGIONS == 1, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_PRONGS  == 3, "COMPO_PRONGS");
+static_assert(FSM::Instance::Info::ORTHO_REGIONS == 2, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_UNITS   == 2, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -94,26 +94,22 @@ using Events = std::vector<Event>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <hfsm2::FeatureTag NFeatureTag = hfsm2::FEATURE_TAG
-		  IF_UTILITY_THEORY(, typename TUtilty = float)
-		  , typename TContext = hfsm2::EmptyContext>
+template <typename TConfig>
 struct LoggerT
-	: hfsm2::LoggerInterfaceT<TContext IF_UTILITY_THEORY(, TUtilty), NFeatureTag>
+	:								 TConfig::LoggerInterface
 {
-	static constexpr hfsm2::FeatureTag FEATURE_TAG = NFeatureTag;
+	using Interface		  = typename TConfig::LoggerInterface;
 
-	using Context		  = TContext;
+	using typename Interface::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using Utilty		  = TUtilty;
+	using typename Interface::Utilty;
 #endif
 
-	using Interface		  = hfsm2::LoggerInterfaceT<Context IF_UTILITY_THEORY(, Utilty), FEATURE_TAG>;
-
-	using Method		  = typename Interface::Method;
-	using StateID		  = typename Interface::StateID;
-	using RegionID		  = typename Interface::RegionID;
-	using TransitionType  = typename Interface::TransitionType;
+	using typename Interface::Method;
+	using typename Interface::StateID;
+	using typename Interface::RegionID;
+	using typename Interface::TransitionType;
 
 #ifdef HFSM2_ENABLE_PLANS
 	using StatusEvent	  = typename Interface::StatusEvent;
@@ -162,7 +158,7 @@ struct LoggerT
 
 	Events history;
 };
-using Logger = LoggerT<>;
+using Logger = LoggerT<::hfsm2::Config>;
 
 //------------------------------------------------------------------------------
 

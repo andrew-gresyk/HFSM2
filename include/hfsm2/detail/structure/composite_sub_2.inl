@@ -150,12 +150,12 @@ CS_<TN, TA, SG, NI, T>::wideDestruct(PlanControl& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideForwardActive(Control& control,
-										  const Request::Type request,
+										  const TransitionType requestType,
 										  const ShortIndex HFSM2_IF_ASSERT(prong))
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	state.deepForwardActive(control, request);
+	state.deepForwardActive(control, requestType);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -163,12 +163,12 @@ CS_<TN, TA, SG, NI, T>::wideForwardActive(Control& control,
 template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
 void
 CS_<TN, TA, SG, NI, T>::wideForwardRequest(Control& control,
-										   const Request::Type request,
+										   const TransitionType requestType,
 										   const ShortIndex HFSM2_IF_ASSERT(prong))
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	state.deepForwardRequest(control, request);
+	state.deepForwardRequest(control, requestType);
 }
 
 //------------------------------------------------------------------------------

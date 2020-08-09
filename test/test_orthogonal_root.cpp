@@ -5,7 +5,9 @@ namespace test_orthogonal_root {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<float>>;
+using Config = hfsm2::Config::ContextT<float>;
+
+using M = hfsm2::MachineT<Config>;
 
 using Action = bool;
 
@@ -70,11 +72,12 @@ struct O2_C2_S2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 13, "");
-static_assert(FSM::Instance::COMPO_REGIONS ==  3, "");
-static_assert(FSM::Instance::COMPO_PRONGS  ==  6, "");
-static_assert(FSM::Instance::ORTHO_REGIONS ==  3, "");
-static_assert(FSM::Instance::ORTHO_UNITS   ==  3, "");
+static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
+static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
+static_assert(FSM::Instance::Info::COMPO_REGIONS ==  3, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_PRONGS  ==  6, "COMPO_PRONGS");
+static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  3, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  3, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -96,7 +99,7 @@ const Types all = {
 
 TEST_CASE("FSM.Orthogonal Root", "[machine]") {
 	float _ = 0.0f;
-	LoggerT<hfsm2::FEATURE_TAG, float> logger;
+	LoggerT<Config> logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

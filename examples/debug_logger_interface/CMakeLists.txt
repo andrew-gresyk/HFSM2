@@ -1,9 +1,17 @@
-cmake_minimum_required(VERSION 2.8)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+cmake_minimum_required(VERSION 3.5)
 
 project(debug_logger_interface)
-include_directories("${CMAKE_CURRENT_LIST_DIR}/../../include")
-add_executable(${PROJECT_NAME} main.cpp)
+
+file(GLOB SOURCE_FILES "*.cpp")
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+	"${CMAKE_CURRENT_LIST_DIR}/../../include")
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+
+if(MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+else()
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror -pedantic)
+endif()

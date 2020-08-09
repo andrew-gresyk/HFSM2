@@ -109,8 +109,8 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepForwardActive	  (Control&, const Request::Type)												{}
-	HFSM2_INLINE void	 deepForwardRequest	  (Control&, const Request::Type)												{}
+	HFSM2_INLINE void	 deepForwardActive	  (Control&, const TransitionType)												{}
+	HFSM2_INLINE void	 deepForwardRequest	  (Control&, const TransitionType)												{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="calculator-gcc-tdm" Version="10.0.0" InternalType="Console">
-  <VirtualDirectory Name="source">
-    <File Name="../../../examples/calculator/main.cpp"/>
-  </VirtualDirectory>
+<CodeLite_Project Name="calculator-gcc-tdm" Version="11000" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="source">
+    <File Name="../../../examples/calculator/main.cpp"/>
+  </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <Dependencies Name="Debug"/>

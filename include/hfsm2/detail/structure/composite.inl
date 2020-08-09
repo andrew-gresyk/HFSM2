@@ -169,7 +169,7 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) {
 		const Status subStatus = _subStates.wideUpdate(control, active);
 
 		if (subStatus.outerTransition)
-			return Status{Status::NONE, true};
+			return Status{Status::Result::NONE, true};
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, STATE_COUNT};
 
@@ -286,7 +286,7 @@ C_<TN, TA, SG, TH, TS...>::deepDestruct(PlanControl& control) {
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
-											 const Request::Type request)
+											 const TransitionType requestType)
 {
 	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
 
@@ -295,9 +295,9 @@ C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
 	if (requested == INVALID_SHORT_INDEX) {
 		const ShortIndex active = compoActive(control);
 
-		_subStates.wideForwardActive (control, request, active);
+		_subStates.wideForwardActive (control, requestType, active);
 	} else
-		_subStates.wideForwardRequest(control, request, requested);
+		_subStates.wideForwardRequest(control, requestType, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -305,14 +305,14 @@ C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepForwardRequest(Control& control,
-											  const Request::Type request)
+											  const TransitionType requestType)
 {
 	const ShortIndex requested = compoRequested(control);
 
 	if (requested == INVALID_SHORT_INDEX)
-		deepRequest					 (control, request);
+		deepRequest					 (control, requestType);
 	else
-		_subStates.wideForwardRequest(control, request, requested);
+		_subStates.wideForwardRequest(control, requestType, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -320,32 +320,32 @@ C_<TN, TA, SG, TH, TS...>::deepForwardRequest(Control& control,
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
-									   const Request::Type request)
+									   const TransitionType requestType)
 {
-	switch (request) {
-	case Request::REMAIN:
+	switch (requestType) {
+	case TransitionType::REMAIN:
 		deepRequestRemain	(control._registry);
 		break;
 
-	case Request::CHANGE:
+	case TransitionType::CHANGE:
 		deepRequestChange	(control);
 		break;
 
-	case Request::RESTART:
+	case TransitionType::RESTART:
 		deepRequestRestart	(control._registry);
 		break;
 
-	case Request::RESUME:
+	case TransitionType::RESUME:
 		deepRequestResume	(control._registry);
 		break;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	case Request::UTILIZE:
+	case TransitionType::UTILIZE:
 		deepRequestUtilize	(control);
 		break;
 
-	case Request::RANDOMIZE:
+	case TransitionType::RANDOMIZE:
 		deepRequestRandomize(control);
 		break;
 

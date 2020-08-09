@@ -44,6 +44,19 @@ StaticArray<T, NC>::fill(const Item filler) {
 template <typename T, LongIndex NC>
 template <typename TValue>
 LongIndex
+Array<T, NC>::append(const TValue& value) {
+	HFSM2_ASSERT(_count < CAPACITY);
+
+	new (&_items[_count]) Item{value};
+
+	return _count++;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T, LongIndex NC>
+template <typename TValue>
+LongIndex
 Array<T, NC>::append(TValue&& value) {
 	HFSM2_ASSERT(_count < CAPACITY);
 
@@ -72,6 +85,18 @@ Array<T, NC>::operator[] (const N i) const {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
+}
+
+//------------------------------------------------------------------------------
+
+template <typename T, LongIndex NC>
+template <LongIndex N>
+Array<T, NC>&
+Array<T, NC>::operator += (const Array<T, N>& other) {
+	for (const auto& item : other)
+		append(item);
+
+	return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

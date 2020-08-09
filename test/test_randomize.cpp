@@ -6,7 +6,9 @@ namespace test_randomize {
 
 //------------------------------------------------------------------------------
 
-using M = hfsm2::MachineT<hfsm2::Config::RandomT<hfsm2::XoShiRo256Plus>>;
+using Config = hfsm2::Config::RandomT<hfsm2::XoShiRo256Plus>;
+
+using M = hfsm2::MachineT<Config>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -85,11 +87,12 @@ struct C_100 : FSM::State { Rank rank(const Control&) {return 1; } Utility utili
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::STATE_COUNT   == 15, "STATE_COUNT");
-static_assert(FSM::Instance::COMPO_REGIONS ==  3, "COMPO_REGIONS");
-static_assert(FSM::Instance::COMPO_PRONGS  == 12, "COMPO_PRONGS");
-static_assert(FSM::Instance::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
-static_assert(FSM::Instance::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT   == 15, "STATE_COUNT");
+static_assert(FSM::Instance::Info::REGION_COUNT  ==  4, "REGION_COUNT");
+static_assert(FSM::Instance::Info::COMPO_REGIONS ==  3, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_PRONGS  == 12, "COMPO_PRONGS");
+static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 

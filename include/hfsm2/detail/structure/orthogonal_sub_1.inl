@@ -183,14 +183,14 @@ OS_<TN, TA, NI, TI, TR...>::wideDestruct(PlanControl& control) {
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 OS_<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
-											  const Request::Type request,
+											  const TransitionType requestType,
 											  const ProngConstBits prongs)
 {
-	const Request::Type local = prongs.get(PRONG_INDEX) ?
-		request : Request::REMAIN;
+	const TransitionType local = prongs.get(PRONG_INDEX) ?
+		requestType : TransitionType::REMAIN;
 
 	initial	 .deepForwardActive(control, local);
-	remaining.wideForwardActive(control, request, prongs);
+	remaining.wideForwardActive(control, requestType, prongs);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -198,14 +198,14 @@ OS_<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
 template <typename TN, typename TA, ShortIndex NI, typename TI, typename... TR>
 void
 OS_<TN, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
-											   const Request::Type request,
+											   const TransitionType requestType,
 											   const ProngConstBits prongs)
 {
-	const Request::Type local = prongs.get(PRONG_INDEX) ?
-		request : Request::REMAIN;
+	const TransitionType local = prongs.get(PRONG_INDEX) ?
+		requestType : TransitionType::REMAIN;
 
 	initial	 .deepForwardRequest(control, local);
-	remaining.wideForwardRequest(control, request, prongs);
+	remaining.wideForwardRequest(control, requestType, prongs);
 }
 
 //------------------------------------------------------------------------------

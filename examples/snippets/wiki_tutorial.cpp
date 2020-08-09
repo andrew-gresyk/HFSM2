@@ -1,22 +1,35 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
-#define HFSM2_ENABLE_PLANS
-#include <hfsm2/machine.hpp>
-
 #include <catch2/catch.hpp>
+
+// Configure optional HFSM2 functionality using #defines
+// (in this case we're using Plans to make transition cycle more straightforward):
+#define HFSM2_ENABLE_PLANS
+
+// Include HFSM2 header:
+#include <hfsm2/machine.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Define interface class between the state machine and its host
+// (also ok to use the host object itself):
 struct Context {
     bool powerOn;
 };
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
+// (Optional) Define type config:
+using Config = hfsm2::Config::ContextT<Context>;
+
+// (Optional, recommended) Definehfsm2::Machine for convenience:
+using M = hfsm2::MachineT<Config>;
 
 //------------------------------------------------------------------------------
 
+// Declare state machine structure.
+// States need to be forward declared, e.g. with a magic macro:
 #define S(s) struct s
+
 using FSM = M::PeerRoot<
                 S(Off),                                // initial top-level state
                 M::Composite<S(On),                    // sub-machine region with a head state (On) and and 3 sub-states
@@ -26,14 +39,18 @@ using FSM = M::PeerRoot<
                 >,
                 S(Done)
             >;
+
 #undef S
 
 //------------------------------------------------------------------------------
 
+// While HFSM2 transitions aren't event-based,
+// events can be used to have FSM react to external stimuli:
 struct Event {};
 
 //------------------------------------------------------------------------------
 
+// Define states and override required state methods:
 struct Off
     : FSM::State
 {
@@ -95,7 +112,9 @@ struct Done
 
 //------------------------------------------------------------------------------
 
+// Write the client code to use your new state machine:
 TEST_CASE("Wiki.Tutorial", "[Wiki]") {
+	// Create context and state machine instances:
     Context context;
     context.powerOn = true;
 

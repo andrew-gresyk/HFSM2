@@ -1,10 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
-template <hfsm2::FeatureTag NFeatureTag IF_UTILITY_THEORY(, typename TUtilty), typename TContext>
+template <typename TConfig>
 void
-LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordMethod(Context& /*context*/,
-																		  const StateID origin,
-																		  const Method method)
+LoggerT<TConfig>::recordMethod(Context& /*context*/,
+							   const StateID origin,
+							   const Method method)
 {
 	REQUIRE(hfsm2::methodName(method));
 
@@ -77,12 +77,12 @@ LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordMethod(Contex
 
 //------------------------------------------------------------------------------
 
-template <hfsm2::FeatureTag NFeatureTag IF_UTILITY_THEORY(, typename TUtilty), typename TContext>
+template <typename TConfig>
 void
-LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordTransition(Context& /*context*/,
-																			  const StateID origin,
-																			  const TransitionType transitionType,
-									const StateID target)
+LoggerT<TConfig>::recordTransition(Context& /*context*/,
+								   const StateID origin,
+								   const TransitionType transitionType,
+								   const StateID target)
 {
 	REQUIRE(hfsm2::transitionName(transitionType));
 
@@ -124,12 +124,12 @@ LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordTransition(Co
 
 #ifdef HFSM2_ENABLE_PLANS
 
-template <hfsm2::FeatureTag NFeatureTag IF_UTILITY_THEORY(, typename TUtilty), typename TContext>
+template <typename TConfig>
 void
-LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordTaskStatus(Context& /*context*/,
-																			  const RegionID region,
-																			  const StateID origin,
-																			  const StatusEvent event)
+LoggerT<TConfig>::recordTaskStatus(Context& /*context*/,
+								   const RegionID region,
+								   const StateID origin,
+								   const StatusEvent event)
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -147,11 +147,11 @@ LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordTaskStatus(Co
 
 //------------------------------------------------------------------------------
 
-template <hfsm2::FeatureTag NFeatureTag IF_UTILITY_THEORY(, typename TUtilty), typename TContext>
+template <typename TConfig>
 void
-LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordPlanStatus(Context& /*context*/,
-																			  const RegionID region,
-																			  const StatusEvent event)
+LoggerT<TConfig>::recordPlanStatus(Context& /*context*/,
+								   const RegionID region,
+								   const StatusEvent event)
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -173,24 +173,24 @@ LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordPlanStatus(Co
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-template <hfsm2::FeatureTag NFeatureTag IF_UTILITY_THEORY(, typename TUtilty), typename TContext>
+template <typename TConfig>
 void
-LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordUtilityResolution(Context& /*context*/,
-																					 const StateID head,
-																					 const StateID prong,
-																					 const Utilty utilty)
+LoggerT<TConfig>::recordUtilityResolution(Context& /*context*/,
+										  const StateID head,
+										  const StateID prong,
+										  const Utilty utilty)
 {
 	history.emplace_back(head, Event::UTILITY_RESOLUTION, prong, utilty);
 }
 
 //------------------------------------------------------------------------------
 
-template <hfsm2::FeatureTag NFeatureTag IF_UTILITY_THEORY(, typename TUtilty), typename TContext>
+template <typename TConfig>
 void
-LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordRandomResolution(Context& /*context*/,
-																					const StateID head,
-																					const StateID prong,
-																					const Utilty utilty)
+LoggerT<TConfig>::recordRandomResolution(Context& /*context*/,
+										 const StateID head,
+										 const StateID prong,
+										 const Utilty utilty)
 {
 	history.emplace_back(head, Event::RANDOM_RESOLUTION, prong, utilty);
 }
@@ -199,19 +199,19 @@ LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordRandomResolut
 
 //------------------------------------------------------------------------------
 
-template <hfsm2::FeatureTag NFeatureTag IF_UTILITY_THEORY(, typename TUtilty), typename TContext>
+template <typename TConfig>
 void
-LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::recordCancelledPending(Context& /*context*/,
-																					const StateID origin)
+LoggerT<TConfig>::recordCancelledPending(Context& /*context*/,
+										 const StateID origin)
 {
 	history.emplace_back(origin, Event::CANCEL_PENDING);
 }
 
 //------------------------------------------------------------------------------
 
-template <hfsm2::FeatureTag NFeatureTag IF_UTILITY_THEORY(, typename TUtilty), typename TContext>
+template <typename TConfig>
 void
-LoggerT<NFeatureTag IF_UTILITY_THEORY(, TUtilty), TContext>::assertSequence(const Events& reference) {
+LoggerT<TConfig>::assertSequence(const Events& reference) {
 	const auto count = std::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {

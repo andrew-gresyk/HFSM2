@@ -143,10 +143,10 @@ struct C_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepForwardActive			   (Control& control, const Request::Type request);
-	HFSM2_INLINE void	 deepForwardRequest			   (Control& control, const Request::Type request);
+	HFSM2_INLINE void	 deepForwardActive			   (Control& control, const TransitionType requestType);
+	HFSM2_INLINE void	 deepForwardRequest			   (Control& control, const TransitionType requestType);
 
-	HFSM2_INLINE void	 deepRequest				   (Control& control, const Request::Type request);
+	HFSM2_INLINE void	 deepRequest				   (Control& control, const TransitionType requestType);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
