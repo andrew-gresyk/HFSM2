@@ -5004,18 +5004,28 @@ public:
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::context()
-	HFSM2_INLINE Context& _()										{ return _context;							}
+	HFSM2_INLINE	   Context& _()									{ return _context;							}
+
+	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
+	/// @return context
+	/// @see Control::context()
+	HFSM2_INLINE const Context& _() const							{ return _context;							}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::_()
-	HFSM2_INLINE Context& context()									{ return _context;							}
+	HFSM2_INLINE	   Context& context()							{ return _context;							}
+
+	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
+	/// @return context
+	/// @see Control::_()
+	HFSM2_INLINE const Context& context() const						{ return _context;							}
 
 	//----------------------------------------------------------------------
 
 	/// @brief Inspect current transition requests
 	/// @return Array of transition requests
-	HFSM2_INLINE const TransitionSet& requests()					{ return _requests;							}
+	HFSM2_INLINE const TransitionSet& requests() const				{ return _requests;							}
 
 	//----------------------------------------------------------------------
 
@@ -5093,11 +5103,19 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Get the last transition that caused the state to be activated
+	/// @param stateId State identifier
+	/// @return Pointer to the last transition that activated the state
 	const Transition* lastTransition(const StateID stateId) const;
 
+	/// @brief Get the last transition that caused the state to be activated
+	/// @tparam TState State type
+	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
 	const Transition* lastTransition() const						{ return lastTransition(stateId<TState>());	}
 
+	/// @brief Get the last transition that caused the current state to be activated
+	/// @return Pointer to the last transition that activated the current state
 	const Transition* lastTransition() const;
 
 #endif
@@ -13165,8 +13183,14 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Get the last transition that caused the state to be activated
+	/// @param stateId State identifier
+	/// @return Pointer to the last transition that activated the state
 	const Transition* lastTransition(const StateID stateId) const;
 
+	/// @brief Get the last transition that caused the state to be activated
+	/// @tparam TState State type
+	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
 	const Transition* lastTransition() const						{ return lastTransition(stateId<TState>());		}
 

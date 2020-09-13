@@ -398,8 +398,14 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Get the last transition that caused the state to be activated
+	/// @param stateId State identifier
+	/// @return Pointer to the last transition that activated the state
 	const Transition* lastTransition(const StateID stateId) const;
 
+	/// @brief Get the last transition that caused the state to be activated
+	/// @tparam TState State type
+	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
 	const Transition* lastTransition() const						{ return lastTransition(stateId<TState>());		}
 
