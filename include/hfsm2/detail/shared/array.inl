@@ -3,14 +3,14 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 StaticArray<T, NC>::StaticArray(const Item filler) {
 	fill(filler);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 template <typename N>
 T&
 StaticArray<T, NC>::operator[] (const N i) {
@@ -21,7 +21,7 @@ StaticArray<T, NC>::operator[] (const N i) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 template <typename N>
 const T&
 StaticArray<T, NC>::operator[] (const N i) const {
@@ -32,18 +32,18 @@ StaticArray<T, NC>::operator[] (const N i) const {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 void
 StaticArray<T, NC>::fill(const Item filler) {
-	for (LongIndex i = 0; i < CAPACITY; ++i)
+	for (Long i = 0; i < CAPACITY; ++i)
 		_items[i] = filler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 template <typename TValue>
-LongIndex
+Long
 Array<T, NC>::append(const TValue& value) {
 	HFSM2_ASSERT(_count < CAPACITY);
 
@@ -54,9 +54,9 @@ Array<T, NC>::append(const TValue& value) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 template <typename TValue>
-LongIndex
+Long
 Array<T, NC>::append(TValue&& value) {
 	HFSM2_ASSERT(_count < CAPACITY);
 
@@ -67,7 +67,7 @@ Array<T, NC>::append(TValue&& value) {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 template <typename N>
 T&
 Array<T, NC>::operator[] (const N i) {
@@ -78,7 +78,7 @@ Array<T, NC>::operator[] (const N i) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 template <typename N>
 const T&
 Array<T, NC>::operator[] (const N i) const {
@@ -89,8 +89,8 @@ Array<T, NC>::operator[] (const N i) const {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
-template <LongIndex N>
+template <typename T, Long NC>
+template <Long N>
 Array<T, NC>&
 Array<T, NC>::operator += (const Array<T, N>& other) {
 	for (const auto& item : other)

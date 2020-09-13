@@ -9,13 +9,13 @@ template <typename TIndices,
 		  typename... TSubStates>
 struct O_ final {
 	using Indices		= TIndices;
-	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
-	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
-	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
-	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
+	static constexpr StateID HEAD_ID	 = Indices::STATE_ID;
+	static constexpr Short	 COMPO_INDEX = Indices::COMPO_INDEX;
+	static constexpr Short	 ORTHO_INDEX = Indices::ORTHO_INDEX;
+	static constexpr Short	 ORTHO_UNIT	 = Indices::ORTHO_UNIT;
 
-	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
-	static constexpr ForkID		ORTHO_ID	= (ForkID) -ORTHO_INDEX - 1;
+	static constexpr Short	 REGION_ID	 = COMPO_INDEX + ORTHO_INDEX;
+	static constexpr ForkID	 ORTHO_ID	 = (ForkID) -ORTHO_INDEX - 1;
 
 	using Args			= TArgs;
 
@@ -31,9 +31,9 @@ struct O_ final {
 	using Head			= THead;
 
 	using Info			= OI_<Head, TSubStates...>;
-	static constexpr ShortIndex WIDTH		= Info::WIDTH;
-	static constexpr ShortIndex REGION_SIZE	= Info::STATE_COUNT;
-	static constexpr ShortIndex ORTHO_UNITS	= Info::ORTHO_UNITS;
+	static constexpr Short WIDTH		= Info::WIDTH;
+	static constexpr Short REGION_SIZE	= Info::STATE_COUNT;
+	static constexpr Short ORTHO_UNITS	= Info::ORTHO_UNITS;
 
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
@@ -42,9 +42,9 @@ struct O_ final {
 	using ProngConstBits= typename OrthoForks::ConstBits;
 
 	using Control		= ControlT<Args>;
+	using ScopedOrigin	= typename Control::Origin;
 
 	using PlanControl	= PlanControlT<Args>;
-	using ScopedOrigin	= typename PlanControl::Origin;
 	using ScopedRegion	= typename PlanControl::Region;
 
 	using FullControl	= FullControlT<Args>;
@@ -89,8 +89,8 @@ struct O_ final {
 	HFSM2_INLINE ProngBits		orthoRequested(		 Registry& registry)		{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
 	HFSM2_INLINE ProngConstBits orthoRequested(const Registry& registry) const	{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM2_INLINE ProngBits		orthoRequested(		 Control& control)			{ return orthoRequested(control._registry);								}
-	HFSM2_INLINE ProngConstBits orthoRequested(const Control& control) const	{ return orthoRequested(control._registry);								}
+	HFSM2_INLINE ProngBits		orthoRequested(		 Control&  control)			{ return orthoRequested(control._registry);								}
+	HFSM2_INLINE ProngConstBits orthoRequested(const Control&  control) const	{ return orthoRequested(control._registry);								}
 
 	HFSM2_INLINE void	 deepRegister		  (Registry& registry, const Parent parent);
 
@@ -118,32 +118,31 @@ struct O_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepForwardActive	  (Control&  control, const TransitionType requestType);
-	HFSM2_INLINE void	 deepForwardRequest	  (Control&  control, const TransitionType requestType);
+	HFSM2_INLINE void	 deepForwardActive	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepForwardRequest	  (Control& control, const Request request);
 
-	HFSM2_INLINE void	 deepRequest		  (Control&  control, const TransitionType requestType);
+	HFSM2_INLINE void	 deepRequest		  (Control& control, const Request request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepRequestChange	  (Control&  control);
-	HFSM2_INLINE void	 deepRequestRemain	  (Registry& registry);
-	HFSM2_INLINE void	 deepRequestRestart	  (Registry& registry);
-	HFSM2_INLINE void	 deepRequestResume	  (Registry& registry);
+	HFSM2_INLINE void	 deepRequestChange	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestRestart	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestResume	  (Control& control, const Request request);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestUtilize	  (Control&  control);
-	HFSM2_INLINE void	 deepRequestRandomize (Control&  control);
+	HFSM2_INLINE void	 deepRequestUtilize	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestRandomize (Control& control, const Request request);
 
-	HFSM2_INLINE UP		 deepReportChange	  (Control&  control);
+	HFSM2_INLINE UP		 deepReportChange	  (Control& control);
 
-	HFSM2_INLINE UP		 deepReportUtilize	  (Control&  control);
-	HFSM2_INLINE Rank	 deepReportRank		  (Control&  control);
-	HFSM2_INLINE Utility deepReportRandomize  (Control&  control);
+	HFSM2_INLINE UP		 deepReportUtilize	  (Control& control);
+	HFSM2_INLINE Rank	 deepReportRank		  (Control& control);
+	HFSM2_INLINE Utility deepReportRandomize  (Control& control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepChangeToRequested(PlanControl& control);
+	HFSM2_INLINE void	 deepChangeToRequested(PlanControl&  control);
 
 	//----------------------------------------------------------------------
 
@@ -164,11 +163,11 @@ struct O_ final {
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
-	static constexpr LongIndex NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
+	static constexpr Long NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
 
-	void deepGetNames(const LongIndex parent,
+	void deepGetNames(const Long parent,
 					  const RegionType region,
-					  const ShortIndex depth,
+					  const Short depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
 

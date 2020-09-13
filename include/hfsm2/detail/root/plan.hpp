@@ -58,7 +58,7 @@ class ConstPlanT {
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
-	static constexpr LongIndex TASK_CAPACITY = Args::TASK_CAPACITY;
+	static constexpr Long TASK_CAPACITY = Args::TASK_CAPACITY;
 
 public:
 	using PlanData		= PlanDataT<Args>;
@@ -77,11 +77,11 @@ public:
 		HFSM2_INLINE const Task& operator  *() const								{ return  _plan._planData.tasks[_curr];								}
 		HFSM2_INLINE const Task* operator ->() const								{ return &_plan._planData.tasks[_curr];								}
 
-		HFSM2_INLINE LongIndex next() const;
+		HFSM2_INLINE Long next() const;
 
 		const ConstPlanT& _plan;
-		LongIndex _curr;
-		LongIndex _next;
+		Long _curr;
+		Long _next;
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -115,7 +115,7 @@ class PlanBaseT {
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
-	static constexpr LongIndex  TASK_CAPACITY	= Args::TASK_CAPACITY;
+	static constexpr Long  TASK_CAPACITY	= Args::TASK_CAPACITY;
 
 public:
 	using PlanData		= PlanDataT<Args>;
@@ -141,11 +141,11 @@ public:
 
 		HFSM2_INLINE void remove();
 
-		HFSM2_INLINE LongIndex next() const;
+		HFSM2_INLINE Long next() const;
 
 		PlanBaseT& _plan;
-		LongIndex _curr;
-		LongIndex _next;
+		Long _curr;
+		Long _next;
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -164,7 +164,7 @@ protected:
 				const StateID destination,
 				const TransitionType transitionType);
 
-	bool linkTask(const LongIndex index);
+	bool linkTask(const Long index);
 
 public:
 	HFSM2_INLINE explicit operator bool() const;
@@ -354,7 +354,7 @@ public:
 	HFSM2_INLINE Iterator first()													{ return Iterator{*this};											}
 
 private:
-	void remove(const LongIndex task);
+	void remove(const Long task);
 
 protected:
 	PlanData& _planData;
@@ -373,12 +373,12 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity
+		, Long NCompoCount
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		, Long NTaskCapacity
 		, typename TPayload>
 class PlanT<ArgsT<TContext
 				, TConfig
@@ -828,12 +828,12 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity>
+		, Long NCompoCount
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		, Long NTaskCapacity>
 class PlanT<ArgsT<TContext
 				, TConfig
 				, TStateList

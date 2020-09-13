@@ -141,36 +141,38 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex   >(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<Step1  >(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<Step1_1>(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<Step1_2>(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<Setup  >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Apex    >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Step1   >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Step1_1 >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Step1_2 >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Setup   >(),	Event::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex   >(),	Event::CONSTRUCT },
-				{ FSM::stateId<Step1  >(),	Event::CONSTRUCT },
-				{ FSM::stateId<Step1_1>(),	Event::CONSTRUCT },
-				{ FSM::stateId<Step1_2>(),	Event::CONSTRUCT },
-				{ FSM::stateId<Setup  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Apex    >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1_1 >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1_2 >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Setup   >(),	Event::CONSTRUCT },
 
-				{ FSM::stateId<Apex   >(),	Event::ENTER },
-				{ FSM::stateId<Step1  >(),	Event::ENTER },
-				{ FSM::stateId<Step1_1>(),	Event::ENTER },
-				{ FSM::stateId<Step1_2>(),	Event::ENTER },
-				{ FSM::stateId<Setup  >(),	Event::ENTER },
+				{ FSM::stateId<Apex    >(),	Event::ENTER },
+				{ FSM::stateId<Step1   >(),	Event::ENTER },
+				{ FSM::stateId<Step1_1 >(),	Event::ENTER },
+				{ FSM::stateId<Step1_2 >(),	Event::ENTER },
+				{ FSM::stateId<Setup   >(),	Event::ENTER },
 			});
 
 			assertActive(machine, all, {
-				FSM::stateId<Apex   >(),
-				FSM::stateId<Step1  >(),
-				FSM::stateId<Step1_1>(),
-				FSM::stateId<Step1_2>(),
-				FSM::stateId<Setup  >(),
+				FSM::stateId<Apex    >(),
+				FSM::stateId<Step1   >(),
+				FSM::stateId<Step1_1 >(),
+				FSM::stateId<Step1_2 >(),
+				FSM::stateId<Setup   >(),
 			});
 
 			assertResumable(machine, all, {});
 
 			REQUIRE(machine.previousTransitions().count() == 0);
+
+			assertLastTransitions(machine, all, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -178,47 +180,53 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex   >(),	Event::UPDATE },
-				{ FSM::stateId<Step1  >(),	Event::UPDATE },
-				{ FSM::stateId<Step1_1>(),	Event::UPDATE },
-				{ FSM::stateId<Step1_2>(),	Event::UPDATE },
-				{ FSM::stateId<Setup  >(),	Event::UPDATE },
+				{ FSM::stateId<Apex    >(),	Event::UPDATE },
+				{ FSM::stateId<Step1   >(),	Event::UPDATE },
+				{ FSM::stateId<Step1_1 >(),	Event::UPDATE },
+				{ FSM::stateId<Step1_2 >(),	Event::UPDATE },
+				{ FSM::stateId<Setup   >(),	Event::UPDATE },
 
-				{ FSM::stateId<Setup  >(),	Event::CHANGE,		FSM::stateId<Work   >() },
+				{ FSM::stateId<Setup   >(),	Event::CHANGE,		FSM::stateId<Work   >() },
 
-				{ FSM::stateId<Setup  >(),	Event::EXIT_GUARD },
-				{ FSM::stateId<Work   >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Setup   >(),	Event::EXIT_GUARD },
+				{ FSM::stateId<Work    >(),	Event::ENTRY_GUARD },
 
-				{ FSM::stateId<Setup  >(),	Event::EXIT },
+				{ FSM::stateId<Setup   >(),	Event::EXIT },
 
-				{ FSM::stateId<Setup  >(),	Event::DESTRUCT },
-				{ FSM::stateId<Work   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Setup   >(),	Event::DESTRUCT },
+				{ FSM::stateId<Work    >(),	Event::CONSTRUCT },
 
-				{ FSM::stateId<Work   >(),	Event::ENTER },
+				{ FSM::stateId<Work    >(),	Event::ENTER },
 			});
 
 			assertActive(machine, all, {
-				FSM::stateId<Apex   >(),
-				FSM::stateId<Step1  >(),
-				FSM::stateId<Step1_1>(),
-				FSM::stateId<Step1_2>(),
-				FSM::stateId<Work   >(),
+				FSM::stateId<Apex    >(),
+				FSM::stateId<Step1   >(),
+				FSM::stateId<Step1_1 >(),
+				FSM::stateId<Step1_2 >(),
+				FSM::stateId<Work    >(),
 			});
 
 			assertResumable(machine, all, {
-				FSM::stateId<Setup>()
+				FSM::stateId<Setup   >()
 			});
 
 			const auto& previousTransitions = machine.previousTransitions();
 			REQUIRE(previousTransitions.count() == 1);
-			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<Setup  >(),
-															FSM::stateId<Work   >(),
+			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<Setup   >(),
+															FSM::stateId<Work    >(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(machine, all, {
+				FSM::stateId<Work    >(),
+			});
+
+			REQUIRE(machine.lastTransition<Work    >() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.changeTo<Step2>();
+		machine.changeTo<Step2   >();
 		machine.update();
 		{
 			logger.assertSequence({
@@ -251,15 +259,15 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 			});
 
 			assertActive(machine, all, {
-				FSM::stateId<Apex   >(),
-				FSM::stateId<Step1  >(),
-				FSM::stateId<Step1_1>(),
-				FSM::stateId<Step1_2>(),
+				FSM::stateId<Apex    >(),
+				FSM::stateId<Step1   >(),
+				FSM::stateId<Step1_1 >(),
+				FSM::stateId<Step1_2 >(),
 				FSM::stateId<Teardown>(),
 			});
 
 			assertResumable(machine, all, {
-				FSM::stateId<Work>()
+				FSM::stateId<Work    >()
 			});
 
 			const auto& previousTransitions = machine.previousTransitions();
@@ -267,6 +275,12 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<Work    >(),
 															FSM::stateId<Teardown>(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(machine, all, {
+				FSM::stateId<Teardown>(),
+			});
+
+			REQUIRE(machine.lastTransition<Teardown>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -305,8 +319,8 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 			});
 
 			assertActive(machine, all, {
-				FSM::stateId<Apex >(),
-				FSM::stateId<Step2>(),
+				FSM::stateId<Apex    >(),
+				FSM::stateId<Step2   >(),
 			});
 
 			assertResumable(machine, all, {
@@ -321,6 +335,12 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<Step1_2 >(),
 															FSM::stateId<Step2   >(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(machine, all, {
+				FSM::stateId<Step2   >(),
+			});
+
+			REQUIRE(machine.lastTransition<Step2   >() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

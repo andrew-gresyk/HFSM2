@@ -174,6 +174,15 @@ void assertResumable(TMachine& machine,
 					 const Types& all,
 					 const Types& toCheck);
 
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+template <typename TMachine>
+void assertLastTransitions(TMachine& machine,
+							 const Types& all,
+							 const Types& toCheck);
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tools.inl"

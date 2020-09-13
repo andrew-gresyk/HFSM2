@@ -7,22 +7,22 @@ struct EmptyPayload {};
 
 //------------------------------------------------------------------------------
 
-using ShortIndex = uint8_t;
-static constexpr ShortIndex	INVALID_SHORT_INDEX = UINT8_MAX;
+using Short = uint8_t;
+static constexpr Short		INVALID_SHORT		= UINT8_MAX;
 
-using RegionID	 = ShortIndex;
-static constexpr RegionID	INVALID_REGION_ID	= INVALID_SHORT_INDEX;
+using RegionID	 = Short;
+static constexpr RegionID	INVALID_REGION_ID	= INVALID_SHORT;
 
 using ForkID	 = int8_t;
 static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-using LongIndex  = uint16_t;
-static constexpr LongIndex	INVALID_LONG_INDEX	= UINT16_MAX;
+using Long  = uint16_t;
+static constexpr Long		INVALID_LONG		= UINT16_MAX;
 
-using StateID	 = LongIndex;
-static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG_INDEX;
+using StateID	 = Long;
+static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;
 
 //------------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ min(const T t1, const T t2) { return t1 < t2 ? t1 : t2; }
 
 template <unsigned NCapacity>
 struct UnsignedCapacityT {
-	static constexpr LongIndex CAPACITY = NCapacity;
+	static constexpr Long CAPACITY = NCapacity;
 
 	using Type = typename std::conditional<CAPACITY <= UINT8_MAX,  uint8_t,
 				 typename std::conditional<CAPACITY <= UINT16_MAX, uint16_t,
@@ -89,7 +89,7 @@ using UnsignedCapacity = typename UnsignedCapacityT<NCapacity>::Type;
 
 template <unsigned NBitWidth>
 struct UnsignedBitWidthT {
-	static constexpr ShortIndex BIT_WIDTH = NBitWidth;
+	static constexpr Short BIT_WIDTH = NBitWidth;
 
 	using Type = typename std::conditional<BIT_WIDTH <= 8,  uint8_t,
 				 typename std::conditional<BIT_WIDTH <= 16, uint16_t,
@@ -105,9 +105,9 @@ using UnsignedBitWidth = typename UnsignedBitWidthT<NCapacity>::Type;
 //------------------------------------------------------------------------------
 
 constexpr
-LongIndex
-roundUp(const LongIndex x,
-		const LongIndex to)
+Long
+roundUp(const Long x,
+		const Long to)
 {
 	return (x + (to - 1)) / to;
 }
@@ -115,8 +115,8 @@ roundUp(const LongIndex x,
 //------------------------------------------------------------------------------
 
 constexpr
-ShortIndex
-bitWidth(const ShortIndex x) {
+Short
+bitWidth(const Short x) {
 	return x <=   2 ? 1 :
 		   x <=   4 ? 2 :
 		   x <=   8 ? 3 :

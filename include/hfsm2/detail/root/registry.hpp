@@ -17,7 +17,7 @@ enum Strategy {
 
 #pragma pack(push, 1)
 
-struct alignas(2 * sizeof(ShortIndex)) Parent {
+struct alignas(2 * sizeof(Short)) Parent {
 	HFSM2_INLINE Parent() = default;
 
 	HFSM2_INLINE Parent(const ForkID forkId_)
@@ -25,18 +25,18 @@ struct alignas(2 * sizeof(ShortIndex)) Parent {
 	{}
 
 	HFSM2_INLINE Parent(const ForkID forkId_,
-						const ShortIndex prong_)
+						const Short prong_)
 		: forkId{forkId_}
 		, prong{prong_}
 	{}
 
 	HFSM2_INLINE explicit operator bool() const {
 		return forkId != INVALID_FORK_ID &&
-			   prong  != INVALID_SHORT_INDEX;
+			   prong  != INVALID_SHORT;
 	}
 
 	ForkID	   forkId = INVALID_FORK_ID;
-	ShortIndex prong  = INVALID_SHORT_INDEX;
+	Short prong  = INVALID_SHORT;
 };
 
 #pragma pack(pop)
@@ -59,12 +59,12 @@ template <typename
 		, typename
 		, typename
 		, typename
-		, LongIndex
-		, LongIndex
-		, LongIndex
-		, LongIndex
-		, LongIndex
-		HFSM2_IF_PLANS(, LongIndex)
+		, Long
+		, Long
+		, Long
+		, Long
+		, Long
+		HFSM2_IF_PLANS(, Long)
 		, typename>
 struct ArgsT;
 
@@ -77,12 +77,12 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, Long NCompoCount
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
 struct RegistryT<ArgsT<TContext
 					 , TConfig
@@ -99,10 +99,10 @@ struct RegistryT<ArgsT<TContext
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
-	static constexpr ShortIndex COMPO_REGIONS	= NCompoCount;
-	static constexpr ShortIndex ORTHO_REGIONS	= NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS		= NOrthoUnits;
+	static constexpr Long  STATE_COUNT		= StateList::SIZE;
+	static constexpr Short COMPO_REGIONS	= NCompoCount;
+	static constexpr Short ORTHO_REGIONS	= NOrthoCount;
+	static constexpr Short ORTHO_UNITS		= NOrthoUnits;
 
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
@@ -113,10 +113,10 @@ struct RegistryT<ArgsT<TContext
 	using OrthoParents	= StaticArray<Parent, ORTHO_REGIONS>;
 	using OrthoUnits	= StaticArray<Units,  ORTHO_UNITS>;
 
-	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
-	using OrthoForks	= BitArray	 <ShortIndex, ORTHO_UNITS>;
+	using CompoForks	= StaticArray<Short, COMPO_REGIONS>;
+	using OrthoForks	= BitArray	 <Short, ORTHO_UNITS>;
 	using OrthoBits		= typename OrthoForks::Bits;
-	using CompoRemains	= BitArray	 <ShortIndex, COMPO_REGIONS>;
+	using CompoRemains	= BitArray	 <Short, COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
@@ -142,10 +142,10 @@ struct RegistryT<ArgsT<TContext
 	OrthoParents orthoParents;
 	OrthoUnits orthoUnits;
 
-	CompoForks compoRequested{INVALID_SHORT_INDEX};
+	CompoForks compoRequested{INVALID_SHORT};
 	OrthoForks orthoRequested;
-	CompoForks compoActive	 {INVALID_SHORT_INDEX};
-	CompoForks compoResumable{INVALID_SHORT_INDEX};
+	CompoForks compoActive	 {INVALID_SHORT};
+	CompoForks compoResumable{INVALID_SHORT};
 
 	CompoRemains compoRemains;
 };
@@ -156,10 +156,10 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, Long NCompoCount
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
 struct RegistryT<ArgsT<TContext
 					 , TConfig
@@ -176,8 +176,8 @@ struct RegistryT<ArgsT<TContext
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
-	static constexpr ShortIndex COMPO_REGIONS	= NCompoCount;
+	static constexpr Long  STATE_COUNT		= StateList::SIZE;
+	static constexpr Short COMPO_REGIONS	= NCompoCount;
 
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
@@ -185,9 +185,9 @@ struct RegistryT<ArgsT<TContext
 	using StateParents	= StaticArray<Parent, STATE_COUNT>;
 	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
 
-	using CompoForks	= StaticArray<ShortIndex, COMPO_REGIONS>;
-	using OrthoForks	= BitArray	 <ShortIndex, 0>;
-	using CompoRemains	= BitArray	 <ShortIndex, COMPO_REGIONS>;
+	using CompoForks	= StaticArray<Short, COMPO_REGIONS>;
+	using OrthoForks	= BitArray	 <Short, 0>;
+	using CompoRemains	= BitArray	 <Short, COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
@@ -209,10 +209,10 @@ struct RegistryT<ArgsT<TContext
 	StateParents stateParents;
 	CompoParents compoParents;
 
-	CompoForks compoRequested{INVALID_SHORT_INDEX};
+	CompoForks compoRequested{INVALID_SHORT};
 	OrthoForks orthoRequested;
-	CompoForks compoActive	 {INVALID_SHORT_INDEX};
-	CompoForks compoResumable{INVALID_SHORT_INDEX};
+	CompoForks compoActive	 {INVALID_SHORT};
+	CompoForks compoResumable{INVALID_SHORT};
 
 	CompoRemains compoRemains;
 };

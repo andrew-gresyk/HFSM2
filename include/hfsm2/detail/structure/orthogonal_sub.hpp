@@ -3,24 +3,24 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename, typename, ShortIndex, typename...>
+template <typename, typename, Short, typename...>
 struct OS_;
 
 //------------------------------------------------------------------------------
 
 template <typename TIndices,
 		  typename TArgs,
-		  ShortIndex NIndex,
+		  Short NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
 struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	using Indices		= TIndices;
-	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
-	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
-	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
-	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
+	static constexpr StateID INITIAL_ID	 = Indices::STATE_ID;
+	static constexpr Short	 COMPO_INDEX = Indices::COMPO_INDEX;
+	static constexpr Short	 ORTHO_INDEX = Indices::ORTHO_INDEX;
+	static constexpr Short	 ORTHO_UNIT	 = Indices::ORTHO_UNIT;
 
-	static constexpr ShortIndex PRONG_INDEX	= NIndex;
+	static constexpr Short	 PRONG_INDEX = NIndex;
 
 	using Args			= TArgs;
 
@@ -77,7 +77,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,								const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,					const ProngConstBits prongs);
 	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
 	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
 
@@ -91,7 +91,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	template <typename TEvent>
 	HFSM2_INLINE Status	 wideReact			  (FullControl&	 control, const TEvent& event);
 
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,								const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,					const ProngConstBits prongs);
 	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
 	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
 
@@ -101,28 +101,27 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive	  (Control&  control, const TransitionType requestType,	const ProngConstBits prongs);
-	HFSM2_INLINE void	 wideForwardRequest	  (Control&  control, const TransitionType requestType,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardActive	  (Control& control, const Request request, const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardRequest	  (Control& control, const Request request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRequestChange	  (Control&  control);
-	HFSM2_INLINE void	 wideRequestRemain	  (Registry& registry);
-	HFSM2_INLINE void	 wideRequestRestart	  (Registry& registry);
-	HFSM2_INLINE void	 wideRequestResume	  (Registry& registry);
+	HFSM2_INLINE void	 wideRequestChange	  (Control& control, const Request request);
+	HFSM2_INLINE void	 wideRequestRestart	  (Control& control, const Request request);
+	HFSM2_INLINE void	 wideRequestResume	  (Control& control, const Request request);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 wideRequestUtilize	  (Control&  control);
-	HFSM2_INLINE void	 wideRequestRandomize (Control&  control);
+	HFSM2_INLINE void	 wideRequestUtilize	  (Control& control, const Request request);
+	HFSM2_INLINE void	 wideRequestRandomize (Control& control, const Request request);
 
-	HFSM2_INLINE Utility wideReportChange	  (Control&  control);
-	HFSM2_INLINE Utility wideReportUtilize	  (Control&  control);
-	HFSM2_INLINE Utility wideReportRandomize  (Control&  control);
+	HFSM2_INLINE Utility wideReportChange	  (Control& control);
+	HFSM2_INLINE Utility wideReportUtilize	  (Control& control);
+	HFSM2_INLINE Utility wideReportRandomize  (Control& control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideChangeToRequested(PlanControl& control);
+	HFSM2_INLINE void	 wideChangeToRequested(PlanControl&  control);
 
 	//----------------------------------------------------------------------
 
@@ -142,10 +141,10 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
-	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
+	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
 
-	void wideGetNames(const LongIndex parent,
-					  const ShortIndex depth,
+	void wideGetNames(const Long parent,
+					  const Short depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
 
@@ -159,16 +158,16 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 template <typename TIndices,
 		  typename TArgs,
-		  ShortIndex NIndex,
+		  Short NIndex,
 		  typename TInitial>
 struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	using Indices		= TIndices;
-	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
-	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
-	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
-	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
+	static constexpr StateID INITIAL_ID	 = Indices::STATE_ID;
+	static constexpr Short	 COMPO_INDEX = Indices::COMPO_INDEX;
+	static constexpr Short	 ORTHO_INDEX = Indices::ORTHO_INDEX;
+	static constexpr Short	 ORTHO_UNIT	 = Indices::ORTHO_UNIT;
 
-	static constexpr ShortIndex PRONG_INDEX	= NIndex;
+	static constexpr Short	 PRONG_INDEX = NIndex;
 
 	using Args			= TArgs;
 
@@ -214,7 +213,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,								const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,					const ProngConstBits prongs);
 	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
 	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
 
@@ -228,7 +227,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	template <typename TEvent>
 	HFSM2_INLINE Status	 wideReact			  (FullControl&  control, const TEvent& event);
 
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,								const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,					const ProngConstBits prongs);
 	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
 	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
 
@@ -238,19 +237,18 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive	  (Control&  control, const TransitionType requestType,	const ProngConstBits prongs);
-	HFSM2_INLINE void	 wideForwardRequest	  (Control&  control, const TransitionType requestType,	const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardActive	  (Control& control, const Request request, const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardRequest	  (Control& control, const Request request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRequestChange	  (Control&  control);
-	HFSM2_INLINE void	 wideRequestRemain	  (Registry& registry);
-	HFSM2_INLINE void	 wideRequestRestart	  (Registry& registry);
-	HFSM2_INLINE void	 wideRequestResume	  (Registry& registry);
+	HFSM2_INLINE void	 wideRequestChange	  (Control& control, const Request request);
+	HFSM2_INLINE void	 wideRequestRestart	  (Control& control, const Request request);
+	HFSM2_INLINE void	 wideRequestResume	  (Control& control, const Request request);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 wideRequestUtilize	  (Control& control);
-	HFSM2_INLINE void	 wideRequestRandomize (Control& control);
+	HFSM2_INLINE void	 wideRequestUtilize	  (Control& control, const Request request);
+	HFSM2_INLINE void	 wideRequestRandomize (Control& control, const Request request);
 
 	HFSM2_INLINE Utility wideReportChange	  (Control& control);
 	HFSM2_INLINE Utility wideReportUtilize	  (Control& control);
@@ -259,7 +257,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideChangeToRequested(PlanControl& control);
+	HFSM2_INLINE void	 wideChangeToRequested(PlanControl&  control);
 
 	//----------------------------------------------------------------------
 
@@ -279,10 +277,10 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
-	static constexpr LongIndex NAME_COUNT	 = Initial::NAME_COUNT;
+	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT;
 
-	void wideGetNames(const LongIndex parent,
-					  const ShortIndex depth,
+	void wideGetNames(const Long parent,
+					  const Short depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
 
