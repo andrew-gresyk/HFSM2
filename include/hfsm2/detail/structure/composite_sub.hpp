@@ -109,23 +109,6 @@ struct CS_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
-
-	template <Strategy = STRATEGY>
-	HFSM2_INLINE void	 wideRequestChange			 (Control& control, const Request request,		 const Short = INVALID_SHORT);
-
-	template <>
-	HFSM2_INLINE void	 wideRequestChange<Composite>(Control& control, const Request request,		 const Short)		{ wideRequestChangeComposite(control);			}
-
-	template <>
-	HFSM2_INLINE void	 wideRequestChange<Resumable>(Control& control, const Request request,		 const Short prong)	{ wideRequestChangeResumable(control, prong);	}
-
-#else
-
-	HFSM2_INLINE void	 wideRequestChange			 (Control& control, const Request request,		 const Short = INVALID_SHORT);
-
-#endif
-
 	HFSM2_INLINE void	 wideRequestChangeComposite	 (Control& control, const Request request);
 	HFSM2_INLINE void	 wideRequestChangeResumable	 (Control& control, const Request request,		 const Short prong);
 
