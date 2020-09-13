@@ -40,7 +40,12 @@ enum class TransitionType : uint8_t {
 
 	SCHEDULE,
 
+<<<<<<< HEAD
 	COUNT
+=======
+	COUNT,
+	REMAIN = COUNT
+>>>>>>> master
 };
 
 #ifdef HFSM2_ENABLE_PLANS
@@ -277,6 +282,7 @@ struct alignas(4) TransitionT<void>
 
 ////////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 struct Request {
 	TransitionType type;
 	Short index;
@@ -284,4 +290,6 @@ struct Request {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+=======
+>>>>>>> master
 }

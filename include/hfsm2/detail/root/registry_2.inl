@@ -3,7 +3,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isActive(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
@@ -20,7 +24,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isResumable(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
@@ -35,7 +43,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 //------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isPendingChange(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
@@ -51,7 +63,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isPendingEnter(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
@@ -67,7 +83,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::isPendingExit(const StateID stateId) const {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
@@ -83,7 +103,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 //------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 const Parent&
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::forkParent(const ForkID forkId) const {
 	HFSM2_ASSERT(forkId > 0);
@@ -93,7 +117,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 //------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::requestImmediate(const Transition& request) {
 	// record request
@@ -136,7 +164,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::requestScheduled(const StateID stateId) {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
@@ -149,7 +181,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 //------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::clearRequests() {
 	compoRequested.clear();
@@ -159,7 +195,11 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+<<<<<<< HEAD
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+=======
+template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+>>>>>>> master
 void
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::clear() {
 	clearRequests();

@@ -22,7 +22,11 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct alignas(alignof(void*)) StructureStateInfo {
+<<<<<<< HEAD
 	enum RegionType : Short {
+=======
+	enum RegionType : ShortIndex {
+>>>>>>> master
 		COMPOSITE,
 		ORTHOGONAL,
 	};
@@ -31,9 +35,15 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+<<<<<<< HEAD
 	HFSM2_INLINE StructureStateInfo(const Long parent_,
 									const RegionType region_,
 									const Short depth_,
+=======
+	HFSM2_INLINE StructureStateInfo(const LongIndex parent_,
+									const RegionType region_,
+									const ShortIndex depth_,
+>>>>>>> master
 									const char* const name_)
 		: name{name_}
 		, parent{parent_}
@@ -44,9 +54,15 @@ struct alignas(alignof(void*)) StructureStateInfo {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	const char* name;
+<<<<<<< HEAD
 	Long parent;
 	RegionType region;
 	Short depth;
+=======
+	LongIndex parent;
+	RegionType region;
+	ShortIndex depth;
+>>>>>>> master
 };
 
 #pragma pack(pop)
