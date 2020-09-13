@@ -67,7 +67,7 @@ struct S_ final {
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE Parent	 stateParent		  (Control& control)	{ return control._registry.stateParents[STATE_ID];		}
+	HFSM2_INLINE Parent	 stateParent		  (Control&  control)	{ return control._registry.stateParents[STATE_ID];		}
 
 	HFSM2_INLINE void	 deepRegister		  (Registry& registry, const Parent parent);
 
@@ -103,25 +103,24 @@ struct S_ final {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_PLANS
-	HFSM2_INLINE void	 wrapPlanSucceeded	  (FullControl&	control);
-	HFSM2_INLINE void	 wrapPlanFailed		  (FullControl&	control);
+	HFSM2_INLINE void	 wrapPlanSucceeded	  (FullControl&	 control);
+	HFSM2_INLINE void	 wrapPlanFailed		  (FullControl&	 control);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepForwardActive	  (Control&, const TransitionType)												{}
-	HFSM2_INLINE void	 deepForwardRequest	  (Control&, const TransitionType)												{}
+	HFSM2_INLINE void	 deepForwardActive	  (Control&,		 const Request		  )										{}
+	HFSM2_INLINE void	 deepForwardRequest	  (Control& control, const Request request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepRequestChange	  (Control&)																	{}
-	HFSM2_INLINE void	 deepRequestRemain	  (Registry&)																	{}
-	HFSM2_INLINE void	 deepRequestRestart	  (Registry&)																	{}
-	HFSM2_INLINE void	 deepRequestResume	  (Registry&)																	{}
+	HFSM2_INLINE void	 deepRequestChange	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestRestart	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestResume	  (Control& control, const Request request);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestUtilize	  (Control&)																	{}
-	HFSM2_INLINE void	 deepRequestRandomize (Control&)																	{}
+	HFSM2_INLINE void	 deepRequestUtilize	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestRandomize (Control& control, const Request request);
 
 	HFSM2_INLINE UP		 deepReportChange	  (Control& control);
 	HFSM2_INLINE UP		 deepReportUtilize	  (Control& control);
@@ -154,9 +153,9 @@ struct S_ final {
 
 	static const char* name();
 
-	void deepGetNames(const LongIndex parent,
+	void deepGetNames(const Long parent,
 					  const RegionType region,
-					  const ShortIndex depth,
+					  const Short depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
 
@@ -164,7 +163,7 @@ struct S_ final {
 
 #if defined _DEBUG || defined HFSM2_ENABLE_STRUCTURE_REPORT || defined HFSM2_ENABLE_LOG_INTERFACE
 
-	static constexpr LongIndex NAME_COUNT = HeadBox::isBare() ? 0 : 1;
+	static constexpr Long NAME_COUNT = HeadBox::isBare() ? 0 : 1;
 
 #endif
 

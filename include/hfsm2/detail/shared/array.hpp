@@ -3,11 +3,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NCapacity>
+template <typename T, Long NCapacity>
 class StaticArray {
 public:
-	static constexpr LongIndex CAPACITY = NCapacity;
-	static constexpr LongIndex DUMMY	= INVALID_LONG_INDEX;
+	static constexpr Long CAPACITY = NCapacity;
+	static constexpr Long DUMMY	   = INVALID_LONG;
 
 	using Item  = T;
 	using Index = UnsignedCapacity<CAPACITY>;
@@ -22,10 +22,10 @@ public:
 	template <typename N>
 	HFSM2_INLINE const Item& operator[] (const N i) const;
 
-	HFSM2_INLINE LongIndex count() const					{ return CAPACITY;									}
+	HFSM2_INLINE Long count() const							{ return CAPACITY;									}
 
 	HFSM2_INLINE void fill(const Item filler);
-	HFSM2_INLINE void clear()								{ fill(INVALID_SHORT_INDEX);						}
+	HFSM2_INLINE void clear()								{ fill(INVALID_SHORT);								}
 
 	HFSM2_INLINE Iterator<      StaticArray>  begin()		{ return Iterator<      StaticArray>(*this,     0); }
 	HFSM2_INLINE Iterator<const	StaticArray>  begin() const	{ return Iterator<const StaticArray>(*this,     0); }
@@ -51,14 +51,14 @@ struct StaticArray<T, 0> {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NCapacity>
+template <typename T, Long NCapacity>
 class Array {
 	template <typename>
 	friend class Iterator;
 
 public:
-	static constexpr LongIndex CAPACITY = NCapacity;
-	static constexpr LongIndex DUMMY	= INVALID_LONG_INDEX;
+	static constexpr Long CAPACITY = NCapacity;
+	static constexpr Long DUMMY	   = INVALID_LONG;
 
 	using Item = T;
 	using Index = UnsignedCapacity<CAPACITY>;
@@ -68,10 +68,10 @@ public:
 
 	// TODO: replace with 'emplace<>()'?
 	template <typename TValue>
-	HFSM2_INLINE LongIndex append(const TValue& value);
+	HFSM2_INLINE Long append(const TValue& value);
 
 	template <typename TValue>
-	HFSM2_INLINE LongIndex append(TValue&& value);
+	HFSM2_INLINE Long append(TValue&& value);
 
 	template <typename N>
 	HFSM2_INLINE	   Item& operator[] (const N i);
@@ -79,9 +79,9 @@ public:
 	template <typename N>
 	HFSM2_INLINE const Item& operator[] (const N i) const;
 
-	HFSM2_INLINE LongIndex count() const											{ return _count;	}
+	HFSM2_INLINE Long count() const													{ return _count;	}
 
-	template <LongIndex N>
+	template <Long N>
 	Array& operator += (const Array<T, N>& other);
 
 	HFSM2_INLINE Iterator<      Array>  begin()			{ return Iterator<		Array>(*this,     0);	}
@@ -93,11 +93,11 @@ public:
 	HFSM2_INLINE Iterator<const Array>   cend() const	{ return Iterator<const Array>(*this, DUMMY);	}
 
 private:
-	HFSM2_INLINE LongIndex next(const LongIndex i) const							{ return i + 1;		}
-	HFSM2_INLINE LongIndex limit() const											{ return _count;	}
+	HFSM2_INLINE Long next(const Long i) const										{ return i + 1;		}
+	HFSM2_INLINE Long limit() const													{ return _count;	}
 
 private:
-	LongIndex _count = 0;
+	Long _count = 0;
 
 #ifdef _MSC_VER
 	#pragma warning(push)
@@ -114,7 +114,14 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-class Array<T, 0> {};
+class Array<T, 0> {
+public:
+	static constexpr Long CAPACITY = 0;
+	static constexpr Long DUMMY	   = INVALID_LONG;
+
+	using Item = T;
+	using Index = UnsignedCapacity<0>;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 

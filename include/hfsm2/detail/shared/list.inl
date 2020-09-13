@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 template <typename... TA>
-LongIndex
+Long
 List<T, NC>::emplace(TA... args) {
 	if (_count < CAPACITY) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
@@ -59,7 +59,7 @@ List<T, NC>::emplace(TA... args) {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 void
 List<T, NC>::remove(const Index i) {
 	HFSM2_ASSERT(i < CAPACITY && _count);
@@ -97,7 +97,7 @@ List<T, NC>::remove(const Index i) {
 
 //------------------------------------------------------------------------------
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 T&
 List<T, NC>::operator[] (const Index i) {
 	HFSM2_IF_ASSERT(verifyStructure());
@@ -107,7 +107,7 @@ List<T, NC>::operator[] (const Index i) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 const T&
 List<T, NC>::operator[] (const Index i) const {
 	HFSM2_IF_ASSERT(verifyStructure());
@@ -119,7 +119,7 @@ List<T, NC>::operator[] (const Index i) const {
 
 #ifdef HFSM2_ENABLE_ASSERT
 
-template <typename T, LongIndex NC>
+template <typename T, Long NC>
 void
 List<T, NC>::verifyStructure(const Index occupied) const {
 	if (_count < CAPACITY) {

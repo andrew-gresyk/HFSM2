@@ -74,15 +74,15 @@ struct TaskT<void>
 //------------------------------------------------------------------------------
 
 struct TaskLink {
-	LongIndex prev		= INVALID_LONG_INDEX;
-	LongIndex next		= INVALID_LONG_INDEX;
+	Long prev		= INVALID_LONG;
+	Long next		= INVALID_LONG;
 };
 
 //------------------------------------------------------------------------------
 
 struct Bounds {
-	LongIndex first		= INVALID_LONG_INDEX;
-	LongIndex last		= INVALID_LONG_INDEX;
+	Long first		= INVALID_LONG;
+	Long last		= INVALID_LONG;
 };
 
 #pragma pack(pop)
@@ -93,12 +93,12 @@ template <typename
 		, typename
 		, typename
 		, typename
-		, LongIndex
-		, LongIndex
-		, LongIndex
-		, LongIndex
-		, LongIndex
-		, LongIndex
+		, Long
+		, Long
+		, Long
+		, Long
+		, Long
+		, Long
 		, typename>
 struct ArgsT;
 
@@ -111,12 +111,12 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity
+		, Long NCompoCount
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		, Long NTaskCapacity
 		, typename TPayload>
 struct PlanDataT<ArgsT<TContext
 					 , TConfig
@@ -134,8 +134,8 @@ struct PlanDataT<ArgsT<TContext
 	using RegionList	= TRegionList;
 	using Payload		= TPayload;
 
-	static constexpr ShortIndex REGION_COUNT  = RegionList::SIZE;
-	static constexpr ShortIndex TASK_CAPACITY = NTaskCapacity;
+	static constexpr Short REGION_COUNT  = RegionList::SIZE;
+	static constexpr Short TASK_CAPACITY = NTaskCapacity;
 
 	using Task			= TaskT<TPayload>;
 	using Tasks			= List<Task, TASK_CAPACITY>;
@@ -158,7 +158,7 @@ struct PlanDataT<ArgsT<TContext
 
 #ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans() const;
-	LongIndex verifyPlan(const RegionID stateId) const;
+	Long verifyPlan(const RegionID stateId) const;
 #endif
 };
 
@@ -168,12 +168,12 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity>
+		, Long NCompoCount
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		, Long NTaskCapacity>
 struct PlanDataT<ArgsT<TContext
 					 , TConfig
 					 , TStateList
@@ -189,8 +189,8 @@ struct PlanDataT<ArgsT<TContext
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr ShortIndex REGION_COUNT  = RegionList::SIZE;
-	static constexpr ShortIndex TASK_CAPACITY = NTaskCapacity;
+	static constexpr Short REGION_COUNT  = RegionList::SIZE;
+	static constexpr Short TASK_CAPACITY = NTaskCapacity;
 
 	using Task			= TaskT<void>;
 	using Tasks			= List<Task, TASK_CAPACITY>;
@@ -210,7 +210,7 @@ struct PlanDataT<ArgsT<TContext
 
 #ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans() const;
-	LongIndex verifyPlan(const RegionID stateId) const;
+	Long verifyPlan(const RegionID stateId) const;
 #endif
 };
 
@@ -220,10 +220,10 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSubstitutionLimit
-		, LongIndex NTaskCapacity
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSubstitutionLimit
+		, Long NTaskCapacity
 		, typename TPayload>
 struct PlanDataT<ArgsT<TContext
 					 , TConfig
@@ -239,7 +239,7 @@ struct PlanDataT<ArgsT<TContext
 {
 #ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans() const													{}
-	LongIndex verifyPlan(const RegionID) const					{ return 0;		}
+	Long verifyPlan(const RegionID) const					{ return 0;		}
 #endif
 };
 

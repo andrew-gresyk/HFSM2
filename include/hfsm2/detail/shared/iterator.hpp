@@ -9,12 +9,12 @@ public:
 	using Container = TContainer;
 	using Item		= typename Container::Item;
 
-	template <typename T, LongIndex NCapacity>
+	template <typename T, Long NCapacity>
 	friend class Array;
 
 private:
 	HFSM2_INLINE Iterator(Container& container,
-						  const LongIndex cursor)
+						  const Long cursor)
 		: _container{container}
 		, _cursor{cursor}
 	{}
@@ -33,7 +33,7 @@ public:
 private:
 	Container& _container;
 
-	LongIndex _cursor;
+	Long _cursor;
 };
 
 //------------------------------------------------------------------------------
@@ -44,12 +44,12 @@ public:
 	using Container = TContainer;
 	using Item = typename Container::Item;
 
-	template <typename T, LongIndex NCapacity>
+	template <typename T, Long NCapacity>
 	friend class Array;
 
 private:
 	HFSM2_INLINE Iterator(const Container& container,
-						  const LongIndex cursor)
+						  const Long cursor)
 		: _container{container}
 		, _cursor{cursor}
 	{}
@@ -66,7 +66,7 @@ public:
 private:
 	const Container& _container;
 
-	LongIndex _cursor;
+	Long _cursor;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

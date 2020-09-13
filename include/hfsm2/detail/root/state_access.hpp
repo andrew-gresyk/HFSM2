@@ -76,7 +76,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  Strategy TG,
-		  ShortIndex NI,
+		  Short NI,
 		  typename... TS>
 struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
 	using Host =		 CS_<TN, TA, TG, NI, TS...>;
@@ -96,7 +96,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  Strategy TG,
-		  ShortIndex NI,
+		  Short NI,
 		  typename... TS>
 struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
 	using Host =   const CS_<TN, TA, TG, NI, TS...>;
@@ -116,7 +116,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  Strategy TG,
-		  ShortIndex NI,
+		  Short NI,
 		  typename TS>
 struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> {
 	using Host =		 CS_<TN, TA, TG, NI, TS>;
@@ -132,7 +132,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  Strategy TG,
-		  ShortIndex NI,
+		  Short NI,
 		  typename TS>
 struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> {
 	using Host =   const CS_<TN, TA, TG, NI, TS>;
@@ -205,7 +205,7 @@ struct Accessor<T, const O_<TN, TA,  T, TS...>> {
 template <typename T,
 		  typename TN,
 		  typename TA,
-		  ShortIndex NI,
+		  Short NI,
 		  typename... TS>
 struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
 	using Host =		 OS_<TN, TA, NI, TS...>;
@@ -224,7 +224,7 @@ struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
 template <typename T,
 		  typename TN,
 		  typename TA,
-		  ShortIndex NI,
+		  Short NI,
 		  typename... TS>
 struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
 	using Host =   const OS_<TN, TA, NI, TS...>;
@@ -243,7 +243,7 @@ struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
 template <typename T,
 		  typename TN,
 		  typename TA,
-		  ShortIndex NI,
+		  Short NI,
 		  typename TS>
 struct Accessor<T,		 OS_<TN, TA, NI, TS>> {
 	using Host =		 OS_<TN, TA, NI, TS>;
@@ -258,7 +258,7 @@ struct Accessor<T,		 OS_<TN, TA, NI, TS>> {
 template <typename T,
 		  typename TN,
 		  typename TA,
-		  ShortIndex NI,
+		  Short NI,
 		  typename TS>
 struct Accessor<T, const OS_<TN, TA, NI, TS>> {
 	using Host =   const OS_<TN, TA, NI, TS>;

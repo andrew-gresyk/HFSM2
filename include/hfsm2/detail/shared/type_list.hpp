@@ -3,12 +3,12 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template<LongIndex N>
+template<Long N>
 struct IndexConstant {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template<LongIndex... Ns>
+template<Long... Ns>
 struct IndexSequence {
 	using Type = IndexSequence<Ns...>;
 };
@@ -18,14 +18,14 @@ struct IndexSequence {
 template<typename, typename>
 struct MakeIndexSequenceT {};
 
-template<LongIndex N, LongIndex... Ns>
+template<Long N, Long... Ns>
 struct MakeIndexSequenceT<IndexConstant<N>,
 						  IndexSequence<Ns...>>
 	: MakeIndexSequenceT<IndexConstant<N - 1>,
 						 IndexSequence<N - 1, Ns...>>
 {};
 
-template<LongIndex... Ns>
+template<Long... Ns>
 struct MakeIndexSequenceT<IndexConstant<0>,
 							  IndexSequence<Ns...>>
 	: IndexSequence<Ns...>
@@ -33,7 +33,7 @@ struct MakeIndexSequenceT<IndexConstant<0>,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template<LongIndex N>
+template<Long N>
 using MakeIndexSequence = typename MakeIndexSequenceT<IndexConstant<N>,
 													  IndexSequence<>>::Type;
 
@@ -47,7 +47,7 @@ using IndexSequenceFor = MakeIndexSequence<sizeof...(Ts)>;
 template <typename T>
 struct ITL_EntryT {};
 
-template <typename T, LongIndex N>
+template <typename T, Long N>
 struct ITL_EntryN
 	: ITL_EntryT<T>
 {};
@@ -57,12 +57,12 @@ struct ITL_EntryN
 template <typename...>
 struct ITL_Impl;
 
-template <LongIndex... Ns, typename... Ts>
+template <Long... Ns, typename... Ts>
 struct ITL_Impl<IndexSequence<Ns...>, Ts...>
 	: ITL_EntryN<Ts, Ns>...
 {
-	template <typename T, LongIndex N>
-	static constexpr LongIndex select(ITL_EntryN<T, N>) { return (LongIndex) N; }
+	template <typename T, Long N>
+	static constexpr Long select(ITL_EntryN<T, N>) { return (Long) N; }
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -73,23 +73,23 @@ struct ITL_
 {
 	using Base = ITL_Impl<IndexSequenceFor<Ts...>, Ts...>;
 
-	static constexpr LongIndex SIZE = sizeof...(Ts);
+	static constexpr Long SIZE = sizeof...(Ts);
 
 	template <typename T>
 	static constexpr bool contains() { return std::is_base_of<ITL_EntryT<T>, ITL_>::value; }
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if< std::is_base_of<ITL_EntryT<T>, ITL_>::value, LongIndex>::type
+	typename std::enable_if< std::is_base_of<ITL_EntryT<T>, ITL_>::value, Long>::type
 	index() {
 		return Base::template select<T>(ITL_{});
 	}
 
 	template <typename T>
 	static constexpr
-	typename std::enable_if<!std::is_base_of<ITL_EntryT<T>, ITL_>::value, LongIndex>::type
+	typename std::enable_if<!std::is_base_of<ITL_EntryT<T>, ITL_>::value, Long>::type
 	index() {
-		return INVALID_LONG_INDEX;
+		return INVALID_LONG;
 	}
 };
 
@@ -121,17 +121,17 @@ using Merge = typename MergeT<Ts...>::Type;
 
 //------------------------------------------------------------------------------
 
-template <LongIndex, LongIndex, typename...>
+template <Long, Long, typename...>
 struct LesserT;
 
-template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
+template <Long H, Long I, typename TFirst, typename... TRest>
 struct LesserT<H, I, TFirst, TRest...> {
 	using Type = typename std::conditional<(I < H),
 										   Prepend<TFirst, typename LesserT<H, I + 1, TRest...>::Type>,
 										   typename LesserT<H, I + 1, TRest...>::Type>::type;
 };
 
-template <LongIndex H, LongIndex I>
+template <Long H, Long I>
 struct LesserT<H, I> {
 	using Type = ITL_<>;
 };
@@ -141,17 +141,17 @@ using SplitL = typename LesserT<sizeof...(Ts) / 2, 0, Ts...>::Type;
 
 //------------------------------------------------------------------------------
 
-template <LongIndex, LongIndex, typename...>
+template <Long, Long, typename...>
 struct GreaterT;
 
-template <LongIndex H, LongIndex I, typename TFirst, typename... TRest>
+template <Long H, Long I, typename TFirst, typename... TRest>
 struct GreaterT<H, I, TFirst, TRest...> {
 	using Type = typename std::conditional<(I < H),
 										   typename GreaterT<H, I + 1, TRest...>::Type,
 										   ITL_<TFirst, TRest...>>::type;
 };
 
-template <LongIndex H, LongIndex I>
+template <Long H, Long I>
 struct GreaterT<H, I> {
 	using Type = ITL_<>;
 };

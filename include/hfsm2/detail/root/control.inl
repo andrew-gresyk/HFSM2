@@ -4,12 +4,30 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
+ControlT<TArgs>::Origin::Origin(ControlT& control_,
+								const StateID stateId)
+	: control{control_}
+	, prevId{control._originId}
+{
+	control.setOrigin(stateId);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+ControlT<TArgs>::Origin::~Origin() {
+	control.resetOrigin(prevId);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
 ControlT<TArgs>::Region::Region(ControlT& control_,
-								const RegionID id)
+								const RegionID regionId)
 	: control{control_}
 	, prevId{control._regionId}
 {
-	control.setRegion(id);
+	control.setRegion(regionId);
 }
 
 //------------------------------------------------------------------------------
@@ -23,53 +41,97 @@ ControlT<TArgs>::Region::~Region() {
 
 template <typename TArgs>
 void
-ControlT<TArgs>::setRegion(const RegionID id) {
-	HFSM2_ASSERT(_regionId <= id && id < RegionList::SIZE);
+ControlT<TArgs>::setOrigin(const StateID stateId) {
+	HFSM2_ASSERT(stateId < StateList::SIZE);
 
-	_regionId = id;
+	_originId = stateId;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TArgs>
+void
+ControlT<TArgs>::resetOrigin(const StateID stateId) { //-V524
+	_originId = stateId;
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
 void
-ControlT<TArgs>::resetRegion(const RegionID id) { //-V524
-	HFSM2_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
+ControlT<TArgs>::setRegion(const RegionID regionId) {
+	HFSM2_ASSERT(_regionId <= regionId && regionId < RegionList::SIZE);
 
-	_regionId = id;
+	_regionId = regionId;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TArgs>
-PlanControlT<TArgs>::Origin::Origin(PlanControlT& control_,
-									const StateID id)
-	: control{control_}
-	, prevId{control._originId}
+void
+ControlT<TArgs>::resetRegion(const RegionID regionId) { //-V524
+	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
+
+	_regionId = regionId;
+}
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+template <typename TArgs>
+void
+ControlT<TArgs>::pinLastTransition(const StateID stateId,
+								   const Short index)
 {
-	control.setOrigin(id);
+	if (index != INVALID_SHORT) {
+		HFSM2_ASSERT(index < TransitionSets::CAPACITY);
+
+		if (!_registry.isActive(stateId))
+			_transitionTargets[stateId] = index;
+	}
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-PlanControlT<TArgs>::Origin::~Origin() {
-	control.resetOrigin(prevId);
+const typename ControlT<TArgs>::Transition*
+ControlT<TArgs>::lastTransition(const StateID stateId) const {
+	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
+		const Short index = _transitionTargets[stateId];
+
+		if (index < _previousTransitions.count())
+			return &_previousTransitions[index];
+	}
+
+	return nullptr;
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TArgs>
+const typename ControlT<TArgs>::Transition*
+ControlT<TArgs>::lastTransition() const {
+	HFSM2_ASSERT(_originId < _transitionTargets.CAPACITY);
+
+	return lastTransition(_originId);
+}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
 PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
-									const RegionID id,
+									const RegionID regionId,
 									const StateID index,
-									const LongIndex size)
+									const Long size)
 	: control{control_}
 	, prevId{control._regionId}
 	, prevIndex{control._regionIndex}
 	, prevSize{control._regionSize}
 {
-	control.setRegion(id, index, size);
+	control.setRegion(regionId, index, size);
 }
 
 //------------------------------------------------------------------------------
@@ -85,36 +147,14 @@ PlanControlT<TArgs>::Region::~Region() {
 
 template <typename TArgs>
 void
-PlanControlT<TArgs>::setOrigin(const StateID id) {
-	HFSM2_ASSERT(_regionId + _regionSize <= StateList::SIZE);
-	HFSM2_ASSERT(_originId <= id && id < StateList::SIZE);
-
-	_originId = id;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-void
-PlanControlT<TArgs>::resetOrigin(const StateID id) { //-V524
-	HFSM2_ASSERT(_regionId + _regionSize <= StateList::SIZE);
-	HFSM2_ASSERT(id <= _originId && _originId < StateList::SIZE);
-
-	_originId = id;
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TArgs>
-void
-PlanControlT<TArgs>::setRegion(const RegionID id,
+PlanControlT<TArgs>::setRegion(const RegionID regionId,
 							   const StateID index,
-							   const LongIndex size)
+							   const Long size)
 {
-	HFSM2_ASSERT(_regionId <= id && id <  RegionList::SIZE);
+	HFSM2_ASSERT(_regionId <= regionId && regionId <  RegionList::SIZE);
 	HFSM2_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
 
-	_regionId	 = id;
+	_regionId	 = regionId;
 	_regionIndex = index;
 	_regionSize	 = size;
 }
@@ -123,14 +163,14 @@ PlanControlT<TArgs>::setRegion(const RegionID id,
 
 template <typename TArgs>
 void
-PlanControlT<TArgs>::resetRegion(const RegionID id, //-V524
+PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
 								 const StateID index,
-								 const LongIndex size)
+								 const Long size)
 {
-	HFSM2_ASSERT(id <= _regionId && _regionId < RegionList::SIZE);
+	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
 	HFSM2_ASSERT(index <= _regionIndex && _regionIndex + _regionSize <= index + size);
 
-	_regionId	 = id;
+	_regionId	 = regionId;
 	_regionIndex = index;
 	_regionSize	 = size;
 }
@@ -325,7 +365,7 @@ FullControlBaseT<TArgs>::fail() {
 
 #ifdef HFSM2_ENABLE_PLANS
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 template <typename TState>
 Status
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::updatePlan(TState& headState,
@@ -378,7 +418,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID stateId,
 																									  const Payload& payload)
@@ -393,7 +433,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	}
 }
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID stateId,
 																									  Payload&& payload)
@@ -410,7 +450,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID stateId,
 																									   const Payload& payload)
@@ -425,7 +465,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	}
 }
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID stateId,
 																									   Payload&& payload)
@@ -442,7 +482,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID stateId,
 																									  const Payload& payload)
@@ -457,7 +497,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	}
 }
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID stateId,
 																									  Payload&& payload)
@@ -476,7 +516,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID stateId,
 																									   const Payload& payload)
@@ -491,7 +531,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	}
 }
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID stateId,
 																									   Payload&& payload)
@@ -508,7 +548,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID stateId,
 																										 const Payload& payload)
@@ -523,7 +563,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	}
 }
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID stateId,
 																										 Payload&& payload)
@@ -542,7 +582,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID stateId,
 																										const Payload& payload)
@@ -552,7 +592,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID stateId,
 																										Payload&& payload)
@@ -566,7 +606,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 
 #ifdef HFSM2_ENABLE_PLANS
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL HFSM2_IF_PLANS(, LongIndex NTC)>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC)>
 template <typename TState>
 Status
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), void>>::updatePlan(TState& headState,

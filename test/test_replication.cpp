@@ -9,7 +9,7 @@ using M = hfsm2::Machine;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace server{
+namespace server {
 
 #define S(s) struct s
 
@@ -242,6 +242,9 @@ TEST_CASE("FSM.Replication", "[machine]") {
 
 			REQUIRE(authority .previousTransitions().count() == 0);
 			REQUIRE(replicated.previousTransitions().count() == 0);
+
+			assertLastTransitions(authority , client::all, {});
+			assertLastTransitions(replicated, server::all, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -249,7 +252,7 @@ TEST_CASE("FSM.Replication", "[machine]") {
 		authority.changeTo<server::O2_C1_S2>();
 		authority.update();
 		{
-			assertActive(authority,  server::all, {
+			assertActive(authority, server::all, {
 				server::FSM::stateId<server::O2      >(),
 				server::FSM::stateId<server::O2_C1   >(),
 				server::FSM::stateId<server::O2_C1_S2>(),
@@ -257,7 +260,7 @@ TEST_CASE("FSM.Replication", "[machine]") {
 				server::FSM::stateId<server::O2_C2_S1>(),
 			});
 
-			assertResumable(authority,  server::all, {
+			assertResumable(authority, server::all, {
 				server::FSM::stateId<server::C1      >(),
 				server::FSM::stateId<server::C1_S1   >(),
 			});
@@ -266,6 +269,20 @@ TEST_CASE("FSM.Replication", "[machine]") {
 			REQUIRE(previousTransitions.count() == 1);
 			REQUIRE(previousTransitions[0] == M::Transition{server::FSM::stateId<server::O2_C1_S2>(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(authority, server::all, {
+				server::FSM::stateId<server::O2      >(),
+				server::FSM::stateId<server::O2_C1   >(),
+				server::FSM::stateId<server::O2_C1_S2>(),
+				server::FSM::stateId<server::O2_C2   >(),
+				server::FSM::stateId<server::O2_C2_S1>(),
+			});
+
+			REQUIRE(authority.lastTransition<server::O2      >() == &previousTransitions[0]);
+			REQUIRE(authority.lastTransition<server::O2_C1   >() == &previousTransitions[0]);
+			REQUIRE(authority.lastTransition<server::O2_C1_S2>() == &previousTransitions[0]);
+			REQUIRE(authority.lastTransition<server::O2_C2   >() == &previousTransitions[0]);
+			REQUIRE(authority.lastTransition<server::O2_C2_S1>() == &previousTransitions[0]);
 		}
 
 		REQUIRE(replicated.replayTransition(authority.previousTransitions()[0]));
@@ -287,6 +304,20 @@ TEST_CASE("FSM.Replication", "[machine]") {
 			REQUIRE(previousTransitions.count() == 1);
 			REQUIRE(previousTransitions[0] == M::Transition{client::FSM::stateId<client::O2_C1_S2>(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(replicated, server::all, {
+				client::FSM::stateId<client::O2      >(),
+				client::FSM::stateId<client::O2_C1   >(),
+				client::FSM::stateId<client::O2_C1_S2>(),
+				client::FSM::stateId<client::O2_C2   >(),
+				client::FSM::stateId<client::O2_C2_S1>(),
+			});
+
+			REQUIRE(replicated.lastTransition<client::O2      >() == &previousTransitions[0]);
+			REQUIRE(replicated.lastTransition<client::O2_C1   >() == &previousTransitions[0]);
+			REQUIRE(replicated.lastTransition<client::O2_C1_S2>() == &previousTransitions[0]);
+			REQUIRE(replicated.lastTransition<client::O2_C2   >() == &previousTransitions[0]);
+			REQUIRE(replicated.lastTransition<client::O2_C2_S1>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -295,7 +326,7 @@ TEST_CASE("FSM.Replication", "[machine]") {
 		authority.changeTo<server::O2_C2_S2>();
 		authority.update();
 		{
-			assertActive(authority,  server::all, {
+			assertActive(authority, server::all, {
 				server::FSM::stateId<server::O2      >(),
 				server::FSM::stateId<server::O2_C1   >(),
 				server::FSM::stateId<server::O2_C1_S1>(),
@@ -316,6 +347,14 @@ TEST_CASE("FSM.Replication", "[machine]") {
 															hfsm2::TransitionType::CHANGE});
 			REQUIRE(previousTransitions[1] == M::Transition{server::FSM::stateId<server::O2_C2_S2>(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(authority, server::all, {
+				server::FSM::stateId<server::O2_C1_S1>(),
+				server::FSM::stateId<server::O2_C2_S2>(),
+			});
+
+			REQUIRE(authority.lastTransition<server::O2_C1_S1>() == &previousTransitions[1]);
+			REQUIRE(authority.lastTransition<server::O2_C2_S2>() == &previousTransitions[1]);
 		}
 
 		REQUIRE(replicated.replayTransitions(authority.previousTransitions()));
@@ -335,12 +374,20 @@ TEST_CASE("FSM.Replication", "[machine]") {
 				client::FSM::stateId<client::O2_C2_S1>(),
 			});
 
-			const auto& previousTransitions = authority.previousTransitions();
+			const auto& previousTransitions = replicated.previousTransitions();
 			REQUIRE(previousTransitions.count() == 2);
-			REQUIRE(previousTransitions[0] == M::Transition{server::FSM::stateId<server::O2_C1_S1>(),
+			REQUIRE(previousTransitions[0] == M::Transition{client::FSM::stateId<client::O2_C1_S1>(),
 															hfsm2::TransitionType::CHANGE});
-			REQUIRE(previousTransitions[1] == M::Transition{server::FSM::stateId<server::O2_C2_S2>(),
+			REQUIRE(previousTransitions[1] == M::Transition{client::FSM::stateId<client::O2_C2_S2>(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(replicated, client::all, {
+				client::FSM::stateId<client::O2_C1_S1>(),
+				client::FSM::stateId<client::O2_C2_S2>(),
+			});
+
+			REQUIRE(replicated.lastTransition<client::O2_C1_S1>() == &previousTransitions[1]);
+			REQUIRE(replicated.lastTransition<client::O2_C2_S2>() == &previousTransitions[1]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -355,6 +402,8 @@ TEST_CASE("FSM.Replication", "[machine]") {
 			assertResumable(replicated, client::all, {});
 
 			REQUIRE(replicated.previousTransitions().count() == 0);
+
+			assertLastTransitions(replicated, client::all, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -378,6 +427,8 @@ TEST_CASE("FSM.Replication", "[machine]") {
 			});
 
 			REQUIRE(authority.previousTransitions().count() == 0);
+
+			assertLastTransitions(authority, server::all, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
