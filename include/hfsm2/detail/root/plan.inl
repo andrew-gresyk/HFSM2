@@ -33,7 +33,7 @@ ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
 
 template <typename TArgs>
 ConstPlanT<TArgs>::Iterator::operator bool() const {
-	HFSM2_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
+	HFSM2_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG);
 
 	return _curr < ConstPlanT::TASK_CAPACITY;
 }
@@ -50,16 +50,16 @@ ConstPlanT<TArgs>::Iterator::operator ++() {
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-LongIndex
+Long
 ConstPlanT<TArgs>::Iterator::next() const {
 	if (_curr < ConstPlanT::TASK_CAPACITY) {
 		const TaskLink& link = _plan._planData.taskLinks[_curr];
 
 		return link.next;
 	} else {
-		HFSM2_ASSERT(_curr == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_curr == INVALID_LONG);
 
-		return INVALID_LONG_INDEX;
+		return INVALID_LONG;
 	}
 }
 
@@ -81,7 +81,7 @@ ConstPlanT<TArgs>::operator bool() const {
 		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
 	} else {
-		HFSM2_ASSERT(_bounds.last == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.last == INVALID_LONG);
 		return false;
 	}
 }
@@ -100,7 +100,7 @@ PlanBaseT<TArgs>::Iterator::Iterator(PlanBaseT& plan)
 
 template <typename TArgs>
 PlanBaseT<TArgs>::Iterator::operator bool() const {
-	HFSM2_ASSERT(_curr < PlanBaseT::TASK_CAPACITY || _curr == INVALID_LONG_INDEX);
+	HFSM2_ASSERT(_curr < PlanBaseT::TASK_CAPACITY || _curr == INVALID_LONG);
 
 	return _curr < PlanBaseT::TASK_CAPACITY;
 }
@@ -125,16 +125,16 @@ PlanBaseT<TArgs>::Iterator::remove() {
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-LongIndex
+Long
 PlanBaseT<TArgs>::Iterator::next() const {
 	if (_curr < PlanBaseT::TASK_CAPACITY) {
 		const TaskLink& link = _plan._planData.taskLinks[_curr];
 
 		return link.next;
 	} else {
-		HFSM2_ASSERT(_curr == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_curr == INVALID_LONG);
 
-		return INVALID_LONG_INDEX;
+		return INVALID_LONG;
 	}
 }
 
@@ -157,7 +157,7 @@ PlanBaseT<TArgs>::operator bool() const {
 		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
 	} else {
-		HFSM2_ASSERT(_bounds.last == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.last == INVALID_LONG);
 		return false;
 	}
 }
@@ -179,12 +179,12 @@ PlanBaseT<TArgs>::append(const StateID origin,
 
 template <typename TArgs>
 bool
-PlanBaseT<TArgs>::linkTask(const LongIndex index) {
+PlanBaseT<TArgs>::linkTask(const Long index) {
 	if (index != Tasks::INVALID) {
-		if (_bounds.first == INVALID_LONG_INDEX) {
-			HFSM2_ASSERT(_bounds.last == INVALID_LONG_INDEX);
-			HFSM2_ASSERT(_planData.taskLinks[index].prev == INVALID_LONG_INDEX);
-			HFSM2_ASSERT(_planData.taskLinks[index].next == INVALID_LONG_INDEX);
+		if (_bounds.first == INVALID_LONG) {
+			HFSM2_ASSERT(_bounds.last == INVALID_LONG);
+			HFSM2_ASSERT(_planData.taskLinks[index].prev == INVALID_LONG);
+			HFSM2_ASSERT(_planData.taskLinks[index].next == INVALID_LONG);
 
 			_bounds.first = index;
 			_bounds.last  = index;
@@ -193,12 +193,12 @@ PlanBaseT<TArgs>::linkTask(const LongIndex index) {
 			HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
 
 			auto& lastLink = _planData.taskLinks[_bounds.last];
-			HFSM2_ASSERT(lastLink.next == INVALID_LONG_INDEX);
+			HFSM2_ASSERT(lastLink.next == INVALID_LONG);
 
 			lastLink.next  = index;
 
 			auto& currLink = _planData.taskLinks[index];
-			HFSM2_ASSERT(lastLink.prev == INVALID_LONG_INDEX);
+			HFSM2_ASSERT(lastLink.prev == INVALID_LONG);
 
 			currLink.prev  = _bounds.last;
 
@@ -218,29 +218,29 @@ PlanBaseT<TArgs>::clear() {
 	if (_bounds.first < TaskLinks::CAPACITY) {
 		HFSM2_ASSERT(_bounds.last < TaskLinks::CAPACITY);
 
-		for (LongIndex index = _bounds.first;
-			 index != INVALID_LONG_INDEX;
+		for (Long index = _bounds.first;
+			 index != INVALID_LONG;
 			 )
 		{
 			HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
 			const auto& taskLink = _planData.taskLinks[index];
 			HFSM2_ASSERT(index == _bounds.first ?
-							 taskLink.prev == INVALID_LONG_INDEX :
+							 taskLink.prev == INVALID_LONG :
 							 taskLink.prev <  TaskLinks::CAPACITY);
 
-			const LongIndex next = taskLink.next;
+			const Long next = taskLink.next;
 
 			_planData.tasks.remove(index);
 
 			index = next;
 		}
 
-		_bounds.first = INVALID_LONG_INDEX;
-		_bounds.last  = INVALID_LONG_INDEX;
+		_bounds.first = INVALID_LONG;
+		_bounds.last  = INVALID_LONG;
 	} else {
-		HFSM2_ASSERT(_bounds.first == INVALID_LONG_INDEX);
-		HFSM2_ASSERT(_bounds.last  == INVALID_LONG_INDEX);
+		HFSM2_ASSERT(_bounds.first == INVALID_LONG);
+		HFSM2_ASSERT(_bounds.last  == INVALID_LONG);
 	}
 }
 
@@ -248,7 +248,7 @@ PlanBaseT<TArgs>::clear() {
 
 template <typename TArgs>
 void
-PlanBaseT<TArgs>::remove(const LongIndex task) {
+PlanBaseT<TArgs>::remove(const Long task) {
 	HFSM2_ASSERT(_planData.planExists.get(_regionId));
 	HFSM2_ASSERT(_bounds.first < TaskLinks::CAPACITY);
 	HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
@@ -273,15 +273,15 @@ PlanBaseT<TArgs>::remove(const LongIndex task) {
 		_bounds.last = curr.prev;
 	}
 
-	curr.prev = INVALID_LONG_INDEX;
-	curr.next = INVALID_LONG_INDEX;
+	curr.prev = INVALID_LONG;
+	curr.next = INVALID_LONG;
 
 	_planData.tasks.remove(task);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL, LongIndex NTC, typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL, Long NTC, typename TTP>
 bool
 PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::append(const StateID origin,
 																		  const StateID destination,
@@ -295,7 +295,7 @@ PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::append(const 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, LongIndex NCC, LongIndex NOC, LongIndex NOU, LongIndex NSB, LongIndex NSL, LongIndex NTC, typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL, Long NTC, typename TTP>
 bool
 PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::append(const StateID origin,
 																		  const StateID destination,

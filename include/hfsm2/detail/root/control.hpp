@@ -18,36 +18,52 @@ class ControlT {
 	friend class R_;
 
 protected:
-	using Context		= typename TArgs::Context;
+	using Context			= typename TArgs::Context;
 
-	using StateList		= typename TArgs::StateList;
-	using RegionList	= typename TArgs::RegionList;
+	using StateList			= typename TArgs::StateList;
+	using RegionList		= typename TArgs::RegionList;
 
-	using Registry		= RegistryT<TArgs>;
+	using Registry			= RegistryT<TArgs>;
 
-	using Payload		= typename TArgs::Payload;
-	using Transition	= TransitionT<Payload>;
-	using Transitions	= Array<Transition, TArgs::COMPO_REGIONS>;
-	using TransitionSet	= Array<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
+	using Payload			= typename TArgs::Payload;
+	using Transition		= TransitionT<Payload>;
+	using TransitionSet		= Array<Transition, TArgs::COMPO_REGIONS>;
+	using TransitionSets	= Array<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	using TransitionTargets	= StaticArray<Short, TArgs::STATE_COUNT>;
+#endif
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG			= typename TArgs::RNG;
+	using RNG				= typename TArgs::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_PLANS
-	using PlanData		= PlanDataT<TArgs>;
-	using ConstPlan		= ConstPlanT<TArgs>;
+	using PlanData			= PlanDataT<TArgs>;
+	using ConstPlan			= ConstPlanT<TArgs>;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger		= typename TArgs::Logger;
+	using Logger			= typename TArgs::Logger;
 #endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	struct Origin {
+		HFSM2_INLINE Origin(ControlT& control_,
+							const StateID stateId);
+
+		HFSM2_INLINE ~Origin();
+
+		ControlT& control;
+		const StateID prevId;
+	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	struct Region {
 		HFSM2_INLINE Region(ControlT& control,
-							const RegionID id);
+							const RegionID regionId);
 
 		HFSM2_INLINE ~Region();
 
@@ -59,22 +75,31 @@ protected:
 
 	HFSM2_INLINE ControlT(Context& context
 						, Registry& registry
-						, Transitions& requests
+						, TransitionSet& requests
 						HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 						HFSM2_IF_PLANS(, PlanData& planData)
-						HFSM2_IF_TRANSITION_HISTORY(, const TransitionSet& previousTransitions)
+						HFSM2_IF_TRANSITION_HISTORY(, TransitionTargets& transitionTargets)
+						HFSM2_IF_TRANSITION_HISTORY(, const TransitionSets& previousTransitions)
 						HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
 		: _context{context}
 		, _registry{registry}
 		, _requests{requests}
 		HFSM2_IF_UTILITY_THEORY(, _rng{rng})
 		HFSM2_IF_PLANS(, _planData{planData})
+		HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets{transitionTargets})
 		HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions{previousTransitions})
 		HFSM2_IF_LOG_INTERFACE(, _logger{logger})
 	{}
 
-	HFSM2_INLINE void setRegion(const RegionID id);
-	HFSM2_INLINE void resetRegion(const RegionID id);
+	HFSM2_INLINE void setOrigin  (const StateID stateId);
+	HFSM2_INLINE void resetOrigin(const StateID stateId);
+
+	HFSM2_INLINE void setRegion	 (const RegionID regionId);
+	HFSM2_INLINE void resetRegion(const RegionID regionId);
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	HFSM2_INLINE void pinLastTransition(const StateID stateId, const Short index);
+#endif
 
 public:
 
@@ -104,27 +129,27 @@ public:
 
 	/// @brief Inspect current transition requests
 	/// @return Array of transition requests
-	HFSM2_INLINE const Transitions& requests()						{ return _requests;							}
+	HFSM2_INLINE const TransitionSet& requests()					{ return _requests;							}
 
 	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active
 	/// @param stateId State identifier
 	/// @return State active status
-	HFSM2_INLINE bool isActive   (const StateID id) const			{ return _registry.isActive   (id);			}
+	HFSM2_INLINE bool isActive   (const StateID stateId) const		{ return _registry.isActive   (stateId);	}
 
 	/// @brief Check if a state is active
 	/// @tparam TState State type
 	/// @return State active status
 	template <typename TState>
-	HFSM2_INLINE bool isActive() const								{ return isActive	(stateId<TState>());	}
+	HFSM2_INLINE bool isActive	 () const							{ return isActive	(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId State identifier
 	/// @return State resumable status
-	HFSM2_INLINE bool isResumable(const StateID id) const			{ return _registry.isResumable(id);			}
+	HFSM2_INLINE bool isResumable(const StateID stateId) const		{ return _registry.isResumable(stateId);	}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState State type
@@ -137,7 +162,7 @@ public:
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId State identifier
 	/// @return State scheduled status
-	HFSM2_INLINE bool isScheduled(const StateID id) const			{ return isResumable(id);					}
+	HFSM2_INLINE bool isScheduled(const StateID stateId) const		{ return isResumable(stateId);				}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState State type
@@ -178,7 +203,16 @@ public:
 
 	/// @brief Get transitions processed during last 'update()', 'react()' or 'replayTransitions()'
 	/// @return Array of last transition requests
-	HFSM2_INLINE const TransitionSet& previousTransitions() const	{ return _previousTransitions;						}
+	HFSM2_INLINE const TransitionSets& previousTransitions() const	{ return _previousTransitions;				}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	const Transition* lastTransition(const StateID stateId) const;
+
+	template <typename TState>
+	const Transition* lastTransition() const						{ return lastTransition(stateId<TState>());	}
+
+	const Transition* lastTransition() const;
 
 #endif
 
@@ -186,17 +220,19 @@ public:
 
 protected:
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	HFSM2_INLINE Logger* logger()									{ return _logger;									}
+	HFSM2_INLINE Logger* logger()									{ return _logger;							}
 #endif
 
 protected:
 	Context& _context;
 	Registry& _registry;
-	Transitions& _requests;
+	TransitionSet& _requests;
+	StateID _originId = INVALID_STATE_ID;
 	RegionID _regionId = 0;
 	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 	HFSM2_IF_PLANS(PlanData& _planData);
-	HFSM2_IF_TRANSITION_HISTORY(const TransitionSet& _previousTransitions);
+	HFSM2_IF_TRANSITION_HISTORY(TransitionTargets& _transitionTargets);
+	HFSM2_IF_TRANSITION_HISTORY(const TransitionSets& _previousTransitions);
 	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
 
@@ -224,11 +260,6 @@ protected:
 	using typename Control::StateList;
 	using typename Control::RegionList;
 
-	using typename Control::Payload;
-	using typename Control::Transition;
-	using typename Control::Transitions;
-	using typename Control::TransitionSet;
-
 #ifdef HFSM2_ENABLE_PLANS
 	using typename Control::PlanData;
 	using typename Control::ConstPlan;
@@ -238,57 +269,28 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Origin {
-		HFSM2_INLINE Origin(PlanControlT& control_,
-							const StateID id);
-
-		HFSM2_INLINE ~Origin();
-
-		PlanControlT& control;
-		const StateID prevId;
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	struct Region {
 		HFSM2_INLINE Region(PlanControlT& control,
-							const RegionID id,
+							const RegionID regionId,
 							const StateID index,
-							const LongIndex size);
+							const Long size);
 
 		HFSM2_INLINE ~Region();
 
 		PlanControlT& control;
 		const RegionID prevId;
-		const LongIndex prevIndex;
-		const LongIndex prevSize;
+		const Long prevIndex;
+		const Long prevSize;
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	using Control::Control;
 
-	HFSM2_INLINE void setOrigin  (const StateID id);
-	HFSM2_INLINE void resetOrigin(const StateID id);
-
-	HFSM2_INLINE void setRegion  (const RegionID id, const StateID index, const LongIndex size);
-	HFSM2_INLINE void resetRegion(const RegionID id, const StateID index, const LongIndex size);
+	HFSM2_INLINE void setRegion  (const RegionID regionId, const StateID index, const Long size);
+	HFSM2_INLINE void resetRegion(const RegionID regionId, const StateID index, const Long size);
 
 public:
-	using Control::stateId;
-	using Control::regionId;
-
-	using Control::_;
-	using Control::context;
-
-	using Control::isActive;
-	using Control::isResumable;
-	using Control::isScheduled;
-
-#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-	using Control::previousTransitions;
-#endif
-
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_PLANS
@@ -329,13 +331,11 @@ public:
 
 protected:
 	using Control::_regionId;
-	using Control::_requests;
 	HFSM2_IF_PLANS(using Control::_planData);
 	HFSM2_IF_LOG_INTERFACE(using Control::_logger);
 
-	StateID _originId = 0;
 	StateID _regionIndex = 0;
-	LongIndex _regionSize = StateList::SIZE;
+	Long _regionSize = StateList::SIZE;
 	Status _status;
 };
 
@@ -360,32 +360,13 @@ class FullControlBaseT
 protected:
 	using PlanControl	= PlanControlT<TArgs>;
 
-	using typename PlanControl::Context;
-
 	using typename PlanControl::StateList;
 	using typename PlanControl::RegionList;
 
-	using typename PlanControl::Origin;
-
-	using typename PlanControl::Registry;
-
-	using typename PlanControl::Payload;
 	using typename PlanControl::Transition;
-	using typename PlanControl::Transitions;
-	using typename PlanControl::TransitionSet;
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using typename PlanControl::RNG;
-#endif
 
 #ifdef HFSM2_ENABLE_PLANS
-	using typename PlanControl::PlanData;
-	using typename PlanControl::Plan;
 	using TasksBits		= BitArray<StateID, StateList::SIZE>;
-#endif
-
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using typename PlanControl::Logger;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -409,22 +390,7 @@ protected:
 #endif
 
 public:
-	using PlanControl::stateId;
-	using PlanControl::regionId;
-
 	using PlanControl::context;
-
-	using PlanControl::isActive;
-	using PlanControl::isResumable;
-	using PlanControl::isScheduled;
-
-#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-	using PlanControl::previousTransitions;
-#endif
-
-#ifdef HFSM2_ENABLE_PLANS
-	using PlanControl::plan;
-#endif
 
 	//----------------------------------------------------------------------
 	// Clang trips over 'stateId<>()', so give it a hint it comes from PlanControl
@@ -544,12 +510,12 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, Long NCompoCount
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
 class FullControlT<ArgsT<TContext
 					   , TConfig
@@ -607,7 +573,6 @@ protected:
 	using typename FullControlBase::Origin;
 
 #ifdef HFSM2_ENABLE_PLANS
-	using typename FullControlBase::PlanData;
 	using typename FullControlBase::Plan;
 	using typename FullControlBase::TasksBits;
 #endif
@@ -829,12 +794,12 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)>
+		, Long NCompoCount
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)>
 class FullControlT<ArgsT<TContext
 					   , TConfig
 					   , TStateList
@@ -888,7 +853,6 @@ protected:
 	using typename FullControlBase::Origin;
 
 #ifdef HFSM2_ENABLE_PLANS
-	using typename FullControlBase::PlanData;
 	using typename FullControlBase::Plan;
 	using typename FullControlBase::TasksBits;
 #endif
@@ -933,12 +897,13 @@ class GuardControlT final
 
 	using typename FullControl::Context;
 
-	using typename FullControl::StateList;
-	using typename FullControl::RegionList;
-
 	using typename FullControl::Registry;
-	using typename FullControl::Transitions;
 	using typename FullControl::TransitionSet;
+	using typename FullControl::TransitionSets;
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	using typename FullControl::TransitionTargets;
+#endif
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using typename FullControl::RNG;
@@ -956,18 +921,20 @@ class GuardControlT final
 
 	HFSM2_INLINE GuardControlT(Context& context
 							 , Registry& registry
-							 , Transitions& requests
-							 , const TransitionSet& currentTransitions
-							 , const Transitions& pendingTransitions
+							 , TransitionSet& requests
+							 , const TransitionSets& currentTransitions
+							 , const TransitionSet& pendingTransitions
 							 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 							 HFSM2_IF_PLANS(, PlanData& planData)
-							 HFSM2_IF_TRANSITION_HISTORY(, const TransitionSet& previousTransitions)
+							 HFSM2_IF_TRANSITION_HISTORY(, TransitionTargets& transitionTargets)
+							 HFSM2_IF_TRANSITION_HISTORY(, const TransitionSets& previousTransitions)
 							 HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
 		: FullControl{context
 					, registry
 					, requests
 					HFSM2_IF_UTILITY_THEORY(, rng)
 					HFSM2_IF_PLANS(, planData)
+					HFSM2_IF_TRANSITION_HISTORY(, transitionTargets)
 					HFSM2_IF_TRANSITION_HISTORY(, previousTransitions)
 					HFSM2_IF_LOG_INTERFACE(, logger)}
 		, _currentTransitions{currentTransitions}
@@ -977,36 +944,7 @@ class GuardControlT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 public:
-	using FullControl::stateId;
-	using FullControl::regionId;
-
-	using FullControl::_;
 	using FullControl::context;
-
-	using FullControl::isActive;
-	using FullControl::isResumable;
-	using FullControl::isScheduled;
-
-	using FullControl::changeTo;
-	using FullControl::restart;
-	using FullControl::resume;
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using FullControl::utilize;
-	using FullControl::randomize;
-#endif
-
-	using FullControl::schedule;
-
-#ifdef HFSM2_ENABLE_PLANS
-	using FullControl::plan;
-	using FullControl::succeed;
-	using FullControl::fail;
-#endif
-
-#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-	using FullControl::previousTransitions;
-#endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -1049,11 +987,11 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE const TransitionSet& currentTransitions() const	{ return _currentTransitions;					}
+	HFSM2_INLINE const TransitionSets& currentTransitions() const	{ return _currentTransitions;					}
 
 	/// @brief Get pending transition requests
 	/// @return Array of pending transition requests
-	HFSM2_INLINE const Transitions&	  pendingTransitions() const	{ return _pendingTransitions;					}
+	HFSM2_INLINE const TransitionSet&  pendingTransitions() const	{ return _pendingTransitions;					}
 
 	/// @brief Cancel pending transition requests
 	///		(can be used to substitute a transition into the current state with a different one)
@@ -1065,8 +1003,8 @@ private:
 
 	HFSM2_IF_LOG_INTERFACE(using FullControl::_logger);
 
-	const TransitionSet& _currentTransitions;
-	const Transitions&	 _pendingTransitions;
+	const TransitionSets& _currentTransitions;
+	const TransitionSet&  _pendingTransitions;
 	bool _cancelled = false;
 };
 

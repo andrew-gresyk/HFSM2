@@ -3,10 +3,10 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TItem, LongIndex NCapacity>
+template <typename TItem, Long NCapacity>
 class List {
 public:
-	using Index = LongIndex;
+	using Index = Long;
 
 	static constexpr Index CAPACITY = NCapacity;
 

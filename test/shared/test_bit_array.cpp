@@ -4,7 +4,7 @@ namespace test_bit_array {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using BitArray = hfsm2::detail::BitArray<hfsm2::ShortIndex, 6>;
+using BitArray = hfsm2::detail::BitArray<hfsm2::Short, 6>;
 using Bits	   = typename BitArray::Bits;
 
 TEST_CASE("Shared.BitArray<>", "[shared]") {

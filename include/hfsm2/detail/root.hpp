@@ -37,7 +37,7 @@ class R_ {
 	using FullControl			= FullControlT <Args>;
 	using GuardControl			= GuardControlT<Args>;
 
-	static constexpr LongIndex	SUBSTITUTION_LIMIT	= Forward::SUBSTITUTION_LIMIT;
+	static constexpr Long	SUBSTITUTION_LIMIT	= Forward::SUBSTITUTION_LIMIT;
 
 #ifdef HFSM2_ENABLE_PLANS
 	using PlanData				= PlanDataT<Args>;
@@ -49,26 +49,29 @@ class R_ {
 #endif
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
-	static constexpr LongIndex NAME_COUNT = MaterialApex::NAME_COUNT;
+	static constexpr Long NAME_COUNT = MaterialApex::NAME_COUNT;
 #endif
 
 #ifdef HFSM2_ENABLE_PLANS
-	static constexpr LongIndex TASK_CAPACITY = Forward::TASK_CAPACITY;
+	static constexpr Long TASK_CAPACITY = Forward::TASK_CAPACITY;
 #endif
 
 public:
 	using Info					= WrapInfo<Apex>;
 
-	static_assert(Info::STATE_COUNT <  (ShortIndex) -1, "Too many states in the hierarchy. Change 'ShortIndex' type.");
-	static_assert(Info::STATE_COUNT == (ShortIndex) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
+	static_assert(Info::STATE_COUNT <  (Short) -1, "Too many states in the hierarchy. Change 'Short' type.");
+	static_assert(Info::STATE_COUNT == (Short) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 	/// @brief Transition
-	using Transition			= typename FullControl::Transition;
+	using Transition			= typename Control::Transition;
 
 	/// @brief Array of transitions
-	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	using Transitions			= typename FullControl::Transitions;
-	using TransitionSet			= typename FullControl::TransitionSet;
+	using TransitionSet			= typename Control::TransitionSet;
+	using TransitionSets		= typename Control::TransitionSets;
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	using TransitionTargets		= typename Control::TransitionTargets;
+#endif
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using Prefix				= StaticArray<wchar_t, Info::REVERSE_DEPTH * 2 + 2>;
@@ -335,7 +338,7 @@ public:
 	template <typename TState>
 	HFSM2_INLINE bool isPendingExit  ()								{ return isPendingExit  (stateId<TState>());	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//------------------------------------------------------------------------------
 
 	/// @brief Reset FSM to initial state (recursively 'exit()' currently active states, 'enter()' initial states)
 	void reset();
@@ -368,7 +371,7 @@ public:
 	/// @brief Get the list of transitions recorded during last 'update()'
 	/// @return Array of last recorded transitions
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	const TransitionSet& previousTransitions() const				{ return _previousTransitions;					}
+	const TransitionSets& previousTransitions() const				{ return _previousTransitions;					}
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
@@ -383,7 +386,7 @@ public:
 	/// @param transitions 'TransitionHistory' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	template <LongIndex NCount>
+	template <Long NCount>
 	bool replayTransitions(const Array<Transition, NCount>& transitions);
 
 	/// @brief Force process a transition (skips 'guard()' calls)
@@ -392,6 +395,13 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	bool replayTransition (const Transition& transition)			{ return replayTransitions(&transition, 1);		}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	const Transition* lastTransition(const StateID stateId) const;
+
+	template <typename TState>
+	const Transition* lastTransition() const						{ return lastTransition(stateId<TState>());		}
 
 #endif
 
@@ -434,23 +444,24 @@ public:
 
 private:
 	void initialEnter();
-	void processTransitions(TransitionSet& currentTransitions);
+	void processTransitions(TransitionSets& currentTransitions);
 
-	bool applyRequest (Control& control, const Transition& request);
+	bool applyRequest (Control& control, const Transition& request, const Short index);
 	bool applyRequests(Control& control);
 
-	bool cancelledByEntryGuards(const TransitionSet& currentTransitions,
-								const Transitions& pendingTransitions);
+	bool cancelledByEntryGuards(const TransitionSets& currentTransitions,
+								const TransitionSet&  pendingTransitions);
 
-	bool cancelledByGuards(const TransitionSet& currentTransitions,
-						   const Transitions& pendingTransitions);
+	bool cancelledByGuards(const TransitionSets& currentTransitions,
+						   const TransitionSet&  pendingTransitions);
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	bool applyRequests(Control& control,
 					   const Transition* const transitions,
 					   const uint64_t count);
 
-	TransitionSet _previousTransitions;
+	TransitionTargets _transitionTargets;
+	TransitionSets _previousTransitions;
 #endif
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
@@ -471,7 +482,7 @@ protected:
 	Registry _registry;
 	HFSM2_IF_PLANS(PlanData _planData);
 
-	Transitions _requests;
+	TransitionSet _requests;
 
 	MaterialApex _apex;
 
@@ -495,8 +506,8 @@ template <FeatureTag NFeatureTag
 		, typename TRNG
 	#endif
 
-		, LongIndex NSubstitutionLimit
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
 class RP_		   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
@@ -721,8 +732,8 @@ template <FeatureTag NFeatureTag
 		, typename TRNG
 	#endif
 
-		, LongIndex NSubstitutionLimit
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TApex>
 class RP_		   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
 	: public	 R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
@@ -759,9 +770,9 @@ template <
 		  typename TUtility,
 		  typename TRNG,
 #endif
-		  LongIndex NSubstitutionLimit,
+		  Long NSubstitutionLimit,
 
-		  HFSM2_IF_PLANS(LongIndex NTaskCapacity,)
+		  HFSM2_IF_PLANS(Long NTaskCapacity,)
 		  typename TPayload,
 		  typename TApex>
 class RW_		<::hfsm2::ConfigT<::hfsm2::EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
@@ -810,9 +821,9 @@ template <typename TContext,
 		  typename TRank,
 		  typename TUtility,
 #endif
-		  LongIndex NSubstitutionLimit,
+		  Long NSubstitutionLimit,
 
-		  HFSM2_IF_PLANS(LongIndex NTaskCapacity,)
+		  HFSM2_IF_PLANS(Long NTaskCapacity,)
 		  typename TPayload,
 		  typename TApex>
 class RW_		<::hfsm2::ConfigT<TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
@@ -862,9 +873,9 @@ public:
 
 template <typename TRank,
 		  typename TUtility,
-		  LongIndex NSubstitutionLimit,
+		  Long NSubstitutionLimit,
 
-		  HFSM2_IF_PLANS(LongIndex NTaskCapacity,)
+		  HFSM2_IF_PLANS(Long NTaskCapacity,)
 		  typename TPayload,
 		  typename TApex>
 class RW_		<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final

@@ -262,4 +262,24 @@ assertResumable(TMachine& machine,
 	}
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+template <typename TMachine>
+void
+assertLastTransitions(TMachine& machine,
+						const Types& all,
+						const Types& toCheck)
+{
+	for (const auto& type : all) {
+		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
+			REQUIRE( machine.lastTransition(type)); //-V521
+		else
+			REQUIRE(!machine.lastTransition(type)); //-V521
+	}
+}
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////

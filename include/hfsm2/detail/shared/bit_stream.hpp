@@ -3,10 +3,10 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
-template <LongIndex NBitCapacity>
+template <Long NBitCapacity>
 struct StreamBuffer {
-	static constexpr LongIndex BIT_CAPACITY	= NBitCapacity;
-	static constexpr LongIndex BYTE_COUNT	= roundUp(BIT_CAPACITY, 8);
+	static constexpr Long BIT_CAPACITY	= NBitCapacity;
+	static constexpr Long BYTE_COUNT	= roundUp(BIT_CAPACITY, 8);
 
 	using Size = UnsignedCapacity<BIT_CAPACITY>;
 	using Data = uint8_t[BYTE_COUNT];
@@ -21,17 +21,17 @@ struct StreamBuffer {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBitCapacity>
+template <Long NBitCapacity>
 class BitWriteStream final {
 public:
-	static constexpr LongIndex BIT_CAPACITY = NBitCapacity;
+	static constexpr Long BIT_CAPACITY = NBitCapacity;
 
 	using Buffer = StreamBuffer<BIT_CAPACITY>;
 
 public:
 	BitWriteStream(Buffer& _buffer);
 
-	template <ShortIndex NBitWidth>
+	template <Short NBitWidth>
 	void write(const UnsignedBitWidth<NBitWidth> item);
 
 private:
@@ -40,10 +40,10 @@ private:
 
 //------------------------------------------------------------------------------
 
-template <LongIndex NBitCapacity>
+template <Long NBitCapacity>
 class BitReadStream final {
 public:
-	static constexpr LongIndex BIT_CAPACITY = NBitCapacity;
+	static constexpr Long BIT_CAPACITY = NBitCapacity;
 
 	using Buffer = StreamBuffer<BIT_CAPACITY>;
 
@@ -52,15 +52,15 @@ public:
 		: _buffer{buffer}
 	{}
 
-	template <ShortIndex NBitWidth>
+	template <Short NBitWidth>
 	UnsignedBitWidth<NBitWidth> read();
 
-	LongIndex cursor() const								{ return _cursor;	}
+	Long cursor() const										{ return _cursor;	}
 
 private:
 	const Buffer& _buffer;
 
-	LongIndex _cursor = 0;
+	Long _cursor = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

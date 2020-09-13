@@ -134,8 +134,8 @@ struct B_<TFirst>
 	using TFirst::regionId;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE Rank	 rank			  (const Control&)			{ return Rank	   {0};	}
-	HFSM2_INLINE Utility utility		  (const Control&)			{ return Utility{1.0f};	}
+	HFSM2_INLINE Rank	 rank			  (const Control&)			{ return Rank	{0};	}
+	HFSM2_INLINE Utility utility		  (const Control&)			{ return Utility{1};	}
 #endif
 
 	HFSM2_INLINE void	 entryGuard		  (GuardControl&)			{}

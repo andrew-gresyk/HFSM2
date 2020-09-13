@@ -4,13 +4,13 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Units {
-	ShortIndex unit;
-	ShortIndex width;
+	Short unit;
+	Short width;
 };
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, ShortIndex NCapacity>
+template <typename TIndex, Short NCapacity>
 class BitArray final {
 public:
 	using Index	= TIndex;
@@ -21,7 +21,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class Bits {
-		template <typename, ShortIndex>
+		template <typename, Short>
 		friend class BitArray;
 
 	private:
@@ -36,13 +36,13 @@ public:
 
 		HFSM2_INLINE void clear();
 
-		template <ShortIndex NIndex>
+		template <Short NIndex>
 		HFSM2_INLINE bool get() const;
 
-		template <ShortIndex NIndex>
+		template <Short NIndex>
 		HFSM2_INLINE void set();
 
-		template <ShortIndex NIndex>
+		template <Short NIndex>
 		HFSM2_INLINE void reset();
 
 		HFSM2_INLINE bool get  (const Index index) const;
@@ -57,7 +57,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class ConstBits {
-		template <typename, ShortIndex>
+		template <typename, Short>
 		friend class BitArray;
 
 	private:
@@ -70,7 +70,7 @@ public:
 	public:
 		HFSM2_INLINE explicit operator bool() const;
 
-		template <ShortIndex NIndex>
+		template <Short NIndex>
 		HFSM2_INLINE bool get() const;
 
 		HFSM2_INLINE bool get(const Index index) const;
@@ -89,23 +89,23 @@ public:
 
 	HFSM2_INLINE void clear();
 
-	template <ShortIndex NIndex>
+	template <Short NIndex>
 	HFSM2_INLINE bool get() const;
 
-	template <ShortIndex NIndex>
+	template <Short NIndex>
 	HFSM2_INLINE void set();
 
-	template <ShortIndex NIndex>
+	template <Short NIndex>
 	HFSM2_INLINE void reset();
 
 	HFSM2_INLINE bool get  (const Index index) const;
 	HFSM2_INLINE void set  (const Index index);
 	HFSM2_INLINE void reset(const Index index);
 
-	template <ShortIndex NUnit, ShortIndex NWidth>
+	template <Short NUnit, Short NWidth>
 	HFSM2_INLINE	  Bits bits();
 
-	template <ShortIndex NUnit, ShortIndex NWidth>
+	template <Short NUnit, Short NWidth>
 	HFSM2_INLINE ConstBits bits() const;
 
 

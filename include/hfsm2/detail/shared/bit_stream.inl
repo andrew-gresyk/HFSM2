@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBC>
+template <Long NBC>
 void
 StreamBuffer<NBC>::clear() {
 	bitSize = 0;
@@ -12,7 +12,7 @@ StreamBuffer<NBC>::clear() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBC>
+template <Long NBC>
 BitWriteStream<NBC>::BitWriteStream(Buffer& buffer)
 	: _buffer{buffer}
 {
@@ -21,11 +21,11 @@ BitWriteStream<NBC>::BitWriteStream(Buffer& buffer)
 
 //------------------------------------------------------------------------------
 
-template <LongIndex NBC>
-template <ShortIndex NBitWidth>
+template <Long NBC>
+template <Short NBitWidth>
 void
 BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
-	constexpr ShortIndex BIT_WIDTH = NBitWidth;
+	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
 	HFSM2_ASSERT(_buffer.bitSize + BIT_WIDTH < BIT_CAPACITY);
@@ -34,14 +34,14 @@ BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
 
 	Item itemBits = item;
 
-	for (ShortIndex itemWidth = BIT_WIDTH; itemWidth; ) {
-		const LongIndex	 byteIndex		= _buffer.bitSize >> 3;
+	for (Short itemWidth = BIT_WIDTH; itemWidth; ) {
+		const Long	 byteIndex		= _buffer.bitSize >> 3;
 		uint8_t& byte = _buffer.payload[byteIndex];
 
-		const ShortIndex byteChunkStart	= _buffer.bitSize & 0x7;
-		const ShortIndex byteDataWidth	= 8 - byteChunkStart;
-		const ShortIndex byteChunkWidth	= detail::min(byteDataWidth, itemWidth);
-		const Item		 byteChunk		= itemBits << byteChunkStart;
+		const Short byteChunkStart	= _buffer.bitSize & 0x7;
+		const Short byteDataWidth	= 8 - byteChunkStart;
+		const Short byteChunkWidth	= detail::min(byteDataWidth, itemWidth);
+		const Item		 byteChunk	= itemBits << byteChunkStart;
 		byte |= byteChunk;
 
 		itemBits	>>= byteChunkWidth;
@@ -52,30 +52,30 @@ BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <LongIndex NBC>
-template <ShortIndex NBitWidth>
+template <Long NBC>
+template <Short NBitWidth>
 UnsignedBitWidth<NBitWidth>
 BitReadStream<NBC>::read() {
-	constexpr ShortIndex BIT_WIDTH = NBitWidth;
+	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
 	using Item = UnsignedBitWidth<BIT_WIDTH>;
 
 	Item item = 0;
-	ShortIndex itemCursor = 0;
+	Short itemCursor = 0;
 
-	for (ShortIndex itemWidth = BIT_WIDTH; itemWidth; )
+	for (Short itemWidth = BIT_WIDTH; itemWidth; )
 		if (HFSM2_CHECKED(_cursor + itemWidth <= _buffer.bitSize)) {
-			const LongIndex	 byteIndex		= _cursor >> 3;
+			const Long	 byteIndex		= _cursor >> 3;
 			const uint8_t& byte = _buffer.payload[byteIndex];
 
-			const ShortIndex byteChunkStart	= _cursor & 0x7;
-			const ShortIndex byteDataWidth	= 8 - byteChunkStart;
-			const ShortIndex byteChunkWidth	= detail::min(byteDataWidth, itemWidth);
-			const ShortIndex byteChunkMask	= (1 << byteChunkWidth) - 1;
-			const Item		 byteChunk		= (byte >> byteChunkStart) & byteChunkMask;
+			const Short byteChunkStart	= _cursor & 0x7;
+			const Short byteDataWidth	= 8 - byteChunkStart;
+			const Short byteChunkWidth	= detail::min(byteDataWidth, itemWidth);
+			const Short byteChunkMask	= (1 << byteChunkWidth) - 1;
+			const Item		 byteChunk	= (byte >> byteChunkStart) & byteChunkMask;
 
-			const Item		 itemChunk		= byteChunk << itemCursor;
+			const Item		 itemChunk	= byteChunk << itemCursor;
 			item |= itemChunk;
 
 			_cursor	   += byteChunkWidth;

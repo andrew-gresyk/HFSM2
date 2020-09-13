@@ -188,14 +188,14 @@ O_<TN, TA, TH, TS...>::deepDestruct(PlanControl& control) {
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
-										 const TransitionType requestType)
+										 const Request request)
 {
 	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
 
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 	HFSM2_ASSERT(!!requested);
 
-	_subStates.wideForwardActive(control, requestType, requested);
+	_subStates.wideForwardActive(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -203,14 +203,16 @@ O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
-										  const TransitionType requestType)
+										  const Request request)
 {
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
 	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
 
 	if (requested)
-		_subStates.wideForwardRequest(control, requestType, requested);
+		_subStates.wideForwardRequest(control, request);
 	else
-		deepRequest					 (control, requestType);
+		deepRequest					 (control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -218,33 +220,29 @@ O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 void
 O_<TN, TA, TH, TS...>::deepRequest(Control& control,
-								   const TransitionType request)
+								   const Request request)
 {
-	switch (request) {
-	case TransitionType::REMAIN:
-		deepRequestRemain (control._registry);
-		break;
-
+	switch (request.type) {
 	case TransitionType::CHANGE:
-		deepRequestChange (control);
+		deepRequestChange	(control, request);
 		break;
 
 	case TransitionType::RESTART:
-		deepRequestRestart(control._registry);
+		deepRequestRestart	(control, request);
 		break;
 
 	case TransitionType::RESUME:
-		deepRequestResume (control._registry);
+		deepRequestResume	(control, request);
 		break;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	case TransitionType::UTILIZE:
-		deepRequestUtilize(control);
+		deepRequestUtilize	(control, request);
 		break;
 
 	case TransitionType::RANDOMIZE:
-		deepRequestRandomize(control);
+		deepRequestRandomize(control, request);
 		break;
 
 #endif
@@ -258,32 +256,36 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepRequestChange(Control& control) {
-	_subStates.wideRequestChange(control);
+O_<TN, TA, TH, TS...>::deepRequestChange(Control& control,
+										 const Request request)
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
+	_subStates.wideRequestChange(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepRequestRemain(Registry& registry) {
-	_subStates.wideRequestRemain(registry);
+O_<TN, TA, TH, TS...>::deepRequestRestart(Control& control,
+										  const Request request)
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
+	_subStates.wideRequestRestart(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepRequestRestart(Registry& registry) {
-	_subStates.wideRequestRestart(registry);
-}
+O_<TN, TA, TH, TS...>::deepRequestResume(Control& control,
+										 const Request request)
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, typename TH, typename... TS>
-void
-O_<TN, TA, TH, TS...>::deepRequestResume(Registry& registry) {
-	_subStates.wideRequestResume(registry);
+	_subStates.wideRequestResume(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -292,16 +294,24 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Registry& registry) {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control) {
-	_subStates.wideRequestUtilize(control);
+O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control,
+										  const Request request)
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
+	_subStates.wideRequestUtilize(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepRequestRandomize(Control& control) {
-	_subStates.wideRequestRandomize(control);
+O_<TN, TA, TH, TS...>::deepRequestRandomize(Control& control,
+											const Request request)
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
+	_subStates.wideRequestRandomize(control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -423,9 +433,9 @@ O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 void
-O_<TN, TA, TH, TS...>::deepGetNames(const LongIndex parent,
+O_<TN, TA, TH, TS...>::deepGetNames(const Long parent,
 									const RegionType region,
-									const ShortIndex depth,
+									const Short depth,
 									StructureStateInfos& stateInfos) const
 {
 	_headState.deepGetNames(parent, region,			depth,	   stateInfos);

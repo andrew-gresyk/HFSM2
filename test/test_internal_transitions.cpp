@@ -232,6 +232,11 @@ struct B_2_1
 													   FSM::stateId<B    >(),
 													   hfsm2::TransitionType::CHANGE});
 
+		REQUIRE(control.lastTransition());
+		REQUIRE(*control.lastTransition() == M::Transition{FSM::stateId<A_2  >(),
+														   FSM::stateId<B    >(),
+														   hfsm2::TransitionType::RESUME});
+
 		control.cancelPendingTransitions();
 		control.resume<B_2_2>();
 	}
@@ -321,6 +326,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			assertResumable(machine, all, {});
 
 			REQUIRE(machine.previousTransitions().count() == 0);
+
+			assertLastTransitions(machine, all, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -341,6 +348,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			assertResumable(machine, all, {});
 
 			REQUIRE(machine.previousTransitions().count() == 0);
+
+			assertLastTransitions(machine, all, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -380,6 +389,14 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<A_1  >(),
 															FSM::stateId<A_2  >(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(machine, all, {
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+
+			REQUIRE(machine.lastTransition<A_2  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<A_2_1>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -404,6 +421,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			});
 
 			REQUIRE(machine.previousTransitions().count() == 0);
+
+			assertLastTransitions(machine, all, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -460,6 +479,20 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<A_2  >(),
 															FSM::stateId<B_2_2>(),
 															hfsm2::TransitionType::CHANGE});
+
+			assertLastTransitions(machine, all, {
+				FSM::stateId<B    >(),
+				FSM::stateId<B_1  >(),
+				FSM::stateId<B_1_1>(),
+				FSM::stateId<B_2  >(),
+				FSM::stateId<B_2_2>(),
+			});
+
+			REQUIRE(machine.lastTransition<B    >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<B_1  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<B_1_1>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<B_2  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<B_2_2>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -490,6 +523,8 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			});
 
 			REQUIRE(machine.previousTransitions().count() == 0);
+
+			assertLastTransitions(machine, all, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -547,6 +582,16 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<B_2_2>(),
 															FSM::stateId<A    >(),
 															hfsm2::TransitionType::RESUME});
+
+			assertLastTransitions(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_1>(),
+			});
+
+			REQUIRE(machine.lastTransition<A    >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<A_2  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<A_2_1>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -603,6 +648,20 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<A_2  >(),
 															FSM::stateId<B    >(),
 															hfsm2::TransitionType::RESUME});
+
+			assertLastTransitions(machine, all, {
+				FSM::stateId<B    >(),
+				FSM::stateId<B_1  >(),
+				FSM::stateId<B_1_1>(),
+				FSM::stateId<B_2  >(),
+				FSM::stateId<B_2_2>(),
+			});
+
+			REQUIRE(machine.lastTransition<B    >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<B_1  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<B_1_1>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<B_2  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransition<B_2_2>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -650,6 +709,17 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions[0] == M::Transition{FSM::stateId<B_2_1>(),
 															FSM::stateId<B_2_2>(),
 															hfsm2::TransitionType::RESUME});
+
+			// No states were activated
+			assertLastTransitions(machine, all, {});
+
+			/* Transition out of an entryGuard()
+			assertLastTransitions(machine, all, {
+				FSM::stateId<B_2_2>(),
+			});
+
+			REQUIRE(machine.lastTransition<B_2_2>() == &previousTransitions[0]);
+			*/
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -711,6 +781,16 @@ TEST_CASE("FSM.Internal Transition", "[machine]") {
 			REQUIRE(previousTransitions[1] == M::Transition{FSM::stateId<B_2_2>(),
 															FSM::stateId<A    >(),
 															hfsm2::TransitionType::RESUME});
+
+			assertLastTransitions(machine, all, {
+				FSM::stateId<A    >(),
+				FSM::stateId<A_2  >(),
+				FSM::stateId<A_2_2>(),
+			});
+
+			REQUIRE(machine.lastTransition<A    >() == &previousTransitions[1]);
+			REQUIRE(machine.lastTransition<A_2  >() == &previousTransitions[1]);
+			REQUIRE(machine.lastTransition<A_2_2>() == &previousTransitions[1]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

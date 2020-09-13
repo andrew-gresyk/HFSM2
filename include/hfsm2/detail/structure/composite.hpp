@@ -10,15 +10,15 @@ template <typename TIndices,
 		  typename... TSubStates>
 struct C_ final {
 	using Indices		= TIndices;
-	static constexpr StateID	HEAD_ID		= Indices::STATE_ID;
-	static constexpr ShortIndex COMPO_INDEX	= Indices::COMPO_INDEX;
-	static constexpr ShortIndex ORTHO_INDEX	= Indices::ORTHO_INDEX;
-	static constexpr ShortIndex ORTHO_UNIT	= Indices::ORTHO_UNIT;
+	static constexpr StateID  HEAD_ID	  = Indices::STATE_ID;
+	static constexpr Short	  COMPO_INDEX = Indices::COMPO_INDEX;
+	static constexpr Short	  ORTHO_INDEX = Indices::ORTHO_INDEX;
+	static constexpr Short	  ORTHO_UNIT  = Indices::ORTHO_UNIT;
 
-	static constexpr Strategy	STRATEGY	= TStrategy;
+	static constexpr Strategy STRATEGY	  = TStrategy;
 
-	static constexpr ShortIndex REGION_ID	= COMPO_INDEX + ORTHO_INDEX;
-	static constexpr ForkID		COMPO_ID	= COMPO_INDEX + 1;
+	static constexpr Short	  REGION_ID	  = COMPO_INDEX + ORTHO_INDEX;
+	static constexpr ForkID	  COMPO_ID	  = COMPO_INDEX + 1;
 
 	using Args			= TArgs;
 
@@ -35,9 +35,9 @@ struct C_ final {
 	using StateParents	= typename Registry::StateParents;
 
 	using Control		= ControlT<Args>;
+	using ScopedOrigin	= typename Control::Origin;
 
 	using PlanControl	= PlanControlT<Args>;
-	using ScopedOrigin	= typename PlanControl::Origin;
 	using ScopedRegion	= typename PlanControl::Region;
 
 #ifdef HFSM2_ENABLE_PLANS
@@ -63,59 +63,56 @@ struct C_ final {
 							  TSubStates...>;
 
 	using Info			= CI_<STRATEGY, Head, TSubStates...>;
-	static constexpr ShortIndex WIDTH		= Info::WIDTH;
-	static constexpr ShortIndex WIDTH_BITS	= Info::WIDTH_BITS;
-	static constexpr ShortIndex STATE_COUNT	= Info::STATE_COUNT;
+	static constexpr Short WIDTH		  = Info::WIDTH;
+	static constexpr Short WIDTH_BITS	  = Info::WIDTH_BITS;
+	static constexpr Short REGION_SIZE	  = Info::STATE_COUNT;
 
 	//----------------------------------------------------------------------
 
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>
 	struct Accessor {
-		HFSM2_INLINE static		  T&	get(	  C_& c)							{ return c._subStates.template access<T>();		}
-		HFSM2_INLINE static const T&	get(const C_& c)							{ return c._subStates.template access<T>();		}
+		HFSM2_INLINE static		  T&	get(	  C_& c)						{ return c._subStates.template access<T>();		}
+		HFSM2_INLINE static const T&	get(const C_& c)						{ return c._subStates.template access<T>();		}
 	};
 
 	template <>
 	struct Accessor<Head> {
-		HFSM2_INLINE static		  Head& get(	  C_& c)							{ return c._headState._headBox.get();			}
-		HFSM2_INLINE static const Head& get(const C_& c)							{ return c._headState._headBox.get();			}
+		HFSM2_INLINE static		  Head& get(	  C_& c)						{ return c._headState._headBox.get();			}
+		HFSM2_INLINE static const Head& get(const C_& c)						{ return c._headState._headBox.get();			}
 	};
 
 	template <typename T>
-	HFSM2_INLINE	   T&	access()												{ return Accessor<T>::get(*this);				}
+	HFSM2_INLINE	   T&	access()											{ return Accessor<T>::get(*this);				}
 
 	template <typename T>
-	HFSM2_INLINE const T&	access() const											{ return Accessor<T>::get(*this);				}
+	HFSM2_INLINE const T&	access() const										{ return Accessor<T>::get(*this);				}
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE	   ShortIndex& compoRequested(		Registry& registry) const	{ return registry.compoRequested[COMPO_INDEX];	}
-	HFSM2_INLINE const ShortIndex& compoRequested(const Registry& registry) const	{ return registry.compoRequested[COMPO_INDEX];	}
+#ifdef HFSM2_ENABLE_SERIALIZATION
+	HFSM2_INLINE Short	 compoRequested				   (const Registry& registry) const  { return registry.compoRequested[COMPO_INDEX];	}
+	HFSM2_INLINE Short&	 compoRequested				   (	  Registry& registry) const  { return registry.compoRequested[COMPO_INDEX];	}
 
-	HFSM2_INLINE	   ShortIndex& compoActive   (		Registry& registry) const	{ return registry.compoActive	[COMPO_INDEX];	}
-	HFSM2_INLINE const ShortIndex& compoActive   (const Registry& registry) const	{ return registry.compoActive	[COMPO_INDEX];	}
+	HFSM2_INLINE Short	 compoActive				   (const Registry& registry) const  { return registry.compoActive	 [COMPO_INDEX];	}
+	HFSM2_INLINE Short&	 compoActive				   (	  Registry& registry) const  { return registry.compoActive	 [COMPO_INDEX];	}
 
-	HFSM2_INLINE	   ShortIndex& compoResumable(		Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
-	HFSM2_INLINE const ShortIndex& compoResumable(const Registry& registry) const	{ return registry.compoResumable[COMPO_INDEX];	}
-
-	HFSM2_INLINE	   ShortIndex& compoRequested(		Control&  control) const	{ return compoRequested(control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoRequested(const Control&  control) const	{ return compoRequested(control._registry);		}
-
-	HFSM2_INLINE	   ShortIndex& compoActive   (		Control&  control) const	{ return compoActive   (control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoActive   (const Control&  control) const	{ return compoActive   (control._registry);		}
-
-	HFSM2_INLINE	   ShortIndex& compoResumable(		Control&  control) const	{ return compoResumable(control._registry);		}
-	HFSM2_INLINE const ShortIndex& compoResumable(const Control&  control) const	{ return compoResumable(control._registry);		}
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE		  ShortIndex  resolveRandom	   (Control&  control,
-														const Utility(& options)[Info::WIDTH], const Utility sum,
-														const Rank	  (& ranks)  [Info::WIDTH], const Rank	  top) const;
+	HFSM2_INLINE Short	 compoResumable				   (const Registry& registry) const  { return registry.compoResumable[COMPO_INDEX];	}
+	HFSM2_INLINE Short&	 compoResumable				   (	  Registry& registry) const  { return registry.compoResumable[COMPO_INDEX];	}
 #endif
 
-	HFSM2_INLINE bool	 compoRemain				   (Control&  control)	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
+	HFSM2_INLINE Short&	 compoRequested				   (Control& control) const	{ return control._registry.compoRequested[COMPO_INDEX];	}
+	HFSM2_INLINE Short&	 compoActive				   (Control& control) const	{ return control._registry.compoActive	 [COMPO_INDEX];	}
+	HFSM2_INLINE Short&	 compoResumable				   (Control& control) const	{ return control._registry.compoResumable[COMPO_INDEX];	}
+
+	HFSM2_INLINE bool	 compoRemain				   (Control& control) const	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	HFSM2_INLINE Short	 resolveRandom				   (Control& control,
+													    const Utility(& options)[Info::WIDTH], const Utility sum,
+													    const Rank	  (& ranks)  [Info::WIDTH], const Rank	  top) const;
+#endif
 
 	HFSM2_INLINE void	 deepRegister				   (Registry& registry, const Parent parent);
 
@@ -143,57 +140,56 @@ struct C_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepForwardActive			   (Control& control, const TransitionType requestType);
-	HFSM2_INLINE void	 deepForwardRequest			   (Control& control, const TransitionType requestType);
+	HFSM2_INLINE void	 deepForwardActive			   (Control& control, const Request request);
+	HFSM2_INLINE void	 deepForwardRequest			   (Control& control, const Request request);
 
-	HFSM2_INLINE void	 deepRequest				   (Control& control, const TransitionType requestType);
+	HFSM2_INLINE void	 deepRequest				   (Control& control, const Request request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 
 	template <Strategy = STRATEGY>
-	HFSM2_INLINE void	 deepRequestChange			   (Control& control, const ShortIndex = INVALID_SHORT_INDEX);
+	HFSM2_INLINE void	 deepRequestChange			   (Control& control, const Request request, const Short = INVALID_SHORT);
 
 	template <>
-	HFSM2_INLINE void	 deepRequestChange<Composite>  (Control& control, const ShortIndex)	{ deepRequestChangeComposite  (control); }
+	HFSM2_INLINE void	 deepRequestChange<Composite>  (Control& control, const Request request, const Short)	{ deepRequestChangeComposite  (control, request); }
 
 	template <>
-	HFSM2_INLINE void	 deepRequestChange<Resumable>  (Control& control, const ShortIndex)	{ deepRequestChangeResumable  (control); }
+	HFSM2_INLINE void	 deepRequestChange<Resumable>  (Control& control, const Request request, const Short)	{ deepRequestChangeResumable  (control, request); }
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	template <>
-	HFSM2_INLINE void	 deepRequestChange<Utilitarian>(Control& control, const ShortIndex)	{ deepRequestChangeUtilitarian(control); }
+	HFSM2_INLINE void	 deepRequestChange<Utilitarian>(Control& control, const Request request, const Short)	{ deepRequestChangeUtilitarian(control, request); }
 
 	template <>
-	HFSM2_INLINE void	 deepRequestChange<RandomUtil> (Control& control, const ShortIndex)	{ deepRequestChangeRandom	  (control); }
+	HFSM2_INLINE void	 deepRequestChange<RandomUtil> (Control& control, const Request request, const Short)	{ deepRequestChangeRandom	  (control, request); }
 
 #endif
 
 #else
 
-	HFSM2_INLINE void	 deepRequestChange			   (Control& control);
+	HFSM2_INLINE void	 deepRequestChange			   (Control& control, const Request request);
 
 #endif
 
-	HFSM2_INLINE void	 deepRequestChangeComposite	   (Control& control);
-	HFSM2_INLINE void	 deepRequestChangeResumable	   (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeComposite	   (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestChangeResumable	   (Control& control, const Request request);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestChangeUtilitarian  (Control& control);
-	HFSM2_INLINE void	 deepRequestChangeRandom	   (Control& control);
+	HFSM2_INLINE void	 deepRequestChangeUtilitarian  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestChangeRandom	   (Control& control, const Request request);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepRequestRemain			   (Registry& registry);
-	HFSM2_INLINE void	 deepRequestRestart			   (Registry& registry);
-	HFSM2_INLINE void	 deepRequestResume			   (Registry& registry);
+	HFSM2_INLINE void	 deepRequestRestart			   (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestResume			   (Control& control, const Request request);
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestUtilize			   (Control&  control);
-	HFSM2_INLINE void	 deepRequestRandomize		   (Control&  control);
+	HFSM2_INLINE void	 deepRequestUtilize			   (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestRandomize		   (Control& control, const Request request);
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -258,11 +254,11 @@ struct C_ final {
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
-	static constexpr LongIndex NAME_COUNT = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
+	static constexpr Long NAME_COUNT = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
 
-	void deepGetNames(const LongIndex parent,
+	void deepGetNames(const Long parent,
 					  const RegionType region,
-					  const ShortIndex depth,
+					  const Short depth,
 					  StructureStateInfos& stateInfos) const;
 #endif
 

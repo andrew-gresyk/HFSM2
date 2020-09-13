@@ -278,7 +278,67 @@ S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 
 //------------------------------------------------------------------------------
 
+template <typename TN_, typename TA, typename TH>
+void
+S_<TN_, TA, TH>::deepForwardRequest(Control& HFSM2_IF_TRANSITION_HISTORY(control),
+									const Request HFSM2_IF_TRANSITION_HISTORY(request))
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA, typename TH>
+void
+S_<TN_, TA, TH>::deepRequestChange(Control& HFSM2_IF_TRANSITION_HISTORY(control),
+								   const Request HFSM2_IF_TRANSITION_HISTORY(request))
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+void
+S_<TN_, TA, TH>::deepRequestRestart(Control& HFSM2_IF_TRANSITION_HISTORY(control),
+									const Request HFSM2_IF_TRANSITION_HISTORY(request))
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+void
+S_<TN_, TA, TH>::deepRequestResume(Control& HFSM2_IF_TRANSITION_HISTORY(control),
+								   const Request HFSM2_IF_TRANSITION_HISTORY(request))
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+template <typename TN_, typename TA, typename TH>
+void
+S_<TN_, TA, TH>::deepRequestUtilize(Control& HFSM2_IF_TRANSITION_HISTORY(control),
+									const Request HFSM2_IF_TRANSITION_HISTORY(request))
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+void
+S_<TN_, TA, TH>::deepRequestRandomize(Control& HFSM2_IF_TRANSITION_HISTORY(control),
+									  const Request HFSM2_IF_TRANSITION_HISTORY(request))
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::UP
@@ -361,9 +421,9 @@ S_<TN_, TA, TH>::name() {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepGetNames(const LongIndex parent,
+S_<TN_, TA, TH>::deepGetNames(const Long parent,
 							  const RegionType region,
-							  const ShortIndex depth,
+							  const Short depth,
 							  StructureStateInfos& _stateInfos) const
 {
 	_stateInfos.append(StructureStateInfo{parent, region, depth, name()});

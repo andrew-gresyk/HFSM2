@@ -65,18 +65,18 @@ struct SI_ final {
 	using StateList			= ITL_<Head>;
 	using RegionList		= ITL_<>;
 
-	static constexpr ShortIndex WIDTH			= 1;
-	static constexpr LongIndex  REVERSE_DEPTH	= 1;
-	static constexpr ShortIndex COMPO_REGIONS	= 0;
-	static constexpr LongIndex  COMPO_PRONGS	= 0;
-	static constexpr ShortIndex ORTHO_REGIONS	= 0;
-	static constexpr ShortIndex ORTHO_UNITS		= 0;
+	static constexpr Short WIDTH		  = 1;
+	static constexpr Long  REVERSE_DEPTH  = 1;
+	static constexpr Short COMPO_REGIONS  = 0;
+	static constexpr Long  COMPO_PRONGS	  = 0;
+	static constexpr Short ORTHO_REGIONS  = 0;
+	static constexpr Short ORTHO_UNITS	  = 0;
 
-	static constexpr LongIndex  ACTIVE_BITS		= 0;
-	static constexpr LongIndex  RESUMABLE_BITS	= 0;
+	static constexpr Long  ACTIVE_BITS	  = 0;
+	static constexpr Long  RESUMABLE_BITS = 0;
 
-	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
-	static constexpr ShortIndex REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long  STATE_COUNT	  = StateList::SIZE;
+	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -88,17 +88,17 @@ struct CSI_<TInitial, TRemaining...> {
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
 
-	static constexpr LongIndex  REVERSE_DEPTH	= Max<Initial::REVERSE_DEPTH,	Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr ShortIndex COMPO_REGIONS	=	  Initial::COMPO_REGIONS  + Remaining::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	=	  Initial::COMPO_PRONGS   + Remaining::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	=	  Initial::ORTHO_REGIONS  + Remaining::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		=	  Initial::ORTHO_UNITS    + Remaining::ORTHO_UNITS;
+	static constexpr Long  REVERSE_DEPTH  = Max<Initial::REVERSE_DEPTH,	  Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr Short COMPO_REGIONS  =		Initial::COMPO_REGIONS  + Remaining::COMPO_REGIONS;
+	static constexpr Long  COMPO_PRONGS	  =		Initial::COMPO_PRONGS   + Remaining::COMPO_PRONGS;
+	static constexpr Short ORTHO_REGIONS  =		Initial::ORTHO_REGIONS  + Remaining::ORTHO_REGIONS;
+	static constexpr Short ORTHO_UNITS	  =		Initial::ORTHO_UNITS    + Remaining::ORTHO_UNITS;
 
-	static constexpr LongIndex  ACTIVE_BITS		= Max<Initial::ACTIVE_BITS,		Remaining::ACTIVE_BITS>::VALUE;
-	static constexpr LongIndex  RESUMABLE_BITS	=	  Initial::RESUMABLE_BITS + Remaining::RESUMABLE_BITS;
+	static constexpr Long  ACTIVE_BITS	  = Max<Initial::ACTIVE_BITS,	  Remaining::ACTIVE_BITS>::VALUE;
+	static constexpr Long  RESUMABLE_BITS =		Initial::RESUMABLE_BITS + Remaining::RESUMABLE_BITS;
 
-	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
-	static constexpr ShortIndex REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long  STATE_COUNT	  = StateList::SIZE;
+	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
 };
 
 template <typename TInitial>
@@ -107,17 +107,17 @@ struct CSI_<TInitial> {
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
 
-	static constexpr LongIndex  REVERSE_DEPTH	= Initial::REVERSE_DEPTH;
-	static constexpr ShortIndex COMPO_REGIONS	= Initial::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	= Initial::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	= Initial::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		= Initial::ORTHO_UNITS;
+	static constexpr Long  REVERSE_DEPTH  = Initial::REVERSE_DEPTH;
+	static constexpr Short COMPO_REGIONS  = Initial::COMPO_REGIONS;
+	static constexpr Long  COMPO_PRONGS	  = Initial::COMPO_PRONGS;
+	static constexpr Short ORTHO_REGIONS  = Initial::ORTHO_REGIONS;
+	static constexpr Short ORTHO_UNITS	  = Initial::ORTHO_UNITS;
 
-	static constexpr LongIndex  ACTIVE_BITS		= Initial::ACTIVE_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS	= Initial::RESUMABLE_BITS;
+	static constexpr Long  ACTIVE_BITS	  = Initial::ACTIVE_BITS;
+	static constexpr Long  RESUMABLE_BITS = Initial::RESUMABLE_BITS;
 
-	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
-	static constexpr ShortIndex REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long  STATE_COUNT	  = StateList::SIZE;
+	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
 };
 
 template <Strategy TStrategy, typename THead, typename... TSubStates>
@@ -130,19 +130,19 @@ struct CI_ final {
 	using StateList			= Merge<typename HeadInfo::StateList, typename SubStates::StateList>;
 	using RegionList		= Merge<typename HeadInfo::StateList, typename SubStates::RegionList>;
 
-	static constexpr ShortIndex	WIDTH			= sizeof...(TSubStates);
-	static constexpr LongIndex	REVERSE_DEPTH	= SubStates::REVERSE_DEPTH + 1;
-	static constexpr ShortIndex	COMPO_REGIONS	= SubStates::COMPO_REGIONS + 1;
-	static constexpr LongIndex	COMPO_PRONGS	= SubStates::COMPO_PRONGS + WIDTH;
-	static constexpr ShortIndex	ORTHO_REGIONS	= SubStates::ORTHO_REGIONS;
-	static constexpr ShortIndex	ORTHO_UNITS		= SubStates::ORTHO_UNITS;
+	static constexpr Short WIDTH		  = sizeof...(TSubStates);
+	static constexpr Long  REVERSE_DEPTH  = SubStates::REVERSE_DEPTH + 1;
+	static constexpr Short COMPO_REGIONS  = SubStates::COMPO_REGIONS + 1;
+	static constexpr Long  COMPO_PRONGS	  = SubStates::COMPO_PRONGS + WIDTH;
+	static constexpr Short ORTHO_REGIONS  = SubStates::ORTHO_REGIONS;
+	static constexpr Short ORTHO_UNITS	  = SubStates::ORTHO_UNITS;
 
-	static constexpr LongIndex	WIDTH_BITS		= bitWidth(WIDTH);
-	static constexpr LongIndex  ACTIVE_BITS		= SubStates::ACTIVE_BITS	+ WIDTH_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS	= SubStates::RESUMABLE_BITS + WIDTH_BITS + 1;
+	static constexpr Long  WIDTH_BITS	  = bitWidth(WIDTH);
+	static constexpr Long  ACTIVE_BITS	  = SubStates::ACTIVE_BITS	+ WIDTH_BITS;
+	static constexpr Long  RESUMABLE_BITS = SubStates::RESUMABLE_BITS + WIDTH_BITS + 1;
 
-	static constexpr LongIndex	STATE_COUNT		= StateList::SIZE;
-	static constexpr ShortIndex	REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long  STATE_COUNT	  = StateList::SIZE;
+	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -154,14 +154,14 @@ struct OSI_<TInitial, TRemaining...> {
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
 
-	static constexpr LongIndex  REVERSE_DEPTH	= Max<Initial::REVERSE_DEPTH,	Remaining::REVERSE_DEPTH>::VALUE;
-	static constexpr ShortIndex COMPO_REGIONS	=	  Initial::COMPO_REGIONS  + Remaining::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	=	  Initial::COMPO_PRONGS   + Remaining::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	=	  Initial::ORTHO_REGIONS  + Remaining::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		=	  Initial::ORTHO_UNITS    + Remaining::ORTHO_UNITS;
+	static constexpr Long  REVERSE_DEPTH  = Max<Initial::REVERSE_DEPTH,	  Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr Short COMPO_REGIONS  =		Initial::COMPO_REGIONS  + Remaining::COMPO_REGIONS;
+	static constexpr Long  COMPO_PRONGS	  =		Initial::COMPO_PRONGS   + Remaining::COMPO_PRONGS;
+	static constexpr Short ORTHO_REGIONS  =		Initial::ORTHO_REGIONS  + Remaining::ORTHO_REGIONS;
+	static constexpr Short ORTHO_UNITS	  =		Initial::ORTHO_UNITS    + Remaining::ORTHO_UNITS;
 
-	static constexpr LongIndex  ACTIVE_BITS		=	  Initial::ACTIVE_BITS    + Remaining::ACTIVE_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS	=	  Initial::RESUMABLE_BITS + Remaining::RESUMABLE_BITS;
+	static constexpr Long  ACTIVE_BITS	  =		Initial::ACTIVE_BITS    + Remaining::ACTIVE_BITS;
+	static constexpr Long  RESUMABLE_BITS =		Initial::RESUMABLE_BITS + Remaining::RESUMABLE_BITS;
 };
 
 template <typename TInitial>
@@ -170,14 +170,14 @@ struct OSI_<TInitial> {
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
 
-	static constexpr LongIndex  REVERSE_DEPTH	= Initial::REVERSE_DEPTH;
-	static constexpr ShortIndex COMPO_REGIONS	= Initial::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	= Initial::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	= Initial::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS		= Initial::ORTHO_UNITS;
+	static constexpr Long  REVERSE_DEPTH	= Initial::REVERSE_DEPTH;
+	static constexpr Short COMPO_REGIONS	= Initial::COMPO_REGIONS;
+	static constexpr Long  COMPO_PRONGS		= Initial::COMPO_PRONGS;
+	static constexpr Short ORTHO_REGIONS	= Initial::ORTHO_REGIONS;
+	static constexpr Short ORTHO_UNITS		= Initial::ORTHO_UNITS;
 
-	static constexpr LongIndex  ACTIVE_BITS		= Initial::ACTIVE_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS	= Initial::RESUMABLE_BITS;
+	static constexpr Long  ACTIVE_BITS		= Initial::ACTIVE_BITS;
+	static constexpr Long  RESUMABLE_BITS	= Initial::RESUMABLE_BITS;
 };
 
 template <typename THead, typename... TSubStates>
@@ -188,18 +188,18 @@ struct OI_ final {
 	using StateList			= Merge<typename HeadInfo::StateList, typename SubStates::StateList>;
 	using RegionList		= Merge<typename HeadInfo::StateList, typename SubStates::RegionList>;
 
-	static constexpr ShortIndex WIDTH			= sizeof...(TSubStates);
-	static constexpr LongIndex  REVERSE_DEPTH	= SubStates::REVERSE_DEPTH + 1;
-	static constexpr ShortIndex COMPO_REGIONS	= SubStates::COMPO_REGIONS;
-	static constexpr LongIndex  COMPO_PRONGS	= SubStates::COMPO_PRONGS;
-	static constexpr ShortIndex ORTHO_REGIONS	= SubStates::ORTHO_REGIONS + 1;
-	static constexpr ShortIndex ORTHO_UNITS		= SubStates::ORTHO_UNITS + (WIDTH + 7) / 8;
+	static constexpr Short WIDTH			= sizeof...(TSubStates);
+	static constexpr Long  REVERSE_DEPTH	= SubStates::REVERSE_DEPTH + 1;
+	static constexpr Short COMPO_REGIONS	= SubStates::COMPO_REGIONS;
+	static constexpr Long  COMPO_PRONGS		= SubStates::COMPO_PRONGS;
+	static constexpr Short ORTHO_REGIONS	= SubStates::ORTHO_REGIONS + 1;
+	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS + (WIDTH + 7) / 8;
 
-	static constexpr LongIndex  ACTIVE_BITS		= SubStates::ACTIVE_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS	= SubStates::RESUMABLE_BITS;
+	static constexpr Long  ACTIVE_BITS		= SubStates::ACTIVE_BITS;
+	static constexpr Long  RESUMABLE_BITS	= SubStates::RESUMABLE_BITS;
 
-	static constexpr LongIndex  STATE_COUNT		= StateList::SIZE;
-	static constexpr ShortIndex REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long  STATE_COUNT		= StateList::SIZE;
+	static constexpr Short REGION_COUNT		= RegionList::SIZE;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -208,12 +208,12 @@ template <typename TContext
 		, typename TConfig
 		, typename TStateList
 		, typename TRegionList
-		, LongIndex NCompoCount
-		, LongIndex NOrthoCount
-		, LongIndex NOrthoUnits
-		, LongIndex NSerialBits
-		, LongIndex NSubstitutionLimit
-		HFSM2_IF_PLANS(, LongIndex NTaskCapacity)
+		, Long NCompoCount
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSerialBits
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
 struct ArgsT final {
 	using Context		= TContext;
@@ -232,15 +232,15 @@ struct ArgsT final {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr LongIndex  STATE_COUNT		   = StateList::SIZE;
-	static constexpr ShortIndex COMPO_REGIONS	   = NCompoCount;
-	static constexpr ShortIndex ORTHO_REGIONS	   = NOrthoCount;
-	static constexpr ShortIndex ORTHO_UNITS		   = NOrthoUnits;
-	static constexpr ShortIndex SERIAL_BITS		   = NSerialBits;
-	static constexpr ShortIndex SUBSTITUTION_LIMIT = NSubstitutionLimit;
+	static constexpr Long  STATE_COUNT		  = StateList::SIZE;
+	static constexpr Short COMPO_REGIONS	  = NCompoCount;
+	static constexpr Short ORTHO_REGIONS	  = NOrthoCount;
+	static constexpr Short ORTHO_UNITS		  = NOrthoUnits;
+	static constexpr Short SERIAL_BITS		  = NSerialBits;
+	static constexpr Short SUBSTITUTION_LIMIT = NSubstitutionLimit;
 
 #ifdef HFSM2_ENABLE_PLANS
-	static constexpr LongIndex  TASK_CAPACITY	   = NTaskCapacity;
+	static constexpr Long  TASK_CAPACITY	  = NTaskCapacity;
 #endif
 
 	using Payload	= TPayload;
@@ -257,14 +257,14 @@ struct ArgsT final {
 //------------------------------------------------------------------------------
 
 template <StateID NStateID,
-		  ShortIndex NCompoIndex,
-		  ShortIndex NOrthoIndex,
-		  ShortIndex NOrthoUnit>
+		  Short NCompoIndex,
+		  Short NOrthoIndex,
+		  Short NOrthoUnit>
 struct I_ {
-	static constexpr StateID	STATE_ID	 = NStateID;
-	static constexpr ShortIndex COMPO_INDEX	 = NCompoIndex;
-	static constexpr ShortIndex ORTHO_INDEX	 = NOrthoIndex;
-	static constexpr ShortIndex ORTHO_UNIT	 = NOrthoUnit;
+	static constexpr StateID STATE_ID	 = NStateID;
+	static constexpr Short	 COMPO_INDEX = NCompoIndex;
+	static constexpr Short	 ORTHO_INDEX = NOrthoIndex;
+	static constexpr Short	 ORTHO_UNIT	 = NOrthoUnit;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -275,13 +275,13 @@ struct S_;
 template <typename, typename, Strategy, typename, typename...>
 struct C_;
 
-template <typename, typename, Strategy, ShortIndex, typename...>
+template <typename, typename, Strategy, Short, typename...>
 struct CS_;
 
 template <typename, typename, typename, typename...>
 struct O_;
 
-template <typename, typename, ShortIndex, typename...>
+template <typename, typename, Short, typename...>
 struct OS_;
 
 template <typename, typename>
@@ -330,21 +330,21 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	static constexpr LongIndex  SUBSTITUTION_LIMIT	= TConfig::SUBSTITUTION_LIMIT;
+	static constexpr Long  SUBSTITUTION_LIMIT	= TConfig::SUBSTITUTION_LIMIT;
 
 #ifdef HFSM2_ENABLE_PLANS
-	static constexpr LongIndex  TASK_CAPACITY		= TConfig::TASK_CAPACITY != INVALID_LONG_INDEX ?
+	static constexpr Long  TASK_CAPACITY		= TConfig::TASK_CAPACITY != INVALID_LONG ?
 														  TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
 #endif
 
 	using Payload	= typename TConfig::Payload;
 
-	static constexpr ShortIndex COMPO_REGIONS		= Apex::COMPO_REGIONS;
-	static constexpr ShortIndex ORTHO_REGIONS		= Apex::ORTHO_REGIONS;
-	static constexpr ShortIndex ORTHO_UNITS			= Apex::ORTHO_UNITS;
+	static constexpr Short COMPO_REGIONS		= Apex::COMPO_REGIONS;
+	static constexpr Short ORTHO_REGIONS		= Apex::ORTHO_REGIONS;
+	static constexpr Short ORTHO_UNITS			= Apex::ORTHO_UNITS;
 
-	static constexpr LongIndex  ACTIVE_BITS			= Apex::ACTIVE_BITS;
-	static constexpr LongIndex  RESUMABLE_BITS		= Apex::RESUMABLE_BITS;
+	static constexpr Long  ACTIVE_BITS			= Apex::ACTIVE_BITS;
+	static constexpr Long  RESUMABLE_BITS		= Apex::RESUMABLE_BITS;
 
 	using StateList		= typename Apex::StateList;
 	using RegionList	= typename Apex::RegionList;
@@ -396,7 +396,7 @@ struct RF_ final {
 
 	template <typename T>
 	static constexpr bool contains() {
-		return StateList::template index<T>() != INVALID_LONG_INDEX;
+		return StateList::template index<T>() != INVALID_LONG;
 	}
 
 	template <typename T>
@@ -408,15 +408,15 @@ struct RF_ final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename T>
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 struct CSubMaterialT;
 
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 struct CSubMaterialT<TN, TA, SG, NI, ITL_<TS...>> {
 	using Type = CS_<TN, TA, SG, NI,	  TS...>;
 };
 
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 using CSubMaterial = typename CSubMaterialT<TN, TA, SG, NI, TS...>::Type;
 
 //------------------------------------------------------------------------------
@@ -439,7 +439,7 @@ struct InfoT<O_<TN, TA, TH, TS...>> {
 	using Type = OI_<	TH, TS...>;
 };
 
-template <typename TN, typename TA, Strategy SG, ShortIndex NI, typename... TS>
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 struct InfoT<CS_<TN, TA, SG, NI, TS...>> {
 	using Type = CSI_<			 TS...>;
 };
