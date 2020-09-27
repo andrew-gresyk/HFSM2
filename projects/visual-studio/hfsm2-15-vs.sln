@@ -5,19 +5,20 @@ VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-411A-839A-B41294202103}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\.editorconfig = ..\..\.editorconfig
 		..\..\.gitignore = ..\..\.gitignore
 		..\..\.travis.yml = ..\..\.travis.yml
 		..\..\appveyor.yml = ..\..\appveyor.yml
+		catch2.runsettings = catch2.runsettings
+		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
 		..\..\README.md = ..\..\README.md
-		vs-flags.txt = vs-flags.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{EDEB0687-3B3E-429D-9213-0A3EED99821D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
-		..\..\hfsm.natvis = ..\..\hfsm.natvis
+		..\..\hfsm2.natvis = ..\..\hfsm2.natvis
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-14", "test-14.vcxproj", "{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}"

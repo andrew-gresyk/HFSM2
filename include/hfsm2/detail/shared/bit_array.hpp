@@ -4,6 +4,12 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Units {
+	inline Units(Short unit_  = INVALID_SHORT,
+				 Short width_ = INVALID_SHORT)
+		: unit {unit_ }
+		, width{width_}
+	{}
+
 	Short unit;
 	Short width;
 };

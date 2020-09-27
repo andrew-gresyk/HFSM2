@@ -19,7 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Event {
-	enum Enum {
+	enum class Type {
 
 	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		RANK,
@@ -67,7 +67,7 @@ struct Event {
 	};
 
 	Event(const hfsm2::StateID origin_,
-		  const Enum type_,
+		  const Type type_,
 		  const hfsm2::StateID target_ = hfsm2::INVALID_STATE_ID,
 		  const float utility_ = 0.0f)
 		: origin{origin_}
@@ -76,7 +76,7 @@ struct Event {
 		, utility{utility_}
 	{}
 
-	Event(const Enum type_,
+	Event(const Type type_,
 		  const hfsm2::StateID target_,
 		  const float utility_ = 0.0f)
 		: origin{hfsm2::INVALID_STATE_ID}
@@ -86,7 +86,7 @@ struct Event {
 	{}
 
 	hfsm2::StateID origin;
-	Enum type;
+	Type type;
 	hfsm2::StateID target;
 	float utility;
 };

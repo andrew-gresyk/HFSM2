@@ -265,9 +265,9 @@
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="Event">
-		<DisplayString Condition="target == 65535">{type, en} [{origin}]</DisplayString>
-		<DisplayString Condition="origin == 65535">(external) {type, en} [{target}]</DisplayString>
-		<DisplayString							  >[{origin}] {type, en} [{target}]</DisplayString>
+		<DisplayString Condition="target == hfsm2::INVALID_STATE_ID"		   >{type, en} [{(unsigned)origin}]</DisplayString>
+		<DisplayString Condition="origin == hfsm2::INVALID_STATE_ID">(external) {type, en} [{(unsigned)target}]</DisplayString>
+		<DisplayString									  >[{(unsigned)origin}] {type, en} [{(unsigned)target}]</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 

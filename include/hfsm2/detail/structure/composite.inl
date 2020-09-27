@@ -111,6 +111,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepEnter(PlanControl& control) {
 	const Short& active = compoActive(control);
+	HFSM2_ASSERT(active != INVALID_SHORT);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -733,8 +734,7 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	} else {
 		requested = INVALID_SHORT;
 
-		// no reconstruction on reenter() by design
-
+		// reconstruction done in S_::reenter()
 		_subStates.wideReenter	(control, active);
 	}
 }
@@ -829,12 +829,12 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepGetNames(const Long parent,
-										const RegionType region,
+										const RegionType regionType,
 										const Short depth,
 										StructureStateInfos& _stateInfos) const
 {
-	_headState.deepGetNames(parent,					 region,						depth,	   _stateInfos);
-	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
+	_headState.deepGetNames(parent,					 regionType,								depth,	   _stateInfos);
+	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, _stateInfos);
 }
 
 #endif

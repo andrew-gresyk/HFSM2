@@ -25,7 +25,7 @@ List<T, NC>::emplace(TA... args) {
 			auto& head = _cells[_vacantHead];
 			HFSM2_ASSERT(head.links.prev == result);
 			head.links.prev = INVALID;
-		} else if (_last < CAPACITY) {
+		} else if (_last < CAPACITY - 1) {
 			// grow
 			++_last;
 			_vacantHead = _last;

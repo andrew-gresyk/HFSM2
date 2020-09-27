@@ -478,8 +478,8 @@ CS_<TN, TA, SG, NI, TS...>::wideGetNames(const Long parent,
 										 const Short depth,
 										 StructureStateInfos& _stateInfos) const
 {
-	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+	lHalf.wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
+	rHalf.wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
 }
 
 #endif

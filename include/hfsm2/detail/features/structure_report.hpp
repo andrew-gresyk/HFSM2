@@ -22,9 +22,11 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct alignas(alignof(void*)) StructureStateInfo {
-	enum RegionType : Short {
+	enum class RegionType : Short {
 		COMPOSITE,
 		ORTHOGONAL,
+
+		COUNT
 	};
 
 	StructureStateInfo() = default;
@@ -32,21 +34,21 @@ struct alignas(alignof(void*)) StructureStateInfo {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_INLINE StructureStateInfo(const Long parent_,
-									const RegionType region_,
+									const RegionType regionType_,
 									const Short depth_,
 									const char* const name_)
 		: name{name_}
 		, parent{parent_}
-		, region{region_}
+		, regionType{regionType_ }
 		, depth{depth_}
 	{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	const char* name;
-	Long parent;
-	RegionType region;
-	Short depth;
+	const char* name	  = nullptr;
+	Long parent			  = INVALID_LONG;
+	RegionType regionType = RegionType::COUNT;
+	Short depth			  = INVALID_SHORT;
 };
 
 #pragma pack(pop)

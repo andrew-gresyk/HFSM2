@@ -26,7 +26,7 @@ struct RegisterT {
 
 template <StateID NS, typename TA>
 struct RegisterT<NS, TA, StaticEmptyT<TA>> {
-	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
+	using StateParents = StaticArray<Parent, TA::STATE_COUNT>;
 
 	static HFSM2_INLINE
 	void
@@ -52,7 +52,6 @@ template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Rank
 S_<TN_, TA, TH>::wrapRank(Control& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::rank,
-						   control.context(),
 						   Method::RANK);
 
 	return _headBox.get().rank(static_cast<const Control&>(control));
@@ -64,7 +63,6 @@ template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Utility
 S_<TN_, TA, TH>::wrapUtility(Control& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::utility,
-						   control.context(),
 						   Method::UTILITY);
 
 	return _headBox.get().utility(static_cast<const Control&>(control));
@@ -78,7 +76,6 @@ template <typename TN_, typename TA, typename TH>
 bool
 S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::entryGuard,
-						   control.context(),
 						   Method::ENTRY_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -101,7 +98,6 @@ S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM2_IF_LOG_INTERFACE(control)) {
 #endif
 
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
-						   control.context(),
 						   Method::CONSTRUCT);
 
 	_headBox.construct();
@@ -113,7 +109,6 @@ template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
-						   control.context(),
 						   Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -133,7 +128,6 @@ S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
 #endif
 
 	HFSM2_LOG_STATE_METHOD(&Head::reenter,
-						   control.context(),
 						   Method::REENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -151,7 +145,6 @@ template <typename TN_, typename TA, typename TH>
 Status
 S_<TN_, TA, TH>::deepUpdate(FullControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::update,
-						   control.context(),
 						   Method::UPDATE);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -172,7 +165,6 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
 	HFSM2_LOG_STATE_METHOD(reaction,
-						   control.context(),
 						   Method::REACT);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -189,7 +181,6 @@ template <typename TN_, typename TA, typename TH>
 bool
 S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::exitGuard,
-						   control.context(),
 						   Method::EXIT_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -208,7 +199,6 @@ template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepExit(PlanControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::exit,
-						   control.context(),
 						   Method::EXIT);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -233,7 +223,6 @@ S_<TN_, TA, TH>::deepDestruct(PlanControl&
 							  )
 {
 	HFSM2_LOG_STATE_METHOD(&Head::exit,
-						   control.context(),
 						   Method::DESTRUCT);
 
 	_headBox.destruct();
@@ -252,7 +241,6 @@ template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::planSucceeded,
-						   control.context(),
 						   Method::PLAN_SUCCEEDED);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -266,7 +254,6 @@ template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::planFailed,
-						   control.context(),
 						   Method::PLAN_FAILED);
 
 	ScopedOrigin origin{control, STATE_ID};

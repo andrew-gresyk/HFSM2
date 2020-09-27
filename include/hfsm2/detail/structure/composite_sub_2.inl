@@ -378,7 +378,7 @@ CS_<TN, TA, SG, NI, T>::wideGetNames(const Long parent,
 									 const Short depth,
 									 StructureStateInfos& _stateInfos) const
 {
-	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+	state.deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
 }
 
 #endif

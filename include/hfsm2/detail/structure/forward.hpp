@@ -392,6 +392,12 @@ struct RF_ final {
 	template <typename... TInjections>
 	using StateT		= StaticStateT<TInjections...>;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger		= typename TConfig::LoggerInterface;
+#endif
+
 	//----------------------------------------------------------------------
 
 	template <typename T>

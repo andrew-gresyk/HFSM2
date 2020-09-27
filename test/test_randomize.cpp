@@ -125,14 +125,14 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 		FSM::Instance machine{generator, &logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<I    >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<Apex >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<I    >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex >(), Event::CONSTRUCT },
-				{ FSM::stateId<I    >(), Event::CONSTRUCT },
+				{ FSM::stateId<Apex >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<I    >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Apex >(), Event::ENTER },
-				{ FSM::stateId<I    >(), Event::ENTER },
+				{ FSM::stateId<Apex >(), Event::Type::ENTER },
+				{ FSM::stateId<I    >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -150,44 +150,44 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 			machine.update();
 			{
 				logger.assertSequence({
-					{						 Event::CHANGE,		FSM::stateId<O    >() },
+					{						 Event::Type::CHANGE,		FSM::stateId<O    >() },
 
-					{ FSM::stateId<Apex >(), Event::UPDATE },
-					{ FSM::stateId<I    >(), Event::UPDATE },
+					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
+					{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-					{ FSM::stateId<N_000>(), Event::RANK },
-					{ FSM::stateId<N_025>(), Event::RANK },
-					{ FSM::stateId<N_050>(), Event::RANK },
-					{ FSM::stateId<N_075>(), Event::RANK },
-					{ FSM::stateId<N_100>(), Event::RANK },
+					{ FSM::stateId<N_000>(), Event::Type::RANK },
+					{ FSM::stateId<N_025>(), Event::Type::RANK },
+					{ FSM::stateId<N_050>(), Event::Type::RANK },
+					{ FSM::stateId<N_075>(), Event::Type::RANK },
+					{ FSM::stateId<N_100>(), Event::Type::RANK },
 
-					{ FSM::stateId<N_000>(), Event::UTILITY },
-					{ FSM::stateId<N_025>(), Event::UTILITY },
-					{ FSM::stateId<N_075>(), Event::UTILITY },
+					{ FSM::stateId<N_000>(), Event::Type::UTILITY },
+					{ FSM::stateId<N_025>(), Event::Type::UTILITY },
+					{ FSM::stateId<N_075>(), Event::Type::UTILITY },
 
-					{ FSM::stateId<N    >(), Event::RANDOM_RESOLUTION, 3 },
+					{ FSM::stateId<N    >(), Event::Type::RANDOM_RESOLUTION, 3 },
 
-					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<N_075>(), Event::ENTRY_GUARD },
-					{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
+					{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
+					{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<N    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<N_075>(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<C    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<C_000>(), Event::Type::ENTRY_GUARD },
 
-					{ FSM::stateId<I    >(), Event::EXIT },
+					{ FSM::stateId<I    >(), Event::Type::EXIT },
 
-					{ FSM::stateId<I    >(), Event::DESTRUCT },
-					{ FSM::stateId<O    >(), Event::CONSTRUCT },
-					{ FSM::stateId<N    >(), Event::CONSTRUCT },
-					{ FSM::stateId<N_075>(), Event::CONSTRUCT },
-					{ FSM::stateId<C    >(), Event::CONSTRUCT },
-					{ FSM::stateId<C_000>(), Event::CONSTRUCT },
+					{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
+					{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<N    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<N_075>(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<C_000>(), Event::Type::CONSTRUCT },
 
-					{ FSM::stateId<O    >(), Event::ENTER },
-					{ FSM::stateId<N    >(), Event::ENTER },
-					{ FSM::stateId<N_075>(), Event::ENTER },
-					{ FSM::stateId<C    >(), Event::ENTER },
-					{ FSM::stateId<C_000>(), Event::ENTER },
+					{ FSM::stateId<O    >(), Event::Type::ENTER },
+					{ FSM::stateId<N    >(), Event::Type::ENTER },
+					{ FSM::stateId<N_075>(), Event::Type::ENTER },
+					{ FSM::stateId<C    >(), Event::Type::ENTER },
+					{ FSM::stateId<C_000>(), Event::Type::ENTER },
 				});
 
 				assertActive(machine, all, {
@@ -212,32 +212,32 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 			machine.update();
 			{
 				logger.assertSequence({
-					{						 Event::RESTART,	FSM::stateId<O    >() },
+					{						 Event::Type::RESTART,	FSM::stateId<O    >() },
 
-					{ FSM::stateId<Apex >(), Event::UPDATE },
-					{ FSM::stateId<I    >(), Event::UPDATE },
+					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
+					{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<N_000>(), Event::ENTRY_GUARD },
-					{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
+					{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
+					{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<N    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<N_000>(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<C    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<C_000>(), Event::Type::ENTRY_GUARD },
 
-					{ FSM::stateId<I    >(), Event::EXIT },
+					{ FSM::stateId<I    >(), Event::Type::EXIT },
 
-					{ FSM::stateId<I    >(), Event::DESTRUCT },
-					{ FSM::stateId<O    >(), Event::CONSTRUCT },
-					{ FSM::stateId<N    >(), Event::CONSTRUCT },
-					{ FSM::stateId<N_000>(), Event::CONSTRUCT },
-					{ FSM::stateId<C    >(), Event::CONSTRUCT },
-					{ FSM::stateId<C_000>(), Event::CONSTRUCT },
+					{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
+					{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<N    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<N_000>(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<C_000>(), Event::Type::CONSTRUCT },
 
-					{ FSM::stateId<O    >(), Event::ENTER },
-					{ FSM::stateId<N    >(), Event::ENTER },
-					{ FSM::stateId<N_000>(), Event::ENTER },
-					{ FSM::stateId<C    >(), Event::ENTER },
-					{ FSM::stateId<C_000>(), Event::ENTER },
+					{ FSM::stateId<O    >(), Event::Type::ENTER },
+					{ FSM::stateId<N    >(), Event::Type::ENTER },
+					{ FSM::stateId<N_000>(), Event::Type::ENTER },
+					{ FSM::stateId<C    >(), Event::Type::ENTER },
+					{ FSM::stateId<C_000>(), Event::Type::ENTER },
 				});
 
 				assertActive(machine, all, {
@@ -262,56 +262,56 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 			machine.update();
 			{
 				logger.assertSequence({
-					{						 Event::RANDOMIZE,	FSM::stateId<O    >() },
+					{						 Event::Type::RANDOMIZE,	FSM::stateId<O    >() },
 
-					{ FSM::stateId<Apex >(), Event::UPDATE },
-					{ FSM::stateId<I    >(), Event::UPDATE },
+					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
+					{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-					{ FSM::stateId<N_000>(), Event::RANK },
-					{ FSM::stateId<N_025>(), Event::RANK },
-					{ FSM::stateId<N_050>(), Event::RANK },
-					{ FSM::stateId<N_075>(), Event::RANK },
-					{ FSM::stateId<N_100>(), Event::RANK },
+					{ FSM::stateId<N_000>(), Event::Type::RANK },
+					{ FSM::stateId<N_025>(), Event::Type::RANK },
+					{ FSM::stateId<N_050>(), Event::Type::RANK },
+					{ FSM::stateId<N_075>(), Event::Type::RANK },
+					{ FSM::stateId<N_100>(), Event::Type::RANK },
 
-					{ FSM::stateId<N_000>(), Event::UTILITY },
-					{ FSM::stateId<N_025>(), Event::UTILITY },
-					{ FSM::stateId<N_075>(), Event::UTILITY },
+					{ FSM::stateId<N_000>(), Event::Type::UTILITY },
+					{ FSM::stateId<N_025>(), Event::Type::UTILITY },
+					{ FSM::stateId<N_075>(), Event::Type::UTILITY },
 
-					{ FSM::stateId<N    >(), Event::RANDOM_RESOLUTION, 3 },
+					{ FSM::stateId<N    >(), Event::Type::RANDOM_RESOLUTION, 3 },
 
-					{ FSM::stateId<C_000>(), Event::RANK },
-					{ FSM::stateId<C_025>(), Event::RANK },
-					{ FSM::stateId<C_050>(), Event::RANK },
-					{ FSM::stateId<C_075>(), Event::RANK },
-					{ FSM::stateId<C_100>(), Event::RANK },
+					{ FSM::stateId<C_000>(), Event::Type::RANK },
+					{ FSM::stateId<C_025>(), Event::Type::RANK },
+					{ FSM::stateId<C_050>(), Event::Type::RANK },
+					{ FSM::stateId<C_075>(), Event::Type::RANK },
+					{ FSM::stateId<C_100>(), Event::Type::RANK },
 
-					{ FSM::stateId<C_000>(), Event::UTILITY },
-					{ FSM::stateId<C_025>(), Event::UTILITY },
-					{ FSM::stateId<C_075>(), Event::UTILITY },
+					{ FSM::stateId<C_000>(), Event::Type::UTILITY },
+					{ FSM::stateId<C_025>(), Event::Type::UTILITY },
+					{ FSM::stateId<C_075>(), Event::Type::UTILITY },
 
-					{ FSM::stateId<C    >(), Event::RANDOM_RESOLUTION, 1 },
+					{ FSM::stateId<C    >(), Event::Type::RANDOM_RESOLUTION, 1 },
 
-					{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-					{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<N    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<N_075>(), Event::ENTRY_GUARD },
-					{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
-					{ FSM::stateId<C_025>(), Event::ENTRY_GUARD },
+					{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
+					{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<N    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<N_075>(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<C    >(), Event::Type::ENTRY_GUARD },
+					{ FSM::stateId<C_025>(), Event::Type::ENTRY_GUARD },
 
-					{ FSM::stateId<I    >(), Event::EXIT },
+					{ FSM::stateId<I    >(), Event::Type::EXIT },
 
-					{ FSM::stateId<I    >(), Event::DESTRUCT },
-					{ FSM::stateId<O    >(), Event::CONSTRUCT },
-					{ FSM::stateId<N    >(), Event::CONSTRUCT },
-					{ FSM::stateId<N_075>(), Event::CONSTRUCT },
-					{ FSM::stateId<C    >(), Event::CONSTRUCT },
-					{ FSM::stateId<C_025>(), Event::CONSTRUCT },
+					{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
+					{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<N    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<N_075>(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
+					{ FSM::stateId<C_025>(), Event::Type::CONSTRUCT },
 
-					{ FSM::stateId<O    >(), Event::ENTER },
-					{ FSM::stateId<N    >(), Event::ENTER },
-					{ FSM::stateId<N_075>(), Event::ENTER },
-					{ FSM::stateId<C    >(), Event::ENTER },
-					{ FSM::stateId<C_025>(), Event::ENTER },
+					{ FSM::stateId<O    >(), Event::Type::ENTER },
+					{ FSM::stateId<N    >(), Event::Type::ENTER },
+					{ FSM::stateId<N_075>(), Event::Type::ENTER },
+					{ FSM::stateId<C    >(), Event::Type::ENTER },
+					{ FSM::stateId<C_025>(), Event::Type::ENTER },
 				});
 
 				assertActive(machine, all, {

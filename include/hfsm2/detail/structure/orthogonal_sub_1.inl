@@ -362,8 +362,8 @@ OS_<TN, TA, NI, TI, TR...>::wideGetNames(const Long parent,
 										 const Short depth,
 										 StructureStateInfos& stateInfos) const
 {
-	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
-	remaining.wideGetNames(parent,								   depth, stateInfos);
+	initial	 .deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, stateInfos);
+	remaining.wideGetNames(parent,											   depth, stateInfos);
 }
 
 #endif

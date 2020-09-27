@@ -13,59 +13,59 @@ LoggerT<TConfig>::recordMethod(Context& /*context*/,
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 		case Method::RANK:
-			history.emplace_back(origin, Event::RANK);
+			history.emplace_back(origin, Event::Type::RANK);
 			break;
 
 		case Method::UTILITY:
-			history.emplace_back(origin, Event::UTILITY);
+			history.emplace_back(origin, Event::Type::UTILITY);
 			break;
 
 	#endif
 
 		case Method::ENTRY_GUARD:
-			history.emplace_back(origin, Event::ENTRY_GUARD);
+			history.emplace_back(origin, Event::Type::ENTRY_GUARD);
 			break;
 
 		case Method::CONSTRUCT:
-			history.emplace_back(origin, Event::CONSTRUCT);
+			history.emplace_back(origin, Event::Type::CONSTRUCT);
 			break;
 
 		case Method::ENTER:
-			history.emplace_back(origin, Event::ENTER);
+			history.emplace_back(origin, Event::Type::ENTER);
 			break;
 
 		case Method::REENTER:
-			history.emplace_back(origin, Event::REENTER);
+			history.emplace_back(origin, Event::Type::REENTER);
 			break;
 
 		case Method::UPDATE:
-			history.emplace_back(origin, Event::UPDATE);
+			history.emplace_back(origin, Event::Type::UPDATE);
 			break;
 
 		case Method::REACT:
-			history.emplace_back(origin, Event::REACT);
+			history.emplace_back(origin, Event::Type::REACT);
 			break;
 
 		case Method::EXIT_GUARD:
-			history.emplace_back(origin, Event::EXIT_GUARD);
+			history.emplace_back(origin, Event::Type::EXIT_GUARD);
 			break;
 
 		case Method::EXIT:
-			history.emplace_back(origin, Event::EXIT);
+			history.emplace_back(origin, Event::Type::EXIT);
 			break;
 
 		case Method::DESTRUCT:
-			history.emplace_back(origin, Event::DESTRUCT);
+			history.emplace_back(origin, Event::Type::DESTRUCT);
 			break;
 
 	#ifdef HFSM2_ENABLE_PLANS
 
 		case Method::PLAN_SUCCEEDED:
-			history.emplace_back(origin, Event::PLAN_SUCCEEDED);
+			history.emplace_back(origin, Event::Type::PLAN_SUCCEEDED);
 			break;
 
 		case Method::PLAN_FAILED:
-			history.emplace_back(origin, Event::PLAN_FAILED);
+			history.emplace_back(origin, Event::Type::PLAN_FAILED);
 			break;
 
 	#endif
@@ -88,31 +88,31 @@ LoggerT<TConfig>::recordTransition(Context& /*context*/,
 
 	switch (transitionType) {
 		case TransitionType::CHANGE:
-			history.emplace_back(origin, Event::CHANGE,    target);
+			history.emplace_back(origin, Event::Type::CHANGE,    target);
 			break;
 
 		case TransitionType::RESTART:
-			history.emplace_back(origin, Event::RESTART,   target);
+			history.emplace_back(origin, Event::Type::RESTART,   target);
 			break;
 
 		case TransitionType::RESUME:
-			history.emplace_back(origin, Event::RESUME,    target);
+			history.emplace_back(origin, Event::Type::RESUME,    target);
 			break;
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 		case TransitionType::UTILIZE:
-			history.emplace_back(origin, Event::UTILIZE,   target);
+			history.emplace_back(origin, Event::Type::UTILIZE,   target);
 			break;
 
 		case TransitionType::RANDOMIZE:
-			history.emplace_back(origin, Event::RANDOMIZE, target);
+			history.emplace_back(origin, Event::Type::RANDOMIZE, target);
 			break;
 
 	#endif
 
 		case TransitionType::SCHEDULE:
-			history.emplace_back(origin, Event::SCHEDULE,  target);
+			history.emplace_back(origin, Event::Type::SCHEDULE,  target);
 			break;
 
 		default:
@@ -133,11 +133,11 @@ LoggerT<TConfig>::recordTaskStatus(Context& /*context*/,
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
-			history.emplace_back(region, Event::TASK_SUCCESS, origin);
+			history.emplace_back(region, Event::Type::TASK_SUCCESS, origin);
 			break;
 
 		case StatusEvent::FAILED:
-			history.emplace_back(region, Event::TASK_FAILURE, origin);
+			history.emplace_back(region, Event::Type::TASK_FAILURE, origin);
 			break;
 
 		default:
@@ -155,11 +155,11 @@ LoggerT<TConfig>::recordPlanStatus(Context& /*context*/,
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
-			history.emplace_back(region, Event::PLAN_SUCCESS, hfsm2::INVALID_STATE_ID);
+			history.emplace_back(region, Event::Type::PLAN_SUCCESS, hfsm2::INVALID_STATE_ID);
 			break;
 
 		case StatusEvent::FAILED:
-			history.emplace_back(region, Event::PLAN_FAILURE, hfsm2::INVALID_STATE_ID);
+			history.emplace_back(region, Event::Type::PLAN_FAILURE, hfsm2::INVALID_STATE_ID);
 			break;
 
 		default:
@@ -180,7 +180,7 @@ LoggerT<TConfig>::recordUtilityResolution(Context& /*context*/,
 										  const StateID prong,
 										  const Utilty utilty)
 {
-	history.emplace_back(head, Event::UTILITY_RESOLUTION, prong, utilty);
+	history.emplace_back(head, Event::Type::UTILITY_RESOLUTION, prong, utilty);
 }
 
 //------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ LoggerT<TConfig>::recordRandomResolution(Context& /*context*/,
 										 const StateID prong,
 										 const Utilty utilty)
 {
-	history.emplace_back(head, Event::RANDOM_RESOLUTION, prong, utilty);
+	history.emplace_back(head, Event::Type::RANDOM_RESOLUTION, prong, utilty);
 }
 
 #endif
@@ -204,7 +204,7 @@ void
 LoggerT<TConfig>::recordCancelledPending(Context& /*context*/,
 										 const StateID origin)
 {
-	history.emplace_back(origin, Event::CANCEL_PENDING);
+	history.emplace_back(origin, Event::Type::CANCEL_PENDING);
 }
 
 //------------------------------------------------------------------------------

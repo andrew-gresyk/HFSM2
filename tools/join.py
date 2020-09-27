@@ -30,6 +30,7 @@ def mergeTo(folder, path, included, pragmaOnceCounter, output):
 
 					if pragma.startswith('once'):
 						pragmaOnceCounter += 1
+
 						if pragmaOnceCounter > 1:
 							continue
 
