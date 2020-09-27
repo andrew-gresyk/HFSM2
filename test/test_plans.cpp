@@ -274,20 +274,20 @@ TEST_CASE("FSM.Plans", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex      >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<Planned   >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<Step1_BT  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<Step1_1   >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<Apex      >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<Planned   >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<Step1_BT  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<Step1_1   >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex      >(), Event::CONSTRUCT },
-				{ FSM::stateId<Planned   >(), Event::CONSTRUCT },
-				{ FSM::stateId<Step1_BT  >(), Event::CONSTRUCT },
-				{ FSM::stateId<Step1_1   >(), Event::CONSTRUCT },
+				{ FSM::stateId<Apex      >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<Planned   >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<Step1_BT  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<Step1_1   >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Apex      >(), Event::ENTER },
-				{ FSM::stateId<Planned   >(), Event::ENTER },
-				{ FSM::stateId<Step1_BT  >(), Event::ENTER },
-				{ FSM::stateId<Step1_1   >(), Event::ENTER },
+				{ FSM::stateId<Apex      >(), Event::Type::ENTER },
+				{ FSM::stateId<Planned   >(), Event::Type::ENTER },
+				{ FSM::stateId<Step1_BT  >(), Event::Type::ENTER },
+				{ FSM::stateId<Step1_1   >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -305,21 +305,21 @@ TEST_CASE("FSM.Plans", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex      >(), Event::UPDATE },
-				{ FSM::stateId<Planned   >(), Event::UPDATE },
-				{ FSM::stateId<Step1_BT  >(), Event::UPDATE },
-				{ FSM::stateId<Step1_1   >(), Event::UPDATE },
-				{ FSM::stateId<Step1_1   >(), Event::CHANGE, FSM::stateId<Step1_2  >() },
+				{ FSM::stateId<Apex      >(), Event::Type::UPDATE },
+				{ FSM::stateId<Planned   >(), Event::Type::UPDATE },
+				{ FSM::stateId<Step1_BT  >(), Event::Type::UPDATE },
+				{ FSM::stateId<Step1_1   >(), Event::Type::UPDATE },
+				{ FSM::stateId<Step1_1   >(), Event::Type::CHANGE, FSM::stateId<Step1_2  >() },
 
-				{ FSM::stateId<Step1_1   >(), Event::EXIT_GUARD  },
-				{ FSM::stateId<Step1_2   >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId<Step1_2   >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Step1_1   >(), Event::EXIT },
+				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT },
 
-				{ FSM::stateId<Step1_1   >(), Event::DESTRUCT },
-				{ FSM::stateId<Step1_2   >(), Event::CONSTRUCT },
+				{ FSM::stateId<Step1_1   >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<Step1_2   >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Step1_2   >(), Event::ENTER },
+				{ FSM::stateId<Step1_2   >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -339,23 +339,23 @@ TEST_CASE("FSM.Plans", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId <Apex      >(), Event::UPDATE },
-				{ FSM::stateId <Planned   >(), Event::UPDATE },
-				{ FSM::stateId <Step1_BT  >(), Event::UPDATE },
-				{ FSM::stateId <Step1_2   >(), Event::UPDATE },
+				{ FSM::stateId <Apex      >(), Event::Type::UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step1_2   >(), Event::Type::UPDATE },
 
-				{ FSM::regionId<Step1_BT  >(), Event::TASK_SUCCESS,	FSM::stateId<Step1_2  >() },
-				{ FSM::stateId <Step1_BT  >(), Event::CHANGE,		FSM::stateId<Step1_3  >() },
+				{ FSM::regionId<Step1_BT  >(), Event::Type::TASK_SUCCESS,	FSM::stateId<Step1_2  >() },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::CHANGE,		FSM::stateId<Step1_3  >() },
 
-				{ FSM::stateId <Step1_2   >(), Event::EXIT_GUARD },
-				{ FSM::stateId <Step1_3   >(), Event::ENTRY_GUARD },
+				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId <Step1_3   >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step1_2   >(), Event::EXIT },
+				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT },
 
-				{ FSM::stateId <Step1_2   >(), Event::DESTRUCT },
-				{ FSM::stateId <Step1_3   >(), Event::CONSTRUCT },
+				{ FSM::stateId <Step1_2   >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Step1_3   >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId <Step1_3   >(), Event::ENTER },
+				{ FSM::stateId <Step1_3   >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -375,41 +375,41 @@ TEST_CASE("FSM.Plans", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId <Apex      >(), Event::UPDATE },
-				{ FSM::stateId <Planned   >(), Event::UPDATE },
-				{ FSM::stateId <Step1_BT  >(), Event::UPDATE },
-				{ FSM::stateId <Step1_3   >(), Event::UPDATE },
+				{ FSM::stateId <Apex      >(), Event::Type::UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step1_3   >(), Event::Type::UPDATE },
 
-				{ FSM::regionId<Step1_BT  >(), Event::TASK_SUCCESS,		FSM::stateId<Step1_3   >() },
-				{ FSM::stateId <Step1_BT  >(), Event::PLAN_SUCCEEDED },
-				{ FSM::regionId<Step1_BT  >(), Event::TASK_SUCCESS,		FSM::stateId<Step1_BT  >() },
-				{ FSM::regionId<Step1_BT  >(), Event::PLAN_SUCCESS },
-				{ FSM::stateId <Planned   >(), Event::CHANGE,			FSM::stateId<Hybrid    >() },
+				{ FSM::regionId<Step1_BT  >(), Event::Type::TASK_SUCCESS,		FSM::stateId<Step1_3   >() },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::PLAN_SUCCEEDED },
+				{ FSM::regionId<Step1_BT  >(), Event::Type::TASK_SUCCESS,		FSM::stateId<Step1_BT  >() },
+				{ FSM::regionId<Step1_BT  >(), Event::Type::PLAN_SUCCESS },
+				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,			FSM::stateId<Hybrid    >() },
 
-				{ FSM::stateId <Step1_BT  >(), Event::EXIT_GUARD  },
-				{ FSM::stateId <Step1_3   >(), Event::EXIT_GUARD  },
-				{ FSM::stateId <Hybrid    >(), Event::ENTRY_GUARD },
-				{ FSM::stateId <Step2L_P  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId <Step2L_1  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId <Step2R_P  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId <Step2R_1  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Step1_3   >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Hybrid    >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step1_3   >(), Event::EXIT   },
-				{ FSM::stateId <Step1_BT  >(), Event::EXIT   },
+				{ FSM::stateId <Step1_3   >(), Event::Type::EXIT   },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::EXIT   },
 
-				{ FSM::stateId <Step1_3   >(), Event::DESTRUCT },
-				{ FSM::stateId <Step1_BT  >(), Event::DESTRUCT },
-				{ FSM::stateId <Hybrid    >(), Event::CONSTRUCT },
-				{ FSM::stateId <Step2L_P  >(), Event::CONSTRUCT },
-				{ FSM::stateId <Step2L_1  >(), Event::CONSTRUCT },
-				{ FSM::stateId <Step2R_P  >(), Event::CONSTRUCT },
-				{ FSM::stateId <Step2R_1  >(), Event::CONSTRUCT },
+				{ FSM::stateId <Step1_3   >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Hybrid    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId <Hybrid    >(), Event::ENTER  },
-				{ FSM::stateId <Step2L_P  >(), Event::ENTER  },
-				{ FSM::stateId <Step2L_1  >(), Event::ENTER  },
-				{ FSM::stateId <Step2R_P  >(), Event::ENTER  },
-				{ FSM::stateId <Step2R_1  >(), Event::ENTER  },
+				{ FSM::stateId <Hybrid    >(), Event::Type::ENTER  },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::ENTER  },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::ENTER  },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::ENTER  },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::ENTER  },
 			});
 
 			assertActive(machine, all, {
@@ -433,40 +433,40 @@ TEST_CASE("FSM.Plans", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId <Apex      >(), Event::UPDATE },
-				{ FSM::stateId <Planned   >(), Event::UPDATE },
-				{ FSM::stateId <Hybrid    >(), Event::UPDATE },
-				{ FSM::stateId <Step2L_P  >(), Event::UPDATE },
-				{ FSM::stateId <Step2L_1  >(), Event::UPDATE },
+				{ FSM::stateId <Apex      >(), Event::Type::UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::UPDATE },
+				{ FSM::stateId <Hybrid    >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::UPDATE },
 
-				{ FSM::regionId<Step2L_P  >(), Event::TASK_SUCCESS,	FSM::stateId<Step2L_1  >() },
+				{ FSM::regionId<Step2L_P  >(), Event::Type::TASK_SUCCESS,	FSM::stateId<Step2L_1  >() },
 
-				{ FSM::stateId <Step2R_P  >(), Event::UPDATE },
-				{ FSM::stateId <Step2R_1  >(), Event::UPDATE },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::UPDATE },
 
-				{ FSM::regionId<Step2R_P  >(), Event::TASK_SUCCESS,	FSM::stateId<Step2R_1  >() },
+				{ FSM::regionId<Step2R_P  >(), Event::Type::TASK_SUCCESS,	FSM::stateId<Step2R_1  >() },
 
-				{ FSM::stateId <Hybrid    >(), Event::CHANGE,		FSM::stateId<Step2L_2  >() },
-				{ FSM::stateId <Hybrid    >(), Event::CHANGE,		FSM::stateId<Step2R_2  >() },
+				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,		FSM::stateId<Step2L_2  >() },
+				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,		FSM::stateId<Step2R_2  >() },
 
-				{ FSM::stateId <Step2L_1  >(), Event::EXIT_GUARD },
-				{ FSM::stateId <Step2R_1  >(), Event::EXIT_GUARD },
-				{ FSM::stateId <Step2L_2  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId <Step2R_2  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId <Step2L_2  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step2L_1  >(), Event::EXIT },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT },
 
-				{ FSM::stateId <Step2L_1  >(), Event::DESTRUCT },
-				{ FSM::stateId <Step2L_2  >(), Event::CONSTRUCT },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Step2L_2  >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId <Step2L_2  >(), Event::ENTER },
+				{ FSM::stateId <Step2L_2  >(), Event::Type::ENTER },
 
-				{ FSM::stateId <Step2R_1  >(), Event::EXIT },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT },
 
-				{ FSM::stateId <Step2R_1  >(), Event::DESTRUCT },
-				{ FSM::stateId <Step2R_2  >(), Event::CONSTRUCT },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId <Step2R_2  >(), Event::ENTER },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -492,52 +492,52 @@ TEST_CASE("FSM.Plans", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId <Apex      >(), Event::UPDATE },
-				{ FSM::stateId <Planned   >(), Event::UPDATE },
-				{ FSM::stateId <Hybrid    >(), Event::UPDATE },
-				{ FSM::stateId <Step2L_P  >(), Event::UPDATE },
-				{ FSM::stateId <Step2L_2  >(), Event::UPDATE },
+				{ FSM::stateId <Apex      >(), Event::Type::UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::UPDATE },
+				{ FSM::stateId <Hybrid    >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step2L_2  >(), Event::Type::UPDATE },
 
-				{ FSM::regionId<Step2L_P  >(), Event::TASK_FAILURE,	  FSM::stateId<Step2L_2 >() },
+				{ FSM::regionId<Step2L_P  >(), Event::Type::TASK_FAILURE,	  FSM::stateId<Step2L_2 >() },
 
-				{ FSM::stateId <Step2R_P  >(), Event::UPDATE },
-				{ FSM::stateId <Step2R_2  >(), Event::UPDATE },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::UPDATE },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::UPDATE },
 
-				{ FSM::regionId<Step2R_P  >(), Event::TASK_FAILURE,	  FSM::stateId<Step2R_2 >() },
+				{ FSM::regionId<Step2R_P  >(), Event::Type::TASK_FAILURE,	  FSM::stateId<Step2R_2 >() },
 
-				{ FSM::stateId <Hybrid    >(), Event::PLAN_FAILED },
-				{ FSM::regionId<Hybrid    >(), Event::TASK_SUCCESS,	  FSM::stateId<Hybrid   >()   },
-				{ FSM::regionId<Hybrid    >(), Event::PLAN_SUCCESS },
+				{ FSM::stateId <Hybrid    >(), Event::Type::PLAN_FAILED },
+				{ FSM::regionId<Hybrid    >(), Event::Type::TASK_SUCCESS,	  FSM::stateId<Hybrid   >()   },
+				{ FSM::regionId<Hybrid    >(), Event::Type::PLAN_SUCCESS },
 
-				{ FSM::stateId <Planned   >(), Event::CHANGE,		  FSM::stateId<Terminal >() },
+				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,		  FSM::stateId<Terminal >() },
 
-				{ FSM::stateId <Hybrid    >(), Event::EXIT_GUARD  },
-				{ FSM::stateId <Step2L_P  >(), Event::EXIT_GUARD  },
-				{ FSM::stateId <Step2L_2  >(), Event::EXIT_GUARD  },
-				{ FSM::stateId <Step2R_P  >(), Event::EXIT_GUARD  },
-				{ FSM::stateId <Step2R_2  >(), Event::EXIT_GUARD  },
-				{ FSM::stateId <Terminal  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId <Terminal_L>(), Event::ENTRY_GUARD },
-				{ FSM::stateId <Terminal_R>(), Event::ENTRY_GUARD },
+				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Step2L_2  >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Terminal  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId <Terminal_L>(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId <Terminal_R>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step2L_2  >(), Event::EXIT },
-				{ FSM::stateId <Step2L_P  >(), Event::EXIT },
-				{ FSM::stateId <Step2R_2  >(), Event::EXIT },
-				{ FSM::stateId <Step2R_P  >(), Event::EXIT },
-				{ FSM::stateId <Hybrid    >(), Event::EXIT },
+				{ FSM::stateId <Step2L_2  >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::EXIT },
+				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT },
 
-				{ FSM::stateId <Step2L_2  >(), Event::DESTRUCT },
-				{ FSM::stateId <Step2L_P  >(), Event::DESTRUCT },
-				{ FSM::stateId <Step2R_2  >(), Event::DESTRUCT },
-				{ FSM::stateId <Step2R_P  >(), Event::DESTRUCT },
-				{ FSM::stateId <Hybrid    >(), Event::DESTRUCT },
-				{ FSM::stateId <Terminal  >(), Event::CONSTRUCT	},
-				{ FSM::stateId <Terminal_L>(), Event::CONSTRUCT	},
-				{ FSM::stateId <Terminal_R>(), Event::CONSTRUCT	},
+				{ FSM::stateId <Step2L_2  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Hybrid    >(), Event::Type::DESTRUCT },
+				{ FSM::stateId <Terminal  >(), Event::Type::CONSTRUCT	},
+				{ FSM::stateId <Terminal_L>(), Event::Type::CONSTRUCT	},
+				{ FSM::stateId <Terminal_R>(), Event::Type::CONSTRUCT	},
 
-				{ FSM::stateId <Terminal  >(), Event::ENTER	},
-				{ FSM::stateId <Terminal_L>(), Event::ENTER	},
-				{ FSM::stateId <Terminal_R>(), Event::ENTER	},
+				{ FSM::stateId <Terminal  >(), Event::Type::ENTER	},
+				{ FSM::stateId <Terminal_L>(), Event::Type::ENTER	},
+				{ FSM::stateId <Terminal_R>(), Event::Type::ENTER	},
 			});
 
 			assertActive(machine, all, {
@@ -562,17 +562,17 @@ TEST_CASE("FSM.Plans", "[machine]") {
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId <Terminal_L>(), Event::EXIT },
-		{ FSM::stateId <Terminal_R>(), Event::EXIT },
-		{ FSM::stateId <Terminal  >(), Event::EXIT },
-		{ FSM::stateId <Planned   >(), Event::EXIT },
-		{ FSM::stateId <Apex      >(), Event::EXIT },
+		{ FSM::stateId <Terminal_L>(), Event::Type::EXIT },
+		{ FSM::stateId <Terminal_R>(), Event::Type::EXIT },
+		{ FSM::stateId <Terminal  >(), Event::Type::EXIT },
+		{ FSM::stateId <Planned   >(), Event::Type::EXIT },
+		{ FSM::stateId <Apex      >(), Event::Type::EXIT },
 
-		{ FSM::stateId <Terminal_L>(), Event::DESTRUCT },
-		{ FSM::stateId <Terminal_R>(), Event::DESTRUCT },
-		{ FSM::stateId <Terminal  >(), Event::DESTRUCT },
-		{ FSM::stateId <Planned   >(), Event::DESTRUCT },
-		{ FSM::stateId <Apex      >(), Event::DESTRUCT },
+		{ FSM::stateId <Terminal_L>(), Event::Type::DESTRUCT },
+		{ FSM::stateId <Terminal_R>(), Event::Type::DESTRUCT },
+		{ FSM::stateId <Terminal  >(), Event::Type::DESTRUCT },
+		{ FSM::stateId <Planned   >(), Event::Type::DESTRUCT },
+		{ FSM::stateId <Apex      >(), Event::Type::DESTRUCT },
 	});
 }
 

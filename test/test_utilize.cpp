@@ -119,14 +119,14 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 	FSM::Instance machine{&logger};
 	{
 		logger.assertSequence({
-			{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
-			{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
+			{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
 
-			{ FSM::stateId<Apex>(),	Event::CONSTRUCT },
-			{ FSM::stateId<I   >(),	Event::CONSTRUCT },
+			{ FSM::stateId<Apex>(),	Event::Type::CONSTRUCT },
+			{ FSM::stateId<I   >(),	Event::Type::CONSTRUCT },
 
-			{ FSM::stateId<Apex>(),	Event::ENTER },
-			{ FSM::stateId<I   >(),	Event::ENTER },
+			{ FSM::stateId<Apex>(),	Event::Type::ENTER },
+			{ FSM::stateId<I   >(),	Event::Type::ENTER },
 		});
 
 		assertActive(machine, all, {
@@ -142,40 +142,40 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 		machine.update();
 
 		logger.assertSequence({
-			{						 Event::CHANGE, FSM::stateId<O   >() },
+			{						 Event::Type::CHANGE, FSM::stateId<O   >() },
 
-			{ FSM::stateId<Apex >(), Event::UPDATE },
-			{ FSM::stateId<I    >(), Event::UPDATE },
+			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
+			{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-			{ FSM::stateId<U_000>(), Event::UTILITY },
-			{ FSM::stateId<U_025>(), Event::UTILITY },
-			{ FSM::stateId<U_050>(), Event::UTILITY },
-			{ FSM::stateId<U_075>(), Event::UTILITY },
-			{ FSM::stateId<U_100>(), Event::UTILITY },
+			{ FSM::stateId<U_000>(), Event::Type::UTILITY },
+			{ FSM::stateId<U_025>(), Event::Type::UTILITY },
+			{ FSM::stateId<U_050>(), Event::Type::UTILITY },
+			{ FSM::stateId<U_075>(), Event::Type::UTILITY },
+			{ FSM::stateId<U_100>(), Event::Type::UTILITY },
 
-			{ FSM::stateId<U    >(), Event::UTILITY_RESOLUTION, 4 },
+			{ FSM::stateId<U    >(), Event::Type::UTILITY_RESOLUTION, 4 },
 
-			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<U_100>(), Event::ENTRY_GUARD },
-			{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
+			{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<U    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<U_100>(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<C    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<C_000>(), Event::Type::ENTRY_GUARD },
 
-			{ FSM::stateId<I    >(), Event::EXIT },
+			{ FSM::stateId<I    >(), Event::Type::EXIT },
 
-			{ FSM::stateId<I    >(), Event::DESTRUCT },
-			{ FSM::stateId<O    >(), Event::CONSTRUCT },
-			{ FSM::stateId<U    >(), Event::CONSTRUCT },
-			{ FSM::stateId<U_100>(), Event::CONSTRUCT },
-			{ FSM::stateId<C    >(), Event::CONSTRUCT },
-			{ FSM::stateId<C_000>(), Event::CONSTRUCT },
+			{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
+			{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<U    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<U_100>(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<C_000>(), Event::Type::CONSTRUCT },
 
-			{ FSM::stateId<O    >(), Event::ENTER },
-			{ FSM::stateId<U    >(), Event::ENTER },
-			{ FSM::stateId<U_100>(), Event::ENTER },
-			{ FSM::stateId<C    >(), Event::ENTER },
-			{ FSM::stateId<C_000>(), Event::ENTER },
+			{ FSM::stateId<O    >(), Event::Type::ENTER },
+			{ FSM::stateId<U    >(), Event::Type::ENTER },
+			{ FSM::stateId<U_100>(), Event::Type::ENTER },
+			{ FSM::stateId<C    >(), Event::Type::ENTER },
+			{ FSM::stateId<C_000>(), Event::Type::ENTER },
 		});
 
 		assertActive(machine, all, {
@@ -197,32 +197,32 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 		machine.update();
 
 		logger.assertSequence({
-			{						 Event::RESTART, FSM::stateId<O   >() },
+			{						 Event::Type::RESTART, FSM::stateId<O   >() },
 
-			{ FSM::stateId<Apex >(), Event::UPDATE },
-			{ FSM::stateId<I    >(), Event::UPDATE },
+			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
+			{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<U_000>(), Event::ENTRY_GUARD },
-			{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<C_000>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
+			{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<U    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<U_000>(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<C    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<C_000>(), Event::Type::ENTRY_GUARD },
 
-			{ FSM::stateId<I    >(), Event::EXIT },
+			{ FSM::stateId<I    >(), Event::Type::EXIT },
 
-			{ FSM::stateId<I    >(), Event::DESTRUCT },
-			{ FSM::stateId<O    >(), Event::CONSTRUCT },
-			{ FSM::stateId<U    >(), Event::CONSTRUCT },
-			{ FSM::stateId<U_000>(), Event::CONSTRUCT },
-			{ FSM::stateId<C    >(), Event::CONSTRUCT },
-			{ FSM::stateId<C_000>(), Event::CONSTRUCT },
+			{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
+			{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<U    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<U_000>(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<C_000>(), Event::Type::CONSTRUCT },
 
-			{ FSM::stateId<O    >(), Event::ENTER },
-			{ FSM::stateId<U    >(), Event::ENTER },
-			{ FSM::stateId<U_000>(), Event::ENTER },
-			{ FSM::stateId<C    >(), Event::ENTER },
-			{ FSM::stateId<C_000>(), Event::ENTER },
+			{ FSM::stateId<O    >(), Event::Type::ENTER },
+			{ FSM::stateId<U    >(), Event::Type::ENTER },
+			{ FSM::stateId<U_000>(), Event::Type::ENTER },
+			{ FSM::stateId<C    >(), Event::Type::ENTER },
+			{ FSM::stateId<C_000>(), Event::Type::ENTER },
 		});
 
 		assertActive(machine, all, {
@@ -244,48 +244,48 @@ TEST_CASE("FSM.Utilize", "[machine]") {
 		machine.update();
 
 		logger.assertSequence({
-			{						 Event::UTILIZE, FSM::stateId<O   >() },
+			{						 Event::Type::UTILIZE, FSM::stateId<O   >() },
 
-			{ FSM::stateId<Apex >(), Event::UPDATE },
-			{ FSM::stateId<I    >(), Event::UPDATE },
+			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
+			{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-			{ FSM::stateId<U_000>(), Event::UTILITY },
-			{ FSM::stateId<U_025>(), Event::UTILITY },
-			{ FSM::stateId<U_050>(), Event::UTILITY },
-			{ FSM::stateId<U_075>(), Event::UTILITY },
-			{ FSM::stateId<U_100>(), Event::UTILITY },
+			{ FSM::stateId<U_000>(), Event::Type::UTILITY },
+			{ FSM::stateId<U_025>(), Event::Type::UTILITY },
+			{ FSM::stateId<U_050>(), Event::Type::UTILITY },
+			{ FSM::stateId<U_075>(), Event::Type::UTILITY },
+			{ FSM::stateId<U_100>(), Event::Type::UTILITY },
 
-			{ FSM::stateId<U    >(), Event::UTILITY_RESOLUTION, 4 },
+			{ FSM::stateId<U    >(), Event::Type::UTILITY_RESOLUTION, 4 },
 
-			{ FSM::stateId<C_000>(), Event::UTILITY },
-			{ FSM::stateId<C_025>(), Event::UTILITY },
-			{ FSM::stateId<C_050>(), Event::UTILITY },
-			{ FSM::stateId<C_075>(), Event::UTILITY },
-			{ FSM::stateId<C_100>(), Event::UTILITY },
+			{ FSM::stateId<C_000>(), Event::Type::UTILITY },
+			{ FSM::stateId<C_025>(), Event::Type::UTILITY },
+			{ FSM::stateId<C_050>(), Event::Type::UTILITY },
+			{ FSM::stateId<C_075>(), Event::Type::UTILITY },
+			{ FSM::stateId<C_100>(), Event::Type::UTILITY },
 
-			{ FSM::stateId<C    >(), Event::UTILITY_RESOLUTION, 4 },
+			{ FSM::stateId<C    >(), Event::Type::UTILITY_RESOLUTION, 4 },
 
-			{ FSM::stateId<I    >(), Event::EXIT_GUARD },
-			{ FSM::stateId<O    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<U    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<U_100>(), Event::ENTRY_GUARD },
-			{ FSM::stateId<C    >(), Event::ENTRY_GUARD },
-			{ FSM::stateId<C_100>(), Event::ENTRY_GUARD },
+			{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
+			{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<U    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<U_100>(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<C    >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<C_100>(), Event::Type::ENTRY_GUARD },
 
-			{ FSM::stateId<I    >(), Event::EXIT },
+			{ FSM::stateId<I    >(), Event::Type::EXIT },
 
-			{ FSM::stateId<I    >(), Event::DESTRUCT },
-			{ FSM::stateId<O    >(), Event::CONSTRUCT },
-			{ FSM::stateId<U    >(), Event::CONSTRUCT },
-			{ FSM::stateId<U_100>(), Event::CONSTRUCT },
-			{ FSM::stateId<C    >(), Event::CONSTRUCT },
-			{ FSM::stateId<C_100>(), Event::CONSTRUCT },
+			{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
+			{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<U    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<U_100>(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
+			{ FSM::stateId<C_100>(), Event::Type::CONSTRUCT },
 
-			{ FSM::stateId<O    >(), Event::ENTER },
-			{ FSM::stateId<U    >(), Event::ENTER },
-			{ FSM::stateId<U_100>(), Event::ENTER },
-			{ FSM::stateId<C    >(), Event::ENTER },
-			{ FSM::stateId<C_100>(), Event::ENTER },
+			{ FSM::stateId<O    >(), Event::Type::ENTER },
+			{ FSM::stateId<U    >(), Event::Type::ENTER },
+			{ FSM::stateId<U_100>(), Event::Type::ENTER },
+			{ FSM::stateId<C    >(), Event::Type::ENTER },
+			{ FSM::stateId<C_100>(), Event::Type::ENTER },
 		});
 
 		assertActive(machine, all, {

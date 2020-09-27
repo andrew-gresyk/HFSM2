@@ -290,7 +290,7 @@ OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
 								  const Short depth,
 								  StructureStateInfos& _stateInfos) const
 {
-	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
+	initial.deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
 }
 
 #endif

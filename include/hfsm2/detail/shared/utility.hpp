@@ -7,7 +7,7 @@ struct EmptyPayload {};
 
 //------------------------------------------------------------------------------
 
-using Short = uint8_t;
+using Short		 = uint8_t;
 static constexpr Short		INVALID_SHORT		= UINT8_MAX;
 
 using RegionID	 = Short;
@@ -18,7 +18,7 @@ static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-using Long  = uint16_t;
+using Long		 = uint16_t;
 static constexpr Long		INVALID_LONG		= UINT16_MAX;
 
 using StateID	 = Long;

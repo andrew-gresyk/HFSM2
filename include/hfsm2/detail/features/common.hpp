@@ -136,9 +136,9 @@ transitionName(const TransitionType type) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
 namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 1)
 
@@ -171,18 +171,18 @@ struct alignas(4) TransitionBase {
 	//----------------------------------------------------------------------
 
 	HFSM2_INLINE bool operator == (const TransitionBase& other) const {
-		return origin == other.origin &&
+		return origin	   == other.origin &&
 			   destination == other.destination &&
-			   method == other.method &&
-			   type == other.type;
+			   method	   == other.method &&
+			   type		   == other.type;
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 	StateID	origin		= INVALID_STATE_ID;
 	StateID	destination	= INVALID_STATE_ID;
 	Method	method		= Method::NONE;
-	TransitionType type;
+	TransitionType type	= TransitionType::COUNT;
 };
 
 #ifdef _MSC_VER
@@ -273,9 +273,9 @@ struct alignas(4) TransitionT<void>
 
 #pragma pack(pop)
 
-}
-
 ////////////////////////////////////////////////////////////////////////////////
+
+}
 
 struct Request {
 	TransitionType type;

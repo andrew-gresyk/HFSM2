@@ -35,8 +35,8 @@ struct alignas(2 * sizeof(Short)) Parent {
 			   prong  != INVALID_SHORT;
 	}
 
-	ForkID	   forkId = INVALID_FORK_ID;
-	Short prong  = INVALID_SHORT;
+	ForkID forkId = INVALID_FORK_ID;
+	Short  prong  = INVALID_SHORT;
 };
 
 #pragma pack(pop)

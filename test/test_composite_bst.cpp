@@ -89,14 +89,14 @@ TEST_CASE("FSM.Composite BST", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<S0  >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<S0  >(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex>(),	Event::CONSTRUCT },
-				{ FSM::stateId<S0  >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Apex>(),	Event::Type::CONSTRUCT },
+				{ FSM::stateId<S0  >(),	Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Apex>(),	Event::ENTER },
-				{ FSM::stateId<S0  >(),	Event::ENTER },
+				{ FSM::stateId<Apex>(),	Event::Type::ENTER },
+				{ FSM::stateId<S0  >(),	Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -112,18 +112,18 @@ TEST_CASE("FSM.Composite BST", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{						 Event::CHANGE, FSM::stateId<S1>() },
+				{						 Event::Type::CHANGE, FSM::stateId<S1>() },
 
-				{ hfsm2::StateID{0},	 Event::UPDATE },
-				{ FSM::stateId<S0>(),	 Event::UPDATE },
+				{ hfsm2::StateID{0},	 Event::Type::UPDATE },
+				{ FSM::stateId<S0>(),	 Event::Type::UPDATE },
 
-				{ FSM::stateId<S0>(),	 Event::EXIT_GUARD },
-				{ FSM::stateId<S1>(),	 Event::ENTRY_GUARD },
+				{ FSM::stateId<S0>(),	 Event::Type::EXIT_GUARD },
+				{ FSM::stateId<S1>(),	 Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<S0>(),	 Event::EXIT },
-				{ FSM::stateId<S0>(),	 Event::DESTRUCT },
-				{ FSM::stateId<S1>(),	 Event::CONSTRUCT },
-				{ FSM::stateId<S1>(),	 Event::ENTER },
+				{ FSM::stateId<S0>(),	 Event::Type::EXIT },
+				{ FSM::stateId<S0>(),	 Event::Type::DESTRUCT },
+				{ FSM::stateId<S1>(),	 Event::Type::CONSTRUCT },
+				{ FSM::stateId<S1>(),	 Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -139,11 +139,11 @@ TEST_CASE("FSM.Composite BST", "[machine]") {
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId<S1>(),	 Event::EXIT },
-		{ hfsm2::StateID{0}, 	 Event::EXIT },
+		{ FSM::stateId<S1>(),	 Event::Type::EXIT },
+		{ hfsm2::StateID{0}, 	 Event::Type::EXIT },
 
-		{ FSM::stateId<S1>(),	 Event::DESTRUCT },
-		{ hfsm2::StateID{0}, 	 Event::DESTRUCT },
+		{ FSM::stateId<S1>(),	 Event::Type::DESTRUCT },
+		{ hfsm2::StateID{0}, 	 Event::Type::DESTRUCT },
 	});
 }
 

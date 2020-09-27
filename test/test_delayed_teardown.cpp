@@ -141,23 +141,23 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex    >(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<Step1   >(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<Step1_1 >(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<Step1_2 >(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<Setup   >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Apex    >(),	Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<Step1   >(),	Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<Setup   >(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex    >(),	Event::CONSTRUCT },
-				{ FSM::stateId<Step1   >(),	Event::CONSTRUCT },
-				{ FSM::stateId<Step1_1 >(),	Event::CONSTRUCT },
-				{ FSM::stateId<Step1_2 >(),	Event::CONSTRUCT },
-				{ FSM::stateId<Setup   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Apex    >(),	Event::Type::CONSTRUCT },
+				{ FSM::stateId<Step1   >(),	Event::Type::CONSTRUCT },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::CONSTRUCT },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::CONSTRUCT },
+				{ FSM::stateId<Setup   >(),	Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Apex    >(),	Event::ENTER },
-				{ FSM::stateId<Step1   >(),	Event::ENTER },
-				{ FSM::stateId<Step1_1 >(),	Event::ENTER },
-				{ FSM::stateId<Step1_2 >(),	Event::ENTER },
-				{ FSM::stateId<Setup   >(),	Event::ENTER },
+				{ FSM::stateId<Apex    >(),	Event::Type::ENTER },
+				{ FSM::stateId<Step1   >(),	Event::Type::ENTER },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::ENTER },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::ENTER },
+				{ FSM::stateId<Setup   >(),	Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -180,23 +180,23 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex    >(),	Event::UPDATE },
-				{ FSM::stateId<Step1   >(),	Event::UPDATE },
-				{ FSM::stateId<Step1_1 >(),	Event::UPDATE },
-				{ FSM::stateId<Step1_2 >(),	Event::UPDATE },
-				{ FSM::stateId<Setup   >(),	Event::UPDATE },
+				{ FSM::stateId<Apex    >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1   >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Setup   >(),	Event::Type::UPDATE },
 
-				{ FSM::stateId<Setup   >(),	Event::CHANGE,		FSM::stateId<Work   >() },
+				{ FSM::stateId<Setup   >(),	Event::Type::CHANGE,		FSM::stateId<Work   >() },
 
-				{ FSM::stateId<Setup   >(),	Event::EXIT_GUARD },
-				{ FSM::stateId<Work    >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Setup   >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Work    >(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Setup   >(),	Event::EXIT },
+				{ FSM::stateId<Setup   >(),	Event::Type::EXIT },
 
-				{ FSM::stateId<Setup   >(),	Event::DESTRUCT },
-				{ FSM::stateId<Work    >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Setup   >(),	Event::Type::DESTRUCT },
+				{ FSM::stateId<Work    >(),	Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Work    >(),	Event::ENTER },
+				{ FSM::stateId<Work    >(),	Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -230,32 +230,32 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{							Event::CHANGE,		FSM::stateId<Step2>() },
+				{							Event::Type::CHANGE,		FSM::stateId<Step2>() },
 
-				{ FSM::stateId<Apex    >(),	Event::UPDATE },
-				{ FSM::stateId<Step1   >(),	Event::UPDATE },
-				{ FSM::stateId<Step1_1 >(),	Event::UPDATE },
-				{ FSM::stateId<Step1_2 >(),	Event::UPDATE },
-				{ FSM::stateId<Work    >(),	Event::UPDATE },
+				{ FSM::stateId<Apex    >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1   >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Work    >(),	Event::Type::UPDATE },
 
-				{ FSM::stateId<Step1   >(),	Event::EXIT_GUARD },
-				{ FSM::stateId<Step1_1 >(),	Event::EXIT_GUARD },
-				{ FSM::stateId<Step1_2 >(),	Event::EXIT_GUARD },
-				{ FSM::stateId<Work    >(),	Event::EXIT_GUARD },
+				{ FSM::stateId<Step1   >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Work    >(),	Event::Type::EXIT_GUARD },
 
-				{ FSM::stateId<Work    >(),	Event::CANCEL_PENDING },
+				{ FSM::stateId<Work    >(),	Event::Type::CANCEL_PENDING },
 
-				{ FSM::stateId<Work    >(),	Event::CHANGE,		FSM::stateId<Teardown>() },
+				{ FSM::stateId<Work    >(),	Event::Type::CHANGE,		FSM::stateId<Teardown>() },
 
-				{ FSM::stateId<Work    >(),	Event::EXIT_GUARD  },
-				{ FSM::stateId<Teardown>(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Work    >(),	Event::Type::EXIT_GUARD  },
+				{ FSM::stateId<Teardown>(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Work    >(),	Event::EXIT  },
+				{ FSM::stateId<Work    >(),	Event::Type::EXIT  },
 
-				{ FSM::stateId<Work    >(),	Event::DESTRUCT },
-				{ FSM::stateId<Teardown>(),	Event::CONSTRUCT },
+				{ FSM::stateId<Work    >(),	Event::Type::DESTRUCT },
+				{ FSM::stateId<Teardown>(),	Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Teardown>(),	Event::ENTER },
+				{ FSM::stateId<Teardown>(),	Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -288,34 +288,34 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex    >(),	Event::UPDATE },
-				{ FSM::stateId<Step1   >(),	Event::UPDATE },
-				{ FSM::stateId<Step1_1 >(),	Event::UPDATE },
-				{ FSM::stateId<Step1_2 >(),	Event::UPDATE },
-				{ FSM::stateId<Teardown>(),	Event::UPDATE },
+				{ FSM::stateId<Apex    >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1   >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::UPDATE },
+				{ FSM::stateId<Teardown>(),	Event::Type::UPDATE },
 
-				{ FSM::regionId<Step1_2>(),	Event::TASK_SUCCESS, FSM::stateId<Teardown>() },
-				{ FSM::stateId<Step1_2 >(),	Event::CHANGE,		 FSM::stateId<Step2   >() },
+				{ FSM::regionId<Step1_2>(),	Event::Type::TASK_SUCCESS, FSM::stateId<Teardown>() },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::CHANGE,		 FSM::stateId<Step2   >() },
 
-				{ FSM::stateId<Step1   >(),	Event::EXIT_GUARD },
-				{ FSM::stateId<Step1_1 >(),	Event::EXIT_GUARD },
-				{ FSM::stateId<Step1_2 >(),	Event::EXIT_GUARD },
-				{ FSM::stateId<Teardown>(),	Event::EXIT_GUARD },
+				{ FSM::stateId<Step1   >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Teardown>(),	Event::Type::EXIT_GUARD },
 
-				{ FSM::stateId<Step2   >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Step2   >(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Step1_1 >(),	Event::EXIT },
-				{ FSM::stateId<Teardown>(),	Event::EXIT },
-				{ FSM::stateId<Step1_2 >(),	Event::EXIT },
-				{ FSM::stateId<Step1   >(),	Event::EXIT },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::EXIT },
+				{ FSM::stateId<Teardown>(),	Event::Type::EXIT },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::EXIT },
+				{ FSM::stateId<Step1   >(),	Event::Type::EXIT },
 
-				{ FSM::stateId<Step1_1 >(),	Event::DESTRUCT },
-				{ FSM::stateId<Teardown>(),	Event::DESTRUCT },
-				{ FSM::stateId<Step1_2 >(),	Event::DESTRUCT },
-				{ FSM::stateId<Step1   >(),	Event::DESTRUCT },
-				{ FSM::stateId<Step2   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Step1_1 >(),	Event::Type::DESTRUCT },
+				{ FSM::stateId<Teardown>(),	Event::Type::DESTRUCT },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::DESTRUCT },
+				{ FSM::stateId<Step1   >(),	Event::Type::DESTRUCT },
+				{ FSM::stateId<Step2   >(),	Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Step2   >(),	Event::ENTER },
+				{ FSM::stateId<Step2   >(),	Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -347,11 +347,11 @@ TEST_CASE("FSM.Delayed Teardown", "[machine]") {
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId<Step2   >(),	Event::EXIT },
-		{ FSM::stateId<Apex    >(),	Event::EXIT },
+		{ FSM::stateId<Step2   >(),	Event::Type::EXIT },
+		{ FSM::stateId<Apex    >(),	Event::Type::EXIT },
 
-		{ FSM::stateId<Step2   >(),	Event::DESTRUCT },
-		{ FSM::stateId<Apex    >(),	Event::DESTRUCT },
+		{ FSM::stateId<Step2   >(),	Event::Type::DESTRUCT },
+		{ FSM::stateId<Apex    >(),	Event::Type::DESTRUCT },
 	});
 }
 

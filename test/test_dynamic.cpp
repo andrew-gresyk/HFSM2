@@ -188,17 +188,17 @@ TEST_CASE("FSM.Dynamic", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::ENTRY_GUARD },
-				{ FSM::stateId<A    >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<A_1  >(), Event::ENTRY_GUARD },
+				{ hfsm2::StateID{0},	 Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<A    >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<A_1  >(), Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0},	 Event::CONSTRUCT },
-				{ FSM::stateId<A    >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_1  >(), Event::CONSTRUCT },
+				{ hfsm2::StateID{0},	 Event::Type::CONSTRUCT },
+				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<A_1  >(), Event::Type::CONSTRUCT },
 
-				{ hfsm2::StateID{0},	 Event::ENTER },
-				{ FSM::stateId<A    >(), Event::ENTER },
-				{ FSM::stateId<A_1  >(), Event::ENTER },
+				{ hfsm2::StateID{0},	 Event::Type::ENTER },
+				{ FSM::stateId<A    >(), Event::Type::ENTER },
+				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -217,15 +217,15 @@ TEST_CASE("FSM.Dynamic", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{						 Event::CHANGE,		FSM::stateId<A_2  >() },
+				{						 Event::Type::CHANGE,		FSM::stateId<A_2  >() },
 
-				{ hfsm2::StateID{0},	 Event::UPDATE },
-				{ FSM::stateId<A    >(), Event::UPDATE },
-				{ FSM::stateId<A_1  >(), Event::UPDATE },
+				{ hfsm2::StateID{0},	 Event::Type::UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::UPDATE },
+				{ FSM::stateId<A_1  >(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A_1  >(), Event::EXIT_GUARD },
-				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<A_2  >(), Event::CANCEL_PENDING },
+				{ FSM::stateId<A_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<A_2  >(), Event::Type::CANCEL_PENDING },
 			});
 
 			checkActive<A, A_1>();
@@ -237,13 +237,13 @@ TEST_CASE("FSM.Dynamic", "[machine]") {
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId<A_1  >(), Event::EXIT },
-		{ FSM::stateId<A    >(), Event::EXIT },
-		{ hfsm2::StateID{0},	 Event::EXIT },
+		{ FSM::stateId<A_1  >(), Event::Type::EXIT },
+		{ FSM::stateId<A    >(), Event::Type::EXIT },
+		{ hfsm2::StateID{0},	 Event::Type::EXIT },
 
-		{ FSM::stateId<A_1  >(), Event::DESTRUCT },
-		{ FSM::stateId<A    >(), Event::DESTRUCT },
-		{ hfsm2::StateID{0},	 Event::DESTRUCT },
+		{ FSM::stateId<A_1  >(), Event::Type::DESTRUCT },
+		{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
+		{ hfsm2::StateID{0},	 Event::Type::DESTRUCT },
 	});
 }
 

@@ -134,29 +134,29 @@ TEST_CASE("FSM.OrthoUnits", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<O1   >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<O1_01>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<O1_02>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<O1_03>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<O1_04>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<O1_05>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<Apex >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<O1   >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<O1_01>(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<O1_02>(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<O1_03>(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<O1_04>(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<O1_05>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex >(), Event::CONSTRUCT },
-				{ FSM::stateId<O1   >(), Event::CONSTRUCT },
-				{ FSM::stateId<O1_01>(), Event::CONSTRUCT },
-				{ FSM::stateId<O1_02>(), Event::CONSTRUCT },
-				{ FSM::stateId<O1_03>(), Event::CONSTRUCT },
-				{ FSM::stateId<O1_04>(), Event::CONSTRUCT },
-				{ FSM::stateId<O1_05>(), Event::CONSTRUCT },
+				{ FSM::stateId<Apex >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<O1   >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<O1_01>(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<O1_02>(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<O1_03>(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<O1_04>(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<O1_05>(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Apex >(), Event::ENTER },
-				{ FSM::stateId<O1   >(), Event::ENTER },
-				{ FSM::stateId<O1_01>(), Event::ENTER },
-				{ FSM::stateId<O1_02>(), Event::ENTER },
-				{ FSM::stateId<O1_03>(), Event::ENTER },
-				{ FSM::stateId<O1_04>(), Event::ENTER },
-				{ FSM::stateId<O1_05>(), Event::ENTER },
+				{ FSM::stateId<Apex >(), Event::Type::ENTER },
+				{ FSM::stateId<O1   >(), Event::Type::ENTER },
+				{ FSM::stateId<O1_01>(), Event::Type::ENTER },
+				{ FSM::stateId<O1_02>(), Event::Type::ENTER },
+				{ FSM::stateId<O1_03>(), Event::Type::ENTER },
+				{ FSM::stateId<O1_04>(), Event::Type::ENTER },
+				{ FSM::stateId<O1_05>(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -175,21 +175,21 @@ TEST_CASE("FSM.OrthoUnits", "[machine]") {
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId<O1_01>(), Event::EXIT },
-		{ FSM::stateId<O1_02>(), Event::EXIT },
-		{ FSM::stateId<O1_03>(), Event::EXIT },
-		{ FSM::stateId<O1_04>(), Event::EXIT },
-		{ FSM::stateId<O1_05>(), Event::EXIT },
-		{ FSM::stateId<O1   >(), Event::EXIT },
-		{ FSM::stateId<Apex >(), Event::EXIT },
+		{ FSM::stateId<O1_01>(), Event::Type::EXIT },
+		{ FSM::stateId<O1_02>(), Event::Type::EXIT },
+		{ FSM::stateId<O1_03>(), Event::Type::EXIT },
+		{ FSM::stateId<O1_04>(), Event::Type::EXIT },
+		{ FSM::stateId<O1_05>(), Event::Type::EXIT },
+		{ FSM::stateId<O1   >(), Event::Type::EXIT },
+		{ FSM::stateId<Apex >(), Event::Type::EXIT },
 
-		{ FSM::stateId<O1_01>(), Event::DESTRUCT },
-		{ FSM::stateId<O1_02>(), Event::DESTRUCT },
-		{ FSM::stateId<O1_03>(), Event::DESTRUCT },
-		{ FSM::stateId<O1_04>(), Event::DESTRUCT },
-		{ FSM::stateId<O1_05>(), Event::DESTRUCT },
-		{ FSM::stateId<O1   >(), Event::DESTRUCT },
-		{ FSM::stateId<Apex >(), Event::DESTRUCT },
+		{ FSM::stateId<O1_01>(), Event::Type::DESTRUCT },
+		{ FSM::stateId<O1_02>(), Event::Type::DESTRUCT },
+		{ FSM::stateId<O1_03>(), Event::Type::DESTRUCT },
+		{ FSM::stateId<O1_04>(), Event::Type::DESTRUCT },
+		{ FSM::stateId<O1_05>(), Event::Type::DESTRUCT },
+		{ FSM::stateId<O1   >(), Event::Type::DESTRUCT },
+		{ FSM::stateId<Apex >(), Event::Type::DESTRUCT },
 	});
 }
 

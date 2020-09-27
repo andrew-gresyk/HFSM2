@@ -183,7 +183,7 @@ template <typename TIndices,
 		  typename TState>
 struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	using Indices		= TIndices;
-	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
+	static constexpr StateID INITIAL_ID	= Indices::STATE_ID;
 	static constexpr Short COMPO_INDEX	= Indices::COMPO_INDEX;
 	static constexpr Short ORTHO_INDEX	= Indices::ORTHO_INDEX;
 	static constexpr Short ORTHO_UNIT	= Indices::ORTHO_UNIT;

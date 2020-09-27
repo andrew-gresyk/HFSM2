@@ -106,17 +106,17 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0}, 	 Event::ENTRY_GUARD },
-				{ FSM::stateId<A    >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<A_1  >(), Event::ENTRY_GUARD },
+				{ hfsm2::StateID{0}, 	 Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<A    >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<A_1  >(), Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0}, 	 Event::CONSTRUCT },
-				{ FSM::stateId<A    >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_1  >(), Event::CONSTRUCT },
+				{ hfsm2::StateID{0}, 	 Event::Type::CONSTRUCT },
+				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<A_1  >(), Event::Type::CONSTRUCT },
 
-				{ hfsm2::StateID{0}, 	 Event::ENTER },
-				{ FSM::stateId<A    >(), Event::ENTER },
-				{ FSM::stateId<A_1  >(), Event::ENTER },
+				{ hfsm2::StateID{0}, 	 Event::Type::ENTER },
+				{ FSM::stateId<A    >(), Event::Type::ENTER },
+				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -133,20 +133,20 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{						 Event::CHANGE,		FSM::stateId<A    >() },
+				{						 Event::Type::CHANGE,		FSM::stateId<A    >() },
 
-				{ hfsm2::StateID{0}, 	 Event::UPDATE },
-				{ FSM::stateId<A    >(), Event::UPDATE },
-				{ FSM::stateId<A_1  >(), Event::UPDATE },
+				{ hfsm2::StateID{0}, 	 Event::Type::UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::UPDATE },
+				{ FSM::stateId<A_1  >(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A    >(), Event::EXIT_GUARD },
-				{ FSM::stateId<A_1  >(), Event::EXIT_GUARD },
+				{ FSM::stateId<A    >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<A_1  >(), Event::Type::EXIT_GUARD },
 
-				{ FSM::stateId<A    >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<A_1  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<A    >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<A_1  >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<A    >(), Event::REENTER },
-				{ FSM::stateId<A_1  >(), Event::REENTER },
+				{ FSM::stateId<A    >(), Event::Type::REENTER },
+				{ FSM::stateId<A_1  >(), Event::Type::REENTER },
 			});
 
 			assertActive(machine, all, {
@@ -163,36 +163,36 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{						 Event::CHANGE, FSM::stateId<B    >() },
+				{						 Event::Type::CHANGE, FSM::stateId<B    >() },
 
-				{ hfsm2::StateID{0}, 	 Event::UPDATE },
-				{ FSM::stateId<A    >(), Event::UPDATE },
-				{ FSM::stateId<A_1  >(), Event::UPDATE },
+				{ hfsm2::StateID{0}, 	 Event::Type::UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::UPDATE },
+				{ FSM::stateId<A_1  >(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A    >(), Event::EXIT_GUARD },
-				{ FSM::stateId<A_1  >(), Event::EXIT_GUARD },
-				{ FSM::stateId<B    >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_1  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_1_1>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_2  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_2_1>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<A    >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<A_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B    >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<B_1  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<B_1_1>(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<B_2  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<B_2_1>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<A_1  >(), Event::EXIT },
-				{ FSM::stateId<A    >(), Event::EXIT },
+				{ FSM::stateId<A_1  >(), Event::Type::EXIT },
+				{ FSM::stateId<A    >(), Event::Type::EXIT },
 
-				{ FSM::stateId<A_1  >(), Event::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_1  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_1_1>(), Event::CONSTRUCT },
-				{ FSM::stateId<B_2  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_2_1>(), Event::CONSTRUCT },
+				{ FSM::stateId<A_1  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_1  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_1_1>(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_2  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_2_1>(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<B    >(), Event::ENTER },
-				{ FSM::stateId<B_1  >(), Event::ENTER },
-				{ FSM::stateId<B_1_1>(), Event::ENTER },
-				{ FSM::stateId<B_2  >(), Event::ENTER },
-				{ FSM::stateId<B_2_1>(), Event::ENTER },
+				{ FSM::stateId<B    >(), Event::Type::ENTER },
+				{ FSM::stateId<B_1  >(), Event::Type::ENTER },
+				{ FSM::stateId<B_1_1>(), Event::Type::ENTER },
+				{ FSM::stateId<B_2  >(), Event::Type::ENTER },
+				{ FSM::stateId<B_2_1>(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -215,31 +215,31 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{						 Event::CHANGE, FSM::stateId<B    >() },
+				{						 Event::Type::CHANGE, FSM::stateId<B    >() },
 
-				{ hfsm2::StateID{0}, 	 Event::UPDATE },
-				{ FSM::stateId<B    >(), Event::UPDATE },
-				{ FSM::stateId<B_1  >(), Event::UPDATE },
-				{ FSM::stateId<B_1_1>(), Event::UPDATE },
-				{ FSM::stateId<B_2  >(), Event::UPDATE },
-				{ FSM::stateId<B_2_1>(), Event::UPDATE },
+				{ hfsm2::StateID{0}, 	 Event::Type::UPDATE },
+				{ FSM::stateId<B    >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_1  >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_1_1>(), Event::Type::UPDATE },
+				{ FSM::stateId<B_2  >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_2_1>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<B    >(), Event::EXIT_GUARD },
-				{ FSM::stateId<B_1  >(), Event::EXIT_GUARD },
-				{ FSM::stateId<B_1_1>(), Event::EXIT_GUARD },
-				{ FSM::stateId<B_2  >(), Event::EXIT_GUARD },
-				{ FSM::stateId<B_2_1>(), Event::EXIT_GUARD },
-				{ FSM::stateId<B    >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_1  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_1_1>(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_2  >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<B_2_1>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B    >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_1_1>(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_2  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_2_1>(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B    >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<B_1  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<B_1_1>(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<B_2  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<B_2_1>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<B    >(), Event::REENTER },
-				{ FSM::stateId<B_1  >(), Event::REENTER },
-				{ FSM::stateId<B_1_1>(), Event::REENTER },
-				{ FSM::stateId<B_2  >(), Event::REENTER },
-				{ FSM::stateId<B_2_1>(), Event::REENTER },
+				{ FSM::stateId<B    >(), Event::Type::REENTER },
+				{ FSM::stateId<B_1  >(), Event::Type::REENTER },
+				{ FSM::stateId<B_1_1>(), Event::Type::REENTER },
+				{ FSM::stateId<B_2  >(), Event::Type::REENTER },
+				{ FSM::stateId<B_2_1>(), Event::Type::REENTER },
 			});
 
 			assertActive(machine, all, {
@@ -260,19 +260,19 @@ TEST_CASE("FSM.Self Transition", "[machine]") {
 	}
 
 	const Events reference = {
-		{ FSM::stateId<B_1_1>(), Event::EXIT },
-		{ FSM::stateId<B_1  >(), Event::EXIT },
-		{ FSM::stateId<B_2_1>(), Event::EXIT },
-		{ FSM::stateId<B_2  >(), Event::EXIT },
-		{ FSM::stateId<B    >(), Event::EXIT },
-		{ hfsm2::StateID{0}, 	 Event::EXIT },
+		{ FSM::stateId<B_1_1>(), Event::Type::EXIT },
+		{ FSM::stateId<B_1  >(), Event::Type::EXIT },
+		{ FSM::stateId<B_2_1>(), Event::Type::EXIT },
+		{ FSM::stateId<B_2  >(), Event::Type::EXIT },
+		{ FSM::stateId<B    >(), Event::Type::EXIT },
+		{ hfsm2::StateID{0}, 	 Event::Type::EXIT },
 
-		{ FSM::stateId<B_1_1>(), Event::DESTRUCT },
-		{ FSM::stateId<B_1  >(), Event::DESTRUCT },
-		{ FSM::stateId<B_2_1>(), Event::DESTRUCT },
-		{ FSM::stateId<B_2  >(), Event::DESTRUCT },
-		{ FSM::stateId<B    >(), Event::DESTRUCT },
-		{ hfsm2::StateID{0}, 	 Event::DESTRUCT },
+		{ FSM::stateId<B_1_1>(), Event::Type::DESTRUCT },
+		{ FSM::stateId<B_1  >(), Event::Type::DESTRUCT },
+		{ FSM::stateId<B_2_1>(), Event::Type::DESTRUCT },
+		{ FSM::stateId<B_2  >(), Event::Type::DESTRUCT },
+		{ FSM::stateId<B    >(), Event::Type::DESTRUCT },
+		{ hfsm2::StateID{0}, 	 Event::Type::DESTRUCT },
 	};
 	logger.assertSequence(reference);
 }
