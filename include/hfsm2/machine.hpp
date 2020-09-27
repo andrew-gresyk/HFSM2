@@ -2641,11 +2641,6 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
-
 #pragma pack(push, 1)
 
 struct alignas(alignof(void*)) StructureStateInfo {
@@ -2679,10 +2674,6 @@ struct alignas(alignof(void*)) StructureStateInfo {
 };
 
 #pragma pack(pop)
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
