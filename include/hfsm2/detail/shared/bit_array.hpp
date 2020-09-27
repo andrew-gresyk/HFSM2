@@ -4,8 +4,8 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Units {
-	Short unit;
-	Short width;
+	Short unit	= INVALID_SHORT;
+	Short width = INVALID_SHORT;
 };
 
 //------------------------------------------------------------------------------

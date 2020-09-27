@@ -145,7 +145,7 @@ struct S_ final {
 	HFSM2_INLINE void	 deepLoadResumable(		 Registry&, ReadStream& ) const												{}
 #endif
 
-	//------------------------------------------------------------------------------
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename TArgs::StructureStateInfos;
@@ -159,7 +159,7 @@ struct S_ final {
 					  StructureStateInfos& stateInfos) const;
 #endif
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #if defined _DEBUG || defined HFSM2_ENABLE_STRUCTURE_REPORT || defined HFSM2_ENABLE_LOG_INTERFACE
 
@@ -167,20 +167,9 @@ struct S_ final {
 
 #endif
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-
-	template <typename>
-	struct Traits_;
-
-	template <typename TR_, typename TH_, typename... TAs_>
-	struct Traits_<TR_(TH_::*)(TAs_...)> {
-		using Host = TH_;
-	};
-
-	template <typename TM_>
-	using Host_			= typename Traits_<TM_>::Host;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -188,33 +177,23 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TMethodType>
-	typename std::enable_if<
-				 std::is_same<
-					 Host_<TMethodType>,
-					 Empty
-				 >::value
-			 >::type
-	log(Logger&,
-		Context&,
-		const Method) const
-	{}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename TMethodType>
-	typename std::enable_if<
-				 !std::is_same<
-					 Host_<TMethodType>,
-					 Empty
-				 >::value
-			 >::type
-	log(Logger& logger,
-		Context& context,
-		const Method method) const
+	template <typename TReturn, typename THost, typename... TParams>
+	void log(TReturn(THost::*)(TParams...),
+			 Logger& logger,
+			 Context& context,
+			 const Method method) const
 	{
 		logger.recordMethod(context, STATE_ID, method);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TReturn, typename... TParams>
+	void log(TReturn(Empty::*)(TParams...),
+			 Logger&,
+			 Context&,
+			 const Method) const
+	{}
 
 #endif
 

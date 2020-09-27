@@ -5,6 +5,11 @@ namespace hfsm2 {
 ////////////////////////////////////////////////////////////////////////////////
 // http://xoshiro.di.unimi.it/splitmix64.c
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 26495) // variable is uninitialized
+#endif
+
 class SplitMix64 {
 public:
 	inline SplitMix64() {}
@@ -16,8 +21,13 @@ private:
 	inline uint64_t raw();
 
 private:
+
 	uint64_t _state;
 };
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 
 //------------------------------------------------------------------------------
 // xoshiro256+ (http://xoshiro.di.unimi.it/xoshiro256plus.c)
@@ -44,6 +54,11 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // https://groups.google.com/forum/#!topic/prng/VFjdFmbMgZI
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 26495) // variable is uninitialized
+#endif
+
 class SplitMix32 {
 public:
 	inline SplitMix32() {}
@@ -57,6 +72,10 @@ private:
 private:
 	uint32_t _state;
 };
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 
 //------------------------------------------------------------------------------
 // http://xoshiro.di.unimi.it/xoshiro128plus.c

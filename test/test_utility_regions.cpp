@@ -182,14 +182,14 @@ TEST_CASE("FSM.Utility Regions", "[machine]") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<Apex>(),	Event::ENTRY_GUARD },
-				{ FSM::stateId<I   >(),	Event::ENTRY_GUARD },
+				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex>(),	Event::CONSTRUCT },
-				{ FSM::stateId<I   >(),	Event::CONSTRUCT },
+				{ FSM::stateId<Apex>(),	Event::Type::CONSTRUCT },
+				{ FSM::stateId<I   >(),	Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<Apex>(),	Event::ENTER },
-				{ FSM::stateId<I   >(),	Event::ENTER },
+				{ FSM::stateId<Apex>(),	Event::Type::ENTER },
+				{ FSM::stateId<I   >(),	Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -206,55 +206,55 @@ TEST_CASE("FSM.Utility Regions", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{						Event::CHANGE, FSM::stateId<F   >() },
+				{						Event::Type::CHANGE, FSM::stateId<F   >() },
 
-				{ FSM::stateId<Apex>(), Event::UPDATE },
-				{ FSM::stateId<I   >(), Event::UPDATE },
+				{ FSM::stateId<Apex>(), Event::Type::UPDATE },
+				{ FSM::stateId<I   >(), Event::Type::UPDATE },
 
-				{ FSM::stateId<C   >(), Event::UTILITY },
-				{ FSM::stateId<C_1 >(), Event::UTILITY },
+				{ FSM::stateId<C   >(), Event::Type::UTILITY },
+				{ FSM::stateId<C_1 >(), Event::Type::UTILITY },
 
-				{ FSM::stateId<R   >(), Event::UTILITY },
-				{ FSM::stateId<R_1 >(), Event::UTILITY },
+				{ FSM::stateId<R   >(), Event::Type::UTILITY },
+				{ FSM::stateId<R_1 >(), Event::Type::UTILITY },
 
-				{ FSM::stateId<U   >(), Event::UTILITY },
-				{ FSM::stateId<U_1 >(), Event::UTILITY },
-				{ FSM::stateId<U_2 >(), Event::UTILITY },
-				{ FSM::stateId<U_3 >(), Event::UTILITY },
-				{ FSM::stateId<U   >(), Event::UTILITY_RESOLUTION, 0 },
+				{ FSM::stateId<U   >(), Event::Type::UTILITY },
+				{ FSM::stateId<U_1 >(), Event::Type::UTILITY },
+				{ FSM::stateId<U_2 >(), Event::Type::UTILITY },
+				{ FSM::stateId<U_3 >(), Event::Type::UTILITY },
+				{ FSM::stateId<U   >(), Event::Type::UTILITY_RESOLUTION, 0 },
 
-				{ FSM::stateId<O   >(), Event::UTILITY },
+				{ FSM::stateId<O   >(), Event::Type::UTILITY },
 
-				{ FSM::stateId<OC  >(), Event::UTILITY },
-				{ FSM::stateId<OC_1>(), Event::UTILITY },
+				{ FSM::stateId<OC  >(), Event::Type::UTILITY },
+				{ FSM::stateId<OC_1>(), Event::Type::UTILITY },
 
-				{ FSM::stateId<OR  >(), Event::UTILITY },
-				{ FSM::stateId<OR_1>(), Event::UTILITY },
+				{ FSM::stateId<OR  >(), Event::Type::UTILITY },
+				{ FSM::stateId<OR_1>(), Event::Type::UTILITY },
 
-				{ FSM::stateId<OU  >(), Event::UTILITY },
-				{ FSM::stateId<OU_1>(), Event::UTILITY },
-				{ FSM::stateId<OU_2>(), Event::UTILITY },
-				{ FSM::stateId<OU_3>(), Event::UTILITY },
-				{ FSM::stateId<OU  >(), Event::UTILITY_RESOLUTION, 0 },
+				{ FSM::stateId<OU  >(), Event::Type::UTILITY },
+				{ FSM::stateId<OU_1>(), Event::Type::UTILITY },
+				{ FSM::stateId<OU_2>(), Event::Type::UTILITY },
+				{ FSM::stateId<OU_3>(), Event::Type::UTILITY },
+				{ FSM::stateId<OU  >(), Event::Type::UTILITY_RESOLUTION, 0 },
 
-				{ FSM::stateId<O   >(), Event::UTILITY_RESOLUTION },
-				{ FSM::stateId<F   >(), Event::UTILITY_RESOLUTION, 0 },
+				{ FSM::stateId<O   >(), Event::Type::UTILITY_RESOLUTION },
+				{ FSM::stateId<F   >(), Event::Type::UTILITY_RESOLUTION, 0 },
 
-				{ FSM::stateId<I   >(), Event::EXIT_GUARD },
-				{ FSM::stateId<F   >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<C   >(), Event::ENTRY_GUARD },
-				{ FSM::stateId<C_1 >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<I   >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<F   >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<C   >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<C_1 >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<I   >(), Event::EXIT },
+				{ FSM::stateId<I   >(), Event::Type::EXIT },
 
-				{ FSM::stateId<I   >(), Event::DESTRUCT },
-				{ FSM::stateId<F   >(), Event::CONSTRUCT },
-				{ FSM::stateId<C   >(), Event::CONSTRUCT },
-				{ FSM::stateId<C_1 >(), Event::CONSTRUCT },
+				{ FSM::stateId<I   >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<F   >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<C   >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<C_1 >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<F   >(), Event::ENTER },
-				{ FSM::stateId<C   >(), Event::ENTER },
-				{ FSM::stateId<C_1 >(), Event::ENTER },
+				{ FSM::stateId<F   >(), Event::Type::ENTER },
+				{ FSM::stateId<C   >(), Event::Type::ENTER },
+				{ FSM::stateId<C_1 >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -272,15 +272,15 @@ TEST_CASE("FSM.Utility Regions", "[machine]") {
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId<C_1 >(),	 Event::EXIT },
-		{ FSM::stateId<C   >(),	 Event::EXIT },
-		{ FSM::stateId<F   >(),	 Event::EXIT },
-		{ hfsm2::StateID{0}, 	 Event::EXIT },
+		{ FSM::stateId<C_1 >(),	 Event::Type::EXIT },
+		{ FSM::stateId<C   >(),	 Event::Type::EXIT },
+		{ FSM::stateId<F   >(),	 Event::Type::EXIT },
+		{ hfsm2::StateID{0}, 	 Event::Type::EXIT },
 
-		{ FSM::stateId<C_1 >(),	 Event::DESTRUCT },
-		{ FSM::stateId<C   >(),	 Event::DESTRUCT },
-		{ FSM::stateId<F   >(),	 Event::DESTRUCT },
-		{ hfsm2::StateID{0}, 	 Event::DESTRUCT },
+		{ FSM::stateId<C_1 >(),	 Event::Type::DESTRUCT },
+		{ FSM::stateId<C   >(),	 Event::Type::DESTRUCT },
+		{ FSM::stateId<F   >(),	 Event::Type::DESTRUCT },
+		{ hfsm2::StateID{0}, 	 Event::Type::DESTRUCT },
 	});
 }
 

@@ -5,13 +5,19 @@
 
 # HFSM2: High-Performance Hierarchical Finite State Machine Framework
 
-Header-only heriarchical FSM framework in C++14, with fully statically-defined structure (no dynamic allocations), built with variadic templates.
+Header-only heriarchical FSM framework in C++11, with fully statically-defined structure (no dynamic allocations), built with variadic templates.
 
 ## Compiler Support
 
 - Visual Studio 14, 15, 16
 - GCC 5, 6, 7, 8, 9
 - Clang 3.7, 3.8, 3.9, 4, 5, 6, 7, 8, 9, 10
+
+---
+
+## See Also
+
+- [FFSM2: High-Performance Flat Finite State Machine Framework](https://github.com/andrew-gresyk/FFSM2)
 
 ---
 
@@ -30,9 +36,8 @@ In-line comment-based docs is an on-going effort.
 - Header-only
 - Convenient, minimal boilerplate
 - Fully static, no dynamic allocations
-- Uses inline-friendly compile-time pylymorphism, no virtual methods were harmed
+- Uses inline-friendly compile-time pylymorphism, no virtual methods are used
 - Type-safe transitions: `FSM.changeTo<TargetState>()` with optional payloads
-- 100% NoUML-compliant
 - [Hierarchical](https://github.com/andrew-gresyk/HFSM2/wiki/Transitions-within-Hierarchy), with a selection of composite (sub-machine) and orthogonal regions
 - Gamedev-friendly, supports explicit `State::update()`
 - Also supports traditional event-based workflow with `State::react()`
@@ -55,14 +60,12 @@ In-line comment-based docs is an on-going effort.
 
 ## Get Updates
 
-- [Blog](https://andrew-gresyk.github.io/)
+- [Blog](https://gresyk.dev)
 - [Twitter](https://www.twitter.com/andrew_gresyk)
 
 ---
 
 ## Get In Touch
-
-Please share your comments and suggestions on:
 
 - [Gitter](https://gitter.im/andrew-gresyk/HFSM2)
 - [Twitter](https://www.twitter.com/andrew_gresyk)

@@ -563,7 +563,7 @@ template <typename TG, typename TA>
 void
 R_<TG, TA>::getStateNames() {
 	_stateInfos.clear();
-	_apex.deepGetNames((Long) -1, StructureStateInfo::COMPOSITE, 0, _stateInfos);
+	_apex.deepGetNames((Long) -1, StructureStateInfo::RegionType::COMPOSITE, 0, _stateInfos);
 
 	Long margin = (Long) -1;
 	for (Long s = 0; s < _stateInfos.count(); ++s) {
@@ -578,7 +578,7 @@ R_<TG, TA>::getStateNames() {
 		else {
 			const Long mark = state.depth * 2 - 1;
 
-			prefix[mark + 0] = state.region == StructureStateInfo::COMPOSITE ? L'└' : L'╙';
+			prefix[mark + 0] = state.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'└' : L'╙';
 			prefix[mark + 1] = L' ';
 			prefix[mark + 2] = L'\0';
 
@@ -590,7 +590,7 @@ R_<TG, TA>::getStateNames() {
 
 				switch (prefixAbove[mark]) {
 				case L' ':
-					prefixAbove[mark] = state.region == StructureStateInfo::COMPOSITE ? L'│' : L'║';
+					prefixAbove[mark] = state.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'│' : L'║';
 					break;
 				case L'└':
 					prefixAbove[mark] = L'├';

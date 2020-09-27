@@ -44,48 +44,48 @@
 
 //------------------------------------------------------------------------------
 
-#define HFSM2_INLINE													//inline
+#define HFSM2_INLINE													 //inline
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #if INTPTR_MAX == INT64_MAX
-	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p64
+	#define HFSM2_64BIT_OR_32BIT(p64, p32)									  p64
 #else
-	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p32
+	#define HFSM2_64BIT_OR_32BIT(p64, p32)									  p32
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if defined _DEBUG && defined _MSC_VER
-	#define HFSM2_BREAK()										  __debugbreak()
+	#define HFSM2_BREAK()										   __debugbreak()
 #else
-	#define HFSM2_BREAK()											  ((void) 0)
+	#define HFSM2_BREAK()											   ((void) 0)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef _DEBUG
-	#define HFSM2_IF_DEBUG(...)										 __VA_ARGS__
+	#define HFSM2_IF_DEBUG(...)										  __VA_ARGS__
 	#define HFSM2_UNLESS_DEBUG(...)
-	#define HFSM2_DEBUG_OR(y, n)											   y
+	#define HFSM2_DEBUG_OR(y, n)												y
 #else
 	#define HFSM2_IF_DEBUG(...)
-	#define HFSM2_UNLESS_DEBUG(...)									 __VA_ARGS__
-	#define HFSM2_DEBUG_OR(y, n)											   n
+	#define HFSM2_UNLESS_DEBUG(...)									  __VA_ARGS__
+	#define HFSM2_DEBUG_OR(y, n)												n
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_ASSERT
-	#define HFSM2_IF_ASSERT(...)									 __VA_ARGS__
-	#define HFSM2_CHECKED(x)					   (!!(x) || (HFSM2_BREAK(), 0))
-	#define HFSM2_ASSERT(x)						   (!!(x) || (HFSM2_BREAK(), 0))
-	#define HFSM2_ASSERT_OR(y, n)											   y
+	#define HFSM2_IF_ASSERT(...)									  __VA_ARGS__
+	#define HFSM2_CHECKED(x)						(!!(x) || (HFSM2_BREAK(), 0))
+	#define HFSM2_ASSERT(x)							(!!(x) || (HFSM2_BREAK(), 0))
+	#define HFSM2_ASSERT_OR(y, n)												y
 #else
 	#define HFSM2_IF_ASSERT(...)
-	#define HFSM2_CHECKED(x)												   x
-	#define HFSM2_ASSERT(x)											  ((void) 0)
-	#define HFSM2_ASSERT_OR(y, n)											   n
+	#define HFSM2_CHECKED(x)													x
+	#define HFSM2_ASSERT(x)											   ((void) 0)
+	#define HFSM2_ASSERT_OR(y, n)												n
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -107,94 +107,97 @@
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	#define HFSM2_IF_UTILITY_THEORY(...)							 __VA_ARGS__
-	#define HFSM2_UTILITY_THEORY_MASK									(1 << 0)
+	#define HFSM2_IF_UTILITY_THEORY(...)							  __VA_ARGS__
+	#define HFSM2_UTILITY_THEORY_MASK									 (1 << 0)
 #else
 	#define HFSM2_IF_UTILITY_THEORY(...)
-	#define HFSM2_UTILITY_THEORY_MASK									(0 << 0)
+	#define HFSM2_UTILITY_THEORY_MASK									 (0 << 0)
 #endif
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_PLANS
-	#define HFSM2_IF_PLANS(...)										 __VA_ARGS__
-	#define HFSM2_PLANS_MASK											(1 << 1)
+	#define HFSM2_IF_PLANS(...)										  __VA_ARGS__
+	#define HFSM2_PLANS_MASK											 (1 << 1)
 #else
 	#define HFSM2_IF_PLANS(...)
-	#define HFSM2_PLANS_MASK											(0 << 1)
+	#define HFSM2_PLANS_MASK											 (0 << 1)
 #endif
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
-	#define HFSM2_IF_SERIALIZATION(...)								 __VA_ARGS__
-	#define HFSM2_SERIALIZATION_MASK									(1 << 2)
+	#define HFSM2_IF_SERIALIZATION(...)								  __VA_ARGS__
+	#define HFSM2_SERIALIZATION_MASK									 (1 << 2)
 #else
 	#define HFSM2_IF_SERIALIZATION(...)
-	#define HFSM2_SERIALIZATION_MASK									(0 << 2)
+	#define HFSM2_SERIALIZATION_MASK									 (0 << 2)
 #endif
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-	#define HFSM2_IF_TRANSITION_HISTORY(...)						 __VA_ARGS__
-	#define HFSM2_TRANSITION_HISTORY_MASK								(1 << 3)
+	#define HFSM2_IF_TRANSITION_HISTORY(...)						  __VA_ARGS__
+	#define HFSM2_TRANSITION_HISTORY_MASK								 (1 << 3)
 #else
 	#define HFSM2_IF_TRANSITION_HISTORY(...)
-	#define HFSM2_TRANSITION_HISTORY_MASK								(0 << 3)
+	#define HFSM2_TRANSITION_HISTORY_MASK								 (0 << 3)
 #endif
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
-	#define HFSM2_IF_STRUCTURE_REPORT(...)							 __VA_ARGS__
-	#define HFSM2_STRUCTURE_REPORT_MASK									(1 << 4)
+	#define HFSM2_IF_STRUCTURE_REPORT(...)							  __VA_ARGS__
+	#define HFSM2_STRUCTURE_REPORT_MASK									 (1 << 4)
 #else
 	#define HFSM2_IF_STRUCTURE_REPORT(...)
-	#define HFSM2_STRUCTURE_REPORT_MASK									(0 << 4)
+	#define HFSM2_STRUCTURE_REPORT_MASK									 (0 << 4)
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 	#define HFSM2_ENABLE_LOG_INTERFACE
+	#define HFSM2_VERBOSE_DEBUG_LOG_MASK								 (1 << 5)
+#else
+	#define HFSM2_VERBOSE_DEBUG_LOG_MASK								 (0 << 5)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
 
-	#define HFSM2_IF_LOG_INTERFACE(...)								 __VA_ARGS__
-	#define HFSM2_LOG_INTERFACE_MASK									(1 << 5)
+	#define HFSM2_IF_LOG_INTERFACE(...)								  __VA_ARGS__
+	#define HFSM2_LOG_INTERFACE_MASK									 (1 << 6)
 
-	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		   \
-		if (_logger)														   \
+	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)			\
+		if (_logger)															\
 			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
 
 #ifdef HFSM2_ENABLE_PLANS
 
-	#define HFSM2_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)			   \
-		if (_logger)														   \
+	#define HFSM2_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)				\
+		if (_logger)															\
 			_logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
 
-	#define HFSM2_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)					   \
-		if (_logger)														   \
+	#define HFSM2_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)						\
+		if (_logger)															\
 			_logger->recordPlanStatus(CONTEXT, REGION, STATUS)
 
 #endif
 
-	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)					   \
-		if (_logger)														   \
+	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)						\
+		if (_logger)															\
 			_logger->recordCancelledPending(CONTEXT, ORIGIN)
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)		   \
-		if (auto* const logger = control.logger())							   \
+	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
+		if (auto* const logger = control.logger())								\
 			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
-	#define HFSM2_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)		   \
-		if (auto* const logger = control.logger())							   \
+	#define HFSM2_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
+		if (auto* const logger = control.logger())								\
 			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 #endif
@@ -202,7 +205,7 @@
 #else
 
 	#define HFSM2_IF_LOG_INTERFACE(...)
-	#define HFSM2_LOG_INTERFACE_MASK									(0 << 5)
+	#define HFSM2_LOG_INTERFACE_MASK									 (0 << 6)
 
 	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)
 
@@ -224,19 +227,19 @@
 
 #ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 
-	#define HFSM2_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)				   \
-		if (auto* const logger = control.logger())							   \
-			logger->recordMethod(CONTEXT, STATE_ID, METHOD_ID)
+	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)							\
+		if (auto* const logger = control.logger())								\
+			logger->recordMethod(control.context(), STATE_ID, METHOD_ID)
 
 #elif defined HFSM2_ENABLE_LOG_INTERFACE
 
-	#define HFSM2_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)				   \
-		if (auto* const logger = control.logger())							   \
-			log<decltype(METHOD)>(*logger, CONTEXT, METHOD_ID)
+	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)							\
+		if (auto* const logger = control.logger())								\
+			log(METHOD, *logger, control.context(), METHOD_ID)
 
 #else
 
-	#define HFSM2_LOG_STATE_METHOD(METHOD, CONTEXT, METHOD_ID)
+	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)
 
 #endif
 
@@ -246,12 +249,13 @@ namespace hfsm2 {
 
 using FeatureTag = uint8_t;
 
-constexpr FeatureTag FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK					|
-								   HFSM2_PLANS_MASK								|
-								   HFSM2_SERIALIZATION_MASK						|
-								   HFSM2_TRANSITION_HISTORY_MASK				|
-								   HFSM2_STRUCTURE_REPORT_MASK					|
-								   HFSM2_LOG_INTERFACE_MASK;
+constexpr FeatureTag HFSM2_FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK				|
+										 HFSM2_PLANS_MASK						|
+										 HFSM2_SERIALIZATION_MASK				|
+										 HFSM2_TRANSITION_HISTORY_MASK			|
+										 HFSM2_STRUCTURE_REPORT_MASK			|
+										 HFSM2_VERBOSE_DEBUG_LOG_MASK			|
+										 HFSM2_LOG_INTERFACE_MASK;
 
 }
 
@@ -262,18 +266,19 @@ constexpr FeatureTag FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK					|
 #undef HFSM2_SERIALIZATION_MASK
 #undef HFSM2_TRANSITION_HISTORY_MASK
 #undef HFSM2_STRUCTURE_REPORT_MASK
+#undef HFSM2_VERBOSE_DEBUG_LOG_MASK
 #undef HFSM2_LOG_INTERFACE_MASK
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
 #endif
 
 #if defined(__GNUC__) || defined(__GNUG__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic" // error : extra ';'
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wpedantic" // error : extra ';'
 #endif
 
 //------------------------------------------------------------------------------
@@ -287,7 +292,7 @@ struct EmptyPayload {};
 
 //------------------------------------------------------------------------------
 
-using Short = uint8_t;
+using Short		 = uint8_t;
 static constexpr Short		INVALID_SHORT		= UINT8_MAX;
 
 using RegionID	 = Short;
@@ -298,7 +303,7 @@ static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-using Long  = uint16_t;
+using Long		 = uint16_t;
 static constexpr Long		INVALID_LONG		= UINT16_MAX;
 
 using StateID	 = Long;
@@ -816,8 +821,8 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Units {
-	Short unit;
-	Short width;
+	Short unit	= INVALID_SHORT;
+	Short width = INVALID_SHORT;
 };
 
 //------------------------------------------------------------------------------
@@ -1517,7 +1522,7 @@ List<T, NC>::emplace(TA... args) {
 			auto& head = _cells[_vacantHead];
 			HFSM2_ASSERT(head.links.prev == result);
 			head.links.prev = INVALID;
-		} else if (_last < CAPACITY) {
+		} else if (_last < CAPACITY - 1) {
 			// grow
 			++_last;
 			_vacantHead = _last;
@@ -1664,6 +1669,11 @@ namespace hfsm2 {
 ////////////////////////////////////////////////////////////////////////////////
 // http://xoshiro.di.unimi.it/splitmix64.c
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 26495) // variable is uninitialized
+#endif
+
 class SplitMix64 {
 public:
 	inline SplitMix64() {}
@@ -1675,8 +1685,13 @@ private:
 	inline uint64_t raw();
 
 private:
+
 	uint64_t _state;
 };
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 
 //------------------------------------------------------------------------------
 // xoshiro256+ (http://xoshiro.di.unimi.it/xoshiro256plus.c)
@@ -1703,6 +1718,11 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 // https://groups.google.com/forum/#!topic/prng/VFjdFmbMgZI
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 26495) // variable is uninitialized
+#endif
+
 class SplitMix32 {
 public:
 	inline SplitMix32() {}
@@ -1716,6 +1736,10 @@ private:
 private:
 	uint32_t _state;
 };
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 
 //------------------------------------------------------------------------------
 // http://xoshiro.di.unimi.it/xoshiro128plus.c
@@ -2366,9 +2390,9 @@ transitionName(const TransitionType type) {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
 namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 1)
 
@@ -2401,18 +2425,18 @@ struct alignas(4) TransitionBase {
 	//----------------------------------------------------------------------
 
 	HFSM2_INLINE bool operator == (const TransitionBase& other) const {
-		return origin == other.origin &&
+		return origin	   == other.origin &&
 			   destination == other.destination &&
-			   method == other.method &&
-			   type == other.type;
+			   method	   == other.method &&
+			   type		   == other.type;
 	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 	StateID	origin		= INVALID_STATE_ID;
 	StateID	destination	= INVALID_STATE_ID;
 	Method	method		= Method::NONE;
-	TransitionType type;
+	TransitionType type	= TransitionType::COUNT;
 };
 
 #ifdef _MSC_VER
@@ -2503,9 +2527,9 @@ struct alignas(4) TransitionT<void>
 
 #pragma pack(pop)
 
-}
-
 ////////////////////////////////////////////////////////////////////////////////
+
+}
 
 struct Request {
 	TransitionType type;
@@ -2521,7 +2545,7 @@ namespace hfsm2 {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <FeatureTag NFeatureTag = FEATURE_TAG
+template <FeatureTag NFeatureTag = HFSM2_FEATURE_TAG
 		, typename TContext = EmptyContext
 		HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)>
 struct LoggerInterfaceT {
@@ -2591,7 +2615,7 @@ struct LoggerInterfaceT {
 
 #else
 
-template <FeatureTag NFeatureTag = FEATURE_TAG
+template <FeatureTag NFeatureTag = HFSM2_FEATURE_TAG
 		, typename TContext = EmptyContext
 		HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)>
 using LoggerInterfaceT = void;
@@ -2617,17 +2641,14 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
-
 #pragma pack(push, 1)
 
 struct alignas(alignof(void*)) StructureStateInfo {
-	enum RegionType : Short {
+	enum class RegionType : Short {
 		COMPOSITE,
 		ORTHOGONAL,
+
+		COUNT
 	};
 
 	StructureStateInfo() = default;
@@ -2635,28 +2656,24 @@ struct alignas(alignof(void*)) StructureStateInfo {
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_INLINE StructureStateInfo(const Long parent_,
-									const RegionType region_,
+									const RegionType regionType_,
 									const Short depth_,
 									const char* const name_)
 		: name{name_}
 		, parent{parent_}
-		, region{region_}
+		, regionType{regionType_ }
 		, depth{depth_}
 	{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	const char* name;
-	Long parent;
-	RegionType region;
-	Short depth;
+	const char* name	  = nullptr;
+	Long parent			  = INVALID_LONG;
+	RegionType regionType = RegionType::COUNT;
+	Short depth			  = INVALID_SHORT;
 };
 
 #pragma pack(pop)
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -4282,8 +4299,8 @@ struct alignas(2 * sizeof(Short)) Parent {
 			   prong  != INVALID_SHORT;
 	}
 
-	ForkID	   forkId = INVALID_FORK_ID;
-	Short prong  = INVALID_SHORT;
+	ForkID forkId = INVALID_FORK_ID;
+	Short  prong  = INVALID_SHORT;
 };
 
 #pragma pack(pop)
@@ -6945,8 +6962,6 @@ struct Guard {
 	static void execute(hfsm2::detail::GuardControlT<TArgs>&) {}
 };
 
-//------------------------------------------------------------------------------
-
 namespace detail {
 
 //------------------------------------------------------------------------------
@@ -7206,7 +7221,7 @@ struct S_ final {
 	HFSM2_INLINE void	 deepLoadResumable(		 Registry&, ReadStream& ) const												{}
 #endif
 
-	//------------------------------------------------------------------------------
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	using StructureStateInfos = typename TArgs::StructureStateInfos;
@@ -7220,7 +7235,7 @@ struct S_ final {
 					  StructureStateInfos& stateInfos) const;
 #endif
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #if defined _DEBUG || defined HFSM2_ENABLE_STRUCTURE_REPORT || defined HFSM2_ENABLE_LOG_INTERFACE
 
@@ -7228,20 +7243,9 @@ struct S_ final {
 
 #endif
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-
-	template <typename>
-	struct Traits_;
-
-	template <typename TR_, typename TH_, typename... TAs_>
-	struct Traits_<TR_(TH_::*)(TAs_...)> {
-		using Host = TH_;
-	};
-
-	template <typename TM_>
-	using Host_			= typename Traits_<TM_>::Host;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -7249,33 +7253,23 @@ struct S_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TMethodType>
-	typename std::enable_if<
-				 std::is_same<
-					 Host_<TMethodType>,
-					 Empty
-				 >::value
-			 >::type
-	log(Logger&,
-		Context&,
-		const Method) const
-	{}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	template <typename TMethodType>
-	typename std::enable_if<
-				 !std::is_same<
-					 Host_<TMethodType>,
-					 Empty
-				 >::value
-			 >::type
-	log(Logger& logger,
-		Context& context,
-		const Method method) const
+	template <typename TReturn, typename THost, typename... TParams>
+	void log(TReturn(THost::*)(TParams...),
+			 Logger& logger,
+			 Context& context,
+			 const Method method) const
 	{
 		logger.recordMethod(context, STATE_ID, method);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	template <typename TReturn, typename... TParams>
+	void log(TReturn(Empty::*)(TParams...),
+			 Logger&,
+			 Context&,
+			 const Method) const
+	{}
 
 #endif
 
@@ -7324,7 +7318,7 @@ struct RegisterT {
 
 template <StateID NS, typename TA>
 struct RegisterT<NS, TA, StaticEmptyT<TA>> {
-	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
+	using StateParents = StaticArray<Parent, TA::STATE_COUNT>;
 
 	static HFSM2_INLINE
 	void
@@ -7350,7 +7344,6 @@ template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Rank
 S_<TN_, TA, TH>::wrapRank(Control& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::rank,
-						   control.context(),
 						   Method::RANK);
 
 	return _headBox.get().rank(static_cast<const Control&>(control));
@@ -7362,7 +7355,6 @@ template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Utility
 S_<TN_, TA, TH>::wrapUtility(Control& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::utility,
-						   control.context(),
 						   Method::UTILITY);
 
 	return _headBox.get().utility(static_cast<const Control&>(control));
@@ -7376,7 +7368,6 @@ template <typename TN_, typename TA, typename TH>
 bool
 S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::entryGuard,
-						   control.context(),
 						   Method::ENTRY_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -7399,7 +7390,6 @@ S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM2_IF_LOG_INTERFACE(control)) {
 #endif
 
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
-						   control.context(),
 						   Method::CONSTRUCT);
 
 	_headBox.construct();
@@ -7411,7 +7401,6 @@ template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
-						   control.context(),
 						   Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -7431,7 +7420,6 @@ S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
 #endif
 
 	HFSM2_LOG_STATE_METHOD(&Head::reenter,
-						   control.context(),
 						   Method::REENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -7449,7 +7437,6 @@ template <typename TN_, typename TA, typename TH>
 Status
 S_<TN_, TA, TH>::deepUpdate(FullControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::update,
-						   control.context(),
 						   Method::UPDATE);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -7470,7 +7457,6 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 {
 	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
 	HFSM2_LOG_STATE_METHOD(reaction,
-						   control.context(),
 						   Method::REACT);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -7487,7 +7473,6 @@ template <typename TN_, typename TA, typename TH>
 bool
 S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::exitGuard,
-						   control.context(),
 						   Method::EXIT_GUARD);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -7506,7 +7491,6 @@ template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepExit(PlanControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::exit,
-						   control.context(),
 						   Method::EXIT);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -7531,7 +7515,6 @@ S_<TN_, TA, TH>::deepDestruct(PlanControl&
 							  )
 {
 	HFSM2_LOG_STATE_METHOD(&Head::exit,
-						   control.context(),
 						   Method::DESTRUCT);
 
 	_headBox.destruct();
@@ -7550,7 +7533,6 @@ template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::planSucceeded,
-						   control.context(),
 						   Method::PLAN_SUCCEEDED);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -7564,7 +7546,6 @@ template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 	HFSM2_LOG_STATE_METHOD(&Head::planFailed,
-						   control.context(),
 						   Method::PLAN_FAILED);
 
 	ScopedOrigin origin{control, STATE_ID};
@@ -8127,6 +8108,12 @@ struct RF_ final {
 	template <typename... TInjections>
 	using StateT		= StaticStateT<TInjections...>;
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger		= typename TConfig::LoggerInterface;
+#endif
+
 	//----------------------------------------------------------------------
 
 	template <typename T>
@@ -8368,7 +8355,7 @@ template <typename TIndices,
 		  typename TState>
 struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	using Indices		= TIndices;
-	static constexpr StateID	INITIAL_ID	= Indices::STATE_ID;
+	static constexpr StateID INITIAL_ID	= Indices::STATE_ID;
 	static constexpr Short COMPO_INDEX	= Indices::COMPO_INDEX;
 	static constexpr Short ORTHO_INDEX	= Indices::ORTHO_INDEX;
 	static constexpr Short ORTHO_UNIT	= Indices::ORTHO_UNIT;
@@ -8996,8 +8983,8 @@ CS_<TN, TA, SG, NI, TS...>::wideGetNames(const Long parent,
 										 const Short depth,
 										 StructureStateInfos& _stateInfos) const
 {
-	lHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
-	rHalf.wideGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+	lHalf.wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
+	rHalf.wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
 }
 
 #endif
@@ -9386,7 +9373,7 @@ CS_<TN, TA, SG, NI, T>::wideGetNames(const Long parent,
 									 const Short depth,
 									 StructureStateInfos& _stateInfos) const
 {
-	state.deepGetNames(parent, StructureStateInfo::COMPOSITE, depth, _stateInfos);
+	state.deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
 }
 
 #endif
@@ -9785,6 +9772,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepEnter(PlanControl& control) {
 	const Short& active = compoActive(control);
+	HFSM2_ASSERT(active != INVALID_SHORT);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -10407,8 +10395,7 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) {
 	} else {
 		requested = INVALID_SHORT;
 
-		// no reconstruction on reenter() by design
-
+		// reconstruction done in S_::reenter()
 		_subStates.wideReenter	(control, active);
 	}
 }
@@ -10503,12 +10490,12 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 void
 C_<TN, TA, SG, TH, TS...>::deepGetNames(const Long parent,
-										const RegionType region,
+										const RegionType regionType,
 										const Short depth,
 										StructureStateInfos& _stateInfos) const
 {
-	_headState.deepGetNames(parent,					 region,						depth,	   _stateInfos);
-	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::COMPOSITE, depth + 1, _stateInfos);
+	_headState.deepGetNames(parent,					 regionType,								depth,	   _stateInfos);
+	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, _stateInfos);
 }
 
 #endif
@@ -11177,8 +11164,8 @@ OS_<TN, TA, NI, TI, TR...>::wideGetNames(const Long parent,
 										 const Short depth,
 										 StructureStateInfos& stateInfos) const
 {
-	initial	 .deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, stateInfos);
-	remaining.wideGetNames(parent,								   depth, stateInfos);
+	initial	 .deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, stateInfos);
+	remaining.wideGetNames(parent,											   depth, stateInfos);
 }
 
 #endif
@@ -11479,7 +11466,7 @@ OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
 								  const Short depth,
 								  StructureStateInfos& _stateInfos) const
 {
-	initial.deepGetNames(parent, StructureStateInfo::ORTHOGONAL, depth, _stateInfos);
+	initial.deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
 }
 
 #endif
@@ -12507,7 +12494,7 @@ struct G_ {
 	/// @brief Set Context type
 	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = G_<FEATURE_TAG,       T HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using ContextT			 = G_<FEATURE_TAG, T	   HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
@@ -12765,7 +12752,7 @@ template <typename TContext = EmptyContext
 		, Long NSubstitutionLimit = 4
 		HFSM2_IF_PLANS(, Long NTaskCapacity = INVALID_LONG)
 		, typename TPayload = void>
-using ConfigT = detail::G_<FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
+using ConfigT = detail::G_<HFSM2_FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
 
 /// @brief Type configuration for MachineT<>
 using Config = ConfigT<>;
@@ -12844,8 +12831,8 @@ class R_ {
 public:
 	using Info					= WrapInfo<Apex>;
 
-	static_assert(Info::STATE_COUNT <  (Short) -1, "Too many states in the hierarchy. Change 'Short' type.");
-	static_assert(Info::STATE_COUNT == (Short) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
+	static_assert(Info::STATE_COUNT <  (unsigned) -1, "Too many states in the hierarchy. Change 'Short' type.");
+	static_assert(Info::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 	/// @brief Transition
 	using Transition			= typename Control::Transition;
@@ -12967,7 +12954,7 @@ public:
 	template <typename TEvent>
 	HFSM2_INLINE void react      (const TEvent& event);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
@@ -14265,7 +14252,7 @@ template <typename TG, typename TA>
 void
 R_<TG, TA>::getStateNames() {
 	_stateInfos.clear();
-	_apex.deepGetNames((Long) -1, StructureStateInfo::COMPOSITE, 0, _stateInfos);
+	_apex.deepGetNames((Long) -1, StructureStateInfo::RegionType::COMPOSITE, 0, _stateInfos);
 
 	Long margin = (Long) -1;
 	for (Long s = 0; s < _stateInfos.count(); ++s) {
@@ -14280,7 +14267,7 @@ R_<TG, TA>::getStateNames() {
 		else {
 			const Long mark = state.depth * 2 - 1;
 
-			prefix[mark + 0] = state.region == StructureStateInfo::COMPOSITE ? L'└' : L'╙';
+			prefix[mark + 0] = state.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'└' : L'╙';
 			prefix[mark + 1] = L' ';
 			prefix[mark + 2] = L'\0';
 
@@ -14292,7 +14279,7 @@ R_<TG, TA>::getStateNames() {
 
 				switch (prefixAbove[mark]) {
 				case L' ':
-					prefixAbove[mark] = state.region == StructureStateInfo::COMPOSITE ? L'│' : L'║';
+					prefixAbove[mark] = state.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'│' : L'║';
 					break;
 				case L'└':
 					prefixAbove[mark] = L'├';

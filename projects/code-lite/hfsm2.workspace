@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="hfsm" Database="" Version="10.0.0">
+<CodeLite_Workspace Name="hfsm2" Database="" Version="10.0.0">
   <VirtualDirectory Name="examples">
     <Project Name="snippets-gcc-tdm" Path="snippets-gcc-tdm/snippets-gcc-tdm.project" Active="No"/>
     <Project Name="advanced_event_handling-gcc-tdm" Path="advanced_event_handling-gcc-tdm/advanced_event_handling-gcc-tdm.project"/>
     <Project Name="temp-gcc-tdm" Path="temp-gcc-tdm/temp-gcc-tdm.project"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="tests">
+  <VirtualDirectory Name="test">
     <Project Name="test-gcc-tdm" Path="test-gcc-tdm/test-gcc-tdm.project" Active="Yes"/>
   </VirtualDirectory>
   <BuildMatrix>

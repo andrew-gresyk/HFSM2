@@ -221,17 +221,17 @@ TEST_CASE("FSM.Serialization", "[machine]") {
 		client::FSM::Instance replicated{&logger};
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},						Event::ENTRY_GUARD },
-				{ client::FSM::stateId<client::C1      >(),	Event::ENTRY_GUARD },
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::ENTRY_GUARD },
+				{ hfsm2::StateID{0},						Event::Type::ENTRY_GUARD },
+				{ client::FSM::stateId<client::C1      >(),	Event::Type::ENTRY_GUARD },
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0},						Event::CONSTRUCT },
-				{ client::FSM::stateId<client::C1      >(),	Event::CONSTRUCT },
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::CONSTRUCT },
+				{ hfsm2::StateID{0},						Event::Type::CONSTRUCT },
+				{ client::FSM::stateId<client::C1      >(),	Event::Type::CONSTRUCT },
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::CONSTRUCT },
 
-				{ hfsm2::StateID{0}, 						Event::ENTER },
-				{ client::FSM::stateId<client::C1      >(),	Event::ENTER },
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::ENTER },
+				{ hfsm2::StateID{0}, 						Event::Type::ENTER },
+				{ client::FSM::stateId<client::C1      >(),	Event::Type::ENTER },
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::ENTER },
 			});
 
 			assertActive(authority,  server::all, {
@@ -272,27 +272,27 @@ TEST_CASE("FSM.Serialization", "[machine]") {
 		replicated.load(buffer);
 		{
 			logger.assertSequence({
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::EXIT },
-				{ client::FSM::stateId<client::C1      >(),	Event::EXIT },
-				{ hfsm2::StateID{0},						Event::EXIT },
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::EXIT },
+				{ client::FSM::stateId<client::C1      >(),	Event::Type::EXIT },
+				{ hfsm2::StateID{0},						Event::Type::EXIT },
 
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::DESTRUCT },
-				{ client::FSM::stateId<client::C1      >(),	Event::DESTRUCT },
-				{ hfsm2::StateID{0},						Event::DESTRUCT },
+				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::DESTRUCT },
+				{ client::FSM::stateId<client::C1      >(),	Event::Type::DESTRUCT },
+				{ hfsm2::StateID{0},						Event::Type::DESTRUCT },
 
-				{ hfsm2::StateID{0}, 						Event::CONSTRUCT },
-				{ client::FSM::stateId<client::O2      >(),	Event::CONSTRUCT },
-				{ client::FSM::stateId<client::O2_C1   >(),	Event::CONSTRUCT },
-				{ client::FSM::stateId<client::O2_C1_S2>(),	Event::CONSTRUCT },
-				{ client::FSM::stateId<client::O2_C2   >(),	Event::CONSTRUCT },
-				{ client::FSM::stateId<client::O2_C2_S1>(),	Event::CONSTRUCT },
+				{ hfsm2::StateID{0}, 						Event::Type::CONSTRUCT },
+				{ client::FSM::stateId<client::O2      >(),	Event::Type::CONSTRUCT },
+				{ client::FSM::stateId<client::O2_C1   >(),	Event::Type::CONSTRUCT },
+				{ client::FSM::stateId<client::O2_C1_S2>(),	Event::Type::CONSTRUCT },
+				{ client::FSM::stateId<client::O2_C2   >(),	Event::Type::CONSTRUCT },
+				{ client::FSM::stateId<client::O2_C2_S1>(),	Event::Type::CONSTRUCT },
 
-				{ hfsm2::StateID{0}, 						Event::ENTER },
-				{ client::FSM::stateId<client::O2      >(),	Event::ENTER },
-				{ client::FSM::stateId<client::O2_C1   >(),	Event::ENTER },
-				{ client::FSM::stateId<client::O2_C1_S2>(),	Event::ENTER },
-				{ client::FSM::stateId<client::O2_C2   >(),	Event::ENTER },
-				{ client::FSM::stateId<client::O2_C2_S1>(),	Event::ENTER },
+				{ hfsm2::StateID{0}, 						Event::Type::ENTER },
+				{ client::FSM::stateId<client::O2      >(),	Event::Type::ENTER },
+				{ client::FSM::stateId<client::O2_C1   >(),	Event::Type::ENTER },
+				{ client::FSM::stateId<client::O2_C1_S2>(),	Event::Type::ENTER },
+				{ client::FSM::stateId<client::O2_C2   >(),	Event::Type::ENTER },
+				{ client::FSM::stateId<client::O2_C2_S1>(),	Event::Type::ENTER },
 			});
 
 			assertActive(replicated, client::all, {

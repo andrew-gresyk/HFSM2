@@ -59,8 +59,8 @@ class R_ {
 public:
 	using Info					= WrapInfo<Apex>;
 
-	static_assert(Info::STATE_COUNT <  (Short) -1, "Too many states in the hierarchy. Change 'Short' type.");
-	static_assert(Info::STATE_COUNT == (Short) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
+	static_assert(Info::STATE_COUNT <  (unsigned) -1, "Too many states in the hierarchy. Change 'Short' type.");
+	static_assert(Info::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 	/// @brief Transition
 	using Transition			= typename Control::Transition;
@@ -182,7 +182,7 @@ public:
 	template <typename TEvent>
 	HFSM2_INLINE void react      (const TEvent& event);
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier

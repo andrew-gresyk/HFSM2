@@ -313,11 +313,11 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		FSM::Instance machine{_, &logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<A    >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_1  >(), Event::CONSTRUCT },
+				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<A_1  >(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<A    >(), Event::ENTER },
-				{ FSM::stateId<A_1  >(), Event::ENTER },
+				{ FSM::stateId<A    >(), Event::Type::ENTER },
+				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -337,9 +337,9 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::REACT },
-				{ FSM::stateId<A    >(), Event::REACT },
-				{ FSM::stateId<A_1  >(), Event::REACT },
+				{ hfsm2::StateID{0},	 Event::Type::REACT },
+				{ FSM::stateId<A    >(), Event::Type::REACT },
+				{ FSM::stateId<A_1  >(), Event::Type::REACT },
 			});
 
 			assertActive(machine, all, {
@@ -359,21 +359,21 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<A    >(), Event::UPDATE },
-				{ FSM::stateId<A_1  >(), Event::UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::UPDATE },
+				{ FSM::stateId<A_1  >(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A_1  >(), Event::CHANGE,			FSM::stateId<A_2  >() },
+				{ FSM::stateId<A_1  >(), Event::Type::CHANGE,			FSM::stateId<A_2  >() },
 
-				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<A_1  >(), Event::EXIT },
+				{ FSM::stateId<A_1  >(), Event::Type::EXIT },
 
-				{ FSM::stateId<A_1  >(), Event::DESTRUCT },
-				{ FSM::stateId<A_2  >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_2_1>(), Event::CONSTRUCT },
+				{ FSM::stateId<A_1  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<A_2  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<A_2_1>(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<A_2  >(), Event::ENTER },
-				{ FSM::stateId<A_2_1>(), Event::ENTER },
+				{ FSM::stateId<A_2  >(), Event::Type::ENTER },
+				{ FSM::stateId<A_2_1>(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -407,10 +407,10 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::REACT },
-				{ FSM::stateId<A    >(), Event::REACT },
-				{ FSM::stateId<A_2  >(), Event::REACT },
-				{ FSM::stateId<A_2_1>(), Event::REACT },
+				{ hfsm2::StateID{0},	 Event::Type::REACT },
+				{ FSM::stateId<A    >(), Event::Type::REACT },
+				{ FSM::stateId<A_2  >(), Event::Type::REACT },
+				{ FSM::stateId<A_2_1>(), Event::Type::REACT },
 			});
 
 			assertActive(machine, all, {
@@ -433,34 +433,34 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<A    >(), Event::UPDATE },
-				{ FSM::stateId<A_2  >(), Event::UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::UPDATE },
+				{ FSM::stateId<A_2  >(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A_2  >(), Event::CHANGE,			FSM::stateId<B_2_2>() },
+				{ FSM::stateId<A_2  >(), Event::Type::CHANGE,			FSM::stateId<B_2_2>() },
 
-				{ FSM::stateId<A_2_1>(), Event::UPDATE },
+				{ FSM::stateId<A_2_1>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A_2  >(), Event::EXIT_GUARD },
-				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<A_2  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<A_2_1>(), Event::EXIT },
-				{ FSM::stateId<A_2  >(), Event::EXIT },
-				{ FSM::stateId<A    >(), Event::EXIT },
+				{ FSM::stateId<A_2_1>(), Event::Type::EXIT },
+				{ FSM::stateId<A_2  >(), Event::Type::EXIT },
+				{ FSM::stateId<A    >(), Event::Type::EXIT },
 
-				{ FSM::stateId<A_2_1>(), Event::DESTRUCT },
-				{ FSM::stateId<A_2  >(), Event::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_1  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_1_1>(), Event::CONSTRUCT },
-				{ FSM::stateId<B_2  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_2_2>(), Event::CONSTRUCT },
+				{ FSM::stateId<A_2_1>(), Event::Type::DESTRUCT },
+				{ FSM::stateId<A_2  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_1  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_1_1>(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_2  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_2_2>(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<B    >(), Event::ENTER },
-				{ FSM::stateId<B_1  >(), Event::ENTER },
-				{ FSM::stateId<B_1_1>(), Event::ENTER },
-				{ FSM::stateId<B_2  >(), Event::ENTER },
-				{ FSM::stateId<B_2_2>(), Event::ENTER },
+				{ FSM::stateId<B    >(), Event::Type::ENTER },
+				{ FSM::stateId<B_1  >(), Event::Type::ENTER },
+				{ FSM::stateId<B_1_1>(), Event::Type::ENTER },
+				{ FSM::stateId<B_2  >(), Event::Type::ENTER },
+				{ FSM::stateId<B_2_2>(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -504,12 +504,12 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::REACT },
-				{ FSM::stateId<B    >(), Event::REACT },
-				{ FSM::stateId<B_1  >(), Event::REACT },
-				{ FSM::stateId<B_1_1>(), Event::REACT },
-				{ FSM::stateId<B_2  >(), Event::REACT },
-				{ FSM::stateId<B_2_2>(), Event::REACT },
+				{ hfsm2::StateID{0},	 Event::Type::REACT },
+				{ FSM::stateId<B    >(), Event::Type::REACT },
+				{ FSM::stateId<B_1  >(), Event::Type::REACT },
+				{ FSM::stateId<B_1_1>(), Event::Type::REACT },
+				{ FSM::stateId<B_2  >(), Event::Type::REACT },
+				{ FSM::stateId<B_2_2>(), Event::Type::REACT },
 			});
 
 			assertActive(machine, all, {
@@ -536,35 +536,35 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<B    >(), Event::UPDATE },
-				{ FSM::stateId<B_1  >(), Event::UPDATE },
-				{ FSM::stateId<B_1_1>(), Event::UPDATE },
-				{ FSM::stateId<B_2  >(), Event::UPDATE },
-				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+				{ FSM::stateId<B    >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_1  >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_1_1>(), Event::Type::UPDATE },
+				{ FSM::stateId<B_2  >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<B_2_2>(), Event::RESUME,			FSM::stateId<A    >() },
+				{ FSM::stateId<B_2_2>(), Event::Type::RESUME,			FSM::stateId<A    >() },
 
-				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
-				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<B_1_1>(), Event::EXIT },
-				{ FSM::stateId<B_1  >(), Event::EXIT },
-				{ FSM::stateId<B_2_2>(), Event::EXIT },
-				{ FSM::stateId<B_2  >(), Event::EXIT },
-				{ FSM::stateId<B    >(), Event::EXIT },
+				{ FSM::stateId<B_1_1>(), Event::Type::EXIT },
+				{ FSM::stateId<B_1  >(), Event::Type::EXIT },
+				{ FSM::stateId<B_2_2>(), Event::Type::EXIT },
+				{ FSM::stateId<B_2  >(), Event::Type::EXIT },
+				{ FSM::stateId<B    >(), Event::Type::EXIT },
 
-				{ FSM::stateId<B_1_1>(), Event::DESTRUCT },
-				{ FSM::stateId<B_1  >(), Event::DESTRUCT },
-				{ FSM::stateId<B_2_2>(), Event::DESTRUCT },
-				{ FSM::stateId<B_2  >(), Event::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_2  >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_2_1>(), Event::CONSTRUCT },
+				{ FSM::stateId<B_1_1>(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B_1  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B_2_2>(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B_2  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<A_2  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<A_2_1>(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<A    >(), Event::ENTER },
-				{ FSM::stateId<A_2  >(), Event::ENTER },
-				{ FSM::stateId<A_2_1>(), Event::ENTER },
+				{ FSM::stateId<A    >(), Event::Type::ENTER },
+				{ FSM::stateId<A_2  >(), Event::Type::ENTER },
+				{ FSM::stateId<A_2_1>(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -604,34 +604,34 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<A    >(), Event::UPDATE },
-				{ FSM::stateId<A_2  >(), Event::UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::UPDATE },
+				{ FSM::stateId<A_2  >(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A_2  >(), Event::RESUME,			FSM::stateId<B    >() },
+				{ FSM::stateId<A_2  >(), Event::Type::RESUME,			FSM::stateId<B    >() },
 
-				{ FSM::stateId<A_2_1>(), Event::UPDATE },
+				{ FSM::stateId<A_2_1>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A_2  >(), Event::EXIT_GUARD },
-				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<A_2  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<A_2_1>(), Event::EXIT },
-				{ FSM::stateId<A_2  >(), Event::EXIT },
-				{ FSM::stateId<A    >(), Event::EXIT },
+				{ FSM::stateId<A_2_1>(), Event::Type::EXIT },
+				{ FSM::stateId<A_2  >(), Event::Type::EXIT },
+				{ FSM::stateId<A    >(), Event::Type::EXIT },
 
-				{ FSM::stateId<A_2_1>(), Event::DESTRUCT },
-				{ FSM::stateId<A_2  >(), Event::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_1  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_1_1>(), Event::CONSTRUCT },
-				{ FSM::stateId<B_2  >(), Event::CONSTRUCT },
-				{ FSM::stateId<B_2_2>(), Event::CONSTRUCT },
+				{ FSM::stateId<A_2_1>(), Event::Type::DESTRUCT },
+				{ FSM::stateId<A_2  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_1  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_1_1>(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_2  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<B_2_2>(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<B    >(), Event::ENTER },
-				{ FSM::stateId<B_1  >(), Event::ENTER },
-				{ FSM::stateId<B_1_1>(), Event::ENTER },
-				{ FSM::stateId<B_2  >(), Event::ENTER },
-				{ FSM::stateId<B_2_2>(), Event::ENTER },
+				{ FSM::stateId<B    >(), Event::Type::ENTER },
+				{ FSM::stateId<B_1  >(), Event::Type::ENTER },
+				{ FSM::stateId<B_1_1>(), Event::Type::ENTER },
+				{ FSM::stateId<B_2  >(), Event::Type::ENTER },
+				{ FSM::stateId<B_2_2>(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -675,25 +675,25 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<B    >(), Event::UPDATE },
-				{ FSM::stateId<B_1  >(), Event::UPDATE },
-				{ FSM::stateId<B_1_1>(), Event::UPDATE },
-				{ FSM::stateId<B_2  >(), Event::UPDATE },
-				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+				{ FSM::stateId<B    >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_1  >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_1_1>(), Event::Type::UPDATE },
+				{ FSM::stateId<B_2  >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<B_2_2>(), Event::CHANGE,			FSM::stateId<B    >() },
+				{ FSM::stateId<B_2_2>(), Event::Type::CHANGE,			FSM::stateId<B    >() },
 
-				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
-				{ FSM::stateId<B_2_1>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_2_1>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<B_2_1>(), Event::CANCEL_PENDING },
+				{ FSM::stateId<B_2_1>(), Event::Type::CANCEL_PENDING },
 
-				{ FSM::stateId<B_2_1>(), Event::RESUME,			FSM::stateId<B_2_2>() },
+				{ FSM::stateId<B_2_1>(), Event::Type::RESUME,			FSM::stateId<B_2_2>() },
 
-				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
-				{ FSM::stateId<B_2_2>(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<B_2_2>(), Event::REENTER },
+				{ FSM::stateId<B_2_2>(), Event::Type::REENTER },
 			});
 
 			assertActive(machine, all, {
@@ -734,36 +734,36 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 		machine.update();
 		{
 			logger.assertSequence({
-				{ FSM::stateId<B    >(), Event::UPDATE },
-				{ FSM::stateId<B_1  >(), Event::UPDATE },
-				{ FSM::stateId<B_1_1>(), Event::UPDATE },
-				{ FSM::stateId<B_2  >(), Event::UPDATE },
-				{ FSM::stateId<B_2_2>(), Event::UPDATE },
+				{ FSM::stateId<B    >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_1  >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_1_1>(), Event::Type::UPDATE },
+				{ FSM::stateId<B_2  >(), Event::Type::UPDATE },
+				{ FSM::stateId<B_2_2>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<B_2_2>(), Event::SCHEDULE,		FSM::stateId<A_2_2>() },
-				{ FSM::stateId<B_2_2>(), Event::RESUME,			FSM::stateId<A    >() },
+				{ FSM::stateId<B_2_2>(), Event::Type::SCHEDULE,		FSM::stateId<A_2_2>() },
+				{ FSM::stateId<B_2_2>(), Event::Type::RESUME,			FSM::stateId<A    >() },
 
-				{ FSM::stateId<B_2_2>(), Event::EXIT_GUARD },
-				{ FSM::stateId<A_2  >(), Event::ENTRY_GUARD },
+				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<B_1_1>(), Event::EXIT },
-				{ FSM::stateId<B_1  >(), Event::EXIT },
-				{ FSM::stateId<B_2_2>(), Event::EXIT },
-				{ FSM::stateId<B_2  >(), Event::EXIT },
-				{ FSM::stateId<B    >(), Event::EXIT },
+				{ FSM::stateId<B_1_1>(), Event::Type::EXIT },
+				{ FSM::stateId<B_1  >(), Event::Type::EXIT },
+				{ FSM::stateId<B_2_2>(), Event::Type::EXIT },
+				{ FSM::stateId<B_2  >(), Event::Type::EXIT },
+				{ FSM::stateId<B    >(), Event::Type::EXIT },
 
-				{ FSM::stateId<B_1_1>(), Event::DESTRUCT },
-				{ FSM::stateId<B_1  >(), Event::DESTRUCT },
-				{ FSM::stateId<B_2_2>(), Event::DESTRUCT },
-				{ FSM::stateId<B_2  >(), Event::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_2  >(), Event::CONSTRUCT },
-				{ FSM::stateId<A_2_2>(), Event::CONSTRUCT },
+				{ FSM::stateId<B_1_1>(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B_1  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B_2_2>(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B_2  >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<B    >(), Event::Type::DESTRUCT },
+				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<A_2  >(), Event::Type::CONSTRUCT },
+				{ FSM::stateId<A_2_2>(), Event::Type::CONSTRUCT },
 
-				{ FSM::stateId<A    >(), Event::ENTER },
-				{ FSM::stateId<A_2  >(), Event::ENTER },
-				{ FSM::stateId<A_2_2>(), Event::ENTER },
+				{ FSM::stateId<A    >(), Event::Type::ENTER },
+				{ FSM::stateId<A_2  >(), Event::Type::ENTER },
+				{ FSM::stateId<A_2_2>(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {
@@ -806,13 +806,13 @@ TEST_CASE("FSM.Internal Payloads", "[machine]") {
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId<A_2_2>(), Event::EXIT },
-		{ FSM::stateId<A_2  >(), Event::EXIT },
-		{ FSM::stateId<A    >(), Event::EXIT },
+		{ FSM::stateId<A_2_2>(), Event::Type::EXIT },
+		{ FSM::stateId<A_2  >(), Event::Type::EXIT },
+		{ FSM::stateId<A    >(), Event::Type::EXIT },
 
-		{ FSM::stateId<A_2_2>(), Event::DESTRUCT },
-		{ FSM::stateId<A_2  >(), Event::DESTRUCT },
-		{ FSM::stateId<A    >(), Event::DESTRUCT },
+		{ FSM::stateId<A_2_2>(), Event::Type::DESTRUCT },
+		{ FSM::stateId<A_2  >(), Event::Type::DESTRUCT },
+		{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
 	});
 }
 
