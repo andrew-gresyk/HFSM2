@@ -79,17 +79,8 @@ struct ITL_
 	static constexpr bool contains() { return std::is_base_of<ITL_EntryT<T>, ITL_>::value; }
 
 	template <typename T>
-	static constexpr
-	typename std::enable_if< std::is_base_of<ITL_EntryT<T>, ITL_>::value, Long>::type
-	index() {
+	static constexpr Long index() {
 		return Base::template select<T>(ITL_{});
-	}
-
-	template <typename T>
-	static constexpr
-	typename std::enable_if<!std::is_base_of<ITL_EntryT<T>, ITL_>::value, Long>::type
-	index() {
-		return INVALID_LONG;
 	}
 };
 
