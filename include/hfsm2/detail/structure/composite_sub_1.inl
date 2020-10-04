@@ -9,7 +9,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename T>
 T&
 CS_<TN, TA, SG, NI, TS...>::access() {
-	return LHalfInfo::StateList::template contains<T>() ?
+	return contains<typename LHalfInfo::StateList, T>() ?
 		lHalf.template access<T>() :
 		rHalf.template access<T>();
 }
@@ -20,7 +20,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename T>
 const T&
 CS_<TN, TA, SG, NI, TS...>::access() const {
-	return LHalfInfo::StateList::template contains<T>() ?
+	return contains<typename LHalfInfo::StateList, T>() ?
 		lHalf.template access<T>() :
 		rHalf.template access<T>();
 }

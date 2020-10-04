@@ -38,13 +38,13 @@ In-line comment-based docs is an on-going effort.
 - Fully static, no dynamic allocations
 - Uses inline-friendly compile-time pylymorphism, no virtual methods are used
 - Type-safe transitions: `FSM.changeTo<TargetState>()` with optional payloads
+- Scaleable, supports robust state re-use via state injections
 - [Hierarchical](https://github.com/andrew-gresyk/HFSM2/wiki/Transitions-within-Hierarchy), with a selection of composite (sub-machine) and orthogonal regions
 - Gamedev-friendly, supports explicit `State::update()`
 - Also supports traditional event-based workflow with `State::react()`
 - Inspect anything: previous and current transitions, state activation status, and more!
 - Game AI-friendly with [Dynamic planning](https://github.com/andrew-gresyk/HFSM2/wiki/Plans) support
 - [Utility theory](https://github.com/andrew-gresyk/HFSM2/wiki/Utility-Theory) support (max score and ranked weighted random)
-- Scaleable, supports robust state re-use via state injections
 - [Serializable](https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization), with activity and transition history support
 - [Debug-assisted](https://gresyk.dev/features/2018/01/15/hfsm-magic.html), includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
 - Built-in logging support

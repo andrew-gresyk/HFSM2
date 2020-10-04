@@ -9,7 +9,7 @@ template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename T>
 T&
 OS_<TN, TA, NI, TI, TR...>::access() {
-	return InitialStates::template contains<T>() ?
+	return contains<InitialStates, T>() ?
 		initial  .template access<T>() :
 		remaining.template access<T>();
 }
@@ -20,7 +20,7 @@ template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename T>
 const T&
 OS_<TN, TA, NI, TI, TR...>::access() const {
-	return InitialStates::template contains<T>() ?
+	return contains<InitialStates, T>() ?
 		initial  .template access<T>() :
 		remaining.template access<T>();
 }

@@ -2093,9 +2093,12 @@ XoShiRo128Plus::raw() {
 
 #endif
 namespace hfsm2 {
-namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#if 0
+
+namespace detail {
 
 template<Long N>
 struct IndexConstant {};
@@ -2159,94 +2162,254 @@ struct ITL_Impl<IndexSequence<Ns...>, Ts...>
 	static constexpr Long select(ITL_EntryN<T, N>) { return (Long) N; }
 };
 
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename... Ts>
-struct ITL_
-	: private ITL_Impl<IndexSequenceFor<Ts...>, Ts...>
+struct TypeList
+	: private	 detail::ITL_Impl<detail::IndexSequenceFor<Ts...>, Ts...>
 {
-	using Base = ITL_Impl<IndexSequenceFor<Ts...>, Ts...>;
+	using Base = detail::ITL_Impl<detail::IndexSequenceFor<Ts...>, Ts...>;
 
 	static constexpr Long SIZE = sizeof...(Ts);
 
 	template <typename T>
-	static constexpr bool contains() { return std::is_base_of<ITL_EntryT<T>, ITL_>::value; }
-
-	template <typename T>
 	static constexpr Long index() {
-		return Base::template select<T>(ITL_{});
+		return Base::template select<T>(TypeList{});
 	}
 };
 
+template <typename TList, typename T>
+constexpr Long index   () { return TList::template index   <T>(); }
+
+template <typename TList, typename T>
+constexpr bool contains() { return std::is_base_of<detail::ITL_EntryT<T>, TList>::value; }
+
 ////////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
 
 template <typename...>
 struct PrependT;
 
 template <typename T, typename... Ts>
-struct PrependT<T, ITL_<Ts...>> {
-	using Type = ITL_<T, Ts...>;
+struct PrependT<T, TypeList<Ts...>> {
+	using Type = TypeList<T, Ts...>;
 };
 
+}
+
 template <typename... Ts>
-using Prepend = typename PrependT<Ts...>::Type;
+using Prepend = typename detail::PrependT<Ts...>::Type;
 
 //------------------------------------------------------------------------------
+
+namespace detail {
 
 template <typename...>
 struct MergeT;
 
 template <typename... Ts1, typename... Ts2>
-struct MergeT<ITL_<Ts1...>, ITL_<Ts2...>> {
-	using Type = ITL_<Ts1..., Ts2...>;
+struct MergeT<TypeList<Ts1...>, TypeList<Ts2...>> {
+	using Type = TypeList<Ts1..., Ts2...>;
 };
 
+}
+
 template <typename... Ts>
-using Merge = typename MergeT<Ts...>::Type;
+using Merge = typename detail::MergeT<Ts...>::Type;
 
 //------------------------------------------------------------------------------
 
+namespace detail {
+
 template <Long, Long, typename...>
-struct LesserT;
+struct LowerT;
 
 template <Long H, Long I, typename TFirst, typename... TRest>
-struct LesserT<H, I, TFirst, TRest...> {
+struct LowerT<H, I, TFirst, TRest...> {
 	using Type = typename std::conditional<(I < H),
-										   Prepend<TFirst, typename LesserT<H, I + 1, TRest...>::Type>,
-										   typename LesserT<H, I + 1, TRest...>::Type>::type;
+										   Prepend<TFirst, typename LowerT<H, I + 1, TRest...>::Type>,
+										   typename LowerT<H, I + 1, TRest...>::Type>::type;
 };
 
 template <Long H, Long I>
-struct LesserT<H, I> {
-	using Type = ITL_<>;
+struct LowerT<H, I> {
+	using Type = TypeList<>;
 };
 
+}
+
 template <typename... Ts>
-using SplitL = typename LesserT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+using Lower = typename detail::LowerT<sizeof...(Ts) / 2, 0, Ts...>::Type;
 
 //------------------------------------------------------------------------------
 
+namespace detail {
+
 template <Long, Long, typename...>
-struct GreaterT;
+struct UpperT;
 
 template <Long H, Long I, typename TFirst, typename... TRest>
-struct GreaterT<H, I, TFirst, TRest...> {
+struct UpperT<H, I, TFirst, TRest...> {
 	using Type = typename std::conditional<(I < H),
-										   typename GreaterT<H, I + 1, TRest...>::Type,
-										   ITL_<TFirst, TRest...>>::type;
+										   typename UpperT<H, I + 1, TRest...>::Type,
+										   TypeList<TFirst, TRest...>>::type;
 };
 
 template <Long H, Long I>
-struct GreaterT<H, I> {
-	using Type = ITL_<>;
+struct UpperT<H, I> {
+	using Type = TypeList<>;
 };
 
+}
+
 template <typename... Ts>
-using SplitR = typename GreaterT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+using Upper = typename detail::UpperT<sizeof...(Ts) / 2, 0, Ts...>::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#else
+
+template <typename... Ts>
+struct TypeList {
+	static constexpr Long SIZE = sizeof...(Ts);
+};
+
+//------------------------------------------------------------------------------
+
+namespace detail {
+
+template <Long N>
+struct Const {
+	static constexpr Long Value = N;
+};
+
+//------------------------------------------------------------------------------
+
+template <typename...>
+struct PrependT;
+
+template <typename T, typename... Ts>
+struct PrependT<T, TypeList<Ts...>> {
+	using Type = TypeList<T, Ts...>;
+};
+
 }
+
+template <typename... Ts>
+using Prepend = typename detail::PrependT<Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+namespace detail {
+
+template <typename...>
+struct MergeT;
+
+template <typename... Ts1, typename... Ts2>
+struct MergeT<TypeList<Ts1...>, TypeList<Ts2...>> {
+	using Type = TypeList<Ts1..., Ts2...>;
+};
+
+}
+
+template <typename... Ts>
+using Merge = typename detail::MergeT<Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+namespace detail {
+
+template <Long, Long, typename...>
+struct LowerT;
+
+template <Long H, Long I, typename TFirst, typename... TRest>
+struct LowerT<H, I, TFirst, TRest...> {
+	using Type = typename std::conditional<(I < H),
+										   Prepend<TFirst, typename LowerT<H, I + 1, TRest...>::Type>,
+										   typename LowerT<H, I + 1, TRest...>::Type
+										   >::type;
+};
+
+template <Long H, Long I>
+struct LowerT<H, I> {
+	using Type = TypeList<>;
+};
+
+}
+
+template <typename... Ts>
+using Lower = typename detail::LowerT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+namespace detail {
+
+template <Long, Long, typename...>
+struct UpperT;
+
+template <Long H, Long I, typename TFirst, typename... TRest>
+struct UpperT<H, I, TFirst, TRest...> {
+	using Type = typename std::conditional<(I < H),
+		typename UpperT<H, I + 1, TRest...>::Type,
+		TypeList<TFirst, TRest...>>::type;
+};
+
+template <Long H, Long I>
+struct UpperT<H, I> {
+	using Type = TypeList<>;
+};
+
+}
+
+template <typename... Ts>
+using Upper = typename detail::UpperT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+
+//------------------------------------------------------------------------------
+
+namespace detail {
+
+template<Long, typename...>
+struct FindImpl
+	: Const<INVALID_LONG>
+{};
+
+template<Long N, typename T, typename TFirst, typename... TRest>
+struct FindImpl<N, T, TFirst, TRest...>
+	: FindImpl<N + 1, T, TRest...>
+{};
+
+template<Long N, typename T, typename... Ts>
+struct FindImpl<N, T, T, Ts...>
+	: Const<N>
+{};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename, typename>
+struct Find;
+
+template <typename T, typename... Ts>
+struct Find<T, TypeList<Ts...>>
+	: FindImpl<0, T, Ts...>
+{};
+
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TList, typename T>
+constexpr Long index   () { return detail::Find<T, TList>::Value;	  }
+
+template <typename TList, typename T>
+constexpr bool contains() { return index<TList, T>() != INVALID_LONG; }
+
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+
 }
 
 namespace hfsm2 {
@@ -3137,8 +3300,8 @@ public:
 
 		HFSM2_INLINE void operator ++();
 
-		HFSM2_INLINE const Task& operator  *() const								{ return  _plan._planData.tasks[_curr];								}
-		HFSM2_INLINE const Task* operator ->() const								{ return &_plan._planData.tasks[_curr];								}
+		HFSM2_INLINE const Task& operator  *() const		{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_INLINE const Task* operator ->() const		{ return &_plan._planData.tasks[_curr];		}
 
 		HFSM2_INLINE Long next() const;
 
@@ -3154,15 +3317,15 @@ private:
 							const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
+	static constexpr StateID  stateId()						{ return			index<StateList , T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()											{ return (RegionID) RegionList::template index<T>();				}
+	static constexpr RegionID regionId()					{ return (RegionID) index<RegionList, T>();	}
 
 public:
 	HFSM2_INLINE explicit operator bool() const;
 
-	HFSM2_INLINE Iterator first()													{ return Iterator{*this};											}
+	HFSM2_INLINE Iterator first()							{ return Iterator{*this};					}
 
 private:
 	const PlanData& _planData;
@@ -3196,11 +3359,11 @@ public:
 
 		HFSM2_INLINE void operator ++();
 
-		HFSM2_INLINE	   Task& operator  *()										{ return  _plan._planData.tasks[_curr];								}
-		HFSM2_INLINE const Task& operator  *() const								{ return  _plan._planData.tasks[_curr];								}
+		HFSM2_INLINE	   Task& operator  *()				{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_INLINE const Task& operator  *() const		{ return  _plan._planData.tasks[_curr];		}
 
-		HFSM2_INLINE	   Task* operator ->()										{ return &_plan._planData.tasks[_curr];								}
-		HFSM2_INLINE const Task* operator ->() const								{ return &_plan._planData.tasks[_curr];								}
+		HFSM2_INLINE	   Task* operator ->()				{ return &_plan._planData.tasks[_curr];		}
+		HFSM2_INLINE const Task* operator ->() const		{ return &_plan._planData.tasks[_curr];		}
 
 		HFSM2_INLINE void remove();
 
@@ -3218,10 +3381,10 @@ protected:
 						   const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
+	static constexpr StateID  stateId()						{ return			index<StateList , T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()											{ return (RegionID) RegionList::template index<T>();				}
+	static constexpr RegionID regionId()					{ return (RegionID) index<RegionList, T>();	}
 
 	bool append(const StateID origin,
 				const StateID destination,
@@ -5016,13 +5179,13 @@ public:
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID stateId()				{ return			StateList ::template index<TState>();	}
+	static constexpr StateID stateId()						{ return			index<StateList , TState>();	}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()			{ return (RegionID) RegionList::template index<TState>();	}
+	static constexpr RegionID regionId()					{ return (RegionID) index<RegionList, TState>();	}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
@@ -6663,10 +6826,10 @@ public:
 	HFSM2_INLINE void postExit	   (Context&)		{}
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
-
-	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr StateID  stateId()		{ return			index<StateList , T>();	}
+																			
+	template <typename T>													
+	static constexpr RegionID regionId()	{ return (RegionID) index<RegionList, T>();	}
 };
 
 //------------------------------------------------------------------------------
@@ -7313,7 +7476,7 @@ struct RegisterT {
 	execute(StateParents& stateParents,
 			const Parent parent)
 	{
-		static constexpr auto HEAD_ID = StateList::template index<TH>();
+		static constexpr auto HEAD_ID = index<StateList, TH>();
 		StaticAssertEquality<STATE_ID, HEAD_ID>();
 
 		stateParents[STATE_ID] = parent;
@@ -7784,8 +7947,8 @@ using WrapInfo = typename WrapInfoT<TS...>::Type;
 template <typename THead>
 struct SI_ final {
 	using Head				= THead;
-	using StateList			= ITL_<Head>;
-	using RegionList		= ITL_<>;
+	using StateList			= TypeList<Head>;
+	using RegionList		= TypeList<>;
 
 	static constexpr Short WIDTH		  = 1;
 	static constexpr Long  REVERSE_DEPTH  = 1;
@@ -8123,15 +8286,13 @@ struct RF_ final {
 	//----------------------------------------------------------------------
 
 	template <typename T>
-	static constexpr bool contains() {
-		return StateList::template index<T>() != INVALID_LONG;
-	}
+	static constexpr bool	  contains()	{ return		 contains<StateList , T>();	}
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()		{ return			index<StateList , T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()	{ return (RegionID) index<RegionList, T>();	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -8140,7 +8301,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 struct CSubMaterialT;
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-struct CSubMaterialT<TN, TA, SG, NI, ITL_<TS...>> {
+struct CSubMaterialT<TN, TA, SG, NI, TypeList<TS...>> {
 	using Type = CS_<TN, TA, SG, NI,	  TS...>;
 };
 
@@ -8149,7 +8310,7 @@ using CSubMaterial = typename CSubMaterialT<TN, TA, SG, NI, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
-template <typename...>
+template <typename>
 struct InfoT;
 
 template <typename TN, typename TA, typename TH>
@@ -8171,6 +8332,9 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 struct InfoT<CS_<TN, TA, SG, NI, TS...>> {
 	using Type = CSI_<			 TS...>;
 };
+
+template <typename T>
+using Info = typename InfoT<T>::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -8221,7 +8385,7 @@ struct CS_ final {
 
 	static constexpr Short	  L_PRONG	  = PRONG_INDEX;
 
-	using LStates		= SplitL<TStates...>;
+	using LStates		= Lower<TStates...>;
 	using LHalf			= CSubMaterial<I_<INITIAL_ID,
 										  COMPO_INDEX,
 										  ORTHO_INDEX,
@@ -8230,11 +8394,12 @@ struct CS_ final {
 									   STRATEGY,
 									   L_PRONG,
 									   LStates>;
-	using LHalfInfo		= typename InfoT<LHalf>::Type;
+
+	using LHalfInfo		= Info<LHalf>;
 
 	static constexpr Short	  R_PRONG	  = PRONG_INDEX + LStates::SIZE;
 
-	using RStates		= SplitR<TStates...>;
+	using RStates		= Upper<TStates...>;
 	using RHalf			= CSubMaterial<I_<INITIAL_ID  + LHalfInfo::STATE_COUNT,
 										  COMPO_INDEX + LHalfInfo::COMPO_REGIONS,
 										  ORTHO_INDEX + LHalfInfo::ORTHO_REGIONS,
@@ -8520,7 +8685,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename T>
 T&
 CS_<TN, TA, SG, NI, TS...>::access() {
-	return LHalfInfo::StateList::template contains<T>() ?
+	return contains<typename LHalfInfo::StateList, T>() ?
 		lHalf.template access<T>() :
 		rHalf.template access<T>();
 }
@@ -8531,7 +8696,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename T>
 const T&
 CS_<TN, TA, SG, NI, TS...>::access() const {
-	return LHalfInfo::StateList::template contains<T>() ?
+	return contains<typename LHalfInfo::StateList, T>() ?
 		lHalf.template access<T>() :
 		rHalf.template access<T>();
 }
@@ -10817,7 +10982,7 @@ template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename T>
 T&
 OS_<TN, TA, NI, TI, TR...>::access() {
-	return InitialStates::template contains<T>() ?
+	return contains<InitialStates, T>() ?
 		initial  .template access<T>() :
 		remaining.template access<T>();
 }
@@ -10828,7 +10993,7 @@ template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename T>
 const T&
 OS_<TN, TA, NI, TI, TR...>::access() const {
-	return InitialStates::template contains<T>() ?
+	return contains<InitialStates, T>() ?
 		initial  .template access<T>() :
 		remaining.template access<T>();
 }
@@ -12199,7 +12364,7 @@ struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
 	using Host =		 CS_<TN, TA, TG, NI, TS...>;
 
 	HFSM2_INLINE	   T& get()		 {
-		return Host::LHalfInfo::StateList::template contains<T>() ?
+		return contains<typename Host::LHalfInfo::StateList, T>() ?
 			Accessor<T,		  typename Host::LHalf>{host.lHalf}.get() :
 			Accessor<T,		  typename Host::RHalf>{host.rHalf}.get();
 	}
@@ -12219,7 +12384,7 @@ struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
 	using Host =   const CS_<TN, TA, TG, NI, TS...>;
 
 	HFSM2_INLINE const T& get() const {
-		return Host::LHalfInfo::StateList::template contains<T>() ?
+		return contains<typename Host::LHalfInfo::StateList, T>() ?
 			Accessor<T, const typename Host::LHalf>{host.lHalf}.get() :
 			Accessor<T, const typename Host::RHalf>{host.rHalf}.get();
 	}
@@ -12328,7 +12493,7 @@ struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
 	using Host =		 OS_<TN, TA, NI, TS...>;
 
 	HFSM2_INLINE	   T& get()		 {
-		return Host::InitialStates::template contains<T>() ?
+		return contains<typename Host::InitialStates, T>() ?
 			Accessor<T,		  typename Host::Initial  >{host.initial  }.get() :
 			Accessor<T,		  typename Host::Remaining>{host.remaining}.get();
 	}
@@ -12347,7 +12512,7 @@ struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
 	using Host =   const OS_<TN, TA, NI, TS...>;
 
 	HFSM2_INLINE const T& get() const {
-		return Host::InitialStates::template contains<T>() ?
+		return contains<typename Host::InitialStates, T>() ?
 			Accessor<T, const typename Host::Initial  >{host.initial  }.get() :
 			Accessor<T, const typename Host::Remaining>{host.remaining}.get();
 	}
@@ -12862,8 +13027,9 @@ public:
 	using Logger				= typename TConfig::LoggerInterface;
 #endif
 
-	//----------------------------------------------------------------------
 public:
+
+	//----------------------------------------------------------------------
 
 	explicit R_(Context& context
 				HFSM2_IF_UTILITY_THEORY(, RNG& rng)
@@ -12871,19 +13037,19 @@ public:
 
 	~R_();
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 	/// @brief Get state identifier for a state type
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID  stateId()					{ return			StateList ::template index<TState>();	}
+	static constexpr StateID  stateId()					{ return			index<StateList , TState>();	}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()				{ return (RegionID) RegionList::template index<TState>();	}
+	static constexpr RegionID regionId()				{ return (RegionID) index<RegionList, TState>();	}
 
 	//----------------------------------------------------------------------
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
@@ -12895,7 +13061,7 @@ private:
 	#pragma warning(disable: 4348) // redefinition of default parameter: parameter 2
 #endif
 
-	template <typename TState, bool = StateList::template contains<TState>()>
+	template <typename TState, bool = contains<StateList, TState>()>
 	struct Accessor;
 
 #ifdef _MSC_VER
@@ -13338,13 +13504,13 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void changeWith   (const Payload& payload)	{ changeWith   (stateId<TState>(		  payload ));	}
+	HFSM2_INLINE void changeWith   (const Payload& payload)	{ changeWith   (stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void changeWith   (	 Payload&& payload)	{ changeWith   (stateId<TState>(std::move(payload)));	}
+	HFSM2_INLINE void changeWith   (	 Payload&& payload)	{ changeWith   (stateId<TState>(), std::move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13364,13 +13530,13 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void restartWith  (const Payload& payload)	{ restartWith  (stateId<TState>(		  payload ));	}
+	HFSM2_INLINE void restartWith  (const Payload& payload)	{ restartWith  (stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void restartWith  (	 Payload&& payload)	{ restartWith  (stateId<TState>(std::move(payload)));	}
+	HFSM2_INLINE void restartWith  (	 Payload&& payload)	{ restartWith  (stateId<TState>(), std::move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13390,13 +13556,13 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void resumeWith   (const Payload& payload)	{ resumeWith   (stateId<TState>(		  payload ));	}
+	HFSM2_INLINE void resumeWith   (const Payload& payload)	{ resumeWith   (stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void resumeWith   (	 Payload&& payload)	{ resumeWith   (stateId<TState>(std::move(payload)));	}
+	HFSM2_INLINE void resumeWith   (	 Payload&& payload)	{ resumeWith   (stateId<TState>(), std::move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13424,7 +13590,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void utilizeWith  (const Payload& payload)	{ utilizeWith  (stateId<TState>(		  payload ));	}
+	HFSM2_INLINE void utilizeWith  (const Payload& payload)	{ utilizeWith  (stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///		with the highest 'utility()' among those with the highest 'rank()')
@@ -13432,7 +13598,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void utilizeWith  (	 Payload&& payload)	{ utilizeWith  (stateId<TState>(std::move(payload)));	}
+	HFSM2_INLINE void utilizeWith  (	 Payload&& payload)	{ utilizeWith  (stateId<TState>(), std::move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13458,7 +13624,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void randomizeWith(const Payload& payload)	{ randomizeWith(stateId<TState>(		  payload ));	}
+	HFSM2_INLINE void randomizeWith(const Payload& payload)	{ randomizeWith(stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///		proportional to 'utility()' among those with the highest 'rank()')
@@ -13466,7 +13632,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void randomizeWith(	 Payload&& payload)	{ randomizeWith(stateId<TState>(std::move(payload)));	}
+	HFSM2_INLINE void randomizeWith(	 Payload&& payload)	{ randomizeWith(stateId<TState>(), std::move(payload));	}
 
 #endif
 
@@ -13488,13 +13654,13 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void scheduleWith (const Payload& payload)	{ scheduleWith (stateId<TState>(		  payload ));	}
+	HFSM2_INLINE void scheduleWith (const Payload& payload)	{ scheduleWith (stateId<TState>(),			 payload );	}
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void scheduleWith (	 Payload&& payload)	{ scheduleWith (stateId<TState>(std::move(payload)));	}
+	HFSM2_INLINE void scheduleWith (	 Payload&& payload)	{ scheduleWith (stateId<TState>(), std::move(payload));	}
 
 	//------------------------------------------------------------------------------
 

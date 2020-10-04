@@ -47,10 +47,10 @@ public:
 	HFSM2_INLINE void postExit	   (Context&)		{}
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
-
-	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr StateID  stateId()		{ return			index<StateList , T>();	}
+																			
+	template <typename T>													
+	static constexpr RegionID regionId()	{ return (RegionID) index<RegionList, T>();	}
 };
 
 //------------------------------------------------------------------------------

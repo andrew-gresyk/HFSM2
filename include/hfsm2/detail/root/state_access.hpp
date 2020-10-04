@@ -82,7 +82,7 @@ struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
 	using Host =		 CS_<TN, TA, TG, NI, TS...>;
 
 	HFSM2_INLINE	   T& get()		 {
-		return Host::LHalfInfo::StateList::template contains<T>() ?
+		return contains<typename Host::LHalfInfo::StateList, T>() ?
 			Accessor<T,		  typename Host::LHalf>{host.lHalf}.get() :
 			Accessor<T,		  typename Host::RHalf>{host.rHalf}.get();
 	}
@@ -102,7 +102,7 @@ struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
 	using Host =   const CS_<TN, TA, TG, NI, TS...>;
 
 	HFSM2_INLINE const T& get() const {
-		return Host::LHalfInfo::StateList::template contains<T>() ?
+		return contains<typename Host::LHalfInfo::StateList, T>() ?
 			Accessor<T, const typename Host::LHalf>{host.lHalf}.get() :
 			Accessor<T, const typename Host::RHalf>{host.rHalf}.get();
 	}
@@ -211,7 +211,7 @@ struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
 	using Host =		 OS_<TN, TA, NI, TS...>;
 
 	HFSM2_INLINE	   T& get()		 {
-		return Host::InitialStates::template contains<T>() ?
+		return contains<typename Host::InitialStates, T>() ?
 			Accessor<T,		  typename Host::Initial  >{host.initial  }.get() :
 			Accessor<T,		  typename Host::Remaining>{host.remaining}.get();
 	}
@@ -230,7 +230,7 @@ struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
 	using Host =   const OS_<TN, TA, NI, TS...>;
 
 	HFSM2_INLINE const T& get() const {
-		return Host::InitialStates::template contains<T>() ?
+		return contains<typename Host::InitialStates, T>() ?
 			Accessor<T, const typename Host::Initial  >{host.initial  }.get() :
 			Accessor<T, const typename Host::Remaining>{host.remaining}.get();
 	}

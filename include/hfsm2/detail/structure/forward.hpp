@@ -62,8 +62,8 @@ using WrapInfo = typename WrapInfoT<TS...>::Type;
 template <typename THead>
 struct SI_ final {
 	using Head				= THead;
-	using StateList			= ITL_<Head>;
-	using RegionList		= ITL_<>;
+	using StateList			= TypeList<Head>;
+	using RegionList		= TypeList<>;
 
 	static constexpr Short WIDTH		  = 1;
 	static constexpr Long  REVERSE_DEPTH  = 1;
@@ -401,15 +401,13 @@ struct RF_ final {
 	//----------------------------------------------------------------------
 
 	template <typename T>
-	static constexpr bool contains() {
-		return StateList::template index<T>() != INVALID_LONG;
-	}
+	static constexpr bool	  contains()	{ return		 contains<StateList , T>();	}
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			StateList ::template index<T>();	}
+	static constexpr StateID  stateId()		{ return			index<StateList , T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) RegionList::template index<T>();	}
+	static constexpr RegionID regionId()	{ return (RegionID) index<RegionList, T>();	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -418,7 +416,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 struct CSubMaterialT;
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-struct CSubMaterialT<TN, TA, SG, NI, ITL_<TS...>> {
+struct CSubMaterialT<TN, TA, SG, NI, TypeList<TS...>> {
 	using Type = CS_<TN, TA, SG, NI,	  TS...>;
 };
 
@@ -427,7 +425,7 @@ using CSubMaterial = typename CSubMaterialT<TN, TA, SG, NI, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
-template <typename...>
+template <typename>
 struct InfoT;
 
 template <typename TN, typename TA, typename TH>
@@ -449,6 +447,9 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 struct InfoT<CS_<TN, TA, SG, NI, TS...>> {
 	using Type = CSI_<			 TS...>;
 };
+
+template <typename T>
+using Info = typename InfoT<T>::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 
