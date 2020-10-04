@@ -43,7 +43,7 @@ struct CS_ final {
 
 	static constexpr Short	  L_PRONG	  = PRONG_INDEX;
 
-	using LStates		= SplitL<TStates...>;
+	using LStates		= Lower<TStates...>;
 	using LHalf			= CSubMaterial<I_<INITIAL_ID,
 										  COMPO_INDEX,
 										  ORTHO_INDEX,
@@ -52,11 +52,12 @@ struct CS_ final {
 									   STRATEGY,
 									   L_PRONG,
 									   LStates>;
-	using LHalfInfo		= typename InfoT<LHalf>::Type;
+
+	using LHalfInfo		= Info<LHalf>;
 
 	static constexpr Short	  R_PRONG	  = PRONG_INDEX + LStates::SIZE;
 
-	using RStates		= SplitR<TStates...>;
+	using RStates		= Upper<TStates...>;
 	using RHalf			= CSubMaterial<I_<INITIAL_ID  + LHalfInfo::STATE_COUNT,
 										  COMPO_INDEX + LHalfInfo::COMPO_REGIONS,
 										  ORTHO_INDEX + LHalfInfo::ORTHO_REGIONS,

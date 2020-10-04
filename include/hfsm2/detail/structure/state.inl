@@ -15,7 +15,7 @@ struct RegisterT {
 	execute(StateParents& stateParents,
 			const Parent parent)
 	{
-		static constexpr auto HEAD_ID = StateList::template index<TH>();
+		static constexpr auto HEAD_ID = index<StateList, TH>();
 		StaticAssertEquality<STATE_ID, HEAD_ID>();
 
 		stateParents[STATE_ID] = parent;

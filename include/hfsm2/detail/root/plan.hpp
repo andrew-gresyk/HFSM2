@@ -74,8 +74,8 @@ public:
 
 		HFSM2_INLINE void operator ++();
 
-		HFSM2_INLINE const Task& operator  *() const								{ return  _plan._planData.tasks[_curr];								}
-		HFSM2_INLINE const Task* operator ->() const								{ return &_plan._planData.tasks[_curr];								}
+		HFSM2_INLINE const Task& operator  *() const		{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_INLINE const Task* operator ->() const		{ return &_plan._planData.tasks[_curr];		}
 
 		HFSM2_INLINE Long next() const;
 
@@ -91,15 +91,15 @@ private:
 							const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
+	static constexpr StateID  stateId()						{ return			index<StateList , T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()											{ return (RegionID) RegionList::template index<T>();				}
+	static constexpr RegionID regionId()					{ return (RegionID) index<RegionList, T>();	}
 
 public:
 	HFSM2_INLINE explicit operator bool() const;
 
-	HFSM2_INLINE Iterator first()													{ return Iterator{*this};											}
+	HFSM2_INLINE Iterator first()							{ return Iterator{*this};					}
 
 private:
 	const PlanData& _planData;
@@ -133,11 +133,11 @@ public:
 
 		HFSM2_INLINE void operator ++();
 
-		HFSM2_INLINE	   Task& operator  *()										{ return  _plan._planData.tasks[_curr];								}
-		HFSM2_INLINE const Task& operator  *() const								{ return  _plan._planData.tasks[_curr];								}
+		HFSM2_INLINE	   Task& operator  *()				{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_INLINE const Task& operator  *() const		{ return  _plan._planData.tasks[_curr];		}
 
-		HFSM2_INLINE	   Task* operator ->()										{ return &_plan._planData.tasks[_curr];								}
-		HFSM2_INLINE const Task* operator ->() const								{ return &_plan._planData.tasks[_curr];								}
+		HFSM2_INLINE	   Task* operator ->()				{ return &_plan._planData.tasks[_curr];		}
+		HFSM2_INLINE const Task* operator ->() const		{ return &_plan._planData.tasks[_curr];		}
 
 		HFSM2_INLINE void remove();
 
@@ -155,10 +155,10 @@ protected:
 						   const RegionID regionId);
 
 	template <typename T>
-	static constexpr StateID  stateId()												{ return			StateList ::template index<T>();				}
+	static constexpr StateID  stateId()						{ return			index<StateList , T>();	}
 
 	template <typename T>
-	static constexpr RegionID regionId()											{ return (RegionID) RegionList::template index<T>();				}
+	static constexpr RegionID regionId()					{ return (RegionID) index<RegionList, T>();	}
 
 	bool append(const StateID origin,
 				const StateID destination,

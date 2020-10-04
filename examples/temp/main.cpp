@@ -1,6 +1,6 @@
 #define HFSM2_ENABLE_UTILITY_THEORY
-#include <hfsm2/machine_dev.hpp>
 #include <iostream>
+#include <hfsm2/machine_dev.hpp>
 
 struct Context {
 	uint8_t cycleCount = 0;

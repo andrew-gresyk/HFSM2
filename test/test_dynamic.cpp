@@ -117,13 +117,13 @@ const Types all = {
 //------------------------------------------------------------------------------
 
 template <typename... Ts>
-using TypeList = hfsm2::detail::ITL_<Ts...>;
+using TypeList = hfsm2::TypeList<Ts...>;
 
 //------------------------------------------------------------------------------
 
 template <typename TState,
 		  typename TAactiveList,
-		  bool = TAactiveList::template contains<TState>()>
+		  bool = hfsm2::contains<TAactiveList, TState>()>
 struct CheckActive {
 	CheckActive() { REQUIRE(TState::c == 0); } //-V521
 };
