@@ -68,7 +68,6 @@ ConstPlanT<TArgs>::Iterator::next() const {
 template <typename TArgs>
 ConstPlanT<TArgs>::ConstPlanT(const PlanData& planData,
 							  const RegionID regionId)
-
 	: _planData{planData}
 	, _bounds{planData.tasksBounds[regionId]}
 {}
@@ -141,15 +140,58 @@ PlanBaseT<TArgs>::Iterator::next() const {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
+PlanBaseT<TArgs>::ConstIterator::ConstIterator(const PlanBaseT& plan)
+	: _plan{plan}
+	, _curr{plan._bounds.first}
+{
+	_next = next();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+PlanBaseT<TArgs>::ConstIterator::operator bool() const {
+	HFSM2_ASSERT(_curr < PlanBaseT::TASK_CAPACITY || _curr == INVALID_LONG);
+
+	return _curr < PlanBaseT::TASK_CAPACITY;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+void
+PlanBaseT<TArgs>::ConstIterator::operator ++() {
+	_curr = _next;
+	_next = next();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+Long
+PlanBaseT<TArgs>::ConstIterator::next() const {
+	if (_curr < PlanBaseT::TASK_CAPACITY) {
+		const TaskLink& link = _plan._planData.taskLinks[_curr];
+
+		return link.next;
+	} else {
+		HFSM2_ASSERT(_curr == INVALID_LONG);
+
+		return INVALID_LONG;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
 PlanBaseT<TArgs>::PlanBaseT(PlanData& planData,
 							const RegionID regionId)
-
 	: _planData{planData}
 	, _regionId{regionId}
 	, _bounds{planData.tasksBounds[regionId]}
 {}
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TArgs>
 PlanBaseT<TArgs>::operator bool() const {

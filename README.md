@@ -1,9 +1,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Build status](https://ci.appveyor.com/api/projects/status/egs56khk70ud35un?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/hfsm2)
+[![Build status](https://ci.appveyor.com/api/projects/status/egs56khk70ud35un?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/HFSM2)
 [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM2.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM2)
 [![Gitter](https://badges.gitter.im/andrew-gresyk/HFSM2.svg)](https://gitter.im/andrew-gresyk/HFSM2)
 
-# HFSM2: High-Performance Hierarchical Finite State Machine Framework
+# [HFSM2: High-Performance Hierarchical Finite State Machine Framework](https://hfsm.dev)
 
 Header-only heriarchical FSM framework in C++11, with fully statically-defined structure (no dynamic allocations), built with variadic templates.
 
@@ -17,15 +17,15 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## See Also
 
-- [FFSM2: High-Performance Flat Finite State Machine Framework](https://github.com/andrew-gresyk/FFSM2)
+- [FFSM2: High-Performance Flat Finite State Machine Framework](https://flat.hfsm.dev)
 
 ---
 
 ## Documentation
 
-[Old Wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) docs are being upgraded and moved to the [New GitBook](https://doc.hfsm.dev/).
-
-In-line comment-based docs is an on-going effort.
+- [doc.hfsm.dev](https://doc.hfsm.dev/)
+- [wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) (Obsolete)
+- In-line comments
 
 ---
 
@@ -43,7 +43,7 @@ In-line comment-based docs is an on-going effort.
 - Gamedev-friendly, supports explicit `State::update()`
 - Also supports traditional event-based workflow with `State::react()`
 - Inspect anything: previous and current transitions, state activation status, and more!
-- Game AI-friendly with [Dynamic planning](https://github.com/andrew-gresyk/HFSM2/wiki/Plans) support
+- Game AI-friendly with [dynamic planning](https://github.com/andrew-gresyk/HFSM2/wiki/Plans) support
 - [Utility theory](https://github.com/andrew-gresyk/HFSM2/wiki/Utility-Theory) support (max score and ranked weighted random)
 - [Serializable](https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization), with activity and transition history support
 - [Debug-assisted](https://gresyk.dev/features/2018/01/15/hfsm-magic.html), includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
@@ -60,8 +60,8 @@ In-line comment-based docs is an on-going effort.
 
 ## Get Updates
 
-- [Blog](https://gresyk.dev)
-- [Twitter](https://www.twitter.com/andrew_gresyk)
+- Blog: [gresyk.dev](https://gresyk.dev)
+- Twitter: [@andrew_gresyk](https://www.twitter.com/andrew_gresyk)
 
 ---
 

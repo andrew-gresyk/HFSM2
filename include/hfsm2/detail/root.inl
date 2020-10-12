@@ -382,7 +382,6 @@ R_<TG, TA>::initialEnter() {
 	_registry.clearRequests();
 
 	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
-
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
@@ -428,14 +427,12 @@ R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) {
 	}
 	HFSM2_ASSERT(_requests.count() == 0);
 
-	if (currentTransitions.count()) {
+	if (currentTransitions.count())
 		_apex.deepChangeToRequested(control);
 
-		_registry.clearRequests();
+	_registry.clearRequests();
 
-		HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
-	}
-
+	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 

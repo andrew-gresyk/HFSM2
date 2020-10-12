@@ -40,10 +40,6 @@ struct C_ final {
 	using PlanControl	= PlanControlT<Args>;
 	using ScopedRegion	= typename PlanControl::Region;
 
-#ifdef HFSM2_ENABLE_PLANS
-	using Plan			= PlanT<Args>;
-#endif
-
 	using FullControl	= FullControlT<Args>;
 	using ControlLock	= typename FullControl::Lock;
 

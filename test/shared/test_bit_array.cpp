@@ -50,7 +50,7 @@ TEST_CASE("Shared.BitArray<>", "[shared]") {
 
 		{
 			Bits bits = bitArray.bits<2, 13>();
-			bits.reset<12>();
+			bits.clear<12>();
 		}
 
 		{
@@ -105,7 +105,7 @@ TEST_CASE("Shared.BitArray<>", "[shared]") {
 
 		{
 			Bits bits = bitArray.bits<2, 13>();
-			bits.reset<12>();
+			bits.clear<12>();
 		}
 
 		{

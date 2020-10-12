@@ -163,7 +163,8 @@ Status
 S_<TN_, TA, TH>::deepReact(FullControl& control,
 						   const TEvent& event)
 {
-	auto reaction = static_cast<void(Head::*)(const TEvent&, FullControl&)>(&Head::react);
+	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::react);
+
 	HFSM2_LOG_STATE_METHOD(reaction,
 						   Method::REACT);
 
@@ -228,8 +229,8 @@ S_<TN_, TA, TH>::deepDestruct(PlanControl&
 	_headBox.destruct();
 
 #ifdef HFSM2_ENABLE_PLANS
-	control._planData.tasksSuccesses.template reset<STATE_ID>();
-	control._planData.tasksFailures .template reset<STATE_ID>();
+	control._planData.tasksSuccesses.template clear<STATE_ID>();
+	control._planData.tasksFailures .template clear<STATE_ID>();
 #endif
 }
 

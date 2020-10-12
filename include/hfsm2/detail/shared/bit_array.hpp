@@ -49,11 +49,11 @@ public:
 		HFSM2_INLINE void set();
 
 		template <Short NIndex>
-		HFSM2_INLINE void reset();
+		HFSM2_INLINE void clear();
 
 		HFSM2_INLINE bool get  (const Index index) const;
 		HFSM2_INLINE void set  (const Index index);
-		HFSM2_INLINE void reset(const Index index);
+		HFSM2_INLINE void clear(const Index index);
 
 	private:
 		Unit* const _storage;
@@ -102,11 +102,11 @@ public:
 	HFSM2_INLINE void set();
 
 	template <Short NIndex>
-	HFSM2_INLINE void reset();
+	HFSM2_INLINE void clear();
 
 	HFSM2_INLINE bool get  (const Index index) const;
 	HFSM2_INLINE void set  (const Index index);
-	HFSM2_INLINE void reset(const Index index);
+	HFSM2_INLINE void clear(const Index index);
 
 	template <Short NUnit, Short NWidth>
 	HFSM2_INLINE	  Bits bits();

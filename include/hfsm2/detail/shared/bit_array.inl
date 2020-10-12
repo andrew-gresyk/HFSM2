@@ -67,7 +67,7 @@ BitArray<TI, NC>::Bits::set() {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::Bits::reset() {
+BitArray<TI, NC>::Bits::clear() {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -110,7 +110,7 @@ BitArray<TI, NC>::Bits::set(const Index index) {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::Bits::reset(const Index index) {
+BitArray<TI, NC>::Bits::clear(const Index index) {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / (sizeof(Unit) * 8);
@@ -213,7 +213,7 @@ BitArray<TI, NC>::set() {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::reset() {
+BitArray<TI, NC>::clear() {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < CAPACITY, "");
 
@@ -256,7 +256,7 @@ BitArray<TI, NC>::set(const Index index) {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::reset(const Index index) {
+BitArray<TI, NC>::clear(const Index index) {
 	HFSM2_ASSERT(index < CAPACITY);
 
 	const Index unit = index / (sizeof(Unit) * 8);

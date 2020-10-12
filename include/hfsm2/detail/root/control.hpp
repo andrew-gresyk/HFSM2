@@ -352,7 +352,7 @@ protected:
 	HFSM2_IF_PLANS(using Control::_planData);
 	HFSM2_IF_LOG_INTERFACE(using Control::_logger);
 
-	StateID _regionIndex = 0;
+	StateID _regionStateId = 0;
 	Long _regionSize = StateList::SIZE;
 	Status _status;
 };
@@ -489,7 +489,7 @@ public:
 	template <typename TState>
 	HFSM2_INLINE void schedule ()							{ schedule (PlanControl::template stateId<TState>());	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_PLANS
 
@@ -501,7 +501,7 @@ public:
 
 #endif
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 protected:
 	using PlanControl::_regionId;
@@ -510,7 +510,7 @@ protected:
 	HFSM2_IF_LOG_INTERFACE(using PlanControl::_logger);
 
 	using PlanControl::_originId;
-	using PlanControl::_regionIndex;
+	using PlanControl::_regionStateId;
 	using PlanControl::_regionSize;
 	using PlanControl::_status;
 
@@ -692,7 +692,7 @@ public:
 	template <typename TState>
 	HFSM2_INLINE void resumeWith   (	 Payload&& payload)	{ resumeWith   (FullControlBase::template stateId<TState>(), std::move(payload));	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
@@ -799,7 +799,7 @@ protected:
 	HFSM2_IF_LOG_INTERFACE(using FullControlBase::_logger);
 
 	using FullControlBase::_originId;
-	using FullControlBase::_regionIndex;
+	using FullControlBase::_regionStateId;
 	using FullControlBase::_regionSize;
 	using FullControlBase::_status;
 

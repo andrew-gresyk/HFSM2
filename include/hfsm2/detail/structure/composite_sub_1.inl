@@ -311,7 +311,7 @@ CS_<TN, TA, SG, NI, TS...>::wideReportRank(Control& control,
 	HFSM2_ASSERT(ranks);
 
 	const Rank l = lHalf.wideReportRank(control, ranks);
-	const Rank r = rHalf.wideReportRank(control, ranks + LStates::SIZE);
+	const Rank r = rHalf.wideReportRank(control, ranks + LStateList::SIZE);
 
 	return l > r?
 		l : r;
@@ -328,8 +328,8 @@ CS_<TN, TA, SG, NI, TS...>::wideReportRandomize(Control& control,
 {
 	HFSM2_ASSERT(options && ranks);
 
-	const Utility l = lHalf.wideReportRandomize(control, options,				  ranks,				 top);
-	const Utility r = rHalf.wideReportRandomize(control, options + LStates::SIZE, ranks + LStates::SIZE, top);
+	const Utility l = lHalf.wideReportRandomize(control, options,					 ranks,					   top);
+	const Utility r = rHalf.wideReportRandomize(control, options + LStateList::SIZE, ranks + LStateList::SIZE, top);
 
 	return { l + r };
 }
@@ -380,8 +380,8 @@ CS_<TN, TA, SG, NI, TS...>::wideReportChangeRandom(Control& control,
 {
 	HFSM2_ASSERT(options && ranks);
 
-	const Utility l = lHalf.wideReportChangeRandom(control, options,				 ranks,					top);
-	const Utility r = rHalf.wideReportChangeRandom(control, options + LStates::SIZE, ranks + LStates::SIZE, top);
+	const Utility l = lHalf.wideReportChangeRandom(control, options,					ranks,					  top);
+	const Utility r = rHalf.wideReportChangeRandom(control, options + LStateList::SIZE, ranks + LStateList::SIZE, top);
 
 	return { l + r };
 }

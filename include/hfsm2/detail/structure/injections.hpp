@@ -20,7 +20,6 @@ protected:
 	using RegionList	= typename TArgs::RegionList;
 
 	using Control		= ControlT<TArgs>;
-
 	using PlanControl	= PlanControlT<TArgs>;
 
 #ifdef HFSM2_ENABLE_PLANS

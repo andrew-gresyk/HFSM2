@@ -363,6 +363,7 @@ struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility
 /// @tparam TRNG RNG type used in 'Random' regions
 /// @tparam NSubstitutionLimit Maximum number times 'guard()' methods can substitute their states for others
 /// @tparam NTaskCapacity Maximum number of tasks across all plans
+/// @tparam TPayload Payload type
 template <typename TContext = EmptyContext
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY

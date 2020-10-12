@@ -24,11 +24,11 @@ public:
 
 	HFSM2_INLINE Iterator& operator ++();
 
-	HFSM2_INLINE	   Item& operator *()		{ return  _container[_cursor]; }
-	HFSM2_INLINE const Item& operator *() const { return  _container[_cursor]; }
+	HFSM2_INLINE	   Item& operator *()		{ return  _container[_cursor];	}
+	HFSM2_INLINE const Item& operator *() const { return  _container[_cursor];	}
 
-	HFSM2_INLINE	   Item* operator->()		{ return &_container[_cursor]; }
-	HFSM2_INLINE const Item* operator->() const { return &_container[_cursor]; }
+	HFSM2_INLINE	   Item* operator->()		{ return &_container[_cursor];	}
+	HFSM2_INLINE const Item* operator->() const { return &_container[_cursor];	}
 
 private:
 	Container& _container;
@@ -59,9 +59,9 @@ public:
 
 	HFSM2_INLINE Iterator& operator ++();
 
-	HFSM2_INLINE const Item& operator *() const { return _container[_cursor]; }
+	HFSM2_INLINE const Item& operator *() const { return _container[_cursor];	}
 
-	HFSM2_INLINE const Item* operator->() const { return &operator *();		 }
+	HFSM2_INLINE const Item* operator->() const { return &operator *();			}
 
 private:
 	const Container& _container;

@@ -9,6 +9,8 @@ namespace detail {
 template <typename TConfig,
 		  typename TApex>
 class R_ {
+	static constexpr FeatureTag FEATURE_TAG = TConfig::FEATURE_TAG;
+
 	using Context				= typename TConfig::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -25,6 +27,9 @@ class R_ {
 	using StateList				= typename Forward::StateList;
 	using RegionList			= typename Forward::RegionList;
 	using Args					= typename Forward::Args;
+
+	static_assert(Args::STATE_COUNT <  (unsigned) -1, "Too many states in the FSM. Change 'Short' type.");
+	static_assert(Args::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
 
@@ -58,9 +63,6 @@ class R_ {
 
 public:
 	using Info					= WrapInfo<Apex>;
-
-	static_assert(Info::STATE_COUNT <  (unsigned) -1, "Too many states in the hierarchy. Change 'Short' type.");
-	static_assert(Info::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
 	/// @brief Transition
 	using Transition			= typename Control::Transition;
@@ -778,7 +780,6 @@ template <
 		  typename TRNG,
 #endif
 		  Long NSubstitutionLimit,
-
 		  HFSM2_IF_PLANS(Long NTaskCapacity,)
 		  typename TPayload,
 		  typename TApex>

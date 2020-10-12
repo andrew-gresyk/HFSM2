@@ -150,6 +150,28 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	struct ConstIterator {
+		HFSM2_INLINE ConstIterator(const PlanBaseT& plan);
+
+		HFSM2_INLINE explicit operator bool() const;
+
+		HFSM2_INLINE void operator ++();
+
+		HFSM2_INLINE	   Task& operator  *()				{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_INLINE const Task& operator  *() const		{ return  _plan._planData.tasks[_curr];		}
+
+		HFSM2_INLINE	   Task* operator ->()				{ return &_plan._planData.tasks[_curr];		}
+		HFSM2_INLINE const Task* operator ->() const		{ return &_plan._planData.tasks[_curr];		}
+
+		HFSM2_INLINE Long next() const;
+
+		const PlanBaseT& _plan;
+		Long _curr;
+		Long _next;
+	};
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 protected:
 	HFSM2_INLINE PlanBaseT(PlanData& planData,
 						   const RegionID regionId);
@@ -350,8 +372,12 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Begin iteration over plan tasks for the current region
-	/// @return
-	HFSM2_INLINE Iterator first()													{ return Iterator{*this};											}
+	/// @return Iterator to the first task
+	HFSM2_INLINE	  Iterator first()												{ return	  Iterator{*this};										}
+
+	/// @brief Begin iteration over plan tasks
+	/// @return ConstIterator to the first task
+	HFSM2_INLINE ConstIterator first() const										{ return ConstIterator{*this};										}
 
 private:
 	void remove(const Long task);
