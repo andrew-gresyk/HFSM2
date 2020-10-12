@@ -43,7 +43,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - Gamedev-friendly, supports explicit `State::update()`
 - Also supports traditional event-based workflow with `State::react()`
 - Inspect anything: previous and current transitions, state activation status, and more!
-- Game AI-friendly with [Dynamic planning](https://github.com/andrew-gresyk/HFSM2/wiki/Plans) support
+- Game AI-friendly with [dynamic planning](https://github.com/andrew-gresyk/HFSM2/wiki/Plans) support
 - [Utility theory](https://github.com/andrew-gresyk/HFSM2/wiki/Utility-Theory) support (max score and ranked weighted random)
 - [Serializable](https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization), with activity and transition history support
 - [Debug-assisted](https://gresyk.dev/features/2018/01/15/hfsm-magic.html), includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`

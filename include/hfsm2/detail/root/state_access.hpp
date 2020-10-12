@@ -83,8 +83,8 @@ struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
 
 	HFSM2_INLINE	   T& get()		 {
 		return contains<typename Host::LHalfInfo::StateList, T>() ?
-			Accessor<T,		  typename Host::LHalf>{host.lHalf}.get() :
-			Accessor<T,		  typename Host::RHalf>{host.rHalf}.get();
+			Accessor<T,		  typename Host::LMaterial>{host.lHalf}.get() :
+			Accessor<T,		  typename Host::RMaterial>{host.rHalf}.get();
 	}
 
 	Host& host;
@@ -103,8 +103,8 @@ struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
 
 	HFSM2_INLINE const T& get() const {
 		return contains<typename Host::LHalfInfo::StateList, T>() ?
-			Accessor<T, const typename Host::LHalf>{host.lHalf}.get() :
-			Accessor<T, const typename Host::RHalf>{host.rHalf}.get();
+			Accessor<T, const typename Host::LMaterial>{host.lHalf}.get() :
+			Accessor<T, const typename Host::RMaterial>{host.rHalf}.get();
 	}
 
 	Host& host;
