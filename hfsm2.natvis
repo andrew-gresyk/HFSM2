@@ -21,7 +21,7 @@
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::Array&lt;*&gt;">
-		<DisplayString>&lt;{_count}&gt;</DisplayString>
+		<DisplayString>&lt;{(unsigned) _count &amp; 0xFF}&gt;</DisplayString>
 		<Expand HideRawView="true">
 			<ArrayItems>
 				<Size>_count</Size>
@@ -80,8 +80,6 @@
 		</Expand>
 	</Type>
 
-	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
-
 	<Type Name="hfsm2::detail::List&lt;*&gt;::Cell">
 		<DisplayString>{item}</DisplayString>
 	</Type>
@@ -110,9 +108,19 @@
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::TransitionBase">
-		<DisplayString Condition="origin == 0xFFFF">{type, en} (► {destination})</DisplayString>
-		<DisplayString>{type, en} ({origin} ► {destination})</DisplayString>
+		<DisplayString Condition="destination == INVALID_STATE_ID">(■)</DisplayString>
+		<DisplayString Condition="origin == INVALID_STATE_ID">(EXTERNAL ► {(unsigned) destination &amp; 0xFF}})</DisplayString>
+		<DisplayString>({(unsigned) origin &amp; 0xFF} ► {(unsigned) destination &amp; 0xFF})</DisplayString>
 		<Expand HideRawView="true" />
+	</Type>
+
+	<Type Name="hfsm2::detail::TransitionT&lt;*&gt;">
+		<DisplayString Condition="destination == INVALID_STATE_ID">(■)</DisplayString>
+		<DisplayString Condition="origin == INVALID_STATE_ID">(EXTERNAL ► {(unsigned) destination &amp; 0xFF})</DisplayString>
+		<DisplayString>({(unsigned) origin &amp; 0xFF} ► {(unsigned) destination &amp; 0xFF})</DisplayString>
+		<Expand HideRawView="true">
+			<ExpandedItem Optional="true">*((Payload*) &amp;storage)</ExpandedItem>
+		</Expand>
 	</Type>
 
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->

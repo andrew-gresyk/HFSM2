@@ -43,31 +43,31 @@ struct CS_ final {
 
 	static constexpr Short	  L_PRONG	  = PRONG_INDEX;
 
-	using LStates		= Lower<TStates...>;
-	using LHalf			= CSubMaterial<I_<INITIAL_ID,
+	using LStateList	= LHalf<TStates...>;
+	using LMaterial		= CSubMaterial<I_<INITIAL_ID,
 										  COMPO_INDEX,
 										  ORTHO_INDEX,
 										  ORTHO_UNIT>,
 									   Args,
 									   STRATEGY,
 									   L_PRONG,
-									   LStates>;
+									   LStateList>;
 
-	using LHalfInfo		= Info<LHalf>;
+	using LHalfInfo		= Info<LMaterial>;
 
-	static constexpr Short	  R_PRONG	  = PRONG_INDEX + LStates::SIZE;
+	static constexpr Short	  R_PRONG	  = PRONG_INDEX + LStateList::SIZE;
 
-	using RStates		= Upper<TStates...>;
-	using RHalf			= CSubMaterial<I_<INITIAL_ID  + LHalfInfo::STATE_COUNT,
+	using RStateList	= RHalf<TStates...>;
+	using RMaterial		= CSubMaterial<I_<INITIAL_ID  + LHalfInfo::STATE_COUNT,
 										  COMPO_INDEX + LHalfInfo::COMPO_REGIONS,
 										  ORTHO_INDEX + LHalfInfo::ORTHO_REGIONS,
 										  ORTHO_UNIT  + LHalfInfo::ORTHO_UNITS>,
 									   Args,
 									   STRATEGY,
 									   R_PRONG,
-									   RStates>;
+									   RStateList>;
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>
@@ -161,7 +161,7 @@ struct CS_ final {
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
-	static constexpr Long NAME_COUNT = LHalf::NAME_COUNT + RHalf::NAME_COUNT;
+	static constexpr Long NAME_COUNT = LMaterial::NAME_COUNT + RMaterial::NAME_COUNT;
 
 	void wideGetNames(const Long parent,
 					  const RegionType region,
@@ -171,8 +171,8 @@ struct CS_ final {
 
 	//----------------------------------------------------------------------
 
-	LHalf lHalf;
-	RHalf rHalf;
+	LMaterial lHalf;
+	RMaterial rHalf;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +220,7 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 								   Args,
 								   TState>;
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
 	template <typename T>

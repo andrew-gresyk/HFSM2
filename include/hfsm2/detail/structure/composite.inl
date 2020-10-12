@@ -198,6 +198,7 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 
 	if (const Status headStatus = _headState.deepReact(control, event)) {
 		ControlLock lock{control};
+
 		_subStates.wideReact(control, event, active);
 
 		return headStatus;

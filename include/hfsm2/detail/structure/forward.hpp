@@ -334,7 +334,7 @@ struct RF_ final {
 
 #ifdef HFSM2_ENABLE_PLANS
 	static constexpr Long  TASK_CAPACITY		= TConfig::TASK_CAPACITY != INVALID_LONG ?
-														  TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
+													  TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
 #endif
 
 	using Payload	= typename TConfig::Payload;

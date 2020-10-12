@@ -133,11 +133,16 @@ namespace detail {
 template <Long, Long, typename...>
 struct LowerT;
 
+template <Long H, Long I, typename... Ts>
+using Lower = typename LowerT<H, I, Ts...>::Type;
+
 template <Long H, Long I, typename TFirst, typename... TRest>
 struct LowerT<H, I, TFirst, TRest...> {
-	using Type = typename std::conditional<(I < H),
-										   Prepend<TFirst, typename LowerT<H, I + 1, TRest...>::Type>,
-										   typename LowerT<H, I + 1, TRest...>::Type>::type;
+	using Type = typename std::conditional<
+					 (I < H),
+					 Prepend<TFirst, Lower<H, I + 1, TRest...>>,
+					 Lower<H, I + 1, TRest...>
+				 >::type;
 };
 
 template <Long H, Long I>
@@ -148,7 +153,7 @@ struct LowerT<H, I> {
 }
 
 template <typename... Ts>
-using Lower = typename detail::LowerT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+using LHalf = detail::Lower<sizeof...(Ts) / 2, 0, Ts...>;
 
 //------------------------------------------------------------------------------
 
@@ -157,11 +162,16 @@ namespace detail {
 template <Long, Long, typename...>
 struct UpperT;
 
+template <Long H, Long I, typename... Ts>
+using Upper = typename UpperT<H, I, Ts...>::Type;
+
 template <Long H, Long I, typename TFirst, typename... TRest>
 struct UpperT<H, I, TFirst, TRest...> {
-	using Type = typename std::conditional<(I < H),
-										   typename UpperT<H, I + 1, TRest...>::Type,
-										   TypeList<TFirst, TRest...>>::type;
+	using Type = typename std::conditional<
+					 (I < H),
+					 UpperT<H, I + 1, TRest...>,
+					 TypeList<TFirst, TRest...>
+				 >::type;
 };
 
 template <Long H, Long I>
@@ -172,7 +182,7 @@ struct UpperT<H, I> {
 }
 
 template <typename... Ts>
-using Upper = typename detail::UpperT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+using RHalf = detail::Upper<sizeof...(Ts) / 2, 0, Ts...>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -231,12 +241,16 @@ namespace detail {
 template <Long, Long, typename...>
 struct LowerT;
 
+template <Long H, Long I, typename... Ts>
+using Lower = typename LowerT<H, I, Ts...>::Type;
+
 template <Long H, Long I, typename TFirst, typename... TRest>
 struct LowerT<H, I, TFirst, TRest...> {
-	using Type = typename std::conditional<(I < H),
-										   Prepend<TFirst, typename LowerT<H, I + 1, TRest...>::Type>,
-										   typename LowerT<H, I + 1, TRest...>::Type
-										   >::type;
+	using Type = typename std::conditional<
+					 (I < H),
+					 Prepend<TFirst, Lower<H, I + 1, TRest...>>,
+					 Lower<H, I + 1, TRest...>
+				 >::type;
 };
 
 template <Long H, Long I>
@@ -247,7 +261,7 @@ struct LowerT<H, I> {
 }
 
 template <typename... Ts>
-using Lower = typename detail::LowerT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+using LHalf = detail::Lower<sizeof...(Ts) / 2, 0, Ts...>;
 
 //------------------------------------------------------------------------------
 
@@ -256,11 +270,16 @@ namespace detail {
 template <Long, Long, typename...>
 struct UpperT;
 
+template <Long H, Long I, typename... Ts>
+using Upper = typename UpperT<H, I, Ts...>::Type;
+
 template <Long H, Long I, typename TFirst, typename... TRest>
 struct UpperT<H, I, TFirst, TRest...> {
-	using Type = typename std::conditional<(I < H),
-		typename UpperT<H, I + 1, TRest...>::Type,
-		TypeList<TFirst, TRest...>>::type;
+	using Type = typename std::conditional<
+					 (I < H),
+					 Upper<H, I + 1, TRest...>,
+					 TypeList<TFirst, TRest...>
+				 >::type;
 };
 
 template <Long H, Long I>
@@ -271,7 +290,7 @@ struct UpperT<H, I> {
 }
 
 template <typename... Ts>
-using Upper = typename detail::UpperT<sizeof...(Ts) / 2, 0, Ts...>::Type;
+using RHalf = detail::Upper<sizeof...(Ts) / 2, 0, Ts...>;
 
 //------------------------------------------------------------------------------
 

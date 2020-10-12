@@ -239,7 +239,6 @@ struct PlanDataT<ArgsT<TContext
 {
 #ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans() const													{}
-	Long verifyPlan(const RegionID) const					{ return 0;		}
 #endif
 };
 

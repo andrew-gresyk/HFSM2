@@ -11,8 +11,8 @@ List<T, NC>::emplace(TA... args) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
-		const Index result = _vacantHead;
-		auto& cell = _cells[result];
+		const Index index = _vacantHead;
+		auto& cell = _cells[index];
 		++_count;
 
 		if (_vacantHead != _vacantTail) {
@@ -23,7 +23,7 @@ List<T, NC>::emplace(TA... args) {
 			_vacantHead = cell.links.next;
 
 			auto& head = _cells[_vacantHead];
-			HFSM2_ASSERT(head.links.prev == result);
+			HFSM2_ASSERT(head.links.prev == index);
 			head.links.prev = INVALID;
 		} else if (_last < CAPACITY - 1) {
 			// grow
@@ -31,9 +31,9 @@ List<T, NC>::emplace(TA... args) {
 			_vacantHead = _last;
 			_vacantTail = _last;
 
-			auto& nextVacant = _cells[_vacantHead];
-			nextVacant.links.prev = INVALID;
-			nextVacant.links.next = INVALID;
+			auto& vacant = _cells[_vacantHead];
+			vacant.links.prev = INVALID;
+			vacant.links.next = INVALID;
 		} else {
 			HFSM2_ASSERT(_count == CAPACITY);
 
@@ -45,7 +45,7 @@ List<T, NC>::emplace(TA... args) {
 
 		new (&cell.item) Item{std::forward<TA>(args)...};
 
-		return result;
+		return index;
 	} else {
 		// full
 		HFSM2_ASSERT(_vacantHead == INVALID);

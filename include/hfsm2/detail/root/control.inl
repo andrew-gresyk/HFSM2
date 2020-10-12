@@ -126,10 +126,10 @@ PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
 									const RegionID regionId,
 									const StateID index,
 									const Long size)
-	: control{control_}
-	, prevId{control._regionId}
-	, prevIndex{control._regionIndex}
-	, prevSize{control._regionSize}
+	: control  {control_}
+	, prevId   {control._regionId}
+	, prevIndex{control._regionStateId}
+	, prevSize {control._regionSize}
 {
 	control.setRegion(regionId, index, size);
 }
@@ -152,11 +152,11 @@ PlanControlT<TArgs>::setRegion(const RegionID regionId,
 							   const Long size)
 {
 	HFSM2_ASSERT(_regionId <= regionId && regionId <  RegionList::SIZE);
-	HFSM2_ASSERT(_regionIndex <= index && index + size <= _regionIndex + _regionSize);
+	HFSM2_ASSERT(_regionStateId <= index && index + size <= _regionStateId + _regionSize);
 
-	_regionId	 = regionId;
-	_regionIndex = index;
-	_regionSize	 = size;
+	_regionId	   = regionId;
+	_regionStateId = index;
+	_regionSize	   = size;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -168,11 +168,11 @@ PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
 								 const Long size)
 {
 	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
-	HFSM2_ASSERT(index <= _regionIndex && _regionIndex + _regionSize <= index + size);
+	HFSM2_ASSERT(index <= _regionStateId && _regionStateId + _regionSize <= index + size);
 
-	_regionId	 = regionId;
-	_regionIndex = index;
-	_regionSize	 = size;
+	_regionId	   = regionId;
+	_regionStateId = index;
+	_regionSize	   = size;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ FullControlBaseT<TArgs>::changeTo(const StateID stateId) {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::CHANGE});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
@@ -253,7 +253,7 @@ FullControlBaseT<TArgs>::restart(const StateID stateId) {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESTART});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
@@ -268,7 +268,7 @@ FullControlBaseT<TArgs>::resume(const StateID stateId) {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESUME});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
@@ -285,7 +285,7 @@ FullControlBaseT<TArgs>::utilize(const StateID stateId) {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::UTILIZE});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
@@ -300,7 +300,7 @@ FullControlBaseT<TArgs>::randomize(const StateID stateId) {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RANDOMIZE});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
@@ -332,9 +332,9 @@ FullControlBaseT<TArgs>::succeed() {
 
 	// TODO: promote taskSuccess all the way up for all regions without plans
 	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
-		HFSM2_ASSERT(_regionIndex < StateList::SIZE);
+		HFSM2_ASSERT(_regionStateId < StateList::SIZE);
 
-		_planData.tasksSuccesses.set(_regionIndex);
+		_planData.tasksSuccesses.set(_regionStateId);
 	}
 
 	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::SUCCEEDED);
@@ -351,9 +351,9 @@ FullControlBaseT<TArgs>::fail() {
 
 	// TODO: promote taskFailure all the way up for all regions without plans
 	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
-		HFSM2_ASSERT(_regionIndex < StateList::SIZE);
+		HFSM2_ASSERT(_regionStateId < StateList::SIZE);
 
-		_planData.tasksFailures.set(_regionIndex);
+		_planData.tasksFailures.set(_regionStateId);
 	}
 
 	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
@@ -365,11 +365,11 @@ FullControlBaseT<TArgs>::fail() {
 
 #ifdef HFSM2_ENABLE_PLANS
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL, Long NTC, typename TTP>
 template <typename TState>
 Status
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::updatePlan(TState& headState,
-																									  const Status subStatus)
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::updatePlan(TState& headState,
+																					 const Status subStatus)
 {
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
@@ -394,10 +394,9 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 					!processed.get(it->origin))
 				{
 					Origin origin{*this, STATE_ID};
-
 					changeTo(it->destination);
 
-					_planData.tasksSuccesses.reset(it->origin);
+					_planData.tasksSuccesses.clear(it->origin);
 					processed.set(it->origin);
 					it.remove();
 				}
@@ -426,7 +425,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::CHANGE, payload});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
@@ -441,7 +440,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::CHANGE, std::move(payload)});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
@@ -458,7 +457,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESTART, payload});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
@@ -473,7 +472,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESTART, std::move(payload)});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
@@ -490,7 +489,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESUME, payload});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
@@ -505,7 +504,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESUME, std::move(payload)});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
@@ -524,7 +523,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::UTILIZE, payload});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
@@ -539,7 +538,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::UTILIZE, std::move(payload)});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
@@ -556,7 +555,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RANDOMIZE, payload});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
@@ -571,7 +570,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RANDOMIZE, std::move(payload)});
 
-		if (stateId < _regionIndex || _regionIndex + _regionSize <= stateId)
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
@@ -606,11 +605,11 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 
 #ifdef HFSM2_ENABLE_PLANS
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC)>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL, Long NTC>
 template <typename TState>
 Status
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), void>>::updatePlan(TState& headState,
-																									   const Status subStatus)
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, void>>::updatePlan(TState& headState,
+																					  const Status subStatus)
 {
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
@@ -635,10 +634,9 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 					!processed.get(it->origin))
 				{
 					Origin origin{*this, STATE_ID};
-
 					changeTo(it->destination);
 
-					_planData.tasksSuccesses.reset(it->origin);
+					_planData.tasksSuccesses.clear(it->origin);
 					processed.set(it->origin);
 					it.remove();
 				}
