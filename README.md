@@ -3,9 +3,9 @@
 [![Build Status](https://travis-ci.org/andrew-gresyk/HFSM2.svg?branch=master)](https://travis-ci.org/andrew-gresyk/HFSM2)
 [![Gitter](https://badges.gitter.im/andrew-gresyk/HFSM2.svg)](https://gitter.im/andrew-gresyk/HFSM2)
 
-# [HFSM2: High-Performance Hierarchical Finite State Machine Framework](https://hfsm.dev)
-
 ![HFSM2](logo/hfsm2-logo-large.png)
+
+# [HFSM2](https://hfsm.dev): High-Performance Hierarchical Finite State Machine Framework
 
 Header-only heriarchical FSM framework in C++11, with fully statically-defined structure (no dynamic allocations), built with variadic templates.
 
@@ -19,13 +19,13 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## See Also
 
-- [FFSM2: High-Performance Flat Finite State Machine Framework](https://flat.hfsm.dev)
+- [FFSM2](https://flat.hfsm.dev): High-Performance **Flat** Finite State Machine Framework
 
 ---
 
 ## Documentation
 
-- [doc.hfsm.dev](https://doc.hfsm.dev/)
+- [GitBook](https://doc.hfsm.dev/)
 - [wiki](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial) (Obsolete)
 - In-line comments
 
