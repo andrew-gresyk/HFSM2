@@ -17,20 +17,10 @@ private:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Links {
+	struct Cell {
+		Item item;
 		Index prev;
 		Index next;
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	union Cell {
-		Item item;
-		Links links;
-
-		HFSM2_INLINE Cell()
-			: links{}
-		{}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

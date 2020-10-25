@@ -8,6 +8,8 @@ namespace detail {
 #pragma pack(push, 2)
 
 struct TaskBase {
+	HFSM2_INLINE TaskBase() {}
+
 	HFSM2_INLINE TaskBase(const StateID origin_,
 						  const StateID destination_,
 						  const TransitionType type_)
@@ -18,7 +20,7 @@ struct TaskBase {
 
 	StateID origin		= INVALID_STATE_ID;
 	StateID destination	= INVALID_STATE_ID;
-	TransitionType type;
+	TransitionType type = TransitionType::COUNT;
 };
 
 //------------------------------------------------------------------------------
@@ -31,6 +33,12 @@ struct TaskT
 	using Storage = typename std::aligned_storage<sizeof(Payload), 2>::type;
 
 	using TaskBase::TaskBase;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_INLINE TaskT() {
+		new (&storage) Payload{};
+	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

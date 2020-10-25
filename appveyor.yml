@@ -1,7 +1,7 @@
 version: "{build}"
 
 image:
-- Visual Studio 2017
+- Visual Studio 2019
 
 configuration:
 - Debug
@@ -12,9 +12,9 @@ platform:
 - x64
 
 build:
-  project: projects\visual-studio\hfsm2-15-vs.sln
+  project: projects\visual-studio\hfsm2-16-vs.sln
   parallel: true
   verbosity: minimal
 
 test_script:
-- cmd: binaries-%PLATFORM%\test-15-%CONFIGURATION%-%PLATFORM%.exe
+- cmd: binaries-%PLATFORM%\test-16-%CONFIGURATION%-%PLATFORM%.exe

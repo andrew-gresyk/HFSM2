@@ -21,7 +21,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## See Also
 
-- **[FFSM2](https://flat.hfsm.dev)**: High-Performance **Flat** Finite State Machine Framework
+- **[FFSM2](https://flat.hfsm.dev)**: High-Performance **Flat** Finite State Machine
 
 ---
 
@@ -64,8 +64,8 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## Receive Updates
 
-- Blog: [gresyk.dev](https://gresyk.dev)
-- Twitter: [@andrew_gresyk](https://www.twitter.com/andrew_gresyk)
+- Blog: **[gresyk.dev](https://gresyk.dev)**
+- Twitter: **[@andrew_gresyk](https://www.twitter.com/andrew_gresyk)**
 
 ---
 

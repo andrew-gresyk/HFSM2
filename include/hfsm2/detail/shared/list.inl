@@ -17,14 +17,14 @@ List<T, NC>::emplace(TA... args) {
 
 		if (_vacantHead != _vacantTail) {
 			// recycle
-			HFSM2_ASSERT(cell.links.prev == INVALID);
-			HFSM2_ASSERT(cell.links.next != INVALID);
+			HFSM2_ASSERT(cell.prev == INVALID);
+			HFSM2_ASSERT(cell.next != INVALID);
 
-			_vacantHead = cell.links.next;
+			_vacantHead = cell.next;
 
 			auto& head = _cells[_vacantHead];
-			HFSM2_ASSERT(head.links.prev == index);
-			head.links.prev = INVALID;
+			HFSM2_ASSERT(head.prev == index);
+			head.prev = INVALID;
 		} else if (_last < CAPACITY - 1) {
 			// grow
 			++_last;
@@ -32,8 +32,8 @@ List<T, NC>::emplace(TA... args) {
 			_vacantTail = _last;
 
 			auto& vacant = _cells[_vacantHead];
-			vacant.links.prev = INVALID;
-			vacant.links.next = INVALID;
+			vacant.prev = INVALID;
+			vacant.next = INVALID;
 		} else {
 			HFSM2_ASSERT(_count == CAPACITY);
 
@@ -70,11 +70,11 @@ List<T, NC>::remove(const Index i) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
-		fresh.links.prev = INVALID;
-		fresh.links.next = _vacantHead;
+		fresh.prev = INVALID;
+		fresh.next = _vacantHead;
 
 		auto& head = _cells[_vacantHead];
-		head.links.prev = i;
+		head.prev = i;
 
 		_vacantHead = i;
 	} else {
@@ -83,8 +83,8 @@ List<T, NC>::remove(const Index i) {
 		HFSM2_ASSERT(_vacantHead == INVALID);
 		HFSM2_ASSERT(_vacantTail == INVALID);
 
-		fresh.links.prev = INVALID;
-		fresh.links.next = INVALID;
+		fresh.prev = INVALID;
+		fresh.next = INVALID;
 
 		_vacantHead = i;
 		_vacantTail = i;
@@ -126,8 +126,8 @@ List<T, NC>::verifyStructure(const Index occupied) const {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
-		HFSM2_ASSERT(_cells[_vacantHead].links.prev == INVALID);
-		HFSM2_ASSERT(_cells[_vacantTail].links.next == INVALID);
+		HFSM2_ASSERT(_cells[_vacantHead].prev == INVALID);
+		HFSM2_ASSERT(_cells[_vacantTail].next == INVALID);
 
 		auto emptyCount = 1;
 
@@ -136,12 +136,12 @@ List<T, NC>::verifyStructure(const Index occupied) const {
 
 			const auto& current = _cells[c];
 
-			const auto f = current.links.next;
+			const auto f = current.next;
 			if (f != INVALID) {
 				// next
 				const auto& following = _cells[f];
 
-				HFSM2_ASSERT(following.links.prev == c);
+				HFSM2_ASSERT(following.prev == c);
 
 				c = f;
 				continue;
