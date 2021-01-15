@@ -1,18 +1,20 @@
+#ifdef HFSM2_ENABLE_PLANS
+
 namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, Long NC>
+template <typename TP, Long NC>
 template <typename... TA>
 Long
-List<T, NC>::emplace(TA... args) {
+TaskListT<TP, NC>::emplace(TA&&... args) noexcept {
 	if (_count < CAPACITY) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
 		const Index index = _vacantHead;
-		auto& cell = _cells[index];
+		auto& cell = _items[index];
 		++_count;
 
 		if (_vacantHead != _vacantTail) {
@@ -22,7 +24,7 @@ List<T, NC>::emplace(TA... args) {
 
 			_vacantHead = cell.next;
 
-			auto& head = _cells[_vacantHead];
+			auto& head = _items[_vacantHead];
 			HFSM2_ASSERT(head.prev == index);
 			head.prev = INVALID;
 		} else if (_last < CAPACITY - 1) {
@@ -31,7 +33,7 @@ List<T, NC>::emplace(TA... args) {
 			_vacantHead = _last;
 			_vacantTail = _last;
 
-			auto& vacant = _cells[_vacantHead];
+			auto& vacant = _items[_vacantHead];
 			vacant.prev = INVALID;
 			vacant.next = INVALID;
 		} else {
@@ -43,7 +45,7 @@ List<T, NC>::emplace(TA... args) {
 
 		HFSM2_IF_ASSERT(verifyStructure());
 
-		new (&cell.item) Item{std::forward<TA>(args)...};
+		new (&cell) Item{std::forward<TA>(args)...};
 
 		return index;
 	} else {
@@ -59,12 +61,12 @@ List<T, NC>::emplace(TA... args) {
 
 //------------------------------------------------------------------------------
 
-template <typename T, Long NC>
+template <typename TP, Long NC>
 void
-List<T, NC>::remove(const Index i) {
+TaskListT<TP, NC>::remove(const Index i) noexcept {
 	HFSM2_ASSERT(i < CAPACITY && _count);
 
-	auto& fresh = _cells[i];
+	auto& fresh = _items[i];
 
 	if (_count < CAPACITY) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
@@ -73,7 +75,7 @@ List<T, NC>::remove(const Index i) {
 		fresh.prev = INVALID;
 		fresh.next = _vacantHead;
 
-		auto& head = _cells[_vacantHead];
+		auto& head = _items[_vacantHead];
 		head.prev = i;
 
 		_vacantHead = i;
@@ -97,49 +99,49 @@ List<T, NC>::remove(const Index i) {
 
 //------------------------------------------------------------------------------
 
-template <typename T, Long NC>
-T&
-List<T, NC>::operator[] (const Index i) {
+template <typename TP, Long NC>
+typename TaskListT<TP, NC>::Item&
+TaskListT<TP, NC>::operator[] (const Index i) noexcept {
 	HFSM2_IF_ASSERT(verifyStructure());
 
-	return _cells[i].item;
+	return _items[i];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, Long NC>
-const T&
-List<T, NC>::operator[] (const Index i) const {
+template <typename TP, Long NC>
+const typename TaskListT<TP, NC>::Item&
+TaskListT<TP, NC>::operator[] (const Index i) const noexcept {
 	HFSM2_IF_ASSERT(verifyStructure());
 
-	return _cells[i].item;
+	return _items[i];
 }
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_ASSERT
 
-template <typename T, Long NC>
+template <typename TP, Long NC>
 void
-List<T, NC>::verifyStructure(const Index occupied) const {
+TaskListT<TP, NC>::verifyStructure(const Index occupied) const noexcept {
 	if (_count < CAPACITY) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
-		HFSM2_ASSERT(_cells[_vacantHead].prev == INVALID);
-		HFSM2_ASSERT(_cells[_vacantTail].next == INVALID);
+		HFSM2_ASSERT(_items[_vacantHead].prev == INVALID);
+		HFSM2_ASSERT(_items[_vacantTail].next == INVALID);
 
 		auto emptyCount = 1;
 
 		for (auto c = _vacantHead; c != _vacantTail; ) {
 			HFSM2_ASSERT(occupied != c);
 
-			const auto& current = _cells[c];
+			const auto& current = _items[c];
 
 			const auto f = current.next;
 			if (f != INVALID) {
 				// next
-				const auto& following = _cells[f];
+				const auto& following = _items[f];
 
 				HFSM2_ASSERT(following.prev == c);
 
@@ -165,3 +167,5 @@ List<T, NC>::verifyStructure(const Index occupied) const {
 
 }
 }
+
+#endif

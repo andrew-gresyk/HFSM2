@@ -4,15 +4,15 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TI, Short NC>
-BitArray<TI, NC>::Bits::operator bool() const {
-	const Short fullUnits = _width / (sizeof(Unit) * 8);
+BitArrayT<TI, NC>::Bits::operator bool() const noexcept {
+	const Short fullUnits = _width / UNIT_WIDTH;
 
 	// TODO: cover this case
 	for (Index i = 0; i < fullUnits; ++i)
 		if (_storage[i])
 			return true;
 
-	const Short bit = _width % (sizeof(Unit) * 8);
+	const Short bit = _width % UNIT_WIDTH;
 	const Unit mask = (1 << bit) - 1;
 	const Unit& u = _storage[fullUnits];
 
@@ -23,10 +23,10 @@ BitArray<TI, NC>::Bits::operator bool() const {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::Bits::clear() {
-	const Index count = (_width + 7) / (sizeof(Unit) * 8);
+BitArrayT<TI, NC>::Bits::clear() noexcept {
+	const Index unitCount = contain(_width, UNIT_WIDTH);
 
-	for (Index i = 0; i < count; ++i)
+	for (Index i = 0; i < unitCount; ++i)
 		_storage[i] = Unit{0};
 }
 
@@ -35,12 +35,12 @@ BitArray<TI, NC>::Bits::clear() {
 template <typename TI, Short NC>
 template <Short NIndex>
 bool
-BitArray<TI, NC>::Bits::get() const {
+BitArrayT<TI, NC>::Bits::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
-	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
-	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
+	constexpr Index BIT_UNIT  = INDEX / UNIT_WIDTH;
+	constexpr Index BIT_INDEX = INDEX % UNIT_WIDTH;
 	constexpr Unit MASK = 1 << BIT_INDEX;
 
 	return (_storage[BIT_UNIT] & MASK) != 0;
@@ -51,12 +51,12 @@ BitArray<TI, NC>::Bits::get() const {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::Bits::set() {
+BitArrayT<TI, NC>::Bits::set() noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
-	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
-	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
+	constexpr Index BIT_UNIT  = INDEX / UNIT_WIDTH;
+	constexpr Index BIT_INDEX = INDEX % UNIT_WIDTH;
 	constexpr Unit MASK = 1 << BIT_INDEX;
 
 	_storage[BIT_UNIT] |= MASK;
@@ -67,12 +67,12 @@ BitArray<TI, NC>::Bits::set() {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::Bits::clear() {
+BitArrayT<TI, NC>::Bits::clear() noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
-	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
-	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
+	constexpr Index BIT_UNIT  = INDEX / UNIT_WIDTH;
+	constexpr Index BIT_INDEX = INDEX % UNIT_WIDTH;
 	constexpr Unit MASK = 1 << BIT_INDEX;
 
 	_storage[BIT_UNIT] &= ~MASK;
@@ -82,11 +82,11 @@ BitArray<TI, NC>::Bits::clear() {
 
 template <typename TI, Short NC>
 bool
-BitArray<TI, NC>::Bits::get(const Index index) const {
+BitArrayT<TI, NC>::Bits::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < _width);
 
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
+	const Index unit = index / UNIT_WIDTH;
+	const Index bit  = index % UNIT_WIDTH;
 	const Unit mask = 1 << bit;
 
 	return (_storage[unit] & mask) != 0;
@@ -96,11 +96,11 @@ BitArray<TI, NC>::Bits::get(const Index index) const {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::Bits::set(const Index index) {
+BitArrayT<TI, NC>::Bits::set(const Index index) noexcept {
 	HFSM2_ASSERT(index < _width);
 
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
+	const Index unit = index / UNIT_WIDTH;
+	const Index bit  = index % UNIT_WIDTH;
 	const Unit mask = 1 << bit;
 
 	_storage[unit] |= mask;
@@ -110,11 +110,11 @@ BitArray<TI, NC>::Bits::set(const Index index) {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::Bits::clear(const Index index) {
+BitArrayT<TI, NC>::Bits::clear(const Index index) noexcept {
 	HFSM2_ASSERT(index < _width);
 
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
+	const Index unit = index / UNIT_WIDTH;
+	const Index bit  = index % UNIT_WIDTH;
 	const Unit mask = 1 << bit;
 
 	_storage[unit] &= ~mask;
@@ -123,14 +123,14 @@ BitArray<TI, NC>::Bits::clear(const Index index) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TI, Short NC>
-BitArray<TI, NC>::ConstBits::operator bool() const {
-	const Short fullUnits = _width / (sizeof(Unit) * 8);
+BitArrayT<TI, NC>::CBits::operator bool() const noexcept {
+	const Short fullUnits = _width / UNIT_WIDTH;
 
 	for (Index i = 0; i < fullUnits; ++i)
 		if (_storage[i])
 			return true;
 
-	const Short bit = _width % (sizeof(Unit) * 8);
+	const Short bit = _width % UNIT_WIDTH;
 	const Unit mask = (1 << bit) - 1;
 	const Unit& u = _storage[fullUnits];
 
@@ -142,12 +142,12 @@ BitArray<TI, NC>::ConstBits::operator bool() const {
 template <typename TI, Short NC>
 template <Short NIndex>
 bool
-BitArray<TI, NC>::ConstBits::get() const {
+BitArrayT<TI, NC>::CBits::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < _width, "");
 
-	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
-	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
+	constexpr Index BIT_UNIT  = INDEX / UNIT_WIDTH;
+	constexpr Index BIT_INDEX = INDEX % UNIT_WIDTH;
 	constexpr Unit MASK = 1 << BIT_INDEX;
 
 	return (_storage[BIT_UNIT] & MASK) != 0;
@@ -157,11 +157,11 @@ BitArray<TI, NC>::ConstBits::get() const {
 
 template <typename TI, Short NC>
 bool
-BitArray<TI, NC>::ConstBits::get(const Index index) const {
+BitArrayT<TI, NC>::CBits::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < _width);
 
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
+	const Index unit = index / UNIT_WIDTH;
+	const Index bit  = index % UNIT_WIDTH;
 	const Unit mask = 1 << bit;
 
 	return (_storage[unit] & mask) != 0;
@@ -171,7 +171,7 @@ BitArray<TI, NC>::ConstBits::get(const Index index) const {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::clear() {
+BitArrayT<TI, NC>::clear() noexcept {
 	for (Unit& unit: _storage)
 		unit = Unit{0};
 }
@@ -181,12 +181,12 @@ BitArray<TI, NC>::clear() {
 template <typename TI, Short NC>
 template <Short NIndex>
 bool
-BitArray<TI, NC>::get() const {
+BitArrayT<TI, NC>::get() const noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < CAPACITY, "");
+	static_assert(INDEX < BIT_COUNT, "");
 
-	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
-	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
+	constexpr Index BIT_UNIT  = INDEX / UNIT_WIDTH;
+	constexpr Index BIT_INDEX = INDEX % UNIT_WIDTH;
 	constexpr Unit MASK = 1 << BIT_INDEX;
 
 	return (_storage[BIT_UNIT] & MASK) != 0;
@@ -197,12 +197,12 @@ BitArray<TI, NC>::get() const {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::set() {
+BitArrayT<TI, NC>::set() noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < CAPACITY, "");
+	static_assert(INDEX < BIT_COUNT, "");
 
-	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
-	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
+	constexpr Index BIT_UNIT  = INDEX / UNIT_WIDTH;
+	constexpr Index BIT_INDEX = INDEX % UNIT_WIDTH;
 	constexpr Unit MASK = 1 << BIT_INDEX;
 
 	_storage[BIT_UNIT] |= MASK;
@@ -213,12 +213,12 @@ BitArray<TI, NC>::set() {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::clear() {
+BitArrayT<TI, NC>::clear() noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < CAPACITY, "");
+	static_assert(INDEX < BIT_COUNT, "");
 
-	constexpr Index BIT_UNIT  = INDEX / (sizeof(Unit) * 8);
-	constexpr Index BIT_INDEX = INDEX % (sizeof(Unit) * 8);
+	constexpr Index BIT_UNIT  = INDEX / UNIT_WIDTH;
+	constexpr Index BIT_INDEX = INDEX % UNIT_WIDTH;
 	constexpr Unit MASK = 1 << BIT_INDEX;
 
 	_storage[BIT_UNIT] &= ~MASK;
@@ -228,11 +228,11 @@ BitArray<TI, NC>::clear() {
 
 template <typename TI, Short NC>
 bool
-BitArray<TI, NC>::get(const Index index) const {
-	HFSM2_ASSERT(index < CAPACITY);
+BitArrayT<TI, NC>::get(const Index index) const noexcept {
+	HFSM2_ASSERT(index < BIT_COUNT);
 
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
+	const Index unit = index / UNIT_WIDTH;
+	const Index bit  = index % UNIT_WIDTH;
 	const Unit mask = 1 << bit;
 
 	return (_storage[unit] & mask) != 0;
@@ -242,11 +242,11 @@ BitArray<TI, NC>::get(const Index index) const {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::set(const Index index) {
-	HFSM2_ASSERT(index < CAPACITY);
+BitArrayT<TI, NC>::set(const Index index) noexcept {
+	HFSM2_ASSERT(index < BIT_COUNT);
 
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
+	const Index unit = index / UNIT_WIDTH;
+	const Index bit  = index % UNIT_WIDTH;
 	const Unit mask = 1 << bit;
 
 	_storage[unit] |= mask;
@@ -256,11 +256,11 @@ BitArray<TI, NC>::set(const Index index) {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::clear(const Index index) {
-	HFSM2_ASSERT(index < CAPACITY);
+BitArrayT<TI, NC>::clear(const Index index) noexcept {
+	HFSM2_ASSERT(index < BIT_COUNT);
 
-	const Index unit = index / (sizeof(Unit) * 8);
-	const Index bit  = index % (sizeof(Unit) * 8);
+	const Index unit = index / UNIT_WIDTH;
+	const Index bit  = index % UNIT_WIDTH;
 	const Unit mask = 1 << bit;
 
 	_storage[unit] &= ~mask;
@@ -270,11 +270,11 @@ BitArray<TI, NC>::clear(const Index index) {
 
 template <typename TI, Short NC>
 template <Short NUnit, Short NWidth>
-typename BitArray<TI, NC>::Bits
-BitArray<TI, NC>::bits() {
+typename BitArrayT<TI, NC>::Bits
+BitArrayT<TI, NC>::bits() noexcept {
 	constexpr Short UNIT  = NUnit;
 	constexpr Short WIDTH = NWidth;
-	static_assert(UNIT + (WIDTH + 7) / (sizeof(Unit) * 8) <= CAPACITY, "");
+	static_assert(UNIT + contain(WIDTH, UNIT_WIDTH) <= UNIT_COUNT, "");
 
 	return Bits{_storage + UNIT, WIDTH};
 }
@@ -283,21 +283,21 @@ BitArray<TI, NC>::bits() {
 
 template <typename TI, Short NC>
 template <Short NUnit, Short NWidth>
-typename BitArray<TI, NC>::ConstBits
-BitArray<TI, NC>::bits() const {
+typename BitArrayT<TI, NC>::CBits
+BitArrayT<TI, NC>::bits() const noexcept {
 	constexpr Short UNIT  = NUnit;
 	constexpr Short WIDTH = NWidth;
-	static_assert(UNIT + (WIDTH + 7) / (sizeof(Unit) * 8) <= CAPACITY, "");
+	static_assert(UNIT + contain(WIDTH, UNIT_WIDTH) <= UNIT_COUNT, "");
 
-	return ConstBits{_storage + UNIT, WIDTH};
+	return CBits{_storage + UNIT, WIDTH};
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TI, Short NC>
-typename BitArray<TI, NC>::Bits
-BitArray<TI, NC>::bits(const Units& units) {
-	HFSM2_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
+typename BitArrayT<TI, NC>::Bits
+BitArrayT<TI, NC>::bits(const Units& units) noexcept {
+	HFSM2_ASSERT(units.unit + contain(units.width, UNIT_WIDTH) <= UNIT_COUNT);
 
 	return Bits{_storage + units.unit, units.width};
 }
@@ -305,11 +305,11 @@ BitArray<TI, NC>::bits(const Units& units) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TI, Short NC>
-typename BitArray<TI, NC>::ConstBits
-BitArray<TI, NC>::bits(const Units& units) const {
-	HFSM2_ASSERT(units.unit + (units.width + 7) / (sizeof(Unit) * 8) <= CAPACITY);
+typename BitArrayT<TI, NC>::CBits
+BitArrayT<TI, NC>::bits(const Units& units) const noexcept {
+	HFSM2_ASSERT(units.unit + contain(units.width, UNIT_WIDTH) <= UNIT_COUNT);
 
-	return ConstBits{_storage + units.unit, units.width};
+	return CBits{_storage + units.unit, units.width};
 }
 
 ////////////////////////////////////////////////////////////////////////////////

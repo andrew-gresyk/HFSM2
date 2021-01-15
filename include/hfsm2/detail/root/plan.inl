@@ -4,7 +4,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 Status::Status(const Result result_,
-			   const bool outerTransition_)
+			   const bool outerTransition_) noexcept
 	: result{result_}
 	, outerTransition{outerTransition_}
 {}
@@ -12,7 +12,7 @@ Status::Status(const Result result_,
 //------------------------------------------------------------------------------
 
 void
-Status::clear() {
+Status::clear() noexcept {
 	result = Result::NONE;
 	outerTransition = false;
 }
@@ -22,7 +22,7 @@ Status::clear() {
 #ifdef HFSM2_ENABLE_PLANS
 
 template <typename TArgs>
-ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
+CPlanT<TArgs>::IteratorT::IteratorT(const CPlanT& plan) noexcept
 	: _plan{plan}
 	, _curr{plan._bounds.first}
 {
@@ -32,17 +32,17 @@ ConstPlanT<TArgs>::Iterator::Iterator(const ConstPlanT& plan)
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-ConstPlanT<TArgs>::Iterator::operator bool() const {
-	HFSM2_ASSERT(_curr < ConstPlanT::TASK_CAPACITY || _curr == INVALID_LONG);
+CPlanT<TArgs>::IteratorT::operator bool() const noexcept {
+	HFSM2_ASSERT(_curr < CPlanT::TASK_CAPACITY || _curr == INVALID_LONG);
 
-	return _curr < ConstPlanT::TASK_CAPACITY;
+	return _curr < CPlanT::TASK_CAPACITY;
 }
 
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
 void
-ConstPlanT<TArgs>::Iterator::operator ++() {
+CPlanT<TArgs>::IteratorT::operator ++() noexcept {
 	_curr = _next;
 	_next = next();
 }
@@ -51,8 +51,8 @@ ConstPlanT<TArgs>::Iterator::operator ++() {
 
 template <typename TArgs>
 Long
-ConstPlanT<TArgs>::Iterator::next() const {
-	if (_curr < ConstPlanT::TASK_CAPACITY) {
+CPlanT<TArgs>::IteratorT::next() const noexcept {
+	if (_curr < CPlanT::TASK_CAPACITY) {
 		const TaskLink& link = _plan._planData.taskLinks[_curr];
 
 		return link.next;
@@ -66,8 +66,8 @@ ConstPlanT<TArgs>::Iterator::next() const {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-ConstPlanT<TArgs>::ConstPlanT(const PlanData& planData,
-							  const RegionID regionId)
+CPlanT<TArgs>::CPlanT(const PlanData& planData,
+					  const RegionID regionId) noexcept
 	: _planData{planData}
 	, _bounds{planData.tasksBounds[regionId]}
 {}
@@ -75,7 +75,7 @@ ConstPlanT<TArgs>::ConstPlanT(const PlanData& planData,
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-ConstPlanT<TArgs>::operator bool() const {
+CPlanT<TArgs>::operator bool() const noexcept {
 	if (_bounds.first < TASK_CAPACITY) {
 		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
@@ -88,7 +88,7 @@ ConstPlanT<TArgs>::operator bool() const {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-PlanBaseT<TArgs>::Iterator::Iterator(PlanBaseT& plan)
+PlanBaseT<TArgs>::IteratorT::IteratorT(PlanBaseT& plan) noexcept
 	: _plan{plan}
 	, _curr{plan._bounds.first}
 {
@@ -98,7 +98,7 @@ PlanBaseT<TArgs>::Iterator::Iterator(PlanBaseT& plan)
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-PlanBaseT<TArgs>::Iterator::operator bool() const {
+PlanBaseT<TArgs>::IteratorT::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < PlanBaseT::TASK_CAPACITY || _curr == INVALID_LONG);
 
 	return _curr < PlanBaseT::TASK_CAPACITY;
@@ -108,7 +108,7 @@ PlanBaseT<TArgs>::Iterator::operator bool() const {
 
 template <typename TArgs>
 void
-PlanBaseT<TArgs>::Iterator::operator ++() {
+PlanBaseT<TArgs>::IteratorT::operator ++() noexcept {
 	_curr = _next;
 	_next = next();
 }
@@ -117,7 +117,7 @@ PlanBaseT<TArgs>::Iterator::operator ++() {
 
 template <typename TArgs>
 void
-PlanBaseT<TArgs>::Iterator::remove() {
+PlanBaseT<TArgs>::IteratorT::remove() noexcept {
 	_plan.remove(_curr);
 }
 
@@ -125,7 +125,7 @@ PlanBaseT<TArgs>::Iterator::remove() {
 
 template <typename TArgs>
 Long
-PlanBaseT<TArgs>::Iterator::next() const {
+PlanBaseT<TArgs>::IteratorT::next() const noexcept {
 	if (_curr < PlanBaseT::TASK_CAPACITY) {
 		const TaskLink& link = _plan._planData.taskLinks[_curr];
 
@@ -140,7 +140,7 @@ PlanBaseT<TArgs>::Iterator::next() const {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-PlanBaseT<TArgs>::ConstIterator::ConstIterator(const PlanBaseT& plan)
+PlanBaseT<TArgs>::CIterator::CIterator(const PlanBaseT& plan) noexcept
 	: _plan{plan}
 	, _curr{plan._bounds.first}
 {
@@ -150,7 +150,7 @@ PlanBaseT<TArgs>::ConstIterator::ConstIterator(const PlanBaseT& plan)
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-PlanBaseT<TArgs>::ConstIterator::operator bool() const {
+PlanBaseT<TArgs>::CIterator::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < PlanBaseT::TASK_CAPACITY || _curr == INVALID_LONG);
 
 	return _curr < PlanBaseT::TASK_CAPACITY;
@@ -160,7 +160,7 @@ PlanBaseT<TArgs>::ConstIterator::operator bool() const {
 
 template <typename TArgs>
 void
-PlanBaseT<TArgs>::ConstIterator::operator ++() {
+PlanBaseT<TArgs>::CIterator::operator ++() noexcept {
 	_curr = _next;
 	_next = next();
 }
@@ -169,7 +169,7 @@ PlanBaseT<TArgs>::ConstIterator::operator ++() {
 
 template <typename TArgs>
 Long
-PlanBaseT<TArgs>::ConstIterator::next() const {
+PlanBaseT<TArgs>::CIterator::next() const noexcept {
 	if (_curr < PlanBaseT::TASK_CAPACITY) {
 		const TaskLink& link = _plan._planData.taskLinks[_curr];
 
@@ -185,7 +185,7 @@ PlanBaseT<TArgs>::ConstIterator::next() const {
 
 template <typename TArgs>
 PlanBaseT<TArgs>::PlanBaseT(PlanData& planData,
-							const RegionID regionId)
+							const RegionID regionId) noexcept
 	: _planData{planData}
 	, _regionId{regionId}
 	, _bounds{planData.tasksBounds[regionId]}
@@ -194,7 +194,7 @@ PlanBaseT<TArgs>::PlanBaseT(PlanData& planData,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TArgs>
-PlanBaseT<TArgs>::operator bool() const {
+PlanBaseT<TArgs>::operator bool() const noexcept {
 	if (_bounds.first < TASK_CAPACITY) {
 		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
 		return true;
@@ -210,7 +210,7 @@ template <typename TArgs>
 bool
 PlanBaseT<TArgs>::append(const StateID origin,
 						 const StateID destination,
-						 const TransitionType transitionType)
+						 const TransitionType transitionType) noexcept
 {
 	_planData.planExists.set(_regionId);
 
@@ -221,7 +221,7 @@ PlanBaseT<TArgs>::append(const StateID origin,
 
 template <typename TArgs>
 bool
-PlanBaseT<TArgs>::linkTask(const Long index) {
+PlanBaseT<TArgs>::linkTask(const Long index) noexcept {
 	if (index != Tasks::INVALID) {
 		if (_bounds.first == INVALID_LONG) {
 			HFSM2_ASSERT(_bounds.last == INVALID_LONG);
@@ -256,7 +256,7 @@ PlanBaseT<TArgs>::linkTask(const Long index) {
 
 template <typename TArgs>
 void
-PlanBaseT<TArgs>::clear() {
+PlanBaseT<TArgs>::clear() noexcept {
 	if (_bounds.first < TaskLinks::CAPACITY) {
 		HFSM2_ASSERT(_bounds.last < TaskLinks::CAPACITY);
 
@@ -290,7 +290,7 @@ PlanBaseT<TArgs>::clear() {
 
 template <typename TArgs>
 void
-PlanBaseT<TArgs>::remove(const Long task) {
+PlanBaseT<TArgs>::remove(const Long task) noexcept {
 	HFSM2_ASSERT(_planData.planExists.get(_regionId));
 	HFSM2_ASSERT(_bounds.first < TaskLinks::CAPACITY);
 	HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
@@ -328,7 +328,7 @@ bool
 PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::append(const StateID origin,
 																		  const StateID destination,
 																		  const TransitionType transitionType,
-																		  const Payload& payload)
+																		  const Payload& payload) noexcept
 {
 	_planData.planExists.set(_regionId);
 
@@ -342,7 +342,7 @@ bool
 PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::append(const StateID origin,
 																		  const StateID destination,
 																		  const TransitionType transitionType,
-																		  Payload&& payload)
+																		  Payload&& payload) noexcept
 {
 	_planData.planExists.set(_regionId);
 

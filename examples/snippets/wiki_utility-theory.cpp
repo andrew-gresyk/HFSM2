@@ -26,7 +26,7 @@ struct Event {
 
     Event(const hfsm2::StateID state_,
           const Enum type_,
-          const hfsm2::StateID prong_ = hfsm2::INVALID_STATE_ID)
+          const hfsm2::StateID prong_ = hfsm2::INVALID_STATE_ID) noexcept
         : state{state_}
         , type{type_}
         , prong{prong_}
@@ -45,7 +45,7 @@ struct Logger
 {
     void recordMethod(Context& /*context*/,
                       const StateID state,
-                      const Method method) override
+                      const Method method) noexcept override
     {
         if (method == Method::RANK)
             history.emplace_back(state, Event::RANK);
@@ -56,7 +56,7 @@ struct Logger
     void recordUtilityResolution(Context& /*context*/,
                                  const StateID head,
                                  const StateID prong,
-                                 const Utilty /*utilty*/) override
+                                 const Utilty /*utilty*/) noexcept override
     {
         history.emplace_back(head, Event::UTILITY_RESOLUTION,  prong);
     }
@@ -64,13 +64,12 @@ struct Logger
     void recordRandomResolution(Context& /*context*/,
                                 const StateID head,
                                 const StateID prong,
-                                const Utilty /*utilty*/) override
+                                const Utilty /*utilty*/) noexcept override
     {
         history.emplace_back(head, Event::RANDOM_RESOLUTION, prong);
     }
 
-    void assertSequence(const Events& reference)
-    {
+    void assertSequence(const Events& reference) noexcept {
         const auto count = std::max(history.size(), reference.size());
 
         for (unsigned i = 0; i < count; ++i) {
@@ -143,11 +142,11 @@ struct R_Activated  : FSM::State {};  // only consider previously activated sub-
 struct U            : FSM::State {};  // for 'Utilitarian' region,
                                       // find the highest-scoring sub-state
 struct U_033        : FSM::State {
-    Utility utility(const Control&) { return 0.33f; }
+    Utility utility(const Control&) noexcept { return 0.33f; }
 };
 
 struct U_067        : FSM::State {
-    Utility utility(const Control&) { return 0.67f; }
+    Utility utility(const Control&) noexcept { return 0.67f; }
 };
 
 struct D            : FSM::State {};  // for 'Random' region,
@@ -155,17 +154,17 @@ struct D            : FSM::State {};  // for 'Random' region,
                                       // 2. from the remaining sub-states,
                                       // randomly select one based on their score
 struct D_Filtered   : FSM::State {
-    Rank rank(const Control&) {return -1; }
+    Rank rank(const Control&) noexcept {return -1; }
 };
 
 struct D_010        : FSM::State {
-    Rank rank(const Control&) {return 0; }
-    Utility utility(const Control&) { return 0.10f; }
+    Rank rank(const Control&) noexcept {return 0; }
+    Utility utility(const Control&) noexcept { return 0.10f; }
 };
 
 struct D_090        : FSM::State {
     // inherit FSM::State::rank(), which returns '0'
-    Utility utility(const Control&) { return 0.90f; }
+    Utility utility(const Control&) noexcept { return 0.90f; }
 };
 
 struct O            : FSM::State {};

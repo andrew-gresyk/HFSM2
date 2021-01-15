@@ -24,7 +24,7 @@ TEST_CASE("Wiki.Plans.Traffic Light", "[Wiki]") {
     struct Apex
         : FSM::State
     {
-        void enter(PlanControl& control) {
+        void enter(PlanControl& control) noexcept {
             // create an empty plan
             auto plan = control.plan();
 
@@ -42,15 +42,15 @@ TEST_CASE("Wiki.Plans.Traffic Light", "[Wiki]") {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     struct Red    : FSM::State {
-        void update(FullControl& control) { control.succeed(); }
+        void update(FullControl& control) noexcept { control.succeed(); }
     };
 
     struct Yellow : FSM::State {
-        void update(FullControl& control) { control.succeed(); }
+        void update(FullControl& control) noexcept { control.succeed(); }
     };
 
     struct Green  : FSM::State {
-        void update(FullControl& control) { control.succeed(); }
+        void update(FullControl& control) noexcept { control.succeed(); }
     };
 
     //----------------------------------------------------------------------
@@ -104,7 +104,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
     struct PlanOwner
         : FSM::State
     {
-        void enter(PlanControl& control) {
+        void enter(PlanControl& control) noexcept {
             auto plan = control.plan();
 
             // build the plan by sequencing transitions
@@ -124,7 +124,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
         //void planSucceeded(FullControl& control) {}
 
         // respond to plan failure below
-        void planFailed(FullControl& control) {
+        void planFailed(FullControl& control) noexcept {
             control.changeTo<End>();
         }
     };
@@ -132,7 +132,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
     struct StateTask
         : FSM::State
     {
-        void update(FullControl& control) {
+        void update(FullControl& control) noexcept {
             control.succeed();
         }
     };
@@ -144,7 +144,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
     struct CT_Initial
         : FSM::State
     {
-        void update(FullControl& control) {
+        void update(FullControl& control) noexcept {
             // mark the task as successful
             control.changeTo<CT_Following>();
         }
@@ -153,7 +153,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
     struct CT_Following
         : FSM::State
     {
-        void update(FullControl& control) {
+        void update(FullControl& control) noexcept {
             // even though CompositeTask has no plan attached to it,
             // the sub-state can 'succeed' the entire region
             control.succeed();
@@ -169,7 +169,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
     struct OT_2
         : FSM::State
     {
-        void update(FullControl& control) {
+        void update(FullControl& control) noexcept {
             // the task can also be marked successful
             // from its sub-state one level down
             control.succeed();
@@ -181,7 +181,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
     struct ReplanTask
         : FSM::State
     {
-        void update(FullControl& control) {
+        void update(FullControl& control) noexcept {
             // parametrized version of PlanControl::plan() allows access to plans
             // hosted by any region
             auto plan = control.plan<PlanOwner>();
@@ -219,7 +219,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
         : FSM::State
     {
         // guard gets executed before the first sub-state activates implicitly ..
-        void entryGuard(GuardControl& control) {
+        void entryGuard(GuardControl& control) noexcept {
             // .. so the plan can start from the second sub-state
             control.changeTo<SubTask_2>();
 
@@ -230,15 +230,15 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
         // without plan execution reactions, plan results
         // are propagated to the outer plan
         //
-        //void planSucceeded(FullControl& control) {}
-        //void planFailed(FullControl& control) {}
+        //void planSucceeded(FullControl& control) noexcept {}
+        //void planFailed(FullControl& control) noexcept {}
     };
 
     // these appear in the plan in reverse order
     struct SubTask_1
         : FSM::State
     {
-        void update(FullControl& control) {
+        void update(FullControl& control) noexcept {
             // owner region's planFailed() gets called in response to plan failure
             control.fail();
         }
@@ -247,7 +247,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
     struct SubTask_2
         : FSM::State
     {
-        void update(FullControl& control) {
+        void update(FullControl& control) noexcept {
             // continue in reverse order, as defined by the plan in SubPlanOwner
             control.succeed();
         }

@@ -8,7 +8,7 @@ namespace detail {
 
 inline
 float
-uniformReal(const uint32_t uint) {
+uniformReal(const uint32_t uint) noexcept {
 	const auto real = convert<float>(UINT32_C(0x7F) << 23 | uint >> 9);
 
 	return real - 1.0f;
@@ -18,7 +18,7 @@ uniformReal(const uint32_t uint) {
 
 inline
 double
-uniformReal(const uint64_t uint) {
+uniformReal(const uint64_t uint) noexcept {
 	const auto real = convert<double>(UINT64_C(0x3FF) << 52 | uint >> 12);
 
 	return real - 1.0;
@@ -28,7 +28,7 @@ uniformReal(const uint64_t uint) {
 
 inline
 uint32_t
-rotl(const uint32_t x, const uint32_t k) {
+rotl(const uint32_t x, const uint32_t k) noexcept {
 	return (x << k) | (x >> (32 - k));
 }
 
@@ -36,7 +36,7 @@ rotl(const uint32_t x, const uint32_t k) {
 
 inline
 uint64_t
-rotl(const uint64_t x, const uint64_t k) {
+rotl(const uint64_t x, const uint64_t k) noexcept {
 	return (x << k) | (x >> (64 - k));
 }
 
@@ -44,14 +44,14 @@ rotl(const uint64_t x, const uint64_t k) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-SplitMix64::SplitMix64(const uint64_t seed)
+SplitMix64::SplitMix64(const uint64_t seed) noexcept
 	: _state{seed}
 {}
 
 //------------------------------------------------------------------------------
 
 uint64_t
-SplitMix64::next() {
+SplitMix64::next() noexcept {
 	for (;;)
 		if (const uint64_t number = raw())
 			return number;
@@ -60,7 +60,7 @@ SplitMix64::next() {
 //------------------------------------------------------------------------------
 
 uint64_t
-SplitMix64::raw() {
+SplitMix64::raw() noexcept {
 	uint64_t z = (_state += 0x9e3779b97f4a7c15);
 	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
 	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
@@ -70,7 +70,7 @@ SplitMix64::raw() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XoShiRo256Plus::XoShiRo256Plus() {
+XoShiRo256Plus::XoShiRo256Plus() noexcept {
 	SplitMix64 generator;
 
 	_state[0] = generator.next();
@@ -81,20 +81,20 @@ XoShiRo256Plus::XoShiRo256Plus() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-XoShiRo256Plus::XoShiRo256Plus(const uint64_t s) {
+XoShiRo256Plus::XoShiRo256Plus(const uint64_t s) noexcept {
 	seed(s);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-XoShiRo256Plus::XoShiRo256Plus(const uint64_t(& s)[4]) {
+XoShiRo256Plus::XoShiRo256Plus(const uint64_t(& s)[4]) noexcept {
 	seed(s);
 }
 
 //------------------------------------------------------------------------------
 
 void
-XoShiRo256Plus::seed(const uint64_t s) {
+XoShiRo256Plus::seed(const uint64_t s) noexcept {
 	SplitMix64 generator{s};
 
 	_state[0] = generator.next();
@@ -106,7 +106,7 @@ XoShiRo256Plus::seed(const uint64_t s) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 void
-XoShiRo256Plus::seed(const uint64_t(& s)[4]) {
+XoShiRo256Plus::seed(const uint64_t(& s)[4]) noexcept {
 	_state[0] = s[0];
 	_state[1] = s[1];
 	_state[2] = s[2];
@@ -116,14 +116,14 @@ XoShiRo256Plus::seed(const uint64_t(& s)[4]) {
 //------------------------------------------------------------------------------
 
 float
-XoShiRo256Plus::next() {
+XoShiRo256Plus::next() noexcept {
 	return detail::uniformReal((uint32_t) raw());
 }
 
 //------------------------------------------------------------------------------
 
 void
-XoShiRo256Plus::jump() {
+XoShiRo256Plus::jump() noexcept {
 	static const uint64_t JUMP[] = { 0x180ec6d33cfd0aba, 0xd5a61266f0c9392c, 0xa9582618e03fc9aa, 0x39abdc4529b1661c };
 
 	uint64_t s0 = 0;
@@ -151,7 +151,7 @@ XoShiRo256Plus::jump() {
 //------------------------------------------------------------------------------
 
 uint64_t
-XoShiRo256Plus::raw() {
+XoShiRo256Plus::raw() noexcept {
 	const uint64_t result_plus = _state[0] + _state[3];
 
 	const uint64_t t = _state[1] << 17;
@@ -170,14 +170,14 @@ XoShiRo256Plus::raw() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-SplitMix32::SplitMix32(const uint32_t seed)
+SplitMix32::SplitMix32(const uint32_t seed) noexcept
 	: _state{seed}
 {}
 
 //------------------------------------------------------------------------------
 
 uint32_t
-SplitMix32::next() {
+SplitMix32::next() noexcept {
 	for (;;)
 		if (const uint32_t number = raw())
 			return number;
@@ -186,7 +186,7 @@ SplitMix32::next() {
 //------------------------------------------------------------------------------
 
 uint32_t
-SplitMix32::raw() {
+SplitMix32::raw() noexcept {
 	uint32_t z = (_state += 0x9E3779B9);
 	z = (z ^ (z >> 16)) * 0x85ebca6b;
 	z = (z ^ (z >> 13)) * 0xc2b2ae35;
@@ -196,7 +196,7 @@ SplitMix32::raw() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-XoShiRo128Plus::XoShiRo128Plus() {
+XoShiRo128Plus::XoShiRo128Plus() noexcept {
 	SplitMix32 generator;
 
 	_state[0] = generator.next();
@@ -207,20 +207,20 @@ XoShiRo128Plus::XoShiRo128Plus() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-XoShiRo128Plus::XoShiRo128Plus(const uint32_t s) {
+XoShiRo128Plus::XoShiRo128Plus(const uint32_t s) noexcept {
 	seed(s);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-XoShiRo128Plus::XoShiRo128Plus(const uint32_t(& s)[4]) {
+XoShiRo128Plus::XoShiRo128Plus(const uint32_t(& s)[4]) noexcept {
 	seed(s);
 }
 
 //------------------------------------------------------------------------------
 
 void
-XoShiRo128Plus::seed(const uint32_t s) {
+XoShiRo128Plus::seed(const uint32_t s) noexcept {
 	SplitMix32 generator{s};
 
 	_state[0] = generator.next();
@@ -232,7 +232,7 @@ XoShiRo128Plus::seed(const uint32_t s) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 void
-XoShiRo128Plus::seed(const uint32_t(& s)[4]) {
+XoShiRo128Plus::seed(const uint32_t(& s)[4]) noexcept {
 	_state[0] = s[0];
 	_state[1] = s[1];
 	_state[2] = s[2];
@@ -242,14 +242,14 @@ XoShiRo128Plus::seed(const uint32_t(& s)[4]) {
 //------------------------------------------------------------------------------
 
 float
-XoShiRo128Plus::next() {
+XoShiRo128Plus::next() noexcept {
 	return detail::uniformReal(raw());
 }
 
 //------------------------------------------------------------------------------
 
 void
-XoShiRo128Plus::jump() {
+XoShiRo128Plus::jump() noexcept {
 	static const uint32_t JUMP[] = { 0x8764000b, 0xf542d2d3, 0x6fa035c3, 0x77f2db5b };
 
 	uint32_t s0 = 0;
@@ -277,7 +277,7 @@ XoShiRo128Plus::jump() {
 //------------------------------------------------------------------------------
 
 uint32_t
-XoShiRo128Plus::raw() {
+XoShiRo128Plus::raw() noexcept {
 	const uint32_t result_plus = _state[0] + _state[3];
 
 	const uint32_t t = _state[1] << 9;

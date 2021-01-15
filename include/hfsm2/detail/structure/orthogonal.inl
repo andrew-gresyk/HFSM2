@@ -20,7 +20,7 @@ O_<TN, TA, TH, TS...>::deepRegister(Registry& registry,
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
 O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) {
-	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
+	const ProngCBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -144,7 +144,7 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 bool
 O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) {
-	const ProngConstBits requested = orthoRequested(static_cast<const GuardControl&>(control));
+	const ProngCBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -192,7 +192,7 @@ O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 {
 	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
 
-	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
+	const ProngCBits requested = orthoRequested(static_cast<const Control&>(control));
 	HFSM2_ASSERT(!!requested);
 
 	_subStates.wideForwardActive(control, request, requested);
@@ -207,7 +207,7 @@ O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	const ProngConstBits requested = orthoRequested(static_cast<const Control&>(control));
+	const ProngCBits requested = orthoRequested(static_cast<const Control&>(control));
 
 	if (requested)
 		_subStates.wideForwardRequest(control, request);

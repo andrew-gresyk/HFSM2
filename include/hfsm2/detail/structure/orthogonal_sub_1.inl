@@ -43,7 +43,7 @@ OS_<TN, TA, NI, TI, TR...>::wideRegister(Registry& registry,
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 bool
 OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
-												  const ProngConstBits prongs)
+												  const ProngCBits prongs)
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
 				   initial  .deepForwardEntryGuard(control) : false;
@@ -128,7 +128,7 @@ OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 bool
 OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
-												 const ProngConstBits prongs)
+												 const ProngCBits prongs)
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
 				   initial  .deepForwardExitGuard(control) : false;
@@ -184,7 +184,7 @@ template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 void
 OS_<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
 											  const Request request,
-											  const ProngConstBits prongs)
+											  const ProngCBits prongs)
 {
 	if (prongs.get(PRONG_INDEX))
 		initial.deepForwardActive(control, request);

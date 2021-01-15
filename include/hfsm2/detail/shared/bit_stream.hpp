@@ -1,19 +1,21 @@
+#ifdef HFSM2_ENABLE_SERIALIZATION
+
 namespace hfsm2 {
 namespace detail {
 
 //------------------------------------------------------------------------------
 
 template <Long NBitCapacity>
-struct StreamBuffer {
+struct StreamBufferT {
 	static constexpr Long BIT_CAPACITY	= NBitCapacity;
-	static constexpr Long BYTE_COUNT	= roundUp(BIT_CAPACITY, 8);
+	static constexpr Long BYTE_COUNT	= contain(BIT_CAPACITY, 8u);
 
 	using Size = UnsignedCapacity<BIT_CAPACITY>;
 	using Data = uint8_t[BYTE_COUNT];
 
-	void clear();
+	void clear()										  noexcept;
 
-	//Size write(const uint8_t byte);
+	//Size write(const uint8_t byte)					  noexcept;
 
 	Size bitSize;
 	Data payload;
@@ -22,17 +24,17 @@ struct StreamBuffer {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <Long NBitCapacity>
-class BitWriteStream final {
+class BitWriteStreamT final {
 public:
 	static constexpr Long BIT_CAPACITY = NBitCapacity;
 
-	using Buffer = StreamBuffer<BIT_CAPACITY>;
+	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	BitWriteStream(Buffer& _buffer);
+	BitWriteStreamT(Buffer& _buffer)					  noexcept;
 
 	template <Short NBitWidth>
-	void write(const UnsignedBitWidth<NBitWidth> item);
+	void write(const UnsignedBitWidth<NBitWidth> item)	  noexcept;
 
 private:
 	Buffer& _buffer;
@@ -41,21 +43,21 @@ private:
 //------------------------------------------------------------------------------
 
 template <Long NBitCapacity>
-class BitReadStream final {
+class BitReadStreamT final {
 public:
 	static constexpr Long BIT_CAPACITY = NBitCapacity;
 
-	using Buffer = StreamBuffer<BIT_CAPACITY>;
+	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	BitReadStream(const Buffer& buffer)
+	BitReadStreamT(const Buffer& buffer)				  noexcept
 		: _buffer{buffer}
 	{}
 
 	template <Short NBitWidth>
-	UnsignedBitWidth<NBitWidth> read();
+	UnsignedBitWidth<NBitWidth> read()					  noexcept;
 
-	Long cursor() const										{ return _cursor;	}
+	Long cursor()									const noexcept	{ return _cursor;	}
 
 private:
 	const Buffer& _buffer;
@@ -69,3 +71,5 @@ private:
 }
 
 #include "bit_stream.inl"
+
+#endif

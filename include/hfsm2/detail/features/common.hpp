@@ -58,7 +58,7 @@ enum class StatusEvent : uint8_t {
 
 static inline
 const char*
-stateName(const std::type_index stateType) {
+stateName(const std::type_index stateType) noexcept {
 	const char* const raw = stateType.name();
 
 	#if defined(_MSC_VER)
@@ -84,7 +84,7 @@ stateName(const std::type_index stateType) {
 
 static inline
 const char*
-methodName(const Method method) {
+methodName(const Method method) noexcept {
 	switch (method) {
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -117,7 +117,7 @@ methodName(const Method method) {
 
 static inline
 const char*
-transitionName(const TransitionType type) {
+transitionName(const TransitionType type) noexcept {
 	switch (type) {
 	case TransitionType::CHANGE:	return "changeTo";
 	case TransitionType::RESTART:	return "restart";
@@ -148,12 +148,12 @@ namespace detail {
 #endif
 
 struct alignas(4) TransitionBase {
-	HFSM2_INLINE TransitionBase() = default;
+	constexpr TransitionBase() noexcept = default;
 
 	//----------------------------------------------------------------------
 
 	HFSM2_INLINE TransitionBase(const StateID destination_,
-								const TransitionType type_)
+								const TransitionType type_) noexcept
 		: destination{destination_}
 		, type{type_}
 	{}
@@ -162,15 +162,15 @@ struct alignas(4) TransitionBase {
 
 	HFSM2_INLINE TransitionBase(const StateID origin_,
 								const StateID destination_,
-								const TransitionType type_)
-		: origin{origin_}
+								const TransitionType type_) noexcept
+		: origin	 {origin_}
 		, destination{destination_}
-		, type{type_}
+		, type		 {type_}
 	{}
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE bool operator == (const TransitionBase& other) const {
+	HFSM2_INLINE bool operator == (const TransitionBase& other) const noexcept {
 		return origin	   == other.origin &&
 			   destination == other.destination &&
 			   method	   == other.method &&
@@ -198,15 +198,19 @@ struct alignas(4) TransitionT
 	using Payload = TPayload;
 	using Storage = typename std::aligned_storage<sizeof(Payload), 4>::type;
 
-	HFSM2_INLINE TransitionT() = default;
-
 	using TransitionBase::TransitionBase;
 
 	//----------------------------------------------------------------------
 
+	HFSM2_INLINE TransitionT() noexcept {
+		new (&storage) Payload{};
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM2_INLINE TransitionT(const StateID destination,
 							 const TransitionType type,
-							 const Payload& payload)
+							 const Payload& payload) noexcept
 		: TransitionBase{destination, type}
 		, payloadSet{true}
 	{
@@ -217,7 +221,7 @@ struct alignas(4) TransitionT
 
 	HFSM2_INLINE TransitionT(const StateID destination,
 							 const TransitionType type,
-							 Payload&& payload)
+							 Payload&& payload) noexcept
 		: TransitionBase{destination, type}
 		, payloadSet{true}
 	{
@@ -229,7 +233,7 @@ struct alignas(4) TransitionT
 	HFSM2_INLINE TransitionT(const StateID origin,
 							 const StateID destination,
 							 const TransitionType type,
-							 const Payload& payload)
+							 const Payload& payload) noexcept
 		: TransitionBase{origin, destination, type}
 		, payloadSet{true}
 	{
@@ -241,7 +245,7 @@ struct alignas(4) TransitionT
 	HFSM2_INLINE TransitionT(const StateID origin,
 							 const StateID destination,
 							 const TransitionType type,
-							 Payload&& payload)
+							 Payload&& payload) noexcept
 		: TransitionBase{origin, destination, type}
 		, payloadSet{true}
 	{
@@ -250,7 +254,7 @@ struct alignas(4) TransitionT
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE bool operator == (const TransitionT& other) const {
+	HFSM2_INLINE bool operator == (const TransitionT& other) const noexcept {
 		return TransitionBase::operator == (other) &&
 			   (payloadSet ==  other.payloadSet);
 		//	  (!payloadSet && !other.payloadSet || payload ==  other.payload);

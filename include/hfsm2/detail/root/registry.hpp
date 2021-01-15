@@ -20,17 +20,17 @@ enum Strategy {
 struct alignas(2 * sizeof(Short)) Parent {
 	HFSM2_INLINE Parent() = default;
 
-	HFSM2_INLINE Parent(const ForkID forkId_)
+	HFSM2_INLINE Parent(const ForkID forkId_) noexcept
 		: forkId{forkId_}
 	{}
 
 	HFSM2_INLINE Parent(const ForkID forkId_,
-						const Short prong_)
+						const Short prong_) noexcept
 		: forkId{forkId_}
 		, prong{prong_}
 	{}
 
-	HFSM2_INLINE explicit operator bool() const {
+	HFSM2_INLINE explicit operator bool() const noexcept {
 		return forkId != INVALID_FORK_ID &&
 			   prong  != INVALID_SHORT;
 	}
@@ -107,35 +107,35 @@ struct RegistryT<ArgsT<TContext
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArray<Parent, STATE_COUNT>;
+	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
 
-	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
-	using OrthoParents	= StaticArray<Parent, ORTHO_REGIONS>;
-	using OrthoUnits	= StaticArray<Units,  ORTHO_UNITS>;
+	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
+	using OrthoParents	= StaticArrayT<Parent, ORTHO_REGIONS>;
+	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
 
-	using CompoForks	= StaticArray<Short, COMPO_REGIONS>;
-	using OrthoForks	= BitArray	 <Short, ORTHO_UNITS>;
+	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
+	using OrthoForks	= BitArrayT	  <Short,  ORTHO_UNITS>;
 	using OrthoBits		= typename OrthoForks::Bits;
-	using CompoRemains	= BitArray	 <Short, COMPO_REGIONS>;
+	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
-	bool isActive		 (const StateID stateId) const;
-	bool isResumable	 (const StateID stateId) const;
+	bool isActive		 (const StateID stateId) const noexcept;
+	bool isResumable	 (const StateID stateId) const noexcept;
 
-	bool isPendingChange (const StateID stateId) const;
-	bool isPendingEnter	 (const StateID stateId) const;
-	bool isPendingExit	 (const StateID stateId) const;
+	bool isPendingChange (const StateID stateId) const noexcept;
+	bool isPendingEnter	 (const StateID stateId) const noexcept;
+	bool isPendingExit	 (const StateID stateId) const noexcept;
 
-	HFSM2_INLINE const Parent&	   forkParent(const ForkID forkId) const;
+	HFSM2_INLINE const Parent&	   forkParent(const ForkID forkId) const noexcept;
 
-	HFSM2_INLINE OrthoBits requestedOrthoFork(const ForkID forkId);
+	HFSM2_INLINE OrthoBits requestedOrthoFork(const ForkID forkId) noexcept;
 
-	bool requestImmediate(const Transition& request);
-	void requestScheduled(const StateID stateId);
+	bool requestImmediate(const Transition& request) noexcept;
+	void requestScheduled(const StateID stateId) noexcept;
 
-	void clearRequests();
-	void clear();
+	void clearRequests() noexcept;
+	void clear() noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -182,29 +182,29 @@ struct RegistryT<ArgsT<TContext
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArray<Parent, STATE_COUNT>;
-	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
+	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
+	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
 
-	using CompoForks	= StaticArray<Short, COMPO_REGIONS>;
-	using OrthoForks	= BitArray	 <Short, 0>;
-	using CompoRemains	= BitArray	 <Short, COMPO_REGIONS>;
+	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
+	using OrthoForks	= BitArrayT	  <Short,  0>;
+	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
-	bool isActive		 (const StateID stateId) const;
-	bool isResumable	 (const StateID stateId) const;
+	bool isActive		 (const StateID stateId) const noexcept;
+	bool isResumable	 (const StateID stateId) const noexcept;
 
-	bool isPendingChange (const StateID stateId) const;
-	bool isPendingEnter	 (const StateID stateId) const;
-	bool isPendingExit	 (const StateID stateId) const;
+	bool isPendingChange (const StateID stateId) const noexcept;
+	bool isPendingEnter	 (const StateID stateId) const noexcept;
+	bool isPendingExit	 (const StateID stateId) const noexcept;
 
-	HFSM2_INLINE const Parent& forkParent(const ForkID forkId) const;
+	HFSM2_INLINE const Parent& forkParent(const ForkID forkId) const noexcept;
 
-	bool requestImmediate(const Transition& request);
-	void requestScheduled(const StateID stateId);
+	bool requestImmediate(const Transition& request) noexcept;
+	void requestScheduled(const StateID stateId) noexcept;
 
-	void clearRequests();
-	void clear();
+	void clearRequests() noexcept;
+	void clear() noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -222,7 +222,7 @@ struct RegistryT<ArgsT<TContext
 template <typename TRegistry>
 void
 backup(const TRegistry& registry,
-	   BackUpT<TRegistry>& copy)
+	   BackUpT<TRegistry>& copy) noexcept
 {
 	overwrite(copy.compoRequested, registry.compoRequested);
 	overwrite(copy.orthoRequested, registry.orthoRequested);
@@ -234,7 +234,7 @@ backup(const TRegistry& registry,
 template <typename TRegistry>
 void
 restore(TRegistry& registry,
-		const BackUpT<TRegistry>& copy)
+		const BackUpT<TRegistry>& copy) noexcept
 {
 	overwrite(registry.compoRequested, copy.compoRequested);
 	overwrite(registry.orthoRequested, copy.orthoRequested);

@@ -5,7 +5,7 @@ namespace detail {
 
 template <StateID NS, typename TA, typename TH>
 struct RegisterT {
-	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
+	using StateParents	= StaticArrayT<Parent, TA::STATE_COUNT>;
 	using StateList		= typename TA::StateList;
 
 	static constexpr StateID STATE_ID = NS;
@@ -13,7 +13,7 @@ struct RegisterT {
 	static HFSM2_INLINE
 	void
 	execute(StateParents& stateParents,
-			const Parent parent)
+			const Parent parent) noexcept
 	{
 		static constexpr auto HEAD_ID = index<StateList, TH>();
 		StaticAssertEquality<STATE_ID, HEAD_ID>();
@@ -26,11 +26,11 @@ struct RegisterT {
 
 template <StateID NS, typename TA>
 struct RegisterT<NS, TA, StaticEmptyT<TA>> {
-	using StateParents = StaticArray<Parent, TA::STATE_COUNT>;
+	using StateParents = StaticArrayT<Parent, TA::STATE_COUNT>;
 
 	static HFSM2_INLINE
 	void
-	execute(StateParents&, const Parent) {}
+	execute(StateParents&, const Parent) noexcept {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ struct RegisterT<NS, TA, StaticEmptyT<TA>> {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepRegister(Registry& registry,
-							  const Parent parent)
+							  const Parent parent) noexcept
 {
 	using Register = RegisterT<STATE_ID, TA, Head>;
 	Register::execute(registry.stateParents, parent);
@@ -50,7 +50,7 @@ S_<TN_, TA, TH>::deepRegister(Registry& registry,
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Rank
-S_<TN_, TA, TH>::wrapRank(Control& control) {
+S_<TN_, TA, TH>::wrapRank(Control& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::rank,
 						   Method::RANK);
 
@@ -61,7 +61,7 @@ S_<TN_, TA, TH>::wrapRank(Control& control) {
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Utility
-S_<TN_, TA, TH>::wrapUtility(Control& control) {
+S_<TN_, TA, TH>::wrapUtility(Control& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::utility,
 						   Method::UTILITY);
 
@@ -71,10 +71,11 @@ S_<TN_, TA, TH>::wrapUtility(Control& control) {
 #endif
 
 //------------------------------------------------------------------------------
+// COMMON
 
 template <typename TN_, typename TA, typename TH>
 bool
-S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
+S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::entryGuard,
 						   Method::ENTRY_GUARD);
 
@@ -91,11 +92,12 @@ S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM2_IF_LOG_INTERFACE(control)) {
-#ifdef HFSM2_ENABLE_PLANS
-	HFSM2_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
-	HFSM2_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
-#endif
+S_<TN_, TA, TH>::deepConstruct(PlanControl&
+						   #if defined HFSM2_ENABLE_PLANS || defined HFSM2_ENABLE_LOG_INTERFACE
+							   control
+						   #endif
+							   ) noexcept {
+	HFSM2_IF_PLANS(control._planData.verifyEmptyStatus(STATE_ID));
 
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
 						   Method::CONSTRUCT);
@@ -107,7 +109,7 @@ S_<TN_, TA, TH>::deepConstruct(PlanControl& HFSM2_IF_LOG_INTERFACE(control)) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
+S_<TN_, TA, TH>::deepEnter(PlanControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
 						   Method::ENTER);
 
@@ -121,11 +123,8 @@ S_<TN_, TA, TH>::deepEnter(PlanControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
-#ifdef HFSM2_ENABLE_PLANS
-	HFSM2_ASSERT(!control._planData.tasksSuccesses.template get<STATE_ID>());
-	HFSM2_ASSERT(!control._planData.tasksFailures .template get<STATE_ID>());
-#endif
+S_<TN_, TA, TH>::deepReenter(PlanControl& control) noexcept {
+	HFSM2_IF_PLANS(control._planData.verifyEmptyStatus(STATE_ID));
 
 	HFSM2_LOG_STATE_METHOD(&Head::reenter,
 						   Method::REENTER);
@@ -143,7 +142,7 @@ S_<TN_, TA, TH>::deepReenter(PlanControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 Status
-S_<TN_, TA, TH>::deepUpdate(FullControl& control) {
+S_<TN_, TA, TH>::deepUpdate(FullControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::update,
 						   Method::UPDATE);
 
@@ -161,7 +160,7 @@ template <typename TN_, typename TA, typename TH>
 template <typename TEvent>
 Status
 S_<TN_, TA, TH>::deepReact(FullControl& control,
-						   const TEvent& event)
+						   const TEvent& event) noexcept
 {
 	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::react);
 
@@ -180,7 +179,7 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 
 template <typename TN_, typename TA, typename TH>
 bool
-S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) {
+S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::exitGuard,
 						   Method::EXIT_GUARD);
 
@@ -198,7 +197,7 @@ S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::deepExit(PlanControl& control) {
+S_<TN_, TA, TH>::deepExit(PlanControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::exit,
 						   Method::EXIT);
 
@@ -221,17 +220,14 @@ S_<TN_, TA, TH>::deepDestruct(PlanControl&
 						  #if defined HFSM2_ENABLE_LOG_INTERFACE || defined HFSM2_ENABLE_PLANS
 							  control
 						  #endif
-							  )
+							  ) noexcept
 {
 	HFSM2_LOG_STATE_METHOD(&Head::exit,
 						   Method::DESTRUCT);
 
 	_headBox.destruct();
 
-#ifdef HFSM2_ENABLE_PLANS
-	control._planData.tasksSuccesses.template clear<STATE_ID>();
-	control._planData.tasksFailures .template clear<STATE_ID>();
-#endif
+	HFSM2_IF_PLANS(control._planData.clearTaskStatus(STATE_ID));
 }
 
 //------------------------------------------------------------------------------
@@ -240,7 +236,7 @@ S_<TN_, TA, TH>::deepDestruct(PlanControl&
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) {
+S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::planSucceeded,
 						   Method::PLAN_SUCCEEDED);
 
@@ -253,7 +249,7 @@ S_<TN_, TA, TH>::wrapPlanSucceeded(FullControl& control) {
 
 template <typename TN_, typename TA, typename TH>
 void
-S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
+S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::planFailed,
 						   Method::PLAN_FAILED);
 
@@ -269,7 +265,7 @@ S_<TN_, TA, TH>::wrapPlanFailed(FullControl& control) {
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepForwardRequest(Control& HFSM2_IF_TRANSITION_HISTORY(control),
-									const Request HFSM2_IF_TRANSITION_HISTORY(request))
+									const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
 }
@@ -279,7 +275,7 @@ S_<TN_, TA, TH>::deepForwardRequest(Control& HFSM2_IF_TRANSITION_HISTORY(control
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepRequestChange(Control& HFSM2_IF_TRANSITION_HISTORY(control),
-								   const Request HFSM2_IF_TRANSITION_HISTORY(request))
+								   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
 }
@@ -289,7 +285,7 @@ S_<TN_, TA, TH>::deepRequestChange(Control& HFSM2_IF_TRANSITION_HISTORY(control)
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepRequestRestart(Control& HFSM2_IF_TRANSITION_HISTORY(control),
-									const Request HFSM2_IF_TRANSITION_HISTORY(request))
+									const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
 }
@@ -299,7 +295,7 @@ S_<TN_, TA, TH>::deepRequestRestart(Control& HFSM2_IF_TRANSITION_HISTORY(control
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepRequestResume(Control& HFSM2_IF_TRANSITION_HISTORY(control),
-								   const Request HFSM2_IF_TRANSITION_HISTORY(request))
+								   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
 }
@@ -311,7 +307,7 @@ S_<TN_, TA, TH>::deepRequestResume(Control& HFSM2_IF_TRANSITION_HISTORY(control)
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepRequestUtilize(Control& HFSM2_IF_TRANSITION_HISTORY(control),
-									const Request HFSM2_IF_TRANSITION_HISTORY(request))
+									const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
 }
@@ -321,7 +317,7 @@ S_<TN_, TA, TH>::deepRequestUtilize(Control& HFSM2_IF_TRANSITION_HISTORY(control
 template <typename TN_, typename TA, typename TH>
 void
 S_<TN_, TA, TH>::deepRequestRandomize(Control& HFSM2_IF_TRANSITION_HISTORY(control),
-									  const Request HFSM2_IF_TRANSITION_HISTORY(request))
+									  const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
 }
@@ -330,7 +326,7 @@ S_<TN_, TA, TH>::deepRequestRandomize(Control& HFSM2_IF_TRANSITION_HISTORY(contr
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::UP
-S_<TN_, TA, TH>::deepReportChange(Control& control) {
+S_<TN_, TA, TH>::deepReportChange(Control& control) noexcept {
 	const Utility utility = wrapUtility(control);
 
 	const Parent parent = stateParent(control);
@@ -342,7 +338,7 @@ S_<TN_, TA, TH>::deepReportChange(Control& control) {
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::UP
-S_<TN_, TA, TH>::deepReportUtilize(Control& control) {
+S_<TN_, TA, TH>::deepReportUtilize(Control& control) noexcept {
 	const Utility utility = wrapUtility(control);
 	const Parent  parent  = stateParent(control);
 
@@ -353,7 +349,7 @@ S_<TN_, TA, TH>::deepReportUtilize(Control& control) {
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Rank
-S_<TN_, TA, TH>::deepReportRank(Control& control) {
+S_<TN_, TA, TH>::deepReportRank(Control& control) noexcept {
 	return wrapRank(control);
 }
 
@@ -361,7 +357,7 @@ S_<TN_, TA, TH>::deepReportRank(Control& control) {
 
 template <typename TN_, typename TA, typename TH>
 typename S_<TN_, TA, TH>::Utility
-S_<TN_, TA, TH>::deepReportRandomize(Control& control) {
+S_<TN_, TA, TH>::deepReportRandomize(Control& control) noexcept {
 	return wrapUtility(control);
 }
 
@@ -373,7 +369,7 @@ S_<TN_, TA, TH>::deepReportRandomize(Control& control) {
 
 template <typename TN_, typename TA, typename TH>
 const char*
-S_<TN_, TA, TH>::name() {
+S_<TN_, TA, TH>::name() noexcept {
 	if (HeadBox::isBare())
 		return "";
 	else {
@@ -412,7 +408,7 @@ void
 S_<TN_, TA, TH>::deepGetNames(const Long parent,
 							  const RegionType region,
 							  const Short depth,
-							  StructureStateInfos& _stateInfos) const
+							  StructureStateInfos& _stateInfos) const noexcept
 {
 	_stateInfos.append(StructureStateInfo{parent, region, depth, name()});
 }

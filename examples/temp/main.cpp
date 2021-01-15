@@ -66,7 +66,8 @@ struct Off
 	void enter(Control&) { std::cout << "Off" << std::endl; }
 };
 
-int main() {
+int
+main() {
 	Context context;
 	FSM::Instance machine{ context };
 

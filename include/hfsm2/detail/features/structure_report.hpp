@@ -29,14 +29,14 @@ struct alignas(alignof(void*)) StructureStateInfo {
 		COUNT
 	};
 
-	StructureStateInfo() = default;
+	StructureStateInfo() noexcept = default;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_INLINE StructureStateInfo(const Long parent_,
 									const RegionType regionType_,
 									const Short depth_,
-									const char* const name_)
+									const char* const name_) noexcept
 		: name{name_}
 		, parent{parent_}
 		, regionType{regionType_ }

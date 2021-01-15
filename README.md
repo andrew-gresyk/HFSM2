@@ -35,7 +35,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## Feature Highlights
 
-- Permissive **[MIT License](https://github.com/andrew-gresyk/FFSM2/blob/master/LICENSE)**
+- Permissive **[MIT License](https://github.com/andrew-gresyk/HFSM2/blob/master/LICENSE)**
 - Written in widely-supported modern(ish) C++11
 - Header-only
 - Convenient, minimal boilerplate

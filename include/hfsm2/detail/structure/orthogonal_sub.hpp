@@ -34,7 +34,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	using StateParents	= typename Registry::StateParents;
 	using OrthoForks	= typename Registry::OrthoForks;
 	using ProngBits		= typename OrthoForks::Bits;
-	using ProngConstBits= typename OrthoForks::ConstBits;
+	using ProngCBits= typename OrthoForks::CBits;
 
 	using Control		= ControlT	   <Args>;
 	using PlanControl	= PlanControlT <Args>;
@@ -77,7 +77,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,					const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,					const ProngCBits prongs);
 	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
 	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
 
@@ -91,7 +91,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	template <typename TEvent>
 	HFSM2_INLINE Status	 wideReact			  (FullControl&	 control, const TEvent& event);
 
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,					const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,					const ProngCBits prongs);
 	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
 	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
 
@@ -101,7 +101,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive	  (Control& control, const Request request, const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardActive	  (Control& control, const Request request, const ProngCBits prongs);
 	HFSM2_INLINE void	 wideForwardRequest	  (Control& control, const Request request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -181,7 +181,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	using StateParents	= typename Registry::StateParents;
 	using OrthoForks	= typename Registry::OrthoForks;
 	using ProngBits		= typename OrthoForks::Bits;
-	using ProngConstBits= typename OrthoForks::ConstBits;
+	using ProngCBits= typename OrthoForks::CBits;
 
 	using Control		= ControlT	   <Args>;
 	using PlanControl	= PlanControlT <Args>;
@@ -213,7 +213,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,					const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,					const ProngCBits prongs);
 	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
 	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
 
@@ -227,7 +227,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	template <typename TEvent>
 	HFSM2_INLINE Status	 wideReact			  (FullControl&  control, const TEvent& event);
 
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,					const ProngConstBits prongs);
+	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,					const ProngCBits prongs);
 	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
 	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
 
@@ -237,7 +237,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive	  (Control& control, const Request request, const ProngConstBits prongs);
+	HFSM2_INLINE void	 wideForwardActive	  (Control& control, const Request request, const ProngCBits prongs);
 	HFSM2_INLINE void	 wideForwardRequest	  (Control& control, const Request request);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

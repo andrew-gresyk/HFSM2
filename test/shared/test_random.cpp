@@ -9,7 +9,7 @@ template <typename T>
 void
 testUniformity(const int average) {
 	using Type = T;
-	using Random = hfsm2::RandomT<Type>;
+	using Random = hfsm2::RNGT<Type>;
 
 	Random random{0};
 	int histogram[10] = {0};
