@@ -177,8 +177,8 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , TPayload>>
 {
-	void clearTaskStatus  (const StateID stateId)		  noexcept {}
-	void verifyEmptyStatus(const StateID stateId)	const noexcept {}
+	void clearTaskStatus  (const StateID)				  noexcept {}
+	void verifyEmptyStatus(const StateID)			const noexcept {}
 
 #ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans()								const noexcept {}

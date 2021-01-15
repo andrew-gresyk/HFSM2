@@ -243,7 +243,7 @@ struct ArgsT final {
 	static constexpr Long  TASK_CAPACITY	  = NTaskCapacity;
 #endif
 
-	using Payload	= TPayload;
+	using Payload		= TPayload;
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer	= StreamBufferT  <SERIAL_BITS>;

@@ -1,3 +1,5 @@
+#ifdef HFSM2_ENABLE_SERIALIZATION
+
 namespace hfsm2 {
 namespace detail {
 
@@ -69,3 +71,5 @@ private:
 }
 
 #include "bit_stream.inl"
+
+#endif

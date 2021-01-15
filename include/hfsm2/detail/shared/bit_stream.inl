@@ -1,3 +1,5 @@
+#ifdef HFSM2_ENABLE_SERIALIZATION
+
 namespace hfsm2 {
 namespace detail {
 
@@ -90,3 +92,5 @@ BitReadStreamT<NBC>::read() noexcept {
 
 }
 }
+
+#endif

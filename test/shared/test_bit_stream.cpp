@@ -1,3 +1,4 @@
+#define HFSM2_ENABLE_SERIALIZATION
 #include "../tools.hpp"
 
 namespace test_bit_stream {

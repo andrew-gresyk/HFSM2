@@ -1306,6 +1306,8 @@ BitArrayT<TI, NC>::bits(const Units& units) const noexcept {
 
 }
 }
+#ifdef HFSM2_ENABLE_SERIALIZATION
+
 namespace hfsm2 {
 namespace detail {
 
@@ -1375,6 +1377,8 @@ private:
 
 }
 }
+
+#ifdef HFSM2_ENABLE_SERIALIZATION
 
 namespace hfsm2 {
 namespace detail {
@@ -1468,6 +1472,10 @@ BitReadStreamT<NBC>::read() noexcept {
 
 }
 }
+
+#endif
+
+#endif
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 namespace hfsm2 {
@@ -2969,8 +2977,8 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , TPayload>>
 {
-	void clearTaskStatus  (const StateID stateId)		  noexcept {}
-	void verifyEmptyStatus(const StateID stateId)	const noexcept {}
+	void clearTaskStatus  (const StateID)				  noexcept {}
+	void verifyEmptyStatus(const StateID)			const noexcept {}
 
 #ifdef HFSM2_ENABLE_ASSERT
 	void verifyPlans()								const noexcept {}
@@ -8149,7 +8157,7 @@ struct ArgsT final {
 	static constexpr Long  TASK_CAPACITY	  = NTaskCapacity;
 #endif
 
-	using Payload	= TPayload;
+	using Payload		= TPayload;
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
 	using SerialBuffer	= StreamBufferT  <SERIAL_BITS>;
@@ -10598,7 +10606,6 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept 
 	}
 }
 
-// COMMON
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
@@ -10682,6 +10689,7 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 #endif
 
+// COMMON
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
