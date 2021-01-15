@@ -42,7 +42,7 @@
 
 // data shared between FSM states and outside code
 struct Context {
-	unsigned cycleCount;
+	unsigned cycleCount = 0;
 };
 
 // convenience typedef
