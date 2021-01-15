@@ -17,7 +17,7 @@ struct Units {
 //------------------------------------------------------------------------------
 
 template <typename TIndex, Short NUnitCount>
-class BitArray final {
+class BitArrayT final {
 public:
 	using Index	= TIndex;
 	using Unit	= unsigned char;
@@ -30,7 +30,7 @@ public:
 
 	class Bits {
 		template <typename, Short>
-		friend class BitArray;
+		friend class BitArrayT;
 
 	private:
 		HFSM2_INLINE explicit Bits(Unit* const storage,
@@ -66,7 +66,7 @@ public:
 
 	class CBits {
 		template <typename, Short>
-		friend class BitArray;
+		friend class BitArrayT;
 
 	private:
 		HFSM2_INLINE explicit CBits(const Unit* const storage,
@@ -91,7 +91,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 public:
-	BitArray() noexcept {
+	BitArrayT() noexcept {
 		clear();
 	}
 
@@ -126,7 +126,7 @@ private:
 //------------------------------------------------------------------------------
 
 template <typename TIndex>
-class BitArray<TIndex, 0> final {
+class BitArrayT<TIndex, 0> final {
 public:
 	HFSM2_INLINE void clear() noexcept {}
 };

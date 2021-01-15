@@ -4,7 +4,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, Long NC>
-StaticArray<T, NC>::StaticArray(const Item filler) noexcept {
+StaticArrayT<T, NC>::StaticArrayT(const Item filler) noexcept {
 	fill(filler);
 }
 
@@ -13,7 +13,7 @@ StaticArray<T, NC>::StaticArray(const Item filler) noexcept {
 template <typename T, Long NC>
 template <typename N>
 T&
-StaticArray<T, NC>::operator[] (const N i) noexcept {
+StaticArrayT<T, NC>::operator[] (const N i) noexcept {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
@@ -24,7 +24,7 @@ StaticArray<T, NC>::operator[] (const N i) noexcept {
 template <typename T, Long NC>
 template <typename N>
 const T&
-StaticArray<T, NC>::operator[] (const N i) const noexcept {
+StaticArrayT<T, NC>::operator[] (const N i) const noexcept {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
@@ -34,7 +34,7 @@ StaticArray<T, NC>::operator[] (const N i) const noexcept {
 
 template <typename T, Long NC>
 void
-StaticArray<T, NC>::fill(const Item filler) noexcept {
+StaticArrayT<T, NC>::fill(const Item filler) noexcept {
 	for (Long i = 0; i < CAPACITY; ++i)
 		_items[i] = filler;
 }
@@ -44,7 +44,7 @@ StaticArray<T, NC>::fill(const Item filler) noexcept {
 template <typename T, Long NC>
 template <typename TValue>
 Long
-Array<T, NC>::append(const TValue& value) noexcept {
+ArrayT<T, NC>::append(const TValue& value) noexcept {
 	HFSM2_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{value};
@@ -57,7 +57,7 @@ Array<T, NC>::append(const TValue& value) noexcept {
 template <typename T, Long NC>
 template <typename TValue>
 Long
-Array<T, NC>::append(TValue&& value) noexcept {
+ArrayT<T, NC>::append(TValue&& value) noexcept {
 	HFSM2_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{std::move(value)};
@@ -70,7 +70,7 @@ Array<T, NC>::append(TValue&& value) noexcept {
 template <typename T, Long NC>
 template <typename N>
 T&
-Array<T, NC>::operator[] (const N i) noexcept {
+ArrayT<T, NC>::operator[] (const N i) noexcept {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
@@ -81,7 +81,7 @@ Array<T, NC>::operator[] (const N i) noexcept {
 template <typename T, Long NC>
 template <typename N>
 const T&
-Array<T, NC>::operator[] (const N i) const noexcept {
+ArrayT<T, NC>::operator[] (const N i) const noexcept {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
@@ -91,8 +91,8 @@ Array<T, NC>::operator[] (const N i) const noexcept {
 
 template <typename T, Long NC>
 template <Long N>
-Array<T, NC>&
-Array<T, NC>::operator += (const Array<T, N>& other) noexcept {
+ArrayT<T, NC>&
+ArrayT<T, NC>::operator += (const ArrayT<T, N>& other) noexcept {
 	for (const auto& item : other)
 		append(item);
 

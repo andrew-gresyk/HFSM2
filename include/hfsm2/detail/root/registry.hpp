@@ -107,16 +107,16 @@ struct RegistryT<ArgsT<TContext
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArray<Parent, STATE_COUNT>;
+	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
 
-	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
-	using OrthoParents	= StaticArray<Parent, ORTHO_REGIONS>;
-	using OrthoUnits	= StaticArray<Units,  ORTHO_UNITS>;
+	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
+	using OrthoParents	= StaticArrayT<Parent, ORTHO_REGIONS>;
+	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
 
-	using CompoForks	= StaticArray<Short, COMPO_REGIONS>;
-	using OrthoForks	= BitArray	 <Short, ORTHO_UNITS>;
+	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
+	using OrthoForks	= BitArrayT	  <Short,  ORTHO_UNITS>;
 	using OrthoBits		= typename OrthoForks::Bits;
-	using CompoRemains	= BitArray	 <Short, COMPO_REGIONS>;
+	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
@@ -182,12 +182,12 @@ struct RegistryT<ArgsT<TContext
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArray<Parent, STATE_COUNT>;
-	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
+	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
+	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
 
-	using CompoForks	= StaticArray<Short, COMPO_REGIONS>;
-	using OrthoForks	= BitArray	 <Short, 0>;
-	using CompoRemains	= BitArray	 <Short, COMPO_REGIONS>;
+	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
+	using OrthoForks	= BitArrayT	  <Short,  0>;
+	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 

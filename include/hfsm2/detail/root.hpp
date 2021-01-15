@@ -78,8 +78,8 @@ public:
 #endif
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
-	using Prefix				= StaticArray<wchar_t, Info::REVERSE_DEPTH * 2 + 2>;
-	using Prefixes				= StaticArray<Prefix, Info::STATE_COUNT>;
+	using Prefix				= StaticArrayT<wchar_t, Info::REVERSE_DEPTH * 2 + 2>;
+	using Prefixes				= StaticArrayT<Prefix, Info::STATE_COUNT>;
 
 	using StructureStateInfos	= typename Args::StructureStateInfos;
 #endif
@@ -405,7 +405,7 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
-	bool replayTransitions(const Array<Transition,
+	bool replayTransitions(const ArrayT<Transition,
 						   NCount>& transitions)					  noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)
@@ -436,11 +436,11 @@ public:
 
 	/// @brief Array of 'StructureEntry' representing FSM structure
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	using Structure				= Array<StructureEntry, NAME_COUNT>;
+	using Structure				= ArrayT<StructureEntry, NAME_COUNT>;
 
 	/// @brief Array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	using ActivityHistory		= Array<char,			NAME_COUNT>;
+	using ActivityHistory		= ArrayT<char,			NAME_COUNT>;
 
 	/// @brief Get the array of 'StructureEntry' representing FSM structure
 	/// @return FSM structure

@@ -5,7 +5,7 @@ namespace detail {
 
 template <typename T>
 bool
-Iterator<T>::operator != (const Iterator<T>& HFSM2_IF_ASSERT(other)) const noexcept {
+IteratorT<T>::operator != (const IteratorT<T>& HFSM2_IF_ASSERT(other)) const noexcept {
 	HFSM2_ASSERT(&_container == &other._container);
 
 	return _cursor != _container.limit();
@@ -14,8 +14,8 @@ Iterator<T>::operator != (const Iterator<T>& HFSM2_IF_ASSERT(other)) const noexc
 //------------------------------------------------------------------------------
 
 template <typename T>
-Iterator<T>&
-Iterator<T>::operator ++() noexcept {
+IteratorT<T>&
+IteratorT<T>::operator ++() noexcept {
 	_cursor = _container.next(_cursor);
 
 	return *this;
@@ -25,7 +25,7 @@ Iterator<T>::operator ++() noexcept {
 
 template <typename T>
 bool
-Iterator<const T>::operator != (const Iterator<const T>& HFSM2_IF_ASSERT(other)) const noexcept {
+IteratorT<const T>::operator != (const IteratorT<const T>& HFSM2_IF_ASSERT(other)) const noexcept {
 	HFSM2_ASSERT(&_container == &other._container);
 
 	return _cursor != _container.limit();
@@ -34,8 +34,8 @@ Iterator<const T>::operator != (const Iterator<const T>& HFSM2_IF_ASSERT(other))
 //------------------------------------------------------------------------------
 
 template <typename T>
-Iterator<const T>&
-Iterator<const T>::operator ++() noexcept {
+IteratorT<const T>&
+IteratorT<const T>::operator ++() noexcept {
 	_cursor = _container.next(_cursor);
 
 	return *this;

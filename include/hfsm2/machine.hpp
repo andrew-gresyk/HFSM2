@@ -429,9 +429,7 @@ using UnsignedBitWidth = typename UnsignedBitWidthT<NCapacity>::Type;
 template <typename T1, typename T2>
 constexpr T1
 contain(const T1 x, const T2 to) noexcept {
-	const auto y = (T1) to;
-
-	return (x + y - 1) / y;
+	return (x + (T1) to - 1) / ((T1) to);
 }
 
 //------------------------------------------------------------------------------
@@ -500,25 +498,25 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TContainer>
-class Iterator {
+class IteratorT {
 public:
 	using Container = TContainer;
 	using Item		= typename Container::Item;
 
 	template <typename T, Long NCapacity>
-	friend class Array;
+	friend class ArrayT;
 
 private:
-	HFSM2_INLINE Iterator(Container& container,
+	HFSM2_INLINE IteratorT(Container& container,
 						  const Long cursor)	  noexcept
 		: _container{container}
 		, _cursor{cursor}
 	{}
 
 public:
-	HFSM2_INLINE bool operator != (const Iterator<Container>& other) const noexcept;
+	HFSM2_INLINE bool operator != (const IteratorT<Container>& other) const noexcept;
 
-	HFSM2_INLINE Iterator& operator ++()		  noexcept;
+	HFSM2_INLINE IteratorT& operator ++()		  noexcept;
 
 	HFSM2_INLINE	   Item& operator *()		  noexcept	{ return  _container[_cursor];	}
 	HFSM2_INLINE const Item& operator *()	const noexcept	{ return  _container[_cursor];	}
@@ -535,25 +533,25 @@ private:
 //------------------------------------------------------------------------------
 
 template <typename TContainer>
-class Iterator<const TContainer> {
+class IteratorT<const TContainer> {
 public:
 	using Container = TContainer;
 	using Item = typename Container::Item;
 
 	template <typename T, Long NCapacity>
-	friend class Array;
+	friend class ArrayT;
 
 private:
-	HFSM2_INLINE Iterator(const Container& container,
+	HFSM2_INLINE IteratorT(const Container& container,
 						  const Long cursor)	  noexcept
 		: _container{container}
 		, _cursor{cursor}
 	{}
 
 public:
-	HFSM2_INLINE bool operator != (const Iterator<const Container>& other) const noexcept;
+	HFSM2_INLINE bool operator != (const IteratorT<const Container>& other) const noexcept;
 
-	HFSM2_INLINE Iterator& operator ++()		  noexcept;
+	HFSM2_INLINE IteratorT& operator ++()		  noexcept;
 
 	HFSM2_INLINE const Item& operator *()	const noexcept	{ return _container[_cursor];	}
 
@@ -577,7 +575,7 @@ namespace detail {
 
 template <typename T>
 bool
-Iterator<T>::operator != (const Iterator<T>& HFSM2_IF_ASSERT(other)) const noexcept {
+IteratorT<T>::operator != (const IteratorT<T>& HFSM2_IF_ASSERT(other)) const noexcept {
 	HFSM2_ASSERT(&_container == &other._container);
 
 	return _cursor != _container.limit();
@@ -586,8 +584,8 @@ Iterator<T>::operator != (const Iterator<T>& HFSM2_IF_ASSERT(other)) const noexc
 //------------------------------------------------------------------------------
 
 template <typename T>
-Iterator<T>&
-Iterator<T>::operator ++() noexcept {
+IteratorT<T>&
+IteratorT<T>::operator ++() noexcept {
 	_cursor = _container.next(_cursor);
 
 	return *this;
@@ -597,7 +595,7 @@ Iterator<T>::operator ++() noexcept {
 
 template <typename T>
 bool
-Iterator<const T>::operator != (const Iterator<const T>& HFSM2_IF_ASSERT(other)) const noexcept {
+IteratorT<const T>::operator != (const IteratorT<const T>& HFSM2_IF_ASSERT(other)) const noexcept {
 	HFSM2_ASSERT(&_container == &other._container);
 
 	return _cursor != _container.limit();
@@ -606,8 +604,8 @@ Iterator<const T>::operator != (const Iterator<const T>& HFSM2_IF_ASSERT(other))
 //------------------------------------------------------------------------------
 
 template <typename T>
-Iterator<const T>&
-Iterator<const T>::operator ++() noexcept {
+IteratorT<const T>&
+IteratorT<const T>::operator ++() noexcept {
 	_cursor = _container.next(_cursor);
 
 	return *this;
@@ -623,7 +621,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, Long NCapacity>
-class StaticArray {
+class StaticArrayT {
 public:
 	static constexpr Long CAPACITY = NCapacity;
 	static constexpr Long DUMMY	   = INVALID_LONG;
@@ -632,8 +630,8 @@ public:
 	using Index = UnsignedCapacity<CAPACITY>;
 
 public:
-	HFSM2_INLINE StaticArray() = default;
-	HFSM2_INLINE StaticArray(const Item filler)					  noexcept;
+	HFSM2_INLINE StaticArrayT() = default;
+	HFSM2_INLINE StaticArrayT(const Item filler)				  noexcept;
 
 	template <typename N>
 	HFSM2_INLINE	   Item& operator[] (const N i)				  noexcept;
@@ -641,18 +639,18 @@ public:
 	template <typename N>
 	HFSM2_INLINE const Item& operator[] (const N i)			const noexcept;
 
-	HFSM2_INLINE Long count() const								  noexcept	{ return CAPACITY;									}
+	HFSM2_INLINE Long count() const								  noexcept	{ return CAPACITY;										}
 
 	HFSM2_INLINE void fill(const Item filler)					  noexcept;
-	HFSM2_INLINE void clear()									  noexcept	{ fill(INVALID_SHORT);								}
+	HFSM2_INLINE void clear()									  noexcept	{ fill(INVALID_SHORT);									}
 
-	HFSM2_INLINE Iterator<      StaticArray>  begin()			  noexcept	{ return Iterator<      StaticArray>(*this,     0); }
-	HFSM2_INLINE Iterator<const StaticArray>  begin()		const noexcept	{ return Iterator<const StaticArray>(*this,     0); }
-	HFSM2_INLINE Iterator<const StaticArray> cbegin()		const noexcept	{ return Iterator<const StaticArray>(*this,     0); }
+	HFSM2_INLINE IteratorT<      StaticArrayT>  begin()			  noexcept	{ return IteratorT<      StaticArrayT>(*this,     0);	}
+	HFSM2_INLINE IteratorT<const StaticArrayT>  begin()		const noexcept	{ return IteratorT<const StaticArrayT>(*this,     0);	}
+	HFSM2_INLINE IteratorT<const StaticArrayT> cbegin()		const noexcept	{ return IteratorT<const StaticArrayT>(*this,     0);	}
 
-	HFSM2_INLINE Iterator<      StaticArray>    end()			  noexcept	{ return Iterator<      StaticArray>(*this, DUMMY);	}
-	HFSM2_INLINE Iterator<const StaticArray>    end()		const noexcept	{ return Iterator<const StaticArray>(*this, DUMMY);	}
-	HFSM2_INLINE Iterator<const StaticArray>   cend()		const noexcept	{ return Iterator<const StaticArray>(*this, DUMMY);	}
+	HFSM2_INLINE IteratorT<      StaticArrayT>    end()			  noexcept	{ return IteratorT<      StaticArrayT>(*this, DUMMY);	}
+	HFSM2_INLINE IteratorT<const StaticArrayT>    end()		const noexcept	{ return IteratorT<const StaticArrayT>(*this, DUMMY);	}
+	HFSM2_INLINE IteratorT<const StaticArrayT>   cend()		const noexcept	{ return IteratorT<const StaticArrayT>(*this, DUMMY);	}
 
 private:
 	Item _items[CAPACITY];
@@ -661,19 +659,19 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-struct StaticArray<T, 0> {
+struct StaticArrayT<T, 0> {
 	using Item  = T;
 
-	HFSM2_INLINE StaticArray() = default;
-	HFSM2_INLINE StaticArray(const Item) noexcept {}
+	HFSM2_INLINE StaticArrayT() = default;
+	HFSM2_INLINE StaticArrayT(const Item) noexcept {}
 };
 
 //------------------------------------------------------------------------------
 
 template <typename T, Long NCapacity>
-class Array {
+class ArrayT {
 	template <typename>
-	friend class Iterator;
+	friend class IteratorT;
 
 public:
 	static constexpr Long CAPACITY = NCapacity;
@@ -683,37 +681,37 @@ public:
 	using Index = UnsignedCapacity<CAPACITY>;
 
 public:
-	HFSM2_INLINE void clear()									  noexcept	{ _count = 0;		}
+	HFSM2_INLINE void clear()										  noexcept	{ _count = 0;		}
 
 	// TODO: replace with 'emplace<>()'?
 	template <typename TValue>
-	HFSM2_INLINE Long append(const TValue& value)				  noexcept;
+	HFSM2_INLINE Long append(const TValue& value)					  noexcept;
 
 	template <typename TValue>
-	HFSM2_INLINE Long append(	  TValue&& value)				  noexcept;
+	HFSM2_INLINE Long append(	  TValue&& value)					  noexcept;
 
 	template <typename N>
-	HFSM2_INLINE	   Item& operator[] (const N i)				  noexcept;
+	HFSM2_INLINE	   Item& operator[] (const N i)					  noexcept;
 
 	template <typename N>
-	HFSM2_INLINE const Item& operator[] (const N i)			const noexcept;
+	HFSM2_INLINE const Item& operator[] (const N i)				const noexcept;
 
-	HFSM2_INLINE Long count()								const noexcept	{ return _count;	}
+	HFSM2_INLINE Long count()									const noexcept	{ return _count;	}
 
 	template <Long N>
-	HFSM2_INLINE Array& operator += (const Array<Item, N>& other) noexcept;
+	HFSM2_INLINE ArrayT& operator += (const ArrayT<Item, N>& other)	  noexcept;
 
-	HFSM2_INLINE Iterator<      Array>  begin()					  noexcept	{ return Iterator<		Array>(*this,     0);	}
-	HFSM2_INLINE Iterator<const Array>  begin()				const noexcept	{ return Iterator<const Array>(*this,     0);	}
-	HFSM2_INLINE Iterator<const Array> cbegin()				const noexcept	{ return Iterator<const Array>(*this,     0);	}
+	HFSM2_INLINE IteratorT<      ArrayT>  begin()					  noexcept	{ return IteratorT<		 ArrayT>(*this,     0);	}
+	HFSM2_INLINE IteratorT<const ArrayT>  begin()				const noexcept	{ return IteratorT<const ArrayT>(*this,     0);	}
+	HFSM2_INLINE IteratorT<const ArrayT> cbegin()				const noexcept	{ return IteratorT<const ArrayT>(*this,     0);	}
 
-	HFSM2_INLINE Iterator<      Array>	  end()					  noexcept	{ return Iterator<		Array>(*this, DUMMY);	}
-	HFSM2_INLINE Iterator<const Array>	  end()				const noexcept	{ return Iterator<const Array>(*this, DUMMY);	}
-	HFSM2_INLINE Iterator<const Array>   cend()				const noexcept	{ return Iterator<const Array>(*this, DUMMY);	}
+	HFSM2_INLINE IteratorT<      ArrayT>	  end()					  noexcept	{ return IteratorT<		 ArrayT>(*this, DUMMY);	}
+	HFSM2_INLINE IteratorT<const ArrayT>	  end()				const noexcept	{ return IteratorT<const ArrayT>(*this, DUMMY);	}
+	HFSM2_INLINE IteratorT<const ArrayT>   cend()				const noexcept	{ return IteratorT<const ArrayT>(*this, DUMMY);	}
 
 private:
-	HFSM2_INLINE Long next(const Long i)					const noexcept	{ return i + 1;		}
-	HFSM2_INLINE Long limit()								const noexcept	{ return _count;	}
+	HFSM2_INLINE Long next(const Long i)						const noexcept	{ return i + 1;		}
+	HFSM2_INLINE Long limit()									const noexcept	{ return _count;	}
 
 private:
 	Long _count = 0;
@@ -733,7 +731,7 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-class Array<T, 0> {
+class ArrayT<T, 0> {
 public:
 	static constexpr Long CAPACITY = 0;
 	static constexpr Long DUMMY	   = INVALID_LONG;
@@ -753,7 +751,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, Long NC>
-StaticArray<T, NC>::StaticArray(const Item filler) noexcept {
+StaticArrayT<T, NC>::StaticArrayT(const Item filler) noexcept {
 	fill(filler);
 }
 
@@ -762,7 +760,7 @@ StaticArray<T, NC>::StaticArray(const Item filler) noexcept {
 template <typename T, Long NC>
 template <typename N>
 T&
-StaticArray<T, NC>::operator[] (const N i) noexcept {
+StaticArrayT<T, NC>::operator[] (const N i) noexcept {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
@@ -773,7 +771,7 @@ StaticArray<T, NC>::operator[] (const N i) noexcept {
 template <typename T, Long NC>
 template <typename N>
 const T&
-StaticArray<T, NC>::operator[] (const N i) const noexcept {
+StaticArrayT<T, NC>::operator[] (const N i) const noexcept {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
@@ -783,7 +781,7 @@ StaticArray<T, NC>::operator[] (const N i) const noexcept {
 
 template <typename T, Long NC>
 void
-StaticArray<T, NC>::fill(const Item filler) noexcept {
+StaticArrayT<T, NC>::fill(const Item filler) noexcept {
 	for (Long i = 0; i < CAPACITY; ++i)
 		_items[i] = filler;
 }
@@ -793,7 +791,7 @@ StaticArray<T, NC>::fill(const Item filler) noexcept {
 template <typename T, Long NC>
 template <typename TValue>
 Long
-Array<T, NC>::append(const TValue& value) noexcept {
+ArrayT<T, NC>::append(const TValue& value) noexcept {
 	HFSM2_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{value};
@@ -806,7 +804,7 @@ Array<T, NC>::append(const TValue& value) noexcept {
 template <typename T, Long NC>
 template <typename TValue>
 Long
-Array<T, NC>::append(TValue&& value) noexcept {
+ArrayT<T, NC>::append(TValue&& value) noexcept {
 	HFSM2_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{std::move(value)};
@@ -819,7 +817,7 @@ Array<T, NC>::append(TValue&& value) noexcept {
 template <typename T, Long NC>
 template <typename N>
 T&
-Array<T, NC>::operator[] (const N i) noexcept {
+ArrayT<T, NC>::operator[] (const N i) noexcept {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
@@ -830,7 +828,7 @@ Array<T, NC>::operator[] (const N i) noexcept {
 template <typename T, Long NC>
 template <typename N>
 const T&
-Array<T, NC>::operator[] (const N i) const noexcept {
+ArrayT<T, NC>::operator[] (const N i) const noexcept {
 	HFSM2_ASSERT(0 <= i && i < CAPACITY);
 
 	return _items[(Index) i];
@@ -840,8 +838,8 @@ Array<T, NC>::operator[] (const N i) const noexcept {
 
 template <typename T, Long NC>
 template <Long N>
-Array<T, NC>&
-Array<T, NC>::operator += (const Array<T, N>& other) noexcept {
+ArrayT<T, NC>&
+ArrayT<T, NC>::operator += (const ArrayT<T, N>& other) noexcept {
 	for (const auto& item : other)
 		append(item);
 
@@ -871,7 +869,7 @@ struct Units {
 //------------------------------------------------------------------------------
 
 template <typename TIndex, Short NUnitCount>
-class BitArray final {
+class BitArrayT final {
 public:
 	using Index	= TIndex;
 	using Unit	= unsigned char;
@@ -884,7 +882,7 @@ public:
 
 	class Bits {
 		template <typename, Short>
-		friend class BitArray;
+		friend class BitArrayT;
 
 	private:
 		HFSM2_INLINE explicit Bits(Unit* const storage,
@@ -920,7 +918,7 @@ public:
 
 	class CBits {
 		template <typename, Short>
-		friend class BitArray;
+		friend class BitArrayT;
 
 	private:
 		HFSM2_INLINE explicit CBits(const Unit* const storage,
@@ -945,7 +943,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 public:
-	BitArray() noexcept {
+	BitArrayT() noexcept {
 		clear();
 	}
 
@@ -980,7 +978,7 @@ private:
 //------------------------------------------------------------------------------
 
 template <typename TIndex>
-class BitArray<TIndex, 0> final {
+class BitArrayT<TIndex, 0> final {
 public:
 	HFSM2_INLINE void clear() noexcept {}
 };
@@ -996,7 +994,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TI, Short NC>
-BitArray<TI, NC>::Bits::operator bool() const noexcept {
+BitArrayT<TI, NC>::Bits::operator bool() const noexcept {
 	const Short fullUnits = _width / UNIT_WIDTH;
 
 	// TODO: cover this case
@@ -1015,7 +1013,7 @@ BitArray<TI, NC>::Bits::operator bool() const noexcept {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::Bits::clear() noexcept {
+BitArrayT<TI, NC>::Bits::clear() noexcept {
 	const Index unitCount = contain(_width, UNIT_WIDTH);
 
 	for (Index i = 0; i < unitCount; ++i)
@@ -1027,7 +1025,7 @@ BitArray<TI, NC>::Bits::clear() noexcept {
 template <typename TI, Short NC>
 template <Short NIndex>
 bool
-BitArray<TI, NC>::Bits::get() const noexcept {
+BitArrayT<TI, NC>::Bits::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -1043,7 +1041,7 @@ BitArray<TI, NC>::Bits::get() const noexcept {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::Bits::set() noexcept {
+BitArrayT<TI, NC>::Bits::set() noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -1059,7 +1057,7 @@ BitArray<TI, NC>::Bits::set() noexcept {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::Bits::clear() noexcept {
+BitArrayT<TI, NC>::Bits::clear() noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -1074,7 +1072,7 @@ BitArray<TI, NC>::Bits::clear() noexcept {
 
 template <typename TI, Short NC>
 bool
-BitArray<TI, NC>::Bits::get(const Index index) const noexcept {
+BitArrayT<TI, NC>::Bits::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / UNIT_WIDTH;
@@ -1088,7 +1086,7 @@ BitArray<TI, NC>::Bits::get(const Index index) const noexcept {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::Bits::set(const Index index) noexcept {
+BitArrayT<TI, NC>::Bits::set(const Index index) noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / UNIT_WIDTH;
@@ -1102,7 +1100,7 @@ BitArray<TI, NC>::Bits::set(const Index index) noexcept {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::Bits::clear(const Index index) noexcept {
+BitArrayT<TI, NC>::Bits::clear(const Index index) noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / UNIT_WIDTH;
@@ -1115,7 +1113,7 @@ BitArray<TI, NC>::Bits::clear(const Index index) noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TI, Short NC>
-BitArray<TI, NC>::CBits::operator bool() const noexcept {
+BitArrayT<TI, NC>::CBits::operator bool() const noexcept {
 	const Short fullUnits = _width / UNIT_WIDTH;
 
 	for (Index i = 0; i < fullUnits; ++i)
@@ -1134,7 +1132,7 @@ BitArray<TI, NC>::CBits::operator bool() const noexcept {
 template <typename TI, Short NC>
 template <Short NIndex>
 bool
-BitArray<TI, NC>::CBits::get() const noexcept {
+BitArrayT<TI, NC>::CBits::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < _width, "");
 
@@ -1149,7 +1147,7 @@ BitArray<TI, NC>::CBits::get() const noexcept {
 
 template <typename TI, Short NC>
 bool
-BitArray<TI, NC>::CBits::get(const Index index) const noexcept {
+BitArrayT<TI, NC>::CBits::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / UNIT_WIDTH;
@@ -1163,7 +1161,7 @@ BitArray<TI, NC>::CBits::get(const Index index) const noexcept {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::clear() noexcept {
+BitArrayT<TI, NC>::clear() noexcept {
 	for (Unit& unit: _storage)
 		unit = Unit{0};
 }
@@ -1173,7 +1171,7 @@ BitArray<TI, NC>::clear() noexcept {
 template <typename TI, Short NC>
 template <Short NIndex>
 bool
-BitArray<TI, NC>::get() const noexcept {
+BitArrayT<TI, NC>::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < BIT_COUNT, "");
 
@@ -1189,7 +1187,7 @@ BitArray<TI, NC>::get() const noexcept {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::set() noexcept {
+BitArrayT<TI, NC>::set() noexcept {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < BIT_COUNT, "");
 
@@ -1205,7 +1203,7 @@ BitArray<TI, NC>::set() noexcept {
 template <typename TI, Short NC>
 template <Short NIndex>
 void
-BitArray<TI, NC>::clear() noexcept {
+BitArrayT<TI, NC>::clear() noexcept {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < BIT_COUNT, "");
 
@@ -1220,7 +1218,7 @@ BitArray<TI, NC>::clear() noexcept {
 
 template <typename TI, Short NC>
 bool
-BitArray<TI, NC>::get(const Index index) const noexcept {
+BitArrayT<TI, NC>::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < BIT_COUNT);
 
 	const Index unit = index / UNIT_WIDTH;
@@ -1234,7 +1232,7 @@ BitArray<TI, NC>::get(const Index index) const noexcept {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::set(const Index index) noexcept {
+BitArrayT<TI, NC>::set(const Index index) noexcept {
 	HFSM2_ASSERT(index < BIT_COUNT);
 
 	const Index unit = index / UNIT_WIDTH;
@@ -1248,7 +1246,7 @@ BitArray<TI, NC>::set(const Index index) noexcept {
 
 template <typename TI, Short NC>
 void
-BitArray<TI, NC>::clear(const Index index) noexcept {
+BitArrayT<TI, NC>::clear(const Index index) noexcept {
 	HFSM2_ASSERT(index < BIT_COUNT);
 
 	const Index unit = index / UNIT_WIDTH;
@@ -1262,8 +1260,8 @@ BitArray<TI, NC>::clear(const Index index) noexcept {
 
 template <typename TI, Short NC>
 template <Short NUnit, Short NWidth>
-typename BitArray<TI, NC>::Bits
-BitArray<TI, NC>::bits() noexcept {
+typename BitArrayT<TI, NC>::Bits
+BitArrayT<TI, NC>::bits() noexcept {
 	constexpr Short UNIT  = NUnit;
 	constexpr Short WIDTH = NWidth;
 	static_assert(UNIT + contain(WIDTH, UNIT_WIDTH) <= UNIT_COUNT, "");
@@ -1275,8 +1273,8 @@ BitArray<TI, NC>::bits() noexcept {
 
 template <typename TI, Short NC>
 template <Short NUnit, Short NWidth>
-typename BitArray<TI, NC>::CBits
-BitArray<TI, NC>::bits() const noexcept {
+typename BitArrayT<TI, NC>::CBits
+BitArrayT<TI, NC>::bits() const noexcept {
 	constexpr Short UNIT  = NUnit;
 	constexpr Short WIDTH = NWidth;
 	static_assert(UNIT + contain(WIDTH, UNIT_WIDTH) <= UNIT_COUNT, "");
@@ -1287,8 +1285,8 @@ BitArray<TI, NC>::bits() const noexcept {
 //------------------------------------------------------------------------------
 
 template <typename TI, Short NC>
-typename BitArray<TI, NC>::Bits
-BitArray<TI, NC>::bits(const Units& units) noexcept {
+typename BitArrayT<TI, NC>::Bits
+BitArrayT<TI, NC>::bits(const Units& units) noexcept {
 	HFSM2_ASSERT(units.unit + contain(units.width, UNIT_WIDTH) <= UNIT_COUNT);
 
 	return Bits{_storage + units.unit, units.width};
@@ -1297,8 +1295,8 @@ BitArray<TI, NC>::bits(const Units& units) noexcept {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TI, Short NC>
-typename BitArray<TI, NC>::CBits
-BitArray<TI, NC>::bits(const Units& units) const noexcept {
+typename BitArrayT<TI, NC>::CBits
+BitArrayT<TI, NC>::bits(const Units& units) const noexcept {
 	HFSM2_ASSERT(units.unit + contain(units.width, UNIT_WIDTH) <= UNIT_COUNT);
 
 	return CBits{_storage + units.unit, units.width};
@@ -1314,7 +1312,7 @@ namespace detail {
 //------------------------------------------------------------------------------
 
 template <Long NBitCapacity>
-struct StreamBuffer {
+struct StreamBufferT {
 	static constexpr Long BIT_CAPACITY	= NBitCapacity;
 	static constexpr Long BYTE_COUNT	= contain(BIT_CAPACITY, 8u);
 
@@ -1332,14 +1330,14 @@ struct StreamBuffer {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <Long NBitCapacity>
-class BitWriteStream final {
+class BitWriteStreamT final {
 public:
 	static constexpr Long BIT_CAPACITY = NBitCapacity;
 
-	using Buffer = StreamBuffer<BIT_CAPACITY>;
+	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	BitWriteStream(Buffer& _buffer)						  noexcept;
+	BitWriteStreamT(Buffer& _buffer)					  noexcept;
 
 	template <Short NBitWidth>
 	void write(const UnsignedBitWidth<NBitWidth> item)	  noexcept;
@@ -1351,14 +1349,14 @@ private:
 //------------------------------------------------------------------------------
 
 template <Long NBitCapacity>
-class BitReadStream final {
+class BitReadStreamT final {
 public:
 	static constexpr Long BIT_CAPACITY = NBitCapacity;
 
-	using Buffer = StreamBuffer<BIT_CAPACITY>;
+	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	BitReadStream(const Buffer& buffer)					  noexcept
+	BitReadStreamT(const Buffer& buffer)				  noexcept
 		: _buffer{buffer}
 	{}
 
@@ -1385,7 +1383,7 @@ namespace detail {
 
 template <Long NBC>
 void
-StreamBuffer<NBC>::clear() noexcept {
+StreamBufferT<NBC>::clear() noexcept {
 	bitSize = 0;
 	fill(payload, 0);
 }
@@ -1393,7 +1391,7 @@ StreamBuffer<NBC>::clear() noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <Long NBC>
-BitWriteStream<NBC>::BitWriteStream(Buffer& buffer) noexcept
+BitWriteStreamT<NBC>::BitWriteStreamT(Buffer& buffer) noexcept
 	: _buffer{buffer}
 {
 	_buffer.clear();
@@ -1404,7 +1402,7 @@ BitWriteStream<NBC>::BitWriteStream(Buffer& buffer) noexcept
 template <Long NBC>
 template <Short NBitWidth>
 void
-BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) noexcept {
+BitWriteStreamT<NBC>::write(const UnsignedBitWidth<NBitWidth> item) noexcept {
 	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
@@ -1435,7 +1433,7 @@ BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) noexcept {
 template <Long NBC>
 template <Short NBitWidth>
 UnsignedBitWidth<NBitWidth>
-BitReadStream<NBC>::read() noexcept {
+BitReadStreamT<NBC>::read() noexcept {
 	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
@@ -2866,13 +2864,13 @@ struct PlanDataT<ArgsT<TContext
 	static constexpr Short TASK_CAPACITY = NTaskCapacity;
 
 	using Task			= TaskT<Payload>;
-	using Tasks			= TaskListT<Payload, TASK_CAPACITY>;
-	using TaskLinks		= StaticArray<TaskLink, TASK_CAPACITY>;
-	using Payloads		= StaticArray<Payload, TASK_CAPACITY>;
+	using Tasks			= TaskListT	   <Payload, TASK_CAPACITY>;
+	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
+	using Payloads		= StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds	= Array<Bounds, RegionList::SIZE>;
-	using TasksBits		= BitArray<StateID, StateList::SIZE>;
-	using RegionBits	= BitArray<RegionID, RegionList::SIZE>;
+	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
+	using TasksBits		= BitArrayT<StateID,  StateList::SIZE>;
+	using RegionBits	= BitArrayT<RegionID, RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -2925,11 +2923,11 @@ struct PlanDataT<ArgsT<TContext
 
 	using Task			= TaskT<void>;
 	using Tasks			= TaskListT<void, TASK_CAPACITY>;
-	using TaskLinks		= StaticArray<TaskLink, TASK_CAPACITY>;
+	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
-	using TasksBounds	= Array<Bounds, RegionList::SIZE>;
-	using TasksBits		= BitArray<StateID, StateList::SIZE>;
-	using RegionBits	= BitArray<RegionID, RegionList::SIZE>;
+	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
+	using TasksBits		= BitArrayT<StateID,  StateList::SIZE>;
+	using RegionBits	= BitArrayT<RegionID, RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -3232,8 +3230,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Iterator {
-		HFSM2_INLINE Iterator(const CPlanT& plan)		  noexcept;
+	struct IteratorT {
+		HFSM2_INLINE IteratorT(const CPlanT& plan)		  noexcept;
 
 		HFSM2_INLINE explicit operator bool()		const noexcept;
 
@@ -3264,7 +3262,7 @@ private:
 public:
 	HFSM2_INLINE explicit operator bool()			const noexcept;
 
-	HFSM2_INLINE Iterator first()						  noexcept	{ return Iterator{*this};					}
+	HFSM2_INLINE IteratorT first()						  noexcept	{ return IteratorT{*this};					}
 
 private:
 	const PlanData& _planData;
@@ -3291,8 +3289,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Iterator {
-		HFSM2_INLINE Iterator(PlanBaseT& plan)			  noexcept;
+	struct IteratorT {
+		HFSM2_INLINE IteratorT(PlanBaseT& plan)			  noexcept;
 
 		HFSM2_INLINE explicit operator bool()		const noexcept;
 
@@ -3537,8 +3535,8 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Begin iteration over plan tasks for the current region
-	/// @return Iterator to the first task
-	HFSM2_INLINE  Iterator first()												  noexcept { return  Iterator{*this};										}
+	/// @return IteratorT to the first task
+	HFSM2_INLINE  IteratorT first()												  noexcept { return  IteratorT{*this};										}
 
 	/// @brief Begin iteration over plan tasks
 	/// @return CIterator to the first task
@@ -4105,7 +4103,7 @@ Status::clear() noexcept {
 #ifdef HFSM2_ENABLE_PLANS
 
 template <typename TArgs>
-CPlanT<TArgs>::Iterator::Iterator(const CPlanT& plan) noexcept
+CPlanT<TArgs>::IteratorT::IteratorT(const CPlanT& plan) noexcept
 	: _plan{plan}
 	, _curr{plan._bounds.first}
 {
@@ -4115,7 +4113,7 @@ CPlanT<TArgs>::Iterator::Iterator(const CPlanT& plan) noexcept
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-CPlanT<TArgs>::Iterator::operator bool() const noexcept {
+CPlanT<TArgs>::IteratorT::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < CPlanT::TASK_CAPACITY || _curr == INVALID_LONG);
 
 	return _curr < CPlanT::TASK_CAPACITY;
@@ -4125,7 +4123,7 @@ CPlanT<TArgs>::Iterator::operator bool() const noexcept {
 
 template <typename TArgs>
 void
-CPlanT<TArgs>::Iterator::operator ++() noexcept {
+CPlanT<TArgs>::IteratorT::operator ++() noexcept {
 	_curr = _next;
 	_next = next();
 }
@@ -4134,7 +4132,7 @@ CPlanT<TArgs>::Iterator::operator ++() noexcept {
 
 template <typename TArgs>
 Long
-CPlanT<TArgs>::Iterator::next() const noexcept {
+CPlanT<TArgs>::IteratorT::next() const noexcept {
 	if (_curr < CPlanT::TASK_CAPACITY) {
 		const TaskLink& link = _plan._planData.taskLinks[_curr];
 
@@ -4171,7 +4169,7 @@ CPlanT<TArgs>::operator bool() const noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-PlanBaseT<TArgs>::Iterator::Iterator(PlanBaseT& plan) noexcept
+PlanBaseT<TArgs>::IteratorT::IteratorT(PlanBaseT& plan) noexcept
 	: _plan{plan}
 	, _curr{plan._bounds.first}
 {
@@ -4181,7 +4179,7 @@ PlanBaseT<TArgs>::Iterator::Iterator(PlanBaseT& plan) noexcept
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-PlanBaseT<TArgs>::Iterator::operator bool() const noexcept {
+PlanBaseT<TArgs>::IteratorT::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < PlanBaseT::TASK_CAPACITY || _curr == INVALID_LONG);
 
 	return _curr < PlanBaseT::TASK_CAPACITY;
@@ -4191,7 +4189,7 @@ PlanBaseT<TArgs>::Iterator::operator bool() const noexcept {
 
 template <typename TArgs>
 void
-PlanBaseT<TArgs>::Iterator::operator ++() noexcept {
+PlanBaseT<TArgs>::IteratorT::operator ++() noexcept {
 	_curr = _next;
 	_next = next();
 }
@@ -4200,7 +4198,7 @@ PlanBaseT<TArgs>::Iterator::operator ++() noexcept {
 
 template <typename TArgs>
 void
-PlanBaseT<TArgs>::Iterator::remove() noexcept {
+PlanBaseT<TArgs>::IteratorT::remove() noexcept {
 	_plan.remove(_curr);
 }
 
@@ -4208,7 +4206,7 @@ PlanBaseT<TArgs>::Iterator::remove() noexcept {
 
 template <typename TArgs>
 Long
-PlanBaseT<TArgs>::Iterator::next() const noexcept {
+PlanBaseT<TArgs>::IteratorT::next() const noexcept {
 	if (_curr < PlanBaseT::TASK_CAPACITY) {
 		const TaskLink& link = _plan._planData.taskLinks[_curr];
 
@@ -4547,16 +4545,16 @@ struct RegistryT<ArgsT<TContext
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArray<Parent, STATE_COUNT>;
+	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
 
-	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
-	using OrthoParents	= StaticArray<Parent, ORTHO_REGIONS>;
-	using OrthoUnits	= StaticArray<Units,  ORTHO_UNITS>;
+	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
+	using OrthoParents	= StaticArrayT<Parent, ORTHO_REGIONS>;
+	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
 
-	using CompoForks	= StaticArray<Short, COMPO_REGIONS>;
-	using OrthoForks	= BitArray	 <Short, ORTHO_UNITS>;
+	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
+	using OrthoForks	= BitArrayT	  <Short,  ORTHO_UNITS>;
 	using OrthoBits		= typename OrthoForks::Bits;
-	using CompoRemains	= BitArray	 <Short, COMPO_REGIONS>;
+	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
@@ -4622,12 +4620,12 @@ struct RegistryT<ArgsT<TContext
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArray<Parent, STATE_COUNT>;
-	using CompoParents	= StaticArray<Parent, COMPO_REGIONS>;
+	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
+	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
 
-	using CompoForks	= StaticArray<Short, COMPO_REGIONS>;
-	using OrthoForks	= BitArray	 <Short, 0>;
-	using CompoRemains	= BitArray	 <Short, COMPO_REGIONS>;
+	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
+	using OrthoForks	= BitArrayT	  <Short,  0>;
+	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
@@ -5106,11 +5104,11 @@ protected:
 
 	using Payload			= typename TArgs::Payload;
 	using Transition		= TransitionT<Payload>;
-	using TransitionSet		= Array<Transition, TArgs::COMPO_REGIONS>;
-	using TransitionSets	= Array<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
+	using TransitionSet		= ArrayT<Transition, TArgs::COMPO_REGIONS>;
+	using TransitionSets	= ArrayT<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-	using TransitionTargets	= StaticArray<Short, TArgs::STATE_COUNT>;
+	using TransitionTargets	= StaticArrayT<Short, TArgs::STATE_COUNT>;
 #endif
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -5470,7 +5468,7 @@ protected:
 	using typename PlanControl::Transition;
 
 #ifdef HFSM2_ENABLE_PLANS
-	using TasksBits		= BitArray<StateID, StateList::SIZE>;
+	using TasksBits		= BitArrayT<StateID, StateList::SIZE>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7492,7 +7490,7 @@ namespace detail {
 
 template <StateID NS, typename TA, typename TH>
 struct RegisterT {
-	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
+	using StateParents	= StaticArrayT<Parent, TA::STATE_COUNT>;
 	using StateList		= typename TA::StateList;
 
 	static constexpr StateID STATE_ID = NS;
@@ -7513,7 +7511,7 @@ struct RegisterT {
 
 template <StateID NS, typename TA>
 struct RegisterT<NS, TA, StaticEmptyT<TA>> {
-	using StateParents = StaticArray<Parent, TA::STATE_COUNT>;
+	using StateParents = StaticArrayT<Parent, TA::STATE_COUNT>;
 
 	static HFSM2_INLINE
 	void
@@ -8154,12 +8152,12 @@ struct ArgsT final {
 	using Payload	= TPayload;
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
-	using SerialBuffer	= StreamBuffer	<SERIAL_BITS>;
-	using WriteStream	= BitWriteStream<SERIAL_BITS>;
-	using ReadStream	= BitReadStream	<SERIAL_BITS>;
+	using SerialBuffer	= StreamBufferT  <SERIAL_BITS>;
+	using WriteStream	= BitWriteStreamT<SERIAL_BITS>;
+	using ReadStream	= BitReadStreamT <SERIAL_BITS>;
 #endif
 
-	HFSM2_IF_STRUCTURE_REPORT(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
+	HFSM2_IF_STRUCTURE_REPORT(using StructureStateInfos = ArrayT<StructureStateInfo, STATE_COUNT>);
 };
 
 //------------------------------------------------------------------------------
@@ -13037,8 +13035,8 @@ public:
 #endif
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
-	using Prefix				= StaticArray<wchar_t, Info::REVERSE_DEPTH * 2 + 2>;
-	using Prefixes				= StaticArray<Prefix, Info::STATE_COUNT>;
+	using Prefix				= StaticArrayT<wchar_t, Info::REVERSE_DEPTH * 2 + 2>;
+	using Prefixes				= StaticArrayT<Prefix, Info::STATE_COUNT>;
 
 	using StructureStateInfos	= typename Args::StructureStateInfos;
 #endif
@@ -13364,7 +13362,7 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
-	bool replayTransitions(const Array<Transition,
+	bool replayTransitions(const ArrayT<Transition,
 						   NCount>& transitions)					  noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)
@@ -13395,11 +13393,11 @@ public:
 
 	/// @brief Array of 'StructureEntry' representing FSM structure
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	using Structure				= Array<StructureEntry, NAME_COUNT>;
+	using Structure				= ArrayT<StructureEntry, NAME_COUNT>;
 
 	/// @brief Array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	using ActivityHistory		= Array<char,			NAME_COUNT>;
+	using ActivityHistory		= ArrayT<char,			NAME_COUNT>;
 
 	/// @brief Get the array of 'StructureEntry' representing FSM structure
 	/// @return FSM structure
@@ -14385,7 +14383,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 template <typename TG, typename TA>
 template <Long NCount>
 bool
-R_<TG, TA>::replayTransitions(const Array<Transition, NCount>& transitions) noexcept {
+R_<TG, TA>::replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept {
 	if (transitions.count())
 		return replayTransitions(&transitions[0],
 								 transitions.count());

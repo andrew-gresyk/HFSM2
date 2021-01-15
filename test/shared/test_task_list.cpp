@@ -1,7 +1,7 @@
 #define HFSM2_ENABLE_PLANS
 #include "../tools.hpp"
 
-namespace test_list {
+namespace test_task_list {
 
 ////////////////////////////////////////////////////////////////////////////////
 

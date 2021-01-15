@@ -5,7 +5,7 @@ namespace detail {
 
 template <StateID NS, typename TA, typename TH>
 struct RegisterT {
-	using StateParents	= StaticArray<Parent, TA::STATE_COUNT>;
+	using StateParents	= StaticArrayT<Parent, TA::STATE_COUNT>;
 	using StateList		= typename TA::StateList;
 
 	static constexpr StateID STATE_ID = NS;
@@ -26,7 +26,7 @@ struct RegisterT {
 
 template <StateID NS, typename TA>
 struct RegisterT<NS, TA, StaticEmptyT<TA>> {
-	using StateParents = StaticArray<Parent, TA::STATE_COUNT>;
+	using StateParents = StaticArrayT<Parent, TA::STATE_COUNT>;
 
 	static HFSM2_INLINE
 	void

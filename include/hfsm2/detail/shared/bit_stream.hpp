@@ -4,7 +4,7 @@ namespace detail {
 //------------------------------------------------------------------------------
 
 template <Long NBitCapacity>
-struct StreamBuffer {
+struct StreamBufferT {
 	static constexpr Long BIT_CAPACITY	= NBitCapacity;
 	static constexpr Long BYTE_COUNT	= contain(BIT_CAPACITY, 8u);
 
@@ -22,14 +22,14 @@ struct StreamBuffer {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <Long NBitCapacity>
-class BitWriteStream final {
+class BitWriteStreamT final {
 public:
 	static constexpr Long BIT_CAPACITY = NBitCapacity;
 
-	using Buffer = StreamBuffer<BIT_CAPACITY>;
+	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	BitWriteStream(Buffer& _buffer)						  noexcept;
+	BitWriteStreamT(Buffer& _buffer)					  noexcept;
 
 	template <Short NBitWidth>
 	void write(const UnsignedBitWidth<NBitWidth> item)	  noexcept;
@@ -41,14 +41,14 @@ private:
 //------------------------------------------------------------------------------
 
 template <Long NBitCapacity>
-class BitReadStream final {
+class BitReadStreamT final {
 public:
 	static constexpr Long BIT_CAPACITY = NBitCapacity;
 
-	using Buffer = StreamBuffer<BIT_CAPACITY>;
+	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	BitReadStream(const Buffer& buffer)					  noexcept
+	BitReadStreamT(const Buffer& buffer)				  noexcept
 		: _buffer{buffer}
 	{}
 

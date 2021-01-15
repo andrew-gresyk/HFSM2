@@ -22,7 +22,8 @@
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_stream.cpp" />
-    <ClCompile Include="..\..\test\shared\test_list.cpp" />
+    <ClCompile Include="..\..\test\shared\test_random.cpp" />
+    <ClCompile Include="..\..\test\shared\test_task_list.cpp" />
     <ClCompile Include="..\..\test\test_access.cpp" />
     <ClCompile Include="..\..\test\test_composite_bst.cpp" />
     <ClCompile Include="..\..\test\test_contexts.cpp" />

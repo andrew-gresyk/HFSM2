@@ -27,11 +27,11 @@ protected:
 
 	using Payload			= typename TArgs::Payload;
 	using Transition		= TransitionT<Payload>;
-	using TransitionSet		= Array<Transition, TArgs::COMPO_REGIONS>;
-	using TransitionSets	= Array<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
+	using TransitionSet		= ArrayT<Transition, TArgs::COMPO_REGIONS>;
+	using TransitionSets	= ArrayT<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-	using TransitionTargets	= StaticArray<Short, TArgs::STATE_COUNT>;
+	using TransitionTargets	= StaticArrayT<Short, TArgs::STATE_COUNT>;
 #endif
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
@@ -391,7 +391,7 @@ protected:
 	using typename PlanControl::Transition;
 
 #ifdef HFSM2_ENABLE_PLANS
-	using TasksBits		= BitArray<StateID, StateList::SIZE>;
+	using TasksBits		= BitArrayT<StateID, StateList::SIZE>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

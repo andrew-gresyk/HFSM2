@@ -72,13 +72,13 @@ struct PlanDataT<ArgsT<TContext
 	static constexpr Short TASK_CAPACITY = NTaskCapacity;
 
 	using Task			= TaskT<Payload>;
-	using Tasks			= TaskListT<Payload, TASK_CAPACITY>;
-	using TaskLinks		= StaticArray<TaskLink, TASK_CAPACITY>;
-	using Payloads		= StaticArray<Payload, TASK_CAPACITY>;
+	using Tasks			= TaskListT	   <Payload, TASK_CAPACITY>;
+	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
+	using Payloads		= StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds	= Array<Bounds, RegionList::SIZE>;
-	using TasksBits		= BitArray<StateID, StateList::SIZE>;
-	using RegionBits	= BitArray<RegionID, RegionList::SIZE>;
+	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
+	using TasksBits		= BitArrayT<StateID,  StateList::SIZE>;
+	using RegionBits	= BitArrayT<RegionID, RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -131,11 +131,11 @@ struct PlanDataT<ArgsT<TContext
 
 	using Task			= TaskT<void>;
 	using Tasks			= TaskListT<void, TASK_CAPACITY>;
-	using TaskLinks		= StaticArray<TaskLink, TASK_CAPACITY>;
+	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
-	using TasksBounds	= Array<Bounds, RegionList::SIZE>;
-	using TasksBits		= BitArray<StateID, StateList::SIZE>;
-	using RegionBits	= BitArray<RegionID, RegionList::SIZE>;
+	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
+	using TasksBits		= BitArrayT<StateID,  StateList::SIZE>;
+	using RegionBits	= BitArrayT<RegionID, RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;

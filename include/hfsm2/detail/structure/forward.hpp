@@ -246,12 +246,12 @@ struct ArgsT final {
 	using Payload	= TPayload;
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
-	using SerialBuffer	= StreamBuffer	<SERIAL_BITS>;
-	using WriteStream	= BitWriteStream<SERIAL_BITS>;
-	using ReadStream	= BitReadStream	<SERIAL_BITS>;
+	using SerialBuffer	= StreamBufferT  <SERIAL_BITS>;
+	using WriteStream	= BitWriteStreamT<SERIAL_BITS>;
+	using ReadStream	= BitReadStreamT <SERIAL_BITS>;
 #endif
 
-	HFSM2_IF_STRUCTURE_REPORT(using StructureStateInfos = Array<StructureStateInfo, STATE_COUNT>);
+	HFSM2_IF_STRUCTURE_REPORT(using StructureStateInfos = ArrayT<StructureStateInfo, STATE_COUNT>);
 };
 
 //------------------------------------------------------------------------------

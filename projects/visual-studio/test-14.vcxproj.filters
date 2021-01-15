@@ -39,9 +39,6 @@
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp">
       <Filter>test\shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\shared\test_list.cpp">
-      <Filter>test\shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_self_transitions.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -104,6 +101,12 @@
     </ClCompile>
     <ClCompile Include="..\..\test\test_contexts_random.cpp">
       <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\shared\test_task_list.cpp">
+      <Filter>test\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\shared\test_random.cpp">
+      <Filter>test\shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

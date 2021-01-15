@@ -126,9 +126,7 @@ using UnsignedBitWidth = typename UnsignedBitWidthT<NCapacity>::Type;
 template <typename T1, typename T2>
 constexpr T1
 contain(const T1 x, const T2 to) noexcept {
-	const auto y = (T1) to;
-
-	return (x + y - 1) / y;
+	return (x + (T1) to - 1) / ((T1) to);
 }
 
 //------------------------------------------------------------------------------

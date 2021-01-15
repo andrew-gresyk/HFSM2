@@ -67,8 +67,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Iterator {
-		HFSM2_INLINE Iterator(const CPlanT& plan)		  noexcept;
+	struct IteratorT {
+		HFSM2_INLINE IteratorT(const CPlanT& plan)		  noexcept;
 
 		HFSM2_INLINE explicit operator bool()		const noexcept;
 
@@ -99,7 +99,7 @@ private:
 public:
 	HFSM2_INLINE explicit operator bool()			const noexcept;
 
-	HFSM2_INLINE Iterator first()						  noexcept	{ return Iterator{*this};					}
+	HFSM2_INLINE IteratorT first()						  noexcept	{ return IteratorT{*this};					}
 
 private:
 	const PlanData& _planData;
@@ -126,8 +126,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Iterator {
-		HFSM2_INLINE Iterator(PlanBaseT& plan)			  noexcept;
+	struct IteratorT {
+		HFSM2_INLINE IteratorT(PlanBaseT& plan)			  noexcept;
 
 		HFSM2_INLINE explicit operator bool()		const noexcept;
 
@@ -372,8 +372,8 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Begin iteration over plan tasks for the current region
-	/// @return Iterator to the first task
-	HFSM2_INLINE  Iterator first()												  noexcept { return  Iterator{*this};										}
+	/// @return IteratorT to the first task
+	HFSM2_INLINE  IteratorT first()												  noexcept { return  IteratorT{*this};										}
 
 	/// @brief Begin iteration over plan tasks
 	/// @return CIterator to the first task

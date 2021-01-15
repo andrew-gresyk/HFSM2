@@ -295,7 +295,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 template <typename TG, typename TA>
 template <Long NCount>
 bool
-R_<TG, TA>::replayTransitions(const Array<Transition, NCount>& transitions) noexcept {
+R_<TG, TA>::replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept {
 	if (transitions.count())
 		return replayTransitions(&transitions[0],
 								 transitions.count());
