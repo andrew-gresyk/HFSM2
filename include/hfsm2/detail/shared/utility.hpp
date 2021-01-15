@@ -30,19 +30,34 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <bool B, class TT, class TF>
+struct ConditionalT {
+	using Type = TT;
+};
+
+template <class TT, class TF>
+struct ConditionalT<false, TT, TF> {
+	using Type = TF;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <bool B, class TT, class TF>
+using Conditional = typename ConditionalT<B, TT, TF>::Type;
+
+////////////////////////////////////////////////////////////////////////////////
+
 template <typename T>
-HFSM2_INLINE
-void
-fill(T& a, const char value) {
+HFSM2_INLINE void
+fill(T& a, const char value) noexcept {
 	memset(&a, (int) value, sizeof(a));
 }
 
 //------------------------------------------------------------------------------
 
 template <typename T, unsigned NCount>
-constexpr
-unsigned
-count(const T(&)[NCount]) {
+constexpr unsigned
+count(const T(&)[NCount]) noexcept {
 	return NCount;
 }
 
@@ -63,9 +78,11 @@ struct Max {
 //------------------------------------------------------------------------------
 
 template <typename T>
-constexpr
-T
-min(const T t1, const T t2) { return t1 < t2 ? t1 : t2; }
+constexpr T
+min(const T t1, const T t2) noexcept {
+	return t1 < t2 ?
+		t1 : t2;
+}
 
 
 //------------------------------------------------------------------------------
@@ -74,10 +91,10 @@ template <unsigned NCapacity>
 struct UnsignedCapacityT {
 	static constexpr Long CAPACITY = NCapacity;
 
-	using Type = typename std::conditional<CAPACITY <= UINT8_MAX,  uint8_t,
-				 typename std::conditional<CAPACITY <= UINT16_MAX, uint16_t,
-				 typename std::conditional<CAPACITY <= UINT32_MAX, uint32_t,
-																   uint64_t>::type>::type>::type;
+	using Type = Conditional<CAPACITY <= UINT8_MAX,  uint8_t,
+				 Conditional<CAPACITY <= UINT16_MAX, uint16_t,
+				 Conditional<CAPACITY <= UINT32_MAX, uint32_t,
+													 uint64_t>>>;
 
 	static_assert(CAPACITY <= UINT64_MAX, "STATIC ASSERT");
 };
@@ -91,32 +108,33 @@ template <unsigned NBitWidth>
 struct UnsignedBitWidthT {
 	static constexpr Short BIT_WIDTH = NBitWidth;
 
-	using Type = typename std::conditional<BIT_WIDTH <= 8,  uint8_t,
-				 typename std::conditional<BIT_WIDTH <= 16, uint16_t,
-				 typename std::conditional<BIT_WIDTH <= 32, uint32_t,
-															uint64_t>::type>::type>::type;
+	using Type = Conditional<BIT_WIDTH <= 8,  uint8_t,
+				 Conditional<BIT_WIDTH <= 16, uint16_t,
+				 Conditional<BIT_WIDTH <= 32, uint32_t,
+											  uint64_t>>>;
 
 	static_assert(BIT_WIDTH <= 64, "STATIC ASSERT");
 };
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <unsigned NCapacity>
 using UnsignedBitWidth = typename UnsignedBitWidthT<NCapacity>::Type;
 
 //------------------------------------------------------------------------------
 
-constexpr
-Long
-roundUp(const Long x,
-		const Long to)
-{
-	return (x + (to - 1)) / to;
+template <typename T1, typename T2>
+constexpr T1
+contain(const T1 x, const T2 to) noexcept {
+	const auto y = (T1) to;
+
+	return (x + y - 1) / y;
 }
 
 //------------------------------------------------------------------------------
 
-constexpr
-Short
-bitWidth(const Short x) {
+constexpr Short
+bitWidth(const Short x) noexcept {
 	return x <=   2 ? 1 :
 		   x <=   4 ? 2 :
 		   x <=   8 ? 3 :
@@ -130,8 +148,8 @@ bitWidth(const Short x) {
 //------------------------------------------------------------------------------
 
 template <typename TTo, typename TFrom>
-void
-overwrite(TTo& to, const TFrom& from) {
+HFSM2_INLINE void
+overwrite(TTo& to, const TFrom& from) noexcept {
 	static_assert(sizeof(TTo) == sizeof(TFrom), "STATIC ASSERT");
 
 #if defined(__GNUC__) || defined(__GNUG__)
@@ -144,7 +162,8 @@ overwrite(TTo& to, const TFrom& from) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TO, typename TI>
-TO convert(const TI& in) {
+HFSM2_INLINE TO
+convert(const TI& in) noexcept {
 	TO out;
 
 	overwrite(out, in);

@@ -1,4 +1,4 @@
-﻿// HFSM (hierarchical state machine for games and interactive applications)
+﻿// HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 //
 // An HFSM2 port of https://gist.github.com/martinmoene/797b1923f9c6c1ae355bb2d6870be25e
@@ -64,7 +64,7 @@ static_assert(FSM::stateId<Paused>()  ==  3, "");
 struct Logger
 	: M::LoggerInterface
 {
-	static const char* stateName(const StateID stateId) {
+	static const char* stateName(const StateID stateId) noexcept {
 		switch (stateId) {
 		case 1:
 			return "Idle";
@@ -81,7 +81,7 @@ struct Logger
 	void recordTransition(Context& /*context*/,
 						  const StateID origin,
 						  const TransitionType /*transition*/,
-						  const StateID target) override
+						  const StateID target) noexcept override
 	{
 		std::cout << stateName(origin) << " -> " << stateName(target) << "\n";
 	}
@@ -94,7 +94,7 @@ struct Base
 	: FSM::State
 {
 	template <typename Event>
-	void react(const Event&, FullControl&) {
+	void react(const Event&, FullControl&) noexcept {
 		std::cout << "[unsupported transition]\n";
 	}
 };
@@ -105,7 +105,7 @@ struct Idle
 {
 	using Base::react;
 
-	void react(const Play& event, FullControl& control) {
+	void react(const Play& event, FullControl& control) noexcept {
 		control.context() = event.title;
 		control.changeTo<Playing>();
 	}
@@ -116,11 +116,11 @@ struct Playing
 {
 	using Base::react;
 
-	void react(const Pause&, FullControl& control) {
+	void react(const Pause&, FullControl& control) noexcept {
 		control.changeTo<Paused>();
 	}
 
-	void react(const Stop&, FullControl& control) {
+	void react(const Stop&, FullControl& control) noexcept {
 		control.changeTo<Idle>();
 	}
 };
@@ -130,39 +130,40 @@ struct Paused
 {
 	using Base::react;
 
-	void react(const Resume&, FullControl& control) {
+	void react(const Resume&, FullControl& control) noexcept {
 		control.changeTo<Playing>();
 	}
 
-	void react(const Stop&, FullControl& control) {
+	void react(const Stop&, FullControl& control) noexcept {
 		control.changeTo<Idle>();
 	}
 };
 
 //------------------------------------------------------------------------------
 
-int main() {
+int
+main() noexcept {
 	// construct everything
 	Context title;
 	Logger logger;
 	FSM::Instance machine(title, &logger);
 
 	// do the work :)
-	machine.react(Play{"any"});
-	machine.react(Stop{});
+	machine.react(Play{"any"});			// Idle -> Playing
+	machine.react(Stop{});				// Playing -> Idle
 
-	machine.react(Play{"optional"});
-	machine.react(Pause{});
-	machine.react(Stop{});
+	machine.react(Play{"optional"});	// Idle -> Playing
+	machine.react(Pause{});				// Playing -> Paused
+	machine.react(Stop{});				// Paused -> Idle
 
-	machine.react(Play{"variant"});
-	machine.react(Pause{}); //-V760
-	machine.react(Resume{});
-	machine.react(Stop{});
+	machine.react(Play{"variant"});		// Idle -> Playing
+	machine.react(Pause{}); //-V760		// Playing -> Paused
+	machine.react(Resume{});			// Paused -> Playing
+	machine.react(Stop{});				// Playing -> Idle
 
-	machine.react(Pause{});
-	machine.react(Resume{});
-	machine.react(Stop{});
+	machine.react(Pause{});				// [unsupported transition]
+	machine.react(Resume{});			// [unsupported transition]
+	machine.react(Stop{});				// [unsupported transition]
 
 	return 0;
 }

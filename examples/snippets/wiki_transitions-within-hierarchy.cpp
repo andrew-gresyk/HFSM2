@@ -90,7 +90,7 @@ TEST_CASE("Wiki.Transitions within Hierarchy.Internal Transition Interface", "[W
     struct Origin
         : FSM::State
     {
-        void update(FullControl& control) {
+        void update(FullControl& control) noexcept {
             control.changeTo<Destination>(); // internal transition
         }
     };
@@ -187,13 +187,13 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Utilize' Transition", "[Wiki]") {
     struct LowRated
         : FSM::State
     {
-        float utility(const Control&) { return 0.5f; }
+        float utility(const Control&) noexcept { return 0.5f; }
     };
 
     struct HighRated
         : FSM::State
     {
-        float utility(const Control&) { return 2.0f; }
+        float utility(const Control&) noexcept { return 2.0f; }
     };
 
     FSM::Instance fsm;
@@ -224,25 +224,25 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Randomize' Transition", "[Wiki]") 
     struct FilteredOut
         : FSM::State
     {
-        int8_t rank(const Control&) { return 0; } // filter out using low rank
+        int8_t rank(const Control&) noexcept { return 0; } // filter out using low rank
 
-        float utility(const Control&) { return 0.5f; }
+        float utility(const Control&) noexcept { return 0.5f; }
     };
 
     struct LowRated
         : FSM::State
     {
-        int8_t rank(const Control&) { return 1; }
+        int8_t rank(const Control&) noexcept { return 1; }
 
-        float utility(const Control&) { return 0.5f; }
+        float utility(const Control&) noexcept { return 0.5f; }
     };
 
     struct HighRated
         : FSM::State
     {
-        int8_t rank(const Control&) { return 1; }
+        int8_t rank(const Control&) noexcept { return 1; }
 
-        float utility(const Control&) { return 2.0f; }
+        float utility(const Control&) noexcept { return 2.0f; }
     };
 
     FSM::Instance fsm;

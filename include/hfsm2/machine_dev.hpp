@@ -1,4 +1,6 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
+// 1.8.0 (2021-01-15)
+//
 // Created by Andrew Gresyk
 //
 // Licensed under the MIT License;
@@ -7,7 +9,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2020
+// Copyright (c) 2021
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,12 +31,16 @@
 
 #pragma once
 
+#define HFSM2_VERSION_MAJOR 1
+#define HFSM2_VERSION_MINOR 8
+#define HFSM2_VERSION_PATCH 0
+
 #include <stdint.h>			// uint32_t, uint64_t
 #include <string.h>			// memcpy_s()
 
 #include <new>
 #include <typeindex>
-#include <utility>			// std::conditional<>, move(), forward()
+#include <utility>			// move(), forward()
 
 #if defined _DEBUG && _MSC_VER
 	#include <intrin.h>		// __debugbreak()
@@ -49,7 +55,6 @@
 #include "detail/shared/array.hpp"
 #include "detail/shared/bit_array.hpp"
 #include "detail/shared/bit_stream.hpp"
-#include "detail/shared/list.hpp"
 #include "detail/shared/random.hpp"
 #include "detail/shared/type_list.hpp"
 
@@ -57,6 +62,7 @@
 #include "detail/features/logger_interface.hpp"
 #include "detail/features/structure_report.hpp"
 
+#include "detail/root/task_list.hpp"
 #include "detail/root/plan_data.hpp"
 #include "detail/root/plan.hpp"
 #include "detail/root/registry.hpp"
@@ -89,7 +95,7 @@ template <FeatureTag NFeatureTag
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
-struct G_ {
+struct G_ final {
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
 
 	using Context			 = TContext;
@@ -107,11 +113,15 @@ struct G_ {
 	static constexpr Long SUBSTITUTION_LIMIT = NSubstitutionLimit;
 
 #ifdef HFSM2_ENABLE_PLANS
-	static constexpr Long TASK_CAPACITY	  = NTaskCapacity;
+	static constexpr Long TASK_CAPACITY		 = NTaskCapacity;
 #endif
 
 	using Payload			 = TPayload;
 	using Transition		 = TransitionT<Payload>;
+
+#ifdef HFSM2_ENABLE_PLANS
+	using Task				 = TaskT<Payload>;
+#endif
 
 	/// @brief Set Context type
 	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
@@ -162,7 +172,7 @@ struct G_ {
 
 	struct UP {
 		HFSM2_INLINE UP(const Utility utility_ = Utility{1},
-						const Short prong_ = INVALID_SHORT)
+						const Short prong_ = INVALID_SHORT) noexcept
 			: utility{utility_}
 			, prong{prong_}
 		{}
@@ -281,6 +291,7 @@ struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility
 	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
 
 	//----------------------------------------------------------------------
+	// COMMON
 
 	/// @brief Root ('changeTo<>()' into the root region acts as 'restart<>()')
 	/// @tparam THead Head state
@@ -293,6 +304,7 @@ struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility
 	template <				  typename... TSubStates>
 	using PeerRoot			  = RF_<Cfg, CompositePeers  <  TSubStates...>>;
 
+	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Resumable root ('changeTo<>()' into the root region acts as 'resume<>()')
@@ -357,28 +369,7 @@ struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility
 }
 
 /// @brief Type configuration for MachineT<>
-/// @tparam TContext Context type for data shared between states and/or data interface between FSM and external code
-/// @tparam TRank Rank type for 'TRank State::rank() const' method
-/// @tparam TUtility Utility type for 'TUtility State::utility() const' method
-/// @tparam TRNG RNG type used in 'Random' regions
-/// @tparam NSubstitutionLimit Maximum number times 'guard()' methods can substitute their states for others
-/// @tparam NTaskCapacity Maximum number of tasks across all plans
-/// @tparam TPayload Payload type
-template <typename TContext = EmptyContext
-
-	#ifdef HFSM2_ENABLE_UTILITY_THEORY
-		, typename TRank    = int8_t
-		, typename TUtility = float
-		, typename TRNG     = ::hfsm2::RandomT<TUtility>
-	#endif
-
-		, Long NSubstitutionLimit = 4
-		HFSM2_IF_PLANS(, Long NTaskCapacity = INVALID_LONG)
-		, typename TPayload = void>
-using ConfigT = detail::G_<HFSM2_FEATURE_TAG, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
-
-/// @brief Type configuration for MachineT<>
-using Config = ConfigT<>;
+using Config = detail::G_<HFSM2_FEATURE_TAG, EmptyContext HFSM2_IF_UTILITY_THEORY(, int8_t, float, RNGT<float>), 4 HFSM2_IF_PLANS(, INVALID_LONG), void>;
 
 /// @brief 'Template namespace' for FSM classes
 /// @tparam TConfig 'ConfigT<>' type configuration for MachineT<>

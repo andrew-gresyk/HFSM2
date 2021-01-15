@@ -39,7 +39,7 @@ struct O_ final {
 	using StateParents	= typename Registry::StateParents;
 	using OrthoForks	= typename Registry::OrthoForks;
 	using ProngBits		= typename OrthoForks::Bits;
-	using ProngConstBits= typename OrthoForks::ConstBits;
+	using ProngCBits	= typename OrthoForks::CBits;
 
 	using Control		= ControlT<Args>;
 	using ScopedOrigin	= typename Control::Origin;
@@ -87,10 +87,10 @@ struct O_ final {
 	//----------------------------------------------------------------------
 
 	HFSM2_INLINE ProngBits		orthoRequested(		 Registry& registry)		{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_INLINE ProngConstBits orthoRequested(const Registry& registry) const	{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_INLINE ProngCBits orthoRequested(const Registry& registry) const	{ return registry.orthoRequested.template bits<ORTHO_UNIT, WIDTH>();	}
 
 	HFSM2_INLINE ProngBits		orthoRequested(		 Control&  control)			{ return orthoRequested(control._registry);								}
-	HFSM2_INLINE ProngConstBits orthoRequested(const Control&  control) const	{ return orthoRequested(control._registry);								}
+	HFSM2_INLINE ProngCBits orthoRequested(const Control&  control) const	{ return orthoRequested(control._registry);								}
 
 	HFSM2_INLINE void	 deepRegister		  (Registry& registry, const Parent parent);
 

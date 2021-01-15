@@ -62,61 +62,71 @@
 
 //------------------------------------------------------------------------------
 
+#ifndef HFSM2_DISABLE_TYPEINDEX
+	#define HFSM2_IF_TYPEINDEX(...)									  __VA_ARGS__
+	#define HFSM2_TYPEINDEX_MASK										 (1 << 0)
+#else
+	#define HFSM2_IF_TYPEINDEX(...)
+	#define HFSM2_TYPEINDEX_MASK										 (0 << 0)
+#endif
+
+//------------------------------------------------------------------------------
+
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 	#define HFSM2_IF_UTILITY_THEORY(...)							  __VA_ARGS__
-	#define HFSM2_UTILITY_THEORY_MASK									 (1 << 0)
+	#define HFSM2_UTILITY_THEORY_MASK									 (1 << 1)
 #else
 	#define HFSM2_IF_UTILITY_THEORY(...)
-	#define HFSM2_UTILITY_THEORY_MASK									 (0 << 0)
+	#define HFSM2_UTILITY_THEORY_MASK									 (0 << 1)
 #endif
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_PLANS
 	#define HFSM2_IF_PLANS(...)										  __VA_ARGS__
-	#define HFSM2_PLANS_MASK											 (1 << 1)
+	#define HFSM2_PLANS_MASK											 (1 << 2)
 #else
 	#define HFSM2_IF_PLANS(...)
-	#define HFSM2_PLANS_MASK											 (0 << 1)
+	#define HFSM2_PLANS_MASK											 (0 << 2)
 #endif
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
 	#define HFSM2_IF_SERIALIZATION(...)								  __VA_ARGS__
-	#define HFSM2_SERIALIZATION_MASK									 (1 << 2)
+	#define HFSM2_SERIALIZATION_MASK									 (1 << 3)
 #else
 	#define HFSM2_IF_SERIALIZATION(...)
-	#define HFSM2_SERIALIZATION_MASK									 (0 << 2)
+	#define HFSM2_SERIALIZATION_MASK									 (0 << 3)
 #endif
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	#define HFSM2_IF_TRANSITION_HISTORY(...)						  __VA_ARGS__
-	#define HFSM2_TRANSITION_HISTORY_MASK								 (1 << 3)
+	#define HFSM2_TRANSITION_HISTORY_MASK								 (1 << 4)
 #else
 	#define HFSM2_IF_TRANSITION_HISTORY(...)
-	#define HFSM2_TRANSITION_HISTORY_MASK								 (0 << 3)
+	#define HFSM2_TRANSITION_HISTORY_MASK								 (0 << 4)
 #endif
 
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 	#define HFSM2_IF_STRUCTURE_REPORT(...)							  __VA_ARGS__
-	#define HFSM2_STRUCTURE_REPORT_MASK									 (1 << 4)
+	#define HFSM2_STRUCTURE_REPORT_MASK									 (1 << 5)
 #else
 	#define HFSM2_IF_STRUCTURE_REPORT(...)
-	#define HFSM2_STRUCTURE_REPORT_MASK									 (0 << 4)
+	#define HFSM2_STRUCTURE_REPORT_MASK									 (0 << 5)
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 	#define HFSM2_ENABLE_LOG_INTERFACE
-	#define HFSM2_VERBOSE_DEBUG_LOG_MASK								 (1 << 5)
+	#define HFSM2_VERBOSE_DEBUG_LOG_MASK								 (1 << 6)
 #else
-	#define HFSM2_VERBOSE_DEBUG_LOG_MASK								 (0 << 5)
+	#define HFSM2_VERBOSE_DEBUG_LOG_MASK								 (0 << 6)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -124,7 +134,7 @@
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
 
 	#define HFSM2_IF_LOG_INTERFACE(...)								  __VA_ARGS__
-	#define HFSM2_LOG_INTERFACE_MASK									 (1 << 6)
+	#define HFSM2_LOG_INTERFACE_MASK									 (1 << 7)
 
 	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)			\
 		if (_logger)															\
@@ -161,7 +171,7 @@
 #else
 
 	#define HFSM2_IF_LOG_INTERFACE(...)
-	#define HFSM2_LOG_INTERFACE_MASK									 (0 << 6)
+	#define HFSM2_LOG_INTERFACE_MASK									 (0 << 7)
 
 	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)
 
@@ -205,18 +215,20 @@ namespace hfsm2 {
 
 using FeatureTag = uint8_t;
 
-constexpr FeatureTag HFSM2_FEATURE_TAG = HFSM2_UTILITY_THEORY_MASK				|
-										 HFSM2_PLANS_MASK						|
-										 HFSM2_SERIALIZATION_MASK				|
-										 HFSM2_TRANSITION_HISTORY_MASK			|
-										 HFSM2_STRUCTURE_REPORT_MASK			|
-										 HFSM2_VERBOSE_DEBUG_LOG_MASK			|
-										 HFSM2_LOG_INTERFACE_MASK;
+constexpr FeatureTag HFSM2_FEATURE_TAG = HFSM2_TYPEINDEX_MASK
+									   | HFSM2_PLANS_MASK
+									   | HFSM2_UTILITY_THEORY_MASK
+									   | HFSM2_SERIALIZATION_MASK
+									   | HFSM2_TRANSITION_HISTORY_MASK
+									   | HFSM2_STRUCTURE_REPORT_MASK
+									   | HFSM2_VERBOSE_DEBUG_LOG_MASK
+									   | HFSM2_LOG_INTERFACE_MASK;
 
 }
 
 //------------------------------------------------------------------------------
 
+#undef HFSM2_TYPEINDEX_MASK
 #undef HFSM2_UTILITY_THEORY_MASK
 #undef HFSM2_PLANS_MASK
 #undef HFSM2_SERIALIZATION_MASK

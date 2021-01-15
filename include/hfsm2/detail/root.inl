@@ -6,7 +6,7 @@ namespace detail {
 template <typename TG, typename TA>
 R_<TG, TA>::R_(Context& context
 			   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-			   HFSM2_IF_LOG_INTERFACE(, Logger* const logger))
+			   HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: _context{context}
 	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
 	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
@@ -21,7 +21,7 @@ R_<TG, TA>::R_(Context& context
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
-R_<TG, TA>::~R_() {
+R_<TG, TA>::~R_() noexcept {
 	PlanControl control{_context
 					  , _registry
 					  , _requests
@@ -41,7 +41,7 @@ R_<TG, TA>::~R_() {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::update() {
+R_<TG, TA>::update() noexcept {
 	FullControl control{_context
 					  , _registry
 					  , _requests
@@ -69,7 +69,7 @@ R_<TG, TA>::update() {
 template <typename TG, typename TA>
 template <typename TEvent>
 void
-R_<TG, TA>::react(const TEvent& event) {
+R_<TG, TA>::react(const TEvent& event) noexcept {
 	FullControl control{_context
 					  , _registry
 					  , _requests
@@ -96,7 +96,7 @@ R_<TG, TA>::react(const TEvent& event) {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::changeTo(const StateID stateId) {
+R_<TG, TA>::changeTo(const StateID stateId) noexcept {
 	_requests.append(Transition{stateId, TransitionType::CHANGE});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
@@ -106,7 +106,7 @@ R_<TG, TA>::changeTo(const StateID stateId) {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::restart(const StateID stateId) {
+R_<TG, TA>::restart(const StateID stateId) noexcept {
 	_requests.append(Transition{stateId, TransitionType::RESTART});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
@@ -116,7 +116,7 @@ R_<TG, TA>::restart(const StateID stateId) {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::resume(const StateID stateId) {
+R_<TG, TA>::resume(const StateID stateId) noexcept {
 	_requests.append(Transition{stateId, TransitionType::RESUME});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
@@ -128,7 +128,7 @@ R_<TG, TA>::resume(const StateID stateId) {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::utilize(const StateID stateId) {
+R_<TG, TA>::utilize(const StateID stateId) noexcept {
 	_requests.append(Transition{stateId, TransitionType::UTILIZE});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
@@ -138,7 +138,7 @@ R_<TG, TA>::utilize(const StateID stateId) {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::randomize(const StateID stateId) {
+R_<TG, TA>::randomize(const StateID stateId) noexcept {
 	_requests.append(Transition{stateId, TransitionType::RANDOMIZE});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
@@ -150,7 +150,7 @@ R_<TG, TA>::randomize(const StateID stateId) {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::schedule(const StateID stateId) {
+R_<TG, TA>::schedule(const StateID stateId) noexcept {
 	_requests.append(Transition{stateId, TransitionType::SCHEDULE});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
@@ -160,7 +160,7 @@ R_<TG, TA>::schedule(const StateID stateId) {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::reset() {
+R_<TG, TA>::reset() noexcept {
 	PlanControl control{_context
 					  , _registry
 					  , _requests
@@ -193,7 +193,7 @@ R_<TG, TA>::reset() {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::save(SerialBuffer& _buffer) const {
+R_<TG, TA>::save(SerialBuffer& _buffer) const noexcept {
 	WriteStream stream{_buffer};
 
 	// TODO: save _registry
@@ -210,7 +210,7 @@ R_<TG, TA>::save(SerialBuffer& _buffer) const {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::load(const SerialBuffer& buffer) {
+R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
 	_requests.clear();
 
 	PlanControl control{_context
@@ -255,7 +255,7 @@ R_<TG, TA>::load(const SerialBuffer& buffer) {
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::replayTransitions(const Transition* const transitions,
-							  const uint64_t count)
+							  const uint64_t count) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
 	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
@@ -295,7 +295,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 template <typename TG, typename TA>
 template <Long NCount>
 bool
-R_<TG, TA>::replayTransitions(const Array<Transition, NCount>& transitions) {
+R_<TG, TA>::replayTransitions(const Array<Transition, NCount>& transitions) noexcept {
 	if (transitions.count())
 		return replayTransitions(&transitions[0],
 								 transitions.count());
@@ -307,7 +307,7 @@ R_<TG, TA>::replayTransitions(const Array<Transition, NCount>& transitions) {
 
 template <typename TG, typename TA>
 const typename R_<TG, TA>::Transition*
-R_<TG, TA>::lastTransition(const StateID stateId) const {
+R_<TG, TA>::lastTransition(const StateID stateId) const noexcept {
 	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
 		const Short index = _transitionTargets[stateId];
 
@@ -324,7 +324,7 @@ R_<TG, TA>::lastTransition(const StateID stateId) const {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::initialEnter() {
+R_<TG, TA>::initialEnter() noexcept {
 	// TODO:
 	//HFSM2_ASSERT(_registry.empty() == 0);
 	HFSM2_ASSERT(_requests.count() == 0);
@@ -389,7 +389,7 @@ R_<TG, TA>::initialEnter() {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) {
+R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) noexcept {
 	HFSM2_ASSERT(_requests.count());
 
 	RegistryBackUp registryUndo;
@@ -442,7 +442,7 @@ template <typename TG, typename TA>
 bool
 R_<TG, TA>::applyRequest(Control& control,
 						 const Transition& request,
-						 const Short index)
+						 const Short index) noexcept
 {
 	switch (request.type) {
 	case TransitionType::CHANGE:
@@ -477,7 +477,7 @@ R_<TG, TA>::applyRequest(Control& control,
 
 template <typename TG, typename TA>
 bool
-R_<TG, TA>::applyRequests(Control& control) {
+R_<TG, TA>::applyRequests(Control& control) noexcept {
 	bool changesMade = false;
 
 	for (Short i = 0; i < _requests.count(); ++i)
@@ -491,7 +491,7 @@ R_<TG, TA>::applyRequests(Control& control) {
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::cancelledByEntryGuards(const TransitionSets& currentTransitions,
-								   const TransitionSet&  pendingTransitions)
+								   const TransitionSet&  pendingTransitions) noexcept
 {
 	GuardControl guardControl{_context
 							, _registry
@@ -512,7 +512,7 @@ R_<TG, TA>::cancelledByEntryGuards(const TransitionSets& currentTransitions,
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::cancelledByGuards(const TransitionSets& currentTransitions,
-							  const TransitionSet&  pendingTransitions)
+							  const TransitionSet&  pendingTransitions) noexcept
 {
 	GuardControl guardControl{_context
 							, _registry
@@ -537,7 +537,7 @@ template <typename TG, typename TA>
 bool
 R_<TG, TA>::applyRequests(Control& control,
 						  const Transition* const transitions,
-						  const uint64_t count)
+						  const uint64_t count) noexcept
 {
 	if (HFSM2_CHECKED(transitions && count)) {
 		bool changesMade = false;
@@ -558,7 +558,7 @@ R_<TG, TA>::applyRequests(Control& control,
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::getStateNames() {
+R_<TG, TA>::getStateNames() noexcept {
 	_stateInfos.clear();
 	_apex.deepGetNames((Long) -1, StructureStateInfo::RegionType::COMPOSITE, 0, _stateInfos);
 
@@ -636,7 +636,7 @@ R_<TG, TA>::getStateNames() {
 
 template <typename TG, typename TA>
 void
-R_<TG, TA>::udpateActivity() {
+R_<TG, TA>::udpateActivity() noexcept {
 	for (Long s = 0, i = 0; s < _stateInfos.count(); ++s)
 		if (_stateInfos[s].name[0] != L'\0') {
 			_structure[i].isActive = isActive(s);
@@ -666,7 +666,7 @@ R_<TG, TA>::udpateActivity() {
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
-																									  const Payload& payload)
+																									  const Payload& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::CHANGE, payload});
 
@@ -676,7 +676,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
-																										   Payload&& payload)
+																										   Payload&& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::CHANGE, std::move(payload)});
 
@@ -688,7 +688,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
-																									   const Payload& payload)
+																									   const Payload& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::RESTART, payload});
 
@@ -698,7 +698,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
-																										    Payload&& payload)
+																											Payload&& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::RESTART, std::move(payload)});
 
@@ -710,7 +710,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
-																									  const Payload& payload)
+																									  const Payload& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::RESUME, payload});
 
@@ -720,7 +720,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
-																										   Payload&& payload)
+																										   Payload&& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::RESUME, std::move(payload)});
 
@@ -734,7 +734,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
-																									   const Payload& payload)
+																									   const Payload& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::UTILIZE, payload});
 
@@ -744,7 +744,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
-																										    Payload&& payload)
+																											Payload&& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::UTILIZE, std::move(payload)});
 
@@ -756,7 +756,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
-																										 const Payload& payload)
+																										 const Payload& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::RANDOMIZE, payload});
 
@@ -766,7 +766,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
-																											  Payload&& payload)
+																											  Payload&& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::RANDOMIZE, std::move(payload)});
 
@@ -780,7 +780,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
-																										const Payload& payload)
+																										const Payload& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::SCHEDULE, payload});
 
@@ -790,7 +790,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
 RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
-																											 Payload&& payload)
+																											 Payload&& payload) noexcept
 {
 	_requests.append(Transition{stateId, TransitionType::SCHEDULE, std::move(payload)});
 

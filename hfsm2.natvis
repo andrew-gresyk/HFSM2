@@ -57,14 +57,20 @@
 	<Type Name="hfsm2::detail::BitArray&lt;*&gt;::Bits">
 		<DisplayString>&lt;{CAPACITY &amp; 0x1}&gt;</DisplayString>
 		<Expand HideRawView="true">
-			<ExpandedItem>_storage</ExpandedItem>
+			<IndexListItems>
+				<Size>(CAPACITY + 7 / 8)</Size>
+				<ValueNode>(_storage[$i / (sizeof(Unit) * 8)] &gt;&gt; ($i % (sizeof(Unit) * 8))) &amp; 0x1</ValueNode>
+			</IndexListItems>
 		</Expand>
 	</Type>
 
-	<Type Name="hfsm2::detail::BitArray&lt;*&gt;::ConstBits">
+	<Type Name="hfsm2::detail::BitArray&lt;*&gt;::CBits">
 		<DisplayString>&lt;{CAPACITY &amp; 0x1}&gt;</DisplayString>
 		<Expand HideRawView="true">
-			<ExpandedItem>_storage</ExpandedItem>
+			<IndexListItems>
+				<Size>(CAPACITY + 7 / 8)</Size>
+				<ValueNode>(_storage[$i / (sizeof(Unit) * 8)] &gt;&gt; ($i % (sizeof(Unit) * 8))) &amp; 0x1</ValueNode>
+			</IndexListItems>
 		</Expand>
 	</Type>
 

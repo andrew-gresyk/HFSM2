@@ -62,8 +62,8 @@ using WrapInfo = typename WrapInfoT<TS...>::Type;
 template <typename THead>
 struct SI_ final {
 	using Head				= THead;
-	using StateList			= TypeList<Head>;
-	using RegionList		= TypeList<>;
+	using StateList			= TL_<Head>;
+	using RegionList		= TL_<>;
 
 	static constexpr Short WIDTH		  = 1;
 	static constexpr Long  REVERSE_DEPTH  = 1;
@@ -285,7 +285,7 @@ template <typename, typename, Short, typename...>
 struct OS_;
 
 template <typename, typename>
-class RW_;
+class RR_;
 
 //------------------------------------------------------------------------------
 
@@ -363,7 +363,7 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using Instance		= RW_<TConfig, Apex>;
+	using Instance		= RR_<TConfig, Apex>;
 
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;
@@ -401,13 +401,13 @@ struct RF_ final {
 	//----------------------------------------------------------------------
 
 	template <typename T>
-	static constexpr bool	  contains()	{ return		 contains<StateList , T>();	}
+	static constexpr bool	  contains() noexcept	{ return contains<StateList, T>();			}
 
 	template <typename T>
-	static constexpr StateID  stateId()		{ return			index<StateList , T>();	}
+	static constexpr StateID  stateId()	 noexcept	{ return index	 <StateList, T>();			}
 
 	template <typename T>
-	static constexpr RegionID regionId()	{ return (RegionID) index<RegionList, T>();	}
+	static constexpr RegionID regionId() noexcept	{ return (RegionID) index<RegionList, T>();	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -416,7 +416,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 struct CSubMaterialT;
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-struct CSubMaterialT<TN, TA, SG, NI, TypeList<TS...>> {
+struct CSubMaterialT<TN, TA, SG, NI, TL_<TS...>> {
 	using Type = CS_<TN, TA, SG, NI,	  TS...>;
 };
 

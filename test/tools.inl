@@ -4,7 +4,7 @@ template <typename TConfig>
 void
 LoggerT<TConfig>::recordMethod(Context& /*context*/,
 							   const StateID origin,
-							   const Method method)
+							   const Method method) noexcept
 {
 	REQUIRE(hfsm2::methodName(method));
 
@@ -82,7 +82,7 @@ void
 LoggerT<TConfig>::recordTransition(Context& /*context*/,
 								   const StateID origin,
 								   const TransitionType transitionType,
-								   const StateID target)
+								   const StateID target) noexcept
 {
 	REQUIRE(hfsm2::transitionName(transitionType));
 
@@ -129,7 +129,7 @@ void
 LoggerT<TConfig>::recordTaskStatus(Context& /*context*/,
 								   const RegionID region,
 								   const StateID origin,
-								   const StatusEvent event)
+								   const StatusEvent event) noexcept
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -151,7 +151,7 @@ template <typename TConfig>
 void
 LoggerT<TConfig>::recordPlanStatus(Context& /*context*/,
 								   const RegionID region,
-								   const StatusEvent event)
+								   const StatusEvent event) noexcept
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -178,7 +178,7 @@ void
 LoggerT<TConfig>::recordUtilityResolution(Context& /*context*/,
 										  const StateID head,
 										  const StateID prong,
-										  const Utilty utilty)
+										  const Utilty utilty) noexcept
 {
 	history.emplace_back(head, Event::Type::UTILITY_RESOLUTION, prong, utilty);
 }
@@ -190,7 +190,7 @@ void
 LoggerT<TConfig>::recordRandomResolution(Context& /*context*/,
 										 const StateID head,
 										 const StateID prong,
-										 const Utilty utilty)
+										 const Utilty utilty) noexcept
 {
 	history.emplace_back(head, Event::Type::RANDOM_RESOLUTION, prong, utilty);
 }
@@ -202,7 +202,7 @@ LoggerT<TConfig>::recordRandomResolution(Context& /*context*/,
 template <typename TConfig>
 void
 LoggerT<TConfig>::recordCancelledPending(Context& /*context*/,
-										 const StateID origin)
+										 const StateID origin) noexcept
 {
 	history.emplace_back(origin, Event::Type::CANCEL_PENDING);
 }
@@ -211,7 +211,7 @@ LoggerT<TConfig>::recordCancelledPending(Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::assertSequence(const Events& reference) {
+LoggerT<TConfig>::assertSequence(const Events& reference) noexcept {
 	const auto count = std::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {
@@ -236,7 +236,7 @@ template <typename TMachine>
 void
 assertActive(TMachine& machine,
 			 const Types& all,
-			 const Types& toCheck)
+			 const Types& toCheck) noexcept
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
@@ -252,7 +252,7 @@ template <typename TMachine>
 void
 assertResumable(TMachine& machine,
 				const Types& all,
-				const Types& toCheck)
+				const Types& toCheck) noexcept
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
@@ -270,7 +270,7 @@ template <typename TMachine>
 void
 assertLastTransitions(TMachine& machine,
 						const Types& all,
-						const Types& toCheck)
+						const Types& toCheck) noexcept
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())

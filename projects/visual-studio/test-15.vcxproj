@@ -25,6 +25,8 @@
     <ClCompile Include="..\..\test\shared\test_list.cpp" />
     <ClCompile Include="..\..\test\test_access.cpp" />
     <ClCompile Include="..\..\test\test_composite_bst.cpp" />
+    <ClCompile Include="..\..\test\test_contexts.cpp" />
+    <ClCompile Include="..\..\test\test_contexts_random.cpp" />
     <ClCompile Include="..\..\test\test_debug.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
     <ClCompile Include="..\..\test\test_dynamic.cpp" />
@@ -54,11 +56,11 @@
     <ClInclude Include="..\..\include\hfsm2\detail\root\plan_data.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\registry.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\state_access.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\root\task_list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\array.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_stream.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_off.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_on.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp" />
@@ -82,11 +84,11 @@
     <None Include="..\..\include\hfsm2\detail\root\plan_data.inl" />
     <None Include="..\..\include\hfsm2\detail\root\registry_1.inl" />
     <None Include="..\..\include\hfsm2\detail\root\registry_2.inl" />
+    <None Include="..\..\include\hfsm2\detail\root\task_list.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\bit_stream.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\iterator.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\list.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\random.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite_sub_1.inl" />

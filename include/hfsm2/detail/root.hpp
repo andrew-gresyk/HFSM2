@@ -9,6 +9,7 @@ namespace detail {
 template <typename TConfig,
 		  typename TApex>
 class R_ {
+public:
 	static constexpr FeatureTag FEATURE_TAG = TConfig::FEATURE_TAG;
 
 	using Context				= typename TConfig::Context;
@@ -21,6 +22,7 @@ class R_ {
 
 	using Payload				= typename TConfig::Payload;
 
+private:
 	using Apex					= TApex;
 
 	using Forward				= RF_<TConfig, Apex>;
@@ -90,11 +92,21 @@ public:
 
 	//----------------------------------------------------------------------
 
-	explicit R_(Context& context
-				HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-				HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr));
+	HFSM2_INLINE explicit R_(Context& context
+						  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+						  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept;
 
-	~R_();
+	HFSM2_INLINE ~R_() noexcept;
+
+	//----------------------------------------------------------------------
+
+	/// @brief Access context
+	/// @return context
+	HFSM2_INLINE	   Context& context()							  noexcept	{ return _context;									}
+
+	/// @brief Access context
+	/// @return context
+	HFSM2_INLINE const Context& context()						const noexcept	{ return _context;									}
 
 	//----------------------------------------------------------------------
 
@@ -102,13 +114,13 @@ public:
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID  stateId()					{ return			index<StateList , TState>();	}
+	static constexpr StateID stateId()								  noexcept	{ return index<StateList, TState>();				}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()				{ return (RegionID) index<RegionList, TState>();	}
+	static constexpr RegionID regionId()							  noexcept	{ return (RegionID) index<RegionList, TState>();	}
 
 	//----------------------------------------------------------------------
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
@@ -129,8 +141,8 @@ private:
 
 	template <typename TState>
 	struct Accessor<TState, true> {
-		HFSM2_INLINE static		  TState& get(		MaterialApex& apex)	{ return apex.template access<TState>();	}
-		HFSM2_INLINE static const TState& get(const MaterialApex& apex)	{ return apex.template access<TState>();	}
+		HFSM2_INLINE static		  TState& get(		MaterialApex& apex) noexcept	{ return apex.template access<TState>();	}
+		HFSM2_INLINE static const TState& get(const MaterialApex& apex) noexcept	{ return apex.template access<TState>();	}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -146,13 +158,13 @@ public:
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_INLINE	   TState& access()										{ return Accessor<TState>::get(_apex);	}
+	HFSM2_INLINE	   TState& access()								  noexcept	{ return Accessor<TState				   >::get(_apex);	}
 
 	/// @brief Access state instance
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_INLINE const TState& access() const								{ return Accessor<TState>::get(_apex);	}
+	HFSM2_INLINE const TState& access()							const noexcept	{ return Accessor<TState				   >::get(_apex);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -164,98 +176,100 @@ public:
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_INLINE	   TState& access()					{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
+	HFSM2_INLINE	   TState& access()								  noexcept	{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
 
 	/// @brief Access state instance
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_INLINE const TState& access() const			{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
+	HFSM2_INLINE const TState& access()							const noexcept	{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
 
 #endif
 
 	//----------------------------------------------------------------------
 
 	/// @brief Trigger FSM update cycle (recursively call 'update()' on all active states, then process requested transitions)
-	void update();
+	void update() noexcept;
 
 	/// @brief Have FSM react to an event (recursively call matching 'react<>()' on all active states, then process requested transitions)
 	/// @tparam TEvent Event type
 	/// @param event Event to react to
 	template <typename TEvent>
-	HFSM2_INLINE void react      (const TEvent& event);
+	HFSM2_INLINE void react(const TEvent& event)					  noexcept;
 
 	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
 	/// @return State active status
-	HFSM2_INLINE bool isActive   (const StateID stateId) const		{ return _registry.isActive   (stateId);		}
+	HFSM2_INLINE bool isActive		 (const StateID stateId)	const noexcept	{ return _registry.isActive   (stateId);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState Destination state type
 	/// @return State active status
 	template <typename TState>
-	HFSM2_INLINE bool isActive   () const							{ return isActive	(stateId<TState>());		}
+	HFSM2_INLINE bool isActive		 ()							const noexcept	{ return isActive	(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId Destination state identifier
 	/// @return State resumable status
-	HFSM2_INLINE bool isResumable(const StateID stateId) const		{ return _registry.isResumable(stateId);		}
+	HFSM2_INLINE bool isResumable	 (const StateID stateId)	const noexcept	{ return _registry.isResumable(stateId);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState Destination state type
 	/// @return State resumable status
 	template <typename TState>
-	HFSM2_INLINE bool isResumable() const							{ return isResumable(stateId<TState>());		}
+	HFSM2_INLINE bool isResumable	 ()							const noexcept	{ return isResumable(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId Destination state identifier
 	/// @return State scheduled status
-	HFSM2_INLINE bool isScheduled(const StateID stateId) const		{ return isResumable(stateId);					}
+	HFSM2_INLINE bool isScheduled	 (const StateID stateId)	const noexcept	{ return isResumable(stateId);					}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState Destination state type
 	/// @return State scheduled status
 	template <typename TState>
-	HFSM2_INLINE bool isScheduled() const							{ return isResumable<TState>();					}
+	HFSM2_INLINE bool isScheduled	 ()							const noexcept	{ return isResumable<TState>();					}
 
 	//------------------------------------------------------------------------------
+	// COMMON
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
-	HFSM2_INLINE void changeTo	 (const StateID stateId);
+	HFSM2_INLINE void changeTo		 (const StateID stateId)		  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
 	template <typename TState>
-	HFSM2_INLINE void changeTo	 ()									{ changeTo (stateId<TState>());					}
+	HFSM2_INLINE void changeTo		 ()								  noexcept	{ changeTo (stateId<TState>());					}
 
+	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
-	HFSM2_INLINE void restart	 (const StateID stateId);
+	HFSM2_INLINE void restart		 (const StateID stateId)		  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
 	template <typename TState>
-	HFSM2_INLINE void restart	 ()									{ restart  (stateId<TState>());					}
+	HFSM2_INLINE void restart		 ()								  noexcept	{ restart  (stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
-	HFSM2_INLINE void resume	 (const StateID stateId);
+	HFSM2_INLINE void resume		 (const StateID stateId)		  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	template <typename TState>
-	HFSM2_INLINE void resume	 ()									{ resume   (stateId<TState>());					}
+	HFSM2_INLINE void resume		 ()								  noexcept	{ resume   (stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -265,14 +279,14 @@ public:
 	///		with the highest 'utility()' among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void utilize	 (const StateID stateId);
+	HFSM2_INLINE void utilize		 (const StateID stateId)		  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///   with the highest 'utility()' among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void utilize	()									{ utilize  (stateId<TState>());					}
+	HFSM2_INLINE void utilize		 ()								  noexcept	{ utilize  (stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -280,14 +294,14 @@ public:
 	///		proportional to 'utility()' among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void randomize	 (const StateID stateId);
+	HFSM2_INLINE void randomize		 (const StateID stateId)		  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///   proportional to 'utility()' among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void randomize	()									{ randomize(stateId<TState>());					}
+	HFSM2_INLINE void randomize		 ()								  noexcept	{ randomize(stateId<TState>());					}
 
 #endif
 
@@ -295,56 +309,56 @@ public:
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
-	HFSM2_INLINE void schedule	 (const StateID stateId);
+	HFSM2_INLINE void schedule		 (const StateID stateId)		  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
 	template <typename TState>
-	HFSM2_INLINE void schedule	()									{ schedule (stateId<TState>());					}
+	HFSM2_INLINE void schedule		 ()								  noexcept	{ schedule (stateId<TState>());					}
 
 	//------------------------------------------------------------------------------
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_INLINE bool isPendingChange(const StateID stateId) const	{ return _registry.isPendingChange(stateId);	}
+	HFSM2_INLINE bool isPendingChange(const StateID stateId)	const noexcept	{ return _registry.isPendingChange(stateId);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM2_INLINE bool isPendingChange()								{ return isPendingChange(stateId<TState>());	}
+	HFSM2_INLINE bool isPendingChange()								  noexcept	{ return isPendingChange(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be activated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation status
-	HFSM2_INLINE bool isPendingEnter (const StateID stateId) const	{ return _registry.isPendingEnter (stateId);	}
+	HFSM2_INLINE bool isPendingEnter (const StateID stateId)	const noexcept	{ return _registry.isPendingEnter (stateId);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState Destination state type
 	/// @return State pending activation status
 	template <typename TState>
-	HFSM2_INLINE bool isPendingEnter ()								{ return isPendingEnter (stateId<TState>());	}
+	HFSM2_INLINE bool isPendingEnter ()								  noexcept	{ return isPendingEnter (stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending deactivation status
-	HFSM2_INLINE bool isPendingExit	 (const StateID stateId) const	{ return _registry.isPendingExit  (stateId);	}
+	HFSM2_INLINE bool isPendingExit	 (const StateID stateId)	const noexcept	{ return _registry.isPendingExit  (stateId);	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending deactivation status
 	template <typename TState>
-	HFSM2_INLINE bool isPendingExit  ()								{ return isPendingExit  (stateId<TState>());	}
+	HFSM2_INLINE bool isPendingExit  ()								  noexcept	{ return isPendingExit  (stateId<TState>());	}
 
 	//------------------------------------------------------------------------------
 
 	/// @brief Reset FSM to initial state (recursively 'exit()' currently active states, 'enter()' initial states)
-	void reset();
+	void reset() noexcept;
 
 	//------------------------------------------------------------------------------
 
@@ -358,12 +372,12 @@ public:
 	/// @brief Serialize FSM into 'buffer'
 	/// @param buffer 'SerialBuffer' to serialize to
 	/// @see HFSM2_ENABLE_SERIALIZATION
-	void save(		SerialBuffer& buffer) const;
+	void save(		SerialBuffer& buffer)						const noexcept;
 
 	/// @brief De-serialize FSM from 'buffer'
 	/// @param buffer 'SerialBuffer' to de-serialize from
 	/// @see HFSM2_ENABLE_SERIALIZATION
-	void load(const SerialBuffer& buffer);
+	void load(const SerialBuffer& buffer)							  noexcept;
 
 #endif
 
@@ -374,7 +388,7 @@ public:
 	/// @brief Get the list of transitions recorded during last 'update()'
 	/// @return Array of last recorded transitions
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	const TransitionSets& previousTransitions() const				{ return _previousTransitions;					}
+	const TransitionSets& previousTransitions()					const noexcept	{ return _previousTransitions;					}
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
@@ -382,7 +396,8 @@ public:
 	/// @param count Number of transitions
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	bool replayTransitions(const Transition* const transitions, const uint64_t count);
+	bool replayTransitions(const Transition* const transitions,
+						   const uint64_t count)					  noexcept;
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
@@ -390,27 +405,28 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
-	bool replayTransitions(const Array<Transition, NCount>& transitions);
+	bool replayTransitions(const Array<Transition,
+						   NCount>& transitions)					  noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
 	/// @param transition 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	bool replayTransition (const Transition& transition)			{ return replayTransitions(&transition, 1);		}
+	bool replayTransition (const Transition& transition)			  noexcept	{ return replayTransitions(&transition, 1);		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	const Transition* lastTransition(const StateID stateId) const;
+	const Transition* lastTransition(const StateID stateId)		const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
 	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
-	const Transition* lastTransition() const						{ return lastTransition(stateId<TState>());		}
+	const Transition* lastTransition()							const noexcept	{ return lastTransition(stateId<TState>());		}
 
 #endif
 
@@ -429,12 +445,12 @@ public:
 	/// @brief Get the array of 'StructureEntry' representing FSM structure
 	/// @return FSM structure
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	const Structure&	   structure()		 const					{ return _structure;							}
+	const Structure&	   structure()							const noexcept	{ return _structure;							}
 
 	/// @brief Get the array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @return FSM activation history
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	const ActivityHistory& activityHistory() const					{ return _activityHistory;						}
+	const ActivityHistory& activityHistory()					const noexcept	{ return _activityHistory;						}
 
 #endif
 
@@ -445,37 +461,37 @@ public:
 	/// @brief Attach logger
 	/// @param logger A logger implementing 'hfsm2::LoggerInterfaceT<>' interface
 	/// @see HFSM2_ENABLE_LOG_INTERFACE
-	void attachLogger(Logger* const logger)							{ _logger = logger;								}
+	HFSM2_INLINE void attachLogger(Logger* const logger)			  noexcept	{ _logger = logger;								}
 
 #endif
 
 	//----------------------------------------------------------------------
 
 private:
-	void initialEnter();
-	void processTransitions(TransitionSets& currentTransitions);
+	void initialEnter() noexcept;
+	void processTransitions(TransitionSets& currentTransitions) noexcept;
 
-	bool applyRequest (Control& control, const Transition& request, const Short index);
-	bool applyRequests(Control& control);
+	bool applyRequest (Control& control, const Transition& request, const Short index) noexcept;
+	bool applyRequests(Control& control) noexcept;
 
 	bool cancelledByEntryGuards(const TransitionSets& currentTransitions,
-								const TransitionSet&  pendingTransitions);
+								const TransitionSet&  pendingTransitions) noexcept;
 
 	bool cancelledByGuards(const TransitionSets& currentTransitions,
-						   const TransitionSet&  pendingTransitions);
+						   const TransitionSet&  pendingTransitions) noexcept;
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	bool applyRequests(Control& control,
 					   const Transition* const transitions,
-					   const uint64_t count);
+					   const uint64_t count) noexcept;
 
 	TransitionTargets _transitionTargets;
 	TransitionSets _previousTransitions;
 #endif
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
-	void getStateNames();
-	void udpateActivity();
+	void getStateNames() noexcept;
+	void udpateActivity() noexcept;
 
 	Prefixes _prefixes;
 	StructureStateInfos _stateInfos;
@@ -485,7 +501,7 @@ private:
 #endif
 
 protected:
-	Context& _context;
+	Context _context;
 	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
 
 	Registry _registry;
@@ -524,78 +540,83 @@ class RP_		   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtilit
 {
 	using Base = R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
-	using Payload				= TPayload;
-	using Transition			= TransitionT<Payload>;
+	using Transition = TransitionT<TPayload>;
+
+public:
+	using Payload	 = typename Base::Payload;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using RNG		 = typename Base::RNG;
+#endif
 
 public:
 	using Base::Base;
-
-	using Base::stateId;
-	using Base::regionId;
 
 	/// @brief Get state identifier for a state type
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID  stateId()								{ return Base::template stateId<TState>();		}
+	static constexpr StateID  stateId()								  noexcept	{ return Base::template stateId<TState>();		}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()							{ return Base::template regionId<TState>();		}
+	static constexpr RegionID regionId()							  noexcept	{ return Base::template regionId<TState>();		}
 
 	//------------------------------------------------------------------------------
+	// COMMON
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_INLINE void changeWith   (const StateID  stateId,
-									const Payload& payload);
+									const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_INLINE void changeWith   (const StateID  stateId,
-										 Payload&& payload);
+										 Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void changeWith   (const Payload& payload)	{ changeWith   (stateId<TState>(),			 payload );	}
+	HFSM2_INLINE void changeWith   (const Payload& payload)			  noexcept	{ changeWith   (stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void changeWith   (	 Payload&& payload)	{ changeWith   (stateId<TState>(), std::move(payload));	}
+	HFSM2_INLINE void changeWith   (	 Payload&& payload)			  noexcept	{ changeWith   (stateId<TState>(), std::move(payload));	}
 
+	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_INLINE void restartWith  (const StateID  stateId,
-									const Payload& payload);
+									const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_INLINE void restartWith  (const StateID  stateId,
-										 Payload&& payload);
+										 Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void restartWith  (const Payload& payload)	{ restartWith  (stateId<TState>(),			 payload );	}
+	HFSM2_INLINE void restartWith  (const Payload& payload)			  noexcept	{ restartWith  (stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void restartWith  (	 Payload&& payload)	{ restartWith  (stateId<TState>(), std::move(payload));	}
+	HFSM2_INLINE void restartWith  (	 Payload&& payload)			  noexcept	{ restartWith  (stateId<TState>(), std::move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -603,25 +624,25 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_INLINE void resumeWith   (const StateID  stateId,
-									const Payload& payload);
+									const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_INLINE void resumeWith   (const StateID  stateId,
-										 Payload&& payload);
+										 Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void resumeWith   (const Payload& payload)	{ resumeWith   (stateId<TState>(),			 payload );	}
+	HFSM2_INLINE void resumeWith   (const Payload& payload)			  noexcept	{ resumeWith   (stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void resumeWith   (	 Payload&& payload)	{ resumeWith   (stateId<TState>(), std::move(payload));	}
+	HFSM2_INLINE void resumeWith   (	 Payload&& payload)			  noexcept	{ resumeWith   (stateId<TState>(), std::move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -633,7 +654,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_INLINE void utilizeWith  (const StateID  stateId,
-									const Payload& payload);
+									const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///		with the highest 'utility()' among those with the highest 'rank()')
@@ -641,7 +662,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_INLINE void utilizeWith  (const StateID  stateId,
-										 Payload&& payload);
+										 Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///		with the highest 'utility()' among those with the highest 'rank()')
@@ -649,7 +670,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void utilizeWith  (const Payload& payload)	{ utilizeWith  (stateId<TState>(),			 payload );	}
+	HFSM2_INLINE void utilizeWith  (const Payload& payload)			  noexcept	{ utilizeWith  (stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///		with the highest 'utility()' among those with the highest 'rank()')
@@ -657,7 +678,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void utilizeWith  (	 Payload&& payload)	{ utilizeWith  (stateId<TState>(), std::move(payload));	}
+	HFSM2_INLINE void utilizeWith  (	 Payload&& payload)			  noexcept	{ utilizeWith  (stateId<TState>(), std::move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -667,7 +688,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_INLINE void randomizeWith(const StateID  stateId,
-									const Payload& payload);
+									const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///		proportional to 'utility()' among those with the highest 'rank()')
@@ -675,7 +696,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_INLINE void randomizeWith(const StateID  stateId,
-										 Payload&& payload);
+										 Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///		proportional to 'utility()' among those with the highest 'rank()')
@@ -683,7 +704,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void randomizeWith(const Payload& payload)	{ randomizeWith(stateId<TState>(),			 payload );	}
+	HFSM2_INLINE void randomizeWith(const Payload& payload)			  noexcept	{ randomizeWith(stateId<TState>(),			 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///		proportional to 'utility()' among those with the highest 'rank()')
@@ -691,7 +712,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void randomizeWith(	 Payload&& payload)	{ randomizeWith(stateId<TState>(), std::move(payload));	}
+	HFSM2_INLINE void randomizeWith(	 Payload&& payload)			  noexcept	{ randomizeWith(stateId<TState>(), std::move(payload));	}
 
 #endif
 
@@ -701,36 +722,38 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_INLINE void scheduleWith (const StateID  stateId,
-									const Payload& payload);
+									const Payload& payload)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_INLINE void scheduleWith (const StateID  stateId,
-										 Payload&& payload);
+										 Payload&& payload)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void scheduleWith (const Payload& payload)	{ scheduleWith (stateId<TState>(),			 payload );	}
+	HFSM2_INLINE void scheduleWith (const Payload& payload)			  noexcept	{ scheduleWith (stateId<TState>(),			 payload );	}
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_INLINE void scheduleWith (	 Payload&& payload)	{ scheduleWith (stateId<TState>(), std::move(payload));	}
+	HFSM2_INLINE void scheduleWith (	 Payload&& payload)			  noexcept	{ scheduleWith (stateId<TState>(), std::move(payload));	}
 
 	//------------------------------------------------------------------------------
 
-private:
+protected:
 	using Base::_context;
+
+private:
 	using Base::_requests;
 
 	HFSM2_IF_LOG_INTERFACE(using Base::_logger);
 };
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <FeatureTag NFeatureTag
 		, typename TContext
@@ -750,7 +773,236 @@ class RP_		   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtilit
 	using Base = R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>;
 
 public:
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using RNG		= typename Base::RNG;
+#endif
+
+public:
 	using Base::Base;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename, typename>
+class RC_;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TContext
+
+template <FeatureTag NFeatureTag
+		, typename TContext
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RC_			<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+{
+	using Base = RP_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+public:
+	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
+
+	using Context	= TContext;
+	using Payload	= typename Base::Payload;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using RNG		= typename Base::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	= typename Base::Logger;
+#endif
+
+public:
+	HFSM2_INLINE explicit RC_(Context& context
+							HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
+		: Base{context
+			 HFSM2_IF_UTILITY_THEORY(, rng)
+			 HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
+	HFSM2_INLINE void setContext(const Context&  context) noexcept { _context =			  context ; }
+	HFSM2_INLINE void setContext(	   Context&& context) noexcept { _context = std::move(context); }
+
+private:
+	using Base::_context;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TContext&
+
+template <FeatureTag NFeatureTag
+		, typename TContext
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RC_			<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+{
+	using Base = RP_<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+public:
+	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
+
+	using Context	= typename Base::Context;
+	using Payload	= typename Base::Payload;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using RNG		= typename Base::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	= typename Base::Logger;
+#endif
+
+public:
+	HFSM2_INLINE explicit RC_(Context context
+							HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
+		: Base{context
+			 HFSM2_IF_UTILITY_THEORY(, rng)
+			 HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
+	HFSM2_INLINE void setContext(Context context) noexcept { _context = context; }
+
+private:
+	using Base::_context;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TContext*
+
+template <FeatureTag NFeatureTag
+		, typename TContext
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RC_			<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+{
+	using Base = RP_<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+public:
+	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
+
+	using Context	= typename Base::Context;
+	using Payload	= typename Base::Payload;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using RNG		= typename Base::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	= typename Base::Logger;
+#endif
+
+public:
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	HFSM2_INLINE explicit RC_(Context context
+							, RNG& rng
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
+		: Base{context
+			 , rng
+			 HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
+#else
+
+	HFSM2_INLINE explicit RC_(Context context = nullptr
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
+		: Base{context
+			 HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
+#endif
+
+	HFSM2_INLINE void setContext(Context context) noexcept { _context = context; }
+
+private:
+	using Base::_context;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TContext == EmptyContext
+
+template <FeatureTag NFeatureTag
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RC_			<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	, public EmptyContext
+{
+	using Base = RP_<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+public:
+	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
+
+	using Context	= typename Base::Context;
+	using Payload	= typename Base::Payload;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using RNG		= typename Base::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Logger	= typename Base::Logger;
+#endif
+
+public:
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+
+	HFSM2_INLINE explicit RC_(RNG& rng
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
+		: Base{static_cast<Context&>(*this)
+			 , rng
+			 HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
+#else
+
+	HFSM2_INLINE explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr)) noexcept
+		: Base{static_cast<Context&>(*this)
+			 HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -760,103 +1012,60 @@ public:
 /// @tparam TApex Root region type
 template <typename TConfig,
 		  typename TApex>
-class RW_ final
-	: public	 RP_<TConfig, TApex>
+class RR_ final
+	: public	 RC_<TConfig, TApex>
 {
-	using Base = RP_<TConfig, TApex>;
+	using Base = RC_<TConfig, TApex>;
 
 public:
 	using Base::Base;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// TContext == ::hfsm2::EmptyContext
-
-template <
+// TRNG == RNGT<TUtility>
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-		  typename TRank,
-		  typename TUtility,
-		  typename TRNG,
+
+/// @brief FSM Root
+/// @tparam Cfg Type configuration
+/// @tparam TApex Root region type
+template <FeatureTag NFeatureTag
+		, typename TContext
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
 #endif
-		  Long NSubstitutionLimit,
-		  HFSM2_IF_PLANS(Long NTaskCapacity,)
-		  typename TPayload,
-		  typename TApex>
-class RW_		<::hfsm2::ConfigT<::hfsm2::EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
-	: public RP_<::hfsm2::ConfigT<::hfsm2::EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	, ::hfsm2::EmptyContext
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RR_			<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
+	: public	 RC_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	HFSM2_IF_UTILITY_THEORY(, public RNGT<TUtility>)
 {
-	using Cfg =  ::hfsm2::ConfigT<::hfsm2::EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
+	using Base = RC_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+public:
+	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
+
+	using Context	= typename Base::Context;
+	using Payload	= typename Base::Payload;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= TRNG;
+	using RNG		= typename Base::RNG;
 #endif
-
-	using Context	= typename Cfg::Context;
-	using Base		= RP_<Cfg, TApex>;
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::LoggerInterface;
+	using Logger	= typename Base::Logger;
 #endif
 
 public:
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-	explicit HFSM2_INLINE RW_(RNG& rng
-							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
-		: Base{static_cast<Context&>(*this)
-			 , rng
-			 HFSM2_IF_LOG_INTERFACE(, logger)}
-	{}
-
-#else
-
-	explicit HFSM2_INLINE RW_(HFSM2_IF_LOG_INTERFACE(  Logger* const logger = nullptr))
-		: Base{static_cast<Context&>(*this)
-			 HFSM2_IF_LOG_INTERFACE(, logger)}
-	{}
-
-#endif
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// TRNG == ::hfsm2::RandomT<TUtility>
-
-template <typename TContext,
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-		  typename TRank,
-		  typename TUtility,
-#endif
-		  Long NSubstitutionLimit,
-
-		  HFSM2_IF_PLANS(Long NTaskCapacity,)
-		  typename TPayload,
-		  typename TApex>
-class RW_		<::hfsm2::ConfigT<TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
-	: public RP_<::hfsm2::ConfigT<TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	HFSM2_IF_UTILITY_THEORY(, ::hfsm2::RandomT<TUtility>)
-{
-	using Cfg =  ::hfsm2::ConfigT<TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, ::hfsm2::RandomT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
-
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= ::hfsm2::RandomT<TUtility>;
-#endif
-
-	using Context	= typename Cfg::Context;
-	using Base		= RP_<Cfg, TApex>;
-
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::LoggerInterface;
-#endif
-
-
-public:
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-
-	explicit HFSM2_INLINE RW_(Context& context
-							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+	HFSM2_INLINE explicit RR_(Context& context
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
 		: Base{context
 			 , static_cast<RNG&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
@@ -865,8 +1074,8 @@ public:
 
 #else
 
-	explicit HFSM2_INLINE RW_(Context& context
-							  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))
+	HFSM2_INLINE explicit RR_(Context& context
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
 		: Base{context
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
@@ -875,36 +1084,39 @@ public:
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// TContext == ::hfsm2::EmptyContext && TRNG == ::hfsm2::RandomT<TUtility>
+// TContext == EmptyContext
+// TRNG == RNGT<TUtility>
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-
-template <typename TRank,
-		  typename TUtility,
-		  Long NSubstitutionLimit,
-
-		  HFSM2_IF_PLANS(Long NTaskCapacity,)
-		  typename TPayload,
-		  typename TApex>
-class RW_		<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
-	: public RP_<::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	, ::hfsm2::EmptyContext
-	, ::hfsm2::RandomT<TUtility>
+/// @brief FSM Root
+/// @tparam Cfg Type configuration
+/// @tparam TApex Root region type
+template <FeatureTag NFeatureTag
+		, typename TRank
+		, typename TUtility
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RR_			<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
+	: public	 RC_<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	, public RNGT<TUtility>
 {
-	using Cfg =  ::hfsm2::ConfigT<::hfsm2::EmptyContext, TRank, TUtility, ::hfsm2::RandomT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
+	using Base = RC_<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
-	using Context	= typename Cfg::Context;
-	using RNG		= typename Cfg::RNG;
-	using Base		= RP_<Cfg, TApex>;
+public:
+	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
+
+	using Context	= typename Base::Context;
+	using Payload	= typename Base::Payload;
+	using RNG		= typename Base::RNG;
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Cfg::LoggerInterface;
+	using Logger	= typename Base::Logger;
 #endif
 
 public:
-	explicit HFSM2_INLINE RW_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))
-		: Base{static_cast<Context&>(*this)
-			 , static_cast<RNG&>(*this)
+	HFSM2_INLINE explicit RR_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr)) noexcept
+		: Base{static_cast<RNG&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 		, RNG{0}
 	{}

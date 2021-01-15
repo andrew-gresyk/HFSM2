@@ -117,44 +117,44 @@ struct LoggerT
 
 	void recordMethod(Context& context,
 					  const StateID origin,
-					  const Method method) override;
+					  const Method method) noexcept override;
 
 	void recordTransition(Context& context,
 						  const StateID origin,
 						  const TransitionType transitionType,
-						  const StateID target) override;
+						  const StateID target) noexcept override;
 
 #ifdef HFSM2_ENABLE_PLANS
 
 	void recordTaskStatus(Context& context,
 						  const RegionID region,
 						  const StateID origin,
-						  const StatusEvent event) override;
+						  const StatusEvent event) noexcept override;
 
 	void recordPlanStatus(Context& context,
 						  const RegionID region,
-						  const StatusEvent event) override;
+						  const StatusEvent event) noexcept override;
 
 #endif
 
 	void recordCancelledPending(Context& context,
-								const StateID origin) override;
+								const StateID origin) noexcept override;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	void recordUtilityResolution(Context& context,
 								 const StateID head,
 								 const StateID prong,
-								 const Utilty utilty) override;
+								 const Utilty utilty) noexcept override;
 
 	void recordRandomResolution(Context& context,
 								const StateID head,
 								const StateID prong,
-								const Utilty utilty) override;
+								const Utilty utilty) noexcept override;
 
 #endif
 
-	void assertSequence(const Events& reference);
+	void assertSequence(const Events& reference) noexcept;
 
 	Events history;
 };
@@ -167,19 +167,19 @@ using Types = std::vector<hfsm2::StateID>;
 template <typename TMachine>
 void assertActive(TMachine& machine,
 				  const Types& all,
-				  const Types& toCheck);
+				  const Types& toCheck) noexcept;
 
 template <typename TMachine>
 void assertResumable(TMachine& machine,
 					 const Types& all,
-					 const Types& toCheck);
+					 const Types& toCheck) noexcept;
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
 template <typename TMachine>
 void assertLastTransitions(TMachine& machine,
 							 const Types& all,
-							 const Types& toCheck);
+							 const Types& toCheck) noexcept;
 
 #endif
 

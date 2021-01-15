@@ -1,4 +1,4 @@
-// HFSM (hierarchical state machine for games and interactive applications)
+// HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 //
 // Event handling example
@@ -94,7 +94,7 @@ struct Reactive
 	: FSM::State
 {
 	// handle a single event type - TransitionEvent
-	void react(const TransitionEvent&, FullControl& control)  {
+	void react(const TransitionEvent&, FullControl& control) noexcept {
 		std::cout << "  Reactive: reacting to TransitionEvent\n";
 
 		control.changeTo<Target>();
@@ -118,12 +118,12 @@ struct ConcreteHandler
 	: FSM::State
 {
 	// handle two event types - PrimaryEvent
-	void react(const PrimaryEvent&, FullControl&)  {
+	void react(const PrimaryEvent&, FullControl&) noexcept {
 		std::cout << "  ConcreteHandler: reacting to PrimaryEvent\n";
 	}
 
 	// and SecondaryEvent
-	void react(const SecondaryEvent&, FullControl&)  {
+	void react(const SecondaryEvent&, FullControl&) noexcept {
 		std::cout << "  ConcreteHandler: reacting to SecondaryEvent\n";
 	}
 
@@ -138,7 +138,7 @@ struct TemplateHandler
 {
 	// handle all possible event types
 	template <typename TEvent>
-	void react(const TEvent&, FullControl&)  {
+	void react(const TEvent&, FullControl&) noexcept {
 		std::cout << "  TemplateHandler: reacting to TEvent\n";
 	}
 };
@@ -151,14 +151,14 @@ struct EnableIfHandler
 	// use std::enable_if to build more complex conditional event handling
 	template <typename TEvent>
 	typename std::enable_if<std::is_class<TEvent>::value>::type
-	react(const TEvent&, FullControl&)  {
+	react(const TEvent&, FullControl&) noexcept {
 		std::cout << "  EnableIfHandler: reacting to a <class event>\n";
 	}
 
 	// but remember to cover all the remaining cases
 	template <typename TEvent>
 	typename std::enable_if<!std::is_class<TEvent>::value>::type
-	react(const TEvent&, FullControl&)  {
+	react(const TEvent&, FullControl&) noexcept {
 		std::cout << "  EnableIfHandler: reacting to a <non-class event>\n";
 	}
 };
@@ -168,7 +168,7 @@ struct EnableIfHandler
 struct Target
 	: FSM::State
 {
-	void enter(Control&) {
+	void enter(Control&) noexcept {
 		std::cout << "    changed to Target\n";
 	}
 };
@@ -176,7 +176,7 @@ struct Target
 ////////////////////////////////////////////////////////////////////////////////
 
 int
-main() {
+main() noexcept {
 	FSM::Instance machine;
 
 	std::cout << "sending PrimaryEvent:\n";

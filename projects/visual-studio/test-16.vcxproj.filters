@@ -102,6 +102,12 @@
     <ClCompile Include="..\..\test\test_internal_payloads.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_contexts.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_contexts_random.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
@@ -114,9 +120,6 @@
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\list.hpp">
       <Filter>hfsm\detail\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp">
@@ -191,6 +194,9 @@
     <ClInclude Include="..\..\include\hfsm2\detail\features\common.hpp">
       <Filter>hfsm\detail\features</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\hfsm2\detail\root\task_list.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\hfsm2\detail\shared\array.inl">
@@ -200,9 +206,6 @@
       <Filter>hfsm\detail\shared</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\shared\iterator.inl">
-      <Filter>hfsm\detail\shared</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\shared\list.inl">
       <Filter>hfsm\detail\shared</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl">
@@ -257,6 +260,9 @@
       <Filter>hfsm\detail\root</Filter>
     </None>
     <None Include="..\..\include\hfsm2\detail\root\registry_1.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\include\hfsm2\detail\root\task_list.inl">
       <Filter>hfsm\detail\root</Filter>
     </None>
   </ItemGroup>

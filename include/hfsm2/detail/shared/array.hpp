@@ -14,26 +14,26 @@ public:
 
 public:
 	HFSM2_INLINE StaticArray() = default;
-	HFSM2_INLINE StaticArray(const Item filler);
+	HFSM2_INLINE StaticArray(const Item filler)					  noexcept;
 
 	template <typename N>
-	HFSM2_INLINE	   Item& operator[] (const N i);
+	HFSM2_INLINE	   Item& operator[] (const N i)				  noexcept;
 
 	template <typename N>
-	HFSM2_INLINE const Item& operator[] (const N i) const;
+	HFSM2_INLINE const Item& operator[] (const N i)			const noexcept;
 
-	HFSM2_INLINE Long count() const							{ return CAPACITY;									}
+	HFSM2_INLINE Long count() const								  noexcept	{ return CAPACITY;									}
 
-	HFSM2_INLINE void fill(const Item filler);
-	HFSM2_INLINE void clear()								{ fill(INVALID_SHORT);								}
+	HFSM2_INLINE void fill(const Item filler)					  noexcept;
+	HFSM2_INLINE void clear()									  noexcept	{ fill(INVALID_SHORT);								}
 
-	HFSM2_INLINE Iterator<      StaticArray>  begin()		{ return Iterator<      StaticArray>(*this,     0); }
-	HFSM2_INLINE Iterator<const	StaticArray>  begin() const	{ return Iterator<const StaticArray>(*this,     0); }
-	HFSM2_INLINE Iterator<const	StaticArray> cbegin() const	{ return Iterator<const StaticArray>(*this,     0); }
+	HFSM2_INLINE Iterator<      StaticArray>  begin()			  noexcept	{ return Iterator<      StaticArray>(*this,     0); }
+	HFSM2_INLINE Iterator<const StaticArray>  begin()		const noexcept	{ return Iterator<const StaticArray>(*this,     0); }
+	HFSM2_INLINE Iterator<const StaticArray> cbegin()		const noexcept	{ return Iterator<const StaticArray>(*this,     0); }
 
-	HFSM2_INLINE Iterator<      StaticArray>    end()		{ return Iterator<      StaticArray>(*this, DUMMY);	}
-	HFSM2_INLINE Iterator<const	StaticArray>    end() const	{ return Iterator<const StaticArray>(*this, DUMMY);	}
-	HFSM2_INLINE Iterator<const	StaticArray>   cend() const	{ return Iterator<const StaticArray>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<      StaticArray>    end()			  noexcept	{ return Iterator<      StaticArray>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<const StaticArray>    end()		const noexcept	{ return Iterator<const StaticArray>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<const StaticArray>   cend()		const noexcept	{ return Iterator<const StaticArray>(*this, DUMMY);	}
 
 private:
 	Item _items[CAPACITY];
@@ -46,7 +46,7 @@ struct StaticArray<T, 0> {
 	using Item  = T;
 
 	HFSM2_INLINE StaticArray() = default;
-	HFSM2_INLINE StaticArray(const Item)											{}
+	HFSM2_INLINE StaticArray(const Item) noexcept {}
 };
 
 //------------------------------------------------------------------------------
@@ -64,37 +64,37 @@ public:
 	using Index = UnsignedCapacity<CAPACITY>;
 
 public:
-	HFSM2_INLINE void clear()														{ _count = 0;		}
+	HFSM2_INLINE void clear()									  noexcept	{ _count = 0;		}
 
 	// TODO: replace with 'emplace<>()'?
 	template <typename TValue>
-	HFSM2_INLINE Long append(const TValue& value);
+	HFSM2_INLINE Long append(const TValue& value)				  noexcept;
 
 	template <typename TValue>
-	HFSM2_INLINE Long append(TValue&& value);
+	HFSM2_INLINE Long append(	  TValue&& value)				  noexcept;
 
 	template <typename N>
-	HFSM2_INLINE	   Item& operator[] (const N i);
+	HFSM2_INLINE	   Item& operator[] (const N i)				  noexcept;
 
 	template <typename N>
-	HFSM2_INLINE const Item& operator[] (const N i) const;
+	HFSM2_INLINE const Item& operator[] (const N i)			const noexcept;
 
-	HFSM2_INLINE Long count() const													{ return _count;	}
+	HFSM2_INLINE Long count()								const noexcept	{ return _count;	}
 
 	template <Long N>
-	Array& operator += (const Array<T, N>& other);
+	HFSM2_INLINE Array& operator += (const Array<Item, N>& other) noexcept;
 
-	HFSM2_INLINE Iterator<      Array>  begin()			{ return Iterator<		Array>(*this,     0);	}
-	HFSM2_INLINE Iterator<const Array>  begin() const	{ return Iterator<const Array>(*this,     0);	}
-	HFSM2_INLINE Iterator<const Array> cbegin() const	{ return Iterator<const Array>(*this,     0);	}
+	HFSM2_INLINE Iterator<      Array>  begin()					  noexcept	{ return Iterator<		Array>(*this,     0);	}
+	HFSM2_INLINE Iterator<const Array>  begin()				const noexcept	{ return Iterator<const Array>(*this,     0);	}
+	HFSM2_INLINE Iterator<const Array> cbegin()				const noexcept	{ return Iterator<const Array>(*this,     0);	}
 
-	HFSM2_INLINE Iterator<      Array>	  end()			{ return Iterator<		Array>(*this, DUMMY);	}
-	HFSM2_INLINE Iterator<const Array>	  end() const	{ return Iterator<const Array>(*this, DUMMY);	}
-	HFSM2_INLINE Iterator<const Array>   cend() const	{ return Iterator<const Array>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<      Array>	  end()					  noexcept	{ return Iterator<		Array>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<const Array>	  end()				const noexcept	{ return Iterator<const Array>(*this, DUMMY);	}
+	HFSM2_INLINE Iterator<const Array>   cend()				const noexcept	{ return Iterator<const Array>(*this, DUMMY);	}
 
 private:
-	HFSM2_INLINE Long next(const Long i) const										{ return i + 1;		}
-	HFSM2_INLINE Long limit() const													{ return _count;	}
+	HFSM2_INLINE Long next(const Long i)					const noexcept	{ return i + 1;		}
+	HFSM2_INLINE Long limit()								const noexcept	{ return _count;	}
 
 private:
 	Long _count = 0;

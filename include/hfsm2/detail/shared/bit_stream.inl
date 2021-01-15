@@ -5,7 +5,7 @@ namespace detail {
 
 template <Long NBC>
 void
-StreamBuffer<NBC>::clear() {
+StreamBuffer<NBC>::clear() noexcept {
 	bitSize = 0;
 	fill(payload, 0);
 }
@@ -13,7 +13,7 @@ StreamBuffer<NBC>::clear() {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <Long NBC>
-BitWriteStream<NBC>::BitWriteStream(Buffer& buffer)
+BitWriteStream<NBC>::BitWriteStream(Buffer& buffer) noexcept
 	: _buffer{buffer}
 {
 	_buffer.clear();
@@ -24,7 +24,7 @@ BitWriteStream<NBC>::BitWriteStream(Buffer& buffer)
 template <Long NBC>
 template <Short NBitWidth>
 void
-BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
+BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) noexcept {
 	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
@@ -55,7 +55,7 @@ BitWriteStream<NBC>::write(const UnsignedBitWidth<NBitWidth> item) {
 template <Long NBC>
 template <Short NBitWidth>
 UnsignedBitWidth<NBitWidth>
-BitReadStream<NBC>::read() {
+BitReadStream<NBC>::read() noexcept {
 	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 

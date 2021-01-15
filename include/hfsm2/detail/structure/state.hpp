@@ -44,8 +44,8 @@ struct S_ final {
 
 	template <typename T>
 	struct Accessor {
-		HFSM2_INLINE static		  T&	   get(		 S_&  )			{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);		}
-		HFSM2_INLINE static const T&	   get(const S_&  )			{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);		}
+		HFSM2_INLINE static		  T&	get(	  S_&  )			  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
+		HFSM2_INLINE static const T&	get(const S_&  )			  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 	};
 
 #ifdef __clang__
@@ -54,83 +54,85 @@ struct S_ final {
 
 	template <>
 	struct Accessor<Head> {
-		HFSM2_INLINE static		  Head& get(	  S_& s)			{ return s._headBox.get();								}
-		HFSM2_INLINE static const Head& get(const S_& s)			{ return s._headBox.get();								}
+		HFSM2_INLINE static		  Head& get(	  S_& s)			  noexcept	{ return s._headBox.get();							}
+		HFSM2_INLINE static const Head& get(const S_& s)			  noexcept	{ return s._headBox.get();							}
 	};
 
 	template <typename T>
-	HFSM2_INLINE	   T& access()									{ return Accessor<T>::get(*this);						}
+	HFSM2_INLINE	   T& access()									  noexcept	{ return Accessor<T>::get(*this);					}
 
 	template <typename T>
-	HFSM2_INLINE const T& access() const							{ return Accessor<T>::get(*this);						}
+	HFSM2_INLINE const T& access()								const noexcept	{ return Accessor<T>::get(*this);					}
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE Parent	 stateParent		  (Control&  control)	{ return control._registry.stateParents[STATE_ID];		}
+	HFSM2_INLINE Parent	 stateParent		  (Control&  control)	  noexcept	{ return control._registry.stateParents[STATE_ID];	}
 
-	HFSM2_INLINE void	 deepRegister		  (Registry& registry, const Parent parent);
+	HFSM2_INLINE void	 deepRegister		  (Registry& registry,
+											   const Parent parent)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE Rank	 wrapRank			  (Control&  control);
-	HFSM2_INLINE Utility wrapUtility		  (Control&  control);
+	HFSM2_INLINE Rank	 wrapRank			  (Control&  control)	  noexcept;
+	HFSM2_INLINE Utility wrapUtility		  (Control&  control)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 deepForwardEntryGuard(GuardControl&)												{ return false;	}
-	HFSM2_INLINE bool	 deepEntryGuard		  (GuardControl& control);
+	HFSM2_INLINE bool	 deepForwardEntryGuard(GuardControl&		) noexcept		{ return false;	}
+	HFSM2_INLINE bool	 deepEntryGuard		  (GuardControl& control) noexcept;
 
-	HFSM2_INLINE void	 deepConstruct		  (PlanControl&  control);
+	HFSM2_INLINE void	 deepConstruct		  (PlanControl&  control) noexcept;
 
-	HFSM2_INLINE void	 deepEnter			  (PlanControl&  control);
-	HFSM2_INLINE void	 deepReenter		  (PlanControl&  control);
+	HFSM2_INLINE void	 deepEnter			  (PlanControl&  control) noexcept;
+	HFSM2_INLINE void	 deepReenter		  (PlanControl&  control) noexcept;
 
-	HFSM2_INLINE Status	 deepUpdate			  (FullControl&  control);
+	HFSM2_INLINE Status	 deepUpdate			  (FullControl&  control) noexcept;
 
 	template <typename TEvent>
-	HFSM2_INLINE Status	 deepReact			  (FullControl&	 control, const TEvent& event);
+	HFSM2_INLINE Status	 deepReact			  (FullControl&	 control,
+											   const TEvent& event)	  noexcept;
 
-	HFSM2_INLINE bool	 deepForwardExitGuard (GuardControl&)												{ return false; }
-	HFSM2_INLINE bool	 deepExitGuard		  (GuardControl& control);
+	HFSM2_INLINE bool	 deepForwardExitGuard (GuardControl&		) noexcept		{ return false; }
+	HFSM2_INLINE bool	 deepExitGuard		  (GuardControl& control) noexcept;
 
-	HFSM2_INLINE void	 deepExit			  (PlanControl&	 control);
+	HFSM2_INLINE void	 deepExit			  (PlanControl&	 control) noexcept;
 
-	HFSM2_INLINE void	 deepDestruct		  (PlanControl&  control);
+	HFSM2_INLINE void	 deepDestruct		  (PlanControl&  control) noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #ifdef HFSM2_ENABLE_PLANS
-	HFSM2_INLINE void	 wrapPlanSucceeded	  (FullControl&	 control);
-	HFSM2_INLINE void	 wrapPlanFailed		  (FullControl&	 control);
+	HFSM2_INLINE void	 wrapPlanSucceeded	  (FullControl&	 control) noexcept;
+	HFSM2_INLINE void	 wrapPlanFailed		  (FullControl&	 control) noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepForwardActive	  (Control&,		 const Request		  )										{}
-	HFSM2_INLINE void	 deepForwardRequest	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepForwardActive	  (Control&,		 const Request		  ) noexcept	{}
+	HFSM2_INLINE void	 deepForwardRequest	  (Control& control, const Request request) noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 deepRequestChange	  (Control& control, const Request request);
-	HFSM2_INLINE void	 deepRequestRestart	  (Control& control, const Request request);
-	HFSM2_INLINE void	 deepRequestResume	  (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestChange	  (Control& control, const Request request) noexcept;
+	HFSM2_INLINE void	 deepRequestRestart	  (Control& control, const Request request) noexcept;
+	HFSM2_INLINE void	 deepRequestResume	  (Control& control, const Request request) noexcept;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 deepRequestUtilize	  (Control& control, const Request request);
-	HFSM2_INLINE void	 deepRequestRandomize (Control& control, const Request request);
+	HFSM2_INLINE void	 deepRequestUtilize	  (Control& control, const Request request) noexcept;
+	HFSM2_INLINE void	 deepRequestRandomize (Control& control, const Request request) noexcept;
 
-	HFSM2_INLINE UP		 deepReportChange	  (Control& control);
-	HFSM2_INLINE UP		 deepReportUtilize	  (Control& control);
-	HFSM2_INLINE Rank	 deepReportRank		  (Control& control);
-	HFSM2_INLINE Utility deepReportRandomize  (Control& control);
+	HFSM2_INLINE UP		 deepReportChange	  (Control& control) noexcept;
+	HFSM2_INLINE UP		 deepReportUtilize	  (Control& control) noexcept;
+	HFSM2_INLINE Rank	 deepReportRank		  (Control& control) noexcept;
+	HFSM2_INLINE Utility deepReportRandomize  (Control& control) noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	deepChangeToRequested(Control&)																		{}
+	HFSM2_INLINE void	deepChangeToRequested(Control&) noexcept									{}
 
 	//----------------------------------------------------------------------
 
@@ -138,11 +140,11 @@ struct S_ final {
 	using WriteStream	= typename TArgs::WriteStream;
 	using ReadStream	= typename TArgs::ReadStream;
 
-	HFSM2_INLINE void	 deepSaveActive	  (const Registry&, WriteStream&) const												{}
-	HFSM2_INLINE void	 deepSaveResumable(const Registry&, WriteStream&) const												{}
+	HFSM2_INLINE void	 deepSaveActive	  (const Registry&, WriteStream&) const noexcept			{}
+	HFSM2_INLINE void	 deepSaveResumable(const Registry&, WriteStream&) const noexcept			{}
 
-	HFSM2_INLINE void	 deepLoadRequested(		 Registry&, ReadStream& ) const												{}
-	HFSM2_INLINE void	 deepLoadResumable(		 Registry&, ReadStream& ) const												{}
+	HFSM2_INLINE void	 deepLoadRequested(		 Registry&, ReadStream& ) const noexcept			{}
+	HFSM2_INLINE void	 deepLoadResumable(		 Registry&, ReadStream& ) const noexcept			{}
 #endif
 
 	//----------------------------------------------------------------------
@@ -151,12 +153,12 @@ struct S_ final {
 	using StructureStateInfos = typename TArgs::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
-	static const char* name();
+	static const char* name() noexcept;
 
 	void deepGetNames(const Long parent,
 					  const RegionType region,
 					  const Short depth,
-					  StructureStateInfos& stateInfos) const;
+					  StructureStateInfos& stateInfos) const noexcept;
 #endif
 
 	//----------------------------------------------------------------------
@@ -181,7 +183,7 @@ struct S_ final {
 	void log(TReturn(THost::*)(TParams...),
 			 Logger& logger,
 			 Context& context,
-			 const Method method) const
+			 const Method method) const noexcept
 	{
 		logger.recordMethod(context, STATE_ID, method);
 	}
@@ -192,7 +194,7 @@ struct S_ final {
 	void log(TReturn(Empty::*)(TParams...),
 			 Logger&,
 			 Context&,
-			 const Method) const
+			 const Method) const noexcept
 	{}
 
 #endif

@@ -2,10 +2,11 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+// COMMON
 
 template <typename TArgs>
 ControlT<TArgs>::Origin::Origin(ControlT& control_,
-								const StateID stateId)
+								const StateID stateId) noexcept
 	: control{control_}
 	, prevId{control._originId}
 {
@@ -15,15 +16,16 @@ ControlT<TArgs>::Origin::Origin(ControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-ControlT<TArgs>::Origin::~Origin() {
+ControlT<TArgs>::Origin::~Origin() noexcept {
 	control.resetOrigin(prevId);
 }
 
+// COMMON
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
 ControlT<TArgs>::Region::Region(ControlT& control_,
-								const RegionID regionId)
+								const RegionID regionId) noexcept
 	: control{control_}
 	, prevId{control._regionId}
 {
@@ -33,7 +35,7 @@ ControlT<TArgs>::Region::Region(ControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-ControlT<TArgs>::Region::~Region() {
+ControlT<TArgs>::Region::~Region() noexcept {
 	control.resetRegion(prevId);
 }
 
@@ -41,7 +43,7 @@ ControlT<TArgs>::Region::~Region() {
 
 template <typename TArgs>
 void
-ControlT<TArgs>::setOrigin(const StateID stateId) {
+ControlT<TArgs>::setOrigin(const StateID stateId) noexcept {
 	HFSM2_ASSERT(stateId < StateList::SIZE);
 
 	_originId = stateId;
@@ -51,7 +53,7 @@ ControlT<TArgs>::setOrigin(const StateID stateId) {
 
 template <typename TArgs>
 void
-ControlT<TArgs>::resetOrigin(const StateID stateId) { //-V524
+ControlT<TArgs>::resetOrigin(const StateID stateId) noexcept { //-V524
 	_originId = stateId;
 }
 
@@ -59,7 +61,7 @@ ControlT<TArgs>::resetOrigin(const StateID stateId) { //-V524
 
 template <typename TArgs>
 void
-ControlT<TArgs>::setRegion(const RegionID regionId) {
+ControlT<TArgs>::setRegion(const RegionID regionId) noexcept {
 	HFSM2_ASSERT(_regionId <= regionId && regionId < RegionList::SIZE);
 
 	_regionId = regionId;
@@ -69,7 +71,7 @@ ControlT<TArgs>::setRegion(const RegionID regionId) {
 
 template <typename TArgs>
 void
-ControlT<TArgs>::resetRegion(const RegionID regionId) { //-V524
+ControlT<TArgs>::resetRegion(const RegionID regionId) noexcept { //-V524
 	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
 
 	_regionId = regionId;
@@ -82,7 +84,7 @@ ControlT<TArgs>::resetRegion(const RegionID regionId) { //-V524
 template <typename TArgs>
 void
 ControlT<TArgs>::pinLastTransition(const StateID stateId,
-								   const Short index)
+								   const Short index) noexcept
 {
 	if (index != INVALID_SHORT) {
 		HFSM2_ASSERT(index < TransitionSets::CAPACITY);
@@ -96,7 +98,7 @@ ControlT<TArgs>::pinLastTransition(const StateID stateId,
 
 template <typename TArgs>
 const typename ControlT<TArgs>::Transition*
-ControlT<TArgs>::lastTransition(const StateID stateId) const {
+ControlT<TArgs>::lastTransition(const StateID stateId) const noexcept {
 	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
 		const Short index = _transitionTargets[stateId];
 
@@ -111,7 +113,7 @@ ControlT<TArgs>::lastTransition(const StateID stateId) const {
 
 template <typename TArgs>
 const typename ControlT<TArgs>::Transition*
-ControlT<TArgs>::lastTransition() const {
+ControlT<TArgs>::lastTransition() const noexcept {
 	HFSM2_ASSERT(_originId < _transitionTargets.CAPACITY);
 
 	return lastTransition(_originId);
@@ -125,7 +127,7 @@ template <typename TArgs>
 PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
 									const RegionID regionId,
 									const StateID index,
-									const Long size)
+									const Long size) noexcept
 	: control  {control_}
 	, prevId   {control._regionId}
 	, prevIndex{control._regionStateId}
@@ -137,7 +139,7 @@ PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-PlanControlT<TArgs>::Region::~Region() {
+PlanControlT<TArgs>::Region::~Region() noexcept {
 	control.resetRegion(prevId, prevIndex, prevSize);
 
 	control._status.clear();
@@ -149,7 +151,7 @@ template <typename TArgs>
 void
 PlanControlT<TArgs>::setRegion(const RegionID regionId,
 							   const StateID index,
-							   const Long size)
+							   const Long size) noexcept
 {
 	HFSM2_ASSERT(_regionId <= regionId && regionId <  RegionList::SIZE);
 	HFSM2_ASSERT(_regionStateId <= index && index + size <= _regionStateId + _regionSize);
@@ -165,7 +167,7 @@ template <typename TArgs>
 void
 PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
 								 const StateID index,
-								 const Long size)
+								 const Long size) noexcept
 {
 	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
 	HFSM2_ASSERT(index <= _regionStateId && _regionStateId + _regionSize <= index + size);
@@ -178,7 +180,7 @@ PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-FullControlBaseT<TArgs>::Lock::Lock(FullControlBaseT& control_)
+FullControlBaseT<TArgs>::Lock::Lock(FullControlBaseT& control_) noexcept
 	: control{!control_._locked ? &control_ : nullptr}
 {
 	if (control)
@@ -188,7 +190,7 @@ FullControlBaseT<TArgs>::Lock::Lock(FullControlBaseT& control_)
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-FullControlBaseT<TArgs>::Lock::~Lock() {
+FullControlBaseT<TArgs>::Lock::~Lock() noexcept {
 	if (control)
 		control->_locked = false;
 }
@@ -200,7 +202,7 @@ FullControlBaseT<TArgs>::Lock::~Lock() {
 template <typename TArgs>
 template <typename TState>
 Status
-FullControlBaseT<TArgs>::buildPlanStatus() {
+FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
 
@@ -231,10 +233,11 @@ FullControlBaseT<TArgs>::buildPlanStatus() {
 #endif
 
 //------------------------------------------------------------------------------
+// COMMON
 
 template <typename TArgs>
 void
-FullControlBaseT<TArgs>::changeTo(const StateID stateId) {
+FullControlBaseT<TArgs>::changeTo(const StateID stateId) noexcept {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::CHANGE});
 
@@ -245,11 +248,12 @@ FullControlBaseT<TArgs>::changeTo(const StateID stateId) {
 	}
 }
 
+// COMMON
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
 void
-FullControlBaseT<TArgs>::restart(const StateID stateId) {
+FullControlBaseT<TArgs>::restart(const StateID stateId) noexcept {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESTART});
 
@@ -264,7 +268,7 @@ FullControlBaseT<TArgs>::restart(const StateID stateId) {
 
 template <typename TArgs>
 void
-FullControlBaseT<TArgs>::resume(const StateID stateId) {
+FullControlBaseT<TArgs>::resume(const StateID stateId) noexcept {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESUME});
 
@@ -281,7 +285,7 @@ FullControlBaseT<TArgs>::resume(const StateID stateId) {
 
 template <typename TArgs>
 void
-FullControlBaseT<TArgs>::utilize(const StateID stateId) {
+FullControlBaseT<TArgs>::utilize(const StateID stateId) noexcept {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::UTILIZE});
 
@@ -296,7 +300,7 @@ FullControlBaseT<TArgs>::utilize(const StateID stateId) {
 
 template <typename TArgs>
 void
-FullControlBaseT<TArgs>::randomize(const StateID stateId) {
+FullControlBaseT<TArgs>::randomize(const StateID stateId) noexcept {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RANDOMIZE});
 
@@ -313,7 +317,7 @@ FullControlBaseT<TArgs>::randomize(const StateID stateId) {
 
 template <typename TArgs>
 void
-FullControlBaseT<TArgs>::schedule(const StateID stateId) {
+FullControlBaseT<TArgs>::schedule(const StateID stateId) noexcept {
 	_requests.append(Transition{_originId, stateId, TransitionType::SCHEDULE});
 
 	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
@@ -325,7 +329,7 @@ FullControlBaseT<TArgs>::schedule(const StateID stateId) {
 
 template <typename TArgs>
 void
-FullControlBaseT<TArgs>::succeed() {
+FullControlBaseT<TArgs>::succeed() noexcept {
 	_status.result = Status::Result::SUCCESS;
 
 	_planData.tasksSuccesses.set(_originId);
@@ -344,7 +348,7 @@ FullControlBaseT<TArgs>::succeed() {
 
 template <typename TArgs>
 void
-FullControlBaseT<TArgs>::fail() {
+FullControlBaseT<TArgs>::fail() noexcept {
 	_status.result = Status::Result::FAILURE;
 
 	_planData.tasksFailures.set(_originId);
@@ -369,7 +373,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long N
 template <typename TState>
 Status
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::updatePlan(TState& headState,
-																					 const Status subStatus)
+																					 const Status subStatus) noexcept
 {
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
@@ -416,11 +420,12 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::update
 #endif
 
 //------------------------------------------------------------------------------
+// COMMON
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID stateId,
-																									  const Payload& payload)
+																									  const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::CHANGE, payload});
@@ -435,7 +440,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID stateId,
-																									  Payload&& payload)
+																									  Payload&& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::CHANGE, std::move(payload)});
@@ -447,12 +452,13 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 	}
 }
 
+// COMMON
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID stateId,
-																									   const Payload& payload)
+																									   const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESTART, payload});
@@ -467,7 +473,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID stateId,
-																									   Payload&& payload)
+																									   Payload&& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESTART, std::move(payload)});
@@ -484,7 +490,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID stateId,
-																									  const Payload& payload)
+																									  const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESUME, payload});
@@ -499,7 +505,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID stateId,
-																									  Payload&& payload)
+																									  Payload&& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RESUME, std::move(payload)});
@@ -518,7 +524,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID stateId,
-																									   const Payload& payload)
+																									   const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::UTILIZE, payload});
@@ -533,7 +539,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID stateId,
-																									   Payload&& payload)
+																									   Payload&& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::UTILIZE, std::move(payload)});
@@ -550,7 +556,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID stateId,
-																										 const Payload& payload)
+																										 const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RANDOMIZE, payload});
@@ -565,7 +571,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID stateId,
-																										 Payload&& payload)
+																										 Payload&& payload) noexcept
 {
 	if (!_locked) {
 		_requests.append(Transition{_originId, stateId, TransitionType::RANDOMIZE, std::move(payload)});
@@ -584,7 +590,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID stateId,
-																										const Payload& payload)
+																										const Payload& payload) noexcept
 {
 	_requests.append(Transition{_originId, stateId, TransitionType::SCHEDULE, payload});
 
@@ -594,7 +600,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NT
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID stateId,
-																										Payload&& payload)
+																										Payload&& payload) noexcept
 {
 	_requests.append(Transition{_originId, stateId, TransitionType::SCHEDULE, std::move(payload)});
 
@@ -609,7 +615,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long N
 template <typename TState>
 Status
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, void>>::updatePlan(TState& headState,
-																					  const Status subStatus)
+																					  const Status subStatus) noexcept
 {
 	using State = TState;
 	static constexpr StateID STATE_ID = State::STATE_ID;
@@ -659,7 +665,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, void>>::updat
 
 template <typename TArgs>
 void
-GuardControlT<TArgs>::cancelPendingTransitions() {
+GuardControlT<TArgs>::cancelPendingTransitions() noexcept {
 	_cancelled = true;
 
 	HFSM2_LOG_CANCELLED_PENDING(context(), _originId);

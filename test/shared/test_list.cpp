@@ -1,10 +1,11 @@
+#define HFSM2_ENABLE_PLANS
 #include "../tools.hpp"
 
 namespace test_list {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using List = hfsm2::detail::List<unsigned, 16>;
+using List = hfsm2::detail::TaskListT<void, 16>;
 
 //------------------------------------------------------------------------------
 
@@ -16,14 +17,18 @@ TEST_CASE("Shared.List<>", "[shared]") {
 
 	WHEN("fill, delete and re-insert an element") {
 		for (List::Index i = 0; i < CAPACITY; ++i) {
-			const auto index = list.emplace(i);
+			const auto index = list.emplace((hfsm2::Long) i,
+											(hfsm2::Long) i,
+											hfsm2::TransitionType::COUNT);
 
 			REQUIRE(index == i); //-V521
 			REQUIRE(list.count() == i + 1); //-V521
 		}
 
 		for (List::Index i = 0; i < CAPACITY; ++i)
-			REQUIRE(list[i] == i); //-V521
+			REQUIRE(list[i] == hfsm2::detail::TaskBase{(hfsm2::Long) i,
+													   (hfsm2::Long) i,
+													   hfsm2::TransitionType::COUNT}); //-V521
 
 		THEN("at the start") {
 			REQUIRE(list.count() == CAPACITY); //-V521
@@ -31,7 +36,9 @@ TEST_CASE("Shared.List<>", "[shared]") {
 			list.remove(0);
 			REQUIRE(list.count() == CAPACITY - 1); //-V521
 
-			const auto index = list.emplace(0u);
+			const auto index = list.emplace((hfsm2::Long) 0u,
+											(hfsm2::Long) 0u,
+											hfsm2::TransitionType::COUNT);
 			REQUIRE(index == 0); //-V521
 			REQUIRE(list.count() == CAPACITY); //-V521
 		}
@@ -43,7 +50,9 @@ TEST_CASE("Shared.List<>", "[shared]") {
 			list.remove(mid);
 			REQUIRE(list.count() == CAPACITY - 1); //-V521
 
-			const auto index = list.emplace(mid);
+			const auto index = list.emplace((hfsm2::Long) mid,
+											(hfsm2::Long) mid,
+											hfsm2::TransitionType::COUNT);
 			REQUIRE(index == mid); //-V521
 			REQUIRE(list.count() == CAPACITY); //-V521
 		}
@@ -55,7 +64,9 @@ TEST_CASE("Shared.List<>", "[shared]") {
 			list.remove(end);
 			REQUIRE(list.count() == CAPACITY - 1); //-V521
 
-			const auto index = list.emplace(end);
+			const auto index = list.emplace((hfsm2::Long) end,
+											(hfsm2::Long) end,
+											hfsm2::TransitionType::COUNT);
 			REQUIRE(index == end); //-V521
 			REQUIRE(list.count() == CAPACITY); //-V521
 		}
@@ -63,14 +74,18 @@ TEST_CASE("Shared.List<>", "[shared]") {
 
 	WHEN("fill, delete all and re-insert all elements") {
 		for (List::Index i = 0; i < CAPACITY; ++i) {
-			const auto index = list.emplace(i);
+			const auto index = list.emplace((hfsm2::Long) i,
+											(hfsm2::Long) i,
+											hfsm2::TransitionType::COUNT);
 
 			REQUIRE(index == i); //-V521
 			REQUIRE(list.count() == i + 1); //-V521
 		}
 
 		for (List::Index i = 0; i < CAPACITY; ++i)
-			REQUIRE(list[i] == i); //-V521
+			REQUIRE(list[i] == hfsm2::detail::TaskBase{(hfsm2::Long) i,
+													   (hfsm2::Long) i,
+													   hfsm2::TransitionType::COUNT}); //-V521
 
 		THEN("from the start") {
 			REQUIRE(list.count() == CAPACITY); //-V521
@@ -81,7 +96,9 @@ TEST_CASE("Shared.List<>", "[shared]") {
 			}
 
 			for (List::Index i = 0; i < CAPACITY; ++i) {
-				const auto index = list.emplace(i);
+				const auto index = list.emplace((hfsm2::Long) i,
+												(hfsm2::Long) i,
+												hfsm2::TransitionType::COUNT);
 
 				REQUIRE(index == CAPACITY - 1 - i); //-V521
 				REQUIRE(list.count() == i + 1); //-V521
@@ -101,7 +118,9 @@ TEST_CASE("Shared.List<>", "[shared]") {
 			}
 
 			for (List::Index i = 0; i < CAPACITY; ++i) {
-				const auto index = list.emplace(i);
+				const auto index = list.emplace((hfsm2::Long) i,
+												(hfsm2::Long) i,
+												hfsm2::TransitionType::COUNT);
 
 				REQUIRE(index == i); //-V521
 				REQUIRE(list.count() == i + 1); //-V521
