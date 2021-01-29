@@ -5,20 +5,35 @@ namespace detail {
 
 //------------------------------------------------------------------------------
 
+template <Long>
+class BitWriteStreamT;
+
+template <Long>
+class BitReadStreamT;
+
+////////////////////////////////////////////////////////////////////////////////
+
 template <Long NBitCapacity>
-struct StreamBufferT {
+class StreamBufferT {
+	template <Long>
+	friend class BitWriteStreamT;
+
+	template <Long>
+	friend class BitReadStreamT;
+
+public:
 	static constexpr Long BIT_CAPACITY	= NBitCapacity;
 	static constexpr Long BYTE_COUNT	= contain(BIT_CAPACITY, 8u);
 
-	using Size = UnsignedCapacity<BIT_CAPACITY>;
 	using Data = uint8_t[BYTE_COUNT];
 
-	void clear()										  noexcept;
+	HFSM2_INLINE void clear()										  noexcept;
 
-	//Size write(const uint8_t byte)					  noexcept;
+	HFSM2_INLINE	   Data& data()									  noexcept	{ return _data;		}
+	HFSM2_INLINE const Data& data()								const noexcept	{ return _data;		}
 
-	Size bitSize;
-	Data payload;
+private:
+	Data _data;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,13 +46,18 @@ public:
 	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	BitWriteStreamT(Buffer& _buffer)					  noexcept;
+	HFSM2_INLINE explicit BitWriteStreamT(Buffer& buffer,
+										  const Long cursor = 0)	  noexcept;
 
 	template <Short NBitWidth>
-	void write(const UnsignedBitWidth<NBitWidth> item)	  noexcept;
+	HFSM2_INLINE void write(const UnsignedBitWidth<NBitWidth> item)	  noexcept;
+
+	HFSM2_INLINE Long cursor()									const noexcept	{ return _cursor;	}
 
 private:
 	Buffer& _buffer;
+
+	Long _cursor = 0;
 };
 
 //------------------------------------------------------------------------------
@@ -50,19 +70,18 @@ public:
 	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	BitReadStreamT(const Buffer& buffer)				  noexcept
-		: _buffer{buffer}
-	{}
+	HFSM2_INLINE explicit BitReadStreamT(const Buffer& buffer,
+										 const Long cursor = 0)		  noexcept;
 
 	template <Short NBitWidth>
-	UnsignedBitWidth<NBitWidth> read()					  noexcept;
+	HFSM2_INLINE UnsignedBitWidth<NBitWidth> read()					  noexcept;
 
-	Long cursor()									const noexcept	{ return _cursor;	}
+	HFSM2_INLINE Long cursor()									const noexcept	{ return _cursor;	}
 
 private:
 	const Buffer& _buffer;
 
-	Long _cursor = 0;
+	Long _cursor;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

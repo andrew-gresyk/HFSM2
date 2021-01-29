@@ -80,8 +80,8 @@ static_assert(FSM::Instance::Info::COMPO_REGIONS  ==  5, "COMPO_REGIONS");
 static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "COMPO_PRONGS");
 static_assert(FSM::Instance::Info::ORTHO_REGIONS  ==  1, "ORTHO_REGIONS");
 static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
-static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "");
-static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "");
+static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "ACTIVE_BITS");
+static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "RESUMABLE_BITS");
 
 //------------------------------------------------------------------------------
 
@@ -174,8 +174,8 @@ static_assert(FSM::Instance::Info::COMPO_REGIONS  ==  5, "COMPO_REGIONS");
 static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "COMPO_PRONGS");
 static_assert(FSM::Instance::Info::ORTHO_REGIONS  ==  1, "ORTHO_REGIONS");
 static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
-static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "");
-static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "");
+static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "ACTIVE_BITS");
+static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "RESUMABLE_BITS");
 
 //------------------------------------------------------------------------------
 

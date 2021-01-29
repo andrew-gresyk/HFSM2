@@ -30,7 +30,7 @@ template <typename
 		, Long
 		, Long
 		, Long
-		, Long
+		HFSM2_IF_SERIALIZATION(, Long)
 		, Long
 		, Long
 		, typename>
@@ -48,7 +48,7 @@ template <typename TContext
 		, Long NCompoCount
 		, Long NOrthoCount
 		, Long NOrthoUnits
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		, Long NTaskCapacity
 		, typename TPayload>
@@ -59,7 +59,7 @@ struct PlanDataT<ArgsT<TContext
 					 , NCompoCount
 					 , NOrthoCount
 					 , NOrthoUnits
-					 , NSerialBits
+					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
 					 , TPayload>>
@@ -72,7 +72,7 @@ struct PlanDataT<ArgsT<TContext
 	static constexpr Short TASK_CAPACITY = NTaskCapacity;
 
 	using Task			= TaskT<Payload>;
-	using Tasks			= TaskListT	   <Payload, TASK_CAPACITY>;
+	using Tasks			= TaskListT	  <Payload,  TASK_CAPACITY>;
 	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
 	using Payloads		= StaticArrayT<Payload,  TASK_CAPACITY>;
 
@@ -108,7 +108,7 @@ template <typename TContext
 		, Long NCompoCount
 		, Long NOrthoCount
 		, Long NOrthoUnits
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		, Long NTaskCapacity>
 struct PlanDataT<ArgsT<TContext
@@ -118,7 +118,7 @@ struct PlanDataT<ArgsT<TContext
 					 , NCompoCount
 					 , NOrthoCount
 					 , NOrthoUnits
-					 , NSerialBits
+					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
 					 , void>>
@@ -172,7 +172,7 @@ struct PlanDataT<ArgsT<TContext
 					 , 0
 					 , NOrthoCount
 					 , NOrthoUnits
-					 , 0
+					 HFSM2_IF_SERIALIZATION(, 0)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
 					 , TPayload>>

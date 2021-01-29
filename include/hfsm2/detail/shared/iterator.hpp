@@ -8,13 +8,14 @@ class IteratorT {
 public:
 	using Container = TContainer;
 	using Item		= typename Container::Item;
+	using Index		= typename Container::Index;
 
-	template <typename T, Long NCapacity>
+	template <typename, unsigned>
 	friend class ArrayT;
 
 private:
 	HFSM2_INLINE IteratorT(Container& container,
-						  const Long cursor)	  noexcept
+						   const Index cursor)	  noexcept
 		: _container{container}
 		, _cursor{cursor}
 	{}
@@ -33,7 +34,7 @@ public:
 private:
 	Container& _container;
 
-	Long _cursor;
+	Index _cursor;
 };
 
 //------------------------------------------------------------------------------
@@ -42,14 +43,15 @@ template <typename TContainer>
 class IteratorT<const TContainer> {
 public:
 	using Container = TContainer;
-	using Item = typename Container::Item;
+	using Item		= typename Container::Item;
+	using Index		= typename Container::Index;
 
-	template <typename T, Long NCapacity>
+	template <typename, unsigned>
 	friend class ArrayT;
 
 private:
 	HFSM2_INLINE IteratorT(const Container& container,
-						  const Long cursor)	  noexcept
+						   const Index cursor)	  noexcept
 		: _container{container}
 		, _cursor{cursor}
 	{}
@@ -66,7 +68,7 @@ public:
 private:
 	const Container& _container;
 
-	Long _cursor;
+	Index _cursor;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

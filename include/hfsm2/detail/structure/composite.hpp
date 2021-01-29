@@ -59,8 +59,12 @@ struct C_ final {
 							  TSubStates...>;
 
 	using Info			= CI_<STRATEGY, Head, TSubStates...>;
+
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Short WIDTH		  = Info::WIDTH;
 	static constexpr Short WIDTH_BITS	  = Info::WIDTH_BITS;
+#endif
+
 	static constexpr Short REGION_SIZE	  = Info::STATE_COUNT;
 
 	//----------------------------------------------------------------------

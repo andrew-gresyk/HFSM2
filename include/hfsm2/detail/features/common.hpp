@@ -28,6 +28,8 @@ enum class Method : uint8_t {
 	COUNT
 };
 
+//------------------------------------------------------------------------------
+
 enum class TransitionType : uint8_t {
 	CHANGE,
 	RESTART,
@@ -42,6 +44,8 @@ enum class TransitionType : uint8_t {
 
 	COUNT
 };
+
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_PLANS
 
@@ -135,6 +139,8 @@ transitionName(const TransitionType type) noexcept {
 		return nullptr;
 	}
 }
+
+//------------------------------------------------------------------------------
 
 namespace detail {
 

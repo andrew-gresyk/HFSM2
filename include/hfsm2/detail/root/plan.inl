@@ -323,12 +323,12 @@ PlanBaseT<TArgs>::remove(const Long task) noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL, Long NTC, typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
 bool
-PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::append(const StateID origin,
-																		  const StateID destination,
-																		  const TransitionType transitionType,
-																		  const Payload& payload) noexcept
+PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::append(const StateID origin,
+																								   const StateID destination,
+																								   const TransitionType transitionType,
+																								   const Payload& payload) noexcept
 {
 	_planData.planExists.set(_regionId);
 
@@ -337,12 +337,12 @@ PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::append(const 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU, Long NSB, Long NSL, Long NTC, typename TTP>
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
 bool
-PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU, NSB, NSL, NTC, TTP>>::append(const StateID origin,
-																		  const StateID destination,
-																		  const TransitionType transitionType,
-																		  Payload&& payload) noexcept
+PlanT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::append(const StateID origin,
+																								   const StateID destination,
+																								   const TransitionType transitionType,
+																								   Payload&& payload) noexcept
 {
 	_planData.planExists.set(_regionId);
 

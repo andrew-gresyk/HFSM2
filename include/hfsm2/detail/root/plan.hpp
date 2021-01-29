@@ -402,7 +402,7 @@ template <typename TContext
 		, Long NCompoCount
 		, Long NOrthoCount
 		, Long NOrthoUnits
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		, Long NTaskCapacity
 		, typename TPayload>
@@ -413,7 +413,7 @@ class PlanT<ArgsT<TContext
 				, NCompoCount
 				, NOrthoCount
 				, NOrthoUnits
-				, NSerialBits
+				HFSM2_IF_SERIALIZATION(, NSerialBits)
 				, NSubstitutionLimit
 				, NTaskCapacity
 				, TPayload>> final
@@ -424,7 +424,7 @@ class PlanT<ArgsT<TContext
 						   , NCompoCount
 						   , NOrthoCount
 						   , NOrthoUnits
-						   , NSerialBits
+						   HFSM2_IF_SERIALIZATION(, NSerialBits)
 						   , NSubstitutionLimit
 						   , NTaskCapacity
 						   , TPayload>>
@@ -445,7 +445,7 @@ class PlanT<ArgsT<TContext
 					 , NCompoCount
 					 , NOrthoCount
 					 , NOrthoUnits
-					 , NSerialBits
+					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
 					 , TPayload>;
@@ -857,7 +857,7 @@ template <typename TContext
 		, Long NCompoCount
 		, Long NOrthoCount
 		, Long NOrthoUnits
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		, Long NTaskCapacity>
 class PlanT<ArgsT<TContext
@@ -867,7 +867,7 @@ class PlanT<ArgsT<TContext
 				, NCompoCount
 				, NOrthoCount
 				, NOrthoUnits
-				, NSerialBits
+				HFSM2_IF_SERIALIZATION(, NSerialBits)
 				, NSubstitutionLimit
 				, NTaskCapacity
 				, void>> final
@@ -878,7 +878,7 @@ class PlanT<ArgsT<TContext
 						   , NCompoCount
 						   , NOrthoCount
 						   , NOrthoUnits
-						   , NSerialBits
+						   HFSM2_IF_SERIALIZATION(, NSerialBits)
 						   , NSubstitutionLimit
 						   , NTaskCapacity
 						   , void>>
@@ -899,7 +899,7 @@ class PlanT<ArgsT<TContext
 					 , NCompoCount
 					 , NOrthoCount
 					 , NOrthoUnits
-					 , NSerialBits
+					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
 					 , void>;

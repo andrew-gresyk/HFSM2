@@ -255,7 +255,7 @@ R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::replayTransitions(const Transition* const transitions,
-							  const uint64_t count) noexcept
+							  const Long count) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
 	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
@@ -272,7 +272,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 		#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-			for (unsigned i = 0; i < count; ++i)
+			for (Long i = 0; i < count; ++i)
 				_previousTransitions.append(transitions[i]);
 		#endif
 
@@ -321,6 +321,7 @@ R_<TG, TA>::lastTransition(const StateID stateId) const noexcept {
 #endif
 
 //------------------------------------------------------------------------------
+// COMMON
 
 template <typename TG, typename TA>
 void
@@ -436,6 +437,7 @@ R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) noexcept {
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
+// COMMON
 //------------------------------------------------------------------------------
 
 template <typename TG, typename TA>
@@ -487,6 +489,7 @@ R_<TG, TA>::applyRequests(Control& control) noexcept {
 }
 
 //------------------------------------------------------------------------------
+// COMMON
 
 template <typename TG, typename TA>
 bool
@@ -542,7 +545,7 @@ R_<TG, TA>::applyRequests(Control& control,
 	if (HFSM2_CHECKED(transitions && count)) {
 		bool changesMade = false;
 
-		for (Short i = 0; i < count; ++i)
+		for (Short i = 0; i < (Short) count; ++i)
 			changesMade |= applyRequest(control, transitions[i], i);
 
 		return changesMade;
@@ -662,6 +665,7 @@ R_<TG, TA>::udpateActivity() noexcept {
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
+// COMMON
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
@@ -683,6 +687,7 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
+// COMMON
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>

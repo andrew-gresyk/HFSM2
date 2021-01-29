@@ -539,7 +539,7 @@ template <typename TContext
 		, Long NCompoCount
 		, Long NOrthoCount
 		, Long NOrthoUnits
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
@@ -550,7 +550,7 @@ class FullControlT<ArgsT<TContext
 					   , NCompoCount
 					   , NOrthoCount
 					   , NOrthoUnits
-					   , NSerialBits
+					   HFSM2_IF_SERIALIZATION(, NSerialBits)
 					   , NSubstitutionLimit
 					   HFSM2_IF_PLANS(, NTaskCapacity)
 					   , TPayload>>
@@ -561,7 +561,7 @@ class FullControlT<ArgsT<TContext
 								  , NCompoCount
 								  , NOrthoCount
 								  , NOrthoUnits
-								  , NSerialBits
+								  HFSM2_IF_SERIALIZATION(, NSerialBits)
 								  , NSubstitutionLimit
 								  HFSM2_IF_PLANS(, NTaskCapacity)
 								  , TPayload>>
@@ -585,7 +585,7 @@ class FullControlT<ArgsT<TContext
 					 , NCompoCount
 					 , NOrthoCount
 					 , NOrthoUnits
-					 , NSerialBits
+					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 HFSM2_IF_PLANS(, NTaskCapacity)
 					 , TPayload>;
@@ -825,7 +825,7 @@ template <typename TContext
 		, Long NCompoCount
 		, Long NOrthoCount
 		, Long NOrthoUnits
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)>
 class FullControlT<ArgsT<TContext
@@ -835,7 +835,7 @@ class FullControlT<ArgsT<TContext
 					   , NCompoCount
 					   , NOrthoCount
 					   , NOrthoUnits
-					   , NSerialBits
+					   HFSM2_IF_SERIALIZATION(, NSerialBits)
 					   , NSubstitutionLimit
 					   HFSM2_IF_PLANS(, NTaskCapacity)
 					   , void>>
@@ -846,7 +846,7 @@ class FullControlT<ArgsT<TContext
 								  , NCompoCount
 								  , NOrthoCount
 								  , NOrthoUnits
-								  , NSerialBits
+								  HFSM2_IF_SERIALIZATION(, NSerialBits)
 								  , NSubstitutionLimit
 								  HFSM2_IF_PLANS(, NTaskCapacity)
 								  , void>>
@@ -870,7 +870,7 @@ class FullControlT<ArgsT<TContext
 					 , NCompoCount
 					 , NOrthoCount
 					 , NOrthoUnits
-					 , NSerialBits
+					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 HFSM2_IF_PLANS(, NTaskCapacity)
 					 , void>;
@@ -1014,6 +1014,7 @@ public:
 	HFSM2_INLINE bool isPendingExit  ()							const noexcept { return isPendingExit  (FullControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	// COMMON
 
 	HFSM2_INLINE const TransitionSets& currentTransitions()		const noexcept { return _currentTransitions;										}
 
