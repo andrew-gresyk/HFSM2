@@ -87,16 +87,14 @@ min(const T t1, const T t2) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <unsigned NCapacity>
+template <uint64_t NCapacity>
 struct UnsignedCapacityT {
-	static constexpr Long CAPACITY = NCapacity;
+	static constexpr uint64_t CAPACITY = NCapacity;
 
 	using Type = Conditional<CAPACITY <= UINT8_MAX,  uint8_t,
 				 Conditional<CAPACITY <= UINT16_MAX, uint16_t,
 				 Conditional<CAPACITY <= UINT32_MAX, uint32_t,
 													 uint64_t>>>;
-
-	static_assert(CAPACITY <= UINT64_MAX, "STATIC ASSERT");
 };
 
 template <unsigned NCapacity>
