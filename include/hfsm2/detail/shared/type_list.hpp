@@ -2,12 +2,14 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+// SPECIFIC
 
 template <typename... Ts>
 struct TL_ {
 	static constexpr Long SIZE = sizeof...(Ts);
 };
 
+// SPECIFIC
 //------------------------------------------------------------------------------
 
 template <Long N>
@@ -130,6 +132,7 @@ constexpr Long index   () noexcept { return detail::Find<TList, T>::VALUE;		}
 template <typename TList, typename T>
 constexpr bool contains() noexcept { return index<TList, T>() != INVALID_LONG;	}
 
+// SPECIFIC
 //------------------------------------------------------------------------------
 
 }

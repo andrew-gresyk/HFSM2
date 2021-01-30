@@ -62,7 +62,7 @@ template <typename
 		, Long
 		, Long
 		, Long
-		, Long
+		HFSM2_IF_SERIALIZATION(, Long)
 		, Long
 		HFSM2_IF_PLANS(, Long)
 		, typename>
@@ -80,7 +80,7 @@ template <typename TContext
 		, Long NCompoCount
 		, Long NOrthoCount
 		, Long NOrthoUnits
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
@@ -91,7 +91,7 @@ struct RegistryT<ArgsT<TContext
 					 , NCompoCount
 					 , NOrthoCount
 					 , NOrthoUnits
-					 , NSerialBits
+					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 HFSM2_IF_PLANS(, NTaskCapacity)
 					 , TPayload>>
@@ -157,7 +157,7 @@ template <typename TContext
 		, typename TStateList
 		, typename TRegionList
 		, Long NCompoCount
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
@@ -168,7 +168,7 @@ struct RegistryT<ArgsT<TContext
 					 , NCompoCount
 					 , 0
 					 , 0
-					 , NSerialBits
+					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 HFSM2_IF_PLANS(, NTaskCapacity)
 					 , TPayload>>

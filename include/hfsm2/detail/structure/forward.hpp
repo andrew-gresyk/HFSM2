@@ -58,6 +58,7 @@ template <typename... TS>
 using WrapInfo = typename WrapInfoT<TS...>::Type;
 
 //------------------------------------------------------------------------------
+// COMMON
 
 template <typename THead>
 struct SI_ final {
@@ -72,8 +73,10 @@ struct SI_ final {
 	static constexpr Short ORTHO_REGIONS  = 0;
 	static constexpr Short ORTHO_UNITS	  = 0;
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Long  ACTIVE_BITS	  = 0;
 	static constexpr Long  RESUMABLE_BITS = 0;
+#endif
 
 	static constexpr Long  STATE_COUNT	  = StateList::SIZE;
 	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
@@ -94,8 +97,10 @@ struct CSI_<TInitial, TRemaining...> {
 	static constexpr Short ORTHO_REGIONS  =		Initial::ORTHO_REGIONS  + Remaining::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS	  =		Initial::ORTHO_UNITS    + Remaining::ORTHO_UNITS;
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Long  ACTIVE_BITS	  = Max<Initial::ACTIVE_BITS,	  Remaining::ACTIVE_BITS>::VALUE;
 	static constexpr Long  RESUMABLE_BITS =		Initial::RESUMABLE_BITS + Remaining::RESUMABLE_BITS;
+#endif
 
 	static constexpr Long  STATE_COUNT	  = StateList::SIZE;
 	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
@@ -113,12 +118,16 @@ struct CSI_<TInitial> {
 	static constexpr Short ORTHO_REGIONS  = Initial::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS	  = Initial::ORTHO_UNITS;
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Long  ACTIVE_BITS	  = Initial::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS = Initial::RESUMABLE_BITS;
+#endif
 
 	static constexpr Long  STATE_COUNT	  = StateList::SIZE;
 	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
 };
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <Strategy TStrategy, typename THead, typename... TSubStates>
 struct CI_ final {
@@ -137,14 +146,17 @@ struct CI_ final {
 	static constexpr Short ORTHO_REGIONS  = SubStates::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS	  = SubStates::ORTHO_UNITS;
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Long  WIDTH_BITS	  = bitWidth(WIDTH);
 	static constexpr Long  ACTIVE_BITS	  = SubStates::ACTIVE_BITS	+ WIDTH_BITS;
 	static constexpr Long  RESUMABLE_BITS = SubStates::RESUMABLE_BITS + WIDTH_BITS + 1;
+#endif
 
 	static constexpr Long  STATE_COUNT	  = StateList::SIZE;
 	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
 };
 
+// COMMON
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TInitial, typename... TRemaining>
@@ -160,8 +172,10 @@ struct OSI_<TInitial, TRemaining...> {
 	static constexpr Short ORTHO_REGIONS  =		Initial::ORTHO_REGIONS  + Remaining::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS	  =		Initial::ORTHO_UNITS    + Remaining::ORTHO_UNITS;
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Long  ACTIVE_BITS	  =		Initial::ACTIVE_BITS    + Remaining::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS =		Initial::RESUMABLE_BITS + Remaining::RESUMABLE_BITS;
+#endif
 };
 
 template <typename TInitial>
@@ -176,8 +190,10 @@ struct OSI_<TInitial> {
 	static constexpr Short ORTHO_REGIONS	= Initial::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS		= Initial::ORTHO_UNITS;
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Long  ACTIVE_BITS		= Initial::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS	= Initial::RESUMABLE_BITS;
+#endif
 };
 
 template <typename THead, typename... TSubStates>
@@ -195,8 +211,10 @@ struct OI_ final {
 	static constexpr Short ORTHO_REGIONS	= SubStates::ORTHO_REGIONS + 1;
 	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS + (WIDTH + 7) / 8;
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Long  ACTIVE_BITS		= SubStates::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS	= SubStates::RESUMABLE_BITS;
+#endif
 
 	static constexpr Long  STATE_COUNT		= StateList::SIZE;
 	static constexpr Short REGION_COUNT		= RegionList::SIZE;
@@ -211,7 +229,7 @@ template <typename TContext
 		, Long NCompoCount
 		, Long NOrthoCount
 		, Long NOrthoUnits
-		, Long NSerialBits
+		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
@@ -236,7 +254,11 @@ struct ArgsT final {
 	static constexpr Short COMPO_REGIONS	  = NCompoCount;
 	static constexpr Short ORTHO_REGIONS	  = NOrthoCount;
 	static constexpr Short ORTHO_UNITS		  = NOrthoUnits;
+
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Short SERIAL_BITS		  = NSerialBits;
+#endif
+
 	static constexpr Short SUBSTITUTION_LIMIT = NSubstitutionLimit;
 
 #ifdef HFSM2_ENABLE_PLANS
@@ -343,8 +365,10 @@ struct RF_ final {
 	static constexpr Short ORTHO_REGIONS		= Apex::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS			= Apex::ORTHO_UNITS;
 
+#ifdef HFSM2_ENABLE_SERIALIZATION
 	static constexpr Long  ACTIVE_BITS			= Apex::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS		= Apex::RESUMABLE_BITS;
+#endif
 
 	using StateList		= typename Apex::StateList;
 	using RegionList	= typename Apex::RegionList;
@@ -356,7 +380,7 @@ struct RF_ final {
 							  , COMPO_REGIONS
 							  , ORTHO_REGIONS
 							  , ORTHO_UNITS
-							  , ACTIVE_BITS + RESUMABLE_BITS
+							  HFSM2_IF_SERIALIZATION(, ACTIVE_BITS + RESUMABLE_BITS)
 							  , SUBSTITUTION_LIMIT
 							  HFSM2_IF_PLANS(, TASK_CAPACITY)
 							  , Payload>;

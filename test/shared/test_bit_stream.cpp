@@ -20,7 +20,7 @@ TEST_CASE("Shared.BitStream<>", "[shared]") {
 	writeStream.write< 3>((uint8_t)        5);
 	writeStream.write<12>((uint16_t)    1472);
 	writeStream.write<21>((uint32_t) 1000000);
-	REQUIRE(buffer.bitSize == 45);
+	REQUIRE(writeStream.cursor() == 45);
 
 	ReadStream readStream{buffer};
 	REQUIRE(readStream.read< 5>() ==      27);

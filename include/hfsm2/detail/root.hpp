@@ -102,11 +102,11 @@ public:
 
 	/// @brief Access context
 	/// @return context
-	HFSM2_INLINE	   Context& context()							  noexcept	{ return _context;									}
+	HFSM2_INLINE	   Context& context()								  noexcept	{ return _context;									}
 
 	/// @brief Access context
 	/// @return context
-	HFSM2_INLINE const Context& context()						const noexcept	{ return _context;									}
+	HFSM2_INLINE const Context& context()							const noexcept	{ return _context;									}
 
 	//----------------------------------------------------------------------
 
@@ -114,13 +114,13 @@ public:
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID stateId()								  noexcept	{ return index<StateList, TState>();				}
+	static constexpr StateID stateId()									  noexcept	{ return index<StateList, TState>();				}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()							  noexcept	{ return (RegionID) index<RegionList, TState>();	}
+	static constexpr RegionID regionId()								  noexcept	{ return (RegionID) index<RegionList, TState>();	}
 
 	//----------------------------------------------------------------------
 #ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
@@ -141,8 +141,8 @@ private:
 
 	template <typename TState>
 	struct Accessor<TState, true> {
-		HFSM2_INLINE static		  TState& get(		MaterialApex& apex) noexcept	{ return apex.template access<TState>();	}
-		HFSM2_INLINE static const TState& get(const MaterialApex& apex) noexcept	{ return apex.template access<TState>();	}
+		HFSM2_INLINE static		  TState& get(		MaterialApex& apex)	  noexcept	{ return apex.template access<TState>();	}
+		HFSM2_INLINE static const TState& get(const MaterialApex& apex)	  noexcept	{ return apex.template access<TState>();	}
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -158,13 +158,13 @@ public:
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_INLINE	   TState& access()								  noexcept	{ return Accessor<TState				   >::get(_apex);	}
+	HFSM2_INLINE	   TState& access()									  noexcept	{ return Accessor<TState				   >::get(_apex);	}
 
 	/// @brief Access state instance
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_INLINE const TState& access()							const noexcept	{ return Accessor<TState				   >::get(_apex);	}
+	HFSM2_INLINE const TState& access()								const noexcept	{ return Accessor<TState				   >::get(_apex);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -176,13 +176,13 @@ public:
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_INLINE	   TState& access()								  noexcept	{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
+	HFSM2_INLINE	   TState& access()									  noexcept	{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
 
 	/// @brief Access state instance
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_INLINE const TState& access()							const noexcept	{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
+	HFSM2_INLINE const TState& access()								const noexcept	{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
 
 #endif
 
@@ -195,81 +195,81 @@ public:
 	/// @tparam TEvent Event type
 	/// @param event Event to react to
 	template <typename TEvent>
-	HFSM2_INLINE void react(const TEvent& event)					  noexcept;
+	HFSM2_INLINE void react(const TEvent& event)						  noexcept;
 
 	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
 	/// @return State active status
-	HFSM2_INLINE bool isActive		 (const StateID stateId)	const noexcept	{ return _registry.isActive   (stateId);		}
+	HFSM2_INLINE bool isActive		 (const StateID stateId)		const noexcept	{ return _registry.isActive   (stateId);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState Destination state type
 	/// @return State active status
 	template <typename TState>
-	HFSM2_INLINE bool isActive		 ()							const noexcept	{ return isActive	(stateId<TState>());		}
+	HFSM2_INLINE bool isActive		 ()								const noexcept	{ return isActive	(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId Destination state identifier
 	/// @return State resumable status
-	HFSM2_INLINE bool isResumable	 (const StateID stateId)	const noexcept	{ return _registry.isResumable(stateId);		}
+	HFSM2_INLINE bool isResumable	 (const StateID stateId)		const noexcept	{ return _registry.isResumable(stateId);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState Destination state type
 	/// @return State resumable status
 	template <typename TState>
-	HFSM2_INLINE bool isResumable	 ()							const noexcept	{ return isResumable(stateId<TState>());		}
+	HFSM2_INLINE bool isResumable	 ()								const noexcept	{ return isResumable(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId Destination state identifier
 	/// @return State scheduled status
-	HFSM2_INLINE bool isScheduled	 (const StateID stateId)	const noexcept	{ return isResumable(stateId);					}
+	HFSM2_INLINE bool isScheduled	 (const StateID stateId)		const noexcept	{ return isResumable(stateId);					}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState Destination state type
 	/// @return State scheduled status
 	template <typename TState>
-	HFSM2_INLINE bool isScheduled	 ()							const noexcept	{ return isResumable<TState>();					}
+	HFSM2_INLINE bool isScheduled	 ()								const noexcept	{ return isResumable<TState>();					}
 
 	//------------------------------------------------------------------------------
 	// COMMON
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
-	HFSM2_INLINE void changeTo		 (const StateID stateId)		  noexcept;
+	HFSM2_INLINE void changeTo		 (const StateID stateId)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
 	template <typename TState>
-	HFSM2_INLINE void changeTo		 ()								  noexcept	{ changeTo (stateId<TState>());					}
+	HFSM2_INLINE void changeTo		 ()									  noexcept	{ changeTo (stateId<TState>());					}
 
 	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
-	HFSM2_INLINE void restart		 (const StateID stateId)		  noexcept;
+	HFSM2_INLINE void restart		 (const StateID stateId)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
 	template <typename TState>
-	HFSM2_INLINE void restart		 ()								  noexcept	{ restart  (stateId<TState>());					}
+	HFSM2_INLINE void restart		 ()									  noexcept	{ restart  (stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
-	HFSM2_INLINE void resume		 (const StateID stateId)		  noexcept;
+	HFSM2_INLINE void resume		 (const StateID stateId)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	template <typename TState>
-	HFSM2_INLINE void resume		 ()								  noexcept	{ resume   (stateId<TState>());					}
+	HFSM2_INLINE void resume		 ()									  noexcept	{ resume   (stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -279,14 +279,14 @@ public:
 	///		with the highest 'utility()' among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void utilize		 (const StateID stateId)		  noexcept;
+	HFSM2_INLINE void utilize		 (const StateID stateId)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state
 	///   with the highest 'utility()' among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void utilize		 ()								  noexcept	{ utilize  (stateId<TState>());					}
+	HFSM2_INLINE void utilize		 ()									  noexcept	{ utilize  (stateId<TState>());					}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -294,14 +294,14 @@ public:
 	///		proportional to 'utility()' among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void randomize		 (const StateID stateId)		  noexcept;
+	HFSM2_INLINE void randomize		 (const StateID stateId)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///   proportional to 'utility()' among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_INLINE void randomize		 ()								  noexcept	{ randomize(stateId<TState>());					}
+	HFSM2_INLINE void randomize		 ()									  noexcept	{ randomize(stateId<TState>());					}
 
 #endif
 
@@ -309,51 +309,51 @@ public:
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
-	HFSM2_INLINE void schedule		 (const StateID stateId)		  noexcept;
+	HFSM2_INLINE void schedule		 (const StateID stateId)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
 	template <typename TState>
-	HFSM2_INLINE void schedule		 ()								  noexcept	{ schedule (stateId<TState>());					}
+	HFSM2_INLINE void schedule		 ()									  noexcept	{ schedule (stateId<TState>());					}
 
 	//------------------------------------------------------------------------------
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_INLINE bool isPendingChange(const StateID stateId)	const noexcept	{ return _registry.isPendingChange(stateId);	}
+	HFSM2_INLINE bool isPendingChange(const StateID stateId)		const noexcept	{ return _registry.isPendingChange(stateId);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM2_INLINE bool isPendingChange()								  noexcept	{ return isPendingChange(stateId<TState>());	}
+	HFSM2_INLINE bool isPendingChange()									  noexcept	{ return isPendingChange(stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be activated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation status
-	HFSM2_INLINE bool isPendingEnter (const StateID stateId)	const noexcept	{ return _registry.isPendingEnter (stateId);	}
+	HFSM2_INLINE bool isPendingEnter (const StateID stateId)		const noexcept	{ return _registry.isPendingEnter (stateId);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState Destination state type
 	/// @return State pending activation status
 	template <typename TState>
-	HFSM2_INLINE bool isPendingEnter ()								  noexcept	{ return isPendingEnter (stateId<TState>());	}
+	HFSM2_INLINE bool isPendingEnter ()									  noexcept	{ return isPendingEnter (stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending deactivation status
-	HFSM2_INLINE bool isPendingExit	 (const StateID stateId)	const noexcept	{ return _registry.isPendingExit  (stateId);	}
+	HFSM2_INLINE bool isPendingExit	 (const StateID stateId)		const noexcept	{ return _registry.isPendingExit  (stateId);	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending deactivation status
 	template <typename TState>
-	HFSM2_INLINE bool isPendingExit  ()								  noexcept	{ return isPendingExit  (stateId<TState>());	}
+	HFSM2_INLINE bool isPendingExit  ()									  noexcept	{ return isPendingExit  (stateId<TState>());	}
 
 	//------------------------------------------------------------------------------
 
@@ -372,12 +372,12 @@ public:
 	/// @brief Serialize FSM into 'buffer'
 	/// @param buffer 'SerialBuffer' to serialize to
 	/// @see HFSM2_ENABLE_SERIALIZATION
-	void save(		SerialBuffer& buffer)						const noexcept;
+	void save(		SerialBuffer& buffer)							const noexcept;
 
 	/// @brief De-serialize FSM from 'buffer'
 	/// @param buffer 'SerialBuffer' to de-serialize from
 	/// @see HFSM2_ENABLE_SERIALIZATION
-	void load(const SerialBuffer& buffer)							  noexcept;
+	void load(const SerialBuffer& buffer)								  noexcept;
 
 #endif
 
@@ -388,7 +388,7 @@ public:
 	/// @brief Get the list of transitions recorded during last 'update()'
 	/// @return Array of last recorded transitions
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	const TransitionSets& previousTransitions()					const noexcept	{ return _previousTransitions;					}
+	const TransitionSets& previousTransitions()						const noexcept	{ return _previousTransitions;					}
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
@@ -397,7 +397,7 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	bool replayTransitions(const Transition* const transitions,
-						   const uint64_t count)					  noexcept;
+						   const Long count)							  noexcept;
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
@@ -405,28 +405,27 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
-	bool replayTransitions(const ArrayT<Transition,
-						   NCount>& transitions)					  noexcept;
+	bool replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
 	/// @param transition 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	bool replayTransition (const Transition& transition)			  noexcept	{ return replayTransitions(&transition, 1);		}
+	bool replayTransition (const Transition& transition)				  noexcept	{ return replayTransitions(&transition, 1);		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	const Transition* lastTransition(const StateID stateId)		const noexcept;
+	const Transition* lastTransition(const StateID stateId)			const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
 	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
-	const Transition* lastTransition()							const noexcept	{ return lastTransition(stateId<TState>());		}
+	const Transition* lastTransition()								const noexcept	{ return lastTransition(stateId<TState>());		}
 
 #endif
 
@@ -440,17 +439,17 @@ public:
 
 	/// @brief Array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	using ActivityHistory		= ArrayT<char,			NAME_COUNT>;
+	using ActivityHistory		= ArrayT<char,			 NAME_COUNT>;
 
 	/// @brief Get the array of 'StructureEntry' representing FSM structure
 	/// @return FSM structure
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	const Structure&	   structure()							const noexcept	{ return _structure;							}
+	const Structure&	   structure()								const noexcept	{ return _structure;							}
 
 	/// @brief Get the array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @return FSM activation history
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	const ActivityHistory& activityHistory()					const noexcept	{ return _activityHistory;						}
+	const ActivityHistory& activityHistory()						const noexcept	{ return _activityHistory;						}
 
 #endif
 
@@ -461,7 +460,7 @@ public:
 	/// @brief Attach logger
 	/// @param logger A logger implementing 'hfsm2::LoggerInterfaceT<>' interface
 	/// @see HFSM2_ENABLE_LOG_INTERFACE
-	HFSM2_INLINE void attachLogger(Logger* const logger)			  noexcept	{ _logger = logger;								}
+	HFSM2_INLINE void attachLogger(Logger* const logger)				  noexcept	{ _logger = logger;								}
 
 #endif
 
@@ -469,7 +468,7 @@ public:
 
 private:
 	void initialEnter() noexcept;
-	void processTransitions(TransitionSets& currentTransitions) noexcept;
+	void processTransitions(TransitionSets& currentTransitions)			  noexcept;
 
 	bool applyRequest (Control& control, const Transition& request, const Short index) noexcept;
 	bool applyRequests(Control& control) noexcept;
@@ -478,12 +477,12 @@ private:
 								const TransitionSet&  pendingTransitions) noexcept;
 
 	bool cancelledByGuards(const TransitionSets& currentTransitions,
-						   const TransitionSet&  pendingTransitions) noexcept;
+						   const TransitionSet&  pendingTransitions)	  noexcept;
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	bool applyRequests(Control& control,
 					   const Transition* const transitions,
-					   const uint64_t count) noexcept;
+					   const uint64_t count)							  noexcept;
 
 	TransitionTargets _transitionTargets;
 	TransitionSets _previousTransitions;

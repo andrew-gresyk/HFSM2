@@ -18,7 +18,7 @@ C_<TN, TA, SG, TH, TS...>::resolveRandom(Control& control,
 
 	Utility cursor = random * sum;
 
-	for (Short i = 0; i < count(ranks); ++i)
+	for (Short i = 0; i < count<Short>(ranks); ++i)
 		if (ranks[i] == top) {
 			HFSM2_ASSERT(options[i] >= 0.0f);
 
@@ -741,7 +741,6 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept 
 	}
 }
 
-// COMMON
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_SERIALIZATION
@@ -825,6 +824,7 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 #endif
 
+// COMMON
 //------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
