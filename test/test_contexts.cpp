@@ -1,5 +1,9 @@
-#include <hfsm2/machine.hpp>
-#include <catch2/catch.hpp>
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
+#include <hfsm2/machine_dev.hpp>
+
+#include <doctest/doctest.h>
 
 namespace test_contexts {
 
@@ -73,7 +77,7 @@ struct B : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("FSM.Contexts", "[machine]") {
+TEST_CASE("FSM.Contexts") {
 	Context primary	  =   7;
 	Context secondary = -39;
 

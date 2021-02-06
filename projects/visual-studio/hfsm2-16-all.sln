@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-41
 		..\..\.gitignore = ..\..\.gitignore
 		..\..\.travis.yml = ..\..\.travis.yml
 		..\..\appveyor.yml = ..\..\appveyor.yml
-		catch2.runsettings = catch2.runsettings
 		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
 		..\..\README.md = ..\..\README.md
 		vs-flags.txt = vs-flags.txt

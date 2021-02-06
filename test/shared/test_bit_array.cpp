@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #include "../tools.hpp"
 
 namespace test_bit_array {
@@ -7,7 +10,7 @@ namespace test_bit_array {
 using BitArray = hfsm2::detail::BitArrayT<hfsm2::Short, 6>;
 using Bits	   = typename BitArray::Bits;
 
-TEST_CASE("Shared.BitArrayT<>", "[shared]") {
+TEST_CASE("Shared.BitArrayT<>") {
 	BitArray bitArray;
 
 	bitArray.clear();

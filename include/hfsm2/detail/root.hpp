@@ -404,7 +404,7 @@ public:
 	/// @param transitions 'TransitionHistory' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	template <Long NCount>
+	template <unsigned NCount>
 	bool replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)

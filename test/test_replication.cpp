@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_TRANSITION_HISTORY
 #include "tools.hpp"
 
@@ -217,7 +220,7 @@ static_assert(server::FSM::Instance::Info::ORTHO_UNITS   == client::FSM::Instanc
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("FSM.Replication", "[machine]") {
+TEST_CASE("FSM.Replication") {
 	Logger logger;
 
 	{

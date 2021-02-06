@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_PLANS
 #define HFSM2_ENABLE_TRANSITION_HISTORY
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
@@ -132,7 +135,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Delayed Teardown", "[machine]") {
+TEST_CASE("FSM.Delayed Teardown") {
 	Logger logger;
 
 	{

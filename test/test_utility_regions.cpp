@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_UTILITY_THEORY
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
@@ -173,7 +176,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Utility Regions", "[machine]") {
+TEST_CASE("FSM.Utility Regions") {
 	Logger logger;
 
 	{

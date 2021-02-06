@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.8.1 (2021-01-15)
+// 1.8.2 (2021-02-06)
 //
 // Created by Andrew Gresyk
 //
@@ -36,7 +36,7 @@
 #define HFSM2_VERSION_PATCH 1
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
-	
+
 #include <stdint.h>			// uint32_t, uint64_t
 #include <string.h>			// memcpy_s()
 
@@ -392,16 +392,14 @@ min(const T t1, const T t2) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <unsigned NCapacity>
+template <uint64_t NCapacity>
 struct UnsignedCapacityT {
-	static constexpr Long CAPACITY = NCapacity;
+	static constexpr uint64_t CAPACITY = NCapacity;
 
 	using Type = Conditional<CAPACITY <= UINT8_MAX,  uint8_t,
 				 Conditional<CAPACITY <= UINT16_MAX, uint16_t,
 				 Conditional<CAPACITY <= UINT32_MAX, uint32_t,
 													 uint64_t>>>;
-
-	static_assert(CAPACITY <= UINT64_MAX, "STATIC ASSERT");
 };
 
 template <unsigned NCapacity>
@@ -2060,6 +2058,7 @@ struct Find<TL_<Ts...>, T>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////
+// SPECIFIC
 
 }
 
@@ -13435,7 +13434,7 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	bool replayTransitions(const Transition* const transitions,
-						   const uint64_t count)						  noexcept;
+						   const Long count)							  noexcept;
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
@@ -14423,7 +14422,7 @@ R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::replayTransitions(const Transition* const transitions,
-							  const uint64_t count) noexcept
+							  const Long count) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
 	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
@@ -14440,7 +14439,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 		#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-			for (unsigned i = 0; i < count; ++i)
+			for (Long i = 0; i < count; ++i)
 				_previousTransitions.append(transitions[i]);
 		#endif
 
@@ -14713,7 +14712,7 @@ R_<TG, TA>::applyRequests(Control& control,
 	if (HFSM2_CHECKED(transitions && count)) {
 		bool changesMade = false;
 
-		for (Short i = 0; i < count; ++i)
+		for (Short i = 0; i < (Short) count; ++i)
 			changesMade |= applyRequest(control, transitions[i], i);
 
 		return changesMade;

@@ -166,29 +166,30 @@ struct Equals {}; // =
 
 // FSM Structure
 using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
+
 using FSM = M::PeerRoot<
-	struct Off,
-	M::Composite<struct On,
-		M::Composite<struct Ready,
-			struct Begin,
-			struct Result
-		>,
-		struct Negated1,
-		M::Composite<struct Operand1,
-			struct Zero1,
-			struct Int1,
-			struct Frac1
-		>,
-		struct Error,
-		struct opEntered,
-		struct Negated2,
-		M::Composite<struct Operand2,
-			struct Zero2,
-			struct Int2,
-			struct Frac2
-		>
-	>
->;
+				struct Off,
+				M::Composite<struct On,
+					M::Composite<struct Ready,
+						struct Begin,
+						struct Result
+					>,
+					struct Negated1,
+					M::Composite<struct Operand1,
+						struct Zero1,
+						struct Int1,
+						struct Frac1
+					>,
+					struct Error,
+					struct opEntered,
+					struct Negated2,
+					M::Composite<struct Operand2,
+						struct Zero2,
+						struct Int2,
+						struct Frac2
+					>
+				>
+			>;
 
 
 

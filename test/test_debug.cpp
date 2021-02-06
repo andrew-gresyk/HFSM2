@@ -1,4 +1,7 @@
-﻿#define HFSM2_ENABLE_STRUCTURE_REPORT
+﻿// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
+#define HFSM2_ENABLE_STRUCTURE_REPORT
 #define HFSM2_ENABLE_UTILITY_THEORY
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
@@ -6,7 +9,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <string.h>
+#include <wchar.h>
 
 namespace test_debug {
 
@@ -163,7 +166,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Debug", "[machine]") {
+TEST_CASE("FSM.Debug") {
 	Empty context;
 	hfsm2::XoShiRo128Plus generator{0};
 	LoggerT<Config> logger;

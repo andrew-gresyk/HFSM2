@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
@@ -80,7 +83,7 @@ static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("FSM.Access", "[machine]") {
+TEST_CASE("FSM.Access") {
 	FSM::Instance machine;
 
 	REQUIRE(machine.access<A	>().id == FSM::stateId<A	>());

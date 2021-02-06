@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TConfig>

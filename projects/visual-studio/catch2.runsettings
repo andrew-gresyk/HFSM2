@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RunSettings>
-
-  <Catch2Adapter>
-    <FilenameFilter>.*</FilenameFilter>
-  </Catch2Adapter>
-
-</RunSettings>

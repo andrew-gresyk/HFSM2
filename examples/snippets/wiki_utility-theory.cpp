@@ -6,11 +6,10 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include <hfsm2/machine.hpp>
 
-#include <catch2/catch.hpp>
-#undef assert
-#define assert(x) REQUIRE(x)
+#include <doctest/doctest.h>
 
-//#include <vector> // already included in catch.hpp
+#include <algorithm>
+#include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -73,15 +72,15 @@ struct Logger
         const auto count = std::max(history.size(), reference.size());
 
         for (unsigned i = 0; i < count; ++i) {
-            assert(i < history.size()); //-V521
-            assert(i < reference.size()); //-V521
+            REQUIRE(i < history.size()); //-V521
+            REQUIRE(i < reference.size()); //-V521
 
             if (i < history.size() &&
                 i < reference.size())
             {
-                assert(history[i].state == reference[i].state); //-V521
-                assert(history[i].type  == reference[i].type); //-V521
-                assert(history[i].prong == reference[i].prong); //-V521
+                REQUIRE(history[i].state == reference[i].state); //-V521
+                REQUIRE(history[i].type  == reference[i].type); //-V521
+                REQUIRE(history[i].prong == reference[i].prong); //-V521
             }
         }
 
@@ -173,23 +172,23 @@ struct O_1          : FSM::State {};
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Wiki.Utility Theory", "[Wiki]") {
+TEST_CASE("Wiki.Utility Theory") {
     Logger logger;
     FSM::Instance fsm{&logger};
-    assert(fsm.isActive<Origin>());        // Initial activation
+    REQUIRE(fsm.isActive<Origin>());        // Initial activation
 
     fsm.changeTo<R_Activated>();
     fsm.update();
-    assert(fsm.isActive<R_Activated>());   // Prepare resumable state
+    REQUIRE(fsm.isActive<R_Activated>());   // Prepare resumable state
 
     fsm.changeTo<Origin>();
     fsm.update();
-    assert(fsm.isActive<Origin>());        // Ready for the main test
+    REQUIRE(fsm.isActive<Origin>());        // Ready for the main test
 
     fsm.changeTo<Destination>();
     fsm.update();
-    assert(fsm.isActive<Destination>());
-    assert(fsm.isActive<S>());
+    REQUIRE(fsm.isActive<Destination>());
+    REQUIRE(fsm.isActive<S>());
 
     const Events reference = {
         { FSM::stateId<S>(),            Event::UTILITY },
