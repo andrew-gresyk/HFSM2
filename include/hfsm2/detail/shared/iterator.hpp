@@ -10,7 +10,7 @@ public:
 	using Item		= typename Container::Item;
 	using Index		= typename Container::Index;
 
-	template <typename, unsigned>
+	template <typename, Long>
 	friend class ArrayT;
 
 private:
@@ -46,7 +46,7 @@ public:
 	using Item		= typename Container::Item;
 	using Index		= typename Container::Index;
 
-	template <typename, unsigned>
+	template <typename, Long>
 	friend class ArrayT;
 
 private:

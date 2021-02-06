@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, unsigned NCapacity>
+template <typename T, Long NCapacity>
 class StaticArrayT {
 public:
 	using Item  = T;
@@ -51,7 +51,7 @@ struct StaticArrayT<T, 0> {
 
 //------------------------------------------------------------------------------
 
-template <typename T, unsigned NCapacity>
+template <typename T, Long NCapacity>
 class ArrayT {
 	template <typename>
 	friend class IteratorT;
@@ -81,7 +81,7 @@ public:
 
 	HFSM2_INLINE Index count()									const noexcept	{ return _count;	}
 
-	template <unsigned N>
+	template <Long N>
 	HFSM2_INLINE ArrayT& operator += (const ArrayT<Item, N>& other)	  noexcept;
 
 	HFSM2_INLINE IteratorT<      ArrayT>  begin()					  noexcept	{ return IteratorT<		 ArrayT>(*this,     0);	}

@@ -397,14 +397,14 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	bool replayTransitions(const Transition* const transitions,
-						   const Long count)							  noexcept;
+						   const Short count)							  noexcept;
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
 	/// @param transitions 'TransitionHistory' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	template <unsigned NCount>
+	template <Long NCount>
 	bool replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)
@@ -482,7 +482,7 @@ private:
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	bool applyRequests(Control& control,
 					   const Transition* const transitions,
-					   const uint64_t count)							  noexcept;
+					   const Short count)								  noexcept;
 
 	TransitionTargets _transitionTargets;
 	TransitionSets _previousTransitions;

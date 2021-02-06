@@ -255,7 +255,7 @@ R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::replayTransitions(const Transition* const transitions,
-							  const Long count) noexcept
+							  const Short count) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
 	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
@@ -272,7 +272,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 		#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-			for (Long i = 0; i < count; ++i)
+			for (Short i = 0; i < count; ++i)
 				_previousTransitions.append(transitions[i]);
 		#endif
 
@@ -293,7 +293,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
-template <unsigned NCount>
+template <Long NCount>
 bool
 R_<TG, TA>::replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept {
 	if (transitions.count())
@@ -540,12 +540,12 @@ template <typename TG, typename TA>
 bool
 R_<TG, TA>::applyRequests(Control& control,
 						  const Transition* const transitions,
-						  const uint64_t count) noexcept
+						  const Short count) noexcept
 {
 	if (HFSM2_CHECKED(transitions && count)) {
 		bool changesMade = false;
 
-		for (Short i = 0; i < (Short) count; ++i)
+		for (Short i = 0; i < count; ++i)
 			changesMade |= applyRequest(control, transitions[i], i);
 
 		return changesMade;

@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.8.2 (2021-02-06)
+// 1.8.3 (2021-02-06)
 //
 // Created by Andrew Gresyk
 //
@@ -402,12 +402,12 @@ struct UnsignedCapacityT {
 													 uint64_t>>>;
 };
 
-template <unsigned NCapacity>
+template <uint64_t NCapacity>
 using UnsignedCapacity = typename UnsignedCapacityT<NCapacity>::Type;
 
 //------------------------------------------------------------------------------
 
-template <unsigned NBitWidth>
+template <uint64_t NBitWidth>
 struct UnsignedBitWidthT {
 	static constexpr Short BIT_WIDTH = NBitWidth;
 
@@ -419,9 +419,7 @@ struct UnsignedBitWidthT {
 	static_assert(BIT_WIDTH <= 64, "STATIC ASSERT");
 };
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <unsigned NCapacity>
+template <uint64_t NCapacity>
 using UnsignedBitWidth = typename UnsignedBitWidthT<NCapacity>::Type;
 
 //------------------------------------------------------------------------------
@@ -480,14 +478,6 @@ struct StaticPrintConst;
 template <typename>
 struct StaticPrintType;
 
-//------------------------------------------------------------------------------
-
-template <unsigned V1, unsigned V2>
-struct StaticAssertEquality;
-
-template <unsigned V1>
-struct StaticAssertEquality<V1, V1> {};
-
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -504,7 +494,7 @@ public:
 	using Item		= typename Container::Item;
 	using Index		= typename Container::Index;
 
-	template <typename, unsigned>
+	template <typename, Long>
 	friend class ArrayT;
 
 private:
@@ -540,7 +530,7 @@ public:
 	using Item		= typename Container::Item;
 	using Index		= typename Container::Index;
 
-	template <typename, unsigned>
+	template <typename, Long>
 	friend class ArrayT;
 
 private:
@@ -622,7 +612,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, unsigned NCapacity>
+template <typename T, Long NCapacity>
 class StaticArrayT {
 public:
 	using Item  = T;
@@ -670,7 +660,7 @@ struct StaticArrayT<T, 0> {
 
 //------------------------------------------------------------------------------
 
-template <typename T, unsigned NCapacity>
+template <typename T, Long NCapacity>
 class ArrayT {
 	template <typename>
 	friend class IteratorT;
@@ -700,7 +690,7 @@ public:
 
 	HFSM2_INLINE Index count()									const noexcept	{ return _count;	}
 
-	template <unsigned N>
+	template <Long N>
 	HFSM2_INLINE ArrayT& operator += (const ArrayT<Item, N>& other)	  noexcept;
 
 	HFSM2_INLINE IteratorT<      ArrayT>  begin()					  noexcept	{ return IteratorT<		 ArrayT>(*this,     0);	}
@@ -751,14 +741,14 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 StaticArrayT<T, NC>::StaticArrayT(const Item filler) noexcept {
 	fill(filler);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename N>
 T&
 StaticArrayT<T, NC>::operator[] (const N i) noexcept {
@@ -769,7 +759,7 @@ StaticArrayT<T, NC>::operator[] (const N i) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename N>
 const T&
 StaticArrayT<T, NC>::operator[] (const N i) const noexcept {
@@ -780,7 +770,7 @@ StaticArrayT<T, NC>::operator[] (const N i) const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 void
 StaticArrayT<T, NC>::fill(const Item filler) noexcept {
 	for (Index i = 0; i < CAPACITY; ++i)
@@ -789,7 +779,7 @@ StaticArrayT<T, NC>::fill(const Item filler) noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename TValue>
 typename ArrayT<T, NC>::Index
 ArrayT<T, NC>::append(const TValue& value) noexcept {
@@ -802,7 +792,7 @@ ArrayT<T, NC>::append(const TValue& value) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename TValue>
 typename ArrayT<T, NC>::Index
 ArrayT<T, NC>::append(TValue&& value) noexcept {
@@ -815,7 +805,7 @@ ArrayT<T, NC>::append(TValue&& value) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename N>
 T&
 ArrayT<T, NC>::operator[] (const N i) noexcept {
@@ -826,7 +816,7 @@ ArrayT<T, NC>::operator[] (const N i) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename N>
 const T&
 ArrayT<T, NC>::operator[] (const N i) const noexcept {
@@ -839,8 +829,8 @@ ArrayT<T, NC>::operator[] (const N i) const noexcept {
 // SPECIFIC
 // SPECIFIC
 
-template <typename T, unsigned NC>
-template <unsigned N>
+template <typename T, Long NC>
+template <Long N>
 ArrayT<T, NC>&
 ArrayT<T, NC>::operator += (const ArrayT<T, N>& other) noexcept {
 	for (const auto& item : other)
@@ -7553,7 +7543,7 @@ struct RegisterT {
 			const Parent parent) noexcept
 	{
 		static constexpr auto HEAD_ID = index<StateList, TH>();
-		StaticAssertEquality<STATE_ID, HEAD_ID>();
+		static_assert(STATE_ID == HEAD_ID, "");
 
 		stateParents[STATE_ID] = parent;
 	}
@@ -13434,14 +13424,14 @@ public:
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	bool replayTransitions(const Transition* const transitions,
-						   const Long count)							  noexcept;
+						   const Short count)							  noexcept;
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
 	/// @param transitions 'TransitionHistory' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	template <unsigned NCount>
+	template <Long NCount>
 	bool replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)
@@ -13519,7 +13509,7 @@ private:
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 	bool applyRequests(Control& control,
 					   const Transition* const transitions,
-					   const uint64_t count)							  noexcept;
+					   const Short count)								  noexcept;
 
 	TransitionTargets _transitionTargets;
 	TransitionSets _previousTransitions;
@@ -14422,7 +14412,7 @@ R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
 template <typename TG, typename TA>
 bool
 R_<TG, TA>::replayTransitions(const Transition* const transitions,
-							  const Long count) noexcept
+							  const Short count) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
 	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
@@ -14439,7 +14429,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 		#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-			for (Long i = 0; i < count; ++i)
+			for (Short i = 0; i < count; ++i)
 				_previousTransitions.append(transitions[i]);
 		#endif
 
@@ -14460,7 +14450,7 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
-template <unsigned NCount>
+template <Long NCount>
 bool
 R_<TG, TA>::replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept {
 	if (transitions.count())
@@ -14707,12 +14697,12 @@ template <typename TG, typename TA>
 bool
 R_<TG, TA>::applyRequests(Control& control,
 						  const Transition* const transitions,
-						  const uint64_t count) noexcept
+						  const Short count) noexcept
 {
 	if (HFSM2_CHECKED(transitions && count)) {
 		bool changesMade = false;
 
-		for (Short i = 0; i < (Short) count; ++i)
+		for (Short i = 0; i < count; ++i)
 			changesMade |= applyRequest(control, transitions[i], i);
 
 		return changesMade;

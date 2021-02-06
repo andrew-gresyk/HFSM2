@@ -1,5 +1,5 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.8.2 (2021-02-06)
+// 1.8.3 (2021-02-06)
 //
 // Created by Andrew Gresyk
 //
