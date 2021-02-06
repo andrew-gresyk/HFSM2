@@ -12,11 +12,19 @@
 
 Header-only heriarchical FSM framework in C++11, with fully statically-defined structure (no dynamic allocations), built with variadic templates.
 
+---
+
 ## Compiler Support
 
 - Visual Studio 14, 15, 16
 - GCC 5, 6, 7, 8, 9
 - Clang 3.7, 3.8, 3.9, 4, 5, 6, 7, 8, 9, 10
+
+---
+
+## Quick Start
+
+- **[Tutorial](examples/snippets/wiki_tutorial.cpp)**
 
 ---
 
@@ -29,7 +37,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 ## Documentation
 
 - GitBook: **[doc.hfsm.dev](https://doc.hfsm.dev/)** (WIP)
-- Wiki: **[Tutorial](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial)** (Obsolete)
+- Wiki: **[Tutorial](../../wiki/Tutorial)** (Obsolete)
 - In-line comments
 
 ---
@@ -58,7 +66,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## 3rd Party Libraries
 
-- **[Catch2](https://github.com/catchorg/Catch2)** unit testing framework
+- **[doctest](https://github.com/onqtam/doctest)** unit testing framework
 - **[XoShiRo](http://xoshiro.di.unimi.it/)** pseuto-random number generators
 
 ---

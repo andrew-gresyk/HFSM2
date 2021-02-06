@@ -1,12 +1,16 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #pragma once
 
 #define HFSM2_ENABLE_LOG_INTERFACE
 #define HFSM2_ENABLE_ASSERT
-#include <hfsm2/machine.hpp>
+#include <hfsm2/machine_dev.hpp>
 
-#include <catch2/catch.hpp>
+#include <doctest/doctest.h>
 
-//#include <vector> // already included in catch.hpp
+#include <algorithm>
+#include <vector>
 
 //------------------------------------------------------------------------------
 

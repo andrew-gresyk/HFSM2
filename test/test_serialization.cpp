@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_SERIALIZATION
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
@@ -209,7 +212,7 @@ static_assert(server::FSM::Instance::Info::RESUMABLE_BITS == client::FSM::Instan
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("FSM.Serialization", "[machine]") {
+TEST_CASE("FSM.Serialization") {
 	Logger logger;
 
 	server::FSM::Instance::SerialBuffer buffer;

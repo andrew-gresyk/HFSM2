@@ -4,13 +4,11 @@
 #define HFSM2_ENABLE_PLANS
 #include <hfsm2/machine.hpp>
 
-#include <catch2/catch.hpp>
-#undef assert
-#define assert(x) REQUIRE(x)
+#include <doctest/doctest.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Plans.Traffic Light", "[Wiki]") {
+TEST_CASE("Wiki.Plans.Traffic Light") {
     using M = hfsm2::Machine;          // stateID
 
     using FSM = M::Root<struct Apex,   //      0
@@ -57,24 +55,24 @@ TEST_CASE("Wiki.Plans.Traffic Light", "[Wiki]") {
 
     FSM::Instance fsm;
 
-    assert(fsm.isActive<Red>());
+    REQUIRE(fsm.isActive<Red>());
 
     fsm.update();
-    assert(fsm.isActive<Yellow>());
+    REQUIRE(fsm.isActive<Yellow>());
 
     fsm.update();
-    assert(fsm.isActive<Green>());
+    REQUIRE(fsm.isActive<Green>());
 
     fsm.update();
-    assert(fsm.isActive<Yellow>());
+    REQUIRE(fsm.isActive<Yellow>());
 
     fsm.update();
-    assert(fsm.isActive<Red>());
+    REQUIRE(fsm.isActive<Red>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
+TEST_CASE("Wiki.Plans.Detailed Demo") {
     using M = hfsm2::Machine;                                 // stateID
 
     using FSM = M::Root<struct Apex,                          //      0
@@ -185,13 +183,13 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
             // parametrized version of PlanControl::plan() allows access to plans
             // hosted by any region
             auto plan = control.plan<PlanOwner>();
-            assert(plan);
+            REQUIRE(plan);
 
             // inspect the plan
             auto taskIterator = plan.first();
-            assert(taskIterator);
-            assert(taskIterator->origin == control.stateId<ReplanTask>());
-            assert(taskIterator->destination == control.stateId<End>());
+            REQUIRE(taskIterator);
+            REQUIRE(taskIterator->origin == control.stateId<ReplanTask>());
+            REQUIRE(taskIterator->destination == control.stateId<End>());
 
             // loop over plan task sequence
             for (auto it = plan.first(); it; ++it) {
@@ -201,7 +199,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
             }
 
             // when the plan is empty it is reported as 'invalid'
-            assert(!plan);
+            REQUIRE(!plan);
 
             // plan can be explicitly cleared too
             plan.clear();
@@ -263,35 +261,35 @@ TEST_CASE("Wiki.Plans.Detailed Demo", "[Wiki]") {
 
     FSM::Instance fsm;
 
-    assert(fsm.isActive<PlanOwner>());
-    assert(fsm.isActive<StateTask>());
+    REQUIRE(fsm.isActive<PlanOwner>());
+    REQUIRE(fsm.isActive<StateTask>());
 
     fsm.update();
-    assert(fsm.isActive<CompositeTask>());
-    assert(fsm.isActive<CT_Initial>());
+    REQUIRE(fsm.isActive<CompositeTask>());
+    REQUIRE(fsm.isActive<CT_Initial>());
 
     fsm.update();
-    assert(fsm.isActive<CompositeTask>());
-    assert(fsm.isActive<CT_Following>());
+    REQUIRE(fsm.isActive<CompositeTask>());
+    REQUIRE(fsm.isActive<CT_Following>());
 
     fsm.update();
-    assert(fsm.isActive<OrthogonalTask>());
-    assert(fsm.isActive<OT_1>());
-    assert(fsm.isActive<OT_2>());
+    REQUIRE(fsm.isActive<OrthogonalTask>());
+    REQUIRE(fsm.isActive<OT_1>());
+    REQUIRE(fsm.isActive<OT_2>());
 
     fsm.update();
-    assert(fsm.isActive<ReplanTask>());
+    REQUIRE(fsm.isActive<ReplanTask>());
 
     fsm.update();
-    assert(fsm.isActive<SubPlanOwner>());
-    assert(fsm.isActive<SubTask_2>());
+    REQUIRE(fsm.isActive<SubPlanOwner>());
+    REQUIRE(fsm.isActive<SubTask_2>());
 
     fsm.update();
-    assert(fsm.isActive<SubPlanOwner>());
-    assert(fsm.isActive<SubTask_1>());
+    REQUIRE(fsm.isActive<SubPlanOwner>());
+    REQUIRE(fsm.isActive<SubTask_1>());
 
     fsm.update();
-    assert(fsm.isActive<End>());
+    REQUIRE(fsm.isActive<End>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

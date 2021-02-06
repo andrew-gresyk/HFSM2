@@ -1,6 +1,10 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_UTILITY_THEORY
-#include <hfsm2/machine.hpp>
-#include <catch2/catch.hpp>
+#include <hfsm2/machine_dev.hpp>
+
+#include <doctest/doctest.h>
 
 namespace test_contexts_random {
 
@@ -78,7 +82,7 @@ struct B : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("FSM.Contexts Random", "[machine]") {
+TEST_CASE("FSM.Contexts Random") {
 	Context primary	  =   7;
 	Context secondary = -39;
 	DummyRNG rng;

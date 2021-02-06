@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_UTILITY_THEORY
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
@@ -115,7 +118,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Randomize", "[machine]") {
+TEST_CASE("FSM.Randomize") {
 	hfsm2::XoShiRo256Plus generator{0};
 	Logger logger;
 
@@ -336,5 +339,3 @@ TEST_CASE("FSM.Randomize", "[machine]") {
 ////////////////////////////////////////////////////////////////////////////////
 
 }
-
-#include <random>

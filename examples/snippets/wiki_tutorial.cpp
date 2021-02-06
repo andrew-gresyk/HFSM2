@@ -1,9 +1,7 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
-#include <catch2/catch.hpp>
-#undef assert
-#define assert(x) REQUIRE(x)
+#include <doctest/doctest.h>
 
 // Configure optional HFSM2 functionality using #defines
 // (in this case we're using Plans to make transition cycle more straightforward):
@@ -115,29 +113,29 @@ struct Done
 //------------------------------------------------------------------------------
 
 // Write the client code to use your new state machine:
-TEST_CASE("Wiki.Tutorial", "[Wiki]") {
+TEST_CASE("Wiki.Tutorial") {
     // Create context and state machine instances:
     Context context;
     context.powerOn = true;
 
     FSM::Instance fsm{context};
-    assert(fsm.isActive<On>());                               // activated by Off::entryGuard()
-    assert(fsm.isActive<Red>());                              // On's initial sub-state
+    REQUIRE(fsm.isActive<On>());                               // activated by Off::entryGuard()
+    REQUIRE(fsm.isActive<Red>());                              // On's initial sub-state
 
     fsm.update();
-    assert(fsm.isActive<Yellow>());                           // 1st setp of On's plan
+    REQUIRE(fsm.isActive<Yellow>());                           // 1st setp of On's plan
 
     fsm.update();
-    assert(fsm.isActive<Green>());                            // 2nd setp of On's plan
+    REQUIRE(fsm.isActive<Green>());                            // 2nd setp of On's plan
 
     fsm.react(Event{});
-    assert(fsm.isActive<Yellow>());                           // 3rd setp of On's plan
+    REQUIRE(fsm.isActive<Yellow>());                           // 3rd setp of On's plan
 
     fsm.update();
-    assert(fsm.isActive<Red>());                              // 4th setp of On's plan
+    REQUIRE(fsm.isActive<Red>());                              // 4th setp of On's plan
 
     fsm.update();
-    assert(fsm.isActive<Done>());                             // activated by On::planSucceeded()
+    REQUIRE(fsm.isActive<Done>());                             // activated by On::planSucceeded()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_SERIALIZATION
 #include "../tools.hpp"
 
@@ -11,7 +14,7 @@ using StreamBuffer = typename WriteStream::Buffer;
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Shared.BitStream<>", "[shared]") {
+TEST_CASE("Shared.BitStream<>") {
 	StreamBuffer buffer;
 
 	WriteStream writeStream{buffer};

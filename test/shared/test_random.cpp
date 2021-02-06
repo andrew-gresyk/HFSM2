@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #define HFSM2_ENABLE_UTILITY_THEORY
 #include "../tools.hpp"
 
@@ -35,7 +38,7 @@ testUniformity(const int average) {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Shared.RandomT<>", "[shared]") {
+TEST_CASE("Shared.RandomT<>") {
 	testUniformity<float>(100);
 }
 

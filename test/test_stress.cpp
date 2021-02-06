@@ -1,3 +1,6 @@
+// HFSM2 (hierarchical state machine for games and interactive applications)
+// Created by Andrew Gresyk
+
 #include "tools.hpp"
 
 namespace test_stress {
@@ -174,7 +177,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Stress", "[machine]") {
+TEST_CASE("FSM.Stress") {
 	FSM::Instance machine;
 
 	WHEN("FSM is activated initially") {

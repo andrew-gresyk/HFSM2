@@ -4,13 +4,11 @@
 #define HFSM2_ENABLE_UTILITY_THEORY
 #include <hfsm2/machine.hpp>
 
-#include <catch2/catch.hpp>
-#undef assert
-#define assert(x) REQUIRE(x)
+#include <doctest/doctest.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into States", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into States") {
     using M = hfsm2::Machine;
 
     using FSM = M::PeerRoot<
@@ -22,16 +20,16 @@ TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into States", "[Wiki]")
     struct Destination : FSM::State {};
 
     FSM::Instance fsm;
-    assert(fsm.isActive<Origin>());
+    REQUIRE(fsm.isActive<Origin>());
 
     fsm.changeTo<Destination>();
     fsm.update();
-    assert(fsm.isActive<Destination>());
+    REQUIRE(fsm.isActive<Destination>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into Regions", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into Regions") {
     using M = hfsm2::Machine;
 
     using FSM = M::PeerRoot<
@@ -48,17 +46,17 @@ TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into Regions", "[Wiki]"
     struct SubState2   : FSM::State {};
 
     FSM::Instance fsm;
-    assert(fsm.isActive<Origin>());
+    REQUIRE(fsm.isActive<Origin>());
 
     fsm.changeTo<Destination>();
     fsm.update();
-    assert(fsm.isActive<Destination>());
-    assert(fsm.isActive<SubState1>());
+    REQUIRE(fsm.isActive<Destination>());
+    REQUIRE(fsm.isActive<SubState1>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Transitions within Hierarchy.External Transition Interface", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.External Transition Interface") {
     using M = hfsm2::Machine;
 
     using FSM = M::PeerRoot<
@@ -70,16 +68,16 @@ TEST_CASE("Wiki.Transitions within Hierarchy.External Transition Interface", "[W
     struct Destination : FSM::State {};
 
     FSM::Instance fsm;
-    assert(fsm.isActive<Origin>());
+    REQUIRE(fsm.isActive<Origin>());
 
     fsm.changeTo<Destination>(); // external transition
     fsm.update();
-    assert(fsm.isActive<Destination>());
+    REQUIRE(fsm.isActive<Destination>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Transitions within Hierarchy.Internal Transition Interface", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.Internal Transition Interface") {
     using M = hfsm2::Machine;
 
     using FSM = M::PeerRoot<
@@ -98,15 +96,15 @@ TEST_CASE("Wiki.Transitions within Hierarchy.Internal Transition Interface", "[W
     struct Destination : FSM::State {};
 
     FSM::Instance fsm;
-    assert(fsm.isActive<Origin>());
+    REQUIRE(fsm.isActive<Origin>());
 
     fsm.update();
-    assert(fsm.isActive<Destination>());
+    REQUIRE(fsm.isActive<Destination>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Transitions within Hierarchy.'Restart' Transition", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.'Restart' Transition") {
     using M = hfsm2::Machine;
 
     using FSM = M::PeerRoot<
@@ -123,16 +121,16 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Restart' Transition", "[Wiki]") {
     struct Secondary : FSM::State {};
 
     FSM::Instance fsm;
-    assert(fsm.isActive<State>());
+    REQUIRE(fsm.isActive<State>());
 
     fsm.changeTo<Region>();
     fsm.update();
-    assert(fsm.isActive<Initial>());
+    REQUIRE(fsm.isActive<Initial>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Transitions within Hierarchy.'Resume' Transition", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.'Resume' Transition") {
     using M = hfsm2::Machine;
 
     using FSM = M::PeerRoot<
@@ -149,28 +147,28 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Resume' Transition", "[Wiki]") {
     struct Secondary : FSM::State {};
 
     FSM::Instance fsm;
-    assert(fsm.isActive<State>());
+    REQUIRE(fsm.isActive<State>());
 
     fsm.changeTo<Secondary>();
     fsm.update();
-    assert(fsm.isActive<Secondary>());
+    REQUIRE(fsm.isActive<Secondary>());
 
     fsm.changeTo<State>();
     fsm.update();
-    assert(fsm.isActive<State>());
+    REQUIRE(fsm.isActive<State>());
 
     fsm.resume<Region>();
     fsm.update();
-    assert(fsm.isActive<Secondary>());
+    REQUIRE(fsm.isActive<Secondary>());
 
     fsm.restart<Region>();
     fsm.update();
-    assert(fsm.isActive<Initial>());
+    REQUIRE(fsm.isActive<Initial>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Transitions within Hierarchy.'Utilize' Transition", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.'Utilize' Transition") {
     using M = hfsm2::Machine;
 
     using FSM = M::PeerRoot<
@@ -197,16 +195,16 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Utilize' Transition", "[Wiki]") {
     };
 
     FSM::Instance fsm;
-    assert(fsm.isActive<State>());
+    REQUIRE(fsm.isActive<State>());
 
     fsm.utilize<Region>();
     fsm.update();
-    assert(fsm.isActive<HighRated>());
+    REQUIRE(fsm.isActive<HighRated>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("Wiki.Transitions within Hierarchy.'Randomize' Transition", "[Wiki]") {
+TEST_CASE("Wiki.Transitions within Hierarchy.'Randomize' Transition") {
     using M = hfsm2::Machine;
 
     using FSM = M::PeerRoot<
@@ -246,11 +244,11 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Randomize' Transition", "[Wiki]") 
     };
 
     FSM::Instance fsm;
-    assert(fsm.isActive<State>());
+    REQUIRE(fsm.isActive<State>());
 
     fsm.randomize<Region>();
     fsm.update();
-    assert(fsm.isActive<HighRated>()); // note, it could be LowRated if the PRNG is seeded differently
+    REQUIRE(fsm.isActive<HighRated>()); // note, it could be LowRated if the PRNG is seeded differently
 }
 
 ////////////////////////////////////////////////////////////////////////////////
