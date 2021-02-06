@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <string.h>
+#include <wchar.h>
 
 namespace test_debug {
 
