@@ -2,7 +2,7 @@
 // Created by Andrew Gresyk
 
 #define HFSM2_ENABLE_UTILITY_THEORY
-#include <hfsm2/machine_dev.hpp>
+#include <hfsm2/machine.hpp>
 
 #include <doctest/doctest.h>
 

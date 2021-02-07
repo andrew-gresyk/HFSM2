@@ -1,7 +1,7 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
-#include <hfsm2/machine_dev.hpp>
+#include <hfsm2/machine.hpp>
 
 #include <doctest/doctest.h>
 
