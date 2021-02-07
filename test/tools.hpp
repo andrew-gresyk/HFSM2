@@ -5,7 +5,7 @@
 
 #define HFSM2_ENABLE_LOG_INTERFACE
 #define HFSM2_ENABLE_ASSERT
-#include <hfsm2/machine_dev.hpp>
+#include <hfsm2/machine.hpp>
 
 #include <doctest/doctest.h>
 
