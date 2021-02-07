@@ -16,7 +16,7 @@ struct RegisterT {
 			const Parent parent) noexcept
 	{
 		static constexpr auto HEAD_ID = index<StateList, TH>();
-		StaticAssertEquality<STATE_ID, HEAD_ID>();
+		static_assert(STATE_ID == HEAD_ID, "");
 
 		stateParents[STATE_ID] = parent;
 	}

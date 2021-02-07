@@ -3,14 +3,14 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 StaticArrayT<T, NC>::StaticArrayT(const Item filler) noexcept {
 	fill(filler);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename N>
 T&
 StaticArrayT<T, NC>::operator[] (const N i) noexcept {
@@ -21,7 +21,7 @@ StaticArrayT<T, NC>::operator[] (const N i) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename N>
 const T&
 StaticArrayT<T, NC>::operator[] (const N i) const noexcept {
@@ -32,7 +32,7 @@ StaticArrayT<T, NC>::operator[] (const N i) const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 void
 StaticArrayT<T, NC>::fill(const Item filler) noexcept {
 	for (Index i = 0; i < CAPACITY; ++i)
@@ -41,7 +41,7 @@ StaticArrayT<T, NC>::fill(const Item filler) noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename TValue>
 typename ArrayT<T, NC>::Index
 ArrayT<T, NC>::append(const TValue& value) noexcept {
@@ -54,7 +54,7 @@ ArrayT<T, NC>::append(const TValue& value) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename TValue>
 typename ArrayT<T, NC>::Index
 ArrayT<T, NC>::append(TValue&& value) noexcept {
@@ -67,7 +67,7 @@ ArrayT<T, NC>::append(TValue&& value) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename N>
 T&
 ArrayT<T, NC>::operator[] (const N i) noexcept {
@@ -78,7 +78,7 @@ ArrayT<T, NC>::operator[] (const N i) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, unsigned NC>
+template <typename T, Long NC>
 template <typename N>
 const T&
 ArrayT<T, NC>::operator[] (const N i) const noexcept {
@@ -91,8 +91,8 @@ ArrayT<T, NC>::operator[] (const N i) const noexcept {
 // SPECIFIC
 // SPECIFIC
 
-template <typename T, unsigned NC>
-template <unsigned N>
+template <typename T, Long NC>
+template <Long N>
 ArrayT<T, NC>&
 ArrayT<T, NC>::operator += (const ArrayT<T, N>& other) noexcept {
 	for (const auto& item : other)

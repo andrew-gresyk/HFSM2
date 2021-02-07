@@ -97,12 +97,12 @@ struct UnsignedCapacityT {
 													 uint64_t>>>;
 };
 
-template <unsigned NCapacity>
+template <uint64_t NCapacity>
 using UnsignedCapacity = typename UnsignedCapacityT<NCapacity>::Type;
 
 //------------------------------------------------------------------------------
 
-template <unsigned NBitWidth>
+template <uint64_t NBitWidth>
 struct UnsignedBitWidthT {
 	static constexpr Short BIT_WIDTH = NBitWidth;
 
@@ -114,9 +114,7 @@ struct UnsignedBitWidthT {
 	static_assert(BIT_WIDTH <= 64, "STATIC ASSERT");
 };
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <unsigned NCapacity>
+template <uint64_t NCapacity>
 using UnsignedBitWidth = typename UnsignedBitWidthT<NCapacity>::Type;
 
 //------------------------------------------------------------------------------
@@ -174,14 +172,6 @@ struct StaticPrintConst;
 
 template <typename>
 struct StaticPrintType;
-
-//------------------------------------------------------------------------------
-
-template <unsigned V1, unsigned V2>
-struct StaticAssertEquality;
-
-template <unsigned V1>
-struct StaticAssertEquality<V1, V1> {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
