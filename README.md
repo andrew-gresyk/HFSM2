@@ -49,7 +49,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - Header-only
 - Convenient, minimal boilerplate
 - Fully static, no dynamic allocations
-- Uses inline-friendly compile-time pylymorphism, no virtual methods are used
+- Uses inline-friendly compile-time polymorphism, no virtual methods are used
 - Type-safe transitions: `FSM.changeTo<TargetState>()` with optional payloads
 - Scaleable, supports robust state re-use via state injections
 - **[Hierarchical](../../wiki/Transitions-within-Hierarchy)**, with a selection of composite (sub-machine) and orthogonal regions
