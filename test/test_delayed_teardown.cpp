@@ -224,7 +224,7 @@ TEST_CASE("FSM.Delayed Teardown") {
 				FSM::stateId<Work    >(),
 			});
 
-			REQUIRE(machine.lastTransition<Work    >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<Work    >() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -283,7 +283,7 @@ TEST_CASE("FSM.Delayed Teardown") {
 				FSM::stateId<Teardown>(),
 			});
 
-			REQUIRE(machine.lastTransition<Teardown>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<Teardown>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -343,7 +343,7 @@ TEST_CASE("FSM.Delayed Teardown") {
 				FSM::stateId<Step2   >(),
 			});
 
-			REQUIRE(machine.lastTransition<Step2   >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<Step2   >() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

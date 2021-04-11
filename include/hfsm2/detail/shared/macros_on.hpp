@@ -159,11 +159,11 @@
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
-		if (auto* const logger = control.logger())								\
+		if (auto* const logger = control._logger)								\
 			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 	#define HFSM2_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
-		if (auto* const logger = control.logger())								\
+		if (auto* const logger = control._logger)								\
 			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 #endif
@@ -194,13 +194,13 @@
 #ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)							\
-		if (auto* const logger = control.logger())								\
+		if (auto* const logger = control._logger)								\
 			logger->recordMethod(control.context(), STATE_ID, METHOD_ID)
 
 #elif defined HFSM2_ENABLE_LOG_INTERFACE
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)							\
-		if (auto* const logger = control.logger())								\
+		if (auto* const logger = control._logger)								\
 			log(METHOD, *logger, control.context(), METHOD_ID)
 
 #else

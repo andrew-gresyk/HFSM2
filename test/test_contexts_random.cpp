@@ -20,7 +20,11 @@ struct DummyRNG {
 
 namespace value_context {
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>::RandomT<DummyRNG>>;
+using Config = hfsm2::Config
+					::ContextT<Context>
+					::RandomT<DummyRNG>;
+
+using M = hfsm2::MachineT<Config>;
 
 struct A;
 struct B;
@@ -36,7 +40,11 @@ struct B : FSM::State {};
 
 namespace reference_context {
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context&>::RandomT<DummyRNG>>;
+using Config = hfsm2::Config
+					::ContextT<Context&>
+					::RandomT<DummyRNG>;
+
+using M = hfsm2::MachineT<Config>;
 
 struct A;
 struct B;
@@ -52,7 +60,11 @@ struct B : FSM::State {};
 
 namespace pointer_context {
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context*>::RandomT<DummyRNG>>;
+using Config = hfsm2::Config
+					::ContextT<Context*>
+					::RandomT<DummyRNG>;
+
+using M = hfsm2::MachineT<Config>;
 
 struct A;
 struct B;
@@ -68,7 +80,10 @@ struct B : FSM::State {};
 
 namespace no_context {
 
-using M = hfsm2::MachineT<hfsm2::Config::RandomT<DummyRNG>>;
+using Config = hfsm2::Config
+					::RandomT<DummyRNG>;
+
+using M = hfsm2::MachineT<Config>;
 
 struct A;
 struct B;

@@ -15,7 +15,10 @@ using Context = int;
 
 namespace value_context {
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context>>;
+using Config = hfsm2::Config
+					::ContextT<Context>;
+
+using M = hfsm2::MachineT<Config>;
 
 struct A;
 struct B;
@@ -31,7 +34,10 @@ struct B : FSM::State {};
 
 namespace reference_context {
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context&>>;
+using Config = hfsm2::Config
+					::ContextT<Context&>;
+
+using M = hfsm2::MachineT<Config>;
 
 struct A;
 struct B;
@@ -47,7 +53,10 @@ struct B : FSM::State {};
 
 namespace pointer_context {
 
-using M = hfsm2::MachineT<hfsm2::Config::ContextT<Context*>>;
+using Config = hfsm2::Config
+					::ContextT<Context*>;
+
+using M = hfsm2::MachineT<Config>;
 
 struct A;
 struct B;

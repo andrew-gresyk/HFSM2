@@ -13,15 +13,16 @@
 
 namespace test_debug {
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
-struct Empty {};
-
-using Config = hfsm2::Config::ContextT<Empty>::RandomT<hfsm2::XoShiRo128Plus>;
+using Config = hfsm2::Config
+					::RandomT<hfsm2::XoShiRo128Plus>;
 
 using M = hfsm2::MachineT<Config>;
 
-////////////////////////////////////////////////////////////////////////////////
+using Logger = LoggerT<Config>;
+
+//------------------------------------------------------------------------------
 
 #define S(s) struct s
 
@@ -49,6 +50,8 @@ using FSM = M::Root<S(Apex),
 
 #undef S
 
+//------------------------------------------------------------------------------
+
 static_assert(FSM::regionId<Apex>()	==  0, "");
 static_assert(FSM::regionId<O	>()	==  1, "");
 static_assert(FSM::regionId<R	>()	==  2, "");
@@ -72,7 +75,7 @@ static_assert(FSM::stateId<N   >() == 12, "");
 static_assert(FSM::stateId<N_1 >() == 13, "");
 static_assert(FSM::stateId<N_2 >() == 14, "");
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 struct Apex	: FSM::State {};
 struct I	: FSM::State {};
@@ -167,14 +170,13 @@ const Types all = {
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Debug") {
-	Empty context;
 	hfsm2::XoShiRo128Plus generator{0};
-	LoggerT<Config> logger;
+	Logger logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		FSM::Instance machine{context, generator, &logger};
+		FSM::Instance machine{generator, &logger};
 		{
 			logger.assertSequence({
 				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },

@@ -22,7 +22,7 @@ public:
 
 	using Payload				= typename TConfig::Payload;
 
-private:
+protected:
 	using Apex					= TApex;
 
 	using Forward				= RF_<TConfig, Apex>;
@@ -419,13 +419,13 @@ public:
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	const Transition* lastTransition(const StateID stateId)			const noexcept;
+	const Transition* lastTransitionTo(const StateID stateId)		const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
 	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
-	const Transition* lastTransition()								const noexcept	{ return lastTransition(stateId<TState>());		}
+	const Transition* lastTransitionTo()							const noexcept	{ return lastTransitionTo(stateId<TState>());	}
 
 #endif
 
@@ -466,8 +466,10 @@ public:
 
 	//----------------------------------------------------------------------
 
-private:
+protected:
 	void initialEnter() noexcept;
+	void finalExit() noexcept;
+
 	void processTransitions(TransitionSets& currentTransitions)			  noexcept;
 
 	bool applyRequest (Control& control, const Transition& request, const Short index) noexcept;
@@ -515,12 +517,63 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TConfig,
-		  typename TApex>
-class RP_;
+// Automatic / manual [de]activation
+
+template <typename, typename>
+class RV_;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Automatic enter() / exit()
 
+template <FeatureTag NFeatureTag
+		, typename TContext
+		, typename TActivation
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RV_		   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 R_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+{
+	using Base = R_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+protected:
+	using typename Base::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using typename Base::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using typename Base::Logger;
+#endif
+
+public:
+	HFSM2_INLINE explicit RV_(Context& context
+							HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept;
+
+	HFSM2_INLINE ~RV_() noexcept;
+
+private:
+	using Base::initialEnter;
+	using Base::finalExit;
+
+/*
+protected:
+	using Base::_registry;
+*/
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Manual enter() / exit()
 template <FeatureTag NFeatureTag
 		, typename TContext
 
@@ -534,18 +587,94 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RP_		   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RV_		   <G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 R_<G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = R_<G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+public:
+	//using typename Base::Payload;
+	using typename Base::Transition;
+
+private:
+	using typename Base::PlanControl;
+
+public:
+	using Base::Base;
+
+	HFSM2_INLINE void enter()													  noexcept;
+	HFSM2_INLINE void exit()													  noexcept;
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+	HFSM2_INLINE bool replayEnter(const Transition* const transitions,
+								  const Short count)							  noexcept;
+
+	template <Long NCount>
+	HFSM2_INLINE bool replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept;
+
+	HFSM2_INLINE bool replayEnter(const StateID destination)					  noexcept;
+
+#endif
+
+private:
+	using Base::initialEnter;
+	using Base::finalExit;
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	using Base::applyRequests;
+
+	using Base::_transitionTargets;
+	using Base::_previousTransitions;
+
+	using Base::_context;
+	using Base::_registry;
+	#ifdef HFSM2_ENABLE_PLANS
+		using Base::_planData;
+	#endif
+	using Base::_requests;
+	using Base::_apex;
+	#ifdef HFSM2_ENABLE_LOG_INTERFACE
+		using Base::_logger;
+	#endif
+#endif
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TConfig,
+		  typename TApex>
+class RP_;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Non-'void' payloads
+
+template <FeatureTag NFeatureTag
+		, typename TContext
+		, typename TActivation
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RP_			<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RV_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+{
+	using Base = RV_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 	using Transition = TransitionT<TPayload>;
 
 public:
-	using Payload	 = typename Base::Payload;
+	using typename Base::Payload;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		 = typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 public:
@@ -745,17 +874,21 @@ public:
 
 protected:
 	using Base::_context;
+	using Base::_registry;
 
 private:
 	using Base::_requests;
 
-	HFSM2_IF_LOG_INTERFACE(using Base::_logger);
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Base::_logger;
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -766,14 +899,14 @@ template <FeatureTag NFeatureTag
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TApex>
-class RP_		   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
-	: public	 R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
+class RP_			<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
+	: public	 RV_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
 {
-	using Base = R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>;
+	using Base = RV_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>;
 
 public:
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 public:
@@ -790,6 +923,7 @@ class RC_;
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -801,23 +935,22 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RC_			<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 RP_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RC_			<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = RP_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RP_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= TContext;
-	using Payload	= typename Base::Payload;
+	using typename Base::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -841,6 +974,7 @@ private:
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -852,23 +986,22 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RC_			<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 RP_<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RC_			<G_<NFeatureTag, TContext&, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext&, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = RP_<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RP_<G_<NFeatureTag, TContext&, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
+	using typename Base::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -891,6 +1024,7 @@ private:
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -902,23 +1036,22 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RC_			<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 RP_<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RC_			<G_<NFeatureTag, TContext*, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext*, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = RP_<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RP_<G_<NFeatureTag, TContext*, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
+	using typename Base::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -952,6 +1085,7 @@ private:
 // TContext == EmptyContext
 
 template <FeatureTag NFeatureTag
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -963,24 +1097,21 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RC_			<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 RP_<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RC_			<G_<NFeatureTag, EmptyContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, EmptyContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 	, public EmptyContext
 {
-	using Base = RP_<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RP_<G_<NFeatureTag, EmptyContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
-
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -989,7 +1120,7 @@ public:
 
 	HFSM2_INLINE explicit RC_(RNG& rng
 							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
-		: Base{static_cast<Context&>(*this)
+		: Base{static_cast<EmptyContext&>(*this)
 			 , rng
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
@@ -997,7 +1128,7 @@ public:
 #else
 
 	HFSM2_INLINE explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr)) noexcept
-		: Base{static_cast<Context&>(*this)
+		: Base{static_cast<EmptyContext&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
 
@@ -1030,6 +1161,7 @@ public:
 /// @tparam TApex Root region type
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -1040,24 +1172,23 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RR_			<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
-	: public	 RC_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RR_			<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
+	: public	 RC_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 	HFSM2_IF_UTILITY_THEORY(, public RNGT<TUtility>)
 {
-	using Base = RC_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RC_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
+	using typename Base::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -1090,34 +1221,31 @@ public:
 /// @tparam Cfg Type configuration
 /// @tparam TApex Root region type
 template <FeatureTag NFeatureTag
+		, typename TActivation
 		, typename TRank
 		, typename TUtility
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RR_			<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
-	: public	 RC_<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RR_			<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
+	: public	 RC_<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 	, public RNGT<TUtility>
 {
-	using Base = RC_<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RC_<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
-	using RNG		= typename Base::RNG;
-
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
 	HFSM2_INLINE explicit RR_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr)) noexcept
-		: Base{static_cast<RNG&>(*this)
+		: Base{static_cast<RNGT<TUtility>&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
-		, RNG{0}
+		, RNGT<TUtility>{0}
 	{}
 };
 

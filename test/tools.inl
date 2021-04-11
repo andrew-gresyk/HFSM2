@@ -277,9 +277,9 @@ assertLastTransitions(TMachine& machine,
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.lastTransition(type)); //-V521
+			REQUIRE( machine.lastTransitionTo(type)); //-V521
 		else
-			REQUIRE(!machine.lastTransition(type)); //-V521
+			REQUIRE(!machine.lastTransitionTo(type)); //-V521
 	}
 }
 

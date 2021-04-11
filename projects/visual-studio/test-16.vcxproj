@@ -42,9 +42,10 @@
     <ClCompile Include="..\..\test\test_guards.cpp" />
     <ClCompile Include="..\..\test\test_internal_payloads.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
+    <ClCompile Include="..\..\test\test_manual_activation.cpp" />
     <ClCompile Include="..\..\test\test_orthogonal_root.cpp" />
     <ClCompile Include="..\..\test\test_ortho_units.cpp" />
-    <ClCompile Include="..\..\test\test_plan_payloads.cpp" />
+    <ClCompile Include="..\..\test\test_plans_payloads.cpp" />
     <ClCompile Include="..\..\test\test_plans.cpp" />
     <ClCompile Include="..\..\test\test_randomize.cpp" />
     <ClCompile Include="..\..\test\test_replication.cpp" />
