@@ -718,7 +718,7 @@ RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::enter() noexcept {
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::enter() noexcept {
 	initialEnter();
 }
 
@@ -726,7 +726,7 @@ RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::exit() noexcept {
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::exit() noexcept {
 	finalExit();
 }
 
@@ -736,7 +736,7 @@ RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 bool
-RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const Transition* const transitions,
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const Transition* const transitions,
 																														 const Short count) noexcept
 {
 	HFSM2_ASSERT(!_registry.isActive());
@@ -779,7 +779,7 @@ RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 template <Long NCount>
 bool
-RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept {
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept {
 	if (transitions.count())
 		return replayEnter(&transitions[0],
 						   transitions.count());

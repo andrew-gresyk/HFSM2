@@ -392,7 +392,7 @@ public:
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
-	/// @param transitions Array of 'Transition' to replay
+	/// @param transitions 'TransitionHistory' to replay
 	/// @param count Number of transitions
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -401,7 +401,7 @@ public:
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
-	/// @param transitions 'TransitionHistory' to replay
+	/// @param transitions Array of 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
@@ -565,15 +565,11 @@ public:
 private:
 	using Base::initialEnter;
 	using Base::finalExit;
-
-/*
-protected:
-	using Base::_registry;
-*/
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Manual enter() / exit()
+
 template <FeatureTag NFeatureTag
 		, typename TContext
 
@@ -587,13 +583,12 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RV_		   <G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 R_<G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RV_		   <G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 R_<G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = R_<G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = R_<G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
-	//using typename Base::Payload;
 	using typename Base::Transition;
 
 private:
@@ -602,18 +597,36 @@ private:
 public:
 	using Base::Base;
 
+	/// @brief Manually start the FSM
+	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_INLINE void enter()													  noexcept;
+
+	/// @brief Manually stop the FSM
+	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_INLINE void exit()													  noexcept;
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions 'TransitionHistory' to replay
+	/// @param count Number of transitions
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
 	HFSM2_INLINE bool replayEnter(const Transition* const transitions,
 								  const Short count)							  noexcept;
 
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions Array of 'Transition' to replay
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
 	HFSM2_INLINE bool replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept;
 
-	HFSM2_INLINE bool replayEnter(const StateID destination)					  noexcept;
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transition 'Transition' to replay
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
+	HFSM2_INLINE bool replayEnter(const Transition& transition)					  noexcept	{ return replayEnter(&transition, 1);	}
 
 #endif
 

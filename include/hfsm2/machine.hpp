@@ -310,6 +310,9 @@ namespace hfsm2 {
 struct EmptyContext {};
 struct EmptyPayload {};
 
+struct Automatic;
+struct Manual;
+
 //------------------------------------------------------------------------------
 
 using Short		 = uint8_t;
@@ -12748,12 +12751,6 @@ struct Accessor<T, const S_<TN, TA,  T>> {
 }
 
 namespace hfsm2 {
-
-//------------------------------------------------------------------------------
-
-struct AutomaticActivation;
-struct ManualActivation;
-
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -12803,48 +12800,48 @@ struct G_ final {
 	/// @brief Set Context type
 	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = G_<FEATURE_TAG, T	  , Activation		 HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using ContextT			 = G_<FEATURE_TAG, T	  , Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 	/// @brief Select manual activation strategy
-	using ManualActivation	 = G_<FEATURE_TAG, Context, ManualActivation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using ManualActivation	 = G_<FEATURE_TAG, Context, Manual	   HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Set Rank type
 	/// @tparam T Rank type for 'TRank State::rank() const' method
 	template <typename T>
-	using RankT				 = G_<FEATURE_TAG, Context, Activation								 , T   , Utility, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using RankT				 = G_<FEATURE_TAG, Context, Activation						   , T   , Utility, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 	/// @brief Set Utility type
 	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using UtilityT			 = G_<FEATURE_TAG, Context, Activation								 , Rank, T      , RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using UtilityT			 = G_<FEATURE_TAG, Context, Activation						   , Rank, T      , RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 	/// @brief Set RNG type
 	/// @tparam T RNG type used in 'Random' regions
 	template <typename T>
-	using RandomT			 = G_<FEATURE_TAG, Context, Activation								 , Rank, Utility, T   , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using RandomT			 = G_<FEATURE_TAG, Context, Activation						   , Rank, Utility, T   , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #endif
 
 	/// @brief Set Substitution limit
 	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
 	template <Long N>
-	using SubstitutionLimitN = G_<FEATURE_TAG, Context, Activation		 HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), N                  HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using SubstitutionLimitN = G_<FEATURE_TAG, Context, Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), N                  HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #ifdef HFSM2_ENABLE_PLANS
 
 	/// @brief Set Task capacity
 	/// @tparam N Maximum number of tasks across all plans
 	template <Long N>
-	using TaskCapacityN		 = G_<FEATURE_TAG, Context, Activation		 HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT                , N             , Payload>;
+	using TaskCapacityN		 = G_<FEATURE_TAG, Context, Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT                , N             , Payload>;
 
 #endif
 
 	/// @brief Set Transition Payload type
 	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using PayloadT			 = G_<FEATURE_TAG, Context, Activation		 HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), T      >;
+	using PayloadT			 = G_<FEATURE_TAG, Context, Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), T      >;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13050,7 +13047,7 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 }
 
 /// @brief Type configuration for MachineT<>
-using Config = detail::G_<HFSM2_FEATURE_TAG, EmptyContext, AutomaticActivation HFSM2_IF_UTILITY_THEORY(, int8_t, float, RNGT<float>), 4 HFSM2_IF_PLANS(, INVALID_LONG), void>;
+using Config = detail::G_<HFSM2_FEATURE_TAG, EmptyContext, Automatic HFSM2_IF_UTILITY_THEORY(, int8_t, float, RNGT<float>), 4 HFSM2_IF_PLANS(, INVALID_LONG), void>;
 
 /// @brief 'Template namespace' for FSM classes
 /// @tparam TConfig 'ConfigT<>' type configuration for MachineT<>
@@ -13459,7 +13456,7 @@ public:
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
-	/// @param transitions Array of 'Transition' to replay
+	/// @param transitions 'TransitionHistory' to replay
 	/// @param count Number of transitions
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -13468,7 +13465,7 @@ public:
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
-	/// @param transitions 'TransitionHistory' to replay
+	/// @param transitions Array of 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
@@ -13632,15 +13629,11 @@ public:
 private:
 	using Base::initialEnter;
 	using Base::finalExit;
-
-/*
-protected:
-	using Base::_registry;
-*/
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Manual enter() / exit()
+
 template <FeatureTag NFeatureTag
 		, typename TContext
 
@@ -13654,13 +13647,12 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RV_		   <G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 R_<G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RV_		   <G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 R_<G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = R_<G_<NFeatureTag, TContext, ManualActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = R_<G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
-	//using typename Base::Payload;
 	using typename Base::Transition;
 
 private:
@@ -13669,18 +13661,36 @@ private:
 public:
 	using Base::Base;
 
+	/// @brief Manually start the FSM
+	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_INLINE void enter()													  noexcept;
+
+	/// @brief Manually stop the FSM
+	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_INLINE void exit()													  noexcept;
 
 #ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions 'TransitionHistory' to replay
+	/// @param count Number of transitions
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
 	HFSM2_INLINE bool replayEnter(const Transition* const transitions,
 								  const Short count)							  noexcept;
 
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions Array of 'Transition' to replay
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
 	HFSM2_INLINE bool replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept;
 
-	HFSM2_INLINE bool replayEnter(const StateID destination)					  noexcept;
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transition 'Transition' to replay
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
+	HFSM2_INLINE bool replayEnter(const Transition& transition)					  noexcept	{ return replayEnter(&transition, 1);	}
 
 #endif
 
@@ -15043,7 +15053,7 @@ RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::enter() noexcept {
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::enter() noexcept {
 	initialEnter();
 }
 
@@ -15051,7 +15061,7 @@ RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::exit() noexcept {
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::exit() noexcept {
 	finalExit();
 }
 
@@ -15061,7 +15071,7 @@ RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 bool
-RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const Transition* const transitions,
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const Transition* const transitions,
 																														 const Short count) noexcept
 {
 	HFSM2_ASSERT(!_registry.isActive());
@@ -15104,7 +15114,7 @@ RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 template <Long NCount>
 bool
-RV_<G_<NFT, TC, ManualActivation HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept {
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept {
 	if (transitions.count())
 		return replayEnter(&transitions[0],
 						   transitions.count());
