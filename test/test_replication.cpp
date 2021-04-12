@@ -6,11 +6,14 @@
 
 namespace test_replication {
 
-//------------------------------------------------------------------------------
-
-using M = hfsm2::Machine;
-
 ////////////////////////////////////////////////////////////////////////////////
+
+using Config = hfsm2::Config
+					::ManualActivation;
+
+using M = hfsm2::MachineT<Config>;
+
+//------------------------------------------------------------------------------
 
 namespace server {
 
@@ -223,219 +226,269 @@ static_assert(server::FSM::Instance::Info::ORTHO_UNITS   == client::FSM::Instanc
 TEST_CASE("FSM.Replication") {
 	Logger logger;
 
+	//----------------------------------------------------------------------
+
+	server::FSM::Instance authority {&logger};
+	client::FSM::Instance replicated{&logger};
 	{
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		assertActive(authority , server::all, {});
+		assertActive(replicated, client::all, {});
 
-		server::FSM::Instance authority {&logger};
-		client::FSM::Instance replicated{&logger};
-		{
-			assertActive(authority,  server::all, {
-				server::FSM::stateId<server::C1      >(),
-				server::FSM::stateId<server::C1_S1   >(),
-			});
-
-			assertActive(replicated, client::all, {
-				client::FSM::stateId<client::C1      >(),
-				client::FSM::stateId<client::C1_S1   >(),
-			});
-
-			assertResumable(authority,  server::all, {});
-
-			assertResumable(replicated, client::all, {});
-
-			REQUIRE(authority .previousTransitions().count() == 0);
-			REQUIRE(replicated.previousTransitions().count() == 0);
-
-			assertLastTransitions(authority , client::all, {});
-			assertLastTransitions(replicated, server::all, {});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		authority.changeTo<server::O2_C1_S2>();
-		authority.update();
-		{
-			assertActive(authority, server::all, {
-				server::FSM::stateId<server::O2      >(),
-				server::FSM::stateId<server::O2_C1   >(),
-				server::FSM::stateId<server::O2_C1_S2>(),
-				server::FSM::stateId<server::O2_C2   >(),
-				server::FSM::stateId<server::O2_C2_S1>(),
-			});
-
-			assertResumable(authority, server::all, {
-				server::FSM::stateId<server::C1      >(),
-				server::FSM::stateId<server::C1_S1   >(),
-			});
-
-			const auto& previousTransitions = authority .previousTransitions();
-			REQUIRE(previousTransitions.count() == 1);
-			REQUIRE(previousTransitions[0] == M::Transition{server::FSM::stateId<server::O2_C1_S2>(),
-															hfsm2::TransitionType::CHANGE});
-
-			assertLastTransitions(authority, server::all, {
-				server::FSM::stateId<server::O2      >(),
-				server::FSM::stateId<server::O2_C1   >(),
-				server::FSM::stateId<server::O2_C1_S2>(),
-				server::FSM::stateId<server::O2_C2   >(),
-				server::FSM::stateId<server::O2_C2_S1>(),
-			});
-
-			REQUIRE(authority.lastTransition<server::O2      >() == &previousTransitions[0]);
-			REQUIRE(authority.lastTransition<server::O2_C1   >() == &previousTransitions[0]);
-			REQUIRE(authority.lastTransition<server::O2_C1_S2>() == &previousTransitions[0]);
-			REQUIRE(authority.lastTransition<server::O2_C2   >() == &previousTransitions[0]);
-			REQUIRE(authority.lastTransition<server::O2_C2_S1>() == &previousTransitions[0]);
-		}
-
-		REQUIRE(replicated.replayTransition(authority.previousTransitions()[0]));
-		{
-			assertActive(replicated, client::all, {
-				client::FSM::stateId<client::O2      >(),
-				client::FSM::stateId<client::O2_C1   >(),
-				client::FSM::stateId<client::O2_C1_S2>(),
-				client::FSM::stateId<client::O2_C2   >(),
-				client::FSM::stateId<client::O2_C2_S1>(),
-			});
-
-			assertResumable(replicated, client::all, {
-				client::FSM::stateId<client::C1      >(),
-				client::FSM::stateId<client::C1_S1   >(),
-			});
-
-			const auto& previousTransitions = replicated.previousTransitions();
-			REQUIRE(previousTransitions.count() == 1);
-			REQUIRE(previousTransitions[0] == M::Transition{client::FSM::stateId<client::O2_C1_S2>(),
-															hfsm2::TransitionType::CHANGE});
-
-			assertLastTransitions(replicated, server::all, {
-				client::FSM::stateId<client::O2      >(),
-				client::FSM::stateId<client::O2_C1   >(),
-				client::FSM::stateId<client::O2_C1_S2>(),
-				client::FSM::stateId<client::O2_C2   >(),
-				client::FSM::stateId<client::O2_C2_S1>(),
-			});
-
-			REQUIRE(replicated.lastTransition<client::O2      >() == &previousTransitions[0]);
-			REQUIRE(replicated.lastTransition<client::O2_C1   >() == &previousTransitions[0]);
-			REQUIRE(replicated.lastTransition<client::O2_C1_S2>() == &previousTransitions[0]);
-			REQUIRE(replicated.lastTransition<client::O2_C2   >() == &previousTransitions[0]);
-			REQUIRE(replicated.lastTransition<client::O2_C2_S1>() == &previousTransitions[0]);
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		authority.changeTo<server::O2_C1_S1>();
-		authority.changeTo<server::O2_C2_S2>();
-		authority.update();
-		{
-			assertActive(authority, server::all, {
-				server::FSM::stateId<server::O2      >(),
-				server::FSM::stateId<server::O2_C1   >(),
-				server::FSM::stateId<server::O2_C1_S1>(),
-				server::FSM::stateId<server::O2_C2   >(),
-				server::FSM::stateId<server::O2_C2_S2>(),
-			});
-
-			assertResumable(authority, server::all, {
-				server::FSM::stateId<server::C1      >(),
-				server::FSM::stateId<server::C1_S1   >(),
-				server::FSM::stateId<server::O2_C1_S2>(),
-				server::FSM::stateId<server::O2_C2_S1>(),
-			});
-
-			const auto& previousTransitions = authority.previousTransitions();
-			REQUIRE(previousTransitions.count() == 2);
-			REQUIRE(previousTransitions[0] == M::Transition{server::FSM::stateId<server::O2_C1_S1>(),
-															hfsm2::TransitionType::CHANGE});
-			REQUIRE(previousTransitions[1] == M::Transition{server::FSM::stateId<server::O2_C2_S2>(),
-															hfsm2::TransitionType::CHANGE});
-
-			assertLastTransitions(authority, server::all, {
-				server::FSM::stateId<server::O2_C1_S1>(),
-				server::FSM::stateId<server::O2_C2_S2>(),
-			});
-
-			REQUIRE(authority.lastTransition<server::O2_C1_S1>() == &previousTransitions[1]);
-			REQUIRE(authority.lastTransition<server::O2_C2_S2>() == &previousTransitions[1]);
-		}
-
-		REQUIRE(replicated.replayTransitions(authority.previousTransitions()));
-		{
-			assertActive(replicated, client::all, {
-				client::FSM::stateId<client::O2      >(),
-				client::FSM::stateId<client::O2_C1   >(),
-				client::FSM::stateId<client::O2_C1_S1>(),
-				client::FSM::stateId<client::O2_C2   >(),
-				client::FSM::stateId<client::O2_C2_S2>(),
-			});
-
-			assertResumable(replicated, client::all, {
-				client::FSM::stateId<client::C1      >(),
-				client::FSM::stateId<client::C1_S1   >(),
-				client::FSM::stateId<client::O2_C1_S2>(),
-				client::FSM::stateId<client::O2_C2_S1>(),
-			});
-
-			const auto& previousTransitions = replicated.previousTransitions();
-			REQUIRE(previousTransitions.count() == 2);
-			REQUIRE(previousTransitions[0] == M::Transition{client::FSM::stateId<client::O2_C1_S1>(),
-															hfsm2::TransitionType::CHANGE});
-			REQUIRE(previousTransitions[1] == M::Transition{client::FSM::stateId<client::O2_C2_S2>(),
-															hfsm2::TransitionType::CHANGE});
-
-			assertLastTransitions(replicated, client::all, {
-				client::FSM::stateId<client::O2_C1_S1>(),
-				client::FSM::stateId<client::O2_C2_S2>(),
-			});
-
-			REQUIRE(replicated.lastTransition<client::O2_C1_S1>() == &previousTransitions[1]);
-			REQUIRE(replicated.lastTransition<client::O2_C2_S2>() == &previousTransitions[1]);
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		replicated.reset();
-		{
-			assertActive(replicated, client::all, {
-				client::FSM::stateId<client::C1      >(),
-				client::FSM::stateId<client::C1_S1   >(),
-			});
-
-			assertResumable(replicated, client::all, {});
-
-			REQUIRE(replicated.previousTransitions().count() == 0);
-
-			assertLastTransitions(replicated, client::all, {});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		authority.changeTo<server::C1_C2_S2>();
-		authority.update();
-		{
-			assertActive(authority,  server::all, {
-				server::FSM::stateId<server::O2      >(),
-				server::FSM::stateId<server::O2_C1   >(),
-				server::FSM::stateId<server::O2_C1_S1>(),
-				server::FSM::stateId<server::O2_C2   >(),
-				server::FSM::stateId<server::O2_C2_S2>(),
-			});
-
-			assertResumable(authority, server::all, {
-				server::FSM::stateId<server::C1      >(),
-				server::FSM::stateId<server::C1_S1   >(),
-				server::FSM::stateId<server::O2_C1_S2>(),
-				server::FSM::stateId<server::O2_C2_S1>(),
-			});
-
-			REQUIRE(authority.previousTransitions().count() == 0);
-
-			assertLastTransitions(authority, server::all, {});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		assertResumable(authority , server::all, {});
+		assertResumable(replicated, client::all, {});
 	}
+
+	//----------------------------------------------------------------------
+
+	authority.enter();
+	{
+		assertActive(authority,  server::all, {
+			server::FSM::stateId<server::C1      >(),
+			server::FSM::stateId<server::C1_S1   >(),
+		});
+
+		assertResumable(authority,  server::all, {});
+
+		REQUIRE(authority .previousTransitions().count() == 0);
+
+		assertLastTransitions(authority, client::all, {});
+	}
+
+	authority.changeTo<server::O2_C2_S2>();
+	authority.update();
+	{
+		assertActive(authority,  server::all, {
+			server::FSM::stateId<server::O2      >(),
+			server::FSM::stateId<server::O2_C1   >(),
+			server::FSM::stateId<server::O2_C1_S1>(),
+			server::FSM::stateId<server::O2_C2   >(),
+			server::FSM::stateId<server::O2_C2_S2>(),
+		});
+
+		assertResumable(authority, server::all, {
+			server::FSM::stateId<server::C1      >(),
+			server::FSM::stateId<server::C1_S1   >(),
+		});
+
+		const auto& previousTransitions = authority.previousTransitions();
+		REQUIRE(previousTransitions.count() == 1);
+		REQUIRE(previousTransitions[0] == M::Transition{server::FSM::stateId<server::O2_C2_S2>(),
+														hfsm2::TransitionType::CHANGE});
+
+		assertLastTransitions(authority, server::all, {
+			server::FSM::stateId<server::O2      >(),
+			server::FSM::stateId<server::O2_C1   >(),
+			server::FSM::stateId<server::O2_C1_S1>(),
+			server::FSM::stateId<server::O2_C2   >(),
+			server::FSM::stateId<server::O2_C2_S2>(),
+		});
+
+		REQUIRE(authority.lastTransitionTo<server::O2      >() == &previousTransitions[0]);
+		REQUIRE(authority.lastTransitionTo<server::O2_C1   >() == &previousTransitions[0]);
+		REQUIRE(authority.lastTransitionTo<server::O2_C1_S1>() == &previousTransitions[0]);
+		REQUIRE(authority.lastTransitionTo<server::O2_C2   >() == &previousTransitions[0]);
+		REQUIRE(authority.lastTransitionTo<server::O2_C2_S2>() == &previousTransitions[0]);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	replicated.replayEnter(authority.previousTransitions());
+	{
+		assertActive(replicated, client::all, {
+			client::FSM::stateId<client::O2      >(),
+			client::FSM::stateId<client::O2_C1   >(),
+			client::FSM::stateId<client::O2_C1_S1>(),
+			client::FSM::stateId<client::O2_C2   >(),
+			client::FSM::stateId<client::O2_C2_S2>(),
+		});
+
+		assertResumable(replicated, client::all, {});
+
+		const auto& previousTransitions = replicated.previousTransitions();
+		REQUIRE(previousTransitions.count() == 1);
+		REQUIRE(previousTransitions[0] == M::Transition{client::FSM::stateId<client::O2_C2_S2>(),
+														hfsm2::TransitionType::CHANGE});
+
+		REQUIRE(replicated.lastTransitionTo<client::O2      >() == &previousTransitions[0]);
+		REQUIRE(replicated.lastTransitionTo<client::O2_C1   >() == &previousTransitions[0]);
+		REQUIRE(replicated.lastTransitionTo<client::O2_C1_S1>() == &previousTransitions[0]);
+		REQUIRE(replicated.lastTransitionTo<client::O2_C2   >() == &previousTransitions[0]);
+		REQUIRE(replicated.lastTransitionTo<client::O2_C2_S2>() == &previousTransitions[0]);
+	}
+
+	//----------------------------------------------------------------------
+
+	authority.changeTo<server::O2_C1_S2>();
+	authority.update();
+	{
+		assertActive(authority, server::all, {
+			server::FSM::stateId<server::O2      >(),
+			server::FSM::stateId<server::O2_C1   >(),
+			server::FSM::stateId<server::O2_C1_S2>(),
+			server::FSM::stateId<server::O2_C2   >(),
+			server::FSM::stateId<server::O2_C2_S2>(),
+		});
+
+		assertResumable(authority, server::all, {
+			server::FSM::stateId<server::C1      >(),
+			server::FSM::stateId<server::C1_S1   >(),
+			server::FSM::stateId<server::O2_C1_S1>(),
+		});
+
+		const auto& previousTransitions = authority .previousTransitions();
+		REQUIRE(previousTransitions.count() == 1);
+		REQUIRE(previousTransitions[0] == M::Transition{server::FSM::stateId<server::O2_C1_S2>(),
+														hfsm2::TransitionType::CHANGE});
+
+		assertLastTransitions(authority, server::all, {
+			server::FSM::stateId<server::O2_C1_S2>(),
+		});
+
+		REQUIRE(authority.lastTransitionTo<server::O2_C1_S2>() == &previousTransitions[0]);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	REQUIRE(replicated.replayTransition(authority.previousTransitions()[0]));
+	{
+		assertActive(replicated, client::all, {
+			client::FSM::stateId<client::O2      >(),
+			client::FSM::stateId<client::O2_C1   >(),
+			client::FSM::stateId<client::O2_C1_S2>(),
+			client::FSM::stateId<client::O2_C2   >(),
+			client::FSM::stateId<client::O2_C2_S2>(),
+		});
+
+		assertResumable(replicated, client::all, {
+			client::FSM::stateId<client::O2_C1_S1>(),
+		});
+
+		const auto& previousTransitions = replicated.previousTransitions();
+		REQUIRE(previousTransitions.count() == 1);
+		REQUIRE(previousTransitions[0] == M::Transition{client::FSM::stateId<client::O2_C1_S2>(),
+														hfsm2::TransitionType::CHANGE});
+
+		assertLastTransitions(replicated, server::all, {
+			client::FSM::stateId<client::O2_C1_S2>(),
+		});
+
+		REQUIRE(replicated.lastTransitionTo<client::O2_C1_S2>() == &previousTransitions[0]);
+	}
+
+	//----------------------------------------------------------------------
+
+	authority.changeTo<server::O2_C1_S1>();
+	authority.changeTo<server::O2_C2_S2>();
+	authority.update();
+	{
+		assertActive(authority, server::all, {
+			server::FSM::stateId<server::O2      >(),
+			server::FSM::stateId<server::O2_C1   >(),
+			server::FSM::stateId<server::O2_C1_S1>(),
+			server::FSM::stateId<server::O2_C2   >(),
+			server::FSM::stateId<server::O2_C2_S2>(),
+		});
+
+		assertResumable(authority, server::all, {
+			server::FSM::stateId<server::C1      >(),
+			server::FSM::stateId<server::C1_S1   >(),
+			server::FSM::stateId<server::O2_C1_S2>(),
+		});
+
+		const auto& previousTransitions = authority.previousTransitions();
+		REQUIRE(previousTransitions.count() == 2);
+		REQUIRE(previousTransitions[0] == M::Transition{server::FSM::stateId<server::O2_C1_S1>(),
+														hfsm2::TransitionType::CHANGE});
+		REQUIRE(previousTransitions[1] == M::Transition{server::FSM::stateId<server::O2_C2_S2>(),
+														hfsm2::TransitionType::CHANGE});
+
+		assertLastTransitions(authority, server::all, {
+			server::FSM::stateId<server::O2_C1_S1>(),
+		});
+
+		REQUIRE(authority.lastTransitionTo<server::O2_C1_S1>() == &previousTransitions[1]);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	REQUIRE(replicated.replayTransitions(authority.previousTransitions()));
+	{
+		assertActive(replicated, client::all, {
+			client::FSM::stateId<client::O2      >(),
+			client::FSM::stateId<client::O2_C1   >(),
+			client::FSM::stateId<client::O2_C1_S1>(),
+			client::FSM::stateId<client::O2_C2   >(),
+			client::FSM::stateId<client::O2_C2_S2>(),
+		});
+
+		assertResumable(replicated, client::all, {
+			client::FSM::stateId<client::O2_C1_S2>(),
+		});
+
+		const auto& previousTransitions = replicated.previousTransitions();
+		REQUIRE(previousTransitions.count() == 2);
+		REQUIRE(previousTransitions[0] == M::Transition{client::FSM::stateId<client::O2_C1_S1>(),
+														hfsm2::TransitionType::CHANGE});
+		REQUIRE(previousTransitions[1] == M::Transition{client::FSM::stateId<client::O2_C2_S2>(),
+														hfsm2::TransitionType::CHANGE});
+
+		assertLastTransitions(replicated, client::all, {
+			client::FSM::stateId<client::O2_C1_S1>(),
+		});
+
+		REQUIRE(replicated.lastTransitionTo<client::O2_C1_S1>() == &previousTransitions[1]);
+	}
+
+	//----------------------------------------------------------------------
+
+	replicated.reset();
+	{
+		assertActive(replicated, client::all, {
+			client::FSM::stateId<client::C1      >(),
+			client::FSM::stateId<client::C1_S1   >(),
+		});
+
+		assertResumable(replicated, client::all, {});
+
+		REQUIRE(replicated.previousTransitions().count() == 0);
+
+		assertLastTransitions(replicated, client::all, {});
+	}
+
+	//----------------------------------------------------------------------
+
+	authority.changeTo<server::C1_C2_S2>();
+	authority.update();
+	{
+		assertActive(authority,  server::all, {
+			server::FSM::stateId<server::O2      >(),
+			server::FSM::stateId<server::O2_C1   >(),
+			server::FSM::stateId<server::O2_C1_S1>(),
+			server::FSM::stateId<server::O2_C2   >(),
+			server::FSM::stateId<server::O2_C2_S2>(),
+		});
+
+		assertResumable(authority, server::all, {
+			server::FSM::stateId<server::C1      >(),
+			server::FSM::stateId<server::C1_S1   >(),
+			server::FSM::stateId<server::O2_C1_S2>(),
+		});
+
+		REQUIRE(authority.previousTransitions().count() == 0);
+
+		assertLastTransitions(authority, server::all, {});
+	}
+
+	//----------------------------------------------------------------------
+
+	authority .exit();
+	replicated.exit();
+	{
+		assertActive(authority , server::all, {});
+		assertActive(replicated, client::all, {});
+	}
+
+	//----------------------------------------------------------------------
 }
 
 ////////////////////////////////////////////////////////////////////////////////

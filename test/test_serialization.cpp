@@ -7,11 +7,11 @@
 
 namespace test_serialization {
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 using M = hfsm2::Machine;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 namespace server{
 
@@ -60,7 +60,7 @@ static_assert(FSM::stateId<O2_C2   >() == 10, "");
 static_assert(FSM::stateId<O2_C2_S1>() == 11, "");
 static_assert(FSM::stateId<O2_C2_S2>() == 12, "");
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 struct C1		: FSM::State {};
 struct C1_S1	: FSM::State {};
@@ -75,7 +75,7 @@ struct O2_C2	: FSM::State {};
 struct O2_C2_S1	: FSM::State {};
 struct O2_C2_S2	: FSM::State {};
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "REGION_COUNT");
@@ -86,7 +86,7 @@ static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
 static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "ACTIVE_BITS");
 static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "RESUMABLE_BITS");
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 const Types all = {
 	FSM::stateId<C1      >(),

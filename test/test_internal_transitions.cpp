@@ -8,11 +8,14 @@ namespace test_internal_transitions {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using Config = hfsm2::Config::ContextT<float>;
+using Config = hfsm2::Config
+					::ContextT<float>;
 
 using M = hfsm2::MachineT<Config>;
 
 using Action = bool;
+
+using Logger = LoggerT<Config>;
 
 //------------------------------------------------------------------------------
 
@@ -61,7 +64,7 @@ static_assert(FSM::stateId<B_2  >() == 10, "");
 static_assert(FSM::stateId<B_2_1>() == 11, "");
 static_assert(FSM::stateId<B_2_2>() == 12, "");
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 class Timed
 	: public FSM::Injection
@@ -306,7 +309,7 @@ const Types all = {
 
 TEST_CASE("FSM.Internal Transition") {
 	float _ = 0.0f;
-	LoggerT<Config> logger;
+	Logger logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -398,8 +401,8 @@ TEST_CASE("FSM.Internal Transition") {
 				FSM::stateId<A_2_1>(),
 			});
 
-			REQUIRE(machine.lastTransition<A_2  >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<A_2_1>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<A_2  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<A_2_1>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -491,11 +494,11 @@ TEST_CASE("FSM.Internal Transition") {
 				FSM::stateId<B_2_2>(),
 			});
 
-			REQUIRE(machine.lastTransition<B    >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<B_1  >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<B_1_1>() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<B_2  >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<B_2_2>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B    >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_1  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_1_1>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_2  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_2_2>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -592,9 +595,9 @@ TEST_CASE("FSM.Internal Transition") {
 				FSM::stateId<A_2_1>(),
 			});
 
-			REQUIRE(machine.lastTransition<A    >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<A_2  >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<A_2_1>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<A    >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<A_2  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<A_2_1>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -660,11 +663,11 @@ TEST_CASE("FSM.Internal Transition") {
 				FSM::stateId<B_2_2>(),
 			});
 
-			REQUIRE(machine.lastTransition<B    >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<B_1  >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<B_1_1>() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<B_2  >() == &previousTransitions[0]);
-			REQUIRE(machine.lastTransition<B_2_2>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B    >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_1  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_1_1>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_2  >() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_2_2>() == &previousTransitions[0]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -721,7 +724,7 @@ TEST_CASE("FSM.Internal Transition") {
 				FSM::stateId<B_2_2>(),
 			});
 
-			REQUIRE(machine.lastTransition<B_2_2>() == &previousTransitions[0]);
+			REQUIRE(machine.lastTransitionTo<B_2_2>() == &previousTransitions[0]);
 			*/
 		}
 
@@ -791,9 +794,9 @@ TEST_CASE("FSM.Internal Transition") {
 				FSM::stateId<A_2_2>(),
 			});
 
-			REQUIRE(machine.lastTransition<A    >() == &previousTransitions[1]);
-			REQUIRE(machine.lastTransition<A_2  >() == &previousTransitions[1]);
-			REQUIRE(machine.lastTransition<A_2_2>() == &previousTransitions[1]);
+			REQUIRE(machine.lastTransitionTo<A    >() == &previousTransitions[1]);
+			REQUIRE(machine.lastTransitionTo<A_2  >() == &previousTransitions[1]);
+			REQUIRE(machine.lastTransitionTo<A_2_2>() == &previousTransitions[1]);
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -5,6 +5,9 @@ namespace hfsm2 {
 struct EmptyContext {};
 struct EmptyPayload {};
 
+struct Automatic;
+struct Manual;
+
 //------------------------------------------------------------------------------
 
 using Short		 = uint8_t;

@@ -120,6 +120,7 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
+	bool isActive		 ()						 const noexcept;
 	bool isActive		 (const StateID stateId) const noexcept;
 	bool isResumable	 (const StateID stateId) const noexcept;
 
@@ -191,6 +192,7 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
+	bool isActive		 ()						 const noexcept;
 	bool isActive		 (const StateID stateId) const noexcept;
 	bool isResumable	 (const StateID stateId) const noexcept;
 

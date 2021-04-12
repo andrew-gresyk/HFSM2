@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.8.3 (2021-02-06)
+// 1.9.0 (2021-04-10)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 1
-#define HFSM2_VERSION_MINOR 8
-#define HFSM2_VERSION_PATCH 3
+#define HFSM2_VERSION_MINOR 9
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -211,11 +211,11 @@
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
-		if (auto* const logger = control.logger())								\
+		if (auto* const logger = control._logger)								\
 			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 	#define HFSM2_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)			\
-		if (auto* const logger = control.logger())								\
+		if (auto* const logger = control._logger)								\
 			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 #endif
@@ -246,13 +246,13 @@
 #ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)							\
-		if (auto* const logger = control.logger())								\
+		if (auto* const logger = control._logger)								\
 			logger->recordMethod(control.context(), STATE_ID, METHOD_ID)
 
 #elif defined HFSM2_ENABLE_LOG_INTERFACE
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)							\
-		if (auto* const logger = control.logger())								\
+		if (auto* const logger = control._logger)								\
 			log(METHOD, *logger, control.context(), METHOD_ID)
 
 #else
@@ -309,6 +309,9 @@ namespace hfsm2 {
 
 struct EmptyContext {};
 struct EmptyPayload {};
+
+struct Automatic;
+struct Manual;
 
 //------------------------------------------------------------------------------
 
@@ -4599,6 +4602,7 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
+	bool isActive		 ()						 const noexcept;
 	bool isActive		 (const StateID stateId) const noexcept;
 	bool isResumable	 (const StateID stateId) const noexcept;
 
@@ -4670,6 +4674,7 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
+	bool isActive		 ()						 const noexcept;
 	bool isActive		 (const StateID stateId) const noexcept;
 	bool isResumable	 (const StateID stateId) const noexcept;
 
@@ -4729,6 +4734,14 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::isActive() const noexcept {
+	return compoActive[0] != INVALID_SHORT;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 bool
@@ -4946,6 +4959,14 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0 HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::isActive() const noexcept {
+	return compoActive[0] != INVALID_SHORT;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 bool
@@ -5338,13 +5359,13 @@ public:
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	const Transition* lastTransition(const StateID stateId)		const noexcept;
+	const Transition* lastTransitionTo(const StateID stateId)	const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
 	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
-	const Transition* lastTransition()							const noexcept	{ return lastTransition(stateId<TState>());			}
+	const Transition* lastTransitionTo()						const noexcept	{ return lastTransitionTo(stateId<TState>());		}
 
 	/// @brief Get the last transition that caused the current state to be activated
 	/// @return Pointer to the last transition that activated the current state
@@ -5353,11 +5374,6 @@ public:
 #endif
 
 	//----------------------------------------------------------------------
-
-protected:
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
-	HFSM2_INLINE Logger* logger()									  noexcept	{ return _logger;									}
-#endif
 
 protected:
 	Context& _context;
@@ -5389,6 +5405,9 @@ class PlanControlT
 
 	template <typename, typename>
 	friend class R_;
+
+	template <typename, typename>
+	friend class RV_;
 
 protected:
 	using Control		= ControlT<TArgs>;
@@ -6260,7 +6279,7 @@ ControlT<TArgs>::pinLastTransition(const StateID stateId,
 
 template <typename TArgs>
 const typename ControlT<TArgs>::Transition*
-ControlT<TArgs>::lastTransition(const StateID stateId) const noexcept {
+ControlT<TArgs>::lastTransitionTo(const StateID stateId) const noexcept {
 	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
 		const Short index = _transitionTargets[stateId];
 
@@ -6278,7 +6297,7 @@ const typename ControlT<TArgs>::Transition*
 ControlT<TArgs>::lastTransition() const noexcept {
 	HFSM2_ASSERT(_originId < _transitionTargets.CAPACITY);
 
-	return lastTransition(_originId);
+	return lastTransitionTo(_originId);
 }
 
 #endif
@@ -6599,6 +6618,8 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 	}
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID stateId,
@@ -6615,7 +6636,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 }
 
 // COMMON
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
@@ -6632,6 +6653,8 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 	}
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID stateId,
@@ -6647,7 +6670,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
@@ -6664,6 +6687,8 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 	}
 }
 
+//------------------------------------------------------------------------------
+
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID stateId,
@@ -6679,7 +6704,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
@@ -6698,6 +6723,8 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 	}
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID stateId,
@@ -6713,7 +6740,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
@@ -6729,6 +6756,8 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
 	}
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
@@ -6747,7 +6776,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
@@ -6758,6 +6787,8 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 
 	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 void
@@ -12726,6 +12757,7 @@ namespace detail {
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -12740,6 +12772,7 @@ struct G_ final {
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
 
 	using Context			 = TContext;
+	using Activation		 = TActivation;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 	using Rank				 = TRank;
@@ -12767,45 +12800,48 @@ struct G_ final {
 	/// @brief Set Context type
 	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
-	using ContextT			 = G_<FEATURE_TAG, T	   HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using ContextT			 = G_<FEATURE_TAG, T	  , Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+
+	/// @brief Select manual activation strategy
+	using ManualActivation	 = G_<FEATURE_TAG, Context, Manual	   HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	/// @brief Set Rank type
 	/// @tparam T Rank type for 'TRank State::rank() const' method
 	template <typename T>
-	using RankT				 = G_<FEATURE_TAG, Context                         , T   , Utility, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using RankT				 = G_<FEATURE_TAG, Context, Activation						   , T   , Utility, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 	/// @brief Set Utility type
 	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using UtilityT			 = G_<FEATURE_TAG, Context                         , Rank, T      , RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using UtilityT			 = G_<FEATURE_TAG, Context, Activation						   , Rank, T      , RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 	/// @brief Set RNG type
 	/// @tparam T RNG type used in 'Random' regions
 	template <typename T>
-	using RandomT			 = G_<FEATURE_TAG, Context                         , Rank, Utility, T   , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using RandomT			 = G_<FEATURE_TAG, Context, Activation						   , Rank, Utility, T   , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #endif
 
 	/// @brief Set Substitution limit
 	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
 	template <Long N>
-	using SubstitutionLimitN = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), N                  HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
+	using SubstitutionLimitN = G_<FEATURE_TAG, Context, Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), N                  HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #ifdef HFSM2_ENABLE_PLANS
 
 	/// @brief Set Task capacity
 	/// @tparam N Maximum number of tasks across all plans
 	template <Long N>
-	using TaskCapacityN		 = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT                , N             , Payload>;
+	using TaskCapacityN		 = G_<FEATURE_TAG, Context, Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT                , N             , Payload>;
 
 #endif
 
 	/// @brief Set Transition Payload type
 	/// @tparam T Utility type for 'TUtility State::utility() const' method
 	template <typename T>
-	using PayloadT			 = G_<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), T      >;
+	using PayloadT			 = G_<FEATURE_TAG, Context, Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), T      >;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -12834,6 +12870,7 @@ struct M_;
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -12844,8 +12881,8 @@ template <FeatureTag NFeatureTag
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
-struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>> {
-	using Cfg = G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
+struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>> {
+	using Cfg = G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
 
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
 
@@ -13010,7 +13047,7 @@ struct M_	   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility
 }
 
 /// @brief Type configuration for MachineT<>
-using Config = detail::G_<HFSM2_FEATURE_TAG, EmptyContext HFSM2_IF_UTILITY_THEORY(, int8_t, float, RNGT<float>), 4 HFSM2_IF_PLANS(, INVALID_LONG), void>;
+using Config = detail::G_<HFSM2_FEATURE_TAG, EmptyContext, Automatic HFSM2_IF_UTILITY_THEORY(, int8_t, float, RNGT<float>), 4 HFSM2_IF_PLANS(, INVALID_LONG), void>;
 
 /// @brief 'Template namespace' for FSM classes
 /// @tparam TConfig 'ConfigT<>' type configuration for MachineT<>
@@ -13049,7 +13086,7 @@ public:
 
 	using Payload				= typename TConfig::Payload;
 
-private:
+protected:
 	using Apex					= TApex;
 
 	using Forward				= RF_<TConfig, Apex>;
@@ -13419,7 +13456,7 @@ public:
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
-	/// @param transitions Array of 'Transition' to replay
+	/// @param transitions 'TransitionHistory' to replay
 	/// @param count Number of transitions
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -13428,7 +13465,7 @@ public:
 
 	/// @brief Force process transitions (skips 'guard()' calls)
 	///   Can be used to synchronize multiple FSMs
-	/// @param transitions 'TransitionHistory' to replay
+	/// @param transitions Array of 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
@@ -13446,13 +13483,13 @@ public:
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	const Transition* lastTransition(const StateID stateId)			const noexcept;
+	const Transition* lastTransitionTo(const StateID stateId)		const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
 	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
-	const Transition* lastTransition()								const noexcept	{ return lastTransition(stateId<TState>());		}
+	const Transition* lastTransitionTo()							const noexcept	{ return lastTransitionTo(stateId<TState>());	}
 
 #endif
 
@@ -13493,8 +13530,10 @@ public:
 
 	//----------------------------------------------------------------------
 
-private:
+protected:
 	void initialEnter() noexcept;
+	void finalExit() noexcept;
+
 	void processTransitions(TransitionSets& currentTransitions)			  noexcept;
 
 	bool applyRequest (Control& control, const Transition& request, const Short index) noexcept;
@@ -13542,11 +13581,58 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TConfig,
-		  typename TApex>
-class RP_;
+// Automatic / manual [de]activation
+
+template <typename, typename>
+class RV_;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Automatic enter() / exit()
+
+template <FeatureTag NFeatureTag
+		, typename TContext
+		, typename TActivation
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RV_		   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 R_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+{
+	using Base = R_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+protected:
+	using typename Base::Context;
+
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	using typename Base::RNG;
+#endif
+
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using typename Base::Logger;
+#endif
+
+public:
+	HFSM2_INLINE explicit RV_(Context& context
+							HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept;
+
+	HFSM2_INLINE ~RV_() noexcept;
+
+private:
+	using Base::initialEnter;
+	using Base::finalExit;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Manual enter() / exit()
 
 template <FeatureTag NFeatureTag
 		, typename TContext
@@ -13561,18 +13647,111 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RP_		   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RV_		   <G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 R_<G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = R_<G_<NFeatureTag, TContext, Manual HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+
+public:
+	using typename Base::Transition;
+
+private:
+	using typename Base::PlanControl;
+
+public:
+	using Base::Base;
+
+	/// @brief Manually start the FSM
+	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
+	HFSM2_INLINE void enter()													  noexcept;
+
+	/// @brief Manually stop the FSM
+	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
+	HFSM2_INLINE void exit()													  noexcept;
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions 'TransitionHistory' to replay
+	/// @param count Number of transitions
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
+	HFSM2_INLINE bool replayEnter(const Transition* const transitions,
+								  const Short count)							  noexcept;
+
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transitions Array of 'Transition' to replay
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
+	template <Long NCount>
+	HFSM2_INLINE bool replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept;
+
+	/// @brief Start the FSM from a specific state
+	///   Can be used to synchronize multiple FSMs
+	/// @param transition 'Transition' to replay
+	/// @see FFSM2_ENABLE_TRANSITION_HISTORY
+	HFSM2_INLINE bool replayEnter(const Transition& transition)					  noexcept	{ return replayEnter(&transition, 1);	}
+
+#endif
+
+private:
+	using Base::initialEnter;
+	using Base::finalExit;
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+	using Base::applyRequests;
+
+	using Base::_transitionTargets;
+	using Base::_previousTransitions;
+
+	using Base::_context;
+	using Base::_registry;
+	#ifdef HFSM2_ENABLE_PLANS
+		using Base::_planData;
+	#endif
+	using Base::_requests;
+	using Base::_apex;
+	#ifdef HFSM2_ENABLE_LOG_INTERFACE
+		using Base::_logger;
+	#endif
+#endif
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TConfig,
+		  typename TApex>
+class RP_;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Non-'void' payloads
+
+template <FeatureTag NFeatureTag
+		, typename TContext
+		, typename TActivation
+
+	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+		, typename TRank
+		, typename TUtility
+		, typename TRNG
+	#endif
+
+		, Long NSubstitutionLimit
+		HFSM2_IF_PLANS(, Long NTaskCapacity)
+		, typename TPayload
+		, typename TApex>
+class RP_			<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RV_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+{
+	using Base = RV_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 	using Transition = TransitionT<TPayload>;
 
 public:
-	using Payload	 = typename Base::Payload;
+	using typename Base::Payload;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		 = typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 public:
@@ -13772,17 +13951,21 @@ public:
 
 protected:
 	using Base::_context;
+	using Base::_registry;
 
 private:
 	using Base::_requests;
 
-	HFSM2_IF_LOG_INTERFACE(using Base::_logger);
+#ifdef HFSM2_ENABLE_LOG_INTERFACE
+	using Base::_logger;
+#endif
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -13793,14 +13976,14 @@ template <FeatureTag NFeatureTag
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TApex>
-class RP_		   <G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
-	: public	 R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
+class RP_			<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
+	: public	 RV_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>
 {
-	using Base = R_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>;
+	using Base = RV_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), void>, TApex>;
 
 public:
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 public:
@@ -13817,6 +14000,7 @@ class RC_;
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -13828,23 +14012,22 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RC_			<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 RP_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RC_			<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = RP_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RP_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= TContext;
-	using Payload	= typename Base::Payload;
+	using typename Base::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -13868,6 +14051,7 @@ private:
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -13879,23 +14063,22 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RC_			<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 RP_<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RC_			<G_<NFeatureTag, TContext&, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext&, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = RP_<G_<NFeatureTag, TContext& HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RP_<G_<NFeatureTag, TContext&, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
+	using typename Base::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -13918,6 +14101,7 @@ private:
 
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -13929,23 +14113,22 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RC_			<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 RP_<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RC_			<G_<NFeatureTag, TContext*, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, TContext*, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 {
-	using Base = RP_<G_<NFeatureTag, TContext* HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RP_<G_<NFeatureTag, TContext*, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
+	using typename Base::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -13979,6 +14162,7 @@ private:
 // TContext == EmptyContext
 
 template <FeatureTag NFeatureTag
+		, typename TActivation
 
 	#ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -13990,24 +14174,21 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RC_			<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
-	: public	 RP_<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RC_			<G_<NFeatureTag, EmptyContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+	: public	 RP_<G_<NFeatureTag, EmptyContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 	, public EmptyContext
 {
-	using Base = RP_<G_<NFeatureTag, EmptyContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RP_<G_<NFeatureTag, EmptyContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
-
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -14016,7 +14197,7 @@ public:
 
 	HFSM2_INLINE explicit RC_(RNG& rng
 							HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept
-		: Base{static_cast<Context&>(*this)
+		: Base{static_cast<EmptyContext&>(*this)
 			 , rng
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
@@ -14024,7 +14205,7 @@ public:
 #else
 
 	HFSM2_INLINE explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr)) noexcept
-		: Base{static_cast<Context&>(*this)
+		: Base{static_cast<EmptyContext&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
 
@@ -14057,6 +14238,7 @@ public:
 /// @tparam TApex Root region type
 template <FeatureTag NFeatureTag
 		, typename TContext
+		, typename TActivation
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 		, typename TRank
@@ -14067,24 +14249,23 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RR_			<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
-	: public	 RC_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RR_			<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
+	: public	 RC_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 	HFSM2_IF_UTILITY_THEORY(, public RNGT<TUtility>)
 {
-	using Base = RC_<G_<NFeatureTag, TContext HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RC_<G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, RNGT<TUtility>), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
+	using typename Base::Context;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
-	using RNG		= typename Base::RNG;
+	using typename Base::RNG;
 #endif
 
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
@@ -14117,34 +14298,31 @@ public:
 /// @tparam Cfg Type configuration
 /// @tparam TApex Root region type
 template <FeatureTag NFeatureTag
+		, typename TActivation
 		, typename TRank
 		, typename TUtility
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RR_			<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
-	: public	 RC_<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
+class RR_			<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
+	: public	 RC_<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 	, public RNGT<TUtility>
 {
-	using Base = RC_<G_<NFeatureTag, EmptyContext, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
+	using Base = RC_<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>;
 
 public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
-	using Context	= typename Base::Context;
-	using Payload	= typename Base::Payload;
-	using RNG		= typename Base::RNG;
-
 #ifdef HFSM2_ENABLE_LOG_INTERFACE
-	using Logger	= typename Base::Logger;
+	using typename Base::Logger;
 #endif
 
 public:
 	HFSM2_INLINE explicit RR_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr)) noexcept
-		: Base{static_cast<RNG&>(*this)
+		: Base{static_cast<RNGT<TUtility>&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
-		, RNG{0}
+		, RNGT<TUtility>{0}
 	{}
 };
 
@@ -14171,26 +14349,12 @@ R_<TG, TA>::R_(Context& context
 	_apex.deepRegister(_registry, Parent{});
 
 	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
-
-	initialEnter();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
 R_<TG, TA>::~R_() noexcept {
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
-
-	_apex.deepExit	  (control);
-	_apex.deepDestruct(control);
-
 	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 }
 
@@ -14199,6 +14363,8 @@ R_<TG, TA>::~R_() noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::update() noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	FullControl control{_context
 					  , _registry
 					  , _requests
@@ -14227,6 +14393,8 @@ template <typename TG, typename TA>
 template <typename TEvent>
 void
 R_<TG, TA>::react(const TEvent& event) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	FullControl control{_context
 					  , _registry
 					  , _requests
@@ -14254,6 +14422,8 @@ R_<TG, TA>::react(const TEvent& event) noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::changeTo(const StateID stateId) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::CHANGE});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
@@ -14264,6 +14434,8 @@ R_<TG, TA>::changeTo(const StateID stateId) noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::restart(const StateID stateId) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RESTART});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
@@ -14274,6 +14446,8 @@ R_<TG, TA>::restart(const StateID stateId) noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::resume(const StateID stateId) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RESUME});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
@@ -14286,6 +14460,8 @@ R_<TG, TA>::resume(const StateID stateId) noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::utilize(const StateID stateId) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::UTILIZE});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
@@ -14296,6 +14472,8 @@ R_<TG, TA>::utilize(const StateID stateId) noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::randomize(const StateID stateId) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RANDOMIZE});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
@@ -14308,6 +14486,8 @@ R_<TG, TA>::randomize(const StateID stateId) noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::schedule(const StateID stateId) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::SCHEDULE});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
@@ -14318,6 +14498,8 @@ R_<TG, TA>::schedule(const StateID stateId) noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::reset() noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	PlanControl control{_context
 					  , _registry
 					  , _requests
@@ -14351,6 +14533,8 @@ R_<TG, TA>::reset() noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::save(SerialBuffer& _buffer) const noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	WriteStream stream{_buffer};
 
 	// TODO: save _registry
@@ -14368,6 +14552,8 @@ R_<TG, TA>::save(SerialBuffer& _buffer) const noexcept {
 template <typename TG, typename TA>
 void
 R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.clear();
 
 	PlanControl control{_context
@@ -14392,10 +14578,10 @@ R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
 
 	// TODO: load _registry
 	// TODO: load _requests
-	// TODO: load _rng				// HFSM2_IF_UTILITY_THEORY()
-	// TODO: load _planData			// HFSM2_IF_PLANS()
+	// TODO: load _rng					// HFSM2_IF_UTILITY_THEORY()
+	// TODO: load _planData				// HFSM2_IF_PLANS()
 	// TODO: load _previousTransitions	// HFSM2_IF_TRANSITION_HISTORY()
-	// TODO: load _activityHistory	// HFSM2_IF_STRUCTURE_REPORT()
+	// TODO: load _activityHistory		// HFSM2_IF_STRUCTURE_REPORT()
 
 	_apex.deepLoadRequested(_registry, stream);
 
@@ -14414,8 +14600,11 @@ bool
 R_<TG, TA>::replayTransitions(const Transition* const transitions,
 							  const Short count) noexcept
 {
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
+	HFSM2_ASSERT(transitions);
+	HFSM2_ASSERT(_registry.isActive());
+
+	_transitionTargets.clear();
+	_previousTransitions.clear();
 
 	if (HFSM2_CHECKED(transitions && count)) {
 		PlanControl control{_context
@@ -14423,15 +14612,13 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 						  , _requests
 						  HFSM2_IF_UTILITY_THEORY(, _rng)
 						  HFSM2_IF_PLANS(, _planData)
-						  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-						  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
+						  , _transitionTargets
+						  , _previousTransitions
 						  HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
-		#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 			for (Short i = 0; i < count; ++i)
 				_previousTransitions.append(transitions[i]);
-		#endif
 
 			_apex.deepChangeToRequested(control);
 
@@ -14464,7 +14651,9 @@ R_<TG, TA>::replayTransitions(const ArrayT<Transition, NCount>& transitions) noe
 
 template <typename TG, typename TA>
 const typename R_<TG, TA>::Transition*
-R_<TG, TA>::lastTransition(const StateID stateId) const noexcept {
+R_<TG, TA>::lastTransitionTo(const StateID stateId) const noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
 	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
 		const Short index = _transitionTargets[stateId];
 
@@ -14478,13 +14667,11 @@ R_<TG, TA>::lastTransition(const StateID stateId) const noexcept {
 #endif
 
 //------------------------------------------------------------------------------
-// COMMON
 
 template <typename TG, typename TA>
 void
 R_<TG, TA>::initialEnter() noexcept {
-	// TODO:
-	//HFSM2_ASSERT(_registry.empty() == 0);
+	HFSM2_ASSERT(!_registry.isActive());
 	HFSM2_ASSERT(_requests.count() == 0);
 	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
 	HFSM2_IF_TRANSITION_HISTORY(HFSM2_ASSERT(_previousTransitions.count() == 0));
@@ -14547,7 +14734,28 @@ R_<TG, TA>::initialEnter() noexcept {
 
 template <typename TG, typename TA>
 void
+R_<TG, TA>::finalExit() noexcept {
+	HFSM2_ASSERT(_registry.isActive());
+
+	PlanControl control{_context
+					  , _registry
+					  , _requests
+					  HFSM2_IF_UTILITY_THEORY(, _rng)
+					  HFSM2_IF_PLANS(, _planData)
+					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
+					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
+					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+
+	_apex.deepExit	  (control);
+	_apex.deepDestruct(control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TG, typename TA>
+void
 R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) noexcept {
+	HFSM2_ASSERT(_registry.isActive());
 	HFSM2_ASSERT(_requests.count());
 
 	RegistryBackUp registryUndo;
@@ -14822,114 +15030,239 @@ R_<TG, TA>::udpateActivity() noexcept {
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
-// COMMON
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RV_(Context& context
+																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: Base{context
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
+{
+	initialEnter();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::~RV_() noexcept {
+	finalExit();
+}
+
+//------------------------------------------------------------------------------
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
-																									  const Payload& payload) noexcept
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::enter() noexcept {
+	initialEnter();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+void
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::exit() noexcept {
+	finalExit();
+}
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+
+template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+bool
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const Transition* const transitions,
+																														 const Short count) noexcept
 {
+	HFSM2_ASSERT(!_registry.isActive());
+	HFSM2_ASSERT(_requests.count() == 0);
+
+	_transitionTargets.clear();
+	HFSM2_ASSERT(_previousTransitions.count() == 0);
+
+	if (HFSM2_CHECKED(transitions && count)) {
+		PlanControl control{_context
+						  , _registry
+						  , _requests
+						  HFSM2_IF_UTILITY_THEORY(, _rng)
+						  HFSM2_IF_PLANS(, _planData)
+						  , _transitionTargets
+						  , _previousTransitions
+						  HFSM2_IF_LOG_INTERFACE(, _logger)};
+
+		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
+			for (Short i = 0; i < count; ++i)
+				_previousTransitions.append(transitions[i]);
+
+			_apex.deepConstruct(control);
+			_apex.deepEnter	   (control);
+
+			_registry.clearRequests();
+
+			HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+			HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+template <Long NCount>
+bool
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const ArrayT<Transition, NCount>& transitions)  noexcept {
+	if (transitions.count())
+		return replayEnter(&transitions[0],
+						   transitions.count());
+	else
+		return false;
+}
+
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+// COMMON
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+void
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
+																										  const Payload& payload) noexcept
+{
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::CHANGE, payload});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
-																										   Payload&& payload) noexcept
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
+																											   Payload&& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::CHANGE, std::move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
 // COMMON
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
-																									   const Payload& payload) noexcept
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
+																										   const Payload& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RESTART, payload});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
-																											Payload&& payload) noexcept
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
+																												Payload&& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RESTART, std::move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
-																									  const Payload& payload) noexcept
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
+																										  const Payload& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RESUME, payload});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
 }
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
-																										   Payload&& payload) noexcept
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
+																											   Payload&& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RESUME, std::move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
-																									   const Payload& payload) noexcept
+RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
+																				 const Payload& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::UTILIZE, payload});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
-																											Payload&& payload) noexcept
+RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
+																					  Payload&& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::UTILIZE, std::move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
-																										 const Payload& payload) noexcept
+RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
+																				   const Payload& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RANDOMIZE, payload});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
-																											  Payload&& payload) noexcept
+RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
+																						Payload&& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::RANDOMIZE, std::move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
@@ -14937,23 +15270,29 @@ RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC),
 
 #endif
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
-																										const Payload& payload) noexcept
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
+																										   const Payload& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::SCHEDULE, payload});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
 
-template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 void
-RP_<G_<NFT, TC HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
-																											 Payload&& payload) noexcept
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
+																												 Payload&& payload) noexcept
 {
+	HFSM2_ASSERT(_registry.isActive());
+
 	_requests.append(Transition{stateId, TransitionType::SCHEDULE, std::move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);

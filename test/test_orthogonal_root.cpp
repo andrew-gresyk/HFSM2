@@ -8,9 +8,7 @@ namespace test_orthogonal_root {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using Config = hfsm2::Config::ContextT<float>;
-
-using M = hfsm2::MachineT<Config>;
+using M = hfsm2::Machine;
 
 using Action = bool;
 
@@ -101,13 +99,12 @@ const Types all = {
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Orthogonal Root") {
-	float _ = 0.0f;
-	LoggerT<Config> logger;
+	Logger logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		FSM::Instance machine{_, &logger};
+		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
 				{ hfsm2::StateID{0},		Event::Type::ENTRY_GUARD },

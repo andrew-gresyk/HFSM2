@@ -182,8 +182,8 @@ void assertResumable(TMachine& machine,
 
 template <typename TMachine>
 void assertLastTransitions(TMachine& machine,
-							 const Types& all,
-							 const Types& toCheck) noexcept;
+						   const Types& all,
+						   const Types& toCheck) noexcept;
 
 #endif
 

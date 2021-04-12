@@ -93,9 +93,6 @@
     <ClCompile Include="..\..\test\test_serialization.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_plan_payloads.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_internal_payloads.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -107,6 +104,12 @@
     </ClCompile>
     <ClCompile Include="..\..\test\shared\test_task_list.cpp">
       <Filter>test\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_plans_payloads.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_manual_activation.cpp">
+      <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

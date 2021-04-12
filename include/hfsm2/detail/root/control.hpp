@@ -220,13 +220,13 @@ public:
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	const Transition* lastTransition(const StateID stateId)		const noexcept;
+	const Transition* lastTransitionTo(const StateID stateId)	const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
 	/// @return Pointer to the last transition that activated the state
 	template <typename TState>
-	const Transition* lastTransition()							const noexcept	{ return lastTransition(stateId<TState>());			}
+	const Transition* lastTransitionTo()						const noexcept	{ return lastTransitionTo(stateId<TState>());		}
 
 	/// @brief Get the last transition that caused the current state to be activated
 	/// @return Pointer to the last transition that activated the current state
@@ -235,11 +235,6 @@ public:
 #endif
 
 	//----------------------------------------------------------------------
-
-protected:
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
-	HFSM2_INLINE Logger* logger()									  noexcept	{ return _logger;									}
-#endif
 
 protected:
 	Context& _context;
@@ -271,6 +266,9 @@ class PlanControlT
 
 	template <typename, typename>
 	friend class R_;
+
+	template <typename, typename>
+	friend class RV_;
 
 protected:
 	using Control		= ControlT<TArgs>;

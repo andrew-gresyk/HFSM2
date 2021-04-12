@@ -6,20 +6,23 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
-namespace test_payloads {
+namespace test_plans_payloads {
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 struct Payload {
 	int i0;
 	int i1;
 };
 
-using Config = hfsm2::Config::PayloadT<Payload>;
+using Config = hfsm2::Config
+					::PayloadT<Payload>;
 
 using M = hfsm2::MachineT<Config>;
 
-////////////////////////////////////////////////////////////////////////////////
+using Logger = LoggerT<Config>;
+
+//------------------------------------------------------------------------------
 
 #define S(s) struct s
 
@@ -276,7 +279,7 @@ const Types all = {
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Plan payloads") {
-	LoggerT<Config> logger;
+	Logger logger;
 
 	{
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
