@@ -150,12 +150,6 @@ TEST_CASE("FSM.Delayed Teardown") {
 				{ FSM::stateId<Step1_2 >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<Setup   >(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex    >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<Step1   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<Step1_1 >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<Step1_2 >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<Setup   >(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Apex    >(),	Event::Type::ENTER },
 				{ FSM::stateId<Step1   >(),	Event::Type::ENTER },
 				{ FSM::stateId<Step1_1 >(),	Event::Type::ENTER },
@@ -195,10 +189,6 @@ TEST_CASE("FSM.Delayed Teardown") {
 				{ FSM::stateId<Work    >(),	Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<Setup   >(),	Event::Type::EXIT },
-
-				{ FSM::stateId<Setup   >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Work    >(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Work    >(),	Event::Type::ENTER },
 			});
 
@@ -254,10 +244,6 @@ TEST_CASE("FSM.Delayed Teardown") {
 				{ FSM::stateId<Teardown>(),	Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<Work    >(),	Event::Type::EXIT  },
-
-				{ FSM::stateId<Work    >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Teardown>(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Teardown>(),	Event::Type::ENTER },
 			});
 
@@ -312,12 +298,6 @@ TEST_CASE("FSM.Delayed Teardown") {
 				{ FSM::stateId<Step1_2 >(),	Event::Type::EXIT },
 				{ FSM::stateId<Step1   >(),	Event::Type::EXIT },
 
-				{ FSM::stateId<Step1_1 >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Teardown>(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Step1_2 >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Step1   >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Step2   >(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Step2   >(),	Event::Type::ENTER },
 			});
 
@@ -352,9 +332,6 @@ TEST_CASE("FSM.Delayed Teardown") {
 	logger.assertSequence({
 		{ FSM::stateId<Step2   >(),	Event::Type::EXIT },
 		{ FSM::stateId<Apex    >(),	Event::Type::EXIT },
-
-		{ FSM::stateId<Step2   >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<Apex    >(),	Event::Type::DESTRUCT },
 	});
 }
 

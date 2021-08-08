@@ -1,4 +1,4 @@
-// FFSM2 (flat state machine for games and interactive applications)
+// HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
@@ -76,9 +76,6 @@ TEST_CASE("FSM.Manual Activation") {
 			{ hfsm2::StateID{0},	Event::Type::ENTRY_GUARD },
 			{ FSM::stateId<B>(),	Event::Type::ENTRY_GUARD },
 
-			{ hfsm2::StateID{0},	Event::Type::CONSTRUCT },
-			{ FSM::stateId<B>(),	Event::Type::CONSTRUCT },
-
 			{ hfsm2::StateID{0},	Event::Type::ENTER },
 			{ FSM::stateId<B>(),	Event::Type::ENTER },
 		});
@@ -92,9 +89,6 @@ TEST_CASE("FSM.Manual Activation") {
 		logger.assertSequence({
 			{ FSM::stateId<B>(),	Event::Type::EXIT },
 			{ hfsm2::StateID{0},	Event::Type::EXIT },
-
-			{ FSM::stateId<B>(),	Event::Type::DESTRUCT },
-			{ hfsm2::StateID{0},	Event::Type::DESTRUCT },
 		});
 
 		assertActive(machine, all, {});

@@ -29,125 +29,230 @@ static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;
 
 //------------------------------------------------------------------------------
 
-namespace detail {
-
 ////////////////////////////////////////////////////////////////////////////////
 
-template <bool B, class TT, class TF>
+template <bool B, typename TT, typename TF>
 struct ConditionalT {
 	using Type = TT;
 };
 
-template <class TT, class TF>
+template <typename TT, typename TF>
 struct ConditionalT<false, TT, TF> {
 	using Type = TF;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <bool B, class TT, class TF>
+template <bool B, typename TT, typename TF>
 using Conditional = typename ConditionalT<B, TT, TF>::Type;
+
+//------------------------------------------------------------------------------
+
+template <typename, typename>
+struct IsSameT {
+	static constexpr bool Value = false;
+};
+
+template <typename T>
+struct IsSameT<T, T> {
+	static constexpr bool Value = true;
+};
+
+template <typename T0, typename T1>
+static constexpr bool IsSame = IsSameT<T0, T1>::Value;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-HFSM2_INLINE void
-fill(T& a, const char value) noexcept {
-	memset(&a, (int) value, sizeof(a));
-}
+struct RemoveConstT {
+	using Type = T;
+};
 
-//------------------------------------------------------------------------------
-
-template <typename TIndex, typename TElement, TIndex NCount>
-constexpr TIndex
-count(const TElement(&)[NCount]) noexcept {
-	return NCount;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <int N1, int N2>
-struct Min {
-	static constexpr auto VALUE = N1 < N2 ? N1 : N2;
+template <typename T>
+struct RemoveConstT<const T> {
+	using Type = T;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <int N1, int N2>
-struct Max {
-	static constexpr auto VALUE = N1 > N2 ? N1 : N2;
-};
+template <typename T>
+using RemoveConst = typename RemoveConstT<T>::Type;
 
 //------------------------------------------------------------------------------
 
 template <typename T>
-constexpr T
-min(const T t1, const T t2) noexcept {
-	return t1 < t2 ?
-		t1 : t2;
-}
-
-
-//------------------------------------------------------------------------------
-
-template <uint64_t NCapacity>
-struct UnsignedCapacityT {
-	static constexpr uint64_t CAPACITY = NCapacity;
-
-	using Type = Conditional<CAPACITY <= UINT8_MAX,  uint8_t,
-				 Conditional<CAPACITY <= UINT16_MAX, uint16_t,
-				 Conditional<CAPACITY <= UINT32_MAX, uint32_t,
-													 uint64_t>>>;
+struct RemoveReferenceT {
+	using Type = T;
 };
 
-template <uint64_t NCapacity>
-using UnsignedCapacity = typename UnsignedCapacityT<NCapacity>::Type;
-
-//------------------------------------------------------------------------------
-
-template <uint64_t NBitWidth>
-struct UnsignedBitWidthT {
-	static constexpr Short BIT_WIDTH = NBitWidth;
-
-	using Type = Conditional<BIT_WIDTH <= 8,  uint8_t,
-				 Conditional<BIT_WIDTH <= 16, uint16_t,
-				 Conditional<BIT_WIDTH <= 32, uint32_t,
-											  uint64_t>>>;
-
-	static_assert(BIT_WIDTH <= 64, "STATIC ASSERT");
+template <typename T>
+struct RemoveReferenceT<T&> {
+	using Type = T;
 };
 
-template <uint64_t NCapacity>
-using UnsignedBitWidth = typename UnsignedBitWidthT<NCapacity>::Type;
+template <typename T>
+struct RemoveReferenceT<T&&> {
+	using Type = T;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+using RemoveReference = typename RemoveReferenceT<T>::Type;
 
 //------------------------------------------------------------------------------
 
-template <typename T1, typename T2>
-constexpr T1
-contain(const T1 x, const T2 to) noexcept {
-	return (x + (T1) to - 1) / (T1) to;
+template <typename>
+constexpr bool IS_LVALUE_REFERENCE = false;
+
+template <typename T>
+constexpr bool IS_LVALUE_REFERENCE<T&> = true;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <uint64_t N>
+using UIndex = Conditional<N <= (1ull <<  8),  uint8_t,
+			   Conditional<N <= (1ull << 16), uint16_t,
+			   Conditional<N <= (1ull << 32), uint32_t,
+												  void>>>;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <uint64_t N>
+using UCapacity = Conditional<N <= (1ull <<  8) - 1,  uint8_t,
+				  Conditional<N <= (1ull << 16) - 1, uint16_t,
+				  Conditional<N <= (1ull << 32) - 1, uint32_t,
+														 void>>>;
+
+////////////////////////////////////////////////////////////////////////////////
+
+HFSM2_CONSTEXPR(11)
+Short
+bitContain(const Short v)							  noexcept {
+	return v <= 1 << 0 ? 0 :
+		   v <= 1 << 1 ? 1 :
+		   v <= 1 << 2 ? 2 :
+		   v <= 1 << 3 ? 3 :
+		   v <= 1 << 4 ? 4 :
+		   v <= 1 << 5 ? 5 :
+		   v <= 1 << 6 ? 6 :
+		   v <= 1 << 7 ? 7 :
+						 8 ;
 }
 
 //------------------------------------------------------------------------------
 
-constexpr Short
-bitWidth(const Short x) noexcept {
-	return x <=   2 ? 1 :
-		   x <=   4 ? 2 :
-		   x <=   8 ? 3 :
-		   x <=  16 ? 4 :
-		   x <=  32 ? 5 :
-		   x <=  64 ? 6 :
-		   x <= 128 ? 7 :
-					  8 ;
+template <uint64_t N>
+using UBitWidth = Conditional<N <=  8,  uint8_t,
+				  Conditional<N <= 16, uint16_t,
+				  Conditional<N <= 32, uint32_t,
+										   void>>>;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+HFSM2_CONSTEXPR(11)
+T&&
+forward(RemoveReference<T>& t)						  noexcept	{
+	return static_cast<T&&>(t);
+}
+
+template <typename T>
+HFSM2_CONSTEXPR(11)
+T&&
+forward(RemoveReference<T>&& t)						  noexcept	{
+	static_assert(!IS_LVALUE_REFERENCE<T>, "");
+
+	return static_cast<T&&>(t);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+HFSM2_CONSTEXPR(11)
+RemoveReference<T>&&
+move(T&& t)											  noexcept	{
+	return static_cast<RemoveReference<T>&&>(t);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T0,
+		  typename T1>
+HFSM2_CONSTEXPR(11)
+T0
+min(const T0 t0,
+	const T1 t1)									  noexcept
+{
+	return t0 < (T0) t1 ?
+		   t0 : (T0) t1;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T0,
+		  typename T1>
+HFSM2_CONSTEXPR(11)
+T0
+max(const T0 t0,
+	const T1 t1)									  noexcept
+{
+	return t0 > (T0) t1 ?
+		   t0 : (T0) t1;
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TTo, typename TFrom>
-HFSM2_INLINE void
-overwrite(TTo& to, const TFrom& from) noexcept {
-	static_assert(sizeof(TTo) == sizeof(TFrom), "STATIC ASSERT");
+template <typename TIndex,
+		  typename TElement,
+		  TIndex NCount>
+HFSM2_CONSTEXPR(11)
+TIndex
+count(const TElement(&)[NCount])					  noexcept	{
+	return NCount;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename T,
+		  typename TT>
+HFSM2_CONSTEXPR(11)
+T
+contain(const T x,
+		const TT to)								  noexcept	{ return (x + (T) to - 1) / (T) to;		}
+
+//------------------------------------------------------------------------------
+
+HFSM2_CONSTEXPR(11)
+uint64_t
+widen(const uint32_t x, const uint32_t y)			  noexcept	{ return (uint64_t) x << 32 | y;		}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+HFSM2_CONSTEXPR(11)
+void
+fill(T& a, const char value)						  noexcept { memset(&a, (int) value, sizeof(a));	}
+
+//------------------------------------------------------------------------------
+
+template <typename T>
+HFSM2_CONSTEXPR(14)
+void
+swap(T& l, T& r)									  noexcept	{
+	T t = move(l);
+	l = move(r);
+	r = move(t);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TTo,
+		  typename TFrom>
+HFSM2_CONSTEXPR(14)
+void
+overwrite(TTo& to, const TFrom& from)				  noexcept	{
+	static_assert(sizeof(TTo) == sizeof(TFrom), "");
 
 #if defined(__GNUC__) || defined(__GNUG__)
 	memcpy  (&to,			  &from, sizeof(from));
@@ -158,9 +263,11 @@ overwrite(TTo& to, const TFrom& from) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TO, typename TI>
-HFSM2_INLINE TO
-convert(const TI& in) noexcept {
+template <typename TO,
+		  typename TI>
+HFSM2_CONSTEXPR(14)
+TO
+convert(const TI& in)								  noexcept	{
 	TO out;
 
 	overwrite(out, in);
@@ -171,12 +278,11 @@ convert(const TI& in) noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <int>
-struct StaticPrintConst;
+struct StaticPrintConstT;
 
 template <typename>
-struct StaticPrintType;
+struct StaticPrintTypeT;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-}
 }

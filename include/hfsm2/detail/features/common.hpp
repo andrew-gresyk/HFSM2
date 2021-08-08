@@ -5,22 +5,20 @@ namespace hfsm2 {
 enum class Method : uint8_t {
 	NONE,
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	RANK,
 	UTILITY,
 #endif
 
 	ENTRY_GUARD,
-	CONSTRUCT,
 	ENTER,
 	REENTER,
 	UPDATE,
 	REACT,
 	EXIT_GUARD,
 	EXIT,
-	DESTRUCT,
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	PLAN_SUCCEEDED,
 	PLAN_FAILED,
 #endif
@@ -35,7 +33,7 @@ enum class TransitionType : uint8_t {
 	RESTART,
 	RESUME,
 
-//#ifdef HFSM2_ENABLE_UTILITY_THEORY
+//#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	UTILIZE,
 	RANDOMIZE,
 //#endif
@@ -47,7 +45,7 @@ enum class TransitionType : uint8_t {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
 enum class StatusEvent : uint8_t {
 	SUCCEEDED,
@@ -60,9 +58,12 @@ enum class StatusEvent : uint8_t {
 
 //------------------------------------------------------------------------------
 
-static inline
+#if HFSM2_TYPEINDEX_AVAILABLE()
+
+static
+inline
 const char*
-stateName(const std::type_index stateType) noexcept {
+stateName(const std::type_index stateType)							  noexcept {
 	const char* const raw = stateType.name();
 
 	#if defined(_MSC_VER)
@@ -84,29 +85,30 @@ stateName(const std::type_index stateType) noexcept {
 	#endif
 }
 
+#endif
+
 //------------------------------------------------------------------------------
 
-static inline
+static
+HFSM2_CONSTEXPR(14)
 const char*
-methodName(const Method method) noexcept {
+methodName(const Method method)										  noexcept {
 	switch (method) {
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	case Method::RANK:			 return "rank";
 	case Method::UTILITY:		 return "utility";
 #endif
 
 	case Method::ENTRY_GUARD:	 return "entryGuard";
 	case Method::ENTER:			 return "enter";
-	case Method::CONSTRUCT:		 return "construct";
 	case Method::REENTER:		 return "reenter";
 	case Method::UPDATE:		 return "update";
 	case Method::REACT:			 return "react";
 	case Method::EXIT_GUARD:	 return "exitGuard";
 	case Method::EXIT:			 return "exit";
-	case Method::DESTRUCT:		 return "destruct";
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	case Method::PLAN_SUCCEEDED: return "planSucceeded";
 	case Method::PLAN_FAILED:	 return "planFailed";
 #endif
@@ -119,7 +121,8 @@ methodName(const Method method) noexcept {
 
 //------------------------------------------------------------------------------
 
-static inline
+static
+HFSM2_CONSTEXPR(14)
 const char*
 transitionName(const TransitionType type) noexcept {
 	switch (type) {
@@ -127,7 +130,7 @@ transitionName(const TransitionType type) noexcept {
 	case TransitionType::RESTART:	return "restart";
 	case TransitionType::RESUME:	return "resume";
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	case TransitionType::UTILIZE:	return "utilize";
 	case TransitionType::RANDOMIZE:	return "randomize";
 #endif
@@ -154,21 +157,24 @@ namespace detail {
 #endif
 
 struct alignas(4) TransitionBase {
-	constexpr TransitionBase() noexcept = default;
+	HFSM2_CONSTEXPR(11)
+	TransitionBase()												  noexcept = default;
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE TransitionBase(const StateID destination_,
-								const TransitionType type_) noexcept
+	HFSM2_CONSTEXPR(11)
+	TransitionBase(const StateID destination_,
+				   const TransitionType type_)						  noexcept
 		: destination{destination_}
-		, type{type_}
+		, type		 {type_}
 	{}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE TransitionBase(const StateID origin_,
-								const StateID destination_,
-								const TransitionType type_) noexcept
+	HFSM2_CONSTEXPR(11)
+	TransitionBase(const StateID origin_,
+				   const StateID destination_,
+				   const TransitionType type_)						  noexcept
 		: origin	 {origin_}
 		, destination{destination_}
 		, type		 {type_}
@@ -176,7 +182,9 @@ struct alignas(4) TransitionBase {
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE bool operator == (const TransitionBase& other) const noexcept {
+	HFSM2_CONSTEXPR(11)
+	bool
+	operator == (const TransitionBase& other)					const noexcept {
 		return origin	   == other.origin &&
 			   destination == other.destination &&
 			   method	   == other.method &&
@@ -204,19 +212,23 @@ struct alignas(4) TransitionT
 	using Payload = TPayload;
 	using Storage = typename std::aligned_storage<sizeof(Payload), 4>::type;
 
-	using TransitionBase::TransitionBase;
-
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE TransitionT() noexcept {
+	using TransitionBase::TransitionBase;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(11)
+	TransitionT()													  noexcept {
 		new (&storage) Payload{};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE TransitionT(const StateID destination,
-							 const TransitionType type,
-							 const Payload& payload) noexcept
+	HFSM2_CONSTEXPR(11)
+	TransitionT(const StateID destination,
+				const TransitionType type,
+				const Payload& payload)								  noexcept
 		: TransitionBase{destination, type}
 		, payloadSet{true}
 	{
@@ -225,9 +237,10 @@ struct alignas(4) TransitionT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE TransitionT(const StateID destination,
-							 const TransitionType type,
-							 Payload&& payload) noexcept
+	HFSM2_CONSTEXPR(11)
+	TransitionT(const StateID destination,
+				const TransitionType type,
+				Payload&& payload)									  noexcept
 		: TransitionBase{destination, type}
 		, payloadSet{true}
 	{
@@ -236,10 +249,11 @@ struct alignas(4) TransitionT
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE TransitionT(const StateID origin,
-							 const StateID destination,
-							 const TransitionType type,
-							 const Payload& payload) noexcept
+	HFSM2_CONSTEXPR(11)
+	TransitionT(const StateID origin,
+				const StateID destination,
+				const TransitionType type,
+				const Payload& payload)								  noexcept
 		: TransitionBase{origin, destination, type}
 		, payloadSet{true}
 	{
@@ -248,10 +262,11 @@ struct alignas(4) TransitionT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE TransitionT(const StateID origin,
-							 const StateID destination,
-							 const TransitionType type,
-							 Payload&& payload) noexcept
+	HFSM2_CONSTEXPR(11)
+	TransitionT(const StateID origin,
+				const StateID destination,
+				const TransitionType type,
+				Payload&& payload)									  noexcept
 		: TransitionBase{origin, destination, type}
 		, payloadSet{true}
 	{
@@ -260,10 +275,21 @@ struct alignas(4) TransitionT
 
 	//----------------------------------------------------------------------
 
-	HFSM2_INLINE bool operator == (const TransitionT& other) const noexcept {
+	HFSM2_CONSTEXPR(11)
+	bool
+	operator == (const TransitionT& other)						const noexcept {
 		return TransitionBase::operator == (other) &&
 			   (payloadSet ==  other.payloadSet);
 		//	  (!payloadSet && !other.payloadSet || payload ==  other.payload);
+	}
+
+	//----------------------------------------------------------------------
+
+	HFSM2_CONSTEXPR(11)
+	const Payload*
+	payload()													const noexcept {
+		return payloadSet ?
+			reinterpret_cast<const Payload*>(&storage) : nullptr;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -1,4 +1,4 @@
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
 namespace hfsm2 {
 namespace detail {
@@ -7,6 +7,7 @@ namespace detail {
 
 template <typename TP, Long NC>
 template <typename... TA>
+HFSM2_CONSTEXPR(14)
 Long
 TaskListT<TP, NC>::emplace(TA&&... args) noexcept {
 	if (_count < CAPACITY) {
@@ -45,7 +46,7 @@ TaskListT<TP, NC>::emplace(TA&&... args) noexcept {
 
 		HFSM2_IF_ASSERT(verifyStructure());
 
-		new (&cell) Item{std::forward<TA>(args)...};
+		new (&cell) Item{forward<TA>(args)...};
 
 		return index;
 	} else {
@@ -62,6 +63,7 @@ TaskListT<TP, NC>::emplace(TA&&... args) noexcept {
 //------------------------------------------------------------------------------
 
 template <typename TP, Long NC>
+HFSM2_CONSTEXPR(14)
 void
 TaskListT<TP, NC>::remove(const Index i) noexcept {
 	HFSM2_ASSERT(i < CAPACITY && _count);
@@ -100,6 +102,7 @@ TaskListT<TP, NC>::remove(const Index i) noexcept {
 //------------------------------------------------------------------------------
 
 template <typename TP, Long NC>
+HFSM2_CONSTEXPR(14)
 typename TaskListT<TP, NC>::Item&
 TaskListT<TP, NC>::operator[] (const Index i) noexcept {
 	HFSM2_IF_ASSERT(verifyStructure());
@@ -110,6 +113,7 @@ TaskListT<TP, NC>::operator[] (const Index i) noexcept {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TP, Long NC>
+HFSM2_CONSTEXPR(11)
 const typename TaskListT<TP, NC>::Item&
 TaskListT<TP, NC>::operator[] (const Index i) const noexcept {
 	HFSM2_IF_ASSERT(verifyStructure());
@@ -119,7 +123,7 @@ TaskListT<TP, NC>::operator[] (const Index i) const noexcept {
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_ASSERT
+#if HFSM2_ASSERT_AVAILABLE()
 
 template <typename TP, Long NC>
 void

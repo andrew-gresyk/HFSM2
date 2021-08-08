@@ -16,7 +16,7 @@ namespace test_debug {
 ////////////////////////////////////////////////////////////////////////////////
 
 using Config = hfsm2::Config
-					::RandomT<hfsm2::XoShiRo128Plus>;
+					::RandomT<hfsm2::FloatRandom>;
 
 using M = hfsm2::MachineT<Config>;
 
@@ -170,7 +170,7 @@ const Types all = {
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Debug") {
-	hfsm2::XoShiRo128Plus generator{0};
+	hfsm2::FloatRandom generator{0};
 	Logger logger;
 
 	{
@@ -181,9 +181,6 @@ TEST_CASE("FSM.Debug") {
 			logger.assertSequence({
 				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
-
-				{ FSM::stateId<Apex>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<I   >(),	Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<Apex>(),	Event::Type::ENTER },
 				{ FSM::stateId<I   >(),	Event::Type::ENTER },
@@ -268,17 +265,6 @@ TEST_CASE("FSM.Debug") {
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT },
 
-				{ FSM::stateId<I   >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<O   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<R   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<R_1 >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<C   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<C_1 >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<U   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<U_1 >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<N   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<N_2 >(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<O   >(),	Event::Type::ENTER },
 				{ FSM::stateId<R   >(),	Event::Type::ENTER },
 				{ FSM::stateId<R_1 >(),	Event::Type::ENTER },
@@ -357,17 +343,6 @@ TEST_CASE("FSM.Debug") {
 		{ FSM::stateId<N   >(),	Event::Type::EXIT },
 		{ FSM::stateId<O   >(),	Event::Type::EXIT },
 		{ hfsm2::StateID{0}, 	Event::Type::EXIT },
-
-		{ FSM::stateId<R_1 >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<R   >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<C_1 >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<C   >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<U_1 >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<U   >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<N_2 >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<N   >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<O   >(),	Event::Type::DESTRUCT },
-		{ hfsm2::StateID{0}, 	Event::Type::DESTRUCT },
 	});
 }
 

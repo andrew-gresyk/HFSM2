@@ -113,10 +113,6 @@ TEST_CASE("FSM.Self Transition") {
 				{ FSM::stateId<A    >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0}, 	 Event::Type::CONSTRUCT },
-				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<A_1  >(), Event::Type::CONSTRUCT },
-
 				{ hfsm2::StateID{0}, 	 Event::Type::ENTER },
 				{ FSM::stateId<A    >(), Event::Type::ENTER },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
@@ -182,14 +178,6 @@ TEST_CASE("FSM.Self Transition") {
 
 				{ FSM::stateId<A_1  >(), Event::Type::EXIT },
 				{ FSM::stateId<A    >(), Event::Type::EXIT },
-
-				{ FSM::stateId<A_1  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_1  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_1_1>(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_2  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_2_1>(), Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<B    >(), Event::Type::ENTER },
 				{ FSM::stateId<B_1  >(), Event::Type::ENTER },
@@ -269,13 +257,6 @@ TEST_CASE("FSM.Self Transition") {
 		{ FSM::stateId<B_2  >(), Event::Type::EXIT },
 		{ FSM::stateId<B    >(), Event::Type::EXIT },
 		{ hfsm2::StateID{0}, 	 Event::Type::EXIT },
-
-		{ FSM::stateId<B_1_1>(), Event::Type::DESTRUCT },
-		{ FSM::stateId<B_1  >(), Event::Type::DESTRUCT },
-		{ FSM::stateId<B_2_1>(), Event::Type::DESTRUCT },
-		{ FSM::stateId<B_2  >(), Event::Type::DESTRUCT },
-		{ FSM::stateId<B    >(), Event::Type::DESTRUCT },
-		{ hfsm2::StateID{0}, 	 Event::Type::DESTRUCT },
 	};
 	logger.assertSequence(reference);
 }

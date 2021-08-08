@@ -1,4 +1,4 @@
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
 namespace hfsm2 {
 namespace detail {
@@ -90,12 +90,12 @@ struct PlanDataT<ArgsT<TContext
 	TasksBits tasksFailures;
 	RegionBits planExists;
 
-	void clearTaskStatus  (const StateID stateId)		  noexcept;
-	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
+	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
 
-#ifdef HFSM2_ENABLE_ASSERT
-	void verifyPlans() const noexcept;
-	Long verifyPlan(const RegionID stateId)			const noexcept;
+#if HFSM2_ASSERT_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
+	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID stateId)			const noexcept;
 #endif
 };
 
@@ -145,12 +145,12 @@ struct PlanDataT<ArgsT<TContext
 	TasksBits tasksFailures;
 	RegionBits planExists;
 
-	void clearTaskStatus  (const StateID stateId)		  noexcept;
-	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
+	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
 
-#ifdef HFSM2_ENABLE_ASSERT
-	void verifyPlans()								const noexcept;
-	Long verifyPlan(const RegionID stateId)			const noexcept;
+#if HFSM2_ASSERT_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
+	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID stateId)			const noexcept;
 #endif
 };
 
@@ -177,11 +177,11 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , TPayload>>
 {
-	void clearTaskStatus  (const StateID)				  noexcept {}
-	void verifyEmptyStatus(const StateID)			const noexcept {}
+	HFSM2_CONSTEXPR(11)	void clearTaskStatus  (const StateID)				  noexcept	{}
+	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID)			const noexcept	{}
 
-#ifdef HFSM2_ENABLE_ASSERT
-	void verifyPlans()								const noexcept {}
+#if HFSM2_ASSERT_AVAILABLE()
+	HFSM2_CONSTEXPR(11)	void verifyPlans()								const noexcept	{}
 #endif
 };
 

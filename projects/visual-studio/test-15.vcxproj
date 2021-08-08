@@ -30,7 +30,6 @@
     <ClCompile Include="..\..\test\test_contexts_random.cpp" />
     <ClCompile Include="..\..\test\test_debug.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
-    <ClCompile Include="..\..\test\test_dynamic.cpp" />
     <ClCompile Include="..\..\test\test_guards.cpp" />
     <ClCompile Include="..\..\test\test_internal_payloads.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
@@ -49,6 +48,9 @@
     <ClCompile Include="..\..\test\test_utility_regions.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\hfsm2\detail\containers\array.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\containers\bit_array.hpp" />
+    <ClInclude Include="..\..\include\hfsm2\detail\containers\task_list.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\features\common.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\features\logger_interface.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\features\structure_report.hpp" />
@@ -58,9 +60,6 @@
     <ClInclude Include="..\..\include\hfsm2\detail\root\plan_data.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\registry.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\root\state_access.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\root\task_list.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\array.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_array.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_stream.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_off.hpp" />
@@ -75,22 +74,20 @@
     <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp" />
     <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp" />
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\state_box.hpp" />
     <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp" />
     <ClInclude Include="..\..\test\tools.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\include\hfsm2\detail\containers\array.inl" />
+    <None Include="..\..\include\hfsm2\detail\containers\bit_array.inl" />
+    <None Include="..\..\include\hfsm2\detail\containers\task_list.inl" />
     <None Include="..\..\include\hfsm2\detail\root.inl" />
     <None Include="..\..\include\hfsm2\detail\root\control.inl" />
     <None Include="..\..\include\hfsm2\detail\root\plan.inl" />
     <None Include="..\..\include\hfsm2\detail\root\plan_data.inl" />
     <None Include="..\..\include\hfsm2\detail\root\registry_1.inl" />
     <None Include="..\..\include\hfsm2\detail\root\registry_2.inl" />
-    <None Include="..\..\include\hfsm2\detail\root\task_list.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\array.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\bit_array.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\bit_stream.inl" />
-    <None Include="..\..\include\hfsm2\detail\shared\iterator.inl" />
     <None Include="..\..\include\hfsm2\detail\shared\random.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\composite_sub_1.inl" />
@@ -100,7 +97,6 @@
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_1.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl" />
     <None Include="..\..\include\hfsm2\detail\structure\state.inl" />
-    <None Include="..\..\include\hfsm2\detail\structure\state_box.inl" />
     <None Include="..\..\test\tools.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

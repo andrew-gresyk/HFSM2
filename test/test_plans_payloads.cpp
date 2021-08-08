@@ -292,11 +292,6 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId<Step1_BT  >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<Step1_1   >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex      >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<Planned   >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<Step1_BT  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<Step1_1   >(), Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Apex      >(), Event::Type::ENTER },
 				{ FSM::stateId<Planned   >(), Event::Type::ENTER },
 				{ FSM::stateId<Step1_BT  >(), Event::Type::ENTER },
@@ -328,10 +323,6 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId<Step1_2   >(), Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT },
-
-				{ FSM::stateId<Step1_1   >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<Step1_2   >(), Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Step1_2   >(), Event::Type::ENTER },
 			});
 
@@ -364,9 +355,6 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId <Step1_3   >(), Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT },
-
-				{ FSM::stateId <Step1_2   >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Step1_3   >(), Event::Type::CONSTRUCT },
 
 				{ FSM::stateId <Step1_3   >(), Event::Type::ENTER },
 			});
@@ -409,14 +397,6 @@ TEST_CASE("FSM.Plan payloads") {
 
 				{ FSM::stateId <Step1_3   >(), Event::Type::EXIT   },
 				{ FSM::stateId <Step1_BT  >(), Event::Type::EXIT   },
-
-				{ FSM::stateId <Step1_3   >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Step1_BT  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Hybrid    >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId <Step2L_P  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId <Step2L_1  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId <Step2R_P  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId <Step2R_1  >(), Event::Type::CONSTRUCT },
 
 				{ FSM::stateId <Hybrid    >(), Event::Type::ENTER  },
 				{ FSM::stateId <Step2L_P  >(), Event::Type::ENTER  },
@@ -468,17 +448,9 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId <Step2R_2  >(), Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT },
-
-				{ FSM::stateId <Step2L_1  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Step2L_2  >(), Event::Type::CONSTRUCT },
-
 				{ FSM::stateId <Step2L_2  >(), Event::Type::ENTER },
 
 				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT },
-
-				{ FSM::stateId <Step2R_1  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Step2R_2  >(), Event::Type::CONSTRUCT },
-
 				{ FSM::stateId <Step2R_2  >(), Event::Type::ENTER },
 			});
 
@@ -522,7 +494,7 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::regionId<Hybrid    >(), Event::Type::TASK_SUCCESS,	  FSM::stateId<Hybrid   >()   },
 				{ FSM::regionId<Hybrid    >(), Event::Type::PLAN_SUCCESS },
 
-				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,		  FSM::stateId<Terminal >() },
+				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,			  FSM::stateId<Terminal >() },
 
 				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT_GUARD  },
@@ -533,20 +505,11 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId <Terminal_L>(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId <Terminal_R>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step2L_2  >(), Event::Type::EXIT },
-				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT },
-				{ FSM::stateId <Step2R_2  >(), Event::Type::EXIT },
-				{ FSM::stateId <Step2R_P  >(), Event::Type::EXIT },
-				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT },
-
-				{ FSM::stateId <Step2L_2  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Step2L_P  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Step2R_2  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Step2R_P  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Hybrid    >(), Event::Type::DESTRUCT },
-				{ FSM::stateId <Terminal  >(), Event::Type::CONSTRUCT	},
-				{ FSM::stateId <Terminal_L>(), Event::Type::CONSTRUCT	},
-				{ FSM::stateId <Terminal_R>(), Event::Type::CONSTRUCT	},
+				{ FSM::stateId <Step2L_2  >(), Event::Type::EXIT	},
+				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT	},
+				{ FSM::stateId <Step2R_2  >(), Event::Type::EXIT	},
+				{ FSM::stateId <Step2R_P  >(), Event::Type::EXIT	},
+				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT	},
 
 				{ FSM::stateId <Terminal  >(), Event::Type::ENTER	},
 				{ FSM::stateId <Terminal_L>(), Event::Type::ENTER	},
@@ -580,12 +543,6 @@ TEST_CASE("FSM.Plan payloads") {
 		{ FSM::stateId <Terminal  >(), Event::Type::EXIT },
 		{ FSM::stateId <Planned   >(), Event::Type::EXIT },
 		{ FSM::stateId <Apex      >(), Event::Type::EXIT },
-
-		{ FSM::stateId <Terminal_L>(), Event::Type::DESTRUCT },
-		{ FSM::stateId <Terminal_R>(), Event::Type::DESTRUCT },
-		{ FSM::stateId <Terminal  >(), Event::Type::DESTRUCT },
-		{ FSM::stateId <Planned   >(), Event::Type::DESTRUCT },
-		{ FSM::stateId <Apex      >(), Event::Type::DESTRUCT },
 	});
 }
 

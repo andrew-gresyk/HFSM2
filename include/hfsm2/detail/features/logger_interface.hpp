@@ -1,6 +1,6 @@
 namespace hfsm2 {
 
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -10,7 +10,7 @@ template <FeatureTag NFeatureTag = HFSM2_FEATURE_TAG
 struct LoggerInterfaceT {
 	using Context		 = TContext;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Utilty		 = TUtilty;
 #endif
 
@@ -19,52 +19,72 @@ struct LoggerInterfaceT {
 	using RegionID		 = ::hfsm2::RegionID;
 	using TransitionType = ::hfsm2::TransitionType;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	using StatusEvent	 = ::hfsm2::StatusEvent;
 #endif
 
-	virtual void recordMethod(Context& /*context*/,
-							  const StateID /*origin*/,
-							  const Method /*method*/) noexcept
+	HFSM2_CONSTEXPR(14)
+	virtual
+	void recordMethod(Context& HFSM2_UNUSED(context),
+					  const StateID HFSM2_UNUSED(origin),
+					  const Method HFSM2_UNUSED(method))			  noexcept
 	{}
 
-	virtual void recordTransition(Context& /*context*/,
-								  const StateID /*origin*/,
-								  const TransitionType /*transitionType*/,
-								  const StateID /*target*/) noexcept
+	HFSM2_CONSTEXPR(14)
+	virtual
+	void
+	recordTransition(Context& HFSM2_UNUSED(context),
+					 const StateID HFSM2_UNUSED(origin),
+					 const TransitionType HFSM2_UNUSED(transitionType),
+					 const StateID HFSM2_UNUSED(target))			  noexcept
 	{}
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
-	virtual void recordTaskStatus(Context& /*context*/,
-								  const RegionID /*region*/,
-								  const StateID /*origin*/,
-								  const StatusEvent /*event*/) noexcept
+	HFSM2_CONSTEXPR(14)
+	virtual
+	void
+	recordTaskStatus(Context& HFSM2_UNUSED(context),
+					 const RegionID HFSM2_UNUSED(region),
+					 const StateID HFSM2_UNUSED(origin),
+					 const StatusEvent HFSM2_UNUSED(event))			  noexcept
 	{}
 
-	virtual void recordPlanStatus(Context& /*context*/,
-								  const RegionID /*region*/,
-								  const StatusEvent /*event*/) noexcept
+	HFSM2_CONSTEXPR(14)
+	virtual
+	void
+	recordPlanStatus(Context& HFSM2_UNUSED(context),
+					 const RegionID HFSM2_UNUSED(region),
+					 const StatusEvent HFSM2_UNUSED(event))			  noexcept
 	{}
 
 #endif
 
-	virtual void recordCancelledPending(Context& /*context*/,
-										const StateID /*origin*/) noexcept
+	HFSM2_CONSTEXPR(14)
+	virtual
+	void
+	recordCancelledPending(Context& HFSM2_UNUSED(context),
+						   const StateID HFSM2_UNUSED(origin))		  noexcept
 	{}
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	virtual void recordUtilityResolution(Context& /*context*/,
-										 const StateID /*head*/,
-										 const StateID /*prong*/,
-										 const Utilty /*utilty*/) noexcept
+	HFSM2_CONSTEXPR(14)
+	virtual
+	void
+	recordUtilityResolution(Context& HFSM2_UNUSED(context),
+							const StateID HFSM2_UNUSED(head),
+							const StateID HFSM2_UNUSED(prong),
+							const Utilty HFSM2_UNUSED(utilty))		  noexcept
 	{}
 
-	virtual void recordRandomResolution(Context& /*context*/,
-										const StateID /*head*/,
-										const StateID /*prong*/,
-										const Utilty /*utilty*/) noexcept
+	HFSM2_CONSTEXPR(14)
+	virtual
+	void
+	recordRandomResolution(Context& HFSM2_UNUSED(context),
+						   const StateID HFSM2_UNUSED(head),
+						   const StateID HFSM2_UNUSED(prong),
+						   const Utilty HFSM2_UNUSED(utilty))		  noexcept
 	{}
 
 #endif

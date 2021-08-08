@@ -32,7 +32,7 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 1
-#define HFSM2_VERSION_MINOR 9
+#define HFSM2_VERSION_MINOR 10
 #define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
@@ -41,8 +41,9 @@
 #include <string.h>			// memcpy_s()
 
 #include <new>
-#include <typeindex>
-#include <utility>			// move(), forward()
+#ifndef HFSM2_DISABLE_TYPEINDEX
+	#include <typeindex>
+#endif
 
 #if defined _DEBUG && _MSC_VER
 	#include <intrin.h>		// __debugbreak()
@@ -54,8 +55,6 @@
 
 #include "detail/shared/utility.hpp"
 #include "detail/shared/iterator.hpp"
-#include "detail/shared/array.hpp"
-#include "detail/shared/bit_array.hpp"
 #include "detail/shared/bit_stream.hpp"
 #include "detail/shared/random.hpp"
 #include "detail/shared/type_list.hpp"
@@ -64,14 +63,16 @@
 #include "detail/features/logger_interface.hpp"
 #include "detail/features/structure_report.hpp"
 
-#include "detail/root/task_list.hpp"
+#include "detail/containers/array.hpp"
+#include "detail/containers/bit_array.hpp"
+#include "detail/containers/task_list.hpp"
+
 #include "detail/root/plan_data.hpp"
 #include "detail/root/plan.hpp"
 #include "detail/root/registry.hpp"
 #include "detail/root/control.hpp"
 
 #include "detail/structure/injections.hpp"
-#include "detail/structure/state_box.hpp"
 #include "detail/structure/state.hpp"
 #include "detail/structure/forward.hpp"
 #include "detail/structure/composite_sub.hpp"
@@ -89,7 +90,7 @@ template <FeatureTag NFeatureTag
 		, typename TContext
 		, typename TActivation
 
-	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	#if HFSM2_UTILITY_THEORY_AVAILABLE()
 		, typename TRank
 		, typename TUtility
 		, typename TRNG
@@ -104,26 +105,26 @@ struct G_ final {
 	using Context			 = TContext;
 	using Activation		 = TActivation;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank				 = TRank;
 	using Utility			 = TUtility;
 	using RNG				 = TRNG;
 #endif
 
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
 	using LoggerInterface	 = LoggerInterfaceT<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Utility)>;
 #endif
 
 	static constexpr Long SUBSTITUTION_LIMIT = NSubstitutionLimit;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	static constexpr Long TASK_CAPACITY		 = NTaskCapacity;
 #endif
 
 	using Payload			 = TPayload;
 	using Transition		 = TransitionT<Payload>;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	using Task				 = TaskT<Payload>;
 #endif
 
@@ -135,7 +136,7 @@ struct G_ final {
 	/// @brief Select manual activation strategy
 	using ManualActivation	 = G_<FEATURE_TAG, Context, Manual	   HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	/// @brief Set Rank type
 	/// @tparam T Rank type for 'TRank State::rank() const' method
@@ -159,7 +160,7 @@ struct G_ final {
 	template <Long N>
 	using SubstitutionLimitN = G_<FEATURE_TAG, Context, Activation HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), N                  HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
 	/// @brief Set Task capacity
 	/// @tparam N Maximum number of tasks across all plans
@@ -175,10 +176,10 @@ struct G_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	struct UP {
-		HFSM2_INLINE UP(const Utility utility_ = Utility{1},
+		HFSM2_CONSTEXPR(14) UP(const Utility utility_ = Utility{1},
 						const Short prong_ = INVALID_SHORT) noexcept
 			: utility{utility_}
 			, prong{prong_}
@@ -202,7 +203,7 @@ template <FeatureTag NFeatureTag
 		, typename TContext
 		, typename TActivation
 
-	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	#if HFSM2_UTILITY_THEORY_AVAILABLE()
 		, typename TRank
 		, typename TUtility
 		, typename TRNG
@@ -218,14 +219,14 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 
 	using Context			= TContext;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Utility			= TUtility;
 #endif
 
 	using Payload			= TPayload;
 	using Transition		= TransitionT<Payload>;
 
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
 	using LoggerInterface	= typename Cfg::LoggerInterface;
 #endif
 
@@ -257,7 +258,7 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	/// @brief Utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
 	/// @tparam THead Head state
@@ -328,7 +329,7 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	/// @brief Utilitarian root ('changeTo<>()' into the root region acts as 'utilize<>()')
 	/// @tparam THead Head state

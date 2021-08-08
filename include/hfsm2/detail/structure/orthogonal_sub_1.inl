@@ -3,12 +3,13 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
+#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename T>
+HFSM2_CONSTEXPR(14)
 T&
-OS_<TN, TA, NI, TI, TR...>::access() {
+OS_<TN, TA, NI, TI, TR...>::access() noexcept {
 	return contains<InitialStates, T>() ?
 		initial  .template access<T>() :
 		remaining.template access<T>();
@@ -18,8 +19,9 @@ OS_<TN, TA, NI, TI, TR...>::access() {
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename T>
+HFSM2_CONSTEXPR(11)
 const T&
-OS_<TN, TA, NI, TI, TR...>::access() const {
+OS_<TN, TA, NI, TI, TR...>::access() const noexcept {
 	return contains<InitialStates, T>() ?
 		initial  .template access<T>() :
 		remaining.template access<T>();
@@ -30,9 +32,10 @@ OS_<TN, TA, NI, TI, TR...>::access() const {
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI, TR...>::wideRegister(Registry& registry,
-										 const ForkID forkId)
+										 const ForkID forkId) noexcept
 {
 	initial  .deepRegister(registry, Parent{forkId, PRONG_INDEX});
 	remaining.wideRegister(registry, forkId);
@@ -41,9 +44,10 @@ OS_<TN, TA, NI, TI, TR...>::wideRegister(Registry& registry,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
-												  const ProngCBits prongs)
+												  const ProngCBits prongs) noexcept
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
 				   initial  .deepForwardEntryGuard(control) : false;
@@ -56,8 +60,9 @@ OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) noexcept {
 	const bool i = initial  .deepForwardEntryGuard(control);
 	const bool r = remaining.wideForwardEntryGuard(control);
 
@@ -67,8 +72,9 @@ OS_<TN, TA, NI, TI, TR...>::wideForwardEntryGuard(GuardControl& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) noexcept {
 	const bool i = initial  .deepEntryGuard(control);
 	const bool r = remaining.wideEntryGuard(control);
 
@@ -78,17 +84,9 @@ OS_<TN, TA, NI, TI, TR...>::wideEntryGuard(GuardControl& control) {
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI, TR...>::wideConstruct(PlanControl& control) {
-	initial	 .deepConstruct(control);
-	remaining.wideConstruct(control);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN, typename TA, Short NI, typename TI, typename... TR>
-void
-OS_<TN, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideEnter(PlanControl& control) noexcept {
 	initial  .deepEnter(control);
 	remaining.wideEnter(control);
 }
@@ -96,8 +94,9 @@ OS_<TN, TA, NI, TI, TR...>::wideEnter(PlanControl& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) noexcept {
 	initial  .deepReenter(control);
 	remaining.wideReenter(control);
 }
@@ -105,8 +104,9 @@ OS_<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) {
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 Status
-OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) noexcept {
 	const auto status =	   initial	.deepUpdate(control);
 	return combine(status, remaining.wideUpdate(control));
 }
@@ -115,9 +115,10 @@ OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) {
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename TEvent>
+HFSM2_CONSTEXPR(14)
 Status
 OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
-									  const TEvent& event)
+									  const TEvent& event) noexcept
 {
 	const auto status =	   initial	.deepReact(control, event);
 	return combine(status, remaining.wideReact(control, event));
@@ -126,9 +127,10 @@ OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
-												 const ProngCBits prongs)
+												 const ProngCBits prongs) noexcept
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
 				   initial  .deepForwardExitGuard(control) : false;
@@ -141,8 +143,9 @@ OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) noexcept {
 	const bool i = initial  .deepForwardExitGuard(control);
 	const bool r = remaining.wideForwardExitGuard(control);
 
@@ -152,8 +155,9 @@ OS_<TN, TA, NI, TI, TR...>::wideForwardExitGuard(GuardControl& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) noexcept {
 	const bool i = initial  .deepExitGuard(control);
 	const bool r = remaining.wideExitGuard(control);
 
@@ -163,8 +167,9 @@ OS_<TN, TA, NI, TI, TR...>::wideExitGuard(GuardControl& control) {
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideExit(PlanControl& control) noexcept {
 	initial	 .deepExit(control);
 	remaining.wideExit(control);
 }
@@ -172,19 +177,11 @@ OS_<TN, TA, NI, TI, TR...>::wideExit(PlanControl& control) {
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
-void
-OS_<TN, TA, NI, TI, TR...>::wideDestruct(PlanControl& control) {
-	initial	 .deepDestruct(control);
-	remaining.wideDestruct(control);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
 											  const Request request,
-											  const ProngCBits prongs)
+											  const ProngCBits prongs) noexcept
 {
 	if (prongs.get(PRONG_INDEX))
 		initial.deepForwardActive(control, request);
@@ -195,9 +192,10 @@ OS_<TN, TA, NI, TI, TR...>::wideForwardActive(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
-											   const Request request)
+											   const Request request) noexcept
 {
 	initial	 .deepForwardRequest(control, request);
 	remaining.wideForwardRequest(control, request);
@@ -206,9 +204,10 @@ OS_<TN, TA, NI, TI, TR...>::wideForwardRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI, TR...>::wideRequestChange(Control& control,
-											  const Request request)
+											  const Request request) noexcept
 {
 	initial  .deepRequestChange(control, request);
 	remaining.wideRequestChange(control, request);
@@ -217,9 +216,10 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestChange(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI, TR...>::wideRequestRestart(Control& control,
-											   const Request request)
+											   const Request request) noexcept
 {
 	initial	 .deepRequestRestart(control, request);
 	remaining.wideRequestRestart(control, request);
@@ -228,9 +228,10 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestRestart(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI, TR...>::wideRequestResume(Control& control,
-											  const Request request)
+											  const Request request) noexcept
 {
 	initial	 .deepRequestResume(control, request);
 	remaining.wideRequestResume(control, request);
@@ -238,12 +239,13 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestResume(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control,
-											   const Request request)
+											   const Request request) noexcept
 {
 	initial  .deepRequestUtilize(control, request);
 	remaining.wideRequestUtilize(control, request);
@@ -252,9 +254,10 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestUtilize(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI, TR...>::wideRequestRandomize(Control& control,
-												 const Request request)
+												 const Request request) noexcept
 {
 	initial  .deepRequestRandomize(control, request);
 	remaining.wideRequestRandomize(control, request);
@@ -263,8 +266,9 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestRandomize(Control& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 typename TA::Utility
-OS_<TN, TA, NI, TI, TR...>::wideReportChange(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideReportChange(Control& control) noexcept {
 	const UP	  i = initial  .deepReportChange(control);
 	const Utility r = remaining.wideReportChange(control);
 
@@ -274,8 +278,9 @@ OS_<TN, TA, NI, TI, TR...>::wideReportChange(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 typename TA::Utility
-OS_<TN, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideReportUtilize(Control& control) noexcept {
 	const UP	  i = initial  .deepReportUtilize(control);
 	const Utility r = remaining.wideReportUtilize(control);
 
@@ -285,8 +290,9 @@ OS_<TN, TA, NI, TI, TR...>::wideReportUtilize(Control& control) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 typename TA::Utility
-OS_<TN, TA, NI, TI, TR...>::wideReportRandomize(Control& control) {
+OS_<TN, TA, NI, TI, TR...>::wideReportRandomize(Control& control) noexcept {
 	const Utility i = initial  .deepReportRandomize(control);
 	const Utility r = remaining.wideReportRandomize(control);
 
@@ -298,20 +304,22 @@ OS_<TN, TA, NI, TI, TR...>::wideReportRandomize(Control& control) {
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) {
+OS_<TN, TA, NI, TI, TR...>::wideChangeToRequested(PlanControl& control) noexcept {
 	initial	 .deepChangeToRequested(control);
 	remaining.wideChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(11)
 void
 OS_<TN, TA, NI, TI, TR...>::wideSaveActive(const Registry& registry,
-										   WriteStream& stream) const
+										   WriteStream& stream) const noexcept
 {
 	initial	 .deepSaveActive(registry, stream);
 	remaining.wideSaveActive(registry, stream);
@@ -320,9 +328,10 @@ OS_<TN, TA, NI, TI, TR...>::wideSaveActive(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(11)
 void
 OS_<TN, TA, NI, TI, TR...>::wideSaveResumable(const Registry& registry,
-											  WriteStream& stream) const
+											  WriteStream& stream) const noexcept
 {
 	initial	 .deepSaveResumable(registry, stream);
 	remaining.wideSaveResumable(registry, stream);
@@ -331,9 +340,10 @@ OS_<TN, TA, NI, TI, TR...>::wideSaveResumable(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(11)
 void
 OS_<TN, TA, NI, TI, TR...>::wideLoadRequested(Registry& registry,
-											  ReadStream& stream) const
+											  ReadStream& stream) const noexcept
 {
 	initial	 .deepLoadRequested(registry, stream);
 	remaining.wideLoadRequested(registry, stream);
@@ -342,9 +352,10 @@ OS_<TN, TA, NI, TI, TR...>::wideLoadRequested(Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(11)
 void
 OS_<TN, TA, NI, TI, TR...>::wideLoadResumable(Registry& registry,
-											  ReadStream& stream) const
+											  ReadStream& stream) const noexcept
 {
 	initial	 .deepLoadResumable(registry, stream);
 	remaining.wideLoadResumable(registry, stream);
@@ -354,13 +365,14 @@ OS_<TN, TA, NI, TI, TR...>::wideLoadResumable(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(11)
 void
 OS_<TN, TA, NI, TI, TR...>::wideGetNames(const Long parent,
 										 const Short depth,
-										 StructureStateInfos& stateInfos) const
+										 StructureStateInfos& stateInfos) const noexcept
 {
 	initial	 .deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, stateInfos);
 	remaining.wideGetNames(parent,											   depth, stateInfos);

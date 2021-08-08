@@ -1,4 +1,4 @@
-#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
 namespace hfsm2 {
 
@@ -33,10 +33,11 @@ struct alignas(alignof(void*)) StructureStateInfo {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE StructureStateInfo(const Long parent_,
-									const RegionType regionType_,
-									const Short depth_,
-									const char* const name_) noexcept
+	HFSM2_CONSTEXPR(11)
+	StructureStateInfo(const Long parent_,
+					   const RegionType regionType_,
+					   const Short depth_,
+					   const char* const name_)						  noexcept
 		: name{name_}
 		, parent{parent_}
 		, regionType{regionType_ }

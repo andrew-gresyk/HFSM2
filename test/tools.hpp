@@ -14,7 +14,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	#define IF_UTILITY_THEORY(...)									 __VA_ARGS__
 #else
 	#define IF_UTILITY_THEORY(...)
@@ -25,27 +25,25 @@
 struct Event {
 	enum class Type {
 
-	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	//#if HFSM2_UTILITY_THEORY_AVAILABLE()
 		RANK,
 		UTILITY,
 	//#endif
 
 		ENTRY_GUARD,
-		CONSTRUCT,
 		ENTER,
 		REENTER,
 		UPDATE,
 		REACT,
 		EXIT_GUARD,
 		EXIT,
-		DESTRUCT,
 
-	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	//#if HFSM2_UTILITY_THEORY_AVAILABLE()
 		UTILITY_RESOLUTION,
 		RANDOM_RESOLUTION,
 	//#endif
 
-	//#ifdef HFSM2_ENABLE_PLANS
+	//#if HFSM2_PLANS_AVAILABLE()
 		PLAN_SUCCEEDED,
 		PLAN_FAILED,
 
@@ -59,7 +57,7 @@ struct Event {
 		RESTART,
 		RESUME,
 
-	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	//#if HFSM2_UTILITY_THEORY_AVAILABLE()
 		UTILIZE,
 		RANDOMIZE,
 	//#endif
@@ -106,7 +104,7 @@ struct LoggerT
 
 	using typename Interface::Context;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using typename Interface::Utilty;
 #endif
 
@@ -115,7 +113,7 @@ struct LoggerT
 	using typename Interface::RegionID;
 	using typename Interface::TransitionType;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	using StatusEvent	  = typename Interface::StatusEvent;
 #endif
 
@@ -128,7 +126,7 @@ struct LoggerT
 						  const TransitionType transitionType,
 						  const StateID target) noexcept override;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
 	void recordTaskStatus(Context& context,
 						  const RegionID region,
@@ -144,7 +142,7 @@ struct LoggerT
 	void recordCancelledPending(Context& context,
 								const StateID origin) noexcept override;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	void recordUtilityResolution(Context& context,
 								 const StateID head,
@@ -178,7 +176,7 @@ void assertResumable(TMachine& machine,
 					 const Types& all,
 					 const Types& toCheck) noexcept;
 
-#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 template <typename TMachine>
 void assertLastTransitions(TMachine& machine,

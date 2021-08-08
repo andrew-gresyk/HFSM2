@@ -190,9 +190,6 @@ TEST_CASE("FSM.Utility Regions") {
 				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<I   >(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Apex>(),	Event::Type::ENTER },
 				{ FSM::stateId<I   >(),	Event::Type::ENTER },
 			});
@@ -252,11 +249,6 @@ TEST_CASE("FSM.Utility Regions") {
 
 				{ FSM::stateId<I   >(), Event::Type::EXIT },
 
-				{ FSM::stateId<I   >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<F   >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<C   >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<C_1 >(), Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<F   >(), Event::Type::ENTER },
 				{ FSM::stateId<C   >(), Event::Type::ENTER },
 				{ FSM::stateId<C_1 >(), Event::Type::ENTER },
@@ -281,11 +273,6 @@ TEST_CASE("FSM.Utility Regions") {
 		{ FSM::stateId<C   >(),	 Event::Type::EXIT },
 		{ FSM::stateId<F   >(),	 Event::Type::EXIT },
 		{ hfsm2::StateID{0}, 	 Event::Type::EXIT },
-
-		{ FSM::stateId<C_1 >(),	 Event::Type::DESTRUCT },
-		{ FSM::stateId<C   >(),	 Event::Type::DESTRUCT },
-		{ FSM::stateId<F   >(),	 Event::Type::DESTRUCT },
-		{ hfsm2::StateID{0}, 	 Event::Type::DESTRUCT },
 	});
 }
 

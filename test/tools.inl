@@ -13,7 +13,7 @@ LoggerT<TConfig>::recordMethod(Context& /*context*/,
 
 	switch (method) {
 
-	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 		case Method::RANK:
 			history.emplace_back(origin, Event::Type::RANK);
@@ -27,10 +27,6 @@ LoggerT<TConfig>::recordMethod(Context& /*context*/,
 
 		case Method::ENTRY_GUARD:
 			history.emplace_back(origin, Event::Type::ENTRY_GUARD);
-			break;
-
-		case Method::CONSTRUCT:
-			history.emplace_back(origin, Event::Type::CONSTRUCT);
 			break;
 
 		case Method::ENTER:
@@ -57,11 +53,7 @@ LoggerT<TConfig>::recordMethod(Context& /*context*/,
 			history.emplace_back(origin, Event::Type::EXIT);
 			break;
 
-		case Method::DESTRUCT:
-			history.emplace_back(origin, Event::Type::DESTRUCT);
-			break;
-
-	#ifdef HFSM2_ENABLE_PLANS
+	#if HFSM2_PLANS_AVAILABLE()
 
 		case Method::PLAN_SUCCEEDED:
 			history.emplace_back(origin, Event::Type::PLAN_SUCCEEDED);
@@ -102,7 +94,7 @@ LoggerT<TConfig>::recordTransition(Context& /*context*/,
 			history.emplace_back(origin, Event::Type::RESUME,    target);
 			break;
 
-	#ifdef HFSM2_ENABLE_UTILITY_THEORY
+	#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 		case TransitionType::UTILIZE:
 			history.emplace_back(origin, Event::Type::UTILIZE,   target);
@@ -125,7 +117,7 @@ LoggerT<TConfig>::recordTransition(Context& /*context*/,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
 template <typename TConfig>
 void
@@ -174,7 +166,7 @@ LoggerT<TConfig>::recordPlanStatus(Context& /*context*/,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 template <typename TConfig>
 void
@@ -267,7 +259,7 @@ assertResumable(TMachine& machine,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 template <typename TMachine>
 void

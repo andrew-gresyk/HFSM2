@@ -10,7 +10,7 @@ namespace test_randomize {
 ////////////////////////////////////////////////////////////////////////////////
 
 using Config = hfsm2::Config
-					::RandomT<hfsm2::XoShiRo256Plus>;
+					::RandomT<hfsm2::FloatRandom>;
 
 using M = hfsm2::MachineT<Config>;
 
@@ -122,7 +122,7 @@ const Types all = {
 //------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Randomize") {
-	hfsm2::XoShiRo256Plus generator{0};
+	hfsm2::FloatRandom generator{0};
 	Logger logger;
 
 	{
@@ -133,9 +133,6 @@ TEST_CASE("FSM.Randomize") {
 			logger.assertSequence({
 				{ FSM::stateId<Apex >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<I    >(), Event::Type::ENTRY_GUARD },
-
-				{ FSM::stateId<Apex >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<I    >(), Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<Apex >(), Event::Type::ENTER },
 				{ FSM::stateId<I    >(), Event::Type::ENTER },
@@ -182,13 +179,6 @@ TEST_CASE("FSM.Randomize") {
 
 					{ FSM::stateId<I    >(), Event::Type::EXIT },
 
-					{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
-					{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<N    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<N_075>(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<C_000>(), Event::Type::CONSTRUCT },
-
 					{ FSM::stateId<O    >(), Event::Type::ENTER },
 					{ FSM::stateId<N    >(), Event::Type::ENTER },
 					{ FSM::stateId<N_075>(), Event::Type::ENTER },
@@ -231,13 +221,6 @@ TEST_CASE("FSM.Randomize") {
 					{ FSM::stateId<C_000>(), Event::Type::ENTRY_GUARD },
 
 					{ FSM::stateId<I    >(), Event::Type::EXIT },
-
-					{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
-					{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<N    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<N_000>(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<C_000>(), Event::Type::CONSTRUCT },
 
 					{ FSM::stateId<O    >(), Event::Type::ENTER },
 					{ FSM::stateId<N    >(), Event::Type::ENTER },
@@ -305,13 +288,6 @@ TEST_CASE("FSM.Randomize") {
 					{ FSM::stateId<C_025>(), Event::Type::ENTRY_GUARD },
 
 					{ FSM::stateId<I    >(), Event::Type::EXIT },
-
-					{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
-					{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<N    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<N_075>(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
-					{ FSM::stateId<C_025>(), Event::Type::CONSTRUCT },
 
 					{ FSM::stateId<O    >(), Event::Type::ENTER },
 					{ FSM::stateId<N    >(), Event::Type::ENTER },

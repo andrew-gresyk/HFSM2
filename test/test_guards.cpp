@@ -294,11 +294,6 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step1_1>(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<Step1  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<Step1_1>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<Step1_2>(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Apex   >(),	Event::Type::ENTER },
 				{ FSM::stateId<Step1  >(),	Event::Type::ENTER },
 				{ FSM::stateId<Step1_1>(),	Event::Type::ENTER },
@@ -525,11 +520,6 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step1_2>(),	Event::Type::EXIT },
 				{ FSM::stateId<Step1  >(),	Event::Type::EXIT },
 
-				{ FSM::stateId<Step1_1>(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Step1_2>(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Step1  >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<Step3  >(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Step3  >(),	Event::Type::ENTER },
 			});
 
@@ -551,9 +541,6 @@ TEST_CASE("FSM.Entry Guard") {
 	logger.assertSequence({
 		{ FSM::stateId<Step3  >(),	Event::Type::EXIT },
 		{ FSM::stateId<Apex   >(),	Event::Type::EXIT },
-
-		{ FSM::stateId<Step3  >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<Apex   >(),	Event::Type::DESTRUCT },
 	});
 }
 

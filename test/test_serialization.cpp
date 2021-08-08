@@ -228,10 +228,6 @@ TEST_CASE("FSM.Serialization") {
 				{ client::FSM::stateId<client::C1      >(),	Event::Type::ENTRY_GUARD },
 				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0},						Event::Type::CONSTRUCT },
-				{ client::FSM::stateId<client::C1      >(),	Event::Type::CONSTRUCT },
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::CONSTRUCT },
-
 				{ hfsm2::StateID{0}, 						Event::Type::ENTER },
 				{ client::FSM::stateId<client::C1      >(),	Event::Type::ENTER },
 				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::ENTER },
@@ -278,17 +274,6 @@ TEST_CASE("FSM.Serialization") {
 				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::EXIT },
 				{ client::FSM::stateId<client::C1      >(),	Event::Type::EXIT },
 				{ hfsm2::StateID{0},						Event::Type::EXIT },
-
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::DESTRUCT },
-				{ client::FSM::stateId<client::C1      >(),	Event::Type::DESTRUCT },
-				{ hfsm2::StateID{0},						Event::Type::DESTRUCT },
-
-				{ hfsm2::StateID{0}, 						Event::Type::CONSTRUCT },
-				{ client::FSM::stateId<client::O2      >(),	Event::Type::CONSTRUCT },
-				{ client::FSM::stateId<client::O2_C1   >(),	Event::Type::CONSTRUCT },
-				{ client::FSM::stateId<client::O2_C1_S2>(),	Event::Type::CONSTRUCT },
-				{ client::FSM::stateId<client::O2_C2   >(),	Event::Type::CONSTRUCT },
-				{ client::FSM::stateId<client::O2_C2_S1>(),	Event::Type::CONSTRUCT },
 
 				{ hfsm2::StateID{0}, 						Event::Type::ENTER },
 				{ client::FSM::stateId<client::O2      >(),	Event::Type::ENTER },

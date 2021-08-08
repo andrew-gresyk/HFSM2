@@ -127,9 +127,6 @@ TEST_CASE("FSM.Utilize") {
 			{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
 			{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
 
-			{ FSM::stateId<Apex>(),	Event::Type::CONSTRUCT },
-			{ FSM::stateId<I   >(),	Event::Type::CONSTRUCT },
-
 			{ FSM::stateId<Apex>(),	Event::Type::ENTER },
 			{ FSM::stateId<I   >(),	Event::Type::ENTER },
 		});
@@ -168,13 +165,6 @@ TEST_CASE("FSM.Utilize") {
 			{ FSM::stateId<C_000>(), Event::Type::ENTRY_GUARD },
 
 			{ FSM::stateId<I    >(), Event::Type::EXIT },
-
-			{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
-			{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<U    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<U_100>(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<C_000>(), Event::Type::CONSTRUCT },
 
 			{ FSM::stateId<O    >(), Event::Type::ENTER },
 			{ FSM::stateId<U    >(), Event::Type::ENTER },
@@ -215,13 +205,6 @@ TEST_CASE("FSM.Utilize") {
 			{ FSM::stateId<C_000>(), Event::Type::ENTRY_GUARD },
 
 			{ FSM::stateId<I    >(), Event::Type::EXIT },
-
-			{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
-			{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<U    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<U_000>(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<C_000>(), Event::Type::CONSTRUCT },
 
 			{ FSM::stateId<O    >(), Event::Type::ENTER },
 			{ FSM::stateId<U    >(), Event::Type::ENTER },
@@ -278,13 +261,6 @@ TEST_CASE("FSM.Utilize") {
 			{ FSM::stateId<C_100>(), Event::Type::ENTRY_GUARD },
 
 			{ FSM::stateId<I    >(), Event::Type::EXIT },
-
-			{ FSM::stateId<I    >(), Event::Type::DESTRUCT },
-			{ FSM::stateId<O    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<U    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<U_100>(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<C    >(), Event::Type::CONSTRUCT },
-			{ FSM::stateId<C_100>(), Event::Type::CONSTRUCT },
 
 			{ FSM::stateId<O    >(), Event::Type::ENTER },
 			{ FSM::stateId<U    >(), Event::Type::ENTER },
