@@ -124,7 +124,7 @@ private:
 template <typename TIndex>
 class BitArrayT<TIndex, 0> final {
 public:
-	HFSM2_CONSTEXPR(11)	void clear()								  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clear()								  noexcept	{}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

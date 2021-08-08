@@ -91,7 +91,7 @@ struct PlanDataT<ArgsT<TContext
 	RegionBits planExists;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
-	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
@@ -146,7 +146,7 @@ struct PlanDataT<ArgsT<TContext
 	RegionBits planExists;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
-	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
@@ -177,11 +177,11 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , TPayload>>
 {
-	HFSM2_CONSTEXPR(11)	void clearTaskStatus  (const StateID)				  noexcept	{}
-	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID)			const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)			const noexcept	{}
 
 #if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(11)	void verifyPlans()								const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept	{}
 #endif
 };
 

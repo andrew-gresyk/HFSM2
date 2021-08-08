@@ -396,7 +396,7 @@ S_<TN_, TA, TH>::name() noexcept {
 //------------------------------------------------------------------------------
 
 template <typename TN_, typename TA, typename TH>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 S_<TN_, TA, TH>::deepGetNames(const Long parent,
 							  const RegionType region,

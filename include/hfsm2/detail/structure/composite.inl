@@ -837,7 +837,7 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 C_<TN, TA, SG, TH, TS...>::deepGetNames(const Long parent,
 										const RegionType regionType,

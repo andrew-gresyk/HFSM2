@@ -2613,7 +2613,7 @@ private:
 template <typename TIndex>
 class BitArrayT<TIndex, 0> final {
 public:
-	HFSM2_CONSTEXPR(11)	void clear()								  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clear()								  noexcept	{}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3383,7 +3383,7 @@ struct PlanDataT<ArgsT<TContext
 	RegionBits planExists;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
-	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
@@ -3438,7 +3438,7 @@ struct PlanDataT<ArgsT<TContext
 	RegionBits planExists;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
-	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
@@ -3469,11 +3469,11 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , TPayload>>
 {
-	HFSM2_CONSTEXPR(11)	void clearTaskStatus  (const StateID)				  noexcept	{}
-	HFSM2_CONSTEXPR(11)	void verifyEmptyStatus(const StateID)			const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)			const noexcept	{}
 
 #if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(11)	void verifyPlans()								const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept	{}
 #endif
 };
 
@@ -3502,7 +3502,7 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
 #if HFSM2_ASSERT_AVAILABLE()
@@ -3589,7 +3589,7 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
 #if HFSM2_ASSERT_AVAILABLE()
@@ -7902,7 +7902,7 @@ struct S_ final
 	static
 	HFSM2_CONSTEXPR(NO)	const char* name() noexcept;
 
-	HFSM2_CONSTEXPR(11)	void deepGetNames(const Long parent,
+	HFSM2_CONSTEXPR(14)	void deepGetNames(const Long parent,
 										  const RegionType region,
 										  const Short depth,
 										  StructureStateInfos& stateInfos)			const noexcept;
@@ -8352,7 +8352,7 @@ S_<TN_, TA, TH>::name() noexcept {
 //------------------------------------------------------------------------------
 
 template <typename TN_, typename TA, typename TH>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 S_<TN_, TA, TH>::deepGetNames(const Long parent,
 							  const RegionType region,
@@ -10298,7 +10298,7 @@ struct C_ final {
 
 	static constexpr Long NAME_COUNT = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
 
-	HFSM2_CONSTEXPR(11)	void deepGetNames(const Long parent,
+	HFSM2_CONSTEXPR(14)	void deepGetNames(const Long parent,
 										  const RegionType region,
 										  const Short depth,
 										  StructureStateInfos& stateInfos)	const noexcept;
@@ -11156,7 +11156,7 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 C_<TN, TA, SG, TH, TS...>::deepGetNames(const Long parent,
 										const RegionType regionType,

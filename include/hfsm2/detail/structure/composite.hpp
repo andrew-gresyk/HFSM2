@@ -253,7 +253,7 @@ struct C_ final {
 
 	static constexpr Long NAME_COUNT = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
 
-	HFSM2_CONSTEXPR(11)	void deepGetNames(const Long parent,
+	HFSM2_CONSTEXPR(14)	void deepGetNames(const Long parent,
 										  const RegionType region,
 										  const Short depth,
 										  StructureStateInfos& stateInfos)	const noexcept;
