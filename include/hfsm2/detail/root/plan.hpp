@@ -140,13 +140,10 @@ public:
 
 		HFSM2_CONSTEXPR(14) void operator ++()					  noexcept;
 
-		HFSM2_CONSTEXPR(14)		  Task& operator  *()			  noexcept	{ return  _plan._planData.tasks[_curr];		}
-		HFSM2_CONSTEXPR(11) const Task& operator  *()		const noexcept	{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_CONSTEXPR(14) Task& operator  *()					  noexcept	{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_CONSTEXPR(14) Task* operator ->()					  noexcept	{ return &_plan._planData.tasks[_curr];		}
 
-		HFSM2_CONSTEXPR(14)		  Task* operator ->()			  noexcept	{ return &_plan._planData.tasks[_curr];		}
-		HFSM2_CONSTEXPR(11) const Task* operator ->()		const noexcept	{ return &_plan._planData.tasks[_curr];		}
-
-		HFSM2_CONSTEXPR(14) void remove()						  noexcept;
+		HFSM2_CONSTEXPR(14) void remove()						  noexcept	{ _plan.remove(_curr);						}
 
 		HFSM2_CONSTEXPR(14) Long next()						const noexcept;
 
@@ -164,10 +161,7 @@ public:
 
 		HFSM2_CONSTEXPR(14) void operator ++()					  noexcept;
 
-		HFSM2_CONSTEXPR(14)		  Task& operator  *()			  noexcept	{ return  _plan._planData.tasks[_curr];		}
 		HFSM2_CONSTEXPR(11) const Task& operator  *()		const noexcept	{ return  _plan._planData.tasks[_curr];		}
-
-		HFSM2_CONSTEXPR(14)		  Task* operator ->()			  noexcept	{ return &_plan._planData.tasks[_curr];		}
 		HFSM2_CONSTEXPR(11) const Task* operator ->()		const noexcept	{ return &_plan._planData.tasks[_curr];		}
 
 		HFSM2_CONSTEXPR(14) Long next()						const noexcept;

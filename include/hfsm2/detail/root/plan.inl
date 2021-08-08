@@ -66,13 +66,11 @@ CPlanT<TArgs>::IteratorT::next() const noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(11)
 CPlanT<TArgs>::operator bool() const noexcept {
-	if (_bounds.first < TASK_CAPACITY) {
-		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
-		return true;
-	} else {
-		HFSM2_ASSERT(_bounds.last == INVALID_LONG);
-		return false;
-	}
+	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
+				 _bounds.last  < TASK_CAPACITY ||
+				 _bounds.last == INVALID_LONG);
+
+	return _bounds.first < TASK_CAPACITY;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,13 +185,11 @@ PlanBaseT<TArgs>::PlanBaseT(PlanData& planData,
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 PlanBaseT<TArgs>::operator bool() const noexcept {
-	if (_bounds.first < TASK_CAPACITY) {
-		HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
-		return true;
-	} else {
-		HFSM2_ASSERT(_bounds.last == INVALID_LONG);
-		return false;
-	}
+	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
+				 _bounds.last  < TASK_CAPACITY ||
+				 _bounds.last == INVALID_LONG);
+
+	return _bounds.first < TASK_CAPACITY;
 }
 
 //------------------------------------------------------------------------------
@@ -205,9 +201,12 @@ PlanBaseT<TArgs>::append(const StateID origin,
 						 const StateID destination,
 						 const TransitionType transitionType) noexcept
 {
-	_planData.planExists.set(_regionId);
+	if (_planData.tasks.count() < TASK_CAPACITY) {
+		_planData.planExists.set(_regionId);
 
-	return linkTask(_planData.tasks.emplace(origin, destination, transitionType));
+		return linkTask(_planData.tasks.emplace(origin, destination, transitionType));
+	} else
+		return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -235,7 +234,6 @@ PlanBaseT<TArgs>::linkTask(const Long index) noexcept {
 
 			auto& currLink = _planData.taskLinks[index];
 			HFSM2_ASSERT(currLink.prev == INVALID_LONG);
-			HFSM2_ASSERT(lastLink.prev == INVALID_LONG);
 
 			currLink.prev  = _bounds.last;
 
