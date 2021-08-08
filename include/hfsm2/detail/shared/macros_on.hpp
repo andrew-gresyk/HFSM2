@@ -352,6 +352,7 @@ constexpr FeatureTag HFSM2_FEATURE_TAG = HFSM2_TYPEINDEX_MASK
 #ifdef __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
+	#pragma clang diagnostic ignored "-Wconstexpr-not-const" // error: 'constexpr' non-static member function will not be implicitly 'const' in C++14; add 'const' to avoid a change in behavior
 #endif
 
 #if defined(__GNUC__) || defined(__GNUG__)

@@ -406,6 +406,7 @@ constexpr FeatureTag HFSM2_FEATURE_TAG = HFSM2_TYPEINDEX_MASK
 #ifdef __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wextra-semi" // error : extra ';' inside a class
+	#pragma clang diagnostic ignored "-Wconstexpr-not-const" // error: 'constexpr' non-static member function will not be implicitly 'const' in C++14; add 'const' to avoid a change in behavior
 #endif
 
 #if defined(__GNUC__) || defined(__GNUG__)
@@ -717,7 +718,7 @@ private:
 	{}
 
 public:
-	HFSM2_CONSTEXPR(11)	bool operator != (const IteratorT& HFSM2_IF_ASSERT(other))	const noexcept	{
+	HFSM2_CONSTEXPR(14)	bool operator != (const IteratorT& HFSM2_IF_ASSERT(other))	const noexcept	{
 		HFSM2_ASSERT(&_container == &other._container);
 
 		return _cursor != _container.limit();
