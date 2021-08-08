@@ -11,7 +11,7 @@ class InjectionT {
 protected:
 	using Context		= typename TArgs::Context;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename TArgs::Rank;
 	using Utility		= typename TArgs::Utility;
 #endif
@@ -22,7 +22,7 @@ protected:
 	using Control		= ControlT<TArgs>;
 	using PlanControl	= PlanControlT<TArgs>;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	using Plan			= PlanT<TArgs>;
 #endif
 
@@ -30,26 +30,26 @@ protected:
 	using GuardControl	= GuardControlT<TArgs>;
 
 public:
-	HFSM2_INLINE void preEntryGuard(Context&)		  noexcept {}
+	HFSM2_CONSTEXPR(14) void preEntryGuard(Context&)	  noexcept {}
 
-	HFSM2_INLINE void preEnter	   (Context&)		  noexcept {}
-	HFSM2_INLINE void preReenter   (Context&)		  noexcept {}
+	HFSM2_CONSTEXPR(14) void preEnter	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14) void preReenter	  (Context&)	  noexcept {}
 
-	HFSM2_INLINE void preUpdate	   (Context&)		  noexcept {}
+	HFSM2_CONSTEXPR(14) void preUpdate	  (Context&)	  noexcept {}
 
 	template <typename TEvent>
-	HFSM2_INLINE void preReact	   (const TEvent&,
-									Context&)		  noexcept {}
+	HFSM2_CONSTEXPR(14) void preReact	  (const TEvent&,
+										   Context&)	  noexcept {}
 
-	HFSM2_INLINE void preExitGuard (Context&)		  noexcept {}
+	HFSM2_CONSTEXPR(14) void preExitGuard (Context&)	  noexcept {}
 
-	HFSM2_INLINE void postExit	   (Context&)		  noexcept {}
-
-	template <typename T>
-	static constexpr StateID  stateId()				  noexcept { return index<StateList, T>();				}
+	HFSM2_CONSTEXPR(14) void postExit	  (Context&)	  noexcept {}
 
 	template <typename T>
-	static constexpr RegionID regionId()			  noexcept { return (RegionID) index<RegionList, T>();	}
+	static constexpr StateID  stateId()					  noexcept { return index<StateList, T>();				}
+
+	template <typename T>
+	static constexpr RegionID regionId()				  noexcept { return (RegionID) index<RegionList, T>();	}
 };
 
 //------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ struct B_<TFirst, TRest...>
 {
 	using typename TFirst::Context;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
 #endif
@@ -77,7 +77,7 @@ struct B_<TFirst, TRest...>
 	using typename TFirst::Control;
 	using typename TFirst::PlanControl;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	using typename TFirst::Plan;
 #endif
 
@@ -87,20 +87,20 @@ struct B_<TFirst, TRest...>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
-	HFSM2_INLINE void widePreEntryGuard(Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14) void widePreEntryGuard(Context& context)		 noexcept;
 
-	HFSM2_INLINE void widePreEnter	   (Context& context)		 noexcept;
-	HFSM2_INLINE void widePreReenter   (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14) void widePreEnter	  (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14) void widePreReenter   (Context& context)		 noexcept;
 
-	HFSM2_INLINE void widePreUpdate	   (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14) void widePreUpdate	  (Context& context)		 noexcept;
 
 	template <typename TEvent>
-	HFSM2_INLINE void widePreReact	   (const TEvent& event,
-										Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14) void widePreReact	  (const TEvent& event,
+											   Context& context)		 noexcept;
 
-	HFSM2_INLINE void widePreExitGuard (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14) void widePreExitGuard (Context& context)		 noexcept;
 
-	HFSM2_INLINE void widePostExit	   (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14) void widePostExit	  (Context& context)		 noexcept;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -111,7 +111,7 @@ struct B_<TFirst>
 {
 	using typename TFirst::Context;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using typename TFirst::Rank;
 	using typename TFirst::Utility;
 #endif
@@ -122,7 +122,7 @@ struct B_<TFirst>
 	using typename TFirst::Control;
 	using typename TFirst::PlanControl;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	using typename TFirst::Plan;
 #endif
 
@@ -132,77 +132,51 @@ struct B_<TFirst>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE Rank	 rank			  (const Control&)			  noexcept { return Rank	{0};	}
-	HFSM2_INLINE Utility utility		  (const Control&)			  noexcept { return Utility{1};		}
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	HFSM2_CONSTEXPR(14) Rank	rank			 (const Control&)		  noexcept { return Rank   {0};		}
+	HFSM2_CONSTEXPR(14) Utility utility			 (const Control&)		  noexcept { return Utility{1};		}
 #endif
 
-	HFSM2_INLINE void	 entryGuard		  (GuardControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14) void	entryGuard		 (GuardControl&)		  noexcept {}
 
-	HFSM2_INLINE void	 enter			  (PlanControl&)			  noexcept {}
-	HFSM2_INLINE void	 reenter		  (PlanControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14) void	enter			 (PlanControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14) void	reenter			 (PlanControl&)			  noexcept {}
 
-	HFSM2_INLINE void	 update			  (FullControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14) void	update			 (FullControl&)			  noexcept {}
 
 	template <typename TEvent>
-	HFSM2_INLINE void	 react			  (const TEvent&,
-						 				   FullControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14) void	react			 (const TEvent&,
+												  FullControl&)			  noexcept {}
 
-	HFSM2_INLINE void	 exitGuard		  (GuardControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14) void	exitGuard		 (GuardControl&)		  noexcept {}
 
-	HFSM2_INLINE void	 exit			  (PlanControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14) void	exit			 (PlanControl&)			  noexcept {}
 
-#ifdef HFSM2_ENABLE_PLANS
-	HFSM2_INLINE void	 planSucceeded	  (FullControl& control)	  noexcept { control.succeed();		}
-	HFSM2_INLINE void	 planFailed		  (FullControl& control)	  noexcept { control.fail();		}
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14) void	planSucceeded	 (FullControl& control)	  noexcept { control.succeed();		}
+	HFSM2_CONSTEXPR(14) void	planFailed		 (FullControl& control)	  noexcept { control.fail();		}
 #endif
 
-	HFSM2_INLINE void	 widePreEntryGuard(Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14) void	widePreEntryGuard(Context& context)		  noexcept;
 
-	HFSM2_INLINE void	 widePreEnter	  (Context& context)		  noexcept;
-	HFSM2_INLINE void	 widePreReenter   (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14) void	widePreEnter	 (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14) void	widePreReenter   (Context& context)		  noexcept;
 
-	HFSM2_INLINE void	 widePreUpdate	  (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14) void	widePreUpdate	 (Context& context)		  noexcept;
 
 	template <typename TEvent>
-	HFSM2_INLINE void	 widePreReact	  (const TEvent& event,
-					 	 				   Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14) void	widePreReact	 (const TEvent& event,
+												  Context& context)		  noexcept;
 
-	HFSM2_INLINE void	 widePreExitGuard (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14) void	widePreExitGuard (Context& context)		  noexcept;
 
-	HFSM2_INLINE void	 widePostExit	  (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14) void	widePostExit	 (Context& context)		  noexcept;
 };
 
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
 using EmptyT = B_<InjectionT<TArgs>>;
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-struct Dynamic_ {};
-
-template <typename... TI>
-struct DB_
-	: Dynamic_
-	, B_<TI...>
-{};
-
-template <typename TArgs>
-using DynamicEmptyT = DB_<InjectionT<TArgs>>;
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-struct Static_ {};
-
-template <typename... TI>
-struct SB_
-	: Static_
-	, B_<TI...>
-{};
-
-template <typename TArgs>
-using StaticEmptyT = SB_<InjectionT<TArgs>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 

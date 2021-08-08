@@ -147,14 +147,6 @@ TEST_CASE("FSM.OrthoUnits") {
 				{ FSM::stateId<O1_04>(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<O1_05>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<O1   >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<O1_01>(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<O1_02>(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<O1_03>(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<O1_04>(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<O1_05>(), Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Apex >(), Event::Type::ENTER },
 				{ FSM::stateId<O1   >(), Event::Type::ENTER },
 				{ FSM::stateId<O1_01>(), Event::Type::ENTER },
@@ -187,14 +179,6 @@ TEST_CASE("FSM.OrthoUnits") {
 		{ FSM::stateId<O1_05>(), Event::Type::EXIT },
 		{ FSM::stateId<O1   >(), Event::Type::EXIT },
 		{ FSM::stateId<Apex >(), Event::Type::EXIT },
-
-		{ FSM::stateId<O1_01>(), Event::Type::DESTRUCT },
-		{ FSM::stateId<O1_02>(), Event::Type::DESTRUCT },
-		{ FSM::stateId<O1_03>(), Event::Type::DESTRUCT },
-		{ FSM::stateId<O1_04>(), Event::Type::DESTRUCT },
-		{ FSM::stateId<O1_05>(), Event::Type::DESTRUCT },
-		{ FSM::stateId<O1   >(), Event::Type::DESTRUCT },
-		{ FSM::stateId<Apex >(), Event::Type::DESTRUCT },
 	});
 }
 

@@ -207,28 +207,15 @@
 
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-	<Type Name="hfsm2::detail::DynamicBox&lt;*&gt;">
-		<DisplayString>{TYPE}</DisplayString>
-		<Expand HideRawView="true" />
-	</Type>
-
-	<Type Name="hfsm2::detail::StaticBox&lt;*&gt;">
-		<DisplayString Optional="true">{TYPE}</DisplayString>
-		<DisplayString Optional="true">{(Type)t_}</DisplayString>
-		<Expand HideRawView="true" />
-	</Type>
-
-	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
-
 	<Type Name="hfsm2::detail::S_&lt;*&gt;">
-		<DisplayString>{_headBox}</DisplayString>
+		<DisplayString>{TYPE}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::C_&lt;*&gt;">
-		<DisplayString>({_headState})</DisplayString>
+		<DisplayString>({TYPE})</DisplayString>
 	</Type>
 
 	<Type Name="hfsm2::detail::CS_&lt;*&gt;">
@@ -239,7 +226,7 @@
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::O_&lt;*&gt;">
-		<DisplayString>[{_headState}]</DisplayString>
+		<DisplayString>[{TYPE}]</DisplayString>
 	</Type>
 
 	<Type Name="hfsm2::detail::OS_&lt;*&gt;">

@@ -73,7 +73,7 @@ struct SI_ final {
 	static constexpr Short ORTHO_REGIONS  = 0;
 	static constexpr Short ORTHO_UNITS	  = 0;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS	  = 0;
 	static constexpr Long  RESUMABLE_BITS = 0;
 #endif
@@ -91,14 +91,14 @@ struct CSI_<TInitial, TRemaining...> {
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
 
-	static constexpr Long  REVERSE_DEPTH  = Max<Initial::REVERSE_DEPTH,	  Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr Long  REVERSE_DEPTH  = max(Initial::REVERSE_DEPTH,	  Remaining::REVERSE_DEPTH);
 	static constexpr Short COMPO_REGIONS  =		Initial::COMPO_REGIONS  + Remaining::COMPO_REGIONS;
 	static constexpr Long  COMPO_PRONGS	  =		Initial::COMPO_PRONGS   + Remaining::COMPO_PRONGS;
 	static constexpr Short ORTHO_REGIONS  =		Initial::ORTHO_REGIONS  + Remaining::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS	  =		Initial::ORTHO_UNITS    + Remaining::ORTHO_UNITS;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
-	static constexpr Long  ACTIVE_BITS	  = Max<Initial::ACTIVE_BITS,	  Remaining::ACTIVE_BITS>::VALUE;
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	static constexpr Long  ACTIVE_BITS	  = max(Initial::ACTIVE_BITS,	  Remaining::ACTIVE_BITS);
 	static constexpr Long  RESUMABLE_BITS =		Initial::RESUMABLE_BITS + Remaining::RESUMABLE_BITS;
 #endif
 
@@ -118,7 +118,7 @@ struct CSI_<TInitial> {
 	static constexpr Short ORTHO_REGIONS  = Initial::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS	  = Initial::ORTHO_UNITS;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS	  = Initial::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS = Initial::RESUMABLE_BITS;
 #endif
@@ -146,8 +146,8 @@ struct CI_ final {
 	static constexpr Short ORTHO_REGIONS  = SubStates::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS	  = SubStates::ORTHO_UNITS;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
-	static constexpr Long  WIDTH_BITS	  = bitWidth(WIDTH);
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	static constexpr Long  WIDTH_BITS	  = bitContain(WIDTH);
 	static constexpr Long  ACTIVE_BITS	  = SubStates::ACTIVE_BITS	+ WIDTH_BITS;
 	static constexpr Long  RESUMABLE_BITS = SubStates::RESUMABLE_BITS + WIDTH_BITS + 1;
 #endif
@@ -166,13 +166,13 @@ struct OSI_<TInitial, TRemaining...> {
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
 
-	static constexpr Long  REVERSE_DEPTH  = Max<Initial::REVERSE_DEPTH,	  Remaining::REVERSE_DEPTH>::VALUE;
+	static constexpr Long  REVERSE_DEPTH  = max(Initial::REVERSE_DEPTH,	  Remaining::REVERSE_DEPTH);
 	static constexpr Short COMPO_REGIONS  =		Initial::COMPO_REGIONS  + Remaining::COMPO_REGIONS;
 	static constexpr Long  COMPO_PRONGS	  =		Initial::COMPO_PRONGS   + Remaining::COMPO_PRONGS;
 	static constexpr Short ORTHO_REGIONS  =		Initial::ORTHO_REGIONS  + Remaining::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS	  =		Initial::ORTHO_UNITS    + Remaining::ORTHO_UNITS;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS	  =		Initial::ACTIVE_BITS    + Remaining::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS =		Initial::RESUMABLE_BITS + Remaining::RESUMABLE_BITS;
 #endif
@@ -190,7 +190,7 @@ struct OSI_<TInitial> {
 	static constexpr Short ORTHO_REGIONS	= Initial::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS		= Initial::ORTHO_UNITS;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS		= Initial::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS	= Initial::RESUMABLE_BITS;
 #endif
@@ -211,7 +211,7 @@ struct OI_ final {
 	static constexpr Short ORTHO_REGIONS	= SubStates::ORTHO_REGIONS + 1;
 	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS + (WIDTH + 7) / 8;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS		= SubStates::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS	= SubStates::RESUMABLE_BITS;
 #endif
@@ -236,14 +236,14 @@ template <typename TContext
 struct ArgsT final {
 	using Context		= TContext;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename TConfig::Rank;
 	using Utility		= typename TConfig::Utility;
 	using RNG			= typename TConfig::RNG;
 	using UP			= typename TConfig::UP;
 #endif
 
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
 	using Logger		= typename TConfig::LoggerInterface;
 #endif
 
@@ -255,19 +255,19 @@ struct ArgsT final {
 	static constexpr Short ORTHO_REGIONS	  = NOrthoCount;
 	static constexpr Short ORTHO_UNITS		  = NOrthoUnits;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Short SERIAL_BITS		  = NSerialBits;
 #endif
 
 	static constexpr Short SUBSTITUTION_LIMIT = NSubstitutionLimit;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	static constexpr Long  TASK_CAPACITY	  = NTaskCapacity;
 #endif
 
 	using Payload		= TPayload;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	using SerialBuffer	= StreamBufferT  <SERIAL_BITS>;
 	using WriteStream	= BitWriteStreamT<SERIAL_BITS>;
 	using ReadStream	= BitReadStreamT <SERIAL_BITS>;
@@ -320,8 +320,8 @@ struct MaterialT   <TN, TA, TH> {
 };
 
 template <typename TN, typename TA, Strategy SG, 			  typename... TS>
-struct MaterialT   <TN, TA, CI_<SG, void,             TS...>> {
-	using Type = C_<TN, TA,     SG, StaticEmptyT<TA>, TS...>;
+struct MaterialT   <TN, TA, CI_<SG, void,       TS...>> {
+	using Type = C_<TN, TA,     SG, EmptyT<TA>, TS...>;
 };
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
@@ -330,8 +330,8 @@ struct MaterialT   <TN, TA, CI_<SG, TH,	TS...>> {
 };
 
 template <typename TN, typename TA,				 typename... TS>
-struct MaterialT   <TN, TA, OI_<void,			  TS...>> {
-	using Type = O_<TN, TA,     StaticEmptyT<TA>, TS...>;
+struct MaterialT   <TN, TA, OI_<void,       TS...>> {
+	using Type = O_<TN, TA,     EmptyT<TA>, TS...>;
 };
 
 template <typename TN, typename TA, typename TH, typename... TS>
@@ -354,7 +354,7 @@ struct RF_ final {
 
 	static constexpr Long  SUBSTITUTION_LIMIT	= TConfig::SUBSTITUTION_LIMIT;
 
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 	static constexpr Long  TASK_CAPACITY		= TConfig::TASK_CAPACITY != INVALID_LONG ?
 													  TConfig::TASK_CAPACITY : Apex::COMPO_PRONGS * 2;
 #endif
@@ -365,7 +365,7 @@ struct RF_ final {
 	static constexpr Short ORTHO_REGIONS		= Apex::ORTHO_REGIONS;
 	static constexpr Short ORTHO_UNITS			= Apex::ORTHO_UNITS;
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS			= Apex::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS		= Apex::RESUMABLE_BITS;
 #endif
@@ -397,28 +397,14 @@ struct RF_ final {
 
 	//----------------------------------------------------------------------
 
-	using DynamicState	= DynamicEmptyT<Args>;
+	using State			= EmptyT<Args>;
 
 	template <typename... TInjections>
-	using DynamicStateT	= DB_<TInjections...>;
+	using StateT		= B_<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using StaticState	= StaticEmptyT<Args>;
-
-	template <typename... TInjections>
-	using StaticStateT	= SB_<TInjections...>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	using State			= StaticState;
-
-	template <typename... TInjections>
-	using StateT		= StaticStateT<TInjections...>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
 	using Logger		= typename TConfig::LoggerInterface;
 #endif
 

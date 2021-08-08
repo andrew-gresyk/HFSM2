@@ -1,4 +1,4 @@
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 
 namespace hfsm2 {
 namespace detail {
@@ -6,34 +6,16 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <Long NBC>
-void
-StreamBufferT<NBC>::clear() noexcept {
-	fill(_data, 0);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <Long NBC>
-BitWriteStreamT<NBC>::BitWriteStreamT(Buffer& buffer,
-									  const Long cursor) noexcept
-	: _buffer{buffer}
-	, _cursor{cursor}
-{
-	_buffer.clear();
-}
-
-//------------------------------------------------------------------------------
-
-template <Long NBC>
 template <Short NBitWidth>
+HFSM2_CONSTEXPR(14)
 void
-BitWriteStreamT<NBC>::write(const UnsignedBitWidth<NBitWidth> item) noexcept {
+BitWriteStreamT<NBC>::write(const UBitWidth<NBitWidth> item) noexcept {
 	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
 	HFSM2_ASSERT(_cursor + BIT_WIDTH <= BIT_CAPACITY);
 
-	using Item = UnsignedBitWidth<BIT_WIDTH>;
+	using Item = UBitWidth<BIT_WIDTH>;
 
 	Item itemBits = item;
 
@@ -43,7 +25,7 @@ BitWriteStreamT<NBC>::write(const UnsignedBitWidth<NBitWidth> item) noexcept {
 
 		const Short byteChunkStart	= _cursor & 0x7;
 		const Short byteDataWidth	= 8 - byteChunkStart;
-		const Short byteChunkWidth	= detail::min(byteDataWidth, itemWidth);
+		const Short byteChunkWidth	= min(byteDataWidth, itemWidth);
 		const Item	byteChunk		= itemBits << byteChunkStart;
 
 		byte		|= byteChunk;
@@ -56,24 +38,16 @@ BitWriteStreamT<NBC>::write(const UnsignedBitWidth<NBitWidth> item) noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <Long NBC>
-BitReadStreamT<NBC>::BitReadStreamT(const Buffer& buffer,
-									const Long cursor) noexcept
-	: _buffer{buffer}
-	, _cursor{cursor}
-{}
-
-//------------------------------------------------------------------------------
-
-template <Long NBC>
 template <Short NBitWidth>
-UnsignedBitWidth<NBitWidth>
+HFSM2_CONSTEXPR(14)
+UBitWidth<NBitWidth>
 BitReadStreamT<NBC>::read() noexcept {
 	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
 	HFSM2_ASSERT(_cursor <= BIT_CAPACITY);
 
-	using Item = UnsignedBitWidth<BIT_WIDTH>;
+	using Item = UBitWidth<BIT_WIDTH>;
 
 	Item item = 0;
 	Short itemCursor = 0;
@@ -85,7 +59,7 @@ BitReadStreamT<NBC>::read() noexcept {
 
 			const Short byteChunkStart	= _cursor & 0x7;
 			const Short byteDataWidth	= 8 - byteChunkStart;
-			const Short byteChunkWidth	= detail::min(byteDataWidth, itemWidth);
+			const Short byteChunkWidth	= min(byteDataWidth, itemWidth);
 			const Short byteChunkMask	= (1 << byteChunkWidth) - 1;
 			const Item	byteChunk		= (byte >> byteChunkStart) & byteChunkMask;
 			const Item	itemChunk		= byteChunk << itemCursor;

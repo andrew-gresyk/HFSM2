@@ -24,7 +24,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	using Args			= TArgs;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
@@ -63,89 +63,87 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
-	template <typename T>
-	HFSM2_INLINE	   T& access();
+#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <typename T>
-	HFSM2_INLINE const T& access() const;
+	HFSM2_CONSTEXPR(14)		  T& access()		  noexcept;
+
+	template <typename T>
+	HFSM2_CONSTEXPR(11) const T& access()	const noexcept;
+
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRegister		  (Registry& registry, const ForkID forkId);
+	HFSM2_CONSTEXPR(14) void	wideRegister		 (Registry& registry, const ForkID forkId)							  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,					const ProngCBits prongs);
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
-	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
+	HFSM2_CONSTEXPR(14) bool	wideForwardEntryGuard(GuardControl& control,				   const ProngCBits prongs)	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideForwardEntryGuard(GuardControl& control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideEntryGuard		 (GuardControl& control											  )	  noexcept;
 
-	HFSM2_INLINE void	 wideConstruct		  (PlanControl&	 control);
+	HFSM2_CONSTEXPR(14) void	wideEnter			 (PlanControl&	control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideReenter			 (PlanControl&	control											  )	  noexcept;
 
-	HFSM2_INLINE void	 wideEnter			  (PlanControl&	 control);
-	HFSM2_INLINE void	 wideReenter		  (PlanControl&	 control);
-
-	HFSM2_INLINE Status	 wideUpdate			  (FullControl&	 control);
+	HFSM2_CONSTEXPR(14) Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
 
 	template <typename TEvent>
-	HFSM2_INLINE Status	 wideReact			  (FullControl&	 control, const TEvent& event);
+	HFSM2_CONSTEXPR(14) Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
 
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,					const ProngCBits prongs);
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
-	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
+	HFSM2_CONSTEXPR(14) bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideExitGuard		 (GuardControl& control											  )	  noexcept;
 
-	HFSM2_INLINE void	 wideExit			  (PlanControl&	 control);
-
-	HFSM2_INLINE void	 wideDestruct		  (PlanControl&  control);
+	HFSM2_CONSTEXPR(14) void	wideExit			 (PlanControl&	control											  )	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive	  (Control& control, const Request request, const ProngCBits prongs);
-	HFSM2_INLINE void	 wideForwardRequest	  (Control& control, const Request request);
+	HFSM2_CONSTEXPR(14) void	wideForwardActive	 (Control& control, const Request request, const ProngCBits prongs)	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideForwardRequest	 (Control& control, const Request request						  )	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRequestChange	  (Control& control, const Request request);
-	HFSM2_INLINE void	 wideRequestRestart	  (Control& control, const Request request);
-	HFSM2_INLINE void	 wideRequestResume	  (Control& control, const Request request);
+	HFSM2_CONSTEXPR(14) void	wideRequestChange	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestRestart	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestResume	 (Control& control, const Request request						  )	  noexcept;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 wideRequestUtilize	  (Control& control, const Request request);
-	HFSM2_INLINE void	 wideRequestRandomize (Control& control, const Request request);
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	HFSM2_CONSTEXPR(14) void	wideRequestUtilize	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestRandomize (Control& control, const Request request						  )	  noexcept;
 
-	HFSM2_INLINE Utility wideReportChange	  (Control& control);
-	HFSM2_INLINE Utility wideReportUtilize	  (Control& control);
-	HFSM2_INLINE Utility wideReportRandomize  (Control& control);
+	HFSM2_CONSTEXPR(14) Utility wideReportChange	 (Control& control												  )	  noexcept;
+	HFSM2_CONSTEXPR(14) Utility wideReportUtilize	 (Control& control												  )	  noexcept;
+	HFSM2_CONSTEXPR(14) Utility wideReportRandomize  (Control& control												  )	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideChangeToRequested(PlanControl&  control);
+	HFSM2_CONSTEXPR(14) void	wideChangeToRequested(PlanControl&  control											  )	  noexcept;
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_INLINE void	 wideSaveActive		  (const Registry& registry, WriteStream& stream) const;
-	HFSM2_INLINE void	 wideSaveResumable	  (const Registry& registry, WriteStream& stream) const;
+	HFSM2_CONSTEXPR(14) void	wideSaveActive		  (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveResumable	  (const Registry& registry, WriteStream& stream)	const noexcept;
 
-	HFSM2_INLINE void	 wideLoadRequested	  (		 Registry& registry, ReadStream&  stream) const;
-	HFSM2_INLINE void	 wideLoadResumable	  (		 Registry& registry, ReadStream&  stream) const;
+	HFSM2_CONSTEXPR(14) void	wideLoadRequested	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadResumable	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
 	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
 
-	void wideGetNames(const Long parent,
-					  const Short depth,
-					  StructureStateInfos& stateInfos) const;
+	HFSM2_CONSTEXPR(14) void wideGetNames(const Long parent,
+										  const Short depth,
+										  StructureStateInfos& stateInfos) const noexcept;
 #endif
 
 	//----------------------------------------------------------------------
@@ -171,7 +169,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	using Args			= TArgs;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
@@ -199,89 +197,87 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
-	template <typename T>
-	HFSM2_INLINE	   T& access()			  { return initial.template access<T>();	}
+#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <typename T>
-	HFSM2_INLINE const T& access() const	  { return initial.template access<T>();	}
+	HFSM2_CONSTEXPR(14)		  T& access()		  noexcept	{ return initial.template access<T>();	}
+
+	template <typename T>
+	HFSM2_CONSTEXPR(14) const T& access()	const noexcept	{ return initial.template access<T>();	}
+
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRegister		  (Registry& registry, const ForkID forkId);
+	HFSM2_CONSTEXPR(14) void	wideRegister		 (Registry& registry, const ForkID forkId)							  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control,					const ProngCBits prongs);
-	HFSM2_INLINE bool	 wideForwardEntryGuard(GuardControl& control);
-	HFSM2_INLINE bool	 wideEntryGuard		  (GuardControl& control);
+	HFSM2_CONSTEXPR(14) bool	wideForwardEntryGuard(GuardControl& control,				   const ProngCBits prongs)	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideForwardEntryGuard(GuardControl& control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideEntryGuard		 (GuardControl& control											  )	  noexcept;
 
-	HFSM2_INLINE void	 wideConstruct		  (PlanControl&  control);
+	HFSM2_CONSTEXPR(14) void	wideEnter			 (PlanControl&	control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideReenter			 (PlanControl&	control											  )	  noexcept;
 
-	HFSM2_INLINE void	 wideEnter			  (PlanControl&  control);
-	HFSM2_INLINE void	 wideReenter		  (PlanControl&  control);
-
-	HFSM2_INLINE Status	 wideUpdate			  (FullControl&  control);
+	HFSM2_CONSTEXPR(14) Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
 
 	template <typename TEvent>
-	HFSM2_INLINE Status	 wideReact			  (FullControl&  control, const TEvent& event);
+	HFSM2_CONSTEXPR(14) Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
 
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control,					const ProngCBits prongs);
-	HFSM2_INLINE bool	 wideForwardExitGuard (GuardControl& control);
-	HFSM2_INLINE bool	 wideExitGuard		  (GuardControl& control);
+	HFSM2_CONSTEXPR(14) bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideExitGuard		 (GuardControl& control											  )	  noexcept;
 
-	HFSM2_INLINE void	 wideExit			  (PlanControl&  control);
-
-	HFSM2_INLINE void	 wideDestruct		  (PlanControl&  control);
+	HFSM2_CONSTEXPR(14) void	wideExit			 (PlanControl&	control											  )	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive	  (Control& control, const Request request, const ProngCBits prongs);
-	HFSM2_INLINE void	 wideForwardRequest	  (Control& control, const Request request);
+	HFSM2_CONSTEXPR(14) void	wideForwardActive	 (Control& control, const Request request, const ProngCBits prongs)	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideForwardRequest	 (Control& control, const Request request						  )	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRequestChange	  (Control& control, const Request request);
-	HFSM2_INLINE void	 wideRequestRestart	  (Control& control, const Request request);
-	HFSM2_INLINE void	 wideRequestResume	  (Control& control, const Request request);
+	HFSM2_CONSTEXPR(14) void	wideRequestChange	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestRestart	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestResume	 (Control& control, const Request request						  )	  noexcept;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_INLINE void	 wideRequestUtilize	  (Control& control, const Request request);
-	HFSM2_INLINE void	 wideRequestRandomize (Control& control, const Request request);
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	HFSM2_CONSTEXPR(14) void	wideRequestUtilize	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestRandomize (Control& control, const Request request						  )	  noexcept;
 
-	HFSM2_INLINE Utility wideReportChange	  (Control& control);
-	HFSM2_INLINE Utility wideReportUtilize	  (Control& control);
-	HFSM2_INLINE Utility wideReportRandomize  (Control& control);
+	HFSM2_CONSTEXPR(14) Utility wideReportChange	 (Control& control												  )	  noexcept;
+	HFSM2_CONSTEXPR(14) Utility wideReportUtilize	 (Control& control												  )	  noexcept;
+	HFSM2_CONSTEXPR(14) Utility wideReportRandomize  (Control& control												  )	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideChangeToRequested(PlanControl&  control);
+	HFSM2_CONSTEXPR(14) void	wideChangeToRequested(PlanControl&  control											  )	  noexcept;
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_INLINE void	 wideSaveActive		  (const Registry& registry, WriteStream& stream) const;
-	HFSM2_INLINE void	 wideSaveResumable	  (const Registry& registry, WriteStream& stream) const;
+	HFSM2_CONSTEXPR(14) void	wideSaveActive		  (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveResumable	  (const Registry& registry, WriteStream& stream)	const noexcept;
 
-	HFSM2_INLINE void	 wideLoadRequested	  (		 Registry& registry, ReadStream&  stream) const;
-	HFSM2_INLINE void	 wideLoadResumable	  (		 Registry& registry, ReadStream&  stream) const;
+	HFSM2_CONSTEXPR(14) void	wideLoadRequested	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadResumable	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
 	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT;
 
-	void wideGetNames(const Long parent,
-					  const Short depth,
-					  StructureStateInfos& stateInfos) const;
+	HFSM2_CONSTEXPR(14) void wideGetNames(const Long parent,
+										  const Short depth,
+										  StructureStateInfos& stateInfos) const;
 #endif
 
 	//----------------------------------------------------------------------

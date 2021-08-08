@@ -24,7 +24,7 @@ struct CS_ final {
 
 	using Args			= TArgs;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
@@ -69,105 +69,96 @@ struct CS_ final {
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
-	template <typename T>
-	HFSM2_INLINE	   T& access()		 noexcept;
+#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <typename T>
-	HFSM2_INLINE const T& access() const noexcept;
+	HFSM2_CONSTEXPR(14)		  T& access()		  noexcept;
+
+	template <typename T>
+	HFSM2_CONSTEXPR(11) const T& access()	const noexcept;
+
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRegister				 (Registry& registry,  const Parent parent) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRegister			   (Registry& registry, const Parent parent)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard		 (GuardControl& control, const Short prong) noexcept;
-	HFSM2_INLINE bool	 wideEntryGuard				 (GuardControl& control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideForwardEntryGuard	   (GuardControl& control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideEntryGuard			   (GuardControl& control, const Short prong)	  noexcept;
 
-	HFSM2_INLINE void	 wideConstruct				 (PlanControl&  control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideEnter				   (PlanControl&  control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideReenter				   (PlanControl&  control, const Short prong)	  noexcept;
 
-	HFSM2_INLINE void	 wideEnter					 (PlanControl&  control, const Short prong) noexcept;
-	HFSM2_INLINE void	 wideReenter				 (PlanControl&  control, const Short prong) noexcept;
-
-	HFSM2_INLINE Status	 wideUpdate					 (FullControl&  control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) Status	wideUpdate				   (FullControl&  control, const Short prong)	  noexcept;
 
 	template <typename TEvent>
-	HFSM2_INLINE Status	 wideReact					 (FullControl&  control,
-													  const TEvent& event,	 const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) Status	wideReact				   (FullControl&  control,
+															const TEvent& event,   const Short prong)	  noexcept;
 
-	HFSM2_INLINE bool	 wideForwardExitGuard		 (GuardControl& control, const Short prong) noexcept;
-	HFSM2_INLINE bool	 wideExitGuard				 (GuardControl& control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideForwardExitGuard	   (GuardControl& control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideExitGuard			   (GuardControl& control, const Short prong)	  noexcept;
 
-	HFSM2_INLINE void	 wideExit					 (PlanControl&  control, const Short prong) noexcept;
-
-	HFSM2_INLINE void	 wideDestruct				 (PlanControl&  control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideExit				   (PlanControl&  control, const Short prong)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive			 (Control& control, const Request request, const Short prong) noexcept;
-	HFSM2_INLINE void	 wideForwardRequest			 (Control& control, const Request request, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideForwardActive		   (Control& control, const Request request, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideForwardRequest		   (Control& control, const Request request, const Short prong)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRequestChangeComposite	 (Control& control, const Request request					) noexcept;
-	HFSM2_INLINE void	 wideRequestChangeResumable	 (Control& control, const Request request, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestChangeComposite (Control& control, const Request request					  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestChangeResumable (Control& control, const Request request, const Short prong)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRequestRestart			 (Control& control, const Request request					) noexcept;
-	HFSM2_INLINE void	 wideRequestResume			 (Control& control, const Request request, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestRestart		   (Control& control, const Request request					  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestResume		   (Control& control, const Request request, const Short prong)	  noexcept;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	/*
-	HFSM2_INLINE void	 wideRequestUtilize			 (Control& control, const Request request) noexcept;
-	HFSM2_INLINE void	 wideRequestRandomize		 (Control& control, const Request request) noexcept;
-	*/
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_INLINE UP		 wideReportChangeComposite	 (Control& control																   ) noexcept;
-	HFSM2_INLINE UP		 wideReportChangeResumable	 (Control& control, const Short prong											   ) noexcept;
-	HFSM2_INLINE UP		 wideReportChangeUtilitarian (Control& control																   ) noexcept;
-	HFSM2_INLINE Utility wideReportChangeRandom		 (Control& control, Utility* const options, const Rank* const ranks, const Rank top) noexcept;
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	HFSM2_CONSTEXPR(14) UP		wideReportChangeComposite  (Control& control																 )	  noexcept;
+	HFSM2_CONSTEXPR(14) UP		wideReportChangeResumable  (Control& control, const Short prong												 )	  noexcept;
+	HFSM2_CONSTEXPR(14) UP		wideReportChangeUtilitarian(Control& control																 )	  noexcept;
+	HFSM2_CONSTEXPR(14) Utility wideReportChangeRandom	   (Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE UP		 wideReportUtilize			 (Control& control																   ) noexcept;
-	HFSM2_INLINE Rank	 wideReportRank				 (Control& control,								  Rank* const ranks				   ) noexcept;
-	HFSM2_INLINE Utility wideReportRandomize		 (Control& control, Utility* const options, const Rank* const ranks, const Rank top) noexcept;
+	HFSM2_CONSTEXPR(14) UP		wideReportUtilize		   (Control& control																 )	  noexcept;
+	HFSM2_CONSTEXPR(14) Rank	wideReportRank			   (Control& control,								Rank* const ranks				 )	  noexcept;
+	HFSM2_CONSTEXPR(14) Utility wideReportRandomize		   (Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideChangeToRequested		 (PlanControl& control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideChangeToRequested	   (PlanControl& control, const Short prong) noexcept;
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_INLINE void	 wideSaveActive				 (const Registry& registry, WriteStream& stream, const Short prong) const noexcept;
-	HFSM2_INLINE void	 wideSaveResumable			 (const Registry& registry, WriteStream& stream	 				  ) const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveActive			   (const Registry& registry, WriteStream& stream, const Short prong)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveResumable		   (const Registry& registry, WriteStream& stream	 				)	const noexcept;
 
-	HFSM2_INLINE void	 wideLoadRequested			 (      Registry& registry, ReadStream&  stream, const Short prong) const noexcept;
-	HFSM2_INLINE void	 wideLoadResumable			 (      Registry& registry, ReadStream&  stream	 				  ) const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadRequested		   (      Registry& registry, ReadStream&  stream, const Short prong)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadResumable		   (      Registry& registry, ReadStream&  stream	 				)	const noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static constexpr Long NAME_COUNT = LMaterial::NAME_COUNT + RMaterial::NAME_COUNT;
 
-	void wideGetNames(const Long parent,
-					  const RegionType region,
-					  const Short depth,
-					  StructureStateInfos& stateInfos) const noexcept;
+	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
+										  const RegionType region,
+										  const Short depth,
+										  StructureStateInfos& stateInfos) const noexcept;
 #endif
 
 	//----------------------------------------------------------------------
@@ -197,7 +188,7 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	using Args			= TArgs;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename Args::Rank;
 	using Utility		= typename Args::Utility;
 	using UP			= typename Args::UP;
@@ -223,105 +214,96 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM2_EXPLICIT_MEMBER_SPECIALIZATION
-	template <typename T>
-	HFSM2_INLINE	   T& access()		 noexcept	 { return state.template access<T>();	}
+#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <typename T>
-	HFSM2_INLINE const T& access() const noexcept	 { return state.template access<T>();	}
+	HFSM2_CONSTEXPR(14)		  T& access()		  noexcept	 { return state.template access<T>();	}
+
+	template <typename T>
+	HFSM2_CONSTEXPR(11) const T& access()	const noexcept	 { return state.template access<T>();	}
+
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRegister				 (Registry& registry,  const Parent parent) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRegister			   (Registry& registry, const Parent parent)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE bool	 wideForwardEntryGuard		 (GuardControl& control, const Short prong) noexcept;
-	HFSM2_INLINE bool	 wideEntryGuard				 (GuardControl& control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideForwardEntryGuard	   (GuardControl& control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideEntryGuard			   (GuardControl& control, const Short prong)	  noexcept;
 
-	HFSM2_INLINE void	 wideConstruct				 (PlanControl&  control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideEnter				   (PlanControl&  control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideReenter				   (PlanControl&  control, const Short prong)	  noexcept;
 
-	HFSM2_INLINE void	 wideEnter					 (PlanControl&  control, const Short prong) noexcept;
-	HFSM2_INLINE void	 wideReenter				 (PlanControl&  control, const Short prong) noexcept;
-
-	HFSM2_INLINE Status	 wideUpdate					 (FullControl&  control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) Status	wideUpdate				   (FullControl&  control, const Short prong)	  noexcept;
 
 	template <typename TEvent>
-	HFSM2_INLINE Status	 wideReact					 (FullControl&  control,
-													  const TEvent& event,	 const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) Status	wideReact				   (FullControl&  control,
+															const TEvent& event,   const Short prong)	  noexcept;
 
-	HFSM2_INLINE bool	 wideForwardExitGuard		 (GuardControl& control, const Short prong) noexcept;
-	HFSM2_INLINE bool	 wideExitGuard				 (GuardControl& control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideForwardExitGuard	   (GuardControl& control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14) bool	wideExitGuard			   (GuardControl& control, const Short prong)	  noexcept;
 
-	HFSM2_INLINE void	 wideExit					 (PlanControl&  control, const Short prong) noexcept;
-
-	HFSM2_INLINE void	 wideDestruct				 (PlanControl&  control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideExit				   (PlanControl&  control, const Short prong)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideForwardActive			 (Control& control, const Request request, const Short prong) noexcept;
-	HFSM2_INLINE void	 wideForwardRequest			 (Control& control, const Request request, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideForwardActive		   (Control& control, const Request request, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideForwardRequest		   (Control& control, const Request request, const Short prong)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRequestChangeComposite	 (Control& control, const Request request					) noexcept;
-	HFSM2_INLINE void	 wideRequestChangeResumable	 (Control& control, const Request request, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestChangeComposite (Control& control, const Request request					  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestChangeResumable (Control& control, const Request request, const Short prong)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideRequestRestart			 (Control& control, const Request request					) noexcept;
-	HFSM2_INLINE void	 wideRequestResume			 (Control& control, const Request request, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestRestart		   (Control& control, const Request request					  )	  noexcept;
+	HFSM2_CONSTEXPR(14) void	wideRequestResume		   (Control& control, const Request request, const Short prong)	  noexcept;
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
-	/*
-	HFSM2_INLINE void	 wideRequestUtilize			 (Control& control, const Request request) noexcept;
-	HFSM2_INLINE void	 wideRequestRandomize		 (Control& control, const Request request) noexcept;
-	*/
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	HFSM2_CONSTEXPR(14) UP		wideReportChangeComposite  (Control& control																 )	  noexcept;
+	HFSM2_CONSTEXPR(14) UP		wideReportChangeResumable  (Control& control, const Short prong												 )	  noexcept;
+	HFSM2_CONSTEXPR(14) UP		wideReportChangeUtilitarian(Control& control																 )	  noexcept;
+	HFSM2_CONSTEXPR(14) Utility wideReportChangeRandom	   (Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE UP		 wideReportChangeComposite	 (Control& control																   ) noexcept;
-	HFSM2_INLINE UP		 wideReportChangeResumable	 (Control& control, const Short prong											   ) noexcept;
-	HFSM2_INLINE UP		 wideReportChangeUtilitarian (Control& control																   ) noexcept;
-	HFSM2_INLINE Utility wideReportChangeRandom		 (Control& control, Utility* const options, const Rank* const ranks, const Rank top) noexcept;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - -  - - - - - - -
-
-	HFSM2_INLINE UP		 wideReportUtilize			 (Control& control																   ) noexcept;
-	HFSM2_INLINE Rank	 wideReportRank				 (Control& control,								  Rank* const ranks				   ) noexcept;
-	HFSM2_INLINE Utility wideReportRandomize		 (Control& control, Utility* const options, const Rank* const ranks, const Rank top) noexcept;
+	HFSM2_CONSTEXPR(14) UP		wideReportUtilize		   (Control& control																 )	  noexcept;
+	HFSM2_CONSTEXPR(14) Rank	wideReportRank			   (Control& control,								Rank* const ranks				 )	  noexcept;
+	HFSM2_CONSTEXPR(14) Utility wideReportRandomize		   (Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE void	 wideChangeToRequested		 (PlanControl& control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14) void	wideChangeToRequested	   (PlanControl& control, const Short prong) noexcept;
 
 	//----------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_INLINE void	wideSaveActive				 (const Registry& registry, WriteStream& stream, const Short prong) const noexcept;
-	HFSM2_INLINE void	wideSaveResumable			 (const Registry& registry, WriteStream& stream					  ) const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveActive			   (const Registry& registry, WriteStream& stream, const Short prong)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveResumable		   (const Registry& registry, WriteStream& stream	 				)	const noexcept;
 
-	HFSM2_INLINE void	wideLoadRequested			 (		Registry& registry, ReadStream&  stream, const Short prong) const noexcept;
-	HFSM2_INLINE void	wideLoadResumable			 (		Registry& registry, ReadStream&  stream					  ) const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadRequested		   (      Registry& registry, ReadStream&  stream, const Short prong)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadResumable		   (      Registry& registry, ReadStream&  stream	 				)	const noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static constexpr Long NAME_COUNT = State::NAME_COUNT;
 
-	void wideGetNames(const Long parent,
-					  const RegionType region,
-					  const Short depth,
-					  StructureStateInfos& stateInfos) const noexcept;
+	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
+										  const RegionType region,
+										  const Short depth,
+										  StructureStateInfos& stateInfos) const noexcept;
 #endif
 
 	//----------------------------------------------------------------------

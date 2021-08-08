@@ -1,103 +1,205 @@
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 namespace hfsm2 {
+namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
-// http://xoshiro.di.unimi.it/splitmix64.c
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 26495) // variable is uninitialized
-#endif
+HFSM2_CONSTEXPR(14) float  uniform(const uint32_t uint)		  noexcept;
+HFSM2_CONSTEXPR(14) double uniform(const uint64_t uint)		  noexcept;
 
-class SplitMix64 {
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename>
+class SimpleRandomT;
+
+//------------------------------------------------------------------------------
+// SplitMix64 (http://xoshiro.di.unimi.it/splitmix64.c)
+
+template <>
+class SimpleRandomT<uint64_t> {
 public:
-	inline SplitMix64()								  noexcept {}
-	inline SplitMix64(const uint64_t seed)			  noexcept;
+	constexpr SimpleRandomT()								  noexcept {}
 
-	inline uint64_t next()							  noexcept;
+	HFSM2_CONSTEXPR(14) SimpleRandomT(const uint64_t seed)	  noexcept;
 
-private:
-	inline uint64_t raw()							  noexcept;
+	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept;
 
 private:
+	HFSM2_CONSTEXPR(14) uint64_t raw64()					  noexcept;
 
-	uint64_t _state;
+private:
+
+	uint64_t _state = 0;
 };
 
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
+//------------------------------------------------------------------------------
+// SplitMix32 (https://groups.google.com/forum/#!topic/prng/VFjdFmbMgZI)
+
+template <>
+class SimpleRandomT<uint32_t> {
+public:
+	constexpr SimpleRandomT()								  noexcept {}
+
+	HFSM2_CONSTEXPR(14) SimpleRandomT(const uint32_t seed)	  noexcept;
+
+	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept;
+
+private:
+	HFSM2_CONSTEXPR(14) uint32_t raw32()					  noexcept;
+
+private:
+	uint32_t _state = 0;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename>
+class BaseRandomT;
+
+//------------------------------------------------------------------------------
+
+template <>
+class BaseRandomT<uint64_t> {
+protected:
+	using Simple = SimpleRandomT<uint64_t>;
+
+public:
+	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
+
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t s)		  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t(& s)[4])	  noexcept	{ seed(s);	}
+
+	HFSM2_CONSTEXPR(14) void seed(const uint64_t s)			  noexcept;
+	HFSM2_CONSTEXPR(14) void seed(const uint64_t(& s)[4])	  noexcept;
+
+protected:
+	uint64_t _state[4];
+};
+
+//------------------------------------------------------------------------------
+
+template <>
+class BaseRandomT<uint32_t> {
+protected:
+	using Simple = SimpleRandomT<uint32_t>;
+
+public:
+	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
+
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t s)		  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t(& s)[4])	  noexcept	{ seed(s);	}
+
+	HFSM2_CONSTEXPR(14) void seed(const uint32_t s)			  noexcept;
+	HFSM2_CONSTEXPR(14) void seed(const uint32_t(& s)[4])	  noexcept;
+
+protected:
+	uint32_t _state[4];
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename>
+class FloatRandomT;
 
 //------------------------------------------------------------------------------
 // xoshiro256+ (http://xoshiro.di.unimi.it/xoshiro256plus.c)
 
-class XoShiRo256Plus {
+template <>
+class FloatRandomT<uint64_t>
+	: BaseRandomT<uint64_t>
+{
+	using Base = BaseRandomT<uint64_t>;
+
 public:
-	inline XoShiRo256Plus() noexcept;
-	inline XoShiRo256Plus(const uint64_t s)			  noexcept;
-	inline XoShiRo256Plus(const uint64_t(& s)[4])	  noexcept;
+	using Base::BaseRandomT;
 
-	inline void seed(const uint64_t s)				  noexcept;
-	inline void seed(const uint64_t(& s)[4])		  noexcept;
+	HFSM2_CONSTEXPR(14) double	float64()					  noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14) float	float32()					  noexcept	{ return uniform(uint32());			}
 
-	inline float next()								  noexcept;
-	inline void jump()								  noexcept;
+	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept;
+	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept	{ return (uint32_t) uint64();		}
 
-private:
-	inline uint64_t raw()							  noexcept;
+	HFSM2_CONSTEXPR(14) float next()						  noexcept	{ return float32();					}
+	HFSM2_CONSTEXPR(14) void  jump()						  noexcept;
+};
 
-private:
-	uint64_t _state[4];
+//------------------------------------------------------------------------------
+// xoshiro128+ (http://xoshiro.di.unimi.it/xoshiro128plus.c)
+
+template <>
+class FloatRandomT<uint32_t>
+	: BaseRandomT<uint32_t>
+{
+	using Base = BaseRandomT<uint32_t>;
+
+public:
+	using Base::BaseRandomT;
+
+	HFSM2_CONSTEXPR(14) double	float64()					  noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14) float	float32()					  noexcept	{ return uniform(uint32());			}
+
+	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept	{ return widen(uint32(), uint32());	}
+	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept;
+
+	HFSM2_CONSTEXPR(14) float next()						  noexcept	{ return float32();					}
+	HFSM2_CONSTEXPR(14) void  jump()						  noexcept;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// https://groups.google.com/forum/#!topic/prng/VFjdFmbMgZI
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 26495) // variable is uninitialized
-#endif
-
-class SplitMix32 {
-public:
-	inline SplitMix32()								  noexcept {}
-	inline SplitMix32(const uint32_t seed)			  noexcept;
-
-	inline uint32_t next()							  noexcept;
-
-private:
-	inline uint32_t raw()							  noexcept;
-
-private:
-	uint32_t _state;
-};
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
+template <typename>
+class IntRandomT;
 
 //------------------------------------------------------------------------------
-// http://xoshiro.di.unimi.it/xoshiro128plus.c
+// xoshiro256** (https://prng.di.unimi.it/xoshiro256starstar.c)
 
-class XoShiRo128Plus {
+template <>
+class IntRandomT<uint64_t>
+	: BaseRandomT<uint64_t>
+{
+	using Base = BaseRandomT<uint64_t>;
+
 public:
-	inline XoShiRo128Plus() noexcept;
-	inline XoShiRo128Plus(const uint32_t s)			  noexcept;
-	inline XoShiRo128Plus(const uint32_t(& s)[4])	  noexcept;
+	using Base::BaseRandomT;
 
-	inline void seed(const uint32_t s)				  noexcept;
-	inline void seed(const uint32_t(& s)[4])		  noexcept;
+	HFSM2_CONSTEXPR(14) double	float64()					  noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14) float	float32()					  noexcept	{ return uniform(uint32());			}
 
-	inline float next()								  noexcept;
-	inline void jump()								  noexcept;
+	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept;
+	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept	{ return (uint32_t) uint64();		}
 
-private:
-	inline uint32_t raw()							  noexcept;
-
-private:
-	uint32_t _state[4];
+	HFSM2_CONSTEXPR(14) void jump()							  noexcept;
 };
+
+//------------------------------------------------------------------------------
+// xoshiro128** (https://prng.di.unimi.it/xoshiro128starstar.c)
+
+template <>
+class IntRandomT<uint32_t>
+	: BaseRandomT<uint32_t>
+{
+	using Base = BaseRandomT<uint32_t>;
+
+public:
+	using Base::BaseRandomT;
+
+	HFSM2_CONSTEXPR(14) double	float64()					  noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14) float	float32()					  noexcept	{ return uniform(uint32());			}
+
+	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept	{ return widen(uint32(), uint32());	}
+	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept;
+
+	HFSM2_CONSTEXPR(14) void jump()							  noexcept;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+
+using SimpleRandom = detail::SimpleRandomT<uintptr_t>;
+using FloatRandom  = detail::FloatRandomT <uintptr_t>;
+using IntRandom	   = detail::IntRandomT	  <uintptr_t>;
 
 //------------------------------------------------------------------------------
 
@@ -108,11 +210,24 @@ class RNGT;
 
 template <>
 class RNGT<float>
-	: public HFSM2_64BIT_OR_32BIT(XoShiRo256Plus, XoShiRo128Plus)
+	: public detail::FloatRandomT<uintptr_t>
 {
 public:
-	using HFSM2_64BIT_OR_32BIT(XoShiRo256Plus::XoShiRo256Plus,
-							   XoShiRo128Plus::XoShiRo128Plus);
+	using Base = detail::FloatRandomT<uintptr_t>;
+
+	using Base::Base;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <>
+class RNGT<uintptr_t>
+	: public detail::IntRandomT<uintptr_t>
+{
+public:
+	using Base = detail::IntRandomT<uintptr_t>;
+
+	using Base::Base;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

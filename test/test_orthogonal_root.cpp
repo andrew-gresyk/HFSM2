@@ -116,15 +116,6 @@ TEST_CASE("FSM.Orthogonal Root") {
 				{ FSM::stateId<O2_C2   >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<O2_C2_S1>(),	Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0},		Event::Type::CONSTRUCT },
-				{ FSM::stateId<C1      >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<C1_S1   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<O2      >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<O2_C1   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<O2_C1_S1>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<O2_C2   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<O2_C2_S1>(),	Event::Type::CONSTRUCT },
-
 				{ hfsm2::StateID{0},		Event::Type::ENTER },
 				{ FSM::stateId<C1      >(),	Event::Type::ENTER },
 				{ FSM::stateId<C1_S1   >(),	Event::Type::ENTER },
@@ -160,15 +151,6 @@ TEST_CASE("FSM.Orthogonal Root") {
 		{ FSM::stateId<O2_C2   >(),	Event::Type::EXIT },
 		{ FSM::stateId<O2      >(),	Event::Type::EXIT },
 		{ hfsm2::StateID{0},		Event::Type::EXIT },
-
-		{ FSM::stateId<C1_S1   >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<C1      >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<O2_C1_S1>(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<O2_C1   >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<O2_C2_S1>(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<O2_C2   >(),	Event::Type::DESTRUCT },
-		{ FSM::stateId<O2      >(),	Event::Type::DESTRUCT },
-		{ hfsm2::StateID{0},		Event::Type::DESTRUCT },
 	});
 }
 

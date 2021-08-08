@@ -9,7 +9,9 @@ cmake-*
 
 /binaries-*
 /hfsm_test.dir
-/projects/code-lite/compile_commands.json
+/projects/code-lite/build-Debug
+/projects/code-lite/Makefile
+/projects/code-lite/tags
 /projects/code-lite/*/CMakeLists.txt
 /projects/code-lite/*/compile_flags.txt
 /projects/visual-studio/.opencppcov

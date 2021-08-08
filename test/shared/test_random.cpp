@@ -23,12 +23,12 @@ testUniformity(const int average) {
 		REQUIRE(real  < Type{1.0});
 
 		const unsigned n = (unsigned) (10.0f * real);
-		REQUIRE(n < hfsm2::detail::count<unsigned>(histogram));
+		REQUIRE(n < hfsm2::count<unsigned>(histogram));
 
 		++histogram[n];
 	}
 
-	for (unsigned i = 1; i < hfsm2::detail::count<unsigned>(histogram); ++i) {
+	for (unsigned i = 1; i < hfsm2::count<unsigned>(histogram); ++i) {
 		const int delta = abs(average - histogram[i]);
 		const float relative = 1.0f * delta / average;
 

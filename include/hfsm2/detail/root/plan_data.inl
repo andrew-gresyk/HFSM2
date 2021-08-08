@@ -1,4 +1,4 @@
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
 namespace hfsm2 {
 namespace detail {
@@ -6,6 +6,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clearTaskStatus(const StateID stateId) noexcept {
 	if (stateId != INVALID_STATE_ID) {
@@ -17,9 +18,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
-#ifdef HFSM2_ENABLE_ASSERT
+#if HFSM2_ASSERT_AVAILABLE()
 
 	if (stateId != INVALID_STATE_ID) {
 		HFSM2_ASSERT(!tasksSuccesses.get(stateId));
@@ -31,9 +33,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_ASSERT
+#if HFSM2_ASSERT_AVAILABLE()
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::verifyPlans() const noexcept {
 	Long planCount = 0;
@@ -47,6 +50,7 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+HFSM2_CONSTEXPR(14)
 Long
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::verifyPlan(const RegionID regionId) const noexcept {
 	Long length = 0;
@@ -89,6 +93,7 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clearTaskStatus(const StateID stateId) noexcept {
 	if (stateId != INVALID_STATE_ID) {
@@ -100,9 +105,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
-#ifdef HFSM2_ENABLE_ASSERT
+#if HFSM2_ASSERT_AVAILABLE()
 
 	if (stateId != INVALID_STATE_ID) {
 		HFSM2_ASSERT(!tasksSuccesses.get(stateId));
@@ -114,9 +120,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_ASSERT
+#if HFSM2_ASSERT_AVAILABLE()
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::verifyPlans() const noexcept {
 	Long planCount = 0;
@@ -130,6 +137,7 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+HFSM2_CONSTEXPR(14)
 Long
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::verifyPlan(const RegionID regionId) const noexcept {
 	Long length = 0;

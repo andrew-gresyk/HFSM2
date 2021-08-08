@@ -26,7 +26,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}</ProjectGuid>
+    <ProjectGuid>{92997883-142C-4F51-8DEC-E9A998600054}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>
   </PropertyGroup>

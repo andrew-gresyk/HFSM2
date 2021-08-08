@@ -4,6 +4,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideRegister(Registry& registry,
 									 const Parent parent) noexcept
@@ -14,6 +15,7 @@ CS_<TN, TA, SG, NI, T>::wideRegister(Registry& registry,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 bool
 CS_<TN, TA, SG, NI, T>::wideForwardEntryGuard(GuardControl& control,
 											  const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -27,6 +29,7 @@ CS_<TN, TA, SG, NI, T>::wideForwardEntryGuard(GuardControl& control,
 // COMMON
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 bool
 CS_<TN, TA, SG, NI, T>::wideEntryGuard(GuardControl& control,
 									   const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -39,18 +42,7 @@ CS_<TN, TA, SG, NI, T>::wideEntryGuard(GuardControl& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
-void
-CS_<TN, TA, SG, NI, T>::wideConstruct(PlanControl& control,
-									  const Short HFSM2_IF_ASSERT(prong)) noexcept
-{
-	HFSM2_ASSERT(prong == PRONG_INDEX);
-
-	state.deepConstruct(control);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideEnter(PlanControl& control,
 								  const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -63,6 +55,7 @@ CS_<TN, TA, SG, NI, T>::wideEnter(PlanControl& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideReenter(PlanControl& control,
 									const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -75,6 +68,7 @@ CS_<TN, TA, SG, NI, T>::wideReenter(PlanControl& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 Status
 CS_<TN, TA, SG, NI, T>::wideUpdate(FullControl& control,
 								   const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -88,6 +82,7 @@ CS_<TN, TA, SG, NI, T>::wideUpdate(FullControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 template <typename TEvent>
+HFSM2_CONSTEXPR(14)
 Status
 CS_<TN, TA, SG, NI, T>::wideReact(FullControl& control,
 								  const TEvent& event,
@@ -101,6 +96,7 @@ CS_<TN, TA, SG, NI, T>::wideReact(FullControl& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 bool
 CS_<TN, TA, SG, NI, T>::wideForwardExitGuard(GuardControl& control,
 											 const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -114,6 +110,7 @@ CS_<TN, TA, SG, NI, T>::wideForwardExitGuard(GuardControl& control,
 // COMMON
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 bool
 CS_<TN, TA, SG, NI, T>::wideExitGuard(GuardControl& control,
 									  const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -126,6 +123,7 @@ CS_<TN, TA, SG, NI, T>::wideExitGuard(GuardControl& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideExit(PlanControl& control,
 								 const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -138,18 +136,7 @@ CS_<TN, TA, SG, NI, T>::wideExit(PlanControl& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
-void
-CS_<TN, TA, SG, NI, T>::wideDestruct(PlanControl& control,
-									 const Short HFSM2_IF_ASSERT(prong)) noexcept
-{
-	HFSM2_ASSERT(prong == PRONG_INDEX);
-
-	state.deepDestruct(control);
-}
-
-//------------------------------------------------------------------------------
-
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideForwardActive(Control& control,
 										  const Request request,
@@ -163,6 +150,7 @@ CS_<TN, TA, SG, NI, T>::wideForwardActive(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideForwardRequest(Control& control,
 										   const Request request,
@@ -176,6 +164,7 @@ CS_<TN, TA, SG, NI, T>::wideForwardRequest(Control& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideRequestChangeComposite(Control& control,
 												   const Request request) noexcept
@@ -186,6 +175,7 @@ CS_<TN, TA, SG, NI, T>::wideRequestChangeComposite(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideRequestChangeResumable(Control& control,
 												   const Request request,
@@ -199,6 +189,7 @@ CS_<TN, TA, SG, NI, T>::wideRequestChangeResumable(Control& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideRequestRestart(Control& control,
 										   const Request request) noexcept
@@ -209,6 +200,7 @@ CS_<TN, TA, SG, NI, T>::wideRequestRestart(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideRequestResume(Control& control,
 										  const Request request,
@@ -221,9 +213,10 @@ CS_<TN, TA, SG, NI, T>::wideRequestResume(Control& control,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, T>::wideReportUtilize(Control& control) noexcept {
 	return state.deepReportUtilize(control);
@@ -232,6 +225,7 @@ CS_<TN, TA, SG, NI, T>::wideReportUtilize(Control& control) noexcept {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 typename TA::Rank
 CS_<TN, TA, SG, NI, T>::wideReportRank(Control& control,
 									   Rank* const ranks) noexcept
@@ -246,6 +240,7 @@ CS_<TN, TA, SG, NI, T>::wideReportRank(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 typename TA::Utility
 CS_<TN, TA, SG, NI, T>::wideReportRandomize(Control& control,
 											Utility* const options,
@@ -263,6 +258,7 @@ CS_<TN, TA, SG, NI, T>::wideReportRandomize(Control& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, T>::wideReportChangeComposite(Control& control) noexcept {
 	return state.deepReportChange(control);
@@ -271,6 +267,7 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeComposite(Control& control) noexcept {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, T>::wideReportChangeResumable(Control& control,
 												  const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -283,6 +280,7 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeResumable(Control& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, T>::wideReportChangeUtilitarian(Control& control) noexcept {
 	return state.deepReportChange(control);
@@ -291,6 +289,7 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeUtilitarian(Control& control) noexcept {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 typename TA::Utility
 CS_<TN, TA, SG, NI, T>::wideReportChangeRandom(Control& control,
 											   Utility* const options,
@@ -310,6 +309,7 @@ CS_<TN, TA, SG, NI, T>::wideReportChangeRandom(Control& control,
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideChangeToRequested(PlanControl& control,
 											  const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -321,9 +321,10 @@ CS_<TN, TA, SG, NI, T>::wideChangeToRequested(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if HFSM2_SERIALIZATION_AVAILABLE()
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideSaveActive(const Registry& registry,
 									   WriteStream& stream,
@@ -337,6 +338,7 @@ CS_<TN, TA, SG, NI, T>::wideSaveActive(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideSaveResumable(const Registry& registry,
 										  WriteStream& stream) const noexcept
@@ -347,6 +349,7 @@ CS_<TN, TA, SG, NI, T>::wideSaveResumable(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideLoadRequested(Registry& registry,
 										  ReadStream& stream,
@@ -360,6 +363,7 @@ CS_<TN, TA, SG, NI, T>::wideLoadRequested(Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideLoadResumable(Registry& registry,
 										  ReadStream& stream) const noexcept
@@ -371,9 +375,10 @@ CS_<TN, TA, SG, NI, T>::wideLoadResumable(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, T>::wideGetNames(const Long parent,
 									 const RegionType /*region*/,

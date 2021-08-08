@@ -1,4 +1,4 @@
-#ifdef HFSM2_ENABLE_PLANS
+#if HFSM2_PLANS_AVAILABLE()
 
 namespace hfsm2 {
 namespace detail {
@@ -8,11 +8,11 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct TaskBase {
-	HFSM2_INLINE TaskBase() noexcept {}
+	HFSM2_CONSTEXPR(11) TaskBase()								  noexcept {}
 
-	HFSM2_INLINE TaskBase(const StateID origin_,
-						  const StateID destination_,
-						  const TransitionType type_) noexcept
+	HFSM2_CONSTEXPR(11) TaskBase(const StateID origin_,
+								 const StateID destination_,
+								 const TransitionType type_)	  noexcept
 		: origin{origin_}
 		, destination{destination_}
 		, type{type_}
@@ -33,7 +33,13 @@ struct TaskBase {
 	TransitionType type = TransitionType::COUNT;
 };
 
-inline bool operator == (const TaskBase& lhs, const TaskBase& rhs) noexcept {
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(11)
+bool
+operator == (const TaskBase& lhs,
+			 const TaskBase& rhs)								  noexcept
+{
 	return lhs.origin	   == rhs.origin &&
 		   lhs.destination == rhs.destination &&
 		   lhs.type		   == rhs.type;
@@ -52,16 +58,16 @@ struct TaskT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE TaskT() noexcept {
+	HFSM2_CONSTEXPR(14) TaskT()									  noexcept {
 		new (&storage) Payload{};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE TaskT(const StateID origin,
-					   const StateID destination,
-					   const TransitionType type,
-					   const Payload& payload) noexcept
+	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin,
+							  const StateID destination,
+							  const TransitionType type,
+							  const Payload& payload)			  noexcept
 		: TaskBase{origin, destination, type}
 		, payloadSet{true}
 	{
@@ -70,14 +76,14 @@ struct TaskT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_INLINE TaskT(const StateID origin,
-					   const StateID destination,
-					   const TransitionType type,
-					   Payload&& payload) noexcept
+	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin,
+							  const StateID destination,
+							  const TransitionType type,
+							  Payload&& payload)				  noexcept
 		: TaskBase{origin, destination, type}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{std::move(payload)};
+		new (&storage) Payload{move(payload)};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -102,11 +108,10 @@ struct TaskT<void>
 template <typename TPayload, Long NCapacity>
 class TaskListT {
 public:
-	using Index = Long;
+	using Index		= Long;
 
-	static constexpr Index CAPACITY = NCapacity;
-
-	static constexpr Index INVALID = Index (-1);
+	static constexpr Index CAPACITY	= NCapacity;
+	static constexpr Index INVALID	= Index (-1);
 
 private:
 	using Payload	= TPayload;
@@ -114,24 +119,24 @@ private:
 
 public:
 	template <typename... TArgs>
-	Index emplace(TArgs&&... args)												  noexcept;
+	HFSM2_CONSTEXPR(14)	Index emplace(TArgs&&... args)							  noexcept;
 
-	void remove(const Index i)													  noexcept;
+	HFSM2_CONSTEXPR(14)	void remove(const Index i)								  noexcept;
 
-	HFSM2_INLINE	   Item& operator[] (const Index i)							  noexcept;
-	HFSM2_INLINE const Item& operator[] (const Index i)						const noexcept;
+	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index i)					  noexcept;
+	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index i)				const noexcept;
 
-	HFSM2_INLINE Index count()												const noexcept	{ return _count;	}
+	HFSM2_CONSTEXPR(11)	Index count()										const noexcept	{ return _count;	}
 
 private:
 	HFSM2_IF_ASSERT(void verifyStructure(const Index occupied = INVALID)	const noexcept);
 
 private:
-	Item _items[CAPACITY];
 	Index _vacantHead = 0;
 	Index _vacantTail = 0;
 	Index _last  = 0;
 	Index _count = 0;
+	Item _items[CAPACITY];
 };
 
 //------------------------------------------------------------------------------

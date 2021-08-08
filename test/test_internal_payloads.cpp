@@ -320,9 +320,6 @@ TEST_CASE("FSM.Internal Payloads") {
 		FSM::Instance machine{_, &logger};
 		{
 			logger.assertSequence({
-				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<A_1  >(), Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<A    >(), Event::Type::ENTER },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
 			});
@@ -344,7 +341,6 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::Type::REACT },
 				{ FSM::stateId<A    >(), Event::Type::REACT },
 				{ FSM::stateId<A_1  >(), Event::Type::REACT },
 			});
@@ -374,10 +370,6 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<A_1  >(), Event::Type::EXIT },
-
-				{ FSM::stateId<A_1  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<A_2  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<A_2_1>(), Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<A_2  >(), Event::Type::ENTER },
 				{ FSM::stateId<A_2_1>(), Event::Type::ENTER },
@@ -414,7 +406,6 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::Type::REACT },
 				{ FSM::stateId<A    >(), Event::Type::REACT },
 				{ FSM::stateId<A_2  >(), Event::Type::REACT },
 				{ FSM::stateId<A_2_1>(), Event::Type::REACT },
@@ -453,15 +444,6 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<A_2_1>(), Event::Type::EXIT },
 				{ FSM::stateId<A_2  >(), Event::Type::EXIT },
 				{ FSM::stateId<A    >(), Event::Type::EXIT },
-
-				{ FSM::stateId<A_2_1>(), Event::Type::DESTRUCT },
-				{ FSM::stateId<A_2  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_1  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_1_1>(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_2  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_2_2>(), Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<B    >(), Event::Type::ENTER },
 				{ FSM::stateId<B_1  >(), Event::Type::ENTER },
@@ -511,7 +493,6 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::Type::REACT },
 				{ FSM::stateId<B    >(), Event::Type::REACT },
 				{ FSM::stateId<B_1  >(), Event::Type::REACT },
 				{ FSM::stateId<B_1_1>(), Event::Type::REACT },
@@ -559,15 +540,6 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<B_2_2>(), Event::Type::EXIT },
 				{ FSM::stateId<B_2  >(), Event::Type::EXIT },
 				{ FSM::stateId<B    >(), Event::Type::EXIT },
-
-				{ FSM::stateId<B_1_1>(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B_1  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B_2_2>(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B_2  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<A_2  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<A_2_1>(), Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<A    >(), Event::Type::ENTER },
 				{ FSM::stateId<A_2  >(), Event::Type::ENTER },
@@ -624,15 +596,6 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<A_2_1>(), Event::Type::EXIT },
 				{ FSM::stateId<A_2  >(), Event::Type::EXIT },
 				{ FSM::stateId<A    >(), Event::Type::EXIT },
-
-				{ FSM::stateId<A_2_1>(), Event::Type::DESTRUCT },
-				{ FSM::stateId<A_2  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_1  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_1_1>(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_2  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<B_2_2>(), Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<B    >(), Event::Type::ENTER },
 				{ FSM::stateId<B_1  >(), Event::Type::ENTER },
@@ -759,15 +722,6 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<B_2  >(), Event::Type::EXIT },
 				{ FSM::stateId<B    >(), Event::Type::EXIT },
 
-				{ FSM::stateId<B_1_1>(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B_1  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B_2_2>(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B_2  >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<B    >(), Event::Type::DESTRUCT },
-				{ FSM::stateId<A    >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<A_2  >(), Event::Type::CONSTRUCT },
-				{ FSM::stateId<A_2_2>(), Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<A    >(), Event::Type::ENTER },
 				{ FSM::stateId<A_2  >(), Event::Type::ENTER },
 				{ FSM::stateId<A_2_2>(), Event::Type::ENTER },
@@ -816,10 +770,6 @@ TEST_CASE("FSM.Internal Payloads") {
 		{ FSM::stateId<A_2_2>(), Event::Type::EXIT },
 		{ FSM::stateId<A_2  >(), Event::Type::EXIT },
 		{ FSM::stateId<A    >(), Event::Type::EXIT },
-
-		{ FSM::stateId<A_2_2>(), Event::Type::DESTRUCT },
-		{ FSM::stateId<A_2  >(), Event::Type::DESTRUCT },
-		{ FSM::stateId<A    >(), Event::Type::DESTRUCT },
 	});
 }
 

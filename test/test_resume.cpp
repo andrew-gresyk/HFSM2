@@ -95,9 +95,6 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Apex>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<I   >(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<Apex>(),	Event::Type::ENTER },
 				{ FSM::stateId<I   >(),	Event::Type::ENTER },
 			});
@@ -131,13 +128,6 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<OC_2>(),	Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT },
-
-				{ FSM::stateId<I   >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<O   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OR  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OR_2>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OC  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OC_2>(),	Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<O   >(),	Event::Type::ENTER },
 				{ FSM::stateId<OR  >(),	Event::Type::ENTER },
@@ -187,13 +177,6 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<OC  >(),	Event::Type::EXIT },
 				{ FSM::stateId<O   >(),	Event::Type::EXIT },
 
-				{ FSM::stateId<OR_2>(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<OR  >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<OC_2>(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<OC  >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<O   >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<I   >(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<I   >(),	Event::Type::ENTER },
 			});
 
@@ -231,13 +214,6 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<OC_1>(),	Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT },
-
-				{ FSM::stateId<I   >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<O   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OR  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OR_2>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OC  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OC_1>(),	Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<O   >(),	Event::Type::ENTER },
 				{ FSM::stateId<OR  >(),	Event::Type::ENTER },
@@ -281,13 +257,6 @@ TEST_CASE("FSM.Resumable") {
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT },
 
-				{ FSM::stateId<I   >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<O   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OR  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OR_1>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OC  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OC_1>(),	Event::Type::CONSTRUCT },
-
 				{ FSM::stateId<O   >(),	Event::Type::ENTER },
 				{ FSM::stateId<OR  >(),	Event::Type::ENTER },
 				{ FSM::stateId<OR_1>(),	Event::Type::ENTER },
@@ -330,13 +299,6 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<OC_2>(),	Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT },
-
-				{ FSM::stateId<I   >(),	Event::Type::DESTRUCT },
-				{ FSM::stateId<O   >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OR  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OR_2>(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OC  >(),	Event::Type::CONSTRUCT },
-				{ FSM::stateId<OC_2>(),	Event::Type::CONSTRUCT },
 
 				{ FSM::stateId<O   >(),	Event::Type::ENTER },
 				{ FSM::stateId<OR  >(),	Event::Type::ENTER },
