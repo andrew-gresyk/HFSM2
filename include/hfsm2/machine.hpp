@@ -125,13 +125,13 @@
 #define HFSM2_ARCHITECTURE(A)							HFSM2_ARCHITECTURE_##A()
 
 #if INTPTR_MAX == INT64_MAX
-	#define HFSM2_ARCHITECTURE_64BIT()										true
-	#define HFSM2_ARCHITECTURE_32BIT()									   false
+	#define HFSM2_ARCHITECTURE_64()											true
+	#define HFSM2_ARCHITECTURE_32()										   false
 
 	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p64
 #elif INTPTR_MAX == INT32_MAX
-	#define HFSM2_ARCHITECTURE_64BIT()									   false
-	#define HFSM2_ARCHITECTURE_32BIT()										true
+	#define HFSM2_ARCHITECTURE_64()										   false
+	#define HFSM2_ARCHITECTURE_32()											true
 
 	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p32
 #else
@@ -1231,7 +1231,7 @@ uniform(const uint64_t uint) noexcept {
 
 //------------------------------------------------------------------------------
 
-constexpr
+HFSM2_CONSTEXPR(11)
 uint32_t
 rotl(const uint32_t x, const uint32_t k) noexcept {
 	return (x << k) | (x >> (32 - k));
@@ -1239,7 +1239,7 @@ rotl(const uint32_t x, const uint32_t k) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-constexpr
+HFSM2_CONSTEXPR(11)
 uint64_t
 rotl(const uint64_t x, const uint64_t k) noexcept {
 	return (x << k) | (x >> (64 - k));
@@ -15722,9 +15722,9 @@ RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 //#undef HFSM2_CONSTEXPR
 //#undef HFSM2_CONSTEXPR_EXTENDED
 
-#undef HFSM2_ARCHITECTURE
-#undef HFSM2_ARCHITECTURE_64BIT
-#undef HFSM2_ARCHITECTURE_32BIT
+//#undef HFSM2_ARCHITECTURE
+//#undef HFSM2_ARCHITECTURE_64
+//#undef HFSM2_ARCHITECTURE_32
 #undef HFSM2_64BIT_OR_32BIT
 
 //#undef HFSM2_BREAK

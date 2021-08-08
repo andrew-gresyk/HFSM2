@@ -71,13 +71,13 @@
 #define HFSM2_ARCHITECTURE(A)							HFSM2_ARCHITECTURE_##A()
 
 #if INTPTR_MAX == INT64_MAX
-	#define HFSM2_ARCHITECTURE_64BIT()										true
-	#define HFSM2_ARCHITECTURE_32BIT()									   false
+	#define HFSM2_ARCHITECTURE_64()											true
+	#define HFSM2_ARCHITECTURE_32()										   false
 
 	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p64
 #elif INTPTR_MAX == INT32_MAX
-	#define HFSM2_ARCHITECTURE_64BIT()									   false
-	#define HFSM2_ARCHITECTURE_32BIT()										true
+	#define HFSM2_ARCHITECTURE_64()										   false
+	#define HFSM2_ARCHITECTURE_32()											true
 
 	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p32
 #else

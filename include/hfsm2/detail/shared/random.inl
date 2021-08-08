@@ -21,7 +21,7 @@ uniform(const uint64_t uint) noexcept {
 
 //------------------------------------------------------------------------------
 
-constexpr
+HFSM2_CONSTEXPR(11)
 uint32_t
 rotl(const uint32_t x, const uint32_t k) noexcept {
 	return (x << k) | (x >> (32 - k));
@@ -29,7 +29,7 @@ rotl(const uint32_t x, const uint32_t k) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-constexpr
+HFSM2_CONSTEXPR(11)
 uint64_t
 rotl(const uint64_t x, const uint64_t k) noexcept {
 	return (x << k) | (x >> (64 - k));
