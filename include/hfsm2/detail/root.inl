@@ -20,7 +20,7 @@ R_<TG, TA>::R_(Context& context
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 R_<TG, TA>::~R_() noexcept {
 	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 }

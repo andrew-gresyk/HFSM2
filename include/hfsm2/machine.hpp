@@ -112,6 +112,14 @@
 	#define HFSM2_CONSTEXPR_17()										  inline
 #endif
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if __cplusplus >= 202002L
+	#define HFSM2_CONSTEXPR_20()									   constexpr
+#else
+	#define HFSM2_CONSTEXPR_20()										  inline
+#endif
+
 //------------------------------------------------------------------------------
 
 #define HFSM2_ARCHITECTURE(A)							HFSM2_ARCHITECTURE_##A()
@@ -630,7 +638,7 @@ widen(const uint32_t x, const uint32_t y)			  noexcept	{ return (uint64_t) x << 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 fill(T& a, const char value)						  noexcept { memset(&a, (int) value, sizeof(a));	}
 
@@ -1028,10 +1036,10 @@ protected:
 	using Simple = SimpleRandomT<uint64_t>;
 
 public:
-	HFSM2_CONSTEXPR(14) BaseRandomT()						  noexcept;
+	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
 
-	HFSM2_CONSTEXPR(14) BaseRandomT(const uint64_t s)		  noexcept	{ seed(s);	}
-	HFSM2_CONSTEXPR(14) BaseRandomT(const uint64_t(& s)[4])	  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t s)		  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t(& s)[4])	  noexcept	{ seed(s);	}
 
 	HFSM2_CONSTEXPR(14) void seed(const uint64_t s)			  noexcept;
 	HFSM2_CONSTEXPR(14) void seed(const uint64_t(& s)[4])	  noexcept;
@@ -1048,10 +1056,10 @@ protected:
 	using Simple = SimpleRandomT<uint32_t>;
 
 public:
-	HFSM2_CONSTEXPR(14) BaseRandomT()						  noexcept;
+	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
 
-	HFSM2_CONSTEXPR(14) BaseRandomT(const uint32_t s)		  noexcept	{ seed(s);	}
-	HFSM2_CONSTEXPR(14) BaseRandomT(const uint32_t(& s)[4])	  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t s)		  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t(& s)[4])	  noexcept	{ seed(s);	}
 
 	HFSM2_CONSTEXPR(14) void seed(const uint32_t s)			  noexcept;
 	HFSM2_CONSTEXPR(14) void seed(const uint32_t(& s)[4])	  noexcept;
@@ -1296,7 +1304,7 @@ SimpleRandomT<uint32_t>::raw32() noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 BaseRandomT<uint64_t>::BaseRandomT() noexcept {
 	Simple generator;
 
@@ -1332,7 +1340,7 @@ BaseRandomT<uint64_t>::seed(const uint64_t(& s)[4]) noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 BaseRandomT<uint32_t>::BaseRandomT() noexcept {
 	Simple generator;
 
@@ -2080,14 +2088,14 @@ struct LoggerInterfaceT {
 	using StatusEvent	 = ::hfsm2::StatusEvent;
 #endif
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void recordMethod(Context& HFSM2_UNUSED(context),
 					  const StateID HFSM2_UNUSED(origin),
 					  const Method HFSM2_UNUSED(method))			  noexcept
 	{}
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordTransition(Context& HFSM2_UNUSED(context),
@@ -2098,7 +2106,7 @@ struct LoggerInterfaceT {
 
 #if HFSM2_PLANS_AVAILABLE()
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordTaskStatus(Context& HFSM2_UNUSED(context),
@@ -2107,7 +2115,7 @@ struct LoggerInterfaceT {
 					 const StatusEvent HFSM2_UNUSED(event))			  noexcept
 	{}
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordPlanStatus(Context& HFSM2_UNUSED(context),
@@ -2117,7 +2125,7 @@ struct LoggerInterfaceT {
 
 #endif
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordCancelledPending(Context& HFSM2_UNUSED(context),
@@ -2126,7 +2134,7 @@ struct LoggerInterfaceT {
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordUtilityResolution(Context& HFSM2_UNUSED(context),
@@ -2135,7 +2143,7 @@ struct LoggerInterfaceT {
 							const Utilty HFSM2_UNUSED(utilty))		  noexcept
 	{}
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordRandomResolution(Context& HFSM2_UNUSED(context),
@@ -5674,7 +5682,7 @@ protected:
 		HFSM2_CONSTEXPR(14)	Origin(ControlT& control_,
 								   const StateID stateId)				  noexcept;
 
-		HFSM2_CONSTEXPR(14)	~Origin()									  noexcept;
+		HFSM2_CONSTEXPR(20)	~Origin()									  noexcept;
 
 		ControlT& control;
 		const StateID prevId;
@@ -5686,7 +5694,7 @@ protected:
 		HFSM2_CONSTEXPR(14) Region(ControlT& control,
 							const RegionID regionId)					  noexcept;
 
-		HFSM2_CONSTEXPR(14) ~Region()									  noexcept;
+		HFSM2_CONSTEXPR(20) ~Region()									  noexcept;
 
 		ControlT& control;
 		const RegionID prevId;
@@ -5913,7 +5921,7 @@ protected:
 							const StateID index,
 							const Long size) noexcept;
 
-		HFSM2_CONSTEXPR(14) ~Region() noexcept;
+		HFSM2_CONSTEXPR(20) ~Region() noexcept;
 
 		PlanControlT& control;
 		const RegionID prevId;
@@ -6018,7 +6026,7 @@ protected:
 
 	struct Lock {
 		HFSM2_CONSTEXPR(14) Lock(FullControlBaseT& control_)	  noexcept;
-		HFSM2_CONSTEXPR(14) ~Lock()								  noexcept;
+		HFSM2_CONSTEXPR(20) ~Lock()								  noexcept;
 
 		FullControlBaseT* const control;
 	};
@@ -6685,7 +6693,7 @@ ControlT<TArgs>::Origin::Origin(ControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 ControlT<TArgs>::Origin::~Origin() noexcept {
 	control.resetOrigin(prevId);
 }
@@ -6706,7 +6714,7 @@ ControlT<TArgs>::Region::Region(ControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 ControlT<TArgs>::Region::~Region() noexcept {
 	control.resetRegion(prevId);
 }
@@ -6819,7 +6827,7 @@ PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 PlanControlT<TArgs>::Region::~Region() noexcept {
 	control.resetRegion(prevId, prevIndex, prevSize);
 
@@ -6874,7 +6882,7 @@ FullControlBaseT<TArgs>::Lock::Lock(FullControlBaseT& control_) noexcept
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 FullControlBaseT<TArgs>::Lock::~Lock() noexcept {
 	if (control)
 		control->_locked = false;
@@ -13552,7 +13560,7 @@ public:
 								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept;
 
-	HFSM2_CONSTEXPR(14) ~R_() noexcept;
+	HFSM2_CONSTEXPR(20) ~R_() noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -14023,7 +14031,7 @@ public:
 		initialEnter();
 	}
 
-	HFSM2_CONSTEXPR(14) ~RV_()																  noexcept	{ finalExit();	}
+	HFSM2_CONSTEXPR(20) ~RV_()																  noexcept	{ finalExit();	}
 
 private:
 	using Base::initialEnter;
@@ -14743,7 +14751,7 @@ R_<TG, TA>::R_(Context& context
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 R_<TG, TA>::~R_() noexcept {
 	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 }

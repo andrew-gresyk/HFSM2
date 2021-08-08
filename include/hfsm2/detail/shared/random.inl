@@ -95,7 +95,7 @@ SimpleRandomT<uint32_t>::raw32() noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 BaseRandomT<uint64_t>::BaseRandomT() noexcept {
 	Simple generator;
 
@@ -131,7 +131,7 @@ BaseRandomT<uint64_t>::seed(const uint64_t(& s)[4]) noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-HFSM2_CONSTEXPR(14)
+HFSM2_CONSTEXPR(20)
 BaseRandomT<uint32_t>::BaseRandomT() noexcept {
 	Simple generator;
 

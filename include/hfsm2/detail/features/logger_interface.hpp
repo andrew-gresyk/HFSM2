@@ -23,14 +23,14 @@ struct LoggerInterfaceT {
 	using StatusEvent	 = ::hfsm2::StatusEvent;
 #endif
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void recordMethod(Context& HFSM2_UNUSED(context),
 					  const StateID HFSM2_UNUSED(origin),
 					  const Method HFSM2_UNUSED(method))			  noexcept
 	{}
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordTransition(Context& HFSM2_UNUSED(context),
@@ -41,7 +41,7 @@ struct LoggerInterfaceT {
 
 #if HFSM2_PLANS_AVAILABLE()
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordTaskStatus(Context& HFSM2_UNUSED(context),
@@ -50,7 +50,7 @@ struct LoggerInterfaceT {
 					 const StatusEvent HFSM2_UNUSED(event))			  noexcept
 	{}
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordPlanStatus(Context& HFSM2_UNUSED(context),
@@ -60,7 +60,7 @@ struct LoggerInterfaceT {
 
 #endif
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordCancelledPending(Context& HFSM2_UNUSED(context),
@@ -69,7 +69,7 @@ struct LoggerInterfaceT {
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordUtilityResolution(Context& HFSM2_UNUSED(context),
@@ -78,7 +78,7 @@ struct LoggerInterfaceT {
 							const Utilty HFSM2_UNUSED(utilty))		  noexcept
 	{}
 
-	HFSM2_CONSTEXPR(14)
+	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
 	recordRandomResolution(Context& HFSM2_UNUSED(context),

@@ -58,6 +58,14 @@
 	#define HFSM2_CONSTEXPR_17()										  inline
 #endif
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if __cplusplus >= 202002L
+	#define HFSM2_CONSTEXPR_20()									   constexpr
+#else
+	#define HFSM2_CONSTEXPR_20()										  inline
+#endif
+
 //------------------------------------------------------------------------------
 
 #define HFSM2_ARCHITECTURE(A)							HFSM2_ARCHITECTURE_##A()

@@ -53,7 +53,7 @@ protected:
 		HFSM2_CONSTEXPR(14)	Origin(ControlT& control_,
 								   const StateID stateId)				  noexcept;
 
-		HFSM2_CONSTEXPR(14)	~Origin()									  noexcept;
+		HFSM2_CONSTEXPR(20)	~Origin()									  noexcept;
 
 		ControlT& control;
 		const StateID prevId;
@@ -65,7 +65,7 @@ protected:
 		HFSM2_CONSTEXPR(14) Region(ControlT& control,
 							const RegionID regionId)					  noexcept;
 
-		HFSM2_CONSTEXPR(14) ~Region()									  noexcept;
+		HFSM2_CONSTEXPR(20) ~Region()									  noexcept;
 
 		ControlT& control;
 		const RegionID prevId;
@@ -292,7 +292,7 @@ protected:
 							const StateID index,
 							const Long size) noexcept;
 
-		HFSM2_CONSTEXPR(14) ~Region() noexcept;
+		HFSM2_CONSTEXPR(20) ~Region() noexcept;
 
 		PlanControlT& control;
 		const RegionID prevId;
@@ -397,7 +397,7 @@ protected:
 
 	struct Lock {
 		HFSM2_CONSTEXPR(14) Lock(FullControlBaseT& control_)	  noexcept;
-		HFSM2_CONSTEXPR(14) ~Lock()								  noexcept;
+		HFSM2_CONSTEXPR(20) ~Lock()								  noexcept;
 
 		FullControlBaseT* const control;
 	};

@@ -96,7 +96,7 @@ public:
 								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept;
 
-	HFSM2_CONSTEXPR(14) ~R_() noexcept;
+	HFSM2_CONSTEXPR(20) ~R_() noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -567,7 +567,7 @@ public:
 		initialEnter();
 	}
 
-	HFSM2_CONSTEXPR(14) ~RV_()																  noexcept	{ finalExit();	}
+	HFSM2_CONSTEXPR(20) ~RV_()																  noexcept	{ finalExit();	}
 
 private:
 	using Base::initialEnter;

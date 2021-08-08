@@ -221,7 +221,7 @@ widen(const uint32_t x, const uint32_t y)			  noexcept	{ return (uint64_t) x << 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 fill(T& a, const char value)						  noexcept { memset(&a, (int) value, sizeof(a));	}
 

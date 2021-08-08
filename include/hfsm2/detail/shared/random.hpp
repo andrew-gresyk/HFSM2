@@ -65,10 +65,10 @@ protected:
 	using Simple = SimpleRandomT<uint64_t>;
 
 public:
-	HFSM2_CONSTEXPR(14) BaseRandomT()						  noexcept;
+	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
 
-	HFSM2_CONSTEXPR(14) BaseRandomT(const uint64_t s)		  noexcept	{ seed(s);	}
-	HFSM2_CONSTEXPR(14) BaseRandomT(const uint64_t(& s)[4])	  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t s)		  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t(& s)[4])	  noexcept	{ seed(s);	}
 
 	HFSM2_CONSTEXPR(14) void seed(const uint64_t s)			  noexcept;
 	HFSM2_CONSTEXPR(14) void seed(const uint64_t(& s)[4])	  noexcept;
@@ -85,10 +85,10 @@ protected:
 	using Simple = SimpleRandomT<uint32_t>;
 
 public:
-	HFSM2_CONSTEXPR(14) BaseRandomT()						  noexcept;
+	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
 
-	HFSM2_CONSTEXPR(14) BaseRandomT(const uint32_t s)		  noexcept	{ seed(s);	}
-	HFSM2_CONSTEXPR(14) BaseRandomT(const uint32_t(& s)[4])	  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t s)		  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t(& s)[4])	  noexcept	{ seed(s);	}
 
 	HFSM2_CONSTEXPR(14) void seed(const uint32_t s)			  noexcept;
 	HFSM2_CONSTEXPR(14) void seed(const uint32_t(& s)[4])	  noexcept;
