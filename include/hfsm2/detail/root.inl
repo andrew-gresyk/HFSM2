@@ -800,7 +800,7 @@ RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 {
 	HFSM2_ASSERT(_registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::CHANGE, std::move(payload)});
+	_requests.emplace(Transition{stateId, TransitionType::CHANGE, move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
@@ -831,7 +831,7 @@ RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 {
 	HFSM2_ASSERT(_registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESTART, std::move(payload)});
+	_requests.emplace(Transition{stateId, TransitionType::RESTART, move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
@@ -861,7 +861,7 @@ RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 {
 	HFSM2_ASSERT(_registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESUME, std::move(payload)});
+	_requests.emplace(Transition{stateId, TransitionType::RESUME, move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
 }
@@ -893,7 +893,7 @@ RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith
 {
 	HFSM2_ASSERT(_registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::UTILIZE, std::move(payload)});
+	_requests.emplace(Transition{stateId, TransitionType::UTILIZE, move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
@@ -923,7 +923,7 @@ RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWi
 {
 	HFSM2_ASSERT(_registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, std::move(payload)});
+	_requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
@@ -955,7 +955,7 @@ RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 {
 	HFSM2_ASSERT(_registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::SCHEDULE, std::move(payload)});
+	_requests.emplace(Transition{stateId, TransitionType::SCHEDULE, move(payload)});
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }

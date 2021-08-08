@@ -17,7 +17,7 @@ StaticArrayT<T, NC>::operator[] (const N index) noexcept	{
 
 template <typename T, Long NC>
 template <typename N>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 const T&
 StaticArrayT<T, NC>::operator[] (const N index) const noexcept	{
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
@@ -79,7 +79,7 @@ ArrayT<T, NC>::operator[] (const N index) noexcept {
 
 template <typename T, Long NC>
 template <typename N>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 const typename ArrayT<T, NC>::Item&
 ArrayT<T, NC>::operator[] (const N index) const noexcept {
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);

@@ -46,21 +46,6 @@ struct ConditionalT<false, TT, TF> {
 template <bool B, typename TT, typename TF>
 using Conditional = typename ConditionalT<B, TT, TF>::Type;
 
-//------------------------------------------------------------------------------
-
-template <typename, typename>
-struct IsSameT {
-	static constexpr bool Value = false;
-};
-
-template <typename T>
-struct IsSameT<T, T> {
-	static constexpr bool Value = true;
-};
-
-template <typename T0, typename T1>
-static constexpr bool IsSame = IsSameT<T0, T1>::Value;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -102,11 +87,15 @@ using RemoveReference = typename RemoveReferenceT<T>::Type;
 
 //------------------------------------------------------------------------------
 
-template <typename>
-constexpr bool IS_LVALUE_REFERENCE = false;
+template <typename T>
+struct IsValueReferenceT final {
+	static const bool VALUE = false;
+};
 
 template <typename T>
-constexpr bool IS_LVALUE_REFERENCE<T&> = true;
+struct IsValueReferenceT<T&> final {
+	static const bool VALUE = true;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -157,11 +146,13 @@ forward(RemoveReference<T>& t)						  noexcept	{
 	return static_cast<T&&>(t);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 template <typename T>
 HFSM2_CONSTEXPR(11)
 T&&
 forward(RemoveReference<T>&& t)						  noexcept	{
-	static_assert(!IS_LVALUE_REFERENCE<T>, "");
+	static_assert(!IsValueReferenceT<T>::VALUE, "");
 
 	return static_cast<T&&>(t);
 }

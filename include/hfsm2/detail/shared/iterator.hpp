@@ -65,7 +65,7 @@ private:
 	{}
 
 public:
-	HFSM2_CONSTEXPR(11)	bool operator != (const IteratorT& HFSM2_IF_ASSERT(other))	const noexcept	{
+	HFSM2_CONSTEXPR(14)	bool operator != (const IteratorT& HFSM2_IF_ASSERT(other))	const noexcept	{
 		HFSM2_ASSERT(&_container == &other._container);
 
 		return _cursor != _container.limit();

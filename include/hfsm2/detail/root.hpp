@@ -557,7 +557,7 @@ protected:
 #endif
 
 public:
-	HFSM2_CONSTEXPR(11) explicit RV_(Context& context
+	HFSM2_CONSTEXPR(14) explicit RV_(Context& context
 								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept
 		: Base{context
@@ -737,7 +737,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void changeWith   (		Payload&& payload)			  noexcept	{ changeWith   (stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void changeWith   (		Payload&& payload)			  noexcept	{ changeWith   (stateId<TState>(), move(payload));	}
 
 	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -764,7 +764,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void restartWith  (		Payload&& payload)			  noexcept	{ restartWith  (stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void restartWith  (		Payload&& payload)			  noexcept	{ restartWith  (stateId<TState>(), move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -790,7 +790,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void resumeWith   (		Payload&& payload)			  noexcept	{ resumeWith   (stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void resumeWith   (		Payload&& payload)			  noexcept	{ resumeWith   (stateId<TState>(), move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -826,7 +826,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void utilizeWith  (		Payload&& payload)			  noexcept	{ utilizeWith  (stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void utilizeWith  (		Payload&& payload)			  noexcept	{ utilizeWith  (stateId<TState>(), move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -860,7 +860,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void randomizeWith(		Payload&& payload)			  noexcept	{ randomizeWith(stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void randomizeWith(		Payload&& payload)			  noexcept	{ randomizeWith(stateId<TState>(), move(payload));	}
 
 #endif
 
@@ -888,7 +888,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void scheduleWith (		Payload&& payload)			  noexcept	{ scheduleWith (stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void scheduleWith (		Payload&& payload)			  noexcept	{ scheduleWith (stateId<TState>(), move(payload));	}
 
 	//------------------------------------------------------------------------------
 
@@ -989,7 +989,7 @@ public:
 	{}
 
 	HFSM2_CONSTEXPR(14) void setContext(const Context&  context)	  noexcept { _context =			  context ; }
-	HFSM2_CONSTEXPR(14) void setContext(	  Context&& context)	  noexcept { _context = std::move(context); }
+	HFSM2_CONSTEXPR(14) void setContext(	  Context&& context)	  noexcept { _context = move(context); }
 
 private:
 	using Base::_context;

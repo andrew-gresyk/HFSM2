@@ -218,14 +218,14 @@ struct alignas(4) TransitionT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	TransitionT()													  noexcept {
 		new (&storage) Payload{};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	TransitionT(const StateID destination,
 				const TransitionType type,
 				const Payload& payload)								  noexcept
@@ -237,19 +237,19 @@ struct alignas(4) TransitionT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	TransitionT(const StateID destination,
 				const TransitionType type,
 				Payload&& payload)									  noexcept
 		: TransitionBase{destination, type}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{std::move(payload)};
+		new (&storage) Payload{move(payload)};
 	}
 
 	//----------------------------------------------------------------------
 
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	TransitionT(const StateID origin,
 				const StateID destination,
 				const TransitionType type,
@@ -262,7 +262,7 @@ struct alignas(4) TransitionT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	TransitionT(const StateID origin,
 				const StateID destination,
 				const TransitionType type,
@@ -270,7 +270,7 @@ struct alignas(4) TransitionT
 		: TransitionBase{origin, destination, type}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{std::move(payload)};
+		new (&storage) Payload{move(payload)};
 	}
 
 	//----------------------------------------------------------------------

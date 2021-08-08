@@ -44,6 +44,7 @@
 #ifndef HFSM2_DISABLE_TYPEINDEX
 	#include <typeindex>
 #endif
+#include <type_traits>		// std::aligned_storage<>
 
 #if defined _DEBUG && _MSC_VER
 	#include <intrin.h>		// __debugbreak()

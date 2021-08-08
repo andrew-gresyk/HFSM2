@@ -647,7 +647,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void changeWith   (		Payload&& payload)	  noexcept { changeWith   (FullControlBase::template stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void changeWith   (		Payload&& payload)	  noexcept { changeWith   (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -674,7 +674,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void restartWith  (		Payload&& payload)	  noexcept { restartWith  (FullControlBase::template stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void restartWith  (		Payload&& payload)	  noexcept { restartWith  (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -700,7 +700,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void resumeWith   (		Payload&& payload)	  noexcept { resumeWith   (FullControlBase::template stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void resumeWith   (		Payload&& payload)	  noexcept { resumeWith   (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	//------------------------------------------------------------------------------
 
@@ -736,7 +736,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void utilizeWith  (		Payload&& payload)	  noexcept { utilizeWith  (FullControlBase::template stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void utilizeWith  (		Payload&& payload)	  noexcept { utilizeWith  (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -770,7 +770,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void randomizeWith(		Payload&& payload)	  noexcept { randomizeWith(FullControlBase::template stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void randomizeWith(		Payload&& payload)	  noexcept { randomizeWith(FullControlBase::template stateId<TState>(), move(payload));	}
 
 #endif
 
@@ -798,7 +798,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14) void scheduleWith (		Payload&& payload)	  noexcept { scheduleWith (FullControlBase::template stateId<TState>(), std::move(payload));	}
+	HFSM2_CONSTEXPR(14) void scheduleWith (		Payload&& payload)	  noexcept { scheduleWith (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	//------------------------------------------------------------------------------
 

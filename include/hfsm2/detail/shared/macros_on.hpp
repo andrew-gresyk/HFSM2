@@ -72,7 +72,7 @@
 	#define HFSM2_ARCHITECTURE_32BIT()										true
 
 	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p32
-else
+#else
 	#error
 #endif
 

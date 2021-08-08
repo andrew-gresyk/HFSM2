@@ -25,7 +25,7 @@ public:
 	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)				  noexcept;
 
 	template <typename N>
-	HFSM2_CONSTEXPR(11)	const Item& operator[] (const N index)			const noexcept;
+	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)			const noexcept;
 
 	HFSM2_CONSTEXPR(11)	Index count()									const noexcept	{ return CAPACITY;					}
 
@@ -88,7 +88,7 @@ public:
 	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)				  noexcept;
 
 	template <typename N>
-	HFSM2_CONSTEXPR(11)	const Item& operator[] (const N index)			const noexcept;
+	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)			const noexcept;
 
 	HFSM2_CONSTEXPR(11)	Index  count()									const noexcept	{ return _count;					}
 

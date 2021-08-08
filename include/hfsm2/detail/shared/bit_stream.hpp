@@ -46,7 +46,7 @@ public:
 	using Buffer = StreamBufferT<BIT_CAPACITY>;
 
 public:
-	HFSM2_CONSTEXPR(11) explicit BitWriteStreamT(Buffer& buffer,
+	HFSM2_CONSTEXPR(14) explicit BitWriteStreamT(Buffer& buffer,
 												 const Long cursor = 0)		  noexcept
 		: _buffer{buffer}
 		, _cursor{cursor}

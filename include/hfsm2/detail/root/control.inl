@@ -474,7 +474,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, std::move(payload)});
+		_requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -511,7 +511,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	 Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, std::move(payload)});
+		_requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -547,7 +547,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, std::move(payload)});
+		_requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -585,7 +585,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	 Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, std::move(payload)});
+		_requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -621,7 +621,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	   Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, std::move(payload)});
+		_requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -653,7 +653,7 @@ void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId,
 																																	  Payload&& payload) noexcept
 {
-	_requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, std::move(payload)});
+	_requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, move(payload)});
 
 	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }

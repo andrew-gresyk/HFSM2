@@ -58,13 +58,13 @@ struct TaskT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11) TaskT()									  noexcept {
+	HFSM2_CONSTEXPR(14) TaskT()									  noexcept {
 		new (&storage) Payload{};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)	TaskT(const StateID origin,
+	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin,
 							  const StateID destination,
 							  const TransitionType type,
 							  const Payload& payload)			  noexcept
@@ -76,14 +76,14 @@ struct TaskT
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)	TaskT(const StateID origin,
+	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin,
 							  const StateID destination,
 							  const TransitionType type,
 							  Payload&& payload)				  noexcept
 		: TaskBase{origin, destination, type}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{std::move(payload)};
+		new (&storage) Payload{move(payload)};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
