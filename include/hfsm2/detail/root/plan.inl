@@ -26,7 +26,7 @@ CPlanT<TArgs>::IteratorT::IteratorT(const CPlanT& plan) noexcept
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 CPlanT<TArgs>::IteratorT::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < CPlanT::TASK_CAPACITY ||
 				 _curr == INVALID_LONG);
@@ -64,7 +64,7 @@ CPlanT<TArgs>::IteratorT::next() const noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 CPlanT<TArgs>::operator bool() const noexcept {
 	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
 				 _bounds.last  < TASK_CAPACITY ||
@@ -134,7 +134,7 @@ PlanBaseT<TArgs>::CIterator::CIterator(const PlanBaseT& plan) noexcept
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 PlanBaseT<TArgs>::CIterator::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < PlanBaseT::TASK_CAPACITY ||
 				 _curr == INVALID_LONG);

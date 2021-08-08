@@ -2602,7 +2602,7 @@ public:
 	HFSM2_CONSTEXPR(14) CBits cbits()							const noexcept;
 
 	HFSM2_CONSTEXPR(14)  Bits  bits(const Units& units)				  noexcept;
-	HFSM2_CONSTEXPR(11) CBits cbits(const Units& units)			const noexcept;
+	HFSM2_CONSTEXPR(14) CBits cbits(const Units& units)			const noexcept;
 
 private:
 	uint8_t _storage[UNIT_COUNT];
@@ -2949,7 +2949,7 @@ BitArrayT<TI, NC>::bits(const Units& units) noexcept {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TI, Short NC>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 typename BitArrayT<TI, NC>::CBits
 BitArrayT<TI, NC>::cbits(const Units& units) const noexcept {
 	HFSM2_ASSERT(units.unit + contain(units.width, 8) <= UNIT_COUNT);
@@ -3745,7 +3745,7 @@ public:
 	struct IteratorT {
 		HFSM2_CONSTEXPR(14) IteratorT(const CPlanT& plan)		  noexcept;
 
-		HFSM2_CONSTEXPR(11) explicit operator bool()		const noexcept;
+		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
 
 		HFSM2_CONSTEXPR(14) void operator ++()					  noexcept;
 
@@ -3775,7 +3775,7 @@ private:
 	static constexpr RegionID regionId()						  noexcept	{ return (RegionID) index<RegionList, T>();	}
 
 public:
-	HFSM2_CONSTEXPR(11) explicit operator bool()			const noexcept;
+	HFSM2_CONSTEXPR(14) explicit operator bool()			const noexcept;
 
 	HFSM2_CONSTEXPR(14) IteratorT first()						  noexcept	{ return IteratorT{*this};					}
 
@@ -3828,7 +3828,7 @@ public:
 	struct CIterator {
 		HFSM2_CONSTEXPR(14) CIterator(const PlanBaseT& plan)	  noexcept;
 
-		HFSM2_CONSTEXPR(11) explicit operator bool()		const noexcept;
+		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
 
 		HFSM2_CONSTEXPR(14) void operator ++()					  noexcept;
 
@@ -4616,7 +4616,7 @@ CPlanT<TArgs>::IteratorT::IteratorT(const CPlanT& plan) noexcept
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 CPlanT<TArgs>::IteratorT::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < CPlanT::TASK_CAPACITY ||
 				 _curr == INVALID_LONG);
@@ -4654,7 +4654,7 @@ CPlanT<TArgs>::IteratorT::next() const noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 CPlanT<TArgs>::operator bool() const noexcept {
 	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
 				 _bounds.last  < TASK_CAPACITY ||
@@ -4724,7 +4724,7 @@ PlanBaseT<TArgs>::CIterator::CIterator(const PlanBaseT& plan) noexcept
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 PlanBaseT<TArgs>::CIterator::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < PlanBaseT::TASK_CAPACITY ||
 				 _curr == INVALID_LONG);
@@ -5076,7 +5076,7 @@ struct RegistryT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14) bool isPendingEnter	 (const StateID stateId)		const noexcept;
 	HFSM2_CONSTEXPR(14) bool isPendingExit	 (const StateID stateId)		const noexcept;
 
-	HFSM2_CONSTEXPR(11) const Parent&	  forkParent(const ForkID forkId)	const noexcept;
+	HFSM2_CONSTEXPR(14) const Parent&	  forkParent(const ForkID forkId)	const noexcept;
 
 	HFSM2_CONSTEXPR(14) OrthoBits requestedOrthoFork(const ForkID forkId)		  noexcept;
 
@@ -5148,7 +5148,7 @@ struct RegistryT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14) bool isPendingEnter	 (const StateID stateId)		const noexcept;
 	HFSM2_CONSTEXPR(14) bool isPendingExit	 (const StateID stateId)		const noexcept;
 
-	HFSM2_CONSTEXPR(11) const Parent& forkParent(const ForkID forkId)		const noexcept;
+	HFSM2_CONSTEXPR(14) const Parent& forkParent(const ForkID forkId)		const noexcept;
 
 	HFSM2_CONSTEXPR(14) bool requestImmediate(const Transition& request)		  noexcept;
 	HFSM2_CONSTEXPR(14) void requestScheduled(const StateID stateId)			  noexcept;
@@ -5316,7 +5316,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 const Parent&
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::forkParent(const ForkID forkId) const noexcept {
 	HFSM2_ASSERT(forkId != 0);
@@ -5535,7 +5535,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0 HFSM2_IF_SERIALIZATION(, NSB), NSL H
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 const Parent&
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0 HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::forkParent(const ForkID forkId) const noexcept {
 	HFSM2_ASSERT(forkId > 0);
@@ -7793,8 +7793,8 @@ struct S_ final
 
 	template <typename T>
 	struct Accessor {
-		HFSM2_CONSTEXPR(11) static			T& get(		 S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
-		HFSM2_CONSTEXPR(11) static const	T& get(const S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
+		HFSM2_CONSTEXPR(14) static			T& get(		 S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
+		HFSM2_CONSTEXPR(14) static const	T& get(const S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 	};
 
 #ifdef __clang__
@@ -7927,7 +7927,7 @@ struct S_ final
 #if HFSM2_LOG_INTERFACE_AVAILABLE()
 
 	template <typename TReturn, typename THost, typename... TParams>
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	void log(TReturn (THost::*)(TParams...),
 			 Logger& logger,
 			 Context& context,
@@ -7939,7 +7939,7 @@ struct S_ final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TReturn, typename... TParams>
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	void log(TReturn (Empty::*)(TParams...),
 			 Logger&,
 			 Context&,

@@ -132,6 +132,20 @@ jobs:
       env: CXX=clang++-10 BUILD_TYPE=Release
       addons: *clang10
 
+    # Clang 11
+    - name: Clang-11 Debug
+      env: CXX=clang++-11 BUILD_TYPE=Debug
+      addons: &clang11
+        apt:
+          sources:
+          - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main'
+            key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+          packages:
+          - clang-11
+    - name: Clang-11 Release
+      env: CXX=clang++-11 BUILD_TYPE=Release
+      addons: *clang11
+
     # GCC 5 (default on the Xenial image)
     - name: GCC-5 Debug
       dist: xenial
@@ -178,6 +192,19 @@ jobs:
     - name: GCC-9 Release
       env: CXX=g++-9 BUILD_TYPE=Release
       addons: *gcc9
+
+    # GCC 10
+    - name: GCC-10 Debug
+      env: CXX=g++-10 BUILD_TYPE=Debug
+      addons: &gcc10
+        apt:
+          sources:
+          - sourceline: ppa:ubuntu-toolchain-r/test
+          packages:
+          - g++-10
+    - name: GCC-10 Release
+      env: CXX=g++-10 BUILD_TYPE=Release
+      addons: *gcc10
 
     # Coverage
     - name: GCC-8 Coverity

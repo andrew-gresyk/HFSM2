@@ -326,7 +326,7 @@ BitArrayT<TI, NC>::bits(const Units& units) noexcept {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TI, Short NC>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 typename BitArrayT<TI, NC>::CBits
 BitArrayT<TI, NC>::cbits(const Units& units) const noexcept {
 	HFSM2_ASSERT(units.unit + contain(units.width, 8) <= UNIT_COUNT);

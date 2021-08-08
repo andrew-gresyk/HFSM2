@@ -113,7 +113,7 @@ public:
 	HFSM2_CONSTEXPR(14) CBits cbits()							const noexcept;
 
 	HFSM2_CONSTEXPR(14)  Bits  bits(const Units& units)				  noexcept;
-	HFSM2_CONSTEXPR(11) CBits cbits(const Units& units)			const noexcept;
+	HFSM2_CONSTEXPR(14) CBits cbits(const Units& units)			const noexcept;
 
 private:
 	uint8_t _storage[UNIT_COUNT];

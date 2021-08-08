@@ -132,7 +132,7 @@ struct RegistryT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14) bool isPendingEnter	 (const StateID stateId)		const noexcept;
 	HFSM2_CONSTEXPR(14) bool isPendingExit	 (const StateID stateId)		const noexcept;
 
-	HFSM2_CONSTEXPR(11) const Parent&	  forkParent(const ForkID forkId)	const noexcept;
+	HFSM2_CONSTEXPR(14) const Parent&	  forkParent(const ForkID forkId)	const noexcept;
 
 	HFSM2_CONSTEXPR(14) OrthoBits requestedOrthoFork(const ForkID forkId)		  noexcept;
 
@@ -204,7 +204,7 @@ struct RegistryT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14) bool isPendingEnter	 (const StateID stateId)		const noexcept;
 	HFSM2_CONSTEXPR(14) bool isPendingExit	 (const StateID stateId)		const noexcept;
 
-	HFSM2_CONSTEXPR(11) const Parent& forkParent(const ForkID forkId)		const noexcept;
+	HFSM2_CONSTEXPR(14) const Parent& forkParent(const ForkID forkId)		const noexcept;
 
 	HFSM2_CONSTEXPR(14) bool requestImmediate(const Transition& request)		  noexcept;
 	HFSM2_CONSTEXPR(14) void requestScheduled(const StateID stateId)			  noexcept;

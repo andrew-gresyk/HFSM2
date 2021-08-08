@@ -54,8 +54,8 @@ struct S_ final
 
 	template <typename T>
 	struct Accessor {
-		HFSM2_CONSTEXPR(11) static			T& get(		 S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
-		HFSM2_CONSTEXPR(11) static const	T& get(const S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
+		HFSM2_CONSTEXPR(14) static			T& get(		 S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
+		HFSM2_CONSTEXPR(14) static const	T& get(const S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 	};
 
 #ifdef __clang__
@@ -188,7 +188,7 @@ struct S_ final
 #if HFSM2_LOG_INTERFACE_AVAILABLE()
 
 	template <typename TReturn, typename THost, typename... TParams>
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	void log(TReturn (THost::*)(TParams...),
 			 Logger& logger,
 			 Context& context,
@@ -200,7 +200,7 @@ struct S_ final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TReturn, typename... TParams>
-	HFSM2_CONSTEXPR(11)
+	HFSM2_CONSTEXPR(14)
 	void log(TReturn (Empty::*)(TParams...),
 			 Logger&,
 			 Context&,

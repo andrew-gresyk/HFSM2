@@ -74,7 +74,7 @@ public:
 	struct IteratorT {
 		HFSM2_CONSTEXPR(14) IteratorT(const CPlanT& plan)		  noexcept;
 
-		HFSM2_CONSTEXPR(11) explicit operator bool()		const noexcept;
+		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
 
 		HFSM2_CONSTEXPR(14) void operator ++()					  noexcept;
 
@@ -104,7 +104,7 @@ private:
 	static constexpr RegionID regionId()						  noexcept	{ return (RegionID) index<RegionList, T>();	}
 
 public:
-	HFSM2_CONSTEXPR(11) explicit operator bool()			const noexcept;
+	HFSM2_CONSTEXPR(14) explicit operator bool()			const noexcept;
 
 	HFSM2_CONSTEXPR(14) IteratorT first()						  noexcept	{ return IteratorT{*this};					}
 
@@ -157,7 +157,7 @@ public:
 	struct CIterator {
 		HFSM2_CONSTEXPR(14) CIterator(const PlanBaseT& plan)	  noexcept;
 
-		HFSM2_CONSTEXPR(11) explicit operator bool()		const noexcept;
+		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
 
 		HFSM2_CONSTEXPR(14) void operator ++()					  noexcept;
 
