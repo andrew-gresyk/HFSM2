@@ -30,20 +30,20 @@ protected:
 	using GuardControl	= GuardControlT<TArgs>;
 
 public:
-	HFSM2_CONSTEXPR(11) void preEntryGuard(Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14) void preEntryGuard(Context&)	  noexcept {}
 
-	HFSM2_CONSTEXPR(11) void preEnter	  (Context&)	  noexcept {}
-	HFSM2_CONSTEXPR(11) void preReenter	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14) void preEnter	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14) void preReenter	  (Context&)	  noexcept {}
 
-	HFSM2_CONSTEXPR(11) void preUpdate	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14) void preUpdate	  (Context&)	  noexcept {}
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(11) void preReact	  (const TEvent&,
+	HFSM2_CONSTEXPR(14) void preReact	  (const TEvent&,
 										   Context&)	  noexcept {}
 
-	HFSM2_CONSTEXPR(11) void preExitGuard (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14) void preExitGuard (Context&)	  noexcept {}
 
-	HFSM2_CONSTEXPR(11) void postExit	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14) void postExit	  (Context&)	  noexcept {}
 
 	template <typename T>
 	static constexpr StateID  stateId()					  noexcept { return index<StateList, T>();				}

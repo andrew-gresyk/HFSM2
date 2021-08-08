@@ -407,7 +407,7 @@ CS_<TN, TA, SG, NI, TS...>::wideChangeToRequested(PlanControl& control,
 #if HFSM2_SERIALIZATION_AVAILABLE()
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, TS...>::wideSaveActive(const Registry& registry,
 										   WriteStream& stream,
@@ -427,7 +427,7 @@ CS_<TN, TA, SG, NI, TS...>::wideSaveActive(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, TS...>::wideSaveResumable(const Registry& registry,
 											  WriteStream& stream) const noexcept
@@ -439,7 +439,7 @@ CS_<TN, TA, SG, NI, TS...>::wideSaveResumable(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, TS...>::wideLoadRequested(Registry& registry,
 											  ReadStream& stream,
@@ -459,7 +459,7 @@ CS_<TN, TA, SG, NI, TS...>::wideLoadRequested(Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 CS_<TN, TA, SG, NI, TS...>::wideLoadResumable(Registry& registry,
 											  ReadStream& stream) const noexcept

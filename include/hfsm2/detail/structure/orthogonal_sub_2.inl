@@ -248,7 +248,7 @@ OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) noexcept {
 #if HFSM2_SERIALIZATION_AVAILABLE()
 
 template <typename TN, typename TA, Short NI, typename TI>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideSaveActive(const Registry& registry,
 									WriteStream& stream) const noexcept
@@ -259,7 +259,7 @@ OS_<TN, TA, NI, TI>::wideSaveActive(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideSaveResumable(const Registry& registry,
 									   WriteStream& stream) const noexcept
@@ -270,7 +270,7 @@ OS_<TN, TA, NI, TI>::wideSaveResumable(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideLoadRequested(Registry& registry,
 									   ReadStream& stream) const noexcept
@@ -281,7 +281,7 @@ OS_<TN, TA, NI, TI>::wideLoadRequested(Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Short NI, typename TI>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 									   ReadStream& stream) const noexcept
@@ -296,7 +296,7 @@ OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
 template <typename TN, typename TA, Short NI, typename TI>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
 								  const Short depth,

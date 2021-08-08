@@ -127,11 +127,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_CONSTEXPR(11) void	wideSaveActive		  (const Registry& registry, WriteStream& stream)	const noexcept;
-	HFSM2_CONSTEXPR(11) void	wideSaveResumable	  (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveActive		  (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveResumable	  (const Registry& registry, WriteStream& stream)	const noexcept;
 
-	HFSM2_CONSTEXPR(11) void	wideLoadRequested	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
-	HFSM2_CONSTEXPR(11) void	wideLoadResumable	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadRequested	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadResumable	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -141,7 +141,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 
 	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
 
-	HFSM2_CONSTEXPR(11)	void wideGetNames(const Long parent,
+	HFSM2_CONSTEXPR(14) void wideGetNames(const Long parent,
 										  const Short depth,
 										  StructureStateInfos& stateInfos) const noexcept;
 #endif
@@ -261,11 +261,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_CONSTEXPR(11) void	wideSaveActive		  (const Registry& registry, WriteStream& stream)	const noexcept;
-	HFSM2_CONSTEXPR(11) void	wideSaveResumable	  (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveActive		  (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideSaveResumable	  (const Registry& registry, WriteStream& stream)	const noexcept;
 
-	HFSM2_CONSTEXPR(11) void	wideLoadRequested	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
-	HFSM2_CONSTEXPR(11) void	wideLoadResumable	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadRequested	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	wideLoadResumable	  (		 Registry& registry, ReadStream&  stream)	const noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -275,7 +275,7 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 
 	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT;
 
-	HFSM2_CONSTEXPR(11)	void wideGetNames(const Long parent,
+	HFSM2_CONSTEXPR(14) void wideGetNames(const Long parent,
 										  const Short depth,
 										  StructureStateInfos& stateInfos) const;
 #endif

@@ -147,11 +147,11 @@ struct S_ final
 	using WriteStream	= typename TArgs::WriteStream;
 	using ReadStream	= typename TArgs::ReadStream;
 
-	HFSM2_CONSTEXPR(11) void	 deepSaveActive	  (const Registry&, WriteStream&)	const noexcept	{}
-	HFSM2_CONSTEXPR(11) void	 deepSaveResumable(const Registry&, WriteStream&)	const noexcept	{}
+	HFSM2_CONSTEXPR(14) void	 deepSaveActive	  (const Registry&, WriteStream&)	const noexcept	{}
+	HFSM2_CONSTEXPR(14) void	 deepSaveResumable(const Registry&, WriteStream&)	const noexcept	{}
 
-	HFSM2_CONSTEXPR(11) void	 deepLoadRequested(		 Registry&, ReadStream& )	const noexcept	{}
-	HFSM2_CONSTEXPR(11) void	 deepLoadResumable(		 Registry&, ReadStream& )	const noexcept	{}
+	HFSM2_CONSTEXPR(14) void	 deepLoadRequested(		 Registry&, ReadStream& )	const noexcept	{}
+	HFSM2_CONSTEXPR(14) void	 deepLoadResumable(		 Registry&, ReadStream& )	const noexcept	{}
 #endif
 
 	//----------------------------------------------------------------------

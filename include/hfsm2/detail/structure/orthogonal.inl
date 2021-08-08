@@ -393,7 +393,7 @@ O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept {
 #if HFSM2_SERIALIZATION_AVAILABLE()
 
 template <typename TN, typename TA, typename TH, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 O_<TN, TA, TH, TS...>::deepSaveActive(const Registry& registry,
 									  WriteStream& stream) const noexcept
@@ -404,7 +404,7 @@ O_<TN, TA, TH, TS...>::deepSaveActive(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, typename TH, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 O_<TN, TA, TH, TS...>::deepSaveResumable(const Registry& registry,
 										 WriteStream& stream) const noexcept
@@ -415,7 +415,7 @@ O_<TN, TA, TH, TS...>::deepSaveResumable(const Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, typename TH, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 O_<TN, TA, TH, TS...>::deepLoadRequested(Registry& registry,
 										 ReadStream& stream) const noexcept
@@ -426,7 +426,7 @@ O_<TN, TA, TH, TS...>::deepLoadRequested(Registry& registry,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, typename TH, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 										 ReadStream& stream) const noexcept
@@ -441,7 +441,7 @@ O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
 template <typename TN, typename TA, typename TH, typename... TS>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 void
 O_<TN, TA, TH, TS...>::deepGetNames(const Long parent,
 									const RegionType region,

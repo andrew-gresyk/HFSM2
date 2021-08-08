@@ -152,11 +152,11 @@ struct O_ final {
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_CONSTEXPR(11) void	deepSaveActive		 (const Registry& registry, WriteStream& stream)	const noexcept;
-	HFSM2_CONSTEXPR(11) void	deepSaveResumable	 (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	deepSaveActive		 (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	deepSaveResumable	 (const Registry& registry, WriteStream& stream)	const noexcept;
 
-	HFSM2_CONSTEXPR(11) void	deepLoadRequested	 (		Registry& registry, ReadStream&  stream)	const noexcept;
-	HFSM2_CONSTEXPR(11) void	deepLoadResumable	 (		Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	deepLoadRequested	 (		Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14) void	deepLoadResumable	 (		Registry& registry, ReadStream&  stream)	const noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -167,7 +167,7 @@ struct O_ final {
 
 	static constexpr Long NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
 
-	HFSM2_CONSTEXPR(11) void deepGetNames(const Long parent,
+	HFSM2_CONSTEXPR(14) void deepGetNames(const Long parent,
 										  const RegionType region,
 										  const Short depth,
 										  StructureStateInfos& stateInfos) const noexcept;
