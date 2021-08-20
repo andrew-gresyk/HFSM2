@@ -1,11 +1,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Build status](https://ci.appveyor.com/api/projects/status/egs56khk70ud35un?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/HFSM2)
-[![Build Status](https://travis-ci.com/andrew-gresyk/HFSM2.svg?branch=master)](https://travis-ci.com/andrew-gresyk/HFSM2)
-[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/andrew-gresyk/HFSM2.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/andrew-gresyk/HFSM2/context:cpp)
-![GitHub Release Date](https://img.shields.io/github/release-date/andrew-gresyk/HFSM2)
+[![GitHub Release Date](https://img.shields.io/github/release-date/andrew-gresyk/HFSM2)](../../releases)
+[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/andrew-gresyk/HFSM2.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/andrew-gresyk/HFSM2/context:cpp)  
+[![MSBuild](../../actions/workflows/msbuild.yml/badge.svg)](../../actions/workflows/msbuild.yml)
+[![CMake](../../actions/workflows/cmake.yml/badge.svg)](../../actions/workflows/cmake.yml)
+[![Build status](https://ci.appveyor.com/api/projects/status/egs56khk70ud35un?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/HFSM2)  
 [![Gitter](https://badges.gitter.im/andrew-gresyk/HFSM2.svg)](https://gitter.im/andrew-gresyk/HFSM2)
 [![Discord](https://img.shields.io/discord/591914197219016707.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/ujpNbqSpfm)
-![Twitter Follow](https://img.shields.io/twitter/follow/andrew_gresyk?style=social)
+[![Twitter Follow](https://img.shields.io/twitter/follow/andrew_gresyk?style=social)](https://www.twitter.com/andrew_gresyk)
 
 ---
 
@@ -74,15 +75,9 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ---
 
-## Receive Updates
-
-- Blog: **[gresyk.dev](https://gresyk.dev)**
-- Twitter: **[@andrew_gresyk](https://www.twitter.com/andrew_gresyk)**
-
----
-
 ## Get In Touch
 
+- Twitter: **[@andrew_gresyk](https://www.twitter.com/andrew_gresyk)**
 - Discord: **[HFSM.dev](https://discord.gg/v4t3tzh)**
 - Gitter: **[andrew-gresyk/HFSM2](https://gitter.im/andrew-gresyk/HFSM2)**
 
@@ -90,6 +85,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## Special Thanks
 
+- [alexandrosk0](https://github.com/alexandrosk0)
 - [DJuego](https://github.com/DJuego)
 - [Kevin Greene](https://github.com/kgreenek)
 - [Kjeld Mathias Petersen](https://github.com/DonMathi)
@@ -97,6 +93,5 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - [Phil Nash](https://github.com/philsquared)
 - [Romain Cheminade](https://github.com/romaincheminade)
 - [Tristan Brindle](https://github.com/tcbrindle)
-
 - [C++::London](https://www.meetup.com/CppLondon/) meetup
 - programming community at [Splash Damage](http://www.splashdamage.com/)

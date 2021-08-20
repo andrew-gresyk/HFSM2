@@ -1,0 +1,34 @@
+name: MSBuild
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  SOLUTION_FILE_PATH: projects\visual-studio\hfsm2-16-vs.sln
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        BUILD_CONFIG: [ Release, Debug ]
+        BUILD_PLATFORM: [ x86, x64 ]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{matrix.BUILD_CONFIG}} /p:Platform=${{matrix.BUILD_PLATFORM}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Test
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: binaries-${{matrix.BUILD_PLATFORM}}\test-16-${{matrix.BUILD_CONFIG}}-${{matrix.BUILD_PLATFORM}}.exe
