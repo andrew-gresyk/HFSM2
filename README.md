@@ -1,8 +1,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![GitHub Release Date](https://img.shields.io/github/release-date/andrew-gresyk/HFSM2)](../../releases)
+[![GitHub Release Date](https://img.shields.io/github/release-date/andrew-gresyk/HFSM2)](https://github.com/andrew-gresyk/HFSM2/releases)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/andrew-gresyk/HFSM2.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/andrew-gresyk/HFSM2/context:cpp)  
-[![MSBuild](../../actions/workflows/msbuild.yml/badge.svg)](../../actions/workflows/msbuild.yml)
-[![CMake](../../actions/workflows/cmake.yml/badge.svg)](../../actions/workflows/cmake.yml)
+[![MSBuild](https://github.com/andrew-gresyk/HFSM2/actions/workflows/msbuild.yml/badge.svg)](https://github.com/andrew-gresyk/HFSM2/actions/workflows/msbuild.yml)
+[![CMake](https://github.com/andrew-gresyk/HFSM2/actions/workflows/cmake.yml/badge.svg)](https://github.com/andrew-gresyk/HFSM2/actions/workflows/cmake.yml)
 [![Build status](https://ci.appveyor.com/api/projects/status/egs56khk70ud35un?svg=true)](https://ci.appveyor.com/project/andrew-gresyk/HFSM2)  
 [![Gitter](https://badges.gitter.im/andrew-gresyk/HFSM2.svg)](https://gitter.im/andrew-gresyk/HFSM2)
 [![Discord](https://img.shields.io/discord/591914197219016707.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/ujpNbqSpfm)
@@ -41,7 +41,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 ## Documentation
 
 - GitBook: **[doc.hfsm.dev](https://doc.hfsm.dev/)** (WIP)
-- Wiki: **[Tutorial](../../wiki/Tutorial)** (Obsolete)
+- Wiki: **[Tutorial](https://github.com/andrew-gresyk/HFSM2/wiki/Tutorial)** (Obsolete)
 - In-line comments
 
 ---
@@ -56,12 +56,12 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - Uses inline-friendly compile-time polymorphism, no virtual methods are used
 - Type-safe transitions: `FSM.changeTo<TargetState>()` with optional payloads
 - Scaleable, supports robust state re-use via state injections
-- **[Hierarchical](../../wiki/Transitions-within-Hierarchy)**, with a selection of composite (sub-machine) and orthogonal regions
+- **[Hierarchical](https://github.com/andrew-gresyk/HFSM2/wiki/Transitions-within-Hierarchy)**, with a selection of composite (sub-machine) and orthogonal regions
 - Gamedev-friendly, supports explicit `State::update()`
 - Also supports traditional event-based workflow with `State::react()`
 - Inspect anything: previous and current transitions, state activation status, and more!
-- Game AI-friendly with **[dynamic planning](../../wiki/Plans)** support
-- **[Utility theory](../../wiki/Utility-Theory)** support (max score and ranked weighted random)
+- Game AI-friendly with **[dynamic planning](https://github.com/andrew-gresyk/HFSM2/wiki/Plans)** support
+- **[Utility theory](https://github.com/andrew-gresyk/HFSM2/wiki/Utility-Theory)** support (max score and ranked weighted random)
 - **[Serializable](https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization)**, with activity and transition history support
 - **[Debug-assisted](https://gresyk.dev/features/2018/01/15/hfsm-magic.html)**, includes automatic structure and activity visualization API with `#define HFSM_ENABLE_STRUCTURE_REPORT`
 - Built-in logging support
