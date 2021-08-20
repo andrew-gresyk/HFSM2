@@ -15,8 +15,8 @@ jobs:
 
     strategy:
       matrix:
-        build_config: [ Release, Debug ]
-        build_platform: [ x86, x64 ]
+        BUILD_CONFIG: [ Release, Debug ]
+        BUILD_PLATFORM: [ x86, x64 ]
 
     steps:
     - uses: actions/checkout@v2
@@ -27,8 +27,8 @@ jobs:
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{matrix.build_config}} /p:Platform=${{matrix.build_platform}} ${{matrix.SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration=${{matrix.BUILD_CONFIG}} /p:Platform=${{matrix.BUILD_PLATFORM}} ${{env.SOLUTION_FILE_PATH}}
 
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: binaries-${{matrix.build_platform}}\test-16-${{matrix.build_config}}-${{matrix.build_platform}}.exe
+      run: binaries-${{matrix.BUILD_PLATFORM}}\test-16-${{matrix.BUILD_CONFIG}}-${{matrix.BUILD_PLATFORM}}.exe
