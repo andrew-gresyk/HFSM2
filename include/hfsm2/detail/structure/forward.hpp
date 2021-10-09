@@ -40,17 +40,17 @@ template <typename...>
 struct WrapInfoT;
 
 template <typename TH>
-struct WrapInfoT<	 TH> {
+struct WrapInfoT<	 TH> final {
 	using Type = SI_<TH>;
 };
 
 template <Strategy SG, typename TH, typename... TS>
-struct WrapInfoT<	 CI_<SG, TH, TS...>> {
+struct WrapInfoT<	 CI_<SG, TH, TS...>> final {
 	using Type =	 CI_<SG, TH, TS...>;
 };
 
 template <typename... TS>
-struct WrapInfoT<	 OI_<TS...>> {
+struct WrapInfoT<	 OI_<TS...>> final {
 	using Type =	 OI_<TS...>;
 };
 
@@ -85,7 +85,7 @@ struct SI_ final {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TInitial, typename... TRemaining>
-struct CSI_<TInitial, TRemaining...> {
+struct CSI_<TInitial, TRemaining...> final {
 	using Initial			= WrapInfo<TInitial>;
 	using Remaining			= CSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
@@ -107,7 +107,7 @@ struct CSI_<TInitial, TRemaining...> {
 };
 
 template <typename TInitial>
-struct CSI_<TInitial> {
+struct CSI_<TInitial> final {
 	using Initial			= WrapInfo<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
@@ -160,7 +160,7 @@ struct CI_ final {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TInitial, typename... TRemaining>
-struct OSI_<TInitial, TRemaining...> {
+struct OSI_<TInitial, TRemaining...> final {
 	using Initial			= WrapInfo<TInitial>;
 	using Remaining			= OSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
@@ -179,7 +179,7 @@ struct OSI_<TInitial, TRemaining...> {
 };
 
 template <typename TInitial>
-struct OSI_<TInitial> {
+struct OSI_<TInitial> final {
 	using Initial			= WrapInfo<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
@@ -209,7 +209,7 @@ struct OI_ final {
 	static constexpr Short COMPO_REGIONS	= SubStates::COMPO_REGIONS;
 	static constexpr Long  COMPO_PRONGS		= SubStates::COMPO_PRONGS;
 	static constexpr Short ORTHO_REGIONS	= SubStates::ORTHO_REGIONS + 1;
-	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS + (WIDTH + 7) / 8;
+	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS + contain(WIDTH, 8);
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS		= SubStates::ACTIVE_BITS;
@@ -282,7 +282,7 @@ template <StateID NStateID,
 		  Short NCompoIndex,
 		  Short NOrthoIndex,
 		  Short NOrthoUnit>
-struct I_ {
+struct I_ final {
 	static constexpr StateID STATE_ID	 = NStateID;
 	static constexpr Short	 COMPO_INDEX = NCompoIndex;
 	static constexpr Short	 ORTHO_INDEX = NOrthoIndex;
@@ -315,28 +315,28 @@ template <typename, typename...>
 struct MaterialT;
 
 template <typename TN, typename TA, typename TH>
-struct MaterialT   <TN, TA, TH> {
+struct MaterialT   <TN, TA, TH> final {
 	using Type = S_<TN, TA, TH>;
 };
 
 template <typename TN, typename TA, Strategy SG, 			  typename... TS>
-struct MaterialT   <TN, TA, CI_<SG, void,       TS...>> {
+struct MaterialT   <TN, TA, CI_<SG, void,       TS...>> final {
 	using Type = C_<TN, TA,     SG, EmptyT<TA>, TS...>;
 };
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-struct MaterialT   <TN, TA, CI_<SG, TH,	TS...>> {
+struct MaterialT   <TN, TA, CI_<SG, TH,	TS...>> final {
 	using Type = C_<TN, TA,     SG, TH,	TS...>;
 };
 
 template <typename TN, typename TA,				 typename... TS>
-struct MaterialT   <TN, TA, OI_<void,       TS...>> {
+struct MaterialT   <TN, TA, OI_<void,       TS...>> final {
 	using Type = O_<TN, TA,     EmptyT<TA>, TS...>;
 };
 
 template <typename TN, typename TA, typename TH, typename... TS>
-struct MaterialT   <TN, TA, OI_<TH,				  TS...>> {
-	using Type = O_<TN, TA,     TH,				  TS...>;
+struct MaterialT   <TN, TA, OI_<TH,			TS...>> final {
+	using Type = O_<TN, TA,     TH,			TS...>;
 };
 
 template <typename TN, typename... TS>
@@ -426,7 +426,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 struct CSubMaterialT;
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-struct CSubMaterialT<TN, TA, SG, NI, TL_<TS...>> {
+struct CSubMaterialT<TN, TA, SG, NI, TL_<TS...>> final {
 	using Type = CS_<TN, TA, SG, NI,	  TS...>;
 };
 
@@ -439,22 +439,22 @@ template <typename>
 struct InfoT;
 
 template <typename TN, typename TA, typename TH>
-struct InfoT<S_<TN, TA, TH>> {
+struct InfoT<S_<TN, TA, TH>> final {
 	using Type = SI_<	TH>;
 };
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-struct InfoT<C_<TN, TA, SG, TH, TS...>> {
+struct InfoT<C_<TN, TA, SG, TH, TS...>> final {
 	using Type = CI_<	SG, TH, TS...>;
 };
 
 template <typename TN, typename TA, typename TH, typename... TS>
-struct InfoT<O_<TN, TA, TH, TS...>> {
+struct InfoT<O_<TN, TA, TH, TS...>> final {
 	using Type = OI_<	TH, TS...>;
 };
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-struct InfoT<CS_<TN, TA, SG, NI, TS...>> {
+struct InfoT<CS_<TN, TA, SG, NI, TS...>> final {
 	using Type = CSI_<			 TS...>;
 };
 

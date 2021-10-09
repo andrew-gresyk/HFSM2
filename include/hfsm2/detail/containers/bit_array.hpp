@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Units {
+struct Units final {
 	HFSM2_CONSTEXPR(11) Units(Short unit_  = INVALID_SHORT,
 							  Short width_ = INVALID_SHORT)			  noexcept
 		: unit {unit_ }
@@ -16,18 +16,18 @@ struct Units {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, Short NUnitCount>
+template <unsigned NCapacity>
 class BitArrayT final {
 public:
-	using Index	= TIndex;
+	using Index	= UCapacity<NCapacity>;
 
-	static constexpr Index UNIT_COUNT = NUnitCount;
-	static constexpr Index BIT_COUNT  = UNIT_COUNT * 8;
+	static constexpr Index CAPACITY   = NCapacity;
+	static constexpr Index UNIT_COUNT = contain(CAPACITY, 8);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class Bits {
-		template <typename, Short>
+		template <unsigned>
 		friend class BitArrayT;
 
 	private:
@@ -63,12 +63,12 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class CBits {
-		template <typename, Short>
+		template <unsigned>
 		friend class BitArrayT;
 
 	private:
 		HFSM2_CONSTEXPR(11)	explicit CBits(const uint8_t* const storage,
-									const Index width)				  noexcept
+										   const Index width)		  noexcept
 			: _storage{storage}
 			, _width{width}
 		{}
@@ -102,9 +102,14 @@ public:
 	template <Short NIndex>
 	HFSM2_CONSTEXPR(14) void clear()								  noexcept;
 
-	HFSM2_CONSTEXPR(14) bool get  (const Index index)			const noexcept;
-	HFSM2_CONSTEXPR(14) void set  (const Index index)				  noexcept;
-	HFSM2_CONSTEXPR(14) void clear(const Index index)				  noexcept;
+	template <typename TIndex>
+	HFSM2_CONSTEXPR(14) bool get  (const TIndex index)			const noexcept;
+
+	template <typename TIndex>
+	HFSM2_CONSTEXPR(14) void set  (const TIndex index)				  noexcept;
+
+	template <typename TIndex>
+	HFSM2_CONSTEXPR(14) void clear(const TIndex index)				  noexcept;
 
 	template <Short NUnit, Short NWidth>
 	HFSM2_CONSTEXPR(14)  Bits  bits()								  noexcept;
@@ -121,8 +126,8 @@ private:
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex>
-class BitArrayT<TIndex, 0> final {
+template <>
+class BitArrayT<0> final {
 public:
 	HFSM2_CONSTEXPR(14)	void clear()								  noexcept	{}
 };

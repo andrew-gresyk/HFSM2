@@ -17,7 +17,7 @@ enum Strategy {
 
 #pragma pack(push, 1)
 
-struct alignas(2 * sizeof(Short)) Parent {
+struct alignas(2 * sizeof(Short)) Parent final {
 	HFSM2_CONSTEXPR(11)
 	Parent() = default;
 
@@ -48,7 +48,7 @@ struct alignas(2 * sizeof(Short)) Parent {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TRegistry>
-struct BackUpT {
+struct BackUpT final {
 	using CompoForks = typename TRegistry::CompoForks;
 	using OrthoForks = typename TRegistry::OrthoForks;
 
@@ -98,7 +98,7 @@ struct RegistryT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 HFSM2_IF_PLANS(, NTaskCapacity)
-					 , TPayload>>
+					 , TPayload>> final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -118,9 +118,9 @@ struct RegistryT<ArgsT<TContext
 	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
 
 	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
-	using OrthoForks	= BitArrayT	  <Short,  ORTHO_UNITS>;
+	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
 	using OrthoBits		= typename OrthoForks::Bits;
-	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
+	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
@@ -176,7 +176,7 @@ struct RegistryT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 HFSM2_IF_PLANS(, NTaskCapacity)
-					 , TPayload>>
+					 , TPayload>> final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -191,8 +191,8 @@ struct RegistryT<ArgsT<TContext
 	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
 
 	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
-	using OrthoForks	= BitArrayT	  <Short,  0>;
-	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
+	using OrthoForks	= BitArrayT	  <0>;
+	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 

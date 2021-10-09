@@ -4,7 +4,7 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-struct StructureEntry {
+struct StructureEntry final {
 	bool isActive;
 	const wchar_t* prefix;
 	const char* name;
@@ -21,7 +21,7 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct alignas(alignof(void*)) StructureStateInfo {
+struct alignas(alignof(void*)) StructureStateInfo final {
 	enum class RegionType : Short {
 		COMPOSITE,
 		ORTHOGONAL,

@@ -4,7 +4,7 @@ namespace detail {
 //------------------------------------------------------------------------------
 
 template <StateID NS, typename TA, typename TH>
-struct RegisterT {
+struct RegisterT final {
 	using StateParents	= StaticArrayT<Parent, TA::STATE_COUNT>;
 	using StateList		= typename TA::StateList;
 
@@ -26,7 +26,7 @@ struct RegisterT {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, typename TA>
-struct RegisterT<NS, TA, EmptyT<TA>> {
+struct RegisterT<NS, TA, EmptyT<TA>> final {
 	using StateParents = StaticArrayT<Parent, TA::STATE_COUNT>;
 
 	static

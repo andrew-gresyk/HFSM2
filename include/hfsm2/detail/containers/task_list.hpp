@@ -48,7 +48,7 @@ operator == (const TaskBase& lhs,
 //------------------------------------------------------------------------------
 
 template <typename TPayload>
-struct TaskT
+struct TaskT final
 	: TaskBase
 {
 	using Payload = TPayload;
@@ -95,7 +95,7 @@ struct TaskT
 //------------------------------------------------------------------------------
 
 template <>
-struct TaskT<void>
+struct TaskT<void> final
 	: TaskBase
 {
 	using TaskBase::TaskBase;

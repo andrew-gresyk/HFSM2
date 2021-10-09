@@ -260,14 +260,14 @@ PlanBaseT<TArgs>::clear() noexcept {
 		{
 			HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
-			const auto& taskLink = _planData.taskLinks[index];
+			const auto& link = _planData.taskLinks[index];
 			HFSM2_ASSERT(index == _bounds.first ?
-							 taskLink.prev == INVALID_LONG :
-							 taskLink.prev <  TaskLinks::CAPACITY);
+							 link.prev == INVALID_LONG :
+							 link.prev <  TaskLinks::CAPACITY);
 
-			const Long next = taskLink.next;
+			const Long next = link.next;
 
-			_planData.tasks.remove(index);
+			remove(index);
 
 			index = next;
 		}
@@ -285,35 +285,35 @@ PlanBaseT<TArgs>::clear() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-PlanBaseT<TArgs>::remove(const Long task) noexcept {
+PlanBaseT<TArgs>::remove(const Long index) noexcept {
 	HFSM2_ASSERT(_planData.planExists.get(_regionId));
 	HFSM2_ASSERT(_bounds.first < TaskLinks::CAPACITY);
 	HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
 
-	HFSM2_ASSERT(task < TaskLinks::CAPACITY);
+	HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
-	TaskLink& curr = _planData.taskLinks[task];
+	TaskLink& link = _planData.taskLinks[index];
 
-	if (curr.prev < TaskLinks::CAPACITY) {
-		TaskLink& prev = _planData.taskLinks[curr.prev];
-		prev.next = curr.next;
+	if (link.prev < TaskLinks::CAPACITY) {
+		TaskLink& prev = _planData.taskLinks[link.prev];
+		prev.next = link.next;
 	} else {
-		HFSM2_ASSERT(_bounds.first == task);
-		_bounds.first = curr.next;
+		HFSM2_ASSERT(_bounds.first == index);
+		_bounds.first = link.next;
 	}
 
-	if (curr.next < TaskLinks::CAPACITY) {
-		TaskLink& next = _planData.taskLinks[curr.next];
-		next.prev = curr.prev;
+	if (link.next < TaskLinks::CAPACITY) {
+		TaskLink& next = _planData.taskLinks[link.next];
+		next.prev = link.prev;
 	} else {
-		HFSM2_ASSERT(_bounds.last == task);
-		_bounds.last = curr.prev;
+		HFSM2_ASSERT(_bounds.last == index);
+		_bounds.last = link.prev;
 	}
 
-	curr.prev = INVALID_LONG;
-	curr.next = INVALID_LONG;
+	link.prev = INVALID_LONG;
+	link.next = INVALID_LONG;
 
-	_planData.tasks.remove(task);
+	_planData.tasks.remove(index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

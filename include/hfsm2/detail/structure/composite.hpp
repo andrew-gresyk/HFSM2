@@ -72,13 +72,13 @@ struct C_ final {
 #if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <typename T>
-	struct Accessor {
+	struct Accessor final {
 		HFSM2_CONSTEXPR(11) static			T& get(		 C_& c)		  noexcept	{ return c._subStates.template access<T>();	}
 		HFSM2_CONSTEXPR(11) static const	T& get(const C_& c)		  noexcept	{ return c._subStates.template access<T>();	}
 	};
 
 	template <>
-	struct Accessor<Head> {
+	struct Accessor<Head> final {
 		HFSM2_CONSTEXPR(11) static		 Head& get(		 C_& c)		  noexcept	{ return c._headState;						}
 		HFSM2_CONSTEXPR(11) static const Head& get(const C_& c)		  noexcept	{ return c._headState;						}
 	};

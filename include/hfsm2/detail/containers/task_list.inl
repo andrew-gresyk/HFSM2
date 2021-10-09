@@ -10,22 +10,23 @@ template <typename... TA>
 HFSM2_CONSTEXPR(14)
 Long
 TaskListT<TP, NC>::emplace(TA&&... args) noexcept {
+	HFSM2_ASSERT(_last  <= CAPACITY);
+
 	if (_count < CAPACITY) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
 		const Index index = _vacantHead;
-		auto& cell = _items[index];
-		++_count;
+		Item& item = _items[index];
 
 		if (_vacantHead != _vacantTail) {
 			// recycle
-			HFSM2_ASSERT(cell.prev == INVALID);
-			HFSM2_ASSERT(cell.next != INVALID);
+			HFSM2_ASSERT(item.prev == INVALID);
+			HFSM2_ASSERT(item.next != INVALID);
 
-			_vacantHead = cell.next;
+			_vacantHead = item.next;
 
-			auto& head = _items[_vacantHead];
+			Item& head = _items[_vacantHead];
 			HFSM2_ASSERT(head.prev == index);
 			head.prev = INVALID;
 		} else if (_last < CAPACITY - 1) {
@@ -34,19 +35,22 @@ TaskListT<TP, NC>::emplace(TA&&... args) noexcept {
 			_vacantHead = _last;
 			_vacantTail = _last;
 
-			auto& vacant = _items[_vacantHead];
+			Item& vacant = _items[_vacantHead];
 			vacant.prev = INVALID;
 			vacant.next = INVALID;
 		} else {
-			HFSM2_ASSERT(_count == CAPACITY);
+			// last
+			HFSM2_ASSERT(_count == CAPACITY - 1);
 
+			_last = CAPACITY;
 			_vacantHead = INVALID;
 			_vacantTail = INVALID;
 		}
 
-		HFSM2_IF_ASSERT(verifyStructure());
+		new (&item) Item{forward<TA>(args)...};
+		++_count;
 
-		new (&cell) Item{forward<TA>(args)...};
+		HFSM2_IF_ASSERT(verifyStructure());
 
 		return index;
 	} else {
@@ -68,16 +72,16 @@ void
 TaskListT<TP, NC>::remove(const Index i) noexcept {
 	HFSM2_ASSERT(i < CAPACITY && _count);
 
-	auto& fresh = _items[i];
+	Item& item = _items[i];
 
 	if (_count < CAPACITY) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
-		fresh.prev = INVALID;
-		fresh.next = _vacantHead;
+		item.prev = INVALID;
+		item.next = _vacantHead;
 
-		auto& head = _items[_vacantHead];
+		Item& head = _items[_vacantHead];
 		head.prev = i;
 
 		_vacantHead = i;
@@ -87,8 +91,8 @@ TaskListT<TP, NC>::remove(const Index i) noexcept {
 		HFSM2_ASSERT(_vacantHead == INVALID);
 		HFSM2_ASSERT(_vacantTail == INVALID);
 
-		fresh.prev = INVALID;
-		fresh.next = INVALID;
+		item.prev = INVALID;
+		item.next = INVALID;
 
 		_vacantHead = i;
 		_vacantTail = i;
@@ -135,17 +139,17 @@ TaskListT<TP, NC>::verifyStructure(const Index occupied) const noexcept {
 		HFSM2_ASSERT(_items[_vacantHead].prev == INVALID);
 		HFSM2_ASSERT(_items[_vacantTail].next == INVALID);
 
-		auto emptyCount = 1;
+		Index emptyCount = 1;
 
-		for (auto c = _vacantHead; c != _vacantTail; ) {
+		for (Index c = _vacantHead; c != _vacantTail; ) {
 			HFSM2_ASSERT(occupied != c);
 
-			const auto& current = _items[c];
+			const Item& current = _items[c];
 
-			const auto f = current.next;
+			const Long f = current.next;
 			if (f != INVALID) {
 				// next
-				const auto& following = _items[f];
+				const Item& following = _items[f];
 
 				HFSM2_ASSERT(following.prev == c);
 

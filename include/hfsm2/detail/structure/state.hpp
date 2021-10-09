@@ -5,7 +5,7 @@ namespace detail {
 
 #if HFSM2_DEBUG_STATE_TYPE_AVAILABLE() || HFSM2_STRUCTURE_REPORT_AVAILABLE() || HFSM2_LOG_INTERFACE_AVAILABLE()
 
-struct None {};
+struct None final {};
 
 #endif
 
@@ -53,7 +53,7 @@ struct S_ final
 #endif
 
 	template <typename T>
-	struct Accessor {
+	struct Accessor final {
 		HFSM2_CONSTEXPR(14) static			T& get(		 S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 		HFSM2_CONSTEXPR(14) static const	T& get(const S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 	};
@@ -63,7 +63,7 @@ struct S_ final
 #endif
 
 	template <>
-	struct Accessor<Head> {
+	struct Accessor<Head> final {
 		HFSM2_CONSTEXPR(11) static		 Head& get(		 S_& s)					  noexcept	{ return s;											}
 		HFSM2_CONSTEXPR(11) static const Head& get(const S_& s)					  noexcept	{ return s;											}
 	};

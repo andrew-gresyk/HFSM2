@@ -3,7 +3,7 @@ namespace hfsm2 {
 //------------------------------------------------------------------------------
 
 struct EmptyContext {};
-struct EmptyPayload {};
+struct EmptyPayload final {};
 
 struct Automatic;
 struct Manual;
@@ -31,30 +31,35 @@ static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <bool B, typename TT, typename TF>
-struct ConditionalT {
+template <bool B,
+		  typename TT,
+		  typename TF>
+struct ConditionalT final {
 	using Type = TT;
 };
 
-template <typename TT, typename TF>
-struct ConditionalT<false, TT, TF> {
+template <typename TT,
+		  typename TF>
+struct ConditionalT<false, TT, TF> final {
 	using Type = TF;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <bool B, typename TT, typename TF>
+template <bool B,
+		  typename TT,
+		  typename TF>
 using Conditional = typename ConditionalT<B, TT, TF>::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct RemoveConstT {
+struct RemoveConstT final {
 	using Type = T;
 };
 
 template <typename T>
-struct RemoveConstT<const T> {
+struct RemoveConstT<const T> final {
 	using Type = T;
 };
 
@@ -66,17 +71,17 @@ using RemoveConst = typename RemoveConstT<T>::Type;
 //------------------------------------------------------------------------------
 
 template <typename T>
-struct RemoveReferenceT {
+struct RemoveReferenceT final {
 	using Type = T;
 };
 
 template <typename T>
-struct RemoveReferenceT<T&> {
+struct RemoveReferenceT<T&> final {
 	using Type = T;
 };
 
 template <typename T>
-struct RemoveReferenceT<T&&> {
+struct RemoveReferenceT<T&&> final {
 	using Type = T;
 };
 

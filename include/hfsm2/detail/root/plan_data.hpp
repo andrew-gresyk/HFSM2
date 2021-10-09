@@ -7,14 +7,14 @@ namespace detail {
 
 #pragma pack(push, 2)
 
-struct TaskLink {
+struct TaskLink final {
 	Long prev		= INVALID_LONG;
 	Long next		= INVALID_LONG;
 };
 
 //------------------------------------------------------------------------------
 
-struct Bounds {
+struct Bounds final {
 	Long first		= INVALID_LONG;
 	Long last		= INVALID_LONG;
 };
@@ -62,7 +62,7 @@ struct PlanDataT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
-					 , TPayload>>
+					 , TPayload>> final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -77,8 +77,8 @@ struct PlanDataT<ArgsT<TContext
 	using Payloads		= StaticArrayT<Payload,  TASK_CAPACITY>;
 
 	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
-	using TasksBits		= BitArrayT<StateID,  StateList::SIZE>;
-	using RegionBits	= BitArrayT<RegionID, RegionList::SIZE>;
+	using TasksBits		= BitArrayT<StateList::SIZE>;
+	using RegionBits	= BitArrayT<RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -121,7 +121,7 @@ struct PlanDataT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
-					 , void>>
+					 , void>> final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -134,8 +134,8 @@ struct PlanDataT<ArgsT<TContext
 	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
 	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
-	using TasksBits		= BitArrayT<StateID,  StateList::SIZE>;
-	using RegionBits	= BitArrayT<RegionID, RegionList::SIZE>;
+	using TasksBits		= BitArrayT<StateList::SIZE>;
+	using RegionBits	= BitArrayT<RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -175,7 +175,7 @@ struct PlanDataT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, 0)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
-					 , TPayload>>
+					 , TPayload>> final
 {
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				  noexcept	{}
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)			const noexcept	{}
