@@ -57,7 +57,7 @@ struct O_ final {
 	using SubStates		= OS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX,
 								 ORTHO_INDEX + 1,
-								 ORTHO_UNIT + (WIDTH + 7) / 8>,
+								 ORTHO_UNIT + contain(WIDTH, 8)>,
 							  Args,
 							  0,
 							  TSubStates...>;
@@ -67,13 +67,13 @@ struct O_ final {
 #if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <typename T>
-	struct Accessor {
+	struct Accessor final {
 		HFSM2_CONSTEXPR(11) static			T& get(		 O_& o)						  noexcept	{ return o._subStates.template access<T>();	}
 		HFSM2_CONSTEXPR(11) static const	T& get(const O_& o)						  noexcept	{ return o._subStates.template access<T>();	}
 	};
 
 	template <>
-	struct Accessor<Head> {
+	struct Accessor<Head> final {
 		HFSM2_CONSTEXPR(11) static		 Head& get(		 O_& o)						  noexcept	{ return o._headState;						}
 		HFSM2_CONSTEXPR(11) static const Head& get(const O_& o)						  noexcept	{ return o._headState;						}
 	};

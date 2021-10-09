@@ -52,7 +52,7 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-struct StaticArrayT<T, 0> {
+struct StaticArrayT<T, 0> final {
 	using Item		= T;
 
 	HFSM2_CONSTEXPR(11)	StaticArrayT() = default;

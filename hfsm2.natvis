@@ -46,8 +46,8 @@
 	<Type Name="hfsm2::detail::BitArrayT&lt;*&gt;">
 		<Expand HideRawView="true">
 			<IndexListItems>
-				<Size>BIT_COUNT</Size>
-				<ValueNode>(_storage[$i / UNIT_WIDTH] &gt;&gt; ($i % UNIT_WIDTH)) &amp; 0x1</ValueNode>
+				<Size>CAPACITY</Size>
+				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
 			</IndexListItems>
 		</Expand>
 	</Type>
@@ -56,8 +56,8 @@
 		<DisplayString>&lt;{CAPACITY &amp; 0x1}&gt;</DisplayString>
 		<Expand HideRawView="true">
 			<IndexListItems>
-				<Size>BIT_COUNT</Size>
-				<ValueNode>(_storage[$i / UNIT_WIDTH] &gt;&gt; ($i % UNIT_WIDTH)) &amp; 0x1</ValueNode>
+				<Size>CAPACITY</Size>
+				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
 			</IndexListItems>
 		</Expand>
 	</Type>
@@ -65,8 +65,8 @@
 	<Type Name="hfsm2::detail::BitArrayT&lt;*&gt;::CBits">
 		<Expand HideRawView="true">
 			<IndexListItems>
-				<Size>BIT_COUNT</Size>
-				<ValueNode>(_storage[$i / UNIT_WIDTH] &gt;&gt; ($i % UNIT_WIDTH)) &amp; 0x1</ValueNode>
+				<Size>CAPACITY</Size>
+				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
 			</IndexListItems>
 		</Expand>
 	</Type>
@@ -175,6 +175,7 @@
 
 	<Type Name="hfsm2::detail::PlanT&lt;*&gt;">
 		<DisplayString Condition="_bounds.first == INVALID_LONG">&lt;Empty&gt;</DisplayString>
+		<DisplayString>_bounds</DisplayString>
 		<Expand HideRawView="true">
 			<CustomListItems MaxItemsPerView="100">
 				<Variable Name="i" InitialValue="_bounds.first" />
@@ -208,7 +209,7 @@
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::S_&lt;*&gt;">
-		<DisplayString>{TYPE}</DisplayString>
+		<DisplayString Optional="true">{TYPE}</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
 

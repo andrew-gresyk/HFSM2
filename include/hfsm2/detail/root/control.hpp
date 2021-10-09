@@ -49,7 +49,7 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Origin {
+	struct Origin final {
 		HFSM2_CONSTEXPR(14)	Origin(ControlT& control_,
 								   const StateID stateId)				  noexcept;
 
@@ -390,12 +390,12 @@ protected:
 	using typename PlanControl::Transition;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using TasksBits		= BitArrayT<StateID, StateList::SIZE>;
+	using TasksBits		= BitArrayT<StateList::SIZE>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Lock {
+	struct Lock final {
 		HFSM2_CONSTEXPR(14) Lock(FullControlBaseT& control_)	  noexcept;
 		HFSM2_CONSTEXPR(20) ~Lock()								  noexcept;
 

@@ -1,4 +1,5 @@
-﻿.codelite
+﻿.cache
+.codelite
 .idea
 .vs
 .vscode
@@ -7,7 +8,8 @@ cmake-*
 
 *.user
 
-/binaries-*
+/binaries*
+/build-*
 /hfsm_test.dir
 /projects/code-lite/build-Debug
 /projects/code-lite/Makefile

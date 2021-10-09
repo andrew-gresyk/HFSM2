@@ -179,7 +179,7 @@ struct G_ final {
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	struct UP {
+	struct UP final {
 		HFSM2_CONSTEXPR(14) UP(const Utility utility_ = Utility{1},
 						const Short prong_ = INVALID_SHORT) noexcept
 			: utility{utility_}
@@ -213,7 +213,7 @@ template <FeatureTag NFeatureTag
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
-struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>> {
+struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>> final {
 	using Cfg = G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
 
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;

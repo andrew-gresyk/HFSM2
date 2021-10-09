@@ -421,7 +421,7 @@ namespace hfsm2 {
 //------------------------------------------------------------------------------
 
 struct EmptyContext {};
-struct EmptyPayload {};
+struct EmptyPayload final {};
 
 struct Automatic;
 struct Manual;
@@ -449,30 +449,35 @@ static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <bool B, typename TT, typename TF>
-struct ConditionalT {
+template <bool B,
+		  typename TT,
+		  typename TF>
+struct ConditionalT final {
 	using Type = TT;
 };
 
-template <typename TT, typename TF>
-struct ConditionalT<false, TT, TF> {
+template <typename TT,
+		  typename TF>
+struct ConditionalT<false, TT, TF> final {
 	using Type = TF;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <bool B, typename TT, typename TF>
+template <bool B,
+		  typename TT,
+		  typename TF>
 using Conditional = typename ConditionalT<B, TT, TF>::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct RemoveConstT {
+struct RemoveConstT final {
 	using Type = T;
 };
 
 template <typename T>
-struct RemoveConstT<const T> {
+struct RemoveConstT<const T> final {
 	using Type = T;
 };
 
@@ -484,17 +489,17 @@ using RemoveConst = typename RemoveConstT<T>::Type;
 //------------------------------------------------------------------------------
 
 template <typename T>
-struct RemoveReferenceT {
+struct RemoveReferenceT final {
 	using Type = T;
 };
 
 template <typename T>
-struct RemoveReferenceT<T&> {
+struct RemoveReferenceT<T&> final {
 	using Type = T;
 };
 
 template <typename T>
-struct RemoveReferenceT<T&&> {
+struct RemoveReferenceT<T&&> final {
 	using Type = T;
 };
 
@@ -977,8 +982,8 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-HFSM2_CONSTEXPR(14) float  uniform(const uint32_t uint)		  noexcept;
-HFSM2_CONSTEXPR(14) double uniform(const uint64_t uint)		  noexcept;
+HFSM2_CONSTEXPR(14)	float  uniform(const uint32_t uint)		  noexcept;
+HFSM2_CONSTEXPR(14)	double uniform(const uint64_t uint)		  noexcept;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -993,12 +998,12 @@ class SimpleRandomT<uint64_t> {
 public:
 	constexpr SimpleRandomT()								  noexcept {}
 
-	HFSM2_CONSTEXPR(14) SimpleRandomT(const uint64_t seed)	  noexcept;
+	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint64_t seed)	  noexcept;
 
-	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept;
 
 private:
-	HFSM2_CONSTEXPR(14) uint64_t raw64()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint64_t raw64()					  noexcept;
 
 private:
 
@@ -1013,12 +1018,12 @@ class SimpleRandomT<uint32_t> {
 public:
 	constexpr SimpleRandomT()								  noexcept {}
 
-	HFSM2_CONSTEXPR(14) SimpleRandomT(const uint32_t seed)	  noexcept;
+	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint32_t seed)	  noexcept;
 
-	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept;
 
 private:
-	HFSM2_CONSTEXPR(14) uint32_t raw32()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint32_t raw32()					  noexcept;
 
 private:
 	uint32_t _state = 0;
@@ -1042,8 +1047,8 @@ public:
 	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t s)		  noexcept	{ seed(s);	}
 	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t(& s)[4])	  noexcept	{ seed(s);	}
 
-	HFSM2_CONSTEXPR(14) void seed(const uint64_t s)			  noexcept;
-	HFSM2_CONSTEXPR(14) void seed(const uint64_t(& s)[4])	  noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(const uint64_t s)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(const uint64_t(& s)[4])	  noexcept;
 
 protected:
 	uint64_t _state[4];
@@ -1062,8 +1067,8 @@ public:
 	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t s)		  noexcept	{ seed(s);	}
 	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t(& s)[4])	  noexcept	{ seed(s);	}
 
-	HFSM2_CONSTEXPR(14) void seed(const uint32_t s)			  noexcept;
-	HFSM2_CONSTEXPR(14) void seed(const uint32_t(& s)[4])	  noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(const uint32_t s)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(const uint32_t(& s)[4])	  noexcept;
 
 protected:
 	uint32_t _state[4];
@@ -1086,14 +1091,14 @@ class FloatRandomT<uint64_t>
 public:
 	using Base::BaseRandomT;
 
-	HFSM2_CONSTEXPR(14) double	float64()					  noexcept	{ return uniform(uint64());			}
-	HFSM2_CONSTEXPR(14) float	float32()					  noexcept	{ return uniform(uint32());			}
+	HFSM2_CONSTEXPR(14)	double	float64()					  noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
 
-	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept;
-	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept	{ return (uint32_t) uint64();		}
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept	{ return (uint32_t) uint64();		}
 
-	HFSM2_CONSTEXPR(14) float next()						  noexcept	{ return float32();					}
-	HFSM2_CONSTEXPR(14) void  jump()						  noexcept;
+	HFSM2_CONSTEXPR(14)	float next()						  noexcept	{ return float32();					}
+	HFSM2_CONSTEXPR(14)	void  jump()						  noexcept;
 };
 
 //------------------------------------------------------------------------------
@@ -1108,14 +1113,14 @@ class FloatRandomT<uint32_t>
 public:
 	using Base::BaseRandomT;
 
-	HFSM2_CONSTEXPR(14) double	float64()					  noexcept	{ return uniform(uint64());			}
-	HFSM2_CONSTEXPR(14) float	float32()					  noexcept	{ return uniform(uint32());			}
+	HFSM2_CONSTEXPR(14)	double	float64()					  noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
 
-	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept	{ return widen(uint32(), uint32());	}
-	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept	{ return widen(uint32(), uint32());	}
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept;
 
-	HFSM2_CONSTEXPR(14) float next()						  noexcept	{ return float32();					}
-	HFSM2_CONSTEXPR(14) void  jump()						  noexcept;
+	HFSM2_CONSTEXPR(14)	float next()						  noexcept	{ return float32();					}
+	HFSM2_CONSTEXPR(14)	void  jump()						  noexcept;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1135,13 +1140,13 @@ class IntRandomT<uint64_t>
 public:
 	using Base::BaseRandomT;
 
-	HFSM2_CONSTEXPR(14) double	float64()					  noexcept	{ return uniform(uint64());			}
-	HFSM2_CONSTEXPR(14) float	float32()					  noexcept	{ return uniform(uint32());			}
+	HFSM2_CONSTEXPR(14)	double	float64()					  noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
 
-	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept;
-	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept	{ return (uint32_t) uint64();		}
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept	{ return (uint32_t) uint64();		}
 
-	HFSM2_CONSTEXPR(14) void jump()							  noexcept;
+	HFSM2_CONSTEXPR(14)	void jump()							  noexcept;
 };
 
 //------------------------------------------------------------------------------
@@ -1156,13 +1161,13 @@ class IntRandomT<uint32_t>
 public:
 	using Base::BaseRandomT;
 
-	HFSM2_CONSTEXPR(14) double	float64()					  noexcept	{ return uniform(uint64());			}
-	HFSM2_CONSTEXPR(14) float	float32()					  noexcept	{ return uniform(uint32());			}
+	HFSM2_CONSTEXPR(14)	double	float64()					  noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
 
-	HFSM2_CONSTEXPR(14) uint64_t uint64()					  noexcept	{ return widen(uint32(), uint32());	}
-	HFSM2_CONSTEXPR(14) uint32_t uint32()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept	{ return widen(uint32(), uint32());	}
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept;
 
-	HFSM2_CONSTEXPR(14) void jump()							  noexcept;
+	HFSM2_CONSTEXPR(14)	void jump()							  noexcept;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1949,7 +1954,7 @@ struct alignas(4) TransitionBase {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TPayload>
-struct alignas(4) TransitionT
+struct alignas(4) TransitionT final
 	: TransitionBase
 {
 	using Payload = TPayload;
@@ -2044,7 +2049,7 @@ struct alignas(4) TransitionT
 //------------------------------------------------------------------------------
 
 template <>
-struct alignas(4) TransitionT<void>
+struct alignas(4) TransitionT<void> final
 	: TransitionBase
 {
 	using TransitionBase::TransitionBase;
@@ -2056,7 +2061,7 @@ struct alignas(4) TransitionT<void>
 
 }
 
-struct Request {
+struct Request final {
 	TransitionType type;
 	Short index;
 };
@@ -2176,7 +2181,7 @@ namespace hfsm2 {
 
 //------------------------------------------------------------------------------
 
-struct StructureEntry {
+struct StructureEntry final {
 	bool isActive;
 	const wchar_t* prefix;
 	const char* name;
@@ -2193,7 +2198,7 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct alignas(alignof(void*)) StructureStateInfo {
+struct alignas(alignof(void*)) StructureStateInfo final {
 	enum class RegionType : Short {
 		COMPOSITE,
 		ORTHOGONAL,
@@ -2291,7 +2296,7 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T>
-struct StaticArrayT<T, 0> {
+struct StaticArrayT<T, 0> final {
 	using Item		= T;
 
 	HFSM2_CONSTEXPR(11)	StaticArrayT() = default;
@@ -2492,7 +2497,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Units {
+struct Units final {
 	HFSM2_CONSTEXPR(11) Units(Short unit_  = INVALID_SHORT,
 							  Short width_ = INVALID_SHORT)			  noexcept
 		: unit {unit_ }
@@ -2505,18 +2510,18 @@ struct Units {
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex, Short NUnitCount>
+template <unsigned NCapacity>
 class BitArrayT final {
 public:
-	using Index	= TIndex;
+	using Index	= UCapacity<NCapacity>;
 
-	static constexpr Index UNIT_COUNT = NUnitCount;
-	static constexpr Index BIT_COUNT  = UNIT_COUNT * 8;
+	static constexpr Index CAPACITY   = NCapacity;
+	static constexpr Index UNIT_COUNT = contain(CAPACITY, 8);
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class Bits {
-		template <typename, Short>
+		template <unsigned>
 		friend class BitArrayT;
 
 	private:
@@ -2552,12 +2557,12 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class CBits {
-		template <typename, Short>
+		template <unsigned>
 		friend class BitArrayT;
 
 	private:
 		HFSM2_CONSTEXPR(11)	explicit CBits(const uint8_t* const storage,
-									const Index width)				  noexcept
+										   const Index width)		  noexcept
 			: _storage{storage}
 			, _width{width}
 		{}
@@ -2591,9 +2596,14 @@ public:
 	template <Short NIndex>
 	HFSM2_CONSTEXPR(14) void clear()								  noexcept;
 
-	HFSM2_CONSTEXPR(14) bool get  (const Index index)			const noexcept;
-	HFSM2_CONSTEXPR(14) void set  (const Index index)				  noexcept;
-	HFSM2_CONSTEXPR(14) void clear(const Index index)				  noexcept;
+	template <typename TIndex>
+	HFSM2_CONSTEXPR(14) bool get  (const TIndex index)			const noexcept;
+
+	template <typename TIndex>
+	HFSM2_CONSTEXPR(14) void set  (const TIndex index)				  noexcept;
+
+	template <typename TIndex>
+	HFSM2_CONSTEXPR(14) void clear(const TIndex index)				  noexcept;
 
 	template <Short NUnit, Short NWidth>
 	HFSM2_CONSTEXPR(14)  Bits  bits()								  noexcept;
@@ -2610,8 +2620,8 @@ private:
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex>
-class BitArrayT<TIndex, 0> final {
+template <>
+class BitArrayT<0> final {
 public:
 	HFSM2_CONSTEXPR(14)	void clear()								  noexcept	{}
 };
@@ -2626,9 +2636,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
-BitArrayT<TI, NC>::Bits::operator bool() const noexcept {
+BitArrayT<NCapacity>::Bits::operator bool() const noexcept {
 	const Short fullUnits = _width / 8;
 
 	// TODO: cover this case
@@ -2645,10 +2655,10 @@ BitArrayT<TI, NC>::Bits::operator bool() const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::clear() noexcept {
+BitArrayT<NCapacity>::Bits::clear() noexcept {
 	const Index unitCount = contain(_width, 8);
 
 	for (Index i = 0; i < unitCount; ++i)
@@ -2657,11 +2667,11 @@ BitArrayT<TI, NC>::Bits::clear() noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::Bits::get() const noexcept {
+BitArrayT<NCapacity>::Bits::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -2674,11 +2684,11 @@ BitArrayT<TI, NC>::Bits::get() const noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::set() noexcept {
+BitArrayT<NCapacity>::Bits::set() noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -2691,11 +2701,11 @@ BitArrayT<TI, NC>::Bits::set() noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::clear() noexcept {
+BitArrayT<NCapacity>::Bits::clear() noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -2708,10 +2718,10 @@ BitArrayT<TI, NC>::Bits::clear() noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::Bits::get(const Index index) const noexcept {
+BitArrayT<NCapacity>::Bits::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / 8;
@@ -2723,10 +2733,10 @@ BitArrayT<TI, NC>::Bits::get(const Index index) const noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::set(const Index index) noexcept {
+BitArrayT<NCapacity>::Bits::set(const Index index) noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / 8;
@@ -2738,10 +2748,10 @@ BitArrayT<TI, NC>::Bits::set(const Index index) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::clear(const Index index) noexcept {
+BitArrayT<NCapacity>::Bits::clear(const Index index) noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / 8;
@@ -2753,9 +2763,9 @@ BitArrayT<TI, NC>::Bits::clear(const Index index) noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
-BitArrayT<TI, NC>::CBits::operator bool() const noexcept {
+BitArrayT<NCapacity>::CBits::operator bool() const noexcept {
 	const Short fullUnits = _width / 8;
 
 	for (Index i = 0; i < fullUnits; ++i)
@@ -2771,11 +2781,11 @@ BitArrayT<TI, NC>::CBits::operator bool() const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::CBits::get() const noexcept {
+BitArrayT<NCapacity>::CBits::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < _width, "");
 
@@ -2788,10 +2798,10 @@ BitArrayT<TI, NC>::CBits::get() const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::CBits::get(const Index index) const noexcept {
+BitArrayT<NCapacity>::CBits::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / 8;
@@ -2802,24 +2812,25 @@ BitArrayT<TI, NC>::CBits::get(const Index index) const noexcept {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// COMMON
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::clear() noexcept {
+BitArrayT<NCapacity>::clear() noexcept {
 	for (uint8_t& unit : _storage)
 		unit = uint8_t{0};
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::get() const noexcept {
+BitArrayT<NCapacity>::get() const noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < BIT_COUNT, "");
+	static_assert(INDEX < CAPACITY, "");
 
 	constexpr Index unitIndex = INDEX / 8;
 	constexpr Index bitIndex  = INDEX % 8;
@@ -2830,13 +2841,13 @@ BitArrayT<TI, NC>::get() const noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::set() noexcept {
+BitArrayT<NCapacity>::set() noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < BIT_COUNT, "");
+	static_assert(INDEX < CAPACITY, "");
 
 	constexpr Index unitIndex = INDEX / 8;
 	constexpr Index bitIndex  = INDEX % 8;
@@ -2847,13 +2858,13 @@ BitArrayT<TI, NC>::set() noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::clear() noexcept {
+BitArrayT<NCapacity>::clear() noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < BIT_COUNT, "");
+	static_assert(INDEX < CAPACITY, "");
 
 	constexpr Index unitIndex = INDEX / 8;
 	constexpr Index bitIndex  = INDEX % 8;
@@ -2864,14 +2875,15 @@ BitArrayT<TI, NC>::clear() noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
+template <typename TIndex>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::get(const Index index) const noexcept {
-	HFSM2_ASSERT(index < BIT_COUNT);
+BitArrayT<NCapacity>::get(const TIndex index) const noexcept {
+	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = index / 8;
-	const Index bit  = index % 8;
+	const Index unit = (Index) index / 8;
+	const Index bit  = (Index) index % 8;
 	const uint8_t mask = 1 << bit;
 
 	return (_storage[unit] & mask) != 0;
@@ -2879,14 +2891,15 @@ BitArrayT<TI, NC>::get(const Index index) const noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
+template <typename TIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::set(const Index index) noexcept {
-	HFSM2_ASSERT(index < BIT_COUNT);
+BitArrayT<NCapacity>::set(const TIndex index) noexcept {
+	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = index / 8;
-	const Index bit  = index % 8;
+	const Index unit = (Index) index / 8;
+	const Index bit  = (Index) index % 8;
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] |= mask;
@@ -2894,14 +2907,15 @@ BitArrayT<TI, NC>::set(const Index index) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
+template <typename TIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::clear(const Index index) noexcept {
-	HFSM2_ASSERT(index < BIT_COUNT);
+BitArrayT<NCapacity>::clear(const TIndex index) noexcept {
+	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = index / 8;
-	const Index bit  = index % 8;
+	const Index unit = (Index) index / 8;
+	const Index bit  = (Index) index % 8;
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] &= ~mask;
@@ -2909,11 +2923,11 @@ BitArrayT<TI, NC>::clear(const Index index) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NUnit, Short NWidth>
 HFSM2_CONSTEXPR(14)
-typename BitArrayT<TI, NC>::Bits
-BitArrayT<TI, NC>::bits() noexcept {
+typename BitArrayT<NCapacity>::Bits
+BitArrayT<NCapacity>::bits() noexcept {
 	constexpr Short UNIT  = NUnit;
 	constexpr Short WIDTH = NWidth;
 	static_assert(UNIT + contain(WIDTH, 8) <= UNIT_COUNT, "");
@@ -2923,11 +2937,11 @@ BitArrayT<TI, NC>::bits() noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NUnit, Short NWidth>
 HFSM2_CONSTEXPR(14)
-typename BitArrayT<TI, NC>::CBits
-BitArrayT<TI, NC>::cbits() const noexcept {
+typename BitArrayT<NCapacity>::CBits
+BitArrayT<NCapacity>::cbits() const noexcept {
 	constexpr Short UNIT  = NUnit;
 	constexpr Short WIDTH = NWidth;
 	static_assert(UNIT + contain(WIDTH, 8) <= UNIT_COUNT, "");
@@ -2937,10 +2951,10 @@ BitArrayT<TI, NC>::cbits() const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
-typename BitArrayT<TI, NC>::Bits
-BitArrayT<TI, NC>::bits(const Units& units) noexcept {
+typename BitArrayT<NCapacity>::Bits
+BitArrayT<NCapacity>::bits(const Units& units) noexcept {
 	HFSM2_ASSERT(units.unit + contain(units.width, 8) <= UNIT_COUNT);
 
 	return Bits{_storage + units.unit, units.width};
@@ -2948,10 +2962,10 @@ BitArrayT<TI, NC>::bits(const Units& units) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
-typename BitArrayT<TI, NC>::CBits
-BitArrayT<TI, NC>::cbits(const Units& units) const noexcept {
+typename BitArrayT<NCapacity>::CBits
+BitArrayT<NCapacity>::cbits(const Units& units) const noexcept {
 	HFSM2_ASSERT(units.unit + contain(units.width, 8) <= UNIT_COUNT);
 
 	return CBits{_storage + units.unit, units.width};
@@ -3011,7 +3025,7 @@ operator == (const TaskBase& lhs,
 //------------------------------------------------------------------------------
 
 template <typename TPayload>
-struct TaskT
+struct TaskT final
 	: TaskBase
 {
 	using Payload = TPayload;
@@ -3058,7 +3072,7 @@ struct TaskT
 //------------------------------------------------------------------------------
 
 template <>
-struct TaskT<void>
+struct TaskT<void> final
 	: TaskBase
 {
 	using TaskBase::TaskBase;
@@ -3124,22 +3138,23 @@ template <typename... TA>
 HFSM2_CONSTEXPR(14)
 Long
 TaskListT<TP, NC>::emplace(TA&&... args) noexcept {
+	HFSM2_ASSERT(_last  <= CAPACITY);
+
 	if (_count < CAPACITY) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
 		const Index index = _vacantHead;
-		auto& cell = _items[index];
-		++_count;
+		Item& item = _items[index];
 
 		if (_vacantHead != _vacantTail) {
 			// recycle
-			HFSM2_ASSERT(cell.prev == INVALID);
-			HFSM2_ASSERT(cell.next != INVALID);
+			HFSM2_ASSERT(item.prev == INVALID);
+			HFSM2_ASSERT(item.next != INVALID);
 
-			_vacantHead = cell.next;
+			_vacantHead = item.next;
 
-			auto& head = _items[_vacantHead];
+			Item& head = _items[_vacantHead];
 			HFSM2_ASSERT(head.prev == index);
 			head.prev = INVALID;
 		} else if (_last < CAPACITY - 1) {
@@ -3148,19 +3163,22 @@ TaskListT<TP, NC>::emplace(TA&&... args) noexcept {
 			_vacantHead = _last;
 			_vacantTail = _last;
 
-			auto& vacant = _items[_vacantHead];
+			Item& vacant = _items[_vacantHead];
 			vacant.prev = INVALID;
 			vacant.next = INVALID;
 		} else {
-			HFSM2_ASSERT(_count == CAPACITY);
+			// last
+			HFSM2_ASSERT(_count == CAPACITY - 1);
 
+			_last = CAPACITY;
 			_vacantHead = INVALID;
 			_vacantTail = INVALID;
 		}
 
-		HFSM2_IF_ASSERT(verifyStructure());
+		new (&item) Item{forward<TA>(args)...};
+		++_count;
 
-		new (&cell) Item{forward<TA>(args)...};
+		HFSM2_IF_ASSERT(verifyStructure());
 
 		return index;
 	} else {
@@ -3182,16 +3200,16 @@ void
 TaskListT<TP, NC>::remove(const Index i) noexcept {
 	HFSM2_ASSERT(i < CAPACITY && _count);
 
-	auto& fresh = _items[i];
+	Item& item = _items[i];
 
 	if (_count < CAPACITY) {
 		HFSM2_ASSERT(_vacantHead < CAPACITY);
 		HFSM2_ASSERT(_vacantTail < CAPACITY);
 
-		fresh.prev = INVALID;
-		fresh.next = _vacantHead;
+		item.prev = INVALID;
+		item.next = _vacantHead;
 
-		auto& head = _items[_vacantHead];
+		Item& head = _items[_vacantHead];
 		head.prev = i;
 
 		_vacantHead = i;
@@ -3201,8 +3219,8 @@ TaskListT<TP, NC>::remove(const Index i) noexcept {
 		HFSM2_ASSERT(_vacantHead == INVALID);
 		HFSM2_ASSERT(_vacantTail == INVALID);
 
-		fresh.prev = INVALID;
-		fresh.next = INVALID;
+		item.prev = INVALID;
+		item.next = INVALID;
 
 		_vacantHead = i;
 		_vacantTail = i;
@@ -3249,17 +3267,17 @@ TaskListT<TP, NC>::verifyStructure(const Index occupied) const noexcept {
 		HFSM2_ASSERT(_items[_vacantHead].prev == INVALID);
 		HFSM2_ASSERT(_items[_vacantTail].next == INVALID);
 
-		auto emptyCount = 1;
+		Index emptyCount = 1;
 
-		for (auto c = _vacantHead; c != _vacantTail; ) {
+		for (Index c = _vacantHead; c != _vacantTail; ) {
 			HFSM2_ASSERT(occupied != c);
 
-			const auto& current = _items[c];
+			const Item& current = _items[c];
 
-			const auto f = current.next;
+			const Long f = current.next;
 			if (f != INVALID) {
 				// next
-				const auto& following = _items[f];
+				const Item& following = _items[f];
 
 				HFSM2_ASSERT(following.prev == c);
 
@@ -3299,14 +3317,14 @@ namespace detail {
 
 #pragma pack(push, 2)
 
-struct TaskLink {
+struct TaskLink final {
 	Long prev		= INVALID_LONG;
 	Long next		= INVALID_LONG;
 };
 
 //------------------------------------------------------------------------------
 
-struct Bounds {
+struct Bounds final {
 	Long first		= INVALID_LONG;
 	Long last		= INVALID_LONG;
 };
@@ -3354,7 +3372,7 @@ struct PlanDataT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
-					 , TPayload>>
+					 , TPayload>> final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -3369,8 +3387,8 @@ struct PlanDataT<ArgsT<TContext
 	using Payloads		= StaticArrayT<Payload,  TASK_CAPACITY>;
 
 	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
-	using TasksBits		= BitArrayT<StateID,  StateList::SIZE>;
-	using RegionBits	= BitArrayT<RegionID, RegionList::SIZE>;
+	using TasksBits		= BitArrayT<StateList::SIZE>;
+	using RegionBits	= BitArrayT<RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -3413,7 +3431,7 @@ struct PlanDataT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
-					 , void>>
+					 , void>> final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -3426,8 +3444,8 @@ struct PlanDataT<ArgsT<TContext
 	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
 	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
-	using TasksBits		= BitArrayT<StateID,  StateList::SIZE>;
-	using RegionBits	= BitArrayT<RegionID, RegionList::SIZE>;
+	using TasksBits		= BitArrayT<StateList::SIZE>;
+	using RegionBits	= BitArrayT<RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -3467,7 +3485,7 @@ struct PlanDataT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, 0)
 					 , NSubstitutionLimit
 					 , NTaskCapacity
-					 , TPayload>>
+					 , TPayload>> final
 {
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				  noexcept	{}
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)			const noexcept	{}
@@ -3676,7 +3694,7 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct Status {
+struct Status final {
 	enum class Result {
 		NONE,
 		SUCCESS,
@@ -3742,7 +3760,7 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct IteratorT {
+	struct IteratorT final {
 		HFSM2_CONSTEXPR(14) IteratorT(const CPlanT& plan)		  noexcept;
 
 		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
@@ -3804,7 +3822,7 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct IteratorT {
+	struct IteratorT final {
 		HFSM2_CONSTEXPR(14) IteratorT(PlanBaseT& plan)			  noexcept;
 
 		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
@@ -3825,7 +3843,7 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct CIterator {
+	struct CIterator final {
 		HFSM2_CONSTEXPR(14) CIterator(const PlanBaseT& plan)	  noexcept;
 
 		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
@@ -4850,14 +4868,14 @@ PlanBaseT<TArgs>::clear() noexcept {
 		{
 			HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
-			const auto& taskLink = _planData.taskLinks[index];
+			const auto& link = _planData.taskLinks[index];
 			HFSM2_ASSERT(index == _bounds.first ?
-							 taskLink.prev == INVALID_LONG :
-							 taskLink.prev <  TaskLinks::CAPACITY);
+							 link.prev == INVALID_LONG :
+							 link.prev <  TaskLinks::CAPACITY);
 
-			const Long next = taskLink.next;
+			const Long next = link.next;
 
-			_planData.tasks.remove(index);
+			remove(index);
 
 			index = next;
 		}
@@ -4875,35 +4893,35 @@ PlanBaseT<TArgs>::clear() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-PlanBaseT<TArgs>::remove(const Long task) noexcept {
+PlanBaseT<TArgs>::remove(const Long index) noexcept {
 	HFSM2_ASSERT(_planData.planExists.get(_regionId));
 	HFSM2_ASSERT(_bounds.first < TaskLinks::CAPACITY);
 	HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
 
-	HFSM2_ASSERT(task < TaskLinks::CAPACITY);
+	HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
-	TaskLink& curr = _planData.taskLinks[task];
+	TaskLink& link = _planData.taskLinks[index];
 
-	if (curr.prev < TaskLinks::CAPACITY) {
-		TaskLink& prev = _planData.taskLinks[curr.prev];
-		prev.next = curr.next;
+	if (link.prev < TaskLinks::CAPACITY) {
+		TaskLink& prev = _planData.taskLinks[link.prev];
+		prev.next = link.next;
 	} else {
-		HFSM2_ASSERT(_bounds.first == task);
-		_bounds.first = curr.next;
+		HFSM2_ASSERT(_bounds.first == index);
+		_bounds.first = link.next;
 	}
 
-	if (curr.next < TaskLinks::CAPACITY) {
-		TaskLink& next = _planData.taskLinks[curr.next];
-		next.prev = curr.prev;
+	if (link.next < TaskLinks::CAPACITY) {
+		TaskLink& next = _planData.taskLinks[link.next];
+		next.prev = link.prev;
 	} else {
-		HFSM2_ASSERT(_bounds.last == task);
-		_bounds.last = curr.prev;
+		HFSM2_ASSERT(_bounds.last == index);
+		_bounds.last = link.prev;
 	}
 
-	curr.prev = INVALID_LONG;
-	curr.next = INVALID_LONG;
+	link.prev = INVALID_LONG;
+	link.next = INVALID_LONG;
 
-	_planData.tasks.remove(task);
+	_planData.tasks.remove(index);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4961,7 +4979,7 @@ enum Strategy {
 
 #pragma pack(push, 1)
 
-struct alignas(2 * sizeof(Short)) Parent {
+struct alignas(2 * sizeof(Short)) Parent final {
 	HFSM2_CONSTEXPR(11)
 	Parent() = default;
 
@@ -4992,7 +5010,7 @@ struct alignas(2 * sizeof(Short)) Parent {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TRegistry>
-struct BackUpT {
+struct BackUpT final {
 	using CompoForks = typename TRegistry::CompoForks;
 	using OrthoForks = typename TRegistry::OrthoForks;
 
@@ -5042,7 +5060,7 @@ struct RegistryT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 HFSM2_IF_PLANS(, NTaskCapacity)
-					 , TPayload>>
+					 , TPayload>> final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -5062,9 +5080,9 @@ struct RegistryT<ArgsT<TContext
 	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
 
 	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
-	using OrthoForks	= BitArrayT	  <Short,  ORTHO_UNITS>;
+	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
 	using OrthoBits		= typename OrthoForks::Bits;
-	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
+	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
@@ -5120,7 +5138,7 @@ struct RegistryT<ArgsT<TContext
 					 HFSM2_IF_SERIALIZATION(, NSerialBits)
 					 , NSubstitutionLimit
 					 HFSM2_IF_PLANS(, NTaskCapacity)
-					 , TPayload>>
+					 , TPayload>> final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
@@ -5135,8 +5153,8 @@ struct RegistryT<ArgsT<TContext
 	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
 
 	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
-	using OrthoForks	= BitArrayT	  <Short,  0>;
-	using CompoRemains	= BitArrayT	  <Short,  COMPO_REGIONS>;
+	using OrthoForks	= BitArrayT	  <0>;
+	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
 
 	using BackUp		= BackUpT<RegistryT>;
 
@@ -5679,7 +5697,7 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Origin {
+	struct Origin final {
 		HFSM2_CONSTEXPR(14)	Origin(ControlT& control_,
 								   const StateID stateId)				  noexcept;
 
@@ -6020,12 +6038,12 @@ protected:
 	using typename PlanControl::Transition;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using TasksBits		= BitArrayT<StateID, StateList::SIZE>;
+	using TasksBits		= BitArrayT<StateList::SIZE>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct Lock {
+	struct Lock final {
 		HFSM2_CONSTEXPR(14) Lock(FullControlBaseT& control_)	  noexcept;
 		HFSM2_CONSTEXPR(20) ~Lock()								  noexcept;
 
@@ -6870,6 +6888,7 @@ PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// COMMON
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
@@ -6889,6 +6908,7 @@ FullControlBaseT<TArgs>::Lock::~Lock() noexcept {
 		control->_locked = false;
 }
 
+// COMMON
 ////////////////////////////////////////////////////////////////////////////////
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -7744,7 +7764,7 @@ namespace detail {
 
 #if HFSM2_DEBUG_STATE_TYPE_AVAILABLE() || HFSM2_STRUCTURE_REPORT_AVAILABLE() || HFSM2_LOG_INTERFACE_AVAILABLE()
 
-struct None {};
+struct None final {};
 
 #endif
 
@@ -7792,7 +7812,7 @@ struct S_ final
 #endif
 
 	template <typename T>
-	struct Accessor {
+	struct Accessor final {
 		HFSM2_CONSTEXPR(14) static			T& get(		 S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 		HFSM2_CONSTEXPR(14) static const	T& get(const S_&  )					  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 	};
@@ -7802,7 +7822,7 @@ struct S_ final
 #endif
 
 	template <>
-	struct Accessor<Head> {
+	struct Accessor<Head> final {
 		HFSM2_CONSTEXPR(11) static		 Head& get(		 S_& s)					  noexcept	{ return s;											}
 		HFSM2_CONSTEXPR(11) static const Head& get(const S_& s)					  noexcept	{ return s;											}
 	};
@@ -7960,7 +7980,7 @@ namespace detail {
 //------------------------------------------------------------------------------
 
 template <StateID NS, typename TA, typename TH>
-struct RegisterT {
+struct RegisterT final {
 	using StateParents	= StaticArrayT<Parent, TA::STATE_COUNT>;
 	using StateList		= typename TA::StateList;
 
@@ -7982,7 +8002,7 @@ struct RegisterT {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <StateID NS, typename TA>
-struct RegisterT<NS, TA, EmptyT<TA>> {
+struct RegisterT<NS, TA, EmptyT<TA>> final {
 	using StateParents = StaticArrayT<Parent, TA::STATE_COUNT>;
 
 	static
@@ -8410,17 +8430,17 @@ template <typename...>
 struct WrapInfoT;
 
 template <typename TH>
-struct WrapInfoT<	 TH> {
+struct WrapInfoT<	 TH> final {
 	using Type = SI_<TH>;
 };
 
 template <Strategy SG, typename TH, typename... TS>
-struct WrapInfoT<	 CI_<SG, TH, TS...>> {
+struct WrapInfoT<	 CI_<SG, TH, TS...>> final {
 	using Type =	 CI_<SG, TH, TS...>;
 };
 
 template <typename... TS>
-struct WrapInfoT<	 OI_<TS...>> {
+struct WrapInfoT<	 OI_<TS...>> final {
 	using Type =	 OI_<TS...>;
 };
 
@@ -8455,7 +8475,7 @@ struct SI_ final {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TInitial, typename... TRemaining>
-struct CSI_<TInitial, TRemaining...> {
+struct CSI_<TInitial, TRemaining...> final {
 	using Initial			= WrapInfo<TInitial>;
 	using Remaining			= CSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
@@ -8477,7 +8497,7 @@ struct CSI_<TInitial, TRemaining...> {
 };
 
 template <typename TInitial>
-struct CSI_<TInitial> {
+struct CSI_<TInitial> final {
 	using Initial			= WrapInfo<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
@@ -8530,7 +8550,7 @@ struct CI_ final {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TInitial, typename... TRemaining>
-struct OSI_<TInitial, TRemaining...> {
+struct OSI_<TInitial, TRemaining...> final {
 	using Initial			= WrapInfo<TInitial>;
 	using Remaining			= OSI_<TRemaining...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
@@ -8549,7 +8569,7 @@ struct OSI_<TInitial, TRemaining...> {
 };
 
 template <typename TInitial>
-struct OSI_<TInitial> {
+struct OSI_<TInitial> final {
 	using Initial			= WrapInfo<TInitial>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
@@ -8579,7 +8599,7 @@ struct OI_ final {
 	static constexpr Short COMPO_REGIONS	= SubStates::COMPO_REGIONS;
 	static constexpr Long  COMPO_PRONGS		= SubStates::COMPO_PRONGS;
 	static constexpr Short ORTHO_REGIONS	= SubStates::ORTHO_REGIONS + 1;
-	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS + (WIDTH + 7) / 8;
+	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS + contain(WIDTH, 8);
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS		= SubStates::ACTIVE_BITS;
@@ -8652,7 +8672,7 @@ template <StateID NStateID,
 		  Short NCompoIndex,
 		  Short NOrthoIndex,
 		  Short NOrthoUnit>
-struct I_ {
+struct I_ final {
 	static constexpr StateID STATE_ID	 = NStateID;
 	static constexpr Short	 COMPO_INDEX = NCompoIndex;
 	static constexpr Short	 ORTHO_INDEX = NOrthoIndex;
@@ -8685,28 +8705,28 @@ template <typename, typename...>
 struct MaterialT;
 
 template <typename TN, typename TA, typename TH>
-struct MaterialT   <TN, TA, TH> {
+struct MaterialT   <TN, TA, TH> final {
 	using Type = S_<TN, TA, TH>;
 };
 
 template <typename TN, typename TA, Strategy SG, 			  typename... TS>
-struct MaterialT   <TN, TA, CI_<SG, void,       TS...>> {
+struct MaterialT   <TN, TA, CI_<SG, void,       TS...>> final {
 	using Type = C_<TN, TA,     SG, EmptyT<TA>, TS...>;
 };
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-struct MaterialT   <TN, TA, CI_<SG, TH,	TS...>> {
+struct MaterialT   <TN, TA, CI_<SG, TH,	TS...>> final {
 	using Type = C_<TN, TA,     SG, TH,	TS...>;
 };
 
 template <typename TN, typename TA,				 typename... TS>
-struct MaterialT   <TN, TA, OI_<void,       TS...>> {
+struct MaterialT   <TN, TA, OI_<void,       TS...>> final {
 	using Type = O_<TN, TA,     EmptyT<TA>, TS...>;
 };
 
 template <typename TN, typename TA, typename TH, typename... TS>
-struct MaterialT   <TN, TA, OI_<TH,				  TS...>> {
-	using Type = O_<TN, TA,     TH,				  TS...>;
+struct MaterialT   <TN, TA, OI_<TH,			TS...>> final {
+	using Type = O_<TN, TA,     TH,			TS...>;
 };
 
 template <typename TN, typename... TS>
@@ -8796,7 +8816,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 struct CSubMaterialT;
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-struct CSubMaterialT<TN, TA, SG, NI, TL_<TS...>> {
+struct CSubMaterialT<TN, TA, SG, NI, TL_<TS...>> final {
 	using Type = CS_<TN, TA, SG, NI,	  TS...>;
 };
 
@@ -8809,22 +8829,22 @@ template <typename>
 struct InfoT;
 
 template <typename TN, typename TA, typename TH>
-struct InfoT<S_<TN, TA, TH>> {
+struct InfoT<S_<TN, TA, TH>> final {
 	using Type = SI_<	TH>;
 };
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-struct InfoT<C_<TN, TA, SG, TH, TS...>> {
+struct InfoT<C_<TN, TA, SG, TH, TS...>> final {
 	using Type = CI_<	SG, TH, TS...>;
 };
 
 template <typename TN, typename TA, typename TH, typename... TS>
-struct InfoT<O_<TN, TA, TH, TS...>> {
+struct InfoT<O_<TN, TA, TH, TS...>> final {
 	using Type = OI_<	TH, TS...>;
 };
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-struct InfoT<CS_<TN, TA, SG, NI, TS...>> {
+struct InfoT<CS_<TN, TA, SG, NI, TS...>> final {
 	using Type = CSI_<			 TS...>;
 };
 
@@ -10117,13 +10137,13 @@ struct C_ final {
 #if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <typename T>
-	struct Accessor {
+	struct Accessor final {
 		HFSM2_CONSTEXPR(11) static			T& get(		 C_& c)		  noexcept	{ return c._subStates.template access<T>();	}
 		HFSM2_CONSTEXPR(11) static const	T& get(const C_& c)		  noexcept	{ return c._subStates.template access<T>();	}
 	};
 
 	template <>
-	struct Accessor<Head> {
+	struct Accessor<Head> final {
 		HFSM2_CONSTEXPR(11) static		 Head& get(		 C_& c)		  noexcept	{ return c._headState;						}
 		HFSM2_CONSTEXPR(11) static const Head& get(const C_& c)		  noexcept	{ return c._headState;						}
 	};
@@ -10465,6 +10485,7 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 }
 
 //------------------------------------------------------------------------------
+// COMMON
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
@@ -10589,6 +10610,7 @@ C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) noexcept {
 #endif
 }
 
+// COMMON
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
@@ -11150,7 +11172,6 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 #endif
 
-// COMMON
 //------------------------------------------------------------------------------
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
@@ -12223,7 +12244,7 @@ struct O_ final {
 	using SubStates		= OS_<I_<HEAD_ID + 1,
 								 COMPO_INDEX,
 								 ORTHO_INDEX + 1,
-								 ORTHO_UNIT + (WIDTH + 7) / 8>,
+								 ORTHO_UNIT + contain(WIDTH, 8)>,
 							  Args,
 							  0,
 							  TSubStates...>;
@@ -12233,13 +12254,13 @@ struct O_ final {
 #if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <typename T>
-	struct Accessor {
+	struct Accessor final {
 		HFSM2_CONSTEXPR(11) static			T& get(		 O_& o)						  noexcept	{ return o._subStates.template access<T>();	}
 		HFSM2_CONSTEXPR(11) static const	T& get(const O_& o)						  noexcept	{ return o._subStates.template access<T>();	}
 	};
 
 	template <>
-	struct Accessor<Head> {
+	struct Accessor<Head> final {
 		HFSM2_CONSTEXPR(11) static		 Head& get(		 O_& o)						  noexcept	{ return o._headState;						}
 		HFSM2_CONSTEXPR(11) static const Head& get(const O_& o)						  noexcept	{ return o._headState;						}
 	};
@@ -12828,7 +12849,7 @@ template <typename T,
 		  Strategy TG,
 		  typename TH,
 		  typename... TS>
-struct Accessor<T,		 C_<TN, TA, TG, TH, TS...>> {
+struct Accessor<T,		 C_<TN, TA, TG, TH, TS...>> final {
 	using Host =		 C_<TN, TA, TG, TH, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
@@ -12844,7 +12865,7 @@ template <typename T,
 		  Strategy TG,
 		  typename TH,
 		  typename... TS>
-struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> {
+struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> final {
 	using Host =   const C_<TN, TA, TG, TH, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
@@ -12859,7 +12880,7 @@ template <typename T,
 		  typename TA,
 		  Strategy TG,
 		  typename... TS>
-struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> {
+struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> final {
 	using Host =		 C_<TN, TA, TG,  T, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return host._headState;	}
@@ -12874,7 +12895,7 @@ template <typename T,
 		  typename TA,
 		  Strategy TG,
 		  typename... TS>
-struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> {
+struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> final {
 	using Host =   const C_<TN, TA, TG,  T, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host._headState;	}
@@ -12890,7 +12911,7 @@ template <typename T,
 		  Strategy TG,
 		  Short NI,
 		  typename... TS>
-struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
+struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> final {
 	using Host =		 CS_<TN, TA, TG, NI, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{
@@ -12910,7 +12931,7 @@ template <typename T,
 		  Strategy TG,
 		  Short NI,
 		  typename... TS>
-struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
+struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> final {
 	using Host =   const CS_<TN, TA, TG, NI, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{
@@ -12930,7 +12951,7 @@ template <typename T,
 		  Strategy TG,
 		  Short NI,
 		  typename TS>
-struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> {
+struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> final {
 	using Host =		 CS_<TN, TA, TG, NI, TS>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return Accessor<T,	   typename Host::State>{host.state}.get();				}
@@ -12946,7 +12967,7 @@ template <typename T,
 		  Strategy TG,
 		  Short NI,
 		  typename TS>
-struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> {
+struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> final {
 	using Host =   const CS_<TN, TA, TG, NI, TS>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::State>{host.state}.get();				}
@@ -12961,7 +12982,7 @@ template <typename T,
 		  typename TA,
 		  typename TH,
 		  typename... TS>
-struct Accessor<T,		 O_<TN, TA, TH, TS...>> {
+struct Accessor<T,		 O_<TN, TA, TH, TS...>> final {
 	using Host =		 O_<TN, TA, TH, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
@@ -12976,7 +12997,7 @@ template <typename T,
 		  typename TA,
 		  typename TH,
 		  typename... TS>
-struct Accessor<T, const O_<TN, TA, TH, TS...>> {
+struct Accessor<T, const O_<TN, TA, TH, TS...>> final {
 	using Host =   const O_<TN, TA, TH, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
@@ -12990,7 +13011,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  typename... TS>
-struct Accessor<T,		 O_<TN, TA,  T, TS...>> {
+struct Accessor<T,		 O_<TN, TA,  T, TS...>> final {
 	using Host =		 O_<TN, TA,  T, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return host._headState;	}
@@ -13004,7 +13025,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  typename... TS>
-struct Accessor<T, const O_<TN, TA,  T, TS...>> {
+struct Accessor<T, const O_<TN, TA,  T, TS...>> final {
 	using Host =   const O_<TN, TA,  T, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host._headState;	}
@@ -13019,7 +13040,7 @@ template <typename T,
 		  typename TA,
 		  Short NI,
 		  typename... TS>
-struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
+struct Accessor<T,		 OS_<TN, TA, NI, TS...>> final {
 	using Host =		 OS_<TN, TA, NI, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{
@@ -13038,7 +13059,7 @@ template <typename T,
 		  typename TA,
 		  Short NI,
 		  typename... TS>
-struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
+struct Accessor<T, const OS_<TN, TA, NI, TS...>> final {
 	using Host =   const OS_<TN, TA, NI, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{
@@ -13057,7 +13078,7 @@ template <typename T,
 		  typename TA,
 		  Short NI,
 		  typename TS>
-struct Accessor<T,		 OS_<TN, TA, NI, TS>> {
+struct Accessor<T,		 OS_<TN, TA, NI, TS>> final {
 	using Host =		 OS_<TN, TA, NI, TS>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return Accessor<T,	   typename Host::Initial>{host.initial  }.get();	}
@@ -13072,7 +13093,7 @@ template <typename T,
 		  typename TA,
 		  Short NI,
 		  typename TS>
-struct Accessor<T, const OS_<TN, TA, NI, TS>> {
+struct Accessor<T, const OS_<TN, TA, NI, TS>> final {
 	using Host =   const OS_<TN, TA, NI, TS>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
@@ -13092,7 +13113,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  typename TH>
-struct Accessor<T,		 S_<TN, TA, TH>> {
+struct Accessor<T,		 S_<TN, TA, TH>> final {
 	using Host =		 S_<TN, TA, TH>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
@@ -13106,7 +13127,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  typename TH>
-struct Accessor<T, const S_<TN, TA, TH>> {
+struct Accessor<T, const S_<TN, TA, TH>> final {
 	using Host =   const S_<TN, TA, TH>;
 
 	HFSM2_CONSTEXPR(14) const T& get()	const noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
@@ -13123,7 +13144,7 @@ struct Accessor<T, const S_<TN, TA, TH>> {
 template <typename T,
 		  typename TN,
 		  typename TA>
-struct Accessor<T,		 S_<TN, TA,  T>> {
+struct Accessor<T,		 S_<TN, TA,  T>> final {
 	using Host =		 S_<TN, TA,  T>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return host;	}
@@ -13136,7 +13157,7 @@ struct Accessor<T,		 S_<TN, TA,  T>> {
 template <typename T,
 		  typename TN,
 		  typename TA>
-struct Accessor<T, const S_<TN, TA,  T>> {
+struct Accessor<T, const S_<TN, TA,  T>> final {
 	using Host =   const S_<TN, TA,  T>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host;	}
@@ -13248,7 +13269,7 @@ struct G_ final {
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	struct UP {
+	struct UP final {
 		HFSM2_CONSTEXPR(14) UP(const Utility utility_ = Utility{1},
 						const Short prong_ = INVALID_SHORT) noexcept
 			: utility{utility_}
@@ -13282,7 +13303,7 @@ template <FeatureTag NFeatureTag
 		, Long NSubstitutionLimit
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload>
-struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>> {
+struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>> final {
 	using Cfg = G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TRank, TUtility, TRNG), NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>;
 
 	static constexpr FeatureTag FEATURE_TAG = NFeatureTag;
@@ -15715,12 +15736,16 @@ RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 
 //#undef HFSM2_UNUSED
 
-//#undef HFSM2_ATTRIBUTE
-//#undef HFSM2_ATTRIBUTE_FALLTHROUGH
-//#undef HFSM2_ATTRIBUTE_NO_UNIQUE_ADDRESS
+#undef HFSM2_ATTRIBUTE
+#undef HFSM2_ATTRIBUTE_FALLTHROUGH
+#undef HFSM2_ATTRIBUTE_NO_UNIQUE_ADDRESS
 
-//#undef HFSM2_CONSTEXPR
-//#undef HFSM2_CONSTEXPR_EXTENDED
+#undef HFSM2_CONSTEXPR
+#undef HFSM2_CONSTEXPR_NO
+#undef HFSM2_CONSTEXPR_11
+#undef HFSM2_CONSTEXPR_14
+#undef HFSM2_CONSTEXPR_17
+#undef HFSM2_CONSTEXPR_20
 
 //#undef HFSM2_ARCHITECTURE
 //#undef HFSM2_ARCHITECTURE_64

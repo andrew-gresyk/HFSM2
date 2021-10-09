@@ -5,7 +5,7 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct Status {
+struct Status final {
 	enum class Result {
 		NONE,
 		SUCCESS,
@@ -71,7 +71,7 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct IteratorT {
+	struct IteratorT final {
 		HFSM2_CONSTEXPR(14) IteratorT(const CPlanT& plan)		  noexcept;
 
 		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
@@ -133,7 +133,7 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct IteratorT {
+	struct IteratorT final {
 		HFSM2_CONSTEXPR(14) IteratorT(PlanBaseT& plan)			  noexcept;
 
 		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;
@@ -154,7 +154,7 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	struct CIterator {
+	struct CIterator final {
 		HFSM2_CONSTEXPR(14) CIterator(const PlanBaseT& plan)	  noexcept;
 
 		HFSM2_CONSTEXPR(14) explicit operator bool()		const noexcept;

@@ -3,9 +3,9 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
-BitArrayT<TI, NC>::Bits::operator bool() const noexcept {
+BitArrayT<NCapacity>::Bits::operator bool() const noexcept {
 	const Short fullUnits = _width / 8;
 
 	// TODO: cover this case
@@ -22,10 +22,10 @@ BitArrayT<TI, NC>::Bits::operator bool() const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::clear() noexcept {
+BitArrayT<NCapacity>::Bits::clear() noexcept {
 	const Index unitCount = contain(_width, 8);
 
 	for (Index i = 0; i < unitCount; ++i)
@@ -34,11 +34,11 @@ BitArrayT<TI, NC>::Bits::clear() noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::Bits::get() const noexcept {
+BitArrayT<NCapacity>::Bits::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -51,11 +51,11 @@ BitArrayT<TI, NC>::Bits::get() const noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::set() noexcept {
+BitArrayT<NCapacity>::Bits::set() noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -68,11 +68,11 @@ BitArrayT<TI, NC>::Bits::set() noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::clear() noexcept {
+BitArrayT<NCapacity>::Bits::clear() noexcept {
 	constexpr Index INDEX = NIndex;
 	HFSM2_ASSERT(INDEX < _width);
 
@@ -85,10 +85,10 @@ BitArrayT<TI, NC>::Bits::clear() noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::Bits::get(const Index index) const noexcept {
+BitArrayT<NCapacity>::Bits::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / 8;
@@ -100,10 +100,10 @@ BitArrayT<TI, NC>::Bits::get(const Index index) const noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::set(const Index index) noexcept {
+BitArrayT<NCapacity>::Bits::set(const Index index) noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / 8;
@@ -115,10 +115,10 @@ BitArrayT<TI, NC>::Bits::set(const Index index) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::Bits::clear(const Index index) noexcept {
+BitArrayT<NCapacity>::Bits::clear(const Index index) noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / 8;
@@ -130,9 +130,9 @@ BitArrayT<TI, NC>::Bits::clear(const Index index) noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
-BitArrayT<TI, NC>::CBits::operator bool() const noexcept {
+BitArrayT<NCapacity>::CBits::operator bool() const noexcept {
 	const Short fullUnits = _width / 8;
 
 	for (Index i = 0; i < fullUnits; ++i)
@@ -148,11 +148,11 @@ BitArrayT<TI, NC>::CBits::operator bool() const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::CBits::get() const noexcept {
+BitArrayT<NCapacity>::CBits::get() const noexcept {
 	constexpr Index INDEX = NIndex;
 	static_assert(INDEX < _width, "");
 
@@ -165,10 +165,10 @@ BitArrayT<TI, NC>::CBits::get() const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::CBits::get(const Index index) const noexcept {
+BitArrayT<NCapacity>::CBits::get(const Index index) const noexcept {
 	HFSM2_ASSERT(index < _width);
 
 	const Index unit = index / 8;
@@ -179,24 +179,25 @@ BitArrayT<TI, NC>::CBits::get(const Index index) const noexcept {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// COMMON
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::clear() noexcept {
+BitArrayT<NCapacity>::clear() noexcept {
 	for (uint8_t& unit : _storage)
 		unit = uint8_t{0};
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::get() const noexcept {
+BitArrayT<NCapacity>::get() const noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < BIT_COUNT, "");
+	static_assert(INDEX < CAPACITY, "");
 
 	constexpr Index unitIndex = INDEX / 8;
 	constexpr Index bitIndex  = INDEX % 8;
@@ -207,13 +208,13 @@ BitArrayT<TI, NC>::get() const noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::set() noexcept {
+BitArrayT<NCapacity>::set() noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < BIT_COUNT, "");
+	static_assert(INDEX < CAPACITY, "");
 
 	constexpr Index unitIndex = INDEX / 8;
 	constexpr Index bitIndex  = INDEX % 8;
@@ -224,13 +225,13 @@ BitArrayT<TI, NC>::set() noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::clear() noexcept {
+BitArrayT<NCapacity>::clear() noexcept {
 	constexpr Index INDEX = NIndex;
-	static_assert(INDEX < BIT_COUNT, "");
+	static_assert(INDEX < CAPACITY, "");
 
 	constexpr Index unitIndex = INDEX / 8;
 	constexpr Index bitIndex  = INDEX % 8;
@@ -241,14 +242,15 @@ BitArrayT<TI, NC>::clear() noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
+template <typename TIndex>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<TI, NC>::get(const Index index) const noexcept {
-	HFSM2_ASSERT(index < BIT_COUNT);
+BitArrayT<NCapacity>::get(const TIndex index) const noexcept {
+	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = index / 8;
-	const Index bit  = index % 8;
+	const Index unit = (Index) index / 8;
+	const Index bit  = (Index) index % 8;
 	const uint8_t mask = 1 << bit;
 
 	return (_storage[unit] & mask) != 0;
@@ -256,14 +258,15 @@ BitArrayT<TI, NC>::get(const Index index) const noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
+template <typename TIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::set(const Index index) noexcept {
-	HFSM2_ASSERT(index < BIT_COUNT);
+BitArrayT<NCapacity>::set(const TIndex index) noexcept {
+	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = index / 8;
-	const Index bit  = index % 8;
+	const Index unit = (Index) index / 8;
+	const Index bit  = (Index) index % 8;
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] |= mask;
@@ -271,14 +274,15 @@ BitArrayT<TI, NC>::set(const Index index) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
+template <typename TIndex>
 HFSM2_CONSTEXPR(14)
 void
-BitArrayT<TI, NC>::clear(const Index index) noexcept {
-	HFSM2_ASSERT(index < BIT_COUNT);
+BitArrayT<NCapacity>::clear(const TIndex index) noexcept {
+	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = index / 8;
-	const Index bit  = index % 8;
+	const Index unit = (Index) index / 8;
+	const Index bit  = (Index) index % 8;
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] &= ~mask;
@@ -286,11 +290,11 @@ BitArrayT<TI, NC>::clear(const Index index) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NUnit, Short NWidth>
 HFSM2_CONSTEXPR(14)
-typename BitArrayT<TI, NC>::Bits
-BitArrayT<TI, NC>::bits() noexcept {
+typename BitArrayT<NCapacity>::Bits
+BitArrayT<NCapacity>::bits() noexcept {
 	constexpr Short UNIT  = NUnit;
 	constexpr Short WIDTH = NWidth;
 	static_assert(UNIT + contain(WIDTH, 8) <= UNIT_COUNT, "");
@@ -300,11 +304,11 @@ BitArrayT<TI, NC>::bits() noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 template <Short NUnit, Short NWidth>
 HFSM2_CONSTEXPR(14)
-typename BitArrayT<TI, NC>::CBits
-BitArrayT<TI, NC>::cbits() const noexcept {
+typename BitArrayT<NCapacity>::CBits
+BitArrayT<NCapacity>::cbits() const noexcept {
 	constexpr Short UNIT  = NUnit;
 	constexpr Short WIDTH = NWidth;
 	static_assert(UNIT + contain(WIDTH, 8) <= UNIT_COUNT, "");
@@ -314,10 +318,10 @@ BitArrayT<TI, NC>::cbits() const noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
-typename BitArrayT<TI, NC>::Bits
-BitArrayT<TI, NC>::bits(const Units& units) noexcept {
+typename BitArrayT<NCapacity>::Bits
+BitArrayT<NCapacity>::bits(const Units& units) noexcept {
 	HFSM2_ASSERT(units.unit + contain(units.width, 8) <= UNIT_COUNT);
 
 	return Bits{_storage + units.unit, units.width};
@@ -325,10 +329,10 @@ BitArrayT<TI, NC>::bits(const Units& units) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TI, Short NC>
+template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
-typename BitArrayT<TI, NC>::CBits
-BitArrayT<TI, NC>::cbits(const Units& units) const noexcept {
+typename BitArrayT<NCapacity>::CBits
+BitArrayT<NCapacity>::cbits(const Units& units) const noexcept {
 	HFSM2_ASSERT(units.unit + contain(units.width, 8) <= UNIT_COUNT);
 
 	return CBits{_storage + units.unit, units.width};

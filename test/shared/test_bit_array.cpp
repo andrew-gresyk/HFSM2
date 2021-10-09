@@ -7,7 +7,7 @@ namespace test_bit_array {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using BitArray = hfsm2::detail::BitArrayT<hfsm2::Short, 6>;
+using BitArray = hfsm2::detail::BitArrayT<32>;
 using Bits	   = typename BitArray::Bits;
 
 TEST_CASE("Shared.BitArrayT<>") {

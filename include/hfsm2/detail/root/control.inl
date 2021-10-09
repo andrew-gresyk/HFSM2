@@ -193,6 +193,7 @@ PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// COMMON
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
@@ -212,6 +213,7 @@ FullControlBaseT<TArgs>::Lock::~Lock() noexcept {
 		control->_locked = false;
 }
 
+// COMMON
 ////////////////////////////////////////////////////////////////////////////////
 
 #if HFSM2_PLANS_AVAILABLE()

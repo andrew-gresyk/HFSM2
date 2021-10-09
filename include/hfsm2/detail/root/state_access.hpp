@@ -16,7 +16,7 @@ template <typename T,
 		  Strategy TG,
 		  typename TH,
 		  typename... TS>
-struct Accessor<T,		 C_<TN, TA, TG, TH, TS...>> {
+struct Accessor<T,		 C_<TN, TA, TG, TH, TS...>> final {
 	using Host =		 C_<TN, TA, TG, TH, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
@@ -32,7 +32,7 @@ template <typename T,
 		  Strategy TG,
 		  typename TH,
 		  typename... TS>
-struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> {
+struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> final {
 	using Host =   const C_<TN, TA, TG, TH, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
@@ -47,7 +47,7 @@ template <typename T,
 		  typename TA,
 		  Strategy TG,
 		  typename... TS>
-struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> {
+struct Accessor<T,		 C_<TN, TA, TG,  T, TS...>> final {
 	using Host =		 C_<TN, TA, TG,  T, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return host._headState;	}
@@ -62,7 +62,7 @@ template <typename T,
 		  typename TA,
 		  Strategy TG,
 		  typename... TS>
-struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> {
+struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> final {
 	using Host =   const C_<TN, TA, TG,  T, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host._headState;	}
@@ -78,7 +78,7 @@ template <typename T,
 		  Strategy TG,
 		  Short NI,
 		  typename... TS>
-struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> {
+struct Accessor<T,		 CS_<TN, TA, TG, NI, TS...>> final {
 	using Host =		 CS_<TN, TA, TG, NI, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{
@@ -98,7 +98,7 @@ template <typename T,
 		  Strategy TG,
 		  Short NI,
 		  typename... TS>
-struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> {
+struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> final {
 	using Host =   const CS_<TN, TA, TG, NI, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{
@@ -118,7 +118,7 @@ template <typename T,
 		  Strategy TG,
 		  Short NI,
 		  typename TS>
-struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> {
+struct Accessor<T,		 CS_<TN, TA, TG, NI, TS>> final {
 	using Host =		 CS_<TN, TA, TG, NI, TS>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return Accessor<T,	   typename Host::State>{host.state}.get();				}
@@ -134,7 +134,7 @@ template <typename T,
 		  Strategy TG,
 		  Short NI,
 		  typename TS>
-struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> {
+struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> final {
 	using Host =   const CS_<TN, TA, TG, NI, TS>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::State>{host.state}.get();				}
@@ -149,7 +149,7 @@ template <typename T,
 		  typename TA,
 		  typename TH,
 		  typename... TS>
-struct Accessor<T,		 O_<TN, TA, TH, TS...>> {
+struct Accessor<T,		 O_<TN, TA, TH, TS...>> final {
 	using Host =		 O_<TN, TA, TH, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return Accessor<T,	   typename Host::SubStates>{host._subStates}.get();	}
@@ -164,7 +164,7 @@ template <typename T,
 		  typename TA,
 		  typename TH,
 		  typename... TS>
-struct Accessor<T, const O_<TN, TA, TH, TS...>> {
+struct Accessor<T, const O_<TN, TA, TH, TS...>> final {
 	using Host =   const O_<TN, TA, TH, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
@@ -178,7 +178,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  typename... TS>
-struct Accessor<T,		 O_<TN, TA,  T, TS...>> {
+struct Accessor<T,		 O_<TN, TA,  T, TS...>> final {
 	using Host =		 O_<TN, TA,  T, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return host._headState;	}
@@ -192,7 +192,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  typename... TS>
-struct Accessor<T, const O_<TN, TA,  T, TS...>> {
+struct Accessor<T, const O_<TN, TA,  T, TS...>> final {
 	using Host =   const O_<TN, TA,  T, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host._headState;	}
@@ -207,7 +207,7 @@ template <typename T,
 		  typename TA,
 		  Short NI,
 		  typename... TS>
-struct Accessor<T,		 OS_<TN, TA, NI, TS...>> {
+struct Accessor<T,		 OS_<TN, TA, NI, TS...>> final {
 	using Host =		 OS_<TN, TA, NI, TS...>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{
@@ -226,7 +226,7 @@ template <typename T,
 		  typename TA,
 		  Short NI,
 		  typename... TS>
-struct Accessor<T, const OS_<TN, TA, NI, TS...>> {
+struct Accessor<T, const OS_<TN, TA, NI, TS...>> final {
 	using Host =   const OS_<TN, TA, NI, TS...>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{
@@ -245,7 +245,7 @@ template <typename T,
 		  typename TA,
 		  Short NI,
 		  typename TS>
-struct Accessor<T,		 OS_<TN, TA, NI, TS>> {
+struct Accessor<T,		 OS_<TN, TA, NI, TS>> final {
 	using Host =		 OS_<TN, TA, NI, TS>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return Accessor<T,	   typename Host::Initial>{host.initial  }.get();	}
@@ -260,7 +260,7 @@ template <typename T,
 		  typename TA,
 		  Short NI,
 		  typename TS>
-struct Accessor<T, const OS_<TN, TA, NI, TS>> {
+struct Accessor<T, const OS_<TN, TA, NI, TS>> final {
 	using Host =   const OS_<TN, TA, NI, TS>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
@@ -280,7 +280,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  typename TH>
-struct Accessor<T,		 S_<TN, TA, TH>> {
+struct Accessor<T,		 S_<TN, TA, TH>> final {
 	using Host =		 S_<TN, TA, TH>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
@@ -294,7 +294,7 @@ template <typename T,
 		  typename TN,
 		  typename TA,
 		  typename TH>
-struct Accessor<T, const S_<TN, TA, TH>> {
+struct Accessor<T, const S_<TN, TA, TH>> final {
 	using Host =   const S_<TN, TA, TH>;
 
 	HFSM2_CONSTEXPR(14) const T& get()	const noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
@@ -311,7 +311,7 @@ struct Accessor<T, const S_<TN, TA, TH>> {
 template <typename T,
 		  typename TN,
 		  typename TA>
-struct Accessor<T,		 S_<TN, TA,  T>> {
+struct Accessor<T,		 S_<TN, TA,  T>> final {
 	using Host =		 S_<TN, TA,  T>;
 
 	HFSM2_CONSTEXPR(14)		  T& get()		  noexcept	{ return host;	}
@@ -324,7 +324,7 @@ struct Accessor<T,		 S_<TN, TA,  T>> {
 template <typename T,
 		  typename TN,
 		  typename TA>
-struct Accessor<T, const S_<TN, TA,  T>> {
+struct Accessor<T, const S_<TN, TA,  T>> final {
 	using Host =   const S_<TN, TA,  T>;
 
 	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host;	}

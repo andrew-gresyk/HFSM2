@@ -28,6 +28,9 @@
     <Filter Include="hfsm\detail\containers">
       <UniqueIdentifier>{9a2f637b-3571-48c2-8340-6408c4d5f001}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\reported">
+      <UniqueIdentifier>{cb563499-0274-47b7-95fb-f5e8ae4da33c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp">
@@ -110,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="..\..\test\test_manual_activation.cpp">
       <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\reported\issue_49.cpp">
+      <Filter>test\reported</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

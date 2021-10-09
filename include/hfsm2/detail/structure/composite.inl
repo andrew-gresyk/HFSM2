@@ -146,6 +146,7 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 }
 
 //------------------------------------------------------------------------------
+// COMMON
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
@@ -270,6 +271,7 @@ C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) noexcept {
 #endif
 }
 
+// COMMON
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
@@ -831,7 +833,6 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 #endif
 
-// COMMON
 //------------------------------------------------------------------------------
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
