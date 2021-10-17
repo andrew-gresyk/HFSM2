@@ -33,9 +33,6 @@ jobs:
               CXX: clang++
             }
 
-        PATH: 
-          - /examples/basic_traffic_light
-
         BUILD_CONFIG: [ Release, Debug ]
 
       fail-fast: false
@@ -79,14 +76,14 @@ jobs:
       run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
       working-directory: ${{github.workspace}}/examples/basic_traffic_light
 
-    # examples/calculator
-    - name: Configure 'examples/calculator'
-      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{github.workspace}}/examples/calculator
-
-    - name: Build 'examples/calculator'
-      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{github.workspace}}/examples/calculator
+    # examples/calculator - disabled, uses <conio.h> and _getch()
+    # - name: Configure 'examples/calculator'
+    #   run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+    #   working-directory: ${{github.workspace}}/examples/calculator
+    #
+    # - name: Build 'examples/calculator'
+    #   run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+    #   working-directory: ${{github.workspace}}/examples/calculator
 
     # examples/debug_logger_interface
     - name: Configure 'examples/debug_logger_interface'
