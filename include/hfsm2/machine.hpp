@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.9.0 (2021-04-10)
+// 1.10.2 (2021-10-17)
 //
 // Created by Andrew Gresyk
 //
@@ -33,7 +33,7 @@
 
 #define HFSM2_VERSION_MAJOR 1
 #define HFSM2_VERSION_MINOR 10
-#define HFSM2_VERSION_PATCH 0
+#define HFSM2_VERSION_PATCH 2
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -987,14 +987,14 @@ HFSM2_CONSTEXPR(14)	double uniform(const uint64_t uint)		  noexcept;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+template <unsigned>
 class SimpleRandomT;
 
 //------------------------------------------------------------------------------
 // SplitMix64 (http://xoshiro.di.unimi.it/splitmix64.c)
 
 template <>
-class SimpleRandomT<uint64_t> {
+class SimpleRandomT<8> {
 public:
 	constexpr SimpleRandomT()								  noexcept {}
 
@@ -1014,7 +1014,7 @@ private:
 // SplitMix32 (https://groups.google.com/forum/#!topic/prng/VFjdFmbMgZI)
 
 template <>
-class SimpleRandomT<uint32_t> {
+class SimpleRandomT<4> {
 public:
 	constexpr SimpleRandomT()								  noexcept {}
 
@@ -1031,15 +1031,15 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+template <unsigned>
 class BaseRandomT;
 
 //------------------------------------------------------------------------------
 
 template <>
-class BaseRandomT<uint64_t> {
+class BaseRandomT<8> {
 protected:
-	using Simple = SimpleRandomT<uint64_t>;
+	using Simple = SimpleRandomT<8>;
 
 public:
 	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
@@ -1057,9 +1057,9 @@ protected:
 //------------------------------------------------------------------------------
 
 template <>
-class BaseRandomT<uint32_t> {
+class BaseRandomT<4> {
 protected:
-	using Simple = SimpleRandomT<uint32_t>;
+	using Simple = SimpleRandomT<4>;
 
 public:
 	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
@@ -1076,17 +1076,17 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+template <unsigned>
 class FloatRandomT;
 
 //------------------------------------------------------------------------------
 // xoshiro256+ (http://xoshiro.di.unimi.it/xoshiro256plus.c)
 
 template <>
-class FloatRandomT<uint64_t>
-	: BaseRandomT<uint64_t>
+class FloatRandomT<8>
+	: BaseRandomT<8>
 {
-	using Base = BaseRandomT<uint64_t>;
+	using Base = BaseRandomT<8>;
 
 public:
 	using Base::BaseRandomT;
@@ -1105,10 +1105,10 @@ public:
 // xoshiro128+ (http://xoshiro.di.unimi.it/xoshiro128plus.c)
 
 template <>
-class FloatRandomT<uint32_t>
-	: BaseRandomT<uint32_t>
+class FloatRandomT<4>
+	: BaseRandomT<4>
 {
-	using Base = BaseRandomT<uint32_t>;
+	using Base = BaseRandomT<4>;
 
 public:
 	using Base::BaseRandomT;
@@ -1125,17 +1125,17 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+template <unsigned>
 class IntRandomT;
 
 //------------------------------------------------------------------------------
 // xoshiro256** (https://prng.di.unimi.it/xoshiro256starstar.c)
 
 template <>
-class IntRandomT<uint64_t>
-	: BaseRandomT<uint64_t>
+class IntRandomT<8>
+	: BaseRandomT<8>
 {
-	using Base = BaseRandomT<uint64_t>;
+	using Base = BaseRandomT<8>;
 
 public:
 	using Base::BaseRandomT;
@@ -1153,10 +1153,10 @@ public:
 // xoshiro128** (https://prng.di.unimi.it/xoshiro128starstar.c)
 
 template <>
-class IntRandomT<uint32_t>
-	: BaseRandomT<uint32_t>
+class IntRandomT<4>
+	: BaseRandomT<4>
 {
-	using Base = BaseRandomT<uint32_t>;
+	using Base = BaseRandomT<4>;
 
 public:
 	using Base::BaseRandomT;
@@ -1174,9 +1174,9 @@ public:
 
 }
 
-using SimpleRandom = detail::SimpleRandomT<uintptr_t>;
-using FloatRandom  = detail::FloatRandomT <uintptr_t>;
-using IntRandom	   = detail::IntRandomT	  <uintptr_t>;
+using SimpleRandom = detail::SimpleRandomT<sizeof(void*)>;
+using FloatRandom  = detail::FloatRandomT <sizeof(void*)>;
+using IntRandom	   = detail::IntRandomT	  <sizeof(void*)>;
 
 //------------------------------------------------------------------------------
 
@@ -1187,10 +1187,10 @@ class RNGT;
 
 template <>
 class RNGT<float>
-	: public detail::FloatRandomT<uintptr_t>
+	: public FloatRandom
 {
 public:
-	using Base = detail::FloatRandomT<uintptr_t>;
+	using Base = FloatRandom;
 
 	using Base::Base;
 };
@@ -1199,10 +1199,10 @@ public:
 
 template <>
 class RNGT<uintptr_t>
-	: public detail::IntRandomT<uintptr_t>
+	: public IntRandom
 {
 public:
-	using Base = detail::IntRandomT<uintptr_t>;
+	using Base = IntRandom;
 
 	using Base::Base;
 };
@@ -1253,7 +1253,7 @@ rotl(const uint64_t x, const uint64_t k) noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 HFSM2_CONSTEXPR(14)
-SimpleRandomT<uint64_t>::SimpleRandomT(const uint64_t seed) noexcept
+SimpleRandomT<8>::SimpleRandomT(const uint64_t seed) noexcept
 	: _state{seed}
 {}
 
@@ -1261,7 +1261,7 @@ SimpleRandomT<uint64_t>::SimpleRandomT(const uint64_t seed) noexcept
 
 HFSM2_CONSTEXPR(14)
 uint64_t
-SimpleRandomT<uint64_t>::uint64() noexcept {
+SimpleRandomT<8>::uint64() noexcept {
 	for (;;)
 		if (const uint64_t number = raw64())
 			return number;
@@ -1271,7 +1271,7 @@ SimpleRandomT<uint64_t>::uint64() noexcept {
 
 HFSM2_CONSTEXPR(14)
 uint64_t
-SimpleRandomT<uint64_t>::raw64() noexcept {
+SimpleRandomT<8>::raw64() noexcept {
 	uint64_t z = (_state += 0x9e3779b97f4a7c15);
 	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
 	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
@@ -1282,7 +1282,7 @@ SimpleRandomT<uint64_t>::raw64() noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 HFSM2_CONSTEXPR(14)
-SimpleRandomT<uint32_t>::SimpleRandomT(const uint32_t seed) noexcept
+SimpleRandomT<4>::SimpleRandomT(const uint32_t seed) noexcept
 	: _state{seed}
 {}
 
@@ -1290,7 +1290,7 @@ SimpleRandomT<uint32_t>::SimpleRandomT(const uint32_t seed) noexcept
 
 HFSM2_CONSTEXPR(14)
 uint32_t
-SimpleRandomT<uint32_t>::uint32() noexcept {
+SimpleRandomT<4>::uint32() noexcept {
 	for (;;)
 		if (const uint32_t number = raw32())
 			return number;
@@ -1300,7 +1300,7 @@ SimpleRandomT<uint32_t>::uint32() noexcept {
 
 HFSM2_CONSTEXPR(14)
 uint32_t
-SimpleRandomT<uint32_t>::raw32() noexcept {
+SimpleRandomT<4>::raw32() noexcept {
 	uint32_t z = (_state += 0x9E3779B9);
 	z = (z ^ (z >> 16)) * 0x85ebca6b;
 	z = (z ^ (z >> 13)) * 0xc2b2ae35;
@@ -1311,7 +1311,7 @@ SimpleRandomT<uint32_t>::raw32() noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 HFSM2_CONSTEXPR(20)
-BaseRandomT<uint64_t>::BaseRandomT() noexcept {
+BaseRandomT<8>::BaseRandomT() noexcept {
 	Simple generator;
 
 	_state[0] = generator.uint64();
@@ -1324,7 +1324,7 @@ BaseRandomT<uint64_t>::BaseRandomT() noexcept {
 
 HFSM2_CONSTEXPR(14)
 void
-BaseRandomT<uint64_t>::seed(const uint64_t s) noexcept {
+BaseRandomT<8>::seed(const uint64_t s) noexcept {
 	Simple generator{s};
 
 	_state[0] = generator.uint64();
@@ -1337,7 +1337,7 @@ BaseRandomT<uint64_t>::seed(const uint64_t s) noexcept {
 
 HFSM2_CONSTEXPR(14)
 void
-BaseRandomT<uint64_t>::seed(const uint64_t(& s)[4]) noexcept {
+BaseRandomT<8>::seed(const uint64_t(& s)[4]) noexcept {
 	_state[0] = s[0];
 	_state[1] = s[1];
 	_state[2] = s[2];
@@ -1347,7 +1347,7 @@ BaseRandomT<uint64_t>::seed(const uint64_t(& s)[4]) noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 HFSM2_CONSTEXPR(20)
-BaseRandomT<uint32_t>::BaseRandomT() noexcept {
+BaseRandomT<4>::BaseRandomT() noexcept {
 	Simple generator;
 
 	_state[0] = generator.uint32();
@@ -1360,7 +1360,7 @@ BaseRandomT<uint32_t>::BaseRandomT() noexcept {
 
 HFSM2_CONSTEXPR(14)
 void
-BaseRandomT<uint32_t>::seed(const uint32_t s) noexcept {
+BaseRandomT<4>::seed(const uint32_t s) noexcept {
 	Simple generator{s};
 
 	_state[0] = generator.uint32();
@@ -1373,7 +1373,7 @@ BaseRandomT<uint32_t>::seed(const uint32_t s) noexcept {
 
 HFSM2_CONSTEXPR(14)
 void
-BaseRandomT<uint32_t>::seed(const uint32_t(& s)[4]) noexcept {
+BaseRandomT<4>::seed(const uint32_t(& s)[4]) noexcept {
 	_state[0] = s[0];
 	_state[1] = s[1];
 	_state[2] = s[2];
@@ -1384,7 +1384,7 @@ BaseRandomT<uint32_t>::seed(const uint32_t(& s)[4]) noexcept {
 
 HFSM2_CONSTEXPR(14)
 uint64_t
-FloatRandomT<uint64_t>::uint64() noexcept {
+FloatRandomT<8>::uint64() noexcept {
 	const uint64_t result = _state[0] + _state[3];
 
 	const uint64_t t = _state[1] << 17;
@@ -1405,7 +1405,7 @@ FloatRandomT<uint64_t>::uint64() noexcept {
 
 HFSM2_CONSTEXPR(14)
 void
-FloatRandomT<uint64_t>::jump() noexcept {
+FloatRandomT<8>::jump() noexcept {
 	constexpr uint64_t JUMP[] = {
 		0x180ec6d33cfd0aba,
 		0xd5a61266f0c9392c,
@@ -1439,7 +1439,7 @@ FloatRandomT<uint64_t>::jump() noexcept {
 
 HFSM2_CONSTEXPR(14)
 uint32_t
-FloatRandomT<uint32_t>::uint32() noexcept {
+FloatRandomT<4>::uint32() noexcept {
 	const uint32_t result = _state[0] + _state[3];
 
 	const uint32_t t = _state[1] << 9;
@@ -1460,7 +1460,7 @@ FloatRandomT<uint32_t>::uint32() noexcept {
 
 HFSM2_CONSTEXPR(14)
 void
-FloatRandomT<uint32_t>::jump() noexcept {
+FloatRandomT<4>::jump() noexcept {
 	constexpr uint32_t JUMP[] = {
 		0x8764000b,
 		0xf542d2d3,
@@ -1494,7 +1494,7 @@ FloatRandomT<uint32_t>::jump() noexcept {
 
 HFSM2_CONSTEXPR(14)
 uint64_t
-IntRandomT<uint64_t>::uint64() noexcept {
+IntRandomT<8>::uint64() noexcept {
 	const uint64_t result = rotl(_state[1] * 5, 7) * 9;
 
 	const uint64_t t = _state[1] << 17;
@@ -1515,7 +1515,7 @@ IntRandomT<uint64_t>::uint64() noexcept {
 
 HFSM2_CONSTEXPR(14)
 void
-IntRandomT<uint64_t>::jump() noexcept {
+IntRandomT<8>::jump() noexcept {
 	constexpr uint64_t JUMP[] = {
 		0x180ec6d33cfd0aba,
 		0xd5a61266f0c9392c,
@@ -1549,7 +1549,7 @@ IntRandomT<uint64_t>::jump() noexcept {
 
 HFSM2_CONSTEXPR(14)
 uint32_t
-IntRandomT<uint32_t>::uint32() noexcept {
+IntRandomT<4>::uint32() noexcept {
 	const uint32_t result = rotl(_state[1] * 5, 7) * 9;
 
 	const uint32_t t = _state[1] << 9;
@@ -1570,7 +1570,7 @@ IntRandomT<uint32_t>::uint32() noexcept {
 
 HFSM2_CONSTEXPR(14)
 void
-IntRandomT<uint32_t>::jump() noexcept {
+IntRandomT<4>::jump() noexcept {
 	constexpr uint32_t JUMP[] = {
 		0x8764000b,
 		0xf542d2d3,

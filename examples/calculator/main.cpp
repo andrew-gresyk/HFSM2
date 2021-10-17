@@ -287,8 +287,6 @@ struct Ready : FSM::State
 // On::Ready::Begin
 struct Begin : FSM::State
 {
-	using FSM::State::react;
-
 	void enter(Control& control)
 	{
 		PRINTCALL;
@@ -526,8 +524,6 @@ struct Frac1 : FSM::State
 // On::Error
 struct Error : FSM::State
 {
-	using FSM::State::react;
-
 	void enter(Control& control)
 	{
 		PRINTCALL;

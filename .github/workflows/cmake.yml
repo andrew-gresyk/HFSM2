@@ -8,21 +8,95 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.PLATFORM.OS }}
+
+    env:
+      CC: ${{ matrix.PLATFORM.CC }}
+      CXX: ${{ matrix.PLATFORM.CXX }}
 
     strategy:
       matrix:
+        PLATFORM:
+          - {
+              OS: ubuntu-latest,
+              CC: gcc,
+              CXX: g++
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang,
+              CXX: clang++
+            }
+          - {
+              OS: macos-latest,
+              CC: clang,
+              CXX: clang++
+            }
+
         BUILD_CONFIG: [ Release, Debug ]
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_CONFIG}}
+    # main test
+    - name: Configure Test
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}
 
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.BUILD_CONFIG}}
-      
+    - name: Build Text
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}
+
+    # examples/advanced_event_handling
+    - name: Configure 'examples/advanced_event_handling'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/advanced_event_handling
+
+    - name: Build 'examples/advanced_event_handling'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/advanced_event_handling
+
+    # examples/basic_audio_player
+    - name: Configure 'examples/basic_audio_player'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/basic_audio_player
+
+    - name: Build 'examples/basic_audio_player'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/basic_audio_player
+
+    # examples/basic_traffic_light
+    - name: Configure 'examples/basic_traffic_light'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/basic_traffic_light
+
+    - name: Build 'examples/basic_traffic_light'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/basic_traffic_light
+
+    # examples/calculator - disabled, uses <conio.h> and _getch()
+    # - name: Configure 'examples/calculator'
+    #   run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+    #   working-directory: ${{github.workspace}}/examples/calculator
+    #
+    # - name: Build 'examples/calculator'
+    #   run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+    #   working-directory: ${{github.workspace}}/examples/calculator
+
+    # examples/debug_logger_interface
+    - name: Configure 'examples/debug_logger_interface'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/debug_logger_interface
+
+    - name: Build 'examples/debug_logger_interface'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/debug_logger_interface
+
+    # examples/snippets
+    - name: Configure 'examples/snippets'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/snippets
+
+    - name: Build 'examples/snippets'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/snippets
