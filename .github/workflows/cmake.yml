@@ -8,10 +8,31 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.PLATFORM.OS }}
+
+    env:
+      CC: ${{ matrix.PLATFORM.CC }}
+      CXX: ${{ matrix.PLATFORM.CXX }}
 
     strategy:
       matrix:
+        PLATFORM:
+          - {
+              OS: ubuntu-latest,
+              CC: gcc,
+              CXX: g++
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang,
+              CXX: clang++
+            }
+          - {
+              OS: macos-latest,
+              CC: clang,
+              CXX: clang++
+            }
+
         PATH: 
           - ''
           - /examples/advanced_event_handling
@@ -20,6 +41,7 @@ jobs:
           - /examples/calculator
           - /examples/debug_logger_interface
           - /examples/snippets
+
         BUILD_CONFIG: [ Release, Debug ]
 
       fail-fast: false
@@ -30,7 +52,7 @@ jobs:
     - run: cd ${{github.workspace}}${{matrix.PATH}}
 
     - name: Configure
-      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_CONFIG}}
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
 
     - name: Build
-      run: cmake --build ./build --config ${{matrix.BUILD_CONFIG}}
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
