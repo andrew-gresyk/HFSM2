@@ -34,13 +34,7 @@ jobs:
             }
 
         PATH: 
-          - ''
-          - /examples/advanced_event_handling
-          - /examples/basic_audio_player
           - /examples/basic_traffic_light
-          - /examples/calculator
-          - /examples/debug_logger_interface
-          - /examples/snippets
 
         BUILD_CONFIG: [ Release, Debug ]
 
@@ -49,10 +43,65 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - run: cd ${{github.workspace}}${{matrix.PATH}}
-
-    - name: Configure
+    # main test
+    - name: Configure Test
       run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}
 
-    - name: Build
+    - name: Build Text
       run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}
+
+    # examples/advanced_event_handling
+    - name: Configure 'examples/advanced_event_handling'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/advanced_event_handling
+
+    - name: Build 'examples/advanced_event_handling'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/advanced_event_handling
+
+    # examples/basic_audio_player
+    - name: Configure 'examples/basic_audio_player'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/basic_audio_player
+
+    - name: Build 'examples/basic_audio_player'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/basic_audio_player
+
+    # examples/basic_traffic_light
+    - name: Configure 'examples/basic_traffic_light'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/basic_traffic_light
+
+    - name: Build 'examples/basic_traffic_light'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/basic_traffic_light
+
+    # examples/calculator
+    - name: Configure 'examples/calculator'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/calculator
+
+    - name: Build 'examples/calculator'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/calculator
+
+    # examples/debug_logger_interface
+    - name: Configure 'examples/debug_logger_interface'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/debug_logger_interface
+
+    - name: Build 'examples/debug_logger_interface'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/debug_logger_interface
+
+    # examples/snippets
+    - name: Configure 'examples/snippets'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/snippets
+
+    - name: Build 'examples/snippets'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{github.workspace}}/examples/snippets
