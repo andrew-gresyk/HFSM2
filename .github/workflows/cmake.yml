@@ -35,8 +35,6 @@ jobs:
 
         BUILD_CONFIG: [ Release, Debug ]
 
-      fail-fast: false
-
     steps:
     - uses: actions/checkout@v2
 
