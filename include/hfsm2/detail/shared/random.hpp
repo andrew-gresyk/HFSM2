@@ -10,14 +10,14 @@ HFSM2_CONSTEXPR(14)	double uniform(const uint64_t uint)		  noexcept;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+template <unsigned>
 class SimpleRandomT;
 
 //------------------------------------------------------------------------------
 // SplitMix64 (http://xoshiro.di.unimi.it/splitmix64.c)
 
 template <>
-class SimpleRandomT<uint64_t> {
+class SimpleRandomT<8> {
 public:
 	constexpr SimpleRandomT()								  noexcept {}
 
@@ -37,7 +37,7 @@ private:
 // SplitMix32 (https://groups.google.com/forum/#!topic/prng/VFjdFmbMgZI)
 
 template <>
-class SimpleRandomT<uint32_t> {
+class SimpleRandomT<4> {
 public:
 	constexpr SimpleRandomT()								  noexcept {}
 
@@ -54,15 +54,15 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+template <unsigned>
 class BaseRandomT;
 
 //------------------------------------------------------------------------------
 
 template <>
-class BaseRandomT<uint64_t> {
+class BaseRandomT<8> {
 protected:
-	using Simple = SimpleRandomT<uint64_t>;
+	using Simple = SimpleRandomT<8>;
 
 public:
 	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
@@ -80,9 +80,9 @@ protected:
 //------------------------------------------------------------------------------
 
 template <>
-class BaseRandomT<uint32_t> {
+class BaseRandomT<4> {
 protected:
-	using Simple = SimpleRandomT<uint32_t>;
+	using Simple = SimpleRandomT<4>;
 
 public:
 	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
@@ -99,17 +99,17 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+template <unsigned>
 class FloatRandomT;
 
 //------------------------------------------------------------------------------
 // xoshiro256+ (http://xoshiro.di.unimi.it/xoshiro256plus.c)
 
 template <>
-class FloatRandomT<uint64_t>
-	: BaseRandomT<uint64_t>
+class FloatRandomT<8>
+	: BaseRandomT<8>
 {
-	using Base = BaseRandomT<uint64_t>;
+	using Base = BaseRandomT<8>;
 
 public:
 	using Base::BaseRandomT;
@@ -128,10 +128,10 @@ public:
 // xoshiro128+ (http://xoshiro.di.unimi.it/xoshiro128plus.c)
 
 template <>
-class FloatRandomT<uint32_t>
-	: BaseRandomT<uint32_t>
+class FloatRandomT<4>
+	: BaseRandomT<4>
 {
-	using Base = BaseRandomT<uint32_t>;
+	using Base = BaseRandomT<4>;
 
 public:
 	using Base::BaseRandomT;
@@ -148,17 +148,17 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename>
+template <unsigned>
 class IntRandomT;
 
 //------------------------------------------------------------------------------
 // xoshiro256** (https://prng.di.unimi.it/xoshiro256starstar.c)
 
 template <>
-class IntRandomT<uint64_t>
-	: BaseRandomT<uint64_t>
+class IntRandomT<8>
+	: BaseRandomT<8>
 {
-	using Base = BaseRandomT<uint64_t>;
+	using Base = BaseRandomT<8>;
 
 public:
 	using Base::BaseRandomT;
@@ -176,10 +176,10 @@ public:
 // xoshiro128** (https://prng.di.unimi.it/xoshiro128starstar.c)
 
 template <>
-class IntRandomT<uint32_t>
-	: BaseRandomT<uint32_t>
+class IntRandomT<4>
+	: BaseRandomT<4>
 {
-	using Base = BaseRandomT<uint32_t>;
+	using Base = BaseRandomT<4>;
 
 public:
 	using Base::BaseRandomT;
@@ -197,9 +197,9 @@ public:
 
 }
 
-using SimpleRandom = detail::SimpleRandomT<uintptr_t>;
-using FloatRandom  = detail::FloatRandomT <uintptr_t>;
-using IntRandom	   = detail::IntRandomT	  <uintptr_t>;
+using SimpleRandom = detail::SimpleRandomT<sizeof(void*)>;
+using FloatRandom  = detail::FloatRandomT <sizeof(void*)>;
+using IntRandom	   = detail::IntRandomT	  <sizeof(void*)>;
 
 //------------------------------------------------------------------------------
 
@@ -210,10 +210,10 @@ class RNGT;
 
 template <>
 class RNGT<float>
-	: public detail::FloatRandomT<uintptr_t>
+	: public FloatRandom
 {
 public:
-	using Base = detail::FloatRandomT<uintptr_t>;
+	using Base = FloatRandom;
 
 	using Base::Base;
 };
@@ -222,10 +222,10 @@ public:
 
 template <>
 class RNGT<uintptr_t>
-	: public detail::IntRandomT<uintptr_t>
+	: public IntRandom
 {
 public:
-	using Base = detail::IntRandomT<uintptr_t>;
+	using Base = IntRandom;
 
 	using Base::Base;
 };
