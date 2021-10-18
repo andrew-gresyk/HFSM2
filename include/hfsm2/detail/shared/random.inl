@@ -8,7 +8,7 @@ namespace detail {
 HFSM2_CONSTEXPR(14)
 float
 uniform(const uint32_t uint) noexcept {
-	return convert<float>(UINT32_C(0x7F) << 23 | uint >> 9) - 1.0f;
+	return reinterpret<float>(UINT32_C(0x7F) << 23 | uint >> 9) - 1.0f;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -16,7 +16,7 @@ uniform(const uint32_t uint) noexcept {
 HFSM2_CONSTEXPR(14)
 double
 uniform(const uint64_t uint) noexcept {
-	return convert<double>(UINT64_C(0x3FF) << 52 | uint >> 12) - 1.0;
+	return reinterpret<double>(UINT64_C(0x3FF) << 52 | uint >> 12) - 1.0;
 }
 
 //------------------------------------------------------------------------------
@@ -95,27 +95,49 @@ SimpleRandomT<4>::raw32() noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-HFSM2_CONSTEXPR(20)
-BaseRandomT<8>::BaseRandomT() noexcept {
-	Simple generator;
+HFSM2_CONSTEXPR(14)
+BaseRandomT<8>::BaseRandomT(SimpleRandom&& simple) noexcept
+	: _state{simple.uint64(), simple.uint64(), simple.uint64(), simple.uint64()}
+{}
 
-	_state[0] = generator.uint64();
-	_state[1] = generator.uint64();
-	_state[2] = generator.uint64();
-	_state[3] = generator.uint64();
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+void
+BaseRandomT<8>::seed(SimpleRandom&& simple) noexcept {
+	_state[0] = simple.uint64();
+	_state[1] = simple.uint64();
+	_state[2] = simple.uint64();
+	_state[3] = simple.uint64();
 }
+
+//------------------------------------------------------------------------------
+
+HFSM2_CONSTEXPR(14)
+BaseRandomT<8>::BaseRandomT() noexcept
+	: BaseRandomT{SimpleRandom{0}}
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+BaseRandomT<8>::BaseRandomT(const uint64_t s) noexcept
+	: BaseRandomT{SimpleRandom{s}}
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+BaseRandomT<8>::BaseRandomT(const uint64_t(& s)[4]) noexcept
+	: _state{s[0], s[1], s[2], s[3]}
+{}
 
 //------------------------------------------------------------------------------
 
 HFSM2_CONSTEXPR(14)
 void
 BaseRandomT<8>::seed(const uint64_t s) noexcept {
-	Simple generator{s};
-
-	_state[0] = generator.uint64();
-	_state[1] = generator.uint64();
-	_state[2] = generator.uint64();
-	_state[3] = generator.uint64();
+	seed(SimpleRandom{s});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -131,27 +153,49 @@ BaseRandomT<8>::seed(const uint64_t(& s)[4]) noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-HFSM2_CONSTEXPR(20)
-BaseRandomT<4>::BaseRandomT() noexcept {
-	Simple generator;
+HFSM2_CONSTEXPR(14)
+BaseRandomT<4>::BaseRandomT(SimpleRandom&& simple) noexcept
+	: _state{simple.uint32(), simple.uint32(), simple.uint32(), simple.uint32()}
+{}
 
-	_state[0] = generator.uint32();
-	_state[1] = generator.uint32();
-	_state[2] = generator.uint32();
-	_state[3] = generator.uint32();
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+void
+BaseRandomT<4>::seed(SimpleRandom&& simple) noexcept {
+	_state[0] = simple.uint32();
+	_state[1] = simple.uint32();
+	_state[2] = simple.uint32();
+	_state[3] = simple.uint32();
 }
+
+//------------------------------------------------------------------------------
+
+HFSM2_CONSTEXPR(14)
+BaseRandomT<4>::BaseRandomT() noexcept
+	: BaseRandomT{SimpleRandom{0}}
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+BaseRandomT<4>::BaseRandomT(const uint32_t s) noexcept
+	: BaseRandomT{SimpleRandom{s}}
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+BaseRandomT<4>::BaseRandomT(const uint32_t(& s)[4]) noexcept
+	: _state{s[0], s[1], s[2], s[3]}
+{}
 
 //------------------------------------------------------------------------------
 
 HFSM2_CONSTEXPR(14)
 void
 BaseRandomT<4>::seed(const uint32_t s) noexcept {
-	Simple generator{s};
-
-	_state[0] = generator.uint32();
-	_state[1] = generator.uint32();
-	_state[2] = generator.uint32();
-	_state[3] = generator.uint32();
+	seed(SimpleRandom{s});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -9,12 +9,12 @@ cmake-*
 *.user
 
 /binaries*
-/build-*
+/build*
 /hfsm_test.dir
-/projects/code-lite/build-Debug
-/projects/code-lite/Makefile
+/projects/code-lite/build-*
 /projects/code-lite/tags
-/projects/code-lite/*/CMakeLists.txt
+/projects/code-lite/Makefile
 /projects/code-lite/*/compile_flags.txt
+/projects/code-lite/*/*.mk
 /projects/visual-studio/.opencppcov
 /projects/visual-studio/*.log

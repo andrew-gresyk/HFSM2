@@ -32,6 +32,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-14", "test-14.vcxproj"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "temp-14", "temp-14.vcxproj", "{92997883-142C-4F51-8DEC-E9A998600054}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C4BC0647-BC2A-4E23-87D0-4EB10BD3C994}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\.github\workflows\cmake.yml = ..\..\.github\workflows\cmake.yml
+		..\..\.github\workflows\msbuild.yml = ..\..\.github\workflows\msbuild.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		ASan|x64 = ASan|x64
@@ -104,6 +110,7 @@ Global
 		{6DB92FC0-A25C-43A4-A081-C2D60848C90F} = {F51AB3E5-170D-44B5-BE40-0DE29537C8BE}
 		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5} = {58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}
 		{92997883-142C-4F51-8DEC-E9A998600054} = {F51AB3E5-170D-44B5-BE40-0DE29537C8BE}
+		{C4BC0647-BC2A-4E23-87D0-4EB10BD3C994} = {6C15FC09-6C89-47F6-8C32-097568461C1F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3BE666E0-1098-42CF-B1FD-F0F0CA579F4C}

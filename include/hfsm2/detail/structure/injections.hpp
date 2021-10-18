@@ -30,20 +30,20 @@ protected:
 	using GuardControl	= GuardControlT<TArgs>;
 
 public:
-	HFSM2_CONSTEXPR(14) void preEntryGuard(Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14)	void preEntryGuard(Context&)	  noexcept {}
 
-	HFSM2_CONSTEXPR(14) void preEnter	  (Context&)	  noexcept {}
-	HFSM2_CONSTEXPR(14) void preReenter	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14)	void preEnter	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14)	void preReenter	  (Context&)	  noexcept {}
 
-	HFSM2_CONSTEXPR(14) void preUpdate	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14)	void preUpdate	  (Context&)	  noexcept {}
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14) void preReact	  (const TEvent&,
+	HFSM2_CONSTEXPR(14)	void preReact	  (const TEvent&,
 										   Context&)	  noexcept {}
 
-	HFSM2_CONSTEXPR(14) void preExitGuard (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14)	void preExitGuard (Context&)	  noexcept {}
 
-	HFSM2_CONSTEXPR(14) void postExit	  (Context&)	  noexcept {}
+	HFSM2_CONSTEXPR(14)	void postExit	  (Context&)	  noexcept {}
 
 	template <typename T>
 	static constexpr StateID  stateId()					  noexcept { return index<StateList, T>();				}
@@ -87,20 +87,20 @@ struct B_<TFirst, TRest...>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
-	HFSM2_CONSTEXPR(14) void widePreEntryGuard(Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14)	void widePreEntryGuard(Context& context)		 noexcept;
 
-	HFSM2_CONSTEXPR(14) void widePreEnter	  (Context& context)		 noexcept;
-	HFSM2_CONSTEXPR(14) void widePreReenter   (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14)	void widePreEnter	  (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14)	void widePreReenter   (Context& context)		 noexcept;
 
-	HFSM2_CONSTEXPR(14) void widePreUpdate	  (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14)	void widePreUpdate	  (Context& context)		 noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14) void widePreReact	  (const TEvent& event,
+	HFSM2_CONSTEXPR(14)	void widePreReact	  (const TEvent& event,
 											   Context& context)		 noexcept;
 
-	HFSM2_CONSTEXPR(14) void widePreExitGuard (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14)	void widePreExitGuard (Context& context)		 noexcept;
 
-	HFSM2_CONSTEXPR(14) void widePostExit	  (Context& context)		 noexcept;
+	HFSM2_CONSTEXPR(14)	void widePostExit	  (Context& context)		 noexcept;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -133,44 +133,44 @@ struct B_<TFirst>
 	using TFirst::regionId;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14) Rank	rank			 (const Control&)		  noexcept { return Rank   {0};		}
-	HFSM2_CONSTEXPR(14) Utility utility			 (const Control&)		  noexcept { return Utility{1};		}
+	HFSM2_CONSTEXPR(14)	Rank	rank			 (const Control&)		  noexcept { return Rank   {0};		}
+	HFSM2_CONSTEXPR(14)	Utility utility			 (const Control&)		  noexcept { return Utility{1};		}
 #endif
 
-	HFSM2_CONSTEXPR(14) void	entryGuard		 (GuardControl&)		  noexcept {}
+	HFSM2_CONSTEXPR(14)	void	entryGuard		 (GuardControl&)		  noexcept {}
 
-	HFSM2_CONSTEXPR(14) void	enter			 (PlanControl&)			  noexcept {}
-	HFSM2_CONSTEXPR(14) void	reenter			 (PlanControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14)	void	enter			 (PlanControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14)	void	reenter			 (PlanControl&)			  noexcept {}
 
-	HFSM2_CONSTEXPR(14) void	update			 (FullControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14)	void	update			 (FullControl&)			  noexcept {}
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14) void	react			 (const TEvent&,
+	HFSM2_CONSTEXPR(14)	void	react			 (const TEvent&,
 												  FullControl&)			  noexcept {}
 
-	HFSM2_CONSTEXPR(14) void	exitGuard		 (GuardControl&)		  noexcept {}
+	HFSM2_CONSTEXPR(14)	void	exitGuard		 (GuardControl&)		  noexcept {}
 
-	HFSM2_CONSTEXPR(14) void	exit			 (PlanControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14)	void	exit			 (PlanControl&)			  noexcept {}
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(14) void	planSucceeded	 (FullControl& control)	  noexcept { control.succeed();		}
-	HFSM2_CONSTEXPR(14) void	planFailed		 (FullControl& control)	  noexcept { control.fail();		}
+	HFSM2_CONSTEXPR(14)	void	planSucceeded	 (FullControl& control)	  noexcept { control.succeed();		}
+	HFSM2_CONSTEXPR(14)	void	planFailed		 (FullControl& control)	  noexcept { control.fail();		}
 #endif
 
-	HFSM2_CONSTEXPR(14) void	widePreEntryGuard(Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePreEntryGuard(Context& context)		  noexcept;
 
-	HFSM2_CONSTEXPR(14) void	widePreEnter	 (Context& context)		  noexcept;
-	HFSM2_CONSTEXPR(14) void	widePreReenter   (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePreEnter	 (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePreReenter   (Context& context)		  noexcept;
 
-	HFSM2_CONSTEXPR(14) void	widePreUpdate	 (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePreUpdate	 (Context& context)		  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14) void	widePreReact	 (const TEvent& event,
+	HFSM2_CONSTEXPR(14)	void	widePreReact	 (const TEvent& event,
 												  Context& context)		  noexcept;
 
-	HFSM2_CONSTEXPR(14) void	widePreExitGuard (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePreExitGuard (Context& context)		  noexcept;
 
-	HFSM2_CONSTEXPR(14) void	widePostExit	 (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePostExit	 (Context& context)		  noexcept;
 };
 
 //------------------------------------------------------------------------------

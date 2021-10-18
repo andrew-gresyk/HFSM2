@@ -113,10 +113,10 @@ using UIndex = Conditional<N <= (1ull <<  8),  uint8_t,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <uint64_t N>
-using UCapacity = Conditional<N <= (1ull <<  8) - 1,  uint8_t,
-				  Conditional<N <= (1ull << 16) - 1, uint16_t,
-				  Conditional<N <= (1ull << 32) - 1, uint32_t,
-														 void>>>;
+using UCapacity = Conditional<N < (1ull <<  8),  uint8_t,
+				  Conditional<N < (1ull << 16), uint16_t,
+				  Conditional<N < (1ull << 32), uint32_t,
+													void>>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -263,8 +263,8 @@ template <typename TO,
 		  typename TI>
 HFSM2_CONSTEXPR(14)
 TO
-convert(const TI& in)								  noexcept	{
-	TO out;
+reinterpret(const TI& in)							  noexcept	{
+	TO out{};
 
 	overwrite(out, in);
 

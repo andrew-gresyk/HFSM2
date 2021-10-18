@@ -1,5 +1,5 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.10.2 (2021-10-17)
+// 1.11.0 (2021-10-18)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 1
-#define HFSM2_VERSION_MINOR 10
-#define HFSM2_VERSION_PATCH 2
+#define HFSM2_VERSION_MINOR 11
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -180,8 +180,8 @@ struct G_ final {
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	struct UP final {
-		HFSM2_CONSTEXPR(14) UP(const Utility utility_ = Utility{1},
-						const Short prong_ = INVALID_SHORT) noexcept
+		HFSM2_CONSTEXPR(14)	UP(const Utility utility_ = Utility{1},
+							   const Short prong_ = INVALID_SHORT) noexcept
 			: utility{utility_}
 			, prong{prong_}
 		{}

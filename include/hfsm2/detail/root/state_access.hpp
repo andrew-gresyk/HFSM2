@@ -35,7 +35,7 @@ template <typename T,
 struct Accessor<T, const C_<TN, TA, TG, TH, TS...>> final {
 	using Host =   const C_<TN, TA, TG, TH, TS...>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
 
 	Host& host;
 };
@@ -65,7 +65,7 @@ template <typename T,
 struct Accessor<T, const C_<TN, TA, TG,  T, TS...>> final {
 	using Host =   const C_<TN, TA, TG,  T, TS...>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host._headState;	}
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{ return host._headState;	}
 
 	Host& host;
 };
@@ -101,7 +101,7 @@ template <typename T,
 struct Accessor<T, const CS_<TN, TA, TG, NI, TS...>> final {
 	using Host =   const CS_<TN, TA, TG, NI, TS...>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{
 		return contains<typename Host::LHalfInfo::StateList, T>() ?
 			Accessor<T, const typename Host::LMaterial>{host.lHalf}.get() :
 			Accessor<T, const typename Host::RMaterial>{host.rHalf}.get();
@@ -137,7 +137,7 @@ template <typename T,
 struct Accessor<T, const CS_<TN, TA, TG, NI, TS>> final {
 	using Host =   const CS_<TN, TA, TG, NI, TS>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::State>{host.state}.get();				}
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{ return Accessor<T, const typename Host::State>{host.state}.get();				}
 
 	Host& host;
 };
@@ -167,7 +167,7 @@ template <typename T,
 struct Accessor<T, const O_<TN, TA, TH, TS...>> final {
 	using Host =   const O_<TN, TA, TH, TS...>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{ return Accessor<T, const typename Host::SubStates>{host._subStates}.get();	}
 
 	Host& host;
 };
@@ -195,7 +195,7 @@ template <typename T,
 struct Accessor<T, const O_<TN, TA,  T, TS...>> final {
 	using Host =   const O_<TN, TA,  T, TS...>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host._headState;	}
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{ return host._headState;	}
 
 	Host& host;
 };
@@ -229,7 +229,7 @@ template <typename T,
 struct Accessor<T, const OS_<TN, TA, NI, TS...>> final {
 	using Host =   const OS_<TN, TA, NI, TS...>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{
 		return contains<typename Host::InitialStates, T>() ?
 			Accessor<T, const typename Host::Initial  >{host.initial  }.get() :
 			Accessor<T, const typename Host::Remaining>{host.remaining}.get();
@@ -263,7 +263,7 @@ template <typename T,
 struct Accessor<T, const OS_<TN, TA, NI, TS>> final {
 	using Host =   const OS_<TN, TA, NI, TS>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{ return Accessor<T, const typename Host::Initial>{host.initial  }.get();	}
 
 	Host& host;
 };
@@ -297,7 +297,7 @@ template <typename T,
 struct Accessor<T, const S_<TN, TA, TH>> final {
 	using Host =   const S_<TN, TA, TH>;
 
-	HFSM2_CONSTEXPR(14) const T& get()	const noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
+	HFSM2_CONSTEXPR(14)	const T& get()	const noexcept	{ HFSM2_BREAK(); return *reinterpret_cast<T*>(0);	}
 
 	Host& host;
 };
@@ -327,7 +327,7 @@ template <typename T,
 struct Accessor<T, const S_<TN, TA,  T>> final {
 	using Host =   const S_<TN, TA,  T>;
 
-	HFSM2_CONSTEXPR(11) const T& get()	const noexcept	{ return host;	}
+	HFSM2_CONSTEXPR(11)	const T& get()	const noexcept	{ return host;	}
 
 	Host& host;
 };

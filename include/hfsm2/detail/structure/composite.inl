@@ -453,10 +453,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	Rank ranks[Info::WIDTH];
+	Rank ranks[Info::WIDTH] = { Rank{} };
 	Rank top = _subStates.wideReportRank(control, ranks);
 
-	Utility options[Info::WIDTH];
+	Utility options[Info::WIDTH] = { Utility{} };
 	const UP sum = _subStates.wideReportChangeRandom(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
@@ -532,10 +532,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	Rank ranks[Info::WIDTH];
+	Rank ranks[Info::WIDTH] = { Rank{} };
 	Rank top = _subStates.wideReportRank(control, ranks);
 
-	Utility options[Info::WIDTH];
+	Utility options[Info::WIDTH] = { Utility{} };
 	const Utility sum = _subStates.wideReportRandomize(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);

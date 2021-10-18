@@ -14,7 +14,7 @@ public:
 	friend class ArrayT;
 
 private:
-	HFSM2_CONSTEXPR(11) IteratorT(Container& container,
+	HFSM2_CONSTEXPR(11)	IteratorT(Container& container,
 								  const Index cursor)									  noexcept
 		: _container{container}
 		, _cursor{cursor}
@@ -58,7 +58,7 @@ public:
 	friend class ArrayT;
 
 private:
-	HFSM2_CONSTEXPR(11) IteratorT(const Container& container,
+	HFSM2_CONSTEXPR(11)	IteratorT(const Container& container,
 								  const Index cursor)									  noexcept
 		: _container{container}
 		, _cursor{cursor}
@@ -79,7 +79,7 @@ public:
 
 	HFSM2_CONSTEXPR(11)	const Item& operator *()	const noexcept	{ return _container[_cursor];	}
 
-	HFSM2_CONSTEXPR(11) const Item* operator->()	const noexcept	{ return &operator *();			}
+	HFSM2_CONSTEXPR(11)	const Item* operator->()	const noexcept	{ return &operator *();			}
 
 private:
 	const Container& _container;
