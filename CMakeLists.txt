@@ -3,10 +3,6 @@ cmake_minimum_required(VERSION 3.5)
 LIST(APPEND CMAKE_MODULE_PATH
 	"${CMAKE_CURRENT_SOURCE_DIR}/CMake/modules")
 
-set(SANITIZE_CXX_FLAGS "")
-#set(SANITIZE_CXX_FLAGS "-fsanitize=address -g -O1 -fno-omit-frame-pointer")
-#set(SANITIZE_CXX_FLAGS "-fsanitize=memory -g -O1 -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-#set(SANITIZE_CXX_FLAGS "-fsanitize=undefined")
 
 project(hfsm2_test)
 
@@ -30,8 +26,3 @@ add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
 add_custom_command(TARGET ${PROJECT_NAME}
 				   POST_BUILD
 				   COMMAND ${PROJECT_NAME})
-
-if ("x_${CMAKE_BUILD_TYPE}" STREQUAL "x_Coverage")
-	set (TEST_PROJECT ${PROJECT_NAME})
-	include (coverage)
-endif ("x_${CMAKE_BUILD_TYPE}" STREQUAL "x_Coverage")

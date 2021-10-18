@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="test" Version="11000" InternalType="Console">
+  <Reconciliation>
+    <Regexes/>
+    <Excludepaths/>
+    <Ignorefiles/>
+    <Extensions>
+      <![CDATA[*.cpp;*.hpp;*.inl]]>
+    </Extensions>
+    <Topleveldir>/Work/HFSM2-experimental</Topleveldir>
+  </Reconciliation>
+  <VirtualDirectory Name="test">
+    <File Name="../../../test/tools.inl"/>
+    <VirtualDirectory Name="reported">
+      <File Name="../../../test/reported/issue_49.cpp"/>
+    </VirtualDirectory>
+    <File Name="../../../test/tools.hpp"/>
+    <File Name="../../../test/test_utilize.cpp"/>
+    <File Name="../../../test/test_utility_regions.cpp"/>
+    <File Name="../../../test/test_stress.cpp"/>
+    <File Name="../../../test/test_serialization.cpp"/>
+    <File Name="../../../test/test_self_transitions.cpp"/>
+    <File Name="../../../test/test_resume.cpp"/>
+    <File Name="../../../test/test_replication.cpp"/>
+    <File Name="../../../test/test_randomize.cpp"/>
+    <File Name="../../../test/test_plans_payloads.cpp"/>
+    <File Name="../../../test/test_plans.cpp"/>
+    <File Name="../../../test/test_ortho_units.cpp"/>
+    <File Name="../../../test/test_orthogonal_root.cpp"/>
+    <File Name="../../../test/test_manual_activation.cpp"/>
+    <File Name="../../../test/test_internal_transitions.cpp"/>
+    <File Name="../../../test/test_internal_payloads.cpp"/>
+    <File Name="../../../test/test_guards.cpp"/>
+    <File Name="../../../test/test_delayed_teardown.cpp"/>
+    <File Name="../../../test/test_debug.cpp"/>
+    <File Name="../../../test/test_contexts_random.cpp"/>
+    <File Name="../../../test/test_contexts.cpp"/>
+    <File Name="../../../test/test_composite_bst.cpp"/>
+    <File Name="../../../test/test_access.cpp"/>
+    <File Name="../../../test/main.cpp"/>
+    <VirtualDirectory Name="shared">
+      <File Name="../../../test/shared/test_task_list.cpp"/>
+      <File Name="../../../test/shared/test_random.cpp"/>
+      <File Name="../../../test/shared/test_bit_stream.cpp"/>
+      <File Name="../../../test/shared/test_bit_array.cpp"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="include">
+    <VirtualDirectory Name="hfsm2">
+      <File Name="../../../include/hfsm2/machine_dev.hpp"/>
+      <File Name="../../../include/hfsm2/machine.hpp"/>
+      <VirtualDirectory Name="detail">
+        <File Name="../../../include/hfsm2/detail/root.inl"/>
+        <File Name="../../../include/hfsm2/detail/root.hpp"/>
+        <VirtualDirectory Name="structure">
+          <File Name="../../../include/hfsm2/detail/structure/state.inl"/>
+          <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub_2.inl"/>
+          <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub_1.inl"/>
+          <File Name="../../../include/hfsm2/detail/structure/orthogonal.inl"/>
+          <File Name="../../../include/hfsm2/detail/structure/injections.inl"/>
+          <File Name="../../../include/hfsm2/detail/structure/composite_sub_2.inl"/>
+          <File Name="../../../include/hfsm2/detail/structure/composite_sub_1.inl"/>
+          <File Name="../../../include/hfsm2/detail/structure/composite.inl"/>
+          <File Name="../../../include/hfsm2/detail/structure/state.hpp"/>
+          <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub.hpp"/>
+          <File Name="../../../include/hfsm2/detail/structure/orthogonal.hpp"/>
+          <File Name="../../../include/hfsm2/detail/structure/injections.hpp"/>
+          <File Name="../../../include/hfsm2/detail/structure/forward.hpp"/>
+          <File Name="../../../include/hfsm2/detail/structure/composite_sub.hpp"/>
+          <File Name="../../../include/hfsm2/detail/structure/composite.hpp"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="shared">
+          <File Name="../../../include/hfsm2/detail/shared/random.inl"/>
+          <File Name="../../../include/hfsm2/detail/shared/bit_stream.inl"/>
+          <File Name="../../../include/hfsm2/detail/shared/utility.hpp"/>
+          <File Name="../../../include/hfsm2/detail/shared/type_list.hpp"/>
+          <File Name="../../../include/hfsm2/detail/shared/random.hpp"/>
+          <File Name="../../../include/hfsm2/detail/shared/macros_on.hpp"/>
+          <File Name="../../../include/hfsm2/detail/shared/macros_off.hpp"/>
+          <File Name="../../../include/hfsm2/detail/shared/iterator.hpp"/>
+          <File Name="../../../include/hfsm2/detail/shared/bit_stream.hpp"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="root">
+          <File Name="../../../include/hfsm2/detail/root/registry_2.inl"/>
+          <File Name="../../../include/hfsm2/detail/root/registry_1.inl"/>
+          <File Name="../../../include/hfsm2/detail/root/plan_data.inl"/>
+          <File Name="../../../include/hfsm2/detail/root/plan.inl"/>
+          <File Name="../../../include/hfsm2/detail/root/control.inl"/>
+          <File Name="../../../include/hfsm2/detail/root/state_access.hpp"/>
+          <File Name="../../../include/hfsm2/detail/root/registry.hpp"/>
+          <File Name="../../../include/hfsm2/detail/root/plan_data.hpp"/>
+          <File Name="../../../include/hfsm2/detail/root/plan.hpp"/>
+          <File Name="../../../include/hfsm2/detail/root/control.hpp"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="features">
+          <File Name="../../../include/hfsm2/detail/features/structure_report.hpp"/>
+          <File Name="../../../include/hfsm2/detail/features/logger_interface.hpp"/>
+          <File Name="../../../include/hfsm2/detail/features/common.hpp"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="containers">
+          <File Name="../../../include/hfsm2/detail/containers/task_list.inl"/>
+          <File Name="../../../include/hfsm2/detail/containers/bit_array.inl"/>
+          <File Name="../../../include/hfsm2/detail/containers/array.inl"/>
+          <File Name="../../../include/hfsm2/detail/containers/task_list.hpp"/>
+          <File Name="../../../include/hfsm2/detail/containers/bit_array.hpp"/>
+          <File Name="../../../include/hfsm2/detail/containers/array.hpp"/>
+        </VirtualDirectory>
+      </VirtualDirectory>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="external">
+    <VirtualDirectory Name="doctest">
+      <File Name="../../../external/doctest/doctest.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="-pedantic;-Wall;-Wextra;-std=c++14" C_Options="-pedantic;-Wall;-Wextra;" Assembler="">
+        <IncludePath Value="."/>
+        <IncludePath Value="$(WorkspacePath)/../../external"/>
+        <IncludePath Value="$(WorkspacePath)/../../include"/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug_Linux" CompilerType="MinGW ( gcc.exe (tdm64-1) 5.1.0 )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-O0" C_Options="-g;-O0" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1"/>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(ProjectName)" IntermediateDirectory="" Command="$(WorkspacePath)/build-$(WorkspaceConfiguration)/bin/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/build-$(WorkspaceConfiguration)/lib" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="CodeLite Makefile Generator"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="yes">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Debug_Windows" CompilerType="MinGW ( C:\GCC\TDM-GCC-64\bin\ )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-O0" C_Options="-g;-O0" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1"/>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(ProjectName)" IntermediateDirectory="$(BUILD_ROOT)/intermediate-$(WorkspaceConfiguration)/" Command="$(BUILD_ROOT)/build-$(WorkspaceConfiguration)/bin/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(BUILD_ROOT)/build-$(WorkspaceConfiguration)/lib" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="CodeLite Makefile Generator"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="yes">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release_Linux" CompilerType="MinGW ( C:\GCC\TDM-GCC-64\bin\ )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O3" C_Options="-O3" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1"/>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(ProjectName)" IntermediateDirectory="" Command="$(WorkspacePath)/build-$(WorkspaceConfiguration)/bin/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/build-$(WorkspaceConfiguration)/lib" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="CodeLite Makefile Generator"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="yes">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release_Windows" CompilerType="MinGW ( C:\GCC\TDM-GCC-64\bin\ )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O3" C_Options="-O3" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1"/>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(ProjectName)" IntermediateDirectory="$(BUILD_ROOT)/intermediate-$(WorkspaceConfiguration)/" Command="$(BUILD_ROOT)/build-$(WorkspaceConfiguration)/bin/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(BUILD_ROOT)/build-$(WorkspaceConfiguration)/lib" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="CodeLite Makefile Generator"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="yes">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

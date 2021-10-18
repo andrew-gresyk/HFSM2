@@ -39,7 +39,7 @@ private:
 template <>
 class SimpleRandomT<4> {
 public:
-	constexpr SimpleRandomT()								  noexcept {}
+	HFSM2_CONSTEXPR(11)	SimpleRandomT()						  noexcept {}
 
 	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint32_t seed)	  noexcept;
 
@@ -62,13 +62,17 @@ class BaseRandomT;
 template <>
 class BaseRandomT<8> {
 protected:
-	using Simple = SimpleRandomT<8>;
+	using SimpleRandom = SimpleRandomT<8>;
+
+	HFSM2_CONSTEXPR(14)	BaseRandomT(SimpleRandom&& simple)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void seed(SimpleRandom&& simple)	  noexcept;
 
 public:
-	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT()						  noexcept;
 
-	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t s)		  noexcept	{ seed(s);	}
-	HFSM2_CONSTEXPR(20) BaseRandomT(const uint64_t(& s)[4])	  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint64_t s)		  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint64_t(& s)[4])	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	void seed(const uint64_t s)			  noexcept;
 	HFSM2_CONSTEXPR(14)	void seed(const uint64_t(& s)[4])	  noexcept;
@@ -82,13 +86,17 @@ protected:
 template <>
 class BaseRandomT<4> {
 protected:
-	using Simple = SimpleRandomT<4>;
+	using SimpleRandom = SimpleRandomT<4>;
+
+	HFSM2_CONSTEXPR(14)	BaseRandomT(SimpleRandom&& simple)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void seed(SimpleRandom&& simple)	  noexcept;
 
 public:
-	HFSM2_CONSTEXPR(20) BaseRandomT()						  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT()						  noexcept;
 
-	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t s)		  noexcept	{ seed(s);	}
-	HFSM2_CONSTEXPR(20) BaseRandomT(const uint32_t(& s)[4])	  noexcept	{ seed(s);	}
+	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint32_t s)		  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint32_t(& s)[4])	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	void seed(const uint32_t s)			  noexcept;
 	HFSM2_CONSTEXPR(14)	void seed(const uint32_t(& s)[4])	  noexcept;

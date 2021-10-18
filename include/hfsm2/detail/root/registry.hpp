@@ -124,23 +124,23 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
-	HFSM2_CONSTEXPR(11) bool isActive		 ()								const noexcept;
-	HFSM2_CONSTEXPR(14) bool isActive		 (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14) bool isResumable	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)		const noexcept;
 
-	HFSM2_CONSTEXPR(14) bool isPendingChange (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14) bool isPendingEnter	 (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14) bool isPendingExit	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingChange (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingEnter	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingExit	 (const StateID stateId)		const noexcept;
 
-	HFSM2_CONSTEXPR(14) const Parent&	  forkParent(const ForkID forkId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	const Parent&	  forkParent(const ForkID forkId)	const noexcept;
 
-	HFSM2_CONSTEXPR(14) OrthoBits requestedOrthoFork(const ForkID forkId)		  noexcept;
+	HFSM2_CONSTEXPR(14)	OrthoBits requestedOrthoFork(const ForkID forkId)		  noexcept;
 
-	HFSM2_CONSTEXPR(14) bool requestImmediate(const Transition& request)		  noexcept;
-	HFSM2_CONSTEXPR(14) void requestScheduled(const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			  noexcept;
 
-	HFSM2_CONSTEXPR(14) void clearRequests()									  noexcept;
-	HFSM2_CONSTEXPR(14) void clear()											  noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests()									  noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()											  noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -196,21 +196,21 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
-	HFSM2_CONSTEXPR(11) bool isActive		 ()								const noexcept;
-	HFSM2_CONSTEXPR(14) bool isActive		 (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14) bool isResumable	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)		const noexcept;
 
-	HFSM2_CONSTEXPR(14) bool isPendingChange (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14) bool isPendingEnter	 (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14) bool isPendingExit	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingChange (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingEnter	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingExit	 (const StateID stateId)		const noexcept;
 
-	HFSM2_CONSTEXPR(14) const Parent& forkParent(const ForkID forkId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	const Parent& forkParent(const ForkID forkId)		const noexcept;
 
-	HFSM2_CONSTEXPR(14) bool requestImmediate(const Transition& request)		  noexcept;
-	HFSM2_CONSTEXPR(14) void requestScheduled(const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			  noexcept;
 
-	HFSM2_CONSTEXPR(14) void clearRequests()									  noexcept;
-	HFSM2_CONSTEXPR(14) void clear()											  noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests()									  noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()											  noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;

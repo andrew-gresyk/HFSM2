@@ -68,83 +68,83 @@ struct O_ final {
 
 	template <typename T>
 	struct Accessor final {
-		HFSM2_CONSTEXPR(11) static			T& get(		 O_& o)						  noexcept	{ return o._subStates.template access<T>();	}
-		HFSM2_CONSTEXPR(11) static const	T& get(const O_& o)						  noexcept	{ return o._subStates.template access<T>();	}
+		HFSM2_CONSTEXPR(11)	static			T& get(		 O_& o)						  noexcept	{ return o._subStates.template access<T>();	}
+		HFSM2_CONSTEXPR(11)	static const	T& get(const O_& o)						  noexcept	{ return o._subStates.template access<T>();	}
 	};
 
 	template <>
 	struct Accessor<Head> final {
-		HFSM2_CONSTEXPR(11) static		 Head& get(		 O_& o)						  noexcept	{ return o._headState;						}
-		HFSM2_CONSTEXPR(11) static const Head& get(const O_& o)						  noexcept	{ return o._headState;						}
+		HFSM2_CONSTEXPR(11)	static		 Head& get(		 O_& o)						  noexcept	{ return o._headState;						}
+		HFSM2_CONSTEXPR(11)	static const Head& get(const O_& o)						  noexcept	{ return o._headState;						}
 	};
 
 	template <typename T>
 	HFSM2_CONSTEXPR(14)		  T&	access()										  noexcept	{ return Accessor<T>::get(*this);			}
 
 	template <typename T>
-	HFSM2_CONSTEXPR(11) const T&	access()									const noexcept	{ return Accessor<T>::get(*this);			}
+	HFSM2_CONSTEXPR(11)	const T&	access()									const noexcept	{ return Accessor<T>::get(*this);			}
 
 #endif
 
 	//----------------------------------------------------------------------
 
-	HFSM2_CONSTEXPR(11) static ProngBits  orthoRequested(	   Registry& registry)	  noexcept	{ return		  registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11) static ProngCBits orthoRequested(const Registry& registry)	  noexcept	{ return		  registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Registry& registry)	  noexcept	{ return		  registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Registry& registry)	  noexcept	{ return		  registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM2_CONSTEXPR(11) static ProngBits  orthoRequested(	   Control&  control)	  noexcept	{ return control._registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11) static ProngCBits orthoRequested(const Control&  control)	  noexcept	{ return control._registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Control&  control)	  noexcept	{ return control._registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Control&  control)	  noexcept	{ return control._registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14) void	deepRegister		 (Registry& registry,
+	HFSM2_CONSTEXPR(14)	void	deepRegister		 (Registry& registry,
 													  const Parent parent)			  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14) bool	deepForwardEntryGuard(GuardControl& control)		  noexcept;
-	HFSM2_CONSTEXPR(14) bool	deepEntryGuard		 (GuardControl& control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard(GuardControl& control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard		 (GuardControl& control)		  noexcept;
 
-	HFSM2_CONSTEXPR(14) void	deepEnter			 (PlanControl&	control)		  noexcept;
-	HFSM2_CONSTEXPR(14) void	deepReenter			 (PlanControl&	control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepEnter			 (PlanControl&	control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepReenter			 (PlanControl&	control)		  noexcept;
 
-	HFSM2_CONSTEXPR(14) Status	deepUpdate			 (FullControl&	control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 (FullControl&	control)		  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14) Status	deepReact			 (FullControl&	control,
+	HFSM2_CONSTEXPR(14)	Status	deepReact			 (FullControl&	control,
 													  const TEvent& event)			  noexcept;
 
-	HFSM2_CONSTEXPR(14) bool	deepForwardExitGuard (GuardControl& control)		  noexcept;
-	HFSM2_CONSTEXPR(14) bool	deepExitGuard		 (GuardControl& control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl& control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepExitGuard		 (GuardControl& control)		  noexcept;
 
-	HFSM2_CONSTEXPR(14) void	deepExit			 (PlanControl&	control)		  noexcept;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14) void	deepForwardActive	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14) void	deepForwardRequest	 (Control& control, const Request request)	  noexcept;
-
-	HFSM2_CONSTEXPR(14) void	deepRequest			 (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepExit			 (PlanControl&	control)		  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14) void	deepRequestChange	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14) void	deepRequestRestart	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14) void	deepRequestResume	 (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardActive	 (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardRequest	 (Control& control, const Request request)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepRequest			 (Control& control, const Request request)	  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange	 (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRestart	 (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestResume	 (Control& control, const Request request)	  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14) void	deepRequestUtilize	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14) void	deepRequestRandomize (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize	 (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize (Control& control, const Request request)	  noexcept;
 
-	HFSM2_CONSTEXPR(14) UP		deepReportChange	 (Control& control)				  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange	 (Control& control)				  noexcept;
 
-	HFSM2_CONSTEXPR(14) UP		deepReportUtilize	 (Control& control)				  noexcept;
-	HFSM2_CONSTEXPR(14) Rank	deepReportRank		 (Control& control)				  noexcept;
-	HFSM2_CONSTEXPR(14) Utility deepReportRandomize  (Control& control)				  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize	 (Control& control)				  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	deepReportRank		 (Control& control)				  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize  (Control& control)				  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14) void	deepChangeToRequested(PlanControl&  control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested(PlanControl&  control)		  noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -152,11 +152,11 @@ struct O_ final {
 	using WriteStream	= typename Args::WriteStream;
 	using ReadStream	= typename Args::ReadStream;
 
-	HFSM2_CONSTEXPR(14) void	deepSaveActive		 (const Registry& registry, WriteStream& stream)	const noexcept;
-	HFSM2_CONSTEXPR(14) void	deepSaveResumable	 (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepSaveActive		 (const Registry& registry, WriteStream& stream)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepSaveResumable	 (const Registry& registry, WriteStream& stream)	const noexcept;
 
-	HFSM2_CONSTEXPR(14) void	deepLoadRequested	 (		Registry& registry, ReadStream&  stream)	const noexcept;
-	HFSM2_CONSTEXPR(14) void	deepLoadResumable	 (		Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepLoadRequested	 (		Registry& registry, ReadStream&  stream)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepLoadResumable	 (		Registry& registry, ReadStream&  stream)	const noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -167,7 +167,7 @@ struct O_ final {
 
 	static constexpr Long NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
 
-	HFSM2_CONSTEXPR(14) void deepGetNames(const Long parent,
+	HFSM2_CONSTEXPR(14)	void deepGetNames(const Long parent,
 										  const RegionType region,
 										  const Short depth,
 										  StructureStateInfos& stateInfos) const noexcept;
