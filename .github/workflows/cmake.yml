@@ -18,37 +18,102 @@ jobs:
       matrix:
         PLATFORM:
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-18.04,
+              CC: gcc-5,
+              CXX: g++-5,
+              INSTALL: true
+            }
+          - {
+              OS: ubuntu-18.04,
+              CC: gcc-6,
+              CXX: g++-6,
+              INSTALL: true
+            }
+          - {
+              OS: ubuntu-18.04,
               CC: gcc-7,
               CXX: g++-7
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: gcc-8,
-              CXX: g++-8
+              CXX: g++-8,
+              INSTALL: true
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-18.04,
               CC: gcc-9,
               CXX: g++-9
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: gcc-10,
               CXX: g++-10
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: gcc-11,
-              CXX: g++-11
+              CXX: g++-11,
+              INSTALL: true
+            }
+          # - {
+          #     OS: ubuntu-20.04,
+          #     CC: clang-4.0,
+          #     CXX: clang++-4.0,
+          #     VERSION: '4.0'
+          #   }
+          # - {
+          #     OS: ubuntu-20.04,
+          #     CC: clang-5.0,
+          #     CXX: clang++-5.0,
+          #     VERSION: '5.0'
+          #   }
+          # - {
+          #     OS: ubuntu-20.04,
+          #     CC: clang-6.0,
+          #     CXX: clang++-6.0,
+          #     VERSION: '6.0'
+          #   }
+          # - {
+          #     OS: ubuntu-20.04,
+          #     CC: clang-7,
+          #     CXX: clang++-7,
+          #     VERSION: '7'
+          #   }
+          # - {
+          #     OS: ubuntu-20.04,
+          #     CC: clang-8,
+          #     CXX: clang++-8,
+          #     VERSION: '8'
+          #   }
+          # - {
+          #     OS: ubuntu-20.04,
+          #     CC: clang-9,
+          #     CXX: clang++-9,
+          #     VERSION: '9'
+          #   }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-10,
+              CXX: clang++-10
             }
           - {
               OS: ubuntu-latest,
+              CC: clang-11,
+              CXX: clang++-11
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-12,
+              CXX: clang++-12
+            }
+          - {
+              OS: macos-10.15,
               CC: clang,
               CXX: clang++
             }
           - {
-              OS: macos-latest,
+              OS: macos-11,
               CC: clang,
               CXX: clang++
             }
@@ -58,15 +123,33 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    # install dependencies
     - name: Install GCC on ubuntu
       if: |
-        startsWith(matrix.PLATFORM.OS, 'ubuntu') &&
-        startsWith(matrix.PLATFORM.CC, 'gcc-')
+        startsWith(matrix.PLATFORM.OS, 'ubuntu-') &&
+        startsWith(matrix.PLATFORM.CC, 'gcc-') &&
+        matrix.PLATFORM.INSTALL
+      # run: |
+      # echo "deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe" | sudo tee /etc/apt/sources.list
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
         sudo apt-get install ${{ matrix.PLATFORM.CC }} ${{ matrix.PLATFORM.CXX }}
-      # continue-on-error: true
+
+    - name: Install Clang on ubuntu
+      if: |
+        matrix.PLATFORM.OS == 'ubuntu-20.04' &&
+        startsWith(matrix.PLATFORM.CC, 'clang-') &&
+        matrix.PLATFORM.VERSION
+      run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+        echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-${{ matrix.PLATFORM.VERSION }} main universe" | sudo tee /etc/apt/sources.list
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install ${{ matrix.PLATFORM.CC }} ${{ matrix.PLATFORM.CXX }}
+      # uses: KyleMayes/install-llvm-action@v1
+      # with:
+      #   version: ${{ matrix.PLATFORM.VERSION }}
 
     # main test
     - name: Configure Test
