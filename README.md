@@ -19,10 +19,12 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## Compiler Support
 
-- Visual Studio: 14, 15, 16
-- GCC: 7, 8, 9, 10, 11
-- Clang: 3.7, 3.8, 3.9, 4, 5, 6, 7, 8, 9, 10, 11
-- AppleClang: 12
+- Visual Studio: **2015, 2017, 2019**
+- GCC: **5, 6, 7, 8, 9, 10, 11**
+- Clang: 3.7, 3.8, 3.9, 4, 5, 6, 7, 8, **9, 10, 11**
+- AppleClang: **12, 13**
+
+(Currently CI-tested in **bold**)
 
 ---
 

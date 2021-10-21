@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.11.0 (2021-10-18)
+// 1.11.1 (2021-10-21)
 //
 // Created by Andrew Gresyk
 //
@@ -33,7 +33,7 @@
 
 #define HFSM2_VERSION_MAJOR 1
 #define HFSM2_VERSION_MINOR 11
-#define HFSM2_VERSION_PATCH 0
+#define HFSM2_VERSION_PATCH 1
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -11033,10 +11033,10 @@ typename TA::UP
 C_<TN, TA, SG, TH, TS...>::deepReportChangeRandom(Control& control) noexcept {
 	const UP h = _headState.deepReportChange(control);
 
-	Rank ranks[Info::WIDTH];
+	Rank ranks[Info::WIDTH] = { Rank{} };
 	Rank top = _subStates.wideReportRank(control, ranks);
 
-	Utility options[Info::WIDTH];
+	Utility options[Info::WIDTH] = { Utility{} };
 	const UP sum = _subStates.wideReportChangeRandom(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
@@ -11086,10 +11086,10 @@ typename TA::Utility
 C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) noexcept {
 	const Utility h = _headState.wrapUtility(control);
 
-	Rank ranks[Info::WIDTH];
+	Rank ranks[Info::WIDTH] = { Rank{} };
 	Rank top = _subStates.wideReportRank(control, ranks);
 
-	Utility options[Info::WIDTH];
+	Utility options[Info::WIDTH] = { Utility{} };
 	const Utility sum = _subStates.wideReportRandomize(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
