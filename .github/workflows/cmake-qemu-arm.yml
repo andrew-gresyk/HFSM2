@@ -6,23 +6,25 @@ on:
   pull_request:
     # branches: [ master ] # to test the char bug with activity history
 
+env:
+  CC: arm-linux-gnueabihf-gcc
+  CXX: arm-linux-gnueabihf-g++
+  AR: arm-linux-gnueabihf-ar
+  LD: arm-linux-gnueabihf-ld
+  LDFLAGS: -L/usr/arm-linux-gnueabihf/lib
+  CMAKE_CROSSCOMPILING: True
+  QEMU_LD_PREFIX: /usr/arm-linux-gnueabihf
+  CMAKE_CROSSCOMPILING_EMULATOR: qemu-arm
+
 jobs:
   build:
     runs-on: ubuntu-20.04
 
-    env:
-      CC: arm-linux-gnueabihf-gcc
-      CXX: arm-linux-gnueabihf-g++
-      AR: arm-linux-gnueabihf-ar
-      LD: arm-linux-gnueabihf-ld
-      LDFLAGS: -L/usr/arm-linux-gnueabihf/lib
-      CMAKE_CROSSCOMPILING: True
-      QEMU_LD_PREFIX: /usr/arm-linux-gnueabihf
-      CMAKE_CROSSCOMPILING_EMULATOR: qemu-arm
     strategy:
       matrix:
          BUILD_CONFIG: [ Release, Debug ]
- 
+        
+    steps: 
     - name: Install ARM GCC on ubuntu      
       run: |
         sudo apt-get update
