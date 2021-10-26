@@ -13976,9 +13976,9 @@ public:
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
 	using Structure				= ArrayT<StructureEntry, NAME_COUNT>;
 
-	/// @brief Array of 'char' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
+	/// @brief Array of 'int8_t' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	using ActivityHistory		= ArrayT<char,			 NAME_COUNT>;
+	using ActivityHistory		= ArrayT<int8_t,		 NAME_COUNT>;
 
 	/// @brief Get the array of 'StructureEntry' representing FSM structure
 	/// @return FSM structure
@@ -15467,7 +15467,7 @@ R_<TG, TA>::getStateNames() noexcept {
 
 		if (state.name[0] != L'\0') {
 			_structure.emplace(StructureEntry{false, &prefix[margin * 2], state.name});
-			_activityHistory.emplace((char) 0);
+			_activityHistory.emplace((int8_t) 0);
 		} else if (s + 1 < _stateInfos.count()) {
 			auto& nextPrefix = _prefixes[s + 1];
 

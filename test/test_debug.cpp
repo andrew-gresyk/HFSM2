@@ -131,7 +131,7 @@ assertStructure(const FSM::Instance::Structure& structure,
 
 //------------------------------------------------------------------------------
 
-using ActivityReference = std::vector<char>;
+using ActivityReference = std::vector<int8_t>;
 
 void
 assertActivity(const FSM::Instance::ActivityHistory& activity,
@@ -212,21 +212,21 @@ TEST_CASE("FSM.Debug") {
 			});
 
 			assertActivity(machine.activityHistory(), {
-				(char) +1,
-				(char) +1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
-				(char) -1,
+				+1,
+				+1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
+				-1,
 			});
 		}
 
@@ -311,21 +311,21 @@ TEST_CASE("FSM.Debug") {
 			});
 
 			assertActivity(machine.activityHistory(), {
-				(char) +2,
-				(char) -1,
-				(char) +1,
-				(char) +1,
-				(char) +1,
-				(char) -2,
-				(char) +1,
-				(char) +1,
-				(char) -2,
-				(char) +1,
-				(char) +1,
-				(char) -2,
-				(char) +1,
-				(char) -2,
-				(char) +1,
+				+2,
+				-1,
+				+1,
+				+1,
+				+1,
+				-2,
+				+1,
+				+1,
+				-2,
+				+1,
+				+1,
+				-2,
+				+1,
+				-2,
+				+1,
 			});
 		}
 
