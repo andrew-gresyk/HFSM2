@@ -1,0 +1,94 @@
+name: CMake QEMU ARM
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    # branches: [ master ] # to test the char bug with activity history
+
+env:
+  CC: arm-linux-gnueabihf-gcc
+  CXX: arm-linux-gnueabihf-g++
+  AR: arm-linux-gnueabihf-ar
+  LD: arm-linux-gnueabihf-ld
+  LDFLAGS: -L/usr/arm-linux-gnueabihf/lib
+  CMAKE_CROSSCOMPILING: True
+  QEMU_LD_PREFIX: /usr/arm-linux-gnueabihf
+  CMAKE_CROSSCOMPILING_EMULATOR: qemu-arm
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+         BUILD_CONFIG: [ Release, Debug ]
+        
+    steps: 
+    - name: Install ARM GCC on ubuntu      
+      run: |
+        sudo apt-get update
+        sudo apt-get install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf qemu-user
+               
+    # main test
+    - name: Configure Test
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}
+
+    - name: Build Text
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}
+
+    # examples/advanced_event_handling
+    - name: Configure 'examples/advanced_event_handling'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/advanced_event_handling
+
+    - name: Build 'examples/advanced_event_handling'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/advanced_event_handling
+
+    # examples/basic_audio_player
+    - name: Configure 'examples/basic_audio_player'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/basic_audio_player
+
+    - name: Build 'examples/basic_audio_player'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/basic_audio_player
+
+    # examples/basic_traffic_light
+    - name: Configure 'examples/basic_traffic_light'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/basic_traffic_light
+
+    - name: Build 'examples/basic_traffic_light'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/basic_traffic_light
+
+    # examples/calculator - disabled, uses <conio.h> and _getch()
+    # - name: Configure 'examples/calculator'
+    #   run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+    #   working-directory: ${{ github.workspace }}/examples/calculator
+    #
+    # - name: Build 'examples/calculator'
+    #   run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+    #   working-directory: ${{ github.workspace }}/examples/calculator
+
+    # examples/debug_logger_interface
+    - name: Configure 'examples/debug_logger_interface'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/debug_logger_interface
+
+    - name: Build 'examples/debug_logger_interface'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/debug_logger_interface
+
+    # examples/snippets
+    - name: Configure 'examples/snippets'
+      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/snippets
+
+    - name: Build 'examples/snippets'
+      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
+      working-directory: ${{ github.workspace }}/examples/snippets
