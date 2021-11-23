@@ -2342,7 +2342,7 @@ private:
 	HFSM2_CONSTEXPR(11)	Index limit()									const noexcept	{ return CAPACITY;					}
 
 private:
-	Item _items[CAPACITY];
+	Item _items[CAPACITY] {};
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
