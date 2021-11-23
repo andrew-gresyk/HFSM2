@@ -39,12 +39,12 @@ def mergeTo(folder, path, included, pragmaOnceCounter, output):
 
 				output.write(line)
 
-#===============================================================================
+#-------------------------------------------------------------------------------
 
 output = open("../include/hfsm2/machine.hpp", 'w', encoding='utf-8-sig')
 included = []
 pragmaOnceCounter = 0
-mergeTo("../include/hfsm2", "machine_dev.hpp", included, pragmaOnceCounter, output)
+mergeTo("../development/hfsm2", "machine_dev.hpp", included, pragmaOnceCounter, output)
 
 output.close()
 
