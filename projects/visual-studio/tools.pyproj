@@ -8,7 +8,7 @@
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>../../tools</WorkingDirectory>
-    <InterpreterId>Global|PythonCore|3.7</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.9</InterpreterId>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <OutputPath>.</OutputPath>
     <Name>HFSM-tools</Name>
@@ -25,10 +25,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.7" />
+    <None Include="../../tools/join.py" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="../../tools/join.py" />
+    <InterpreterReference Include="Global|PythonCore|3.9" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

@@ -4,32 +4,32 @@
     <Filter Include="test">
       <UniqueIdentifier>{25afde4c-8636-489f-9a74-e87f38b09cb9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="hfsm">
-      <UniqueIdentifier>{25fa5477-2735-467a-a226-594457ffc81b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="hfsm\detail">
-      <UniqueIdentifier>{4f79560d-9216-46d3-a50b-7e0371432070}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="hfsm\detail\shared">
-      <UniqueIdentifier>{5bc66e5e-fa7d-4e7a-94c8-216828158489}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="hfsm\detail\structure">
-      <UniqueIdentifier>{34703284-85b6-4e84-93bf-50c41d0640a7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test\shared">
       <UniqueIdentifier>{0c30db65-2c34-43a1-93d5-23be4089ce5f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="hfsm\detail\root">
-      <UniqueIdentifier>{ca75d30d-f526-4ed3-858d-685eb8dcc1ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="hfsm\detail\features">
-      <UniqueIdentifier>{64f42c3e-a810-4683-9d62-71c49d08c384}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="hfsm\detail\containers">
-      <UniqueIdentifier>{1d96701a-3818-4b79-95c5-b4d7a67255b2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test\reported">
       <UniqueIdentifier>{36bf527d-8767-4c60-9219-2cf767f942bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm">
+      <UniqueIdentifier>{2b7be9f7-d2bc-430c-836c-063d77e2e916}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail">
+      <UniqueIdentifier>{edba8ae6-36ad-4773-8ea8-b1abfcdd9690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\shared">
+      <UniqueIdentifier>{86ae22e7-9c9c-47f4-abad-42040ec47604}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\structure">
+      <UniqueIdentifier>{41fb49ff-e0a3-4327-b64d-3ef3f30213a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\root">
+      <UniqueIdentifier>{fff60fb5-0552-4885-99cd-508906fa7d2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\features">
+      <UniqueIdentifier>{4fb3ecfd-5ec5-4ad2-a850-41718c87a19c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hfsm\detail\containers">
+      <UniqueIdentifier>{186806e1-384c-420f-8fcb-d1839700be31}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -119,150 +119,150 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\hfsm2\machine_dev.hpp">
-      <Filter>hfsm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\iterator.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\type_list.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\utility.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\composite.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\composite_sub.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\forward.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\orthogonal_sub.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\state.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\random.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\structure\injections.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\root\control.hpp">
-      <Filter>hfsm\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\root\plan.hpp">
-      <Filter>hfsm\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\root\plan_data.hpp">
-      <Filter>hfsm\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\root\state_access.hpp">
-      <Filter>hfsm\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\root.hpp">
-      <Filter>hfsm\detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\bit_stream.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\root\registry.hpp">
-      <Filter>hfsm\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_off.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\shared\macros_on.hpp">
-      <Filter>hfsm\detail\shared</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\tools.hpp">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\features\logger_interface.hpp">
+    <ClInclude Include="..\..\development\hfsm2\machine_dev.hpp">
+      <Filter>hfsm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\root.hpp">
+      <Filter>hfsm\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\bit_stream.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\iterator.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_off.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_on.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\random.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\type_list.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\utility.hpp">
+      <Filter>hfsm\detail\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite_sub.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\forward.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\injections.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\state.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\root\registry.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\root\state_access.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\features\common.hpp">
       <Filter>hfsm\detail\features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\features\structure_report.hpp">
+    <ClInclude Include="..\..\development\hfsm2\detail\features\logger_interface.hpp">
       <Filter>hfsm\detail\features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\features\common.hpp">
+    <ClInclude Include="..\..\development\hfsm2\detail\features\structure_report.hpp">
       <Filter>hfsm\detail\features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\containers\array.hpp">
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\array.hpp">
       <Filter>hfsm\detail\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\containers\bit_array.hpp">
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_array.hpp">
       <Filter>hfsm\detail\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\hfsm2\detail\containers\task_list.hpp">
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\task_list.hpp">
       <Filter>hfsm\detail\containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\hfsm2\detail\structure\composite.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\orthogonal.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_1.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\orthogonal_sub_2.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\state.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\composite_sub_2.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\composite_sub_1.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\shared\random.inl">
-      <Filter>hfsm\detail\shared</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\structure\injections.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\root\control.inl">
-      <Filter>hfsm\detail\root</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\root\plan.inl">
-      <Filter>hfsm\detail\root</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\root\plan_data.inl">
-      <Filter>hfsm\detail\root</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\root.inl">
-      <Filter>hfsm\detail</Filter>
-    </None>
-    <None Include="..\..\include\hfsm2\detail\shared\bit_stream.inl">
-      <Filter>hfsm\detail\shared</Filter>
-    </None>
     <None Include="..\..\test\tools.inl">
       <Filter>test</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\root\registry_2.inl">
+    <None Include="..\..\development\hfsm2\detail\root.inl">
+      <Filter>hfsm\detail</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\shared\bit_stream.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\shared\random.inl">
+      <Filter>hfsm\detail\shared</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\composite.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\composite_sub_1.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\composite_sub_2.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\injections.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\orthogonal.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_1.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_2.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\state.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\root\control.inl">
       <Filter>hfsm\detail\root</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\root\registry_1.inl">
+    <None Include="..\..\development\hfsm2\detail\root\plan.inl">
       <Filter>hfsm\detail\root</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\containers\array.inl">
+    <None Include="..\..\development\hfsm2\detail\root\plan_data.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\root\registry_1.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\root\registry_2.inl">
+      <Filter>hfsm\detail\root</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\containers\array.inl">
       <Filter>hfsm\detail\containers</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\containers\bit_array.inl">
+    <None Include="..\..\development\hfsm2\detail\containers\bit_array.inl">
       <Filter>hfsm\detail\containers</Filter>
     </None>
-    <None Include="..\..\include\hfsm2\detail\containers\task_list.inl">
+    <None Include="..\..\development\hfsm2\detail\containers\task_list.inl">
       <Filter>hfsm\detail\containers</Filter>
     </None>
   </ItemGroup>

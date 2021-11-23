@@ -1,27 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ImportGroup Label="PropertySheets" />
-  <PropertyGroup Label="UserMacros" />
-  <PropertyGroup>
-    <OutDir>$(SolutionDir)..\..\binaries-$(PlatformTarget)\</OutDir>
-    <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformTarget)\$(ProjectName)-$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformTarget)</TargetName>
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="shared-vs.props" />
+  </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)../../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>Level4</WarningLevel>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>-Wpedantic %(AdditionalOptions)</AdditionalOptions>
       <SupportJustMyCode>false</SupportJustMyCode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup />
 </Project>
