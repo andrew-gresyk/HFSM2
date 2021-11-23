@@ -6,7 +6,7 @@
 [![ARM GCC](https://github.com/andrew-gresyk/HFSM2/actions/workflows/cmake-qemu-arm.yml/badge.svg)](https://github.com/andrew-gresyk/HFSM2/actions/workflows/cmake-qemu-arm.yml)
 [![MS VS](https://github.com/andrew-gresyk/HFSM2/actions/workflows/msbuild.yml/badge.svg)](https://github.com/andrew-gresyk/HFSM2/actions/workflows/msbuild.yml)  
 [![Gitter](https://badges.gitter.im/andrew-gresyk/HFSM2.svg)](https://gitter.im/andrew-gresyk/HFSM2)
-[![Discord](https://img.shields.io/discord/591914197219016707.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/ujpNbqSpfm)
+[![Discord](https://img.shields.io/discord/755015945269018695.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/v4t3tzh)
 [![Twitter Follow](https://img.shields.io/twitter/follow/andrew_gresyk?style=social)](https://www.twitter.com/andrew_gresyk)
 
 ---
@@ -27,7 +27,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - Clang: 3.7, 3.8, 3.9, 4, 5, 6, 7, 8, **9, 10, 11**
 - AppleClang: **12, 13**
 
-(Currently CI-tested in **bold**)
+(Currently CI-tested toolchains are in **bold**)
 
 ---
 
