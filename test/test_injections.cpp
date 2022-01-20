@@ -3,7 +3,7 @@
 
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #define HFSM2_DISABLE_TYPEINDEX
-#include <hfsm2/machine_dev.hpp>
+#include <hfsm2/machine.hpp>
 
 #include "tools.hpp"
 
