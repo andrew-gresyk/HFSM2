@@ -4,14 +4,14 @@
 // An HFSM2 port of https://gist.github.com/martinmoene/797b1923f9c6c1ae355bb2d6870be25e
 // by Martin Moene (see https://twitter.com/MartinMoene/status/1118453128834232320)
 
-#define HFSM2_ENABLE_LOG_INTERFACE
-#define HFSM2_ENABLE_STRUCTURE_REPORT
-#include <hfsm2/machine.hpp>
-
 #include <assert.h>
 
 #include <iostream>
 #include <string>
+
+#define HFSM2_ENABLE_LOG_INTERFACE
+#define HFSM2_ENABLE_STRUCTURE_REPORT
+#include <hfsm2/machine.hpp>
 
 //------------------------------------------------------------------------------
 
