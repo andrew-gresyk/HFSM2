@@ -48,8 +48,8 @@ C_<TN, TA, SG, TH, TS...>::deepRegister(Registry& registry,
 {
 	registry.compoParents[COMPO_INDEX] = parent;
 
-	_headState.deepRegister(registry, parent);
-	_subStates.wideRegister(registry, Parent{COMPO_ID});
+	HeadState::deepRegister(registry, parent);
+	SubStates::wideRegister(registry, Parent{COMPO_ID});
 }
 
 //------------------------------------------------------------------------------
@@ -66,9 +66,9 @@ C_<TN, TA, SG, TH, TS...>::deepForwardEntryGuard(GuardControl& control) noexcept
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (requested == INVALID_SHORT)
-		return _subStates.wideForwardEntryGuard(control, active);
+		return SubStates::wideForwardEntryGuard(control, active);
 	else
-		return _subStates.wideEntryGuard	   (control, requested);
+		return SubStates::wideEntryGuard	   (control, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -82,8 +82,8 @@ C_<TN, TA, SG, TH, TS...>::deepEntryGuard(GuardControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return _headState.deepEntryGuard(control) ||
-		   _subStates.wideEntryGuard(control, requested);
+	return HeadState::deepEntryGuard(control) ||
+		   SubStates::wideEntryGuard(control, requested);
 }
 
 //------------------------------------------------------------------------------
@@ -108,8 +108,8 @@ C_<TN, TA, SG, TH, TS...>::deepEnter(PlanControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepEnter(control);
-	_subStates.wideEnter(control, active);
+	HeadState::deepEnter(control);
+	SubStates::wideEnter(control, active);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -127,19 +127,19 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepReenter(control);
+	HeadState::deepReenter(control);
 
 	if (active == requested)
-		_subStates.wideReenter(control, active);
+		SubStates::wideReenter(control, active);
 	else {
-		_subStates.wideExit	  (control, active);
+		SubStates::wideExit	  (control, active);
 
 		active	  = requested;
 
 		if (requested == resumable)
 			resumable = INVALID_SHORT;
 
-		_subStates.wideEnter  (control, active);
+		SubStates::wideEnter  (control, active);
 	}
 
 	requested = INVALID_SHORT;
@@ -157,13 +157,13 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const Status headStatus = _headState.deepUpdate(control)) {
+	if (const Status headStatus = HeadState::deepUpdate(control)) {
 		ControlLock lock{control};
-		_subStates.wideUpdate(control, active);
+		SubStates::wideUpdate(control, active);
 
 		return headStatus;
 	} else {
-		const Status subStatus = _subStates.wideUpdate(control, active);
+		const Status subStatus = SubStates::wideUpdate(control, active);
 
 		if (subStatus.outerTransition)
 			return Status{Status::Result::NONE, true};
@@ -172,9 +172,42 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 
 	#if HFSM2_PLANS_AVAILABLE()
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan(_headState, subStatus) : subStatus;
+			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
 	#else
 		return subStatus;
+	#endif
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+C_<TN, TA, SG, TH, TS...>::deepReverseUpdate(FullControl& control) noexcept {
+	const Short active = compoActive(control);
+	HFSM2_ASSERT(active != INVALID_SHORT);
+
+	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	if (const Status subStatus = SubStates::wideReverseUpdate(control, active)) {
+		ControlLock lock{control};
+		HeadState::deepReverseUpdate(control);
+
+		return subStatus;
+	} else {
+		const Status headStatus = HeadState::deepReverseUpdate(control);
+
+		if (headStatus.outerTransition)
+			return Status{Status::Result::NONE, true};
+
+		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	#if HFSM2_PLANS_AVAILABLE()
+		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
+			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
+	#else
+		return headStatus;
 	#endif
 	}
 }
@@ -193,25 +226,60 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const Status headStatus = _headState.deepReact(control, event)) {
+	if (const Status headStatus = HeadState::deepReact(control, event)) {
 		ControlLock lock{control};
-
-		_subStates.wideReact(control, event, active);
+		SubStates::wideReact(control, event, active);
 
 		return headStatus;
 	} else {
-		const Status subStatus = _subStates.wideReact(control, event, active);
+		const Status subStatus = SubStates::wideReact(control, event, active);
 
 		if (subStatus.outerTransition)
-			return subStatus;
+			return Status{Status::Result::NONE, true};
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	#if HFSM2_PLANS_AVAILABLE()
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan(_headState, subStatus) : subStatus;
+			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
 	#else
 		return subStatus;
+	#endif
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+C_<TN, TA, SG, TH, TS...>::deepReverseReact(FullControl& control,
+											const TEvent& event) noexcept
+{
+	const Short active = compoActive(control);
+	HFSM2_ASSERT(active != INVALID_SHORT);
+
+	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	if (const Status subStatus = SubStates::wideReverseReact(control, event, active)) {
+		ControlLock lock{control};
+		HeadState::deepReverseReact(control, event);
+
+		return subStatus;
+	} else {
+		const Status headStatus = HeadState::deepReverseReact(control, event);
+
+		if (headStatus.outerTransition)
+			return Status{Status::Result::NONE, true};
+
+		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	#if HFSM2_PLANS_AVAILABLE()
+		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
+			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
+	#else
+		return headStatus;
 	#endif
 	}
 }
@@ -228,9 +296,9 @@ C_<TN, TA, SG, TH, TS...>::deepForwardExitGuard(GuardControl& control) noexcept 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (compoRequested(control) == INVALID_SHORT)
-		return _subStates.wideForwardExitGuard(control, active);
+		return SubStates::wideForwardExitGuard(control, active);
 	else
-		return _subStates.wideExitGuard		  (control, active);
+		return SubStates::wideExitGuard		  (control, active);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -244,8 +312,8 @@ C_<TN, TA, SG, TH, TS...>::deepExitGuard(GuardControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return _headState.deepExitGuard(control) ||
-		   _subStates.wideExitGuard(control, active);
+	return HeadState::deepExitGuard(control) ||
+		   SubStates::wideExitGuard(control, active);
 }
 
 //------------------------------------------------------------------------------
@@ -259,8 +327,8 @@ C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) noexcept {
 
 	HFSM2_ASSERT(active != INVALID_SHORT);
 
-	_subStates.wideExit(control, active);
-	_headState.deepExit(control);
+	SubStates::wideExit(control, active);
+	HeadState::deepExit(control);
 
 	resumable = active;
 	active	  = INVALID_SHORT;
@@ -287,9 +355,9 @@ C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
 	if (requested == INVALID_SHORT) {
 		const Short active = compoActive(control);
 
-		_subStates.wideForwardActive (control, request, active);
+		SubStates::wideForwardActive (control, request, active);
 	} else
-		_subStates.wideForwardRequest(control, request, requested);
+		SubStates::wideForwardRequest(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -305,7 +373,7 @@ C_<TN, TA, SG, TH, TS...>::deepForwardRequest(Control& control,
 	const Short requested = compoRequested(control);
 
 	if (requested != INVALID_SHORT)
-		_subStates.wideForwardRequest(control, request, requested);
+		SubStates::wideForwardRequest(control, request, requested);
 	else
 		deepRequest					 (control, request);
 }
@@ -400,7 +468,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeComposite(Control& control,
 
 	requested = 0;
 
-	_subStates.wideRequestChangeComposite(control, request);
+	SubStates::wideRequestChangeComposite(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -419,7 +487,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeResumable(Control& control,
 	requested = (resumable != INVALID_SHORT) ?
 		resumable : 0;
 
-	_subStates.wideRequestChangeResumable(control, request, requested);
+	SubStates::wideRequestChangeResumable(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -434,7 +502,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeUtilitarian(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	const UP s = _subStates.wideReportChangeUtilitarian(control);
+	const UP s = SubStates::wideReportChangeUtilitarian(control);
 	HFSM2_ASSERT(s.prong != INVALID_SHORT);
 
 	Short& requested = compoRequested(control);
@@ -454,10 +522,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control,
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	Rank ranks[Info::WIDTH] = { Rank{} };
-	Rank top = _subStates.wideReportRank(control, ranks);
+	Rank top = SubStates::wideReportRank(control, ranks);
 
 	Utility options[Info::WIDTH] = { Utility{} };
-	const UP sum = _subStates.wideReportChangeRandom(control, options, ranks, top);
+	const UP sum = SubStates::wideReportChangeRandom(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
@@ -480,7 +548,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRestart(Control& control,
 
 	requested = 0;
 
-	_subStates.wideRequestRestart(control, request);
+	SubStates::wideRequestRestart(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -499,7 +567,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestResume(Control& control,
 	requested = (resumable != INVALID_SHORT) ?
 		resumable : 0;
 
-	_subStates.wideRequestResume(control, request, requested);
+	SubStates::wideRequestResume(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -514,7 +582,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	const UP s = _subStates.wideReportUtilize(control);
+	const UP s = SubStates::wideReportUtilize(control);
 
 	Short& requested = compoRequested(control);
 	requested = s.prong;
@@ -533,10 +601,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control,
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	Rank ranks[Info::WIDTH] = { Rank{} };
-	Rank top = _subStates.wideReportRank(control, ranks);
+	Rank top = SubStates::wideReportRank(control, ranks);
 
 	Utility options[Info::WIDTH] = { Utility{} };
-	const Utility sum = _subStates.wideReportRandomize(control, options, ranks, top);
+	const Utility sum = SubStates::wideReportRandomize(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum, ranks, top);
@@ -584,8 +652,8 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeComposite(Control& control) noexcept 
 	Short& requested = compoRequested(control);
 	requested = 0;
 
-	const UP h = _headState.deepReportChange(control);
-	const UP s = _subStates.wideReportChangeComposite(control);
+	const UP h = HeadState::deepReportChange(control);
+	const UP s = SubStates::wideReportChangeComposite(control);
 
 	return {
 		h.utility * s.utility,
@@ -605,8 +673,8 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeResumable(Control& control) noexcept 
 	requested = (resumable != INVALID_SHORT) ?
 		resumable : 0;
 
-	const UP h = _headState.deepReportChange(control);
-	const UP s = _subStates.wideReportChangeResumable(control, requested);
+	const UP h = HeadState::deepReportChange(control);
+	const UP s = SubStates::wideReportChangeResumable(control, requested);
 
 	return {
 		h.utility * s.utility,
@@ -620,8 +688,8 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 C_<TN, TA, SG, TH, TS...>::deepReportChangeUtilitarian(Control& control) noexcept {
-	const UP h = _headState.deepReportChange(control);
-	const UP s = _subStates.wideReportChangeUtilitarian(control);
+	const UP h = HeadState::deepReportChange(control);
+	const UP s = SubStates::wideReportChangeUtilitarian(control);
 
 	Short& requested = compoRequested(control);
 	requested = s.prong;
@@ -640,13 +708,13 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 C_<TN, TA, SG, TH, TS...>::deepReportChangeRandom(Control& control) noexcept {
-	const UP h = _headState.deepReportChange(control);
+	const UP h = HeadState::deepReportChange(control);
 
 	Rank ranks[Info::WIDTH] = { Rank{} };
-	Rank top = _subStates.wideReportRank(control, ranks);
+	Rank top = SubStates::wideReportRank(control, ranks);
 
 	Utility options[Info::WIDTH] = { Utility{} };
-	const UP sum = _subStates.wideReportChangeRandom(control, options, ranks, top);
+	const UP sum = SubStates::wideReportChangeRandom(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
@@ -664,8 +732,8 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 C_<TN, TA, SG, TH, TS...>::deepReportUtilize(Control& control) noexcept {
-	const UP h = _headState.deepReportUtilize(control);
-	const UP s = _subStates.wideReportUtilize(control);
+	const UP h = HeadState::deepReportUtilize(control);
+	const UP s = SubStates::wideReportUtilize(control);
 
 	Short& requested = compoRequested(control);
 	requested = s.prong;
@@ -684,7 +752,7 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::Rank
 C_<TN, TA, SG, TH, TS...>::deepReportRank(Control& control) noexcept {
-	return _headState.wrapRank(control);
+	return HeadState::wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -693,13 +761,13 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::Utility
 C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) noexcept {
-	const Utility h = _headState.wrapUtility(control);
+	const Utility h = HeadState::wrapUtility(control);
 
 	Rank ranks[Info::WIDTH] = { Rank{} };
-	Rank top = _subStates.wideReportRank(control, ranks);
+	Rank top = SubStates::wideReportRank(control, ranks);
 
 	Utility options[Info::WIDTH] = { Utility{} };
-	const Utility sum = _subStates.wideReportRandomize(control, options, ranks, top);
+	const Utility sum = SubStates::wideReportRandomize(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum, ranks, top);
@@ -724,25 +792,25 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept 
 	HFSM2_ASSERT(active != INVALID_SHORT);
 
 	if (requested == INVALID_SHORT)
-		_subStates.wideChangeToRequested(control, active);
+		SubStates::wideChangeToRequested(control, active);
 	else if (requested != active) {
-		_subStates.wideExit   (control, active);
+		SubStates::wideExit   (control, active);
 
 		resumable = active;
 		active	  = requested;
 		requested = INVALID_SHORT;
 
-		_subStates.wideEnter  (control, active);
+		SubStates::wideEnter  (control, active);
 	} else if (compoRemain(control)) {
-		_subStates.wideExit   (control, active);
+		SubStates::wideExit   (control, active);
 
 		requested = INVALID_SHORT;
 
-		_subStates.wideEnter  (control, active);
+		SubStates::wideEnter  (control, active);
 	} else {
 		requested = INVALID_SHORT;
 
-		_subStates.wideReenter(control, active);
+		SubStates::wideReenter(control, active);
 	}
 }
 
@@ -767,7 +835,7 @@ C_<TN, TA, SG, TH, TS...>::deepSaveActive(const Registry& registry,
 	} else
 		stream.template write<1>(0);
 
-	_subStates.wideSaveActive(registry,stream, active);
+	SubStates::wideSaveActive(registry,stream, active);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -786,7 +854,7 @@ C_<TN, TA, SG, TH, TS...>::deepSaveResumable(const Registry& registry,
 	} else
 		stream.template write<1>(0);
 
-	_subStates.wideSaveResumable(registry, stream);
+	SubStates::wideSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -809,7 +877,7 @@ C_<TN, TA, SG, TH, TS...>::deepLoadRequested(Registry& registry,
 	} else
 		resumable = INVALID_SHORT;
 
-	_subStates.wideLoadRequested(registry, stream, requested);
+	SubStates::wideLoadRequested(registry, stream, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -828,7 +896,7 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 	} else
 		resumable = INVALID_SHORT;
 
-	_subStates.wideLoadResumable(registry, stream);
+	SubStates::wideLoadResumable(registry, stream);
 }
 
 #endif
@@ -845,8 +913,8 @@ C_<TN, TA, SG, TH, TS...>::deepGetNames(const Long parent,
 										const Short depth,
 										StructureStateInfos& _stateInfos) const noexcept
 {
-	_headState.deepGetNames(parent,					 regionType,								depth,	   _stateInfos);
-	_subStates.wideGetNames(_stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, _stateInfos);
+	HeadState::deepGetNames(parent,					 regionType,								depth,	   _stateInfos);
+	SubStates::wideGetNames(_stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, _stateInfos);
 }
 
 #endif

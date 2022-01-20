@@ -8,7 +8,17 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  typename THead,
 		  typename... TSubStates>
-struct C_ final {
+struct HFSM2_EMPTY_BASES C_
+	: S_<TIndices, TArgs, THead>
+	, CS_<I_<TIndices::STATE_ID + 1,
+			 TIndices::COMPO_INDEX + 1,
+			 TIndices::ORTHO_INDEX,
+			 TIndices::ORTHO_UNIT>,
+		  TArgs,
+		  TStrategy,
+		  0,
+		  TL_<TSubStates...>>
+{
 	using Indices		= TIndices;
 	static constexpr StateID  HEAD_ID	  = Indices::STATE_ID;
 	static constexpr Short	  COMPO_INDEX = Indices::COMPO_INDEX;
@@ -56,7 +66,7 @@ struct C_ final {
 							  Args,
 							  STRATEGY,
 							  0,
-							  TSubStates...>;
+							  TL_<TSubStates...>>;
 
 	using Info			= CI_<STRATEGY, Head, TSubStates...>;
 
@@ -66,30 +76,6 @@ struct C_ final {
 #endif
 
 	static constexpr Short REGION_SIZE	  = Info::STATE_COUNT;
-
-	//----------------------------------------------------------------------
-
-#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
-
-	template <typename T>
-	struct Accessor final {
-		HFSM2_CONSTEXPR(11)	static			T& get(		 C_& c)		  noexcept	{ return c._subStates.template access<T>();	}
-		HFSM2_CONSTEXPR(11)	static const	T& get(const C_& c)		  noexcept	{ return c._subStates.template access<T>();	}
-	};
-
-	template <>
-	struct Accessor<Head> final {
-		HFSM2_CONSTEXPR(11)	static		 Head& get(		 C_& c)		  noexcept	{ return c._headState;						}
-		HFSM2_CONSTEXPR(11)	static const Head& get(const C_& c)		  noexcept	{ return c._headState;						}
-	};
-
-	template <typename T>
-	HFSM2_CONSTEXPR(14)		  T&	access()						  noexcept	{ return Accessor<T>::get(*this);			}
-
-	template <typename T>
-	HFSM2_CONSTEXPR(11)	const T&	access()					const noexcept	{ return Accessor<T>::get(*this);			}
-
-#endif
 
 	//----------------------------------------------------------------------
 
@@ -127,9 +113,14 @@ struct C_ final {
 	HFSM2_CONSTEXPR(14)	void	deepReenter					  (PlanControl&  control)					  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	deepUpdate					  (FullControl&  control)					  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepReverseUpdate			  (FullControl&  control)					  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	deepReact					  (FullControl&  control,
+															   const TEvent& event)						  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepReverseReact			  (FullControl&  control,
 															   const TEvent& event)						  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard		  (GuardControl& control)					  noexcept;
@@ -260,9 +251,6 @@ struct C_ final {
 #endif
 
 	//----------------------------------------------------------------------
-
-	HeadState _headState;
-	SubStates _subStates;
 
 	HFSM2_IF_DEBUG(static constexpr Info _info = Info{});
 };

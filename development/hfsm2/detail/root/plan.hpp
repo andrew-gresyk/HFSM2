@@ -161,7 +161,7 @@ public:
 
 		HFSM2_CONSTEXPR(14)	void operator ++()					  noexcept;
 
-		HFSM2_CONSTEXPR(11)	const Task& operator  *()		const noexcept	{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_CONSTEXPR(14)	const Task& operator  *()		const noexcept	{ return  _plan._planData.tasks[_curr];		}
 		HFSM2_CONSTEXPR(11)	const Task* operator ->()		const noexcept	{ return &_plan._planData.tasks[_curr];		}
 
 		HFSM2_CONSTEXPR(14)	Long next()						const noexcept;

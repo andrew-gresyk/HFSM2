@@ -117,6 +117,15 @@
     <ClCompile Include="..\..\test\reported\issue_49.cpp">
       <Filter>test\reported</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_reverse_payloads.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_reverse_transitions.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_injections.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\tools.hpp">
@@ -156,9 +165,6 @@
       <Filter>hfsm\detail\root</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\root\registry.hpp">
-      <Filter>hfsm\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\state_access.hpp">
       <Filter>hfsm\detail\root</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\shared\bit_stream.hpp">
@@ -250,9 +256,6 @@
     <None Include="..\..\development\hfsm2\detail\structure\composite_sub_2.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
-    <None Include="..\..\development\hfsm2\detail\structure\injections.inl">
-      <Filter>hfsm\detail\structure</Filter>
-    </None>
     <None Include="..\..\development\hfsm2\detail\structure\orthogonal.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
@@ -263,6 +266,12 @@
       <Filter>hfsm\detail\structure</Filter>
     </None>
     <None Include="..\..\development\hfsm2\detail\structure\state.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\injections_2.inl">
+      <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\structure\injections_1.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
   </ItemGroup>

@@ -1,5 +1,5 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.12.0 (2021-11-24)
+// 1.14.0 (2022-01-22)
 //
 // Created by Andrew Gresyk
 //
@@ -9,7 +9,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2021
+// Copyright (c) 2022
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 1
-#define HFSM2_VERSION_MINOR 12
+#define HFSM2_VERSION_MINOR 14
 #define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
@@ -80,7 +80,6 @@
 #include "detail/structure/composite.hpp"
 #include "detail/structure/orthogonal_sub.hpp"
 #include "detail/structure/orthogonal.hpp"
-#include "detail/root/state_access.hpp"
 
 namespace hfsm2 {
 namespace detail {

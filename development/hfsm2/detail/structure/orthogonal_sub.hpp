@@ -13,7 +13,16 @@ template <typename TIndices,
 		  Short NIndex,
 		  typename TInitial,
 		  typename... TRemaining>
-struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
+struct HFSM2_EMPTY_BASES OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...>
+	: InitialOS<TIndices,
+				TArgs,
+				TInitial>
+	, RemainingOS<TIndices,
+				  TArgs,
+				  NIndex,
+				  TInitial,
+				  TRemaining...>
+{
 	using Indices		= TIndices;
 	static constexpr StateID INITIAL_ID	 = Indices::STATE_ID;
 	static constexpr Short	 COMPO_INDEX = Indices::COMPO_INDEX;
@@ -34,46 +43,27 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	using StateParents	= typename Registry::StateParents;
 	using OrthoForks	= typename Registry::OrthoForks;
 	using ProngBits		= typename OrthoForks::Bits;
-	using ProngCBits= typename OrthoForks::CBits;
+	using ProngCBits	= typename OrthoForks::CBits;
 
 	using Control		= ControlT	   <Args>;
 	using PlanControl	= PlanControlT <Args>;
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		= Material<I_<INITIAL_ID,
-									  COMPO_INDEX,
-									  ORTHO_INDEX,
-									  ORTHO_UNIT>,
-								   Args,
-								   TInitial>;
-
 	using InitialInfo	= WrapInfo<TInitial>;
 	using InitialStates	= typename InitialInfo::StateList;
 
-	using Remaining		= OS_<I_<INITIAL_ID  + InitialInfo::STATE_COUNT,
-								 COMPO_INDEX + InitialInfo::COMPO_REGIONS,
-								 ORTHO_INDEX + InitialInfo::ORTHO_REGIONS,
-								 ORTHO_UNIT  + InitialInfo::ORTHO_UNITS>,
-							  Args,
-							  PRONG_INDEX + 1,
-							  TRemaining...>;
+	using Initial		= InitialOS<TIndices,
+									TArgs,
+									TInitial>;
 
-	using Info	= OSI_<TInitial, TRemaining...>;
+	using Remaining		= RemainingOS<TIndices,
+									  TArgs,
+									  NIndex,
+									  TInitial,
+									  TRemaining...>;
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
-
-	template <typename T>
-	HFSM2_CONSTEXPR(14)		  T& access()		  noexcept;
-
-	template <typename T>
-	HFSM2_CONSTEXPR(11)	const T& access()	const noexcept;
-
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 	HFSM2_CONSTEXPR(14)	void	wideRegister		 (Registry& registry, const ForkID forkId)							  noexcept;
 
@@ -87,9 +77,13 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 	HFSM2_CONSTEXPR(14)	void	wideReenter			 (PlanControl&	control											  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate	 (FullControl&  control											  )	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	wideReverseReact	 (FullControl&	control, const TEvent& event					  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
@@ -147,9 +141,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...> final {
 #endif
 
 	//----------------------------------------------------------------------
-
-	Initial initial;
-	Remaining remaining;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +149,11 @@ template <typename TIndices,
 		  typename TArgs,
 		  Short NIndex,
 		  typename TInitial>
-struct OS_<TIndices, TArgs, NIndex, TInitial> final {
+struct OS_<TIndices, TArgs, NIndex, TInitial>
+	: InitialOS<TIndices,
+				TArgs,
+				TInitial>
+{
 	using Indices		= TIndices;
 	static constexpr StateID INITIAL_ID	 = Indices::STATE_ID;
 	static constexpr Short	 COMPO_INDEX = Indices::COMPO_INDEX;
@@ -186,28 +181,11 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Initial		= Material<I_<INITIAL_ID,
-									  COMPO_INDEX,
-									  ORTHO_INDEX,
-									  ORTHO_UNIT>,
-								   Args,
-								   TInitial>;
+	using Initial		= InitialOS<TIndices,
+									TArgs,
+									TInitial>;
 
-	using Info	= OSI_<TInitial>;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
-
-	template <typename T>
-	HFSM2_CONSTEXPR(14)		  T& access()		  noexcept	{ return initial.template access<T>();	}
-
-	template <typename T>
-	HFSM2_CONSTEXPR(14)	const T& access()	const noexcept	{ return initial.template access<T>();	}
-
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	//----------------------------------------------------------------------
 
 	HFSM2_CONSTEXPR(14)	void	wideRegister		 (Registry& registry, const ForkID forkId)							  noexcept;
 
@@ -221,9 +199,13 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 	HFSM2_CONSTEXPR(14)	void	wideReenter			 (PlanControl&	control											  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate	 (FullControl&	control											  )	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	wideReverseReact	 (FullControl&	control, const TEvent& event					  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
@@ -281,8 +263,6 @@ struct OS_<TIndices, TArgs, NIndex, TInitial> final {
 #endif
 
 	//----------------------------------------------------------------------
-
-	Initial initial;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

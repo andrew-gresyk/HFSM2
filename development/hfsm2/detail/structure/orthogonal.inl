@@ -12,8 +12,8 @@ O_<TN, TA, TH, TS...>::deepRegister(Registry& registry,
 	registry.orthoParents[ORTHO_INDEX] = parent;
 	registry.orthoUnits[ORTHO_INDEX] = Units{ORTHO_UNIT, WIDTH};
 
-	_headState.deepRegister(registry, parent);
-	_subStates.wideRegister(registry, ORTHO_ID);
+	HeadState::deepRegister(registry, parent);
+	SubStates::wideRegister(registry, ORTHO_ID);
 }
 
 //------------------------------------------------------------------------------
@@ -27,9 +27,9 @@ O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (requested)
-		return _subStates.wideForwardEntryGuard(control, requested);
+		return SubStates::wideForwardEntryGuard(control, requested);
 	else
-		return _subStates.wideForwardEntryGuard(control);
+		return SubStates::wideForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -40,8 +40,8 @@ bool
 O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return _headState.deepEntryGuard(control) ||
-		   _subStates.wideEntryGuard(control);
+	return HeadState::deepEntryGuard(control) ||
+		   SubStates::wideEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -55,8 +55,8 @@ O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepEnter(control);
-	_subStates.wideEnter(control);
+	HeadState::deepEnter(control);
+	SubStates::wideEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -70,8 +70,8 @@ O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	_headState.deepReenter(control);
-	_subStates.wideReenter(control);
+	HeadState::deepReenter(control);
+	SubStates::wideReenter(control);
 }
 
 //------------------------------------------------------------------------------
@@ -82,24 +82,54 @@ Status
 O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const auto headStatus = _headState.deepUpdate(control)) {
+	if (const Status headStatus = HeadState::deepUpdate(control)) {
 		ControlLock lock{control};
-		_subStates.wideUpdate(control);
+		SubStates::wideUpdate(control);
 
 		return headStatus;
 	} else {
-		const Status subStatus = _subStates.wideUpdate(control);
+		const Status subStatus = SubStates::wideUpdate(control);
 
 		if (subStatus.outerTransition)
-			return subStatus;
+			return Status{Status::Result::NONE, true};
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	#if HFSM2_PLANS_AVAILABLE()
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan(_headState, subStatus) : subStatus;
+			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
 	#else
 		return subStatus;
+	#endif
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+O_<TN, TA, TH, TS...>::deepReverseUpdate(FullControl& control) noexcept {
+	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	if (const Status subStatus = SubStates::wideReverseUpdate(control)) {
+		ControlLock lock{control};
+		HeadState::deepReverseUpdate(control);
+
+		return subStatus;
+	} else {
+		const Status headStatus = HeadState::deepReverseUpdate(control);
+
+		if (headStatus.outerTransition)
+			return Status{Status::Result::NONE, true};
+
+		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	#if HFSM2_PLANS_AVAILABLE()
+		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
+			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
+	#else
+		return headStatus;
 	#endif
 	}
 }
@@ -115,24 +145,57 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 {
 	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const auto headStatus = _headState.deepReact(control, event)) {
+	if (const Status headStatus = HeadState::deepReact(control, event)) {
 		ControlLock lock{control};
-		_subStates.wideReact(control, event);
+		SubStates::wideReact(control, event);
 
 		return headStatus;
 	} else {
-		const Status subStatus = _subStates.wideReact(control, event);
+		const Status subStatus = SubStates::wideReact(control, event);
 
 		if (subStatus.outerTransition)
-			return subStatus;
+			return Status{Status::Result::NONE, true};
 
 		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	#if HFSM2_PLANS_AVAILABLE()
 		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan(_headState, subStatus) : subStatus;
+			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
 	#else
 		return subStatus;
+	#endif
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+O_<TN, TA, TH, TS...>::deepReverseReact(FullControl& control,
+										const TEvent& event) noexcept
+{
+	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	if (const Status subStatus = SubStates::wideReverseReact(control, event)) {
+		ControlLock lock{control};
+		HeadState::deepReverseReact(control, event);
+
+		return subStatus;
+	} else {
+		const Status headStatus = HeadState::deepReverseReact(control, event);
+
+		if (headStatus.outerTransition)
+			return Status{Status::Result::NONE, true};
+
+		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	#if HFSM2_PLANS_AVAILABLE()
+		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
+			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
+	#else
+		return headStatus;
 	#endif
 	}
 }
@@ -148,9 +211,9 @@ O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	if (requested)
-		return _subStates.wideForwardExitGuard(control, requested);
+		return SubStates::wideForwardExitGuard(control, requested);
 	else
-		return _subStates.wideForwardExitGuard(control);
+		return SubStates::wideForwardExitGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -161,8 +224,8 @@ bool
 O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return _headState.deepExitGuard(control) ||
-		   _subStates.wideExitGuard(control);
+	return HeadState::deepExitGuard(control) ||
+		   SubStates::wideExitGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -171,8 +234,8 @@ template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 void
 O_<TN, TA, TH, TS...>::deepExit(PlanControl& control) noexcept {
-	_subStates.wideExit(control);
-	_headState.deepExit(control);
+	SubStates::wideExit(control);
+	HeadState::deepExit(control);
 }
 
 //------------------------------------------------------------------------------
@@ -188,7 +251,7 @@ O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 	const ProngCBits requested = orthoRequested(static_cast<const Control&>(control));
 	HFSM2_ASSERT(!!requested);
 
-	_subStates.wideForwardActive(control, request, requested);
+	SubStates::wideForwardActive(control, request, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -204,7 +267,7 @@ O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
 	const ProngCBits requested = orthoRequested(static_cast<const Control&>(control));
 
 	if (requested)
-		_subStates.wideForwardRequest(control, request);
+		SubStates::wideForwardRequest(control, request);
 	else
 		deepRequest					 (control, request);
 }
@@ -257,7 +320,7 @@ O_<TN, TA, TH, TS...>::deepRequestChange(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	_subStates.wideRequestChange(control, request);
+	SubStates::wideRequestChange(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -270,7 +333,7 @@ O_<TN, TA, TH, TS...>::deepRequestRestart(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	_subStates.wideRequestRestart(control, request);
+	SubStates::wideRequestRestart(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -283,7 +346,7 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	_subStates.wideRequestResume(control, request);
+	SubStates::wideRequestResume(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -298,7 +361,7 @@ O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	_subStates.wideRequestUtilize(control, request);
+	SubStates::wideRequestUtilize(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -311,7 +374,7 @@ O_<TN, TA, TH, TS...>::deepRequestRandomize(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	_subStates.wideRequestRandomize(control, request);
+	SubStates::wideRequestRandomize(control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -320,8 +383,8 @@ template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 O_<TN, TA, TH, TS...>::deepReportChange(Control& control) noexcept {
-	const UP	  h = _headState.deepReportChange(control);
-	const Utility s = _subStates.wideReportChange(control);
+	const UP	  h = HeadState::deepReportChange(control);
+	const Utility s = SubStates::wideReportChange(control);
 
 	const Utility sub = s / WIDTH;
 
@@ -339,8 +402,8 @@ template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) noexcept {
-	const UP	  h = _headState.deepReportUtilize(control);
-	const Utility s = _subStates.wideReportUtilize(control);
+	const UP	  h = HeadState::deepReportUtilize(control);
+	const Utility s = SubStates::wideReportUtilize(control);
 
 	const Utility sub = s / WIDTH;
 
@@ -358,7 +421,7 @@ template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::Rank
 O_<TN, TA, TH, TS...>::deepReportRank(Control& control) noexcept {
-	return _headState.wrapRank(control);
+	return HeadState::wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -367,8 +430,8 @@ template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::Utility
 O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) noexcept {
-	const Utility h = _headState.wrapUtility(control);
-	const Utility s = _subStates.wideReportRandomize(control);
+	const Utility h = HeadState::wrapUtility(control);
+	const Utility s = SubStates::wideReportRandomize(control);
 
 	const Utility sub = s / WIDTH;
 
@@ -385,7 +448,7 @@ template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 void
 O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept {
-	_subStates.wideChangeToRequested(control);
+	SubStates::wideChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
@@ -398,7 +461,7 @@ void
 O_<TN, TA, TH, TS...>::deepSaveActive(const Registry& registry,
 									  WriteStream& stream) const noexcept
 {
-	_subStates.wideSaveActive(registry, stream);
+	SubStates::wideSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -409,7 +472,7 @@ void
 O_<TN, TA, TH, TS...>::deepSaveResumable(const Registry& registry,
 										 WriteStream& stream) const noexcept
 {
-	_subStates.wideSaveResumable(registry, stream);
+	SubStates::wideSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -420,7 +483,7 @@ void
 O_<TN, TA, TH, TS...>::deepLoadRequested(Registry& registry,
 										 ReadStream& stream) const noexcept
 {
-	_subStates.wideLoadRequested(registry, stream);
+	SubStates::wideLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -431,7 +494,7 @@ void
 O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 										 ReadStream& stream) const noexcept
 {
-	_subStates.wideLoadResumable(registry, stream);
+	SubStates::wideLoadResumable(registry, stream);
 }
 
 #endif
@@ -448,8 +511,8 @@ O_<TN, TA, TH, TS...>::deepGetNames(const Long parent,
 									const Short depth,
 									StructureStateInfos& stateInfos) const noexcept
 {
-	_headState.deepGetNames(parent, region,			depth,	   stateInfos);
-	_subStates.wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
+	HeadState::deepGetNames(parent, region,			depth,	   stateInfos);
+	SubStates::wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);
 }
 
 #endif

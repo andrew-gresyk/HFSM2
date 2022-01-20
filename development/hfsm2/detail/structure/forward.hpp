@@ -11,14 +11,8 @@ struct SI_;
 template <Strategy, typename, typename...>
 struct CI_;
 
-template <typename...>
+template <typename>
 struct CSI_;
-
-template <typename TInitial, typename... TRemaining>
-struct CSI_<TInitial, TRemaining...>;
-
-template <typename TInitial>
-struct CSI_<TInitial>;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -28,11 +22,11 @@ struct OI_;
 template <typename...>
 struct OSI_;
 
-template <typename TInitial, typename... TRemaining>
-struct OSI_<TInitial, TRemaining...>;
+template <typename TI, typename... TR>
+struct OSI_<TI, TR...>;
 
-template <typename TInitial>
-struct OSI_<TInitial>;
+template <typename TI>
+struct OSI_<TI>;
 
 //------------------------------------------------------------------------------
 
@@ -45,13 +39,13 @@ struct WrapInfoT<	 TH> final {
 };
 
 template <Strategy SG, typename TH, typename... TS>
-struct WrapInfoT<	 CI_<SG, TH, TS...>> final {
-	using Type =	 CI_<SG, TH, TS...>;
+struct WrapInfoT<CI_<SG, TH, TS...>> final {
+	using Type = CI_<SG, TH, TS...>;
 };
 
 template <typename... TS>
-struct WrapInfoT<	 OI_<TS...>> final {
-	using Type =	 OI_<TS...>;
+struct WrapInfoT<OI_<TS...>> final {
+	using Type = OI_<TS...>;
 };
 
 template <typename... TS>
@@ -84,10 +78,10 @@ struct SI_ final {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TInitial, typename... TRemaining>
-struct CSI_<TInitial, TRemaining...> final {
-	using Initial			= WrapInfo<TInitial>;
-	using Remaining			= CSI_<TRemaining...>;
+template <typename TI, typename... TR>
+struct CSI_<TL_<TI, TR...>> final {
+	using Initial			= WrapInfo<TI>;
+	using Remaining			= CSI_<TL_<TR...>>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
 
@@ -106,9 +100,9 @@ struct CSI_<TInitial, TRemaining...> final {
 	static constexpr Short REGION_COUNT	  = RegionList::SIZE;
 };
 
-template <typename TInitial>
-struct CSI_<TInitial> final {
-	using Initial			= WrapInfo<TInitial>;
+template <typename TI>
+struct CSI_<TL_<TI>> final {
+	using Initial			= WrapInfo<TI>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
 
@@ -135,7 +129,7 @@ struct CI_ final {
 
 	using Head				= THead;
 	using HeadInfo			= SI_<Head>;
-	using SubStates			= CSI_<TSubStates...>;
+	using SubStates			= CSI_<TL_<TSubStates...>>;
 	using StateList			= Merge<typename HeadInfo::StateList, typename SubStates::StateList>;
 	using RegionList		= Merge<typename HeadInfo::StateList, typename SubStates::RegionList>;
 
@@ -159,10 +153,10 @@ struct CI_ final {
 // COMMON
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TInitial, typename... TRemaining>
-struct OSI_<TInitial, TRemaining...> final {
-	using Initial			= WrapInfo<TInitial>;
-	using Remaining			= OSI_<TRemaining...>;
+template <typename TI, typename... TR>
+struct OSI_<TI, TR...> final {
+	using Initial			= WrapInfo<TI>;
+	using Remaining			= OSI_<TR...>;
 	using StateList			= Merge<typename Initial::StateList,  typename Remaining::StateList>;
 	using RegionList		= Merge<typename Initial::RegionList, typename Remaining::RegionList>;
 
@@ -178,9 +172,9 @@ struct OSI_<TInitial, TRemaining...> final {
 #endif
 };
 
-template <typename TInitial>
-struct OSI_<TInitial> final {
-	using Initial			= WrapInfo<TInitial>;
+template <typename TI>
+struct OSI_<TI> final {
+	using Initial			= WrapInfo<TI>;
 	using StateList			= typename Initial::StateList;
 	using RegionList		= typename Initial::RegionList;
 
@@ -297,7 +291,7 @@ struct S_;
 template <typename, typename, Strategy, typename, typename...>
 struct C_;
 
-template <typename, typename, Strategy, Short, typename...>
+template <typename, typename, Strategy, Short, typename>
 struct CS_;
 
 template <typename, typename, typename, typename...>
@@ -312,35 +306,35 @@ class RR_;
 //------------------------------------------------------------------------------
 
 template <typename, typename...>
-struct MaterialT;
+struct MaterialT_;
 
 template <typename TN, typename TA, typename TH>
-struct MaterialT   <TN, TA, TH> final {
+struct MaterialT_  <TN, TA, TH> final {
 	using Type = S_<TN, TA, TH>;
 };
 
 template <typename TN, typename TA, Strategy SG, 			  typename... TS>
-struct MaterialT   <TN, TA, CI_<SG, void,       TS...>> final {
+struct MaterialT_  <TN, TA, CI_<SG, void,       TS...>> final {
 	using Type = C_<TN, TA,     SG, EmptyT<TA>, TS...>;
 };
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-struct MaterialT   <TN, TA, CI_<SG, TH,	TS...>> final {
+struct MaterialT_  <TN, TA, CI_<SG, TH,	TS...>> final {
 	using Type = C_<TN, TA,     SG, TH,	TS...>;
 };
 
 template <typename TN, typename TA,				 typename... TS>
-struct MaterialT   <TN, TA, OI_<void,       TS...>> final {
+struct MaterialT_  <TN, TA, OI_<void,       TS...>> final {
 	using Type = O_<TN, TA,     EmptyT<TA>, TS...>;
 };
 
 template <typename TN, typename TA, typename TH, typename... TS>
-struct MaterialT   <TN, TA, OI_<TH,			TS...>> final {
+struct MaterialT_  <TN, TA, OI_<TH,			TS...>> final {
 	using Type = O_<TN, TA,     TH,			TS...>;
 };
 
 template <typename TN, typename... TS>
-using Material = typename MaterialT<TN, TS...>::Type;
+using MaterialT = typename MaterialT_<TN, TS...>::Type;
 
 //------------------------------------------------------------------------------
 
@@ -427,7 +421,7 @@ struct CSubMaterialT;
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 struct CSubMaterialT<TN, TA, SG, NI, TL_<TS...>> final {
-	using Type = CS_<TN, TA, SG, NI,	  TS...>;
+	using Type = CS_<TN, TA, SG, NI, TL_<TS...>>;
 };
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
@@ -454,12 +448,88 @@ struct InfoT<O_<TN, TA, TH, TS...>> final {
 };
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-struct InfoT<CS_<TN, TA, SG, NI, TS...>> final {
-	using Type = CSI_<			 TS...>;
+struct InfoT<CS_<TN, TA, SG, NI, TL_<TS...>>> final {
+	using Type = CSI_<			 TL_<TS...>>;
 };
 
 template <typename T>
 using Info = typename InfoT<T>::Type;
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+struct LHalfCST;
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+struct LHalfCST<TN, TA, SG, NI, TL_<TS...>> final {
+	using Type = CS_<TN,
+					 TA,
+					 SG,
+					 NI,
+					 LHalfTypes<TS...>>;
+};
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename TL>
+using LHalfCS = typename LHalfCST<TN, TA, SG, NI, TL>::Type;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+struct RHalfCST;
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+struct RHalfCST<TN, TA, SG, NI, TL_<TS...>> final {
+	using Indices		= TN;
+	static constexpr StateID  INITIAL_ID  = Indices::STATE_ID;
+	static constexpr Short	  COMPO_INDEX = Indices::COMPO_INDEX;
+	static constexpr Short	  ORTHO_INDEX = Indices::ORTHO_INDEX;
+	static constexpr Short	  ORTHO_UNIT  = Indices::ORTHO_UNIT;
+
+	using LStateList	= LHalfTypes<TS...>;
+
+	using LHalfInfo		= CSI_<LStateList>;
+
+	using Type			= CS_<I_<INITIAL_ID  + LHalfInfo::STATE_COUNT,
+								 COMPO_INDEX + LHalfInfo::COMPO_REGIONS,
+								 ORTHO_INDEX + LHalfInfo::ORTHO_REGIONS,
+								 ORTHO_UNIT  + LHalfInfo::ORTHO_UNITS>,
+							  TA,
+							  SG,
+							  NI + LStateList::SIZE,
+							  RHalfTypes<TS...>>;
+};
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename TL>
+using RHalfCS = typename RHalfCST<TN, TA, SG, NI, TL>::Type;
+
+//------------------------------------------------------------------------------
+
+template <typename TN, typename TA, typename TI>
+using InitialOS = MaterialT<TN, TA, TI>;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+struct RemainingOST final {
+	using Indices		= TN;
+	static constexpr StateID INITIAL_ID	 = Indices::STATE_ID;
+	static constexpr Short	 COMPO_INDEX = Indices::COMPO_INDEX;
+	static constexpr Short	 ORTHO_INDEX = Indices::ORTHO_INDEX;
+	static constexpr Short	 ORTHO_UNIT	 = Indices::ORTHO_UNIT;
+
+	using InitialInfo	= WrapInfo<TI>;
+
+	using Type			= OS_<I_<INITIAL_ID  + InitialInfo::STATE_COUNT,
+								 COMPO_INDEX + InitialInfo::COMPO_REGIONS,
+								 ORTHO_INDEX + InitialInfo::ORTHO_REGIONS,
+								 ORTHO_UNIT  + InitialInfo::ORTHO_UNITS>,
+							  TA,
+							  NI + 1,
+							  TR...>;
+};
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+using RemainingOS = typename RemainingOST<TN, TA, NI, TI, TR...>::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 

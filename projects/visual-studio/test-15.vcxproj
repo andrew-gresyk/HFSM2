@@ -32,6 +32,7 @@
     <ClCompile Include="..\..\test\test_debug.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
     <ClCompile Include="..\..\test\test_guards.cpp" />
+    <ClCompile Include="..\..\test\test_injections.cpp" />
     <ClCompile Include="..\..\test\test_internal_payloads.cpp" />
     <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
     <ClCompile Include="..\..\test\test_manual_activation.cpp" />
@@ -42,6 +43,8 @@
     <ClCompile Include="..\..\test\test_randomize.cpp" />
     <ClCompile Include="..\..\test\test_replication.cpp" />
     <ClCompile Include="..\..\test\test_resume.cpp" />
+    <ClCompile Include="..\..\test\test_reverse_payloads.cpp" />
+    <ClCompile Include="..\..\test\test_reverse_transitions.cpp" />
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
     <ClCompile Include="..\..\test\test_serialization.cpp" />
     <ClCompile Include="..\..\test\test_stress.cpp" />
@@ -60,7 +63,6 @@
     <ClInclude Include="..\..\development\hfsm2\detail\root\plan.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\root\registry.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\root\state_access.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\shared\bit_stream.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\shared\iterator.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_off.hpp" />
@@ -93,7 +95,8 @@
     <None Include="..\..\development\hfsm2\detail\structure\composite.inl" />
     <None Include="..\..\development\hfsm2\detail\structure\composite_sub_1.inl" />
     <None Include="..\..\development\hfsm2\detail\structure\composite_sub_2.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\injections.inl" />
+    <None Include="..\..\development\hfsm2\detail\structure\injections_1.inl" />
+    <None Include="..\..\development\hfsm2\detail\structure\injections_2.inl" />
     <None Include="..\..\development\hfsm2\detail\structure\orthogonal.inl" />
     <None Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_1.inl" />
     <None Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_2.inl" />
@@ -134,10 +137,6 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="shared-vs-15.props" />
@@ -173,17 +172,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <Link />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -196,17 +190,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <Link />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
