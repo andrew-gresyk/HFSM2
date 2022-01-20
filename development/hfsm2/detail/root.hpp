@@ -23,9 +23,7 @@ public:
 	using Payload				= typename TConfig::Payload;
 
 protected:
-	using Apex					= TApex;
-
-	using Forward				= RF_<TConfig, Apex>;
+	using Forward				= RF_<TConfig, TApex>;
 	using StateList				= typename Forward::StateList;
 	using RegionList			= typename Forward::RegionList;
 	using Args					= typename Forward::Args;
@@ -33,7 +31,7 @@ protected:
 	static_assert(Args::STATE_COUNT <  (unsigned) -1, "Too many states in the FSM. Change 'Short' type.");
 	static_assert(Args::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
-	using MaterialApex			= Material<I_<0, 0, 0, 0>, Args, Apex>;
+	using Apex					= MaterialT<I_<0, 0, 0, 0>, Args, TApex>;
 
 	using Registry				= RegistryT<Args>;
 	using CompoForks			= typename Registry::CompoForks;
@@ -56,7 +54,7 @@ protected:
 #endif
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
-	static constexpr Long NAME_COUNT = MaterialApex::NAME_COUNT;
+	static constexpr Long NAME_COUNT = Apex::NAME_COUNT;
 #endif
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -64,7 +62,7 @@ protected:
 #endif
 
 public:
-	using Info					= WrapInfo<Apex>;
+	using Info					= WrapInfo<TApex>;
 
 	/// @brief Transition
 	using Transition			= typename Control::Transition;
@@ -124,79 +122,41 @@ public:
 
 	//----------------------------------------------------------------------
 
-#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
-
-private:
-
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4348) // redefinition of default parameter: parameter 2
-#endif
-
-	template <typename TState, bool = contains<StateList, TState>()>
-	struct Accessor;
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
-
+	/// @brief Access state instance
+	/// @tparam TState State type
+	/// @return State instance
 	template <typename TState>
-	struct Accessor<TState, true> {
-		HFSM2_CONSTEXPR(14)	static		 TState& get(	   MaterialApex& apex)	  noexcept	{ return apex.template access<TState>();	}
-		HFSM2_CONSTEXPR(14)	static const TState& get(const MaterialApex& apex)	  noexcept	{ return apex.template access<TState>();	}
-	};
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-public:
-
-	// if you see..
-	// VS	 - error C2027: use of undefined type 'hfsm2::detail::R_<..>::Accessor<TState,false>'
-	// Clang - error : implicit instantiation of undefined template 'hfsm2::detail::R_<..>::Accessor<*, false>'
-	//
-	// .. you're trying to access() a type that is not present in the state machine hierarchy
+	HFSM2_CONSTEXPR(14)		  TState& access()									  noexcept	{ return static_cast<	   TState&>(_apex);			}
 
 	/// @brief Access state instance
 	/// @tparam TState State type
 	/// @return State instance
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)		  TState& access()									  noexcept	{ return Accessor<TState				   >::get(_apex);	}
-
-	/// @brief Access state instance
-	/// @tparam TState State type
-	/// @return State instance
-	template <typename TState>
-	HFSM2_CONSTEXPR(11)	const TState& access()								const noexcept	{ return Accessor<TState				   >::get(_apex);	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#else
-
-public:
-
-	/// @brief Access state instance
-	/// @tparam TState State type
-	/// @return State instance
-	template <typename TState>
-	HFSM2_CONSTEXPR(14)		  TState& access()									  noexcept	{ return Accessor<TState,	   MaterialApex>{_apex}.get();	}
-
-	/// @brief Access state instance
-	/// @tparam TState State type
-	/// @return State instance
-	template <typename TState>
-	HFSM2_CONSTEXPR(11)	const TState& access()								const noexcept	{ return Accessor<TState, const MaterialApex>{_apex}.get();	}
-
-#endif
+	HFSM2_CONSTEXPR(11)	const TState& access()								const noexcept	{ return static_cast<const TState&>(_apex);			}
 
 	//----------------------------------------------------------------------
 
-	/// @brief Trigger FSM update cycle (recursively call 'update()' on all active states, then process requested transitions)
-	HFSM2_CONSTEXPR(14)	void update() noexcept;
+	/// @brief Trigger FSM update cycle (recursively call 'update()' from the root down to the leaf states,
+	///   on all active states, then process requested transitions)
+	HFSM2_CONSTEXPR(14)	void update()											  noexcept;
 
-	/// @brief Have FSM react to an event (recursively call matching 'react<>()' on all active states, then process requested transitions)
+	/// @brief Trigger FSM update cycle (recursively call 'update()' in reverse order, from the leaf states to the root,
+	///   on all active states, then process requested transitions)
+	HFSM2_CONSTEXPR(14)	void reverseUpdate()									  noexcept;
+
+	/// @brief Have FSM react to an event (recursively call matching 'react<>()' from the root down to the leaf states,
+	///    on all active states, then process requested transitions)
 	/// @tparam TEvent Event type
 	/// @param event Event to react to
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void react(const TEvent& event)							  noexcept;
+
+	/// @brief Have FSM react to an event (recursively call matching 'react<>()' in reverse order, from the leaf states to the root,
+	///   on all active states, then process requested transitions)
+	/// @tparam TEvent Event type
+	/// @param event Event to react to
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	void reverseReact(const TEvent& event)					  noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -473,8 +433,13 @@ protected:
 
 	HFSM2_CONSTEXPR(14)	void processTransitions(TransitionSets& currentTransitions)			  noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool applyRequest (Control& control, const Transition& request, const Short index) noexcept;
-	HFSM2_CONSTEXPR(14)	bool applyRequests(Control& control)								  noexcept;
+	HFSM2_CONSTEXPR(14)	bool applyRequest(const TransitionSets& currentTransitions,
+										  Control& control,
+										  const Transition& request,
+										  const Short index)								  noexcept;
+
+	HFSM2_CONSTEXPR(14)	bool applyRequests(const TransitionSets& currentTransitions,
+										   Control& control)								  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool cancelledByEntryGuards(const TransitionSets& currentTransitions,
 													const TransitionSet&  pendingTransitions) noexcept;
@@ -511,7 +476,7 @@ protected:
 
 	TransitionSet _requests;
 
-	MaterialApex _apex;
+	Apex _apex;
 
 	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };

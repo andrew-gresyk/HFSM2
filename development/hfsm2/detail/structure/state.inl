@@ -140,8 +140,27 @@ S_<TN_, TA, TH>::deepUpdate(FullControl& control) noexcept {
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head::widePreUpdate(control.context());
-	Head::		 update(control);
+	Head:: widePreUpdate(control.context());
+	Head::		  update(control);
+	Head::widePostUpdate(control.context());
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepReverseUpdate(FullControl& control) noexcept {
+	HFSM2_LOG_STATE_METHOD(&Head::reverseUpdate,
+						   Method::REVERSE_UPDATE);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	Head:: widePreReverseUpdate(control.context());
+	Head::		  reverseUpdate(control);
+	Head::widePostReverseUpdate(control.context());
 
 	return control._status;
 }
@@ -162,8 +181,32 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head::widePreReact(event, control.context());
-	(this->*reaction)(event, control);
+	Head:: widePreReact(event, control.context());
+	(this->*reaction)  (event, control);
+	Head::widePostReact(event, control.context());
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepReverseReact(FullControl& control,
+								  const TEvent& event) noexcept
+{
+	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::reverseReact);
+
+	HFSM2_LOG_STATE_METHOD(reaction,
+						   Method::REVERSE_REACT);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	Head:: widePreReverseReact(event, control.context());
+	(this->*reaction)		  (event, control);
+	Head::widePostReverseReact(event, control.context());
 
 	return control._status;
 }

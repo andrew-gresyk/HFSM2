@@ -68,6 +68,14 @@
 
 //------------------------------------------------------------------------------
 
+#if defined _MSC_VER
+	#define HFSM2_EMPTY_BASES							 __declspec(empty_bases)
+#else
+	#define HFSM2_EMPTY_BASES
+#endif
+
+//------------------------------------------------------------------------------
+
 #define HFSM2_ARCHITECTURE(A)							HFSM2_ARCHITECTURE_##A()
 
 #if INTPTR_MAX == INT64_MAX

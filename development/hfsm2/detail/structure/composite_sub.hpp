@@ -8,7 +8,18 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  Short NIndex,
 		  typename... TStates>
-struct CS_ final {
+struct HFSM2_EMPTY_BASES CS_<TIndices, TArgs, TStrategy, NIndex, TL_<TStates...>>
+	: LHalfCS<TIndices,
+			  TArgs,
+			  TStrategy,
+			  NIndex,
+			  TL_<TStates...>>
+	, RHalfCS<TIndices,
+			  TArgs,
+			  TStrategy,
+			  NIndex,
+			  TL_<TStates...>>
+{
 	static_assert(sizeof...(TStates) >= 2, "");
 
 	using Indices		= TIndices;
@@ -23,6 +34,7 @@ struct CS_ final {
 	static constexpr Short	  PRONG_INDEX = NIndex;
 
 	using Args			= TArgs;
+	using SubStateList	= TL_<TStates...>;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename Args::Rank;
@@ -41,93 +53,76 @@ struct CS_ final {
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	static constexpr Short	  L_PRONG	  = PRONG_INDEX;
-
 	using LStateList	= LHalfTypes<TStates...>;
-	using LMaterial		= CSubMaterial<I_<INITIAL_ID,
-										  COMPO_INDEX,
-										  ORTHO_INDEX,
-										  ORTHO_UNIT>,
-									   Args,
-									   STRATEGY,
-									   L_PRONG,
-									   LStateList>;
+	using LHalfInfo		= CSI_<LStateList>;
 
-	using LHalfInfo		= Info<LMaterial>;
-
+	static constexpr Short	  L_PRONG	  = PRONG_INDEX;
 	static constexpr Short	  R_PRONG	  = PRONG_INDEX + LStateList::SIZE;
 
-	using RStateList	= RHalfTypes<TStates...>;
-	using RMaterial		= CSubMaterial<I_<INITIAL_ID  + LHalfInfo::STATE_COUNT,
-										  COMPO_INDEX + LHalfInfo::COMPO_REGIONS,
-										  ORTHO_INDEX + LHalfInfo::ORTHO_REGIONS,
-										  ORTHO_UNIT  + LHalfInfo::ORTHO_UNITS>,
-									   Args,
-									   STRATEGY,
-									   R_PRONG,
-									   RStateList>;
+	using LHalf			= LHalfCS<Indices,
+								  Args,
+								  STRATEGY,
+								  PRONG_INDEX,
+								  SubStateList>;
+
+	using RHalf			= RHalfCS<Indices,
+								  Args,
+								  STRATEGY,
+								  PRONG_INDEX,
+								  SubStateList>;
 
 	//----------------------------------------------------------------------
-
-#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
-
-	template <typename T>
-	HFSM2_CONSTEXPR(14)		  T& access()		  noexcept;
-
-	template <typename T>
-	HFSM2_CONSTEXPR(11)	const T& access()	const noexcept;
-
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)	void	wideRegister			   (Registry& registry, const Parent parent)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard	   (GuardControl& control, const Short prong)	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard			   (GuardControl& control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard	   (GuardControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard			   (GuardControl& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideEnter				   (PlanControl&  control, const Short prong)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideReenter				   (PlanControl&  control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideEnter				   (PlanControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReenter				   (PlanControl	& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   (FullControl&  control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   (FullControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate		   (FullControl	& control,						  const Short prong)  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReact				   (FullControl&  control,
-															const TEvent& event,   const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideReact				   (FullControl	& control, const TEvent& event,	  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard	   (GuardControl& control, const Short prong)	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideExitGuard			   (GuardControl& control, const Short prong)	  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	wideReverseReact		   (FullControl	& control, const TEvent& event,	  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideExit				   (PlanControl&  control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard	   (GuardControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideExitGuard			   (GuardControl& control,						  const Short prong)  noexcept;
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	void	wideForwardActive		   (Control& control, const Request request, const Short prong)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideForwardRequest		   (Control& control, const Request request, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideExit				   (PlanControl	& control,						  const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestChangeComposite (Control& control, const Request request					  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestChangeResumable (Control& control, const Request request, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardActive		   (Control		& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardRequest		   (Control		& control, const Request request, const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestRestart		   (Control& control, const Request request					  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestResume		   (Control& control, const Request request, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeComposite (Control		& control, const Request request				   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeResumable (Control		& control, const Request request, const Short prong)  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	wideRequestRestart		   (Control		& control, const Request request				   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestResume		   (Control		& control, const Request request, const Short prong)  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeComposite  (Control& control																 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeResumable  (Control& control, const Short prong												 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeUtilitarian(Control& control																 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportChangeRandom	   (Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeComposite  (Control		& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeResumable  (Control		& control,						  const Short prong						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeUtilitarian(Control		& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportChangeRandom	   (Control		& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	UP		wideReportUtilize		   (Control& control																 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Rank	wideReportRank			   (Control& control,								Rank* const ranks				 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize		   (Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportUtilize		   (Control		& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	wideReportRank			   (Control		& control,								 Rank* const ranks				  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize		   (Control		& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -153,7 +148,7 @@ struct CS_ final {
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
-	static constexpr Long NAME_COUNT = LMaterial::NAME_COUNT + RMaterial::NAME_COUNT;
+	static constexpr Long NAME_COUNT = LHalf::NAME_COUNT + RHalf::NAME_COUNT;
 
 	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
 										  const RegionType region,
@@ -162,9 +157,6 @@ struct CS_ final {
 #endif
 
 	//----------------------------------------------------------------------
-
-	LMaterial lHalf;
-	RMaterial rHalf;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +166,15 @@ template <typename TIndices,
 		  Strategy TStrategy,
 		  Short NIndex,
 		  typename TState>
-struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
+struct CS_<TIndices,
+		   TArgs,
+		   TStrategy,
+		   NIndex,
+		   TL_<TState>>
+	: MaterialT<TIndices,
+				TArgs,
+				TState>
+{
 	using Indices		= TIndices;
 	static constexpr StateID INITIAL_ID	= Indices::STATE_ID;
 	static constexpr Short COMPO_INDEX	= Indices::COMPO_INDEX;
@@ -205,74 +205,62 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using State			= Material<I_<INITIAL_ID,
-									  COMPO_INDEX,
-									  ORTHO_INDEX,
-									  ORTHO_UNIT>,
-								   Args,
-								   TState>;
+	using State			= MaterialT<Indices,
+									Args,
+									TState>;
 
 	//----------------------------------------------------------------------
-
-#if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
-
-	template <typename T>
-	HFSM2_CONSTEXPR(14)		  T& access()		  noexcept	 { return state.template access<T>();	}
-
-	template <typename T>
-	HFSM2_CONSTEXPR(11)	const T& access()	const noexcept	 { return state.template access<T>();	}
-
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)	void	wideRegister			   (Registry& registry, const Parent parent)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard	   (GuardControl& control, const Short prong)	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard			   (GuardControl& control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard	   (GuardControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard			   (GuardControl& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideEnter				   (PlanControl&  control, const Short prong)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideReenter				   (PlanControl&  control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideEnter				   (PlanControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReenter				   (PlanControl	& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   (FullControl&  control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   (FullControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate		   (FullControl	& control,						  const Short prong)  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReact				   (FullControl&  control,
-															const TEvent& event,   const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideReact				   (FullControl	& control, const TEvent& event	, const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard	   (GuardControl& control, const Short prong)	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideExitGuard			   (GuardControl& control, const Short prong)	  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	wideReverseReact		   (FullControl	& control, const TEvent& event	, const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideExit				   (PlanControl&  control, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard	   (GuardControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideExitGuard			   (GuardControl& control,						  const Short prong)  noexcept;
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	void	wideForwardActive		   (Control& control, const Request request, const Short prong)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideForwardRequest		   (Control& control, const Request request, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideExit				   (PlanControl	& control,						  const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestChangeComposite (Control& control, const Request request					  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestChangeResumable (Control& control, const Request request, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardActive		   (Control		& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardRequest		   (Control		& control, const Request request, const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestRestart		   (Control& control, const Request request					  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestResume		   (Control& control, const Request request, const Short prong)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeComposite (Control		& control, const Request request				   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeResumable (Control		& control, const Request request, const Short prong)  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	wideRequestRestart		   (Control		& control, const Request request				   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestResume		   (Control		& control, const Request request, const Short prong)  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeComposite  (Control& control																 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeResumable  (Control& control, const Short prong												 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeUtilitarian(Control& control																 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportChangeRandom	   (Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeComposite  (Control		& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeResumable  (Control		& control						, const Short prong						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeUtilitarian(Control		& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportChangeRandom	   (Control		& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	UP		wideReportUtilize		   (Control& control																 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Rank	wideReportRank			   (Control& control,								Rank* const ranks				 )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize		   (Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportUtilize		   (Control		& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	wideReportRank			   (Control		& control,								 Rank* const ranks				  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize		   (Control		& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -307,8 +295,6 @@ struct CS_<TIndices, TArgs, TStrategy, NIndex, TState> final {
 #endif
 
 	//----------------------------------------------------------------------
-
-	State state;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
