@@ -13706,6 +13706,10 @@ public:
 								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept;
 
+	HFSM2_CONSTEXPR(14)	explicit R_(Context&& context
+								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept;
+
 	HFSM2_CONSTEXPR(20)	~R_() noexcept;
 
 	//----------------------------------------------------------------------
@@ -14144,6 +14148,16 @@ public:
 		initialEnter();
 	}
 
+	HFSM2_CONSTEXPR(14)	explicit RV_(Context&& context
+								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept
+		: Base{std::move(context)
+		HFSM2_IF_UTILITY_THEORY(, rng)
+		HFSM2_IF_LOG_INTERFACE(, logger)}
+	{
+		initialEnter();
+	}
+
 	HFSM2_CONSTEXPR(20)	~RV_()																  noexcept	{ finalExit();	}
 
 private:
@@ -14565,6 +14579,14 @@ public:
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 	{}
 
+	HFSM2_CONSTEXPR(14)	explicit RC_(Context&& context
+								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept
+		: Base{std::move(context)
+			 HFSM2_IF_UTILITY_THEORY(, rng)
+			 HFSM2_IF_LOG_INTERFACE(, logger)}
+	{}
+
 	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)	  noexcept { _context =			  context ; }
 	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)	  noexcept { _context = move(context); }
 
@@ -14853,6 +14875,20 @@ R_<TG, TA>::R_(Context& context
 			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: _context{context}
+	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
+	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
+{
+	_apex.deepRegister(_registry, Parent{});
+
+	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
+}
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+R_<TG, TA>::R_(Context&& context
+			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: _context{std::move(context)}
 	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
 	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
 {
