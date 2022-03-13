@@ -72,8 +72,6 @@
     <Topleveldir>/Work/HFSM2</Topleveldir>
   </Reconciliation>
   <VirtualDirectory Name="test">
-    <File Name="../../../test/test_reverse_transitions.cpp"/>
-    <File Name="../../../test/test_reverse_payloads.cpp"/>
     <File Name="../../../test/test_injections.cpp"/>
     <File Name="../../../test/tools.inl"/>
     <VirtualDirectory Name="reported">

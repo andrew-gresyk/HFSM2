@@ -166,37 +166,6 @@ R_<TG, TA>::react(const TEvent& event) noexcept {
 	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG, typename TA>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-void
-R_<TG, TA>::reverseReact(const TEvent& event) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
-
-	FullControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
-
-	_apex.deepReverseReact(control, event);
-
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
-
-	TransitionSets currentTransitions;
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-
-	if (_requests.count())
-		processTransitions(currentTransitions);
-
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TG, typename TA>

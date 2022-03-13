@@ -1827,9 +1827,7 @@ enum class Method : uint8_t {
 	ENTER,
 	REENTER,
 	UPDATE,
-	REVERSE_UPDATE,
 	REACT,
-	REVERSE_REACT,
 	EXIT_GUARD,
 	EXIT,
 
@@ -1919,9 +1917,7 @@ methodName(const Method method)										  noexcept {
 	case Method::ENTER:			 return "enter";
 	case Method::REENTER:		 return "reenter";
 	case Method::UPDATE:		 return "update";
-	case Method::REVERSE_UPDATE: return "reverseUpdate";
 	case Method::REACT:			 return "react";
-	case Method::REVERSE_REACT:	 return "reverseReact";
 	case Method::EXIT_GUARD:	 return "exitGuard";
 	case Method::EXIT:			 return "exit";
 
@@ -7556,23 +7552,12 @@ public:
 	HFSM2_CONSTEXPR(14)	void preUpdate		  (Context&)	  noexcept	{}
 	HFSM2_CONSTEXPR(14)	void postUpdate		  (Context&)	  noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void preReverseUpdate (Context&)	  noexcept	{}
-	HFSM2_CONSTEXPR(14)	void postReverseUpdate(Context&)	  noexcept	{}
-
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void preReact		  (const TEvent&,
 											   Context&)	  noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void postReact		  (const TEvent&,
-											   Context&)	  noexcept	{}
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void preReverseReact  (const TEvent&,
-											   Context&)	  noexcept	{}
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void postReverseReact (const TEvent&,
 											   Context&)	  noexcept	{}
 
 	HFSM2_CONSTEXPR(14)	void preExitGuard	  (Context&)	  noexcept	{}
@@ -7629,23 +7614,12 @@ struct HFSM2_EMPTY_BASES B_<TFirst, TRest...>
 	HFSM2_CONSTEXPR(14)	void widePreUpdate		  (Context& context)	  noexcept;
 	HFSM2_CONSTEXPR(14)	void widePostUpdate		  (Context& context)	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void widePreReverseUpdate (Context& context)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void widePostReverseUpdate(Context& context)	  noexcept;
-
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void widePreReact		  (const TEvent& event,
 												   Context& context)	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void widePostReact		  (const TEvent& event,
-												   Context& context)	  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void widePreReverseReact  (const TEvent& event,
-												   Context& context)	  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void widePostReverseReact (const TEvent& event,
 												   Context& context)	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	void widePreExitGuard	  (Context& context)	  noexcept;
@@ -7693,15 +7667,10 @@ struct B_<TFirst>
 	HFSM2_CONSTEXPR(14)	void	reenter				 (PlanControl&)			  noexcept	{}
 
 	HFSM2_CONSTEXPR(14)	void	update				 (FullControl&)			  noexcept	{}
-	HFSM2_CONSTEXPR(14)	void	reverseUpdate		 (FullControl&)			  noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	react				 (const TEvent&,
 													  FullControl&)			  noexcept {}
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void	reverseReact		 (const TEvent&,
-													  FullControl&)			  noexcept	{}
 
 	HFSM2_CONSTEXPR(14)	void	exitGuard			 (GuardControl&)		  noexcept	{}
 
@@ -7720,23 +7689,12 @@ struct B_<TFirst>
 	HFSM2_CONSTEXPR(14)	void	widePreUpdate		 (Context& context)		  noexcept;
 	HFSM2_CONSTEXPR(14)	void	widePostUpdate		 (Context& context)		  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	widePreReverseUpdate (Context& context)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void	widePostReverseUpdate(Context& context)		  noexcept;
-
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	widePreReact		 (const TEvent& event,
 													  Context& context)		  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	widePostReact		 (const TEvent& event,
-													  Context& context)		  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void	widePreReverseReact  (const TEvent& event,
-													  Context& context)		  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void	widePostReverseReact (const TEvent& event,
 													  Context& context)		  noexcept;
 
 	HFSM2_CONSTEXPR(14)	void	widePreExitGuard	 (Context& context)		  noexcept;
@@ -7805,24 +7763,6 @@ B_<TF, TR...>::widePostUpdate(Context& context) noexcept {
 	B_<TR...>::widePostUpdate(context);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TF, typename... TR>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF, TR...>::widePreReverseUpdate(Context& context) noexcept {
-	TF		 ::	   preReverseUpdate(context);
-	B_<TR...>::widePreReverseUpdate(context);
-}
-
-template <typename TF, typename... TR>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF, TR...>::widePostReverseUpdate(Context& context) noexcept {
-	TF		 ::	   postReverseUpdate(context);
-	B_<TR...>::widePostReverseUpdate(context);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TF, typename... TR>
@@ -7845,30 +7785,6 @@ B_<TF, TR...>::widePostReact(const TEvent& event,
 {
 	TF		 ::	   postReact(event, context);
 	B_<TR...>::widePostReact(event, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TF, typename... TR>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF, TR...>::widePreReverseReact(const TEvent& event,
-								   Context& context) noexcept
-{
-	TF		 ::	   preReverseReact(event, context);
-	B_<TR...>::widePreReverseReact(event, context);
-}
-
-template <typename TF, typename... TR>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF, TR...>::widePostReverseReact(const TEvent& event,
-									Context& context) noexcept
-{
-	TF		 ::	   postReverseReact(event, context);
-	B_<TR...>::widePostReverseReact(event, context);
 }
 
 //------------------------------------------------------------------------------
@@ -7941,22 +7857,6 @@ B_<TF>::widePostUpdate(Context& context) noexcept {
 	TF::	postUpdate(context);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TF>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF>::widePreReverseUpdate(Context& context) noexcept {
-	TF::	preReverseUpdate(context);
-}
-
-template <typename TF>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF>::widePostReverseUpdate(Context& context) noexcept {
-	TF::postReverseUpdate(context);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TF>
@@ -7977,28 +7877,6 @@ B_<TF>::widePostReact(const TEvent& event,
 					  Context& context) noexcept
 {
 	TF::	postReact(event, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TF>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF>::widePreReverseReact(const TEvent& event,
-							Context& context) noexcept
-{
-	TF::	preReverseReact(event, context);
-}
-
-template <typename TF>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF>::widePostReverseReact(const TEvent& event,
-							 Context& context) noexcept
-{
-	TF::postReverseReact(event, context);
 }
 
 //------------------------------------------------------------------------------
@@ -8091,14 +7969,9 @@ struct S_
 	HFSM2_CONSTEXPR(14)	void	deepReenter			 (PlanControl&	control)	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 (FullControl&	control)	  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	deepReverseUpdate	 (FullControl&	control)	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	deepReact			 (FullControl&	control,
-													  const TEvent&	event)		  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReverseReact	 (FullControl&	control,
 													  const TEvent&	event)		  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl&		   )	  noexcept	{ return false; }
@@ -8361,24 +8234,6 @@ S_<TN_, TA, TH>::deepUpdate(FullControl& control) noexcept {
 	return control._status;
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA, typename TH>
-HFSM2_CONSTEXPR(14)
-Status
-S_<TN_, TA, TH>::deepReverseUpdate(FullControl& control) noexcept {
-	HFSM2_LOG_STATE_METHOD(&Head::reverseUpdate,
-						   Method::REVERSE_UPDATE);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	Head:: widePreReverseUpdate(control.context());
-	Head::		  reverseUpdate(control);
-	Head::widePostReverseUpdate(control.context());
-
-	return control._status;
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN_, typename TA, typename TH>
@@ -8398,29 +8253,6 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 	Head:: widePreReact(event, control.context());
 	(this->*reaction)  (event, control);
 	Head::widePostReact(event, control.context());
-
-	return control._status;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN_, typename TA, typename TH>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-S_<TN_, TA, TH>::deepReverseReact(FullControl& control,
-								  const TEvent& event) noexcept
-{
-	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::reverseReact);
-
-	HFSM2_LOG_STATE_METHOD(reaction,
-						   Method::REVERSE_REACT);
-
-	ScopedOrigin origin{control, STATE_ID};
-
-	Head:: widePreReverseReact(event, control.context());
-	(this->*reaction)		  (event, control);
-	Head::widePostReverseReact(event, control.context());
 
 	return control._status;
 }
@@ -9293,13 +9125,9 @@ struct HFSM2_EMPTY_BASES CS_<TIndices, TArgs, TStrategy, NIndex, TL_<TStates...>
 	HFSM2_CONSTEXPR(14)	void	wideReenter				   (PlanControl	& control,						  const Short prong)  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   (FullControl	& control,						  const Short prong)  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate		   (FullControl	& control,						  const Short prong)  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	wideReact				   (FullControl	& control, const TEvent& event,	  const Short prong)  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReverseReact		   (FullControl	& control, const TEvent& event,	  const Short prong)  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard	   (GuardControl& control,						  const Short prong)  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideExitGuard			   (GuardControl& control,						  const Short prong)  noexcept;
@@ -9431,13 +9259,9 @@ struct CS_<TIndices,
 	HFSM2_CONSTEXPR(14)	void	wideReenter				   (PlanControl	& control,						  const Short prong)  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   (FullControl	& control,						  const Short prong)  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate		   (FullControl	& control,						  const Short prong)  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	wideReact				   (FullControl	& control, const TEvent& event	, const Short prong)  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReverseReact		   (FullControl	& control, const TEvent& event	, const Short prong)  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard	   (GuardControl& control,						  const Short prong)  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideExitGuard			   (GuardControl& control,						  const Short prong)  noexcept;
@@ -9606,21 +9430,6 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 		RHalf::wideUpdate(control, prong);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-HFSM2_CONSTEXPR(14)
-Status
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReverseUpdate(FullControl& control,
-												   const Short prong) noexcept
-{
-	HFSM2_ASSERT(prong != INVALID_SHORT);
-
-	return prong < R_PRONG ?
-		LHalf::wideReverseUpdate(control, prong) :
-		RHalf::wideReverseUpdate(control, prong);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
@@ -9636,23 +9445,6 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReact(FullControl& control,
 	return prong < R_PRONG ?
 		LHalf::wideReact(control, event, prong) :
 		RHalf::wideReact(control, event, prong);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReverseReact(FullControl& control,
-												  const TEvent& event,
-												  const Short prong) noexcept
-{
-	HFSM2_ASSERT(prong != INVALID_SHORT);
-
-	return prong < R_PRONG ?
-		LHalf::wideReverseReact(control, event, prong) :
-		RHalf::wideReverseReact(control, event, prong);
 }
 
 //------------------------------------------------------------------------------
@@ -10089,19 +9881,6 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideUpdate(FullControl& control,
 	return State::deepUpdate(control);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
-HFSM2_CONSTEXPR(14)
-Status
-CS_<TN, TA, SG, NI, TL_<T>>::wideReverseUpdate(FullControl& control,
-											   const Short HFSM2_IF_ASSERT(prong)) noexcept
-{
-	HFSM2_ASSERT(prong == PRONG_INDEX);
-
-	return State::deepReverseUpdate(control);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
@@ -10115,21 +9894,6 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReact(FullControl& control,
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
 	return State::deepReact(control, event);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-CS_<TN, TA, SG, NI, TL_<T>>::wideReverseReact(FullControl& control,
-											  const TEvent& event,
-											  const Short HFSM2_IF_ASSERT(prong)) noexcept
-{
-	HFSM2_ASSERT(prong == PRONG_INDEX);
-
-	return State::deepReverseReact(control, event);
 }
 
 //------------------------------------------------------------------------------
@@ -10548,14 +10312,9 @@ struct HFSM2_EMPTY_BASES C_
 	HFSM2_CONSTEXPR(14)	void	deepReenter					  (PlanControl&  control)					  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	deepUpdate					  (FullControl&  control)					  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	deepReverseUpdate			  (FullControl&  control)					  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	deepReact					  (FullControl&  control,
-															   const TEvent& event)						  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReverseReact			  (FullControl&  control,
 															   const TEvent& event)						  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard		  (GuardControl& control)					  noexcept;
@@ -10876,39 +10635,6 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-HFSM2_CONSTEXPR(14)
-Status
-C_<TN, TA, SG, TH, TS...>::deepReverseUpdate(FullControl& control) noexcept {
-	const Short active = compoActive(control);
-	HFSM2_ASSERT(active != INVALID_SHORT);
-
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	if (const Status subStatus = SubStates::wideReverseUpdate(control, active)) {
-		ControlLock lock{control};
-		HeadState::deepReverseUpdate(control);
-
-		return subStatus;
-	} else {
-		const Status headStatus = HeadState::deepReverseUpdate(control);
-
-		if (headStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
-
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	#if HFSM2_PLANS_AVAILABLE()
-		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
-	#else
-		return headStatus;
-	#endif
-	}
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
@@ -10941,42 +10667,6 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
 	#else
 		return subStatus;
-	#endif
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-C_<TN, TA, SG, TH, TS...>::deepReverseReact(FullControl& control,
-											const TEvent& event) noexcept
-{
-	const Short active = compoActive(control);
-	HFSM2_ASSERT(active != INVALID_SHORT);
-
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	if (const Status subStatus = SubStates::wideReverseReact(control, event, active)) {
-		ControlLock lock{control};
-		HeadState::deepReverseReact(control, event);
-
-		return subStatus;
-	} else {
-		const Status headStatus = HeadState::deepReverseReact(control, event);
-
-		if (headStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
-
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	#if HFSM2_PLANS_AVAILABLE()
-		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
-	#else
-		return headStatus;
 	#endif
 	}
 }
@@ -11699,13 +11389,9 @@ struct HFSM2_EMPTY_BASES OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...>
 	HFSM2_CONSTEXPR(14)	void	wideReenter			 (PlanControl&	control											  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate	 (FullControl&  control											  )	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReverseReact	 (FullControl&	control, const TEvent& event					  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
@@ -11821,13 +11507,9 @@ struct OS_<TIndices, TArgs, NIndex, TInitial>
 	HFSM2_CONSTEXPR(14)	void	wideReenter			 (PlanControl&	control											  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate	 (FullControl&	control											  )	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReverseReact	 (FullControl&	control, const TEvent& event					  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
@@ -11977,16 +11659,6 @@ OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) noexcept {
 	return combine(status, Remaining::wideUpdate(control));
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Short NI, typename TI, typename... TR>
-HFSM2_CONSTEXPR(14)
-Status
-OS_<TN, TA, NI, TI, TR...>::wideReverseUpdate(FullControl& control) noexcept {
-	const auto status =	   Initial	::deepReverseUpdate(control);
-	return combine(status, Remaining::wideReverseUpdate(control));
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
@@ -11998,19 +11670,6 @@ OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 {
 	const auto status =	   Initial	::deepReact(control, event);
 	return combine(status, Remaining::wideReact(control, event));
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Short NI, typename TI, typename... TR>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-OS_<TN, TA, NI, TI, TR...>::wideReverseReact(FullControl& control,
-											 const TEvent& event) noexcept
-{
-	const auto status =	   Initial	::deepReverseReact(control, event);
-	return combine(status, Remaining::wideReverseReact(control, event));
 }
 
 //------------------------------------------------------------------------------
@@ -12344,15 +12003,6 @@ OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) noexcept {
 	return Initial::deepUpdate(control);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Short NI, typename TI>
-HFSM2_CONSTEXPR(14)
-Status
-OS_<TN, TA, NI, TI>::wideReverseUpdate(FullControl& control) noexcept {
-	return Initial::deepReverseUpdate(control);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI>
@@ -12363,18 +12013,6 @@ OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
 							   const TEvent& event) noexcept
 {
 	return Initial::deepReact(control, event);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Short NI, typename TI>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-OS_<TN, TA, NI, TI>::wideReverseReact(FullControl& control,
-									  const TEvent& event) noexcept
-{
-	return Initial::deepReverseReact(control, event);
 }
 
 //------------------------------------------------------------------------------
@@ -12702,14 +12340,9 @@ struct HFSM2_EMPTY_BASES O_
 	HFSM2_CONSTEXPR(14)	void	deepReenter			 (PlanControl&	control)		  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 (FullControl&	control)		  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	deepReverseUpdate	 (FullControl&  control)		  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	deepReact			 (FullControl&	control,
-													  const TEvent& event)			  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReverseReact	 (FullControl&  control,
 													  const TEvent& event)			  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl& control)		  noexcept;
@@ -12886,36 +12519,6 @@ O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, typename TH, typename... TS>
-HFSM2_CONSTEXPR(14)
-Status
-O_<TN, TA, TH, TS...>::deepReverseUpdate(FullControl& control) noexcept {
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	if (const Status subStatus = SubStates::wideReverseUpdate(control)) {
-		ControlLock lock{control};
-		HeadState::deepReverseUpdate(control);
-
-		return subStatus;
-	} else {
-		const Status headStatus = HeadState::deepReverseUpdate(control);
-
-		if (headStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
-
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	#if HFSM2_PLANS_AVAILABLE()
-		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
-	#else
-		return headStatus;
-	#endif
-	}
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, typename TH, typename... TS>
@@ -12945,39 +12548,6 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
 	#else
 		return subStatus;
-	#endif
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, typename TH, typename... TS>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-O_<TN, TA, TH, TS...>::deepReverseReact(FullControl& control,
-										const TEvent& event) noexcept
-{
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	if (const Status subStatus = SubStates::wideReverseReact(control, event)) {
-		ControlLock lock{control};
-		HeadState::deepReverseReact(control, event);
-
-		return subStatus;
-	} else {
-		const Status headStatus = HeadState::deepReverseReact(control, event);
-
-		if (headStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
-
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	#if HFSM2_PLANS_AVAILABLE()
-		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
-	#else
-		return headStatus;
 	#endif
 	}
 }
@@ -13771,23 +13341,12 @@ public:
 	///   on all active states, then process requested transitions)
 	HFSM2_CONSTEXPR(14)	void update()											  noexcept;
 
-	/// @brief Trigger FSM update cycle (recursively call 'update()' in reverse order, from the leaf states to the root,
-	///   on all active states, then process requested transitions)
-	HFSM2_CONSTEXPR(14)	void reverseUpdate()									  noexcept;
-
 	/// @brief Have FSM react to an event (recursively call matching 'react<>()' from the root down to the leaf states,
 	///    on all active states, then process requested transitions)
 	/// @tparam TEvent Event type
 	/// @param event Event to react to
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void react(const TEvent& event)							  noexcept;
-
-	/// @brief Have FSM react to an event (recursively call matching 'react<>()' in reverse order, from the leaf states to the root,
-	///   on all active states, then process requested transitions)
-	/// @tparam TEvent Event type
-	/// @param event Event to react to
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void reverseReact(const TEvent& event)					  noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -14983,36 +14542,6 @@ R_<TG, TA>::update() noexcept {
 	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
-void
-R_<TG, TA>::reverseUpdate() noexcept {
-	HFSM2_ASSERT(_registry.isActive());
-
-	FullControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
-
-	_apex.deepReverseUpdate(control);
-
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
-
-	TransitionSets currentTransitions;
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-
-	if (_requests.count())
-		processTransitions(currentTransitions);
-
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TG, typename TA>
@@ -15032,37 +14561,6 @@ R_<TG, TA>::react(const TEvent& event) noexcept {
 					  HFSM2_IF_LOG_INTERFACE(, _logger)};
 
 	_apex.deepReact(control, event);
-
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
-
-	TransitionSets currentTransitions;
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-
-	if (_requests.count())
-		processTransitions(currentTransitions);
-
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG, typename TA>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-void
-R_<TG, TA>::reverseReact(const TEvent& event) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
-
-	FullControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
-
-	_apex.deepReverseReact(control, event);
 
 	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
 

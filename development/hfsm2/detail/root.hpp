@@ -160,13 +160,6 @@ public:
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void react(const TEvent& event)							  noexcept;
 
-	/// @brief Have FSM react to an event (recursively call matching 'react<>()' in reverse order, from the leaf states to the root,
-	///   on all active states, then process requested transitions)
-	/// @tparam TEvent Event type
-	/// @param event Event to react to
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void reverseReact(const TEvent& event)					  noexcept;
-
 	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active

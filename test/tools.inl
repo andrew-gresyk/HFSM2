@@ -41,16 +41,8 @@ LoggerT<TConfig>::recordMethod(Context& /*context*/,
 			history.emplace_back(origin, Event::Type::UPDATE);
 			break;
 
-		case Method::REVERSE_UPDATE:
-			history.emplace_back(origin, Event::Type::REVERSE_UPDATE);
-			break;
-
 		case Method::REACT:
 			history.emplace_back(origin, Event::Type::REACT);
-			break;
-
-		case Method::REVERSE_REACT:
-			history.emplace_back(origin, Event::Type::REVERSE_REACT);
 			break;
 
 		case Method::EXIT_GUARD:
