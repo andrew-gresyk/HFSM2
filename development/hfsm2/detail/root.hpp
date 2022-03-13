@@ -96,10 +96,6 @@ public:
 								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	explicit R_(const PureContext& context
-								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
-
 	HFSM2_CONSTEXPR(14)	explicit R_(PureContext&& context
 								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
@@ -958,7 +954,8 @@ public:
 								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
 
-	using Base::Base;
+	HFSM2_CONSTEXPR(NO) RC_(const RC_& )														  noexcept = default;
+	HFSM2_CONSTEXPR(NO) RC_(	  RC_&&)														  noexcept = default;
 
 	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)								  noexcept	{ _context =	  context ; }
 	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)								  noexcept	{ _context = move(context); }

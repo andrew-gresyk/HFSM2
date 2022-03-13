@@ -21,22 +21,6 @@ R_<TG, TA>::R_(Context& context
 
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
-R_<TG, TA>::R_(const PureContext& context
-			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
-	: _context{context}
-	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
-	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
-{
-	_apex.deepRegister(_registry, Parent{});
-
-	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
 R_<TG, TA>::R_(PureContext&& context
 			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
