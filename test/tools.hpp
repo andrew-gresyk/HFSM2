@@ -34,9 +34,7 @@ struct Event {
 		ENTER,
 		REENTER,
 		UPDATE,
-		REVERSE_UPDATE,
 		REACT,
-		REVERSE_REACT,
 		EXIT_GUARD,
 		EXIT,
 

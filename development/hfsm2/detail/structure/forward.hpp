@@ -229,6 +229,7 @@ template <typename TContext
 		, typename TPayload>
 struct ArgsT final {
 	using Context		= TContext;
+	using PureContext	= Undecorate<Context>;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename TConfig::Rank;

@@ -1,5 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="test" Version="11000" InternalType="Console">
+  <VirtualDirectory Name="development">
+    <VirtualDirectory Name="hfsm2">
+      <File Name="../../../development/hfsm2/machine_dev.hpp"/>
+      <VirtualDirectory Name="detail">
+        <File Name="../../../development/hfsm2/detail/root.inl"/>
+        <File Name="../../../development/hfsm2/detail/root.hpp"/>
+        <VirtualDirectory Name="structure">
+          <File Name="../../../development/hfsm2/detail/structure/state.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/state.hpp"/>
+          <File Name="../../../development/hfsm2/detail/structure/orthogonal_sub_2.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/orthogonal_sub_1.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/orthogonal_sub.hpp"/>
+          <File Name="../../../development/hfsm2/detail/structure/orthogonal.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/orthogonal.hpp"/>
+          <File Name="../../../development/hfsm2/detail/structure/injections_2.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/injections_1.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/injections.hpp"/>
+          <File Name="../../../development/hfsm2/detail/structure/forward.hpp"/>
+          <File Name="../../../development/hfsm2/detail/structure/composite_sub_2.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/composite_sub_1.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/composite_sub.hpp"/>
+          <File Name="../../../development/hfsm2/detail/structure/composite.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/composite.hpp"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="shared">
+          <File Name="../../../development/hfsm2/detail/shared/utility.hpp"/>
+          <File Name="../../../development/hfsm2/detail/shared/type_list.hpp"/>
+          <File Name="../../../development/hfsm2/detail/shared/random.inl"/>
+          <File Name="../../../development/hfsm2/detail/shared/random.hpp"/>
+          <File Name="../../../development/hfsm2/detail/shared/macros_on.hpp"/>
+          <File Name="../../../development/hfsm2/detail/shared/macros_off.hpp"/>
+          <File Name="../../../development/hfsm2/detail/shared/iterator.hpp"/>
+          <File Name="../../../development/hfsm2/detail/shared/bit_stream.inl"/>
+          <File Name="../../../development/hfsm2/detail/shared/bit_stream.hpp"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="root">
+          <File Name="../../../development/hfsm2/detail/root/registry_2.inl"/>
+          <File Name="../../../development/hfsm2/detail/root/registry_1.inl"/>
+          <File Name="../../../development/hfsm2/detail/root/registry.hpp"/>
+          <File Name="../../../development/hfsm2/detail/root/plan_data.inl"/>
+          <File Name="../../../development/hfsm2/detail/root/plan_data.hpp"/>
+          <File Name="../../../development/hfsm2/detail/root/plan.inl"/>
+          <File Name="../../../development/hfsm2/detail/root/plan.hpp"/>
+          <File Name="../../../development/hfsm2/detail/root/control.inl"/>
+          <File Name="../../../development/hfsm2/detail/root/control.hpp"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="features">
+          <File Name="../../../development/hfsm2/detail/features/structure_report.hpp"/>
+          <File Name="../../../development/hfsm2/detail/features/logger_interface.hpp"/>
+          <File Name="../../../development/hfsm2/detail/features/common.hpp"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="containers">
+          <File Name="../../../development/hfsm2/detail/containers/task_list.inl"/>
+          <File Name="../../../development/hfsm2/detail/containers/task_list.hpp"/>
+          <File Name="../../../development/hfsm2/detail/containers/bit_array.inl"/>
+          <File Name="../../../development/hfsm2/detail/containers/bit_array.hpp"/>
+          <File Name="../../../development/hfsm2/detail/containers/array.inl"/>
+          <File Name="../../../development/hfsm2/detail/containers/array.hpp"/>
+        </VirtualDirectory>
+      </VirtualDirectory>
+    </VirtualDirectory>
+  </VirtualDirectory>
   <Reconciliation>
     <Regexes/>
     <Excludepaths/>
@@ -7,9 +69,10 @@
     <Extensions>
       <![CDATA[*.cpp;*.hpp;*.inl]]>
     </Extensions>
-    <Topleveldir>/Work/HFSM2-experimental</Topleveldir>
+    <Topleveldir>/Work/HFSM2</Topleveldir>
   </Reconciliation>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_injections.cpp"/>
     <File Name="../../../test/tools.inl"/>
     <VirtualDirectory Name="reported">
       <File Name="../../../test/reported/issue_49.cpp"/>
@@ -47,65 +110,7 @@
   </VirtualDirectory>
   <VirtualDirectory Name="include">
     <VirtualDirectory Name="hfsm2">
-      <File Name="../../../include/hfsm2/machine_dev.hpp"/>
       <File Name="../../../include/hfsm2/machine.hpp"/>
-      <VirtualDirectory Name="detail">
-        <File Name="../../../include/hfsm2/detail/root.inl"/>
-        <File Name="../../../include/hfsm2/detail/root.hpp"/>
-        <VirtualDirectory Name="structure">
-          <File Name="../../../include/hfsm2/detail/structure/state.inl"/>
-          <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub_2.inl"/>
-          <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub_1.inl"/>
-          <File Name="../../../include/hfsm2/detail/structure/orthogonal.inl"/>
-          <File Name="../../../include/hfsm2/detail/structure/injections.inl"/>
-          <File Name="../../../include/hfsm2/detail/structure/composite_sub_2.inl"/>
-          <File Name="../../../include/hfsm2/detail/structure/composite_sub_1.inl"/>
-          <File Name="../../../include/hfsm2/detail/structure/composite.inl"/>
-          <File Name="../../../include/hfsm2/detail/structure/state.hpp"/>
-          <File Name="../../../include/hfsm2/detail/structure/orthogonal_sub.hpp"/>
-          <File Name="../../../include/hfsm2/detail/structure/orthogonal.hpp"/>
-          <File Name="../../../include/hfsm2/detail/structure/injections.hpp"/>
-          <File Name="../../../include/hfsm2/detail/structure/forward.hpp"/>
-          <File Name="../../../include/hfsm2/detail/structure/composite_sub.hpp"/>
-          <File Name="../../../include/hfsm2/detail/structure/composite.hpp"/>
-        </VirtualDirectory>
-        <VirtualDirectory Name="shared">
-          <File Name="../../../include/hfsm2/detail/shared/random.inl"/>
-          <File Name="../../../include/hfsm2/detail/shared/bit_stream.inl"/>
-          <File Name="../../../include/hfsm2/detail/shared/utility.hpp"/>
-          <File Name="../../../include/hfsm2/detail/shared/type_list.hpp"/>
-          <File Name="../../../include/hfsm2/detail/shared/random.hpp"/>
-          <File Name="../../../include/hfsm2/detail/shared/macros_on.hpp"/>
-          <File Name="../../../include/hfsm2/detail/shared/macros_off.hpp"/>
-          <File Name="../../../include/hfsm2/detail/shared/iterator.hpp"/>
-          <File Name="../../../include/hfsm2/detail/shared/bit_stream.hpp"/>
-        </VirtualDirectory>
-        <VirtualDirectory Name="root">
-          <File Name="../../../include/hfsm2/detail/root/registry_2.inl"/>
-          <File Name="../../../include/hfsm2/detail/root/registry_1.inl"/>
-          <File Name="../../../include/hfsm2/detail/root/plan_data.inl"/>
-          <File Name="../../../include/hfsm2/detail/root/plan.inl"/>
-          <File Name="../../../include/hfsm2/detail/root/control.inl"/>
-          <File Name="../../../include/hfsm2/detail/root/state_access.hpp"/>
-          <File Name="../../../include/hfsm2/detail/root/registry.hpp"/>
-          <File Name="../../../include/hfsm2/detail/root/plan_data.hpp"/>
-          <File Name="../../../include/hfsm2/detail/root/plan.hpp"/>
-          <File Name="../../../include/hfsm2/detail/root/control.hpp"/>
-        </VirtualDirectory>
-        <VirtualDirectory Name="features">
-          <File Name="../../../include/hfsm2/detail/features/structure_report.hpp"/>
-          <File Name="../../../include/hfsm2/detail/features/logger_interface.hpp"/>
-          <File Name="../../../include/hfsm2/detail/features/common.hpp"/>
-        </VirtualDirectory>
-        <VirtualDirectory Name="containers">
-          <File Name="../../../include/hfsm2/detail/containers/task_list.inl"/>
-          <File Name="../../../include/hfsm2/detail/containers/bit_array.inl"/>
-          <File Name="../../../include/hfsm2/detail/containers/array.inl"/>
-          <File Name="../../../include/hfsm2/detail/containers/task_list.hpp"/>
-          <File Name="../../../include/hfsm2/detail/containers/bit_array.hpp"/>
-          <File Name="../../../include/hfsm2/detail/containers/array.hpp"/>
-        </VirtualDirectory>
-      </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="external">
@@ -117,8 +122,9 @@
   <Dependencies/>
   <Settings Type="Executable">
     <GlobalSettings>
-      <Compiler Options="-pedantic;-Wall;-Wextra;-std=c++14" C_Options="-pedantic;-Wall;-Wextra;" Assembler="">
+      <Compiler Options="-pedantic;-Wall;-Wextra;-std=c++11" C_Options="-pedantic;-Wall;-Wextra;" Assembler="">
         <IncludePath Value="."/>
+        <IncludePath Value="$(WorkspacePath)/../../development"/>
         <IncludePath Value="$(WorkspacePath)/../../external"/>
         <IncludePath Value="$(WorkspacePath)/../../include"/>
       </Compiler>

@@ -14,7 +14,7 @@ cmake-*
 /projects/code-lite/build-*
 /projects/code-lite/tags
 /projects/code-lite/Makefile
-/projects/code-lite/*/compile_flags.txt
-/projects/code-lite/*/*.mk
+/projects/code-lite/test/compile_flags.txt
+/projects/code-lite/test/test.mk
 /projects/visual-studio/.opencppcov
 /projects/visual-studio/*.log

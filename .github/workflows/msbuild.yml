@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 env:
-  SOLUTION_FILE_PATH: projects\visual-studio\hfsm2-16-vs.sln
+  SOLUTION_FILE_PATH: projects\visual-studio\hfsm2-vs.sln
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@master
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -31,4 +31,4 @@ jobs:
 
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: binaries-${{matrix.BUILD_PLATFORM}}\test-16-${{matrix.BUILD_CONFIG}}-${{matrix.BUILD_PLATFORM}}.exe
+      run: binaries-${{matrix.BUILD_PLATFORM}}\test-17-${{matrix.BUILD_CONFIG}}-${{matrix.BUILD_PLATFORM}}.exe

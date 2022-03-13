@@ -56,42 +56,48 @@ jobs:
               CXX: g++-11,
               INSTALL: true
             }
-          # - {
-          #     OS: ubuntu-20.04,
-          #     CC: clang-4.0,
-          #     CXX: clang++-4.0,
-          #     VERSION: '4.0'
-          #   }
-          # - {
-          #     OS: ubuntu-20.04,
-          #     CC: clang-5.0,
-          #     CXX: clang++-5.0,
-          #     VERSION: '5.0'
-          #   }
-          # - {
-          #     OS: ubuntu-20.04,
-          #     CC: clang-6.0,
-          #     CXX: clang++-6.0,
-          #     VERSION: '6.0'
-          #   }
-          # - {
-          #     OS: ubuntu-20.04,
-          #     CC: clang-7,
-          #     CXX: clang++-7,
-          #     VERSION: '7'
-          #   }
-          # - {
-          #     OS: ubuntu-20.04,
-          #     CC: clang-8,
-          #     CXX: clang++-8,
-          #     VERSION: '8'
-          #   }
-          # - {
-          #     OS: ubuntu-20.04,
-          #     CC: clang-9,
-          #     CXX: clang++-9,
-          #     VERSION: '9'
-          #   }
+          - {
+              OS: ubuntu-18.04,
+              CC: clang-3.9,
+              CXX: clang++-3.9,
+              VERSION: '3.9'
+            }
+          - {
+              OS: ubuntu-18.04,
+              CC: clang-4.0,
+              CXX: clang++-4.0,
+              VERSION: '4.0'
+            }
+          - {
+              OS: ubuntu-18.04,
+              CC: clang-5.0,
+              CXX: clang++-5.0,
+              VERSION: '5.0'
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-6.0,
+              CXX: clang++-6.0,
+              VERSION: '6.0'
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-7,
+              CXX: clang++-7,
+              VERSION: '7'
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-8,
+              CXX: clang++-8,
+              VERSION: '8'
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-9,
+              CXX: clang++-9,
+              VERSION: '9'
+            }
           - {
               OS: ubuntu-latest,
               CC: clang-10,
@@ -106,6 +112,12 @@ jobs:
               OS: ubuntu-latest,
               CC: clang-12,
               CXX: clang++-12
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-13,
+              CXX: clang++-13,
+              VERSION: '13'
             }
           - {
               OS: macos-10.15,
@@ -138,25 +150,19 @@ jobs:
 
     - name: Install Clang on ubuntu
       if: |
-        matrix.PLATFORM.OS == 'ubuntu-20.04' &&
+        startsWith(matrix.PLATFORM.OS, 'ubuntu-') &&
         startsWith(matrix.PLATFORM.CC, 'clang-') &&
         matrix.PLATFORM.VERSION
-      run: |
-        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
-        echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-${{ matrix.PLATFORM.VERSION }} main universe" | sudo tee /etc/apt/sources.list
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-        sudo apt-get install ${{ matrix.PLATFORM.CC }} ${{ matrix.PLATFORM.CXX }}
-      # uses: KyleMayes/install-llvm-action@v1
-      # with:
-      #   version: ${{ matrix.PLATFORM.VERSION }}
+      uses: egor-tensin/setup-clang@v1
+      with:
+          version: ${{ matrix.PLATFORM.VERSION }}
 
     # main test
     - name: Configure Test
       run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
       working-directory: ${{ github.workspace }}
 
-    - name: Build Text
+    - name: Build Test
       run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
       working-directory: ${{ github.workspace }}
 

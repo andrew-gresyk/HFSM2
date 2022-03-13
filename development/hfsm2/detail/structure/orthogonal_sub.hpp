@@ -77,13 +77,9 @@ struct HFSM2_EMPTY_BASES OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...>
 	HFSM2_CONSTEXPR(14)	void	wideReenter			 (PlanControl&	control											  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate	 (FullControl&  control											  )	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReverseReact	 (FullControl&	control, const TEvent& event					  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
@@ -199,13 +195,9 @@ struct OS_<TIndices, TArgs, NIndex, TInitial>
 	HFSM2_CONSTEXPR(14)	void	wideReenter			 (PlanControl&	control											  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	wideReverseUpdate	 (FullControl&	control											  )	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReverseReact	 (FullControl&	control, const TEvent& event					  )	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;

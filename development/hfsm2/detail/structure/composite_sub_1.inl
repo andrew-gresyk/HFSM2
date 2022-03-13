@@ -93,21 +93,6 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 		RHalf::wideUpdate(control, prong);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-HFSM2_CONSTEXPR(14)
-Status
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReverseUpdate(FullControl& control,
-												   const Short prong) noexcept
-{
-	HFSM2_ASSERT(prong != INVALID_SHORT);
-
-	return prong < R_PRONG ?
-		LHalf::wideReverseUpdate(control, prong) :
-		RHalf::wideReverseUpdate(control, prong);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
@@ -123,23 +108,6 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReact(FullControl& control,
 	return prong < R_PRONG ?
 		LHalf::wideReact(control, event, prong) :
 		RHalf::wideReact(control, event, prong);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReverseReact(FullControl& control,
-												  const TEvent& event,
-												  const Short prong) noexcept
-{
-	HFSM2_ASSERT(prong != INVALID_SHORT);
-
-	return prong < R_PRONG ?
-		LHalf::wideReverseReact(control, event, prong) :
-		RHalf::wideReverseReact(control, event, prong);
 }
 
 //------------------------------------------------------------------------------

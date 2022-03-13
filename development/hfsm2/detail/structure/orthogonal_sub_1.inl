@@ -83,16 +83,6 @@ OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) noexcept {
 	return combine(status, Remaining::wideUpdate(control));
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Short NI, typename TI, typename... TR>
-HFSM2_CONSTEXPR(14)
-Status
-OS_<TN, TA, NI, TI, TR...>::wideReverseUpdate(FullControl& control) noexcept {
-	const auto status =	   Initial	::deepReverseUpdate(control);
-	return combine(status, Remaining::wideReverseUpdate(control));
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
@@ -104,19 +94,6 @@ OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 {
 	const auto status =	   Initial	::deepReact(control, event);
 	return combine(status, Remaining::wideReact(control, event));
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Short NI, typename TI, typename... TR>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-OS_<TN, TA, NI, TI, TR...>::wideReverseReact(FullControl& control,
-											 const TEvent& event) noexcept
-{
-	const auto status =	   Initial	::deepReverseReact(control, event);
-	return combine(status, Remaining::wideReverseReact(control, event));
 }
 
 //------------------------------------------------------------------------------

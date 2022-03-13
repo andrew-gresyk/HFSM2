@@ -76,8 +76,12 @@ struct Work
 			const auto& requests = control.requests();
 			REQUIRE(requests.count() == 0);
 
-			for (const auto& transition : control.pendingTransitions())
-				REQUIRE(control.plan().change<Teardown>(transition.destination));
+			for (const auto& transition : control.pendingTransitions()) {
+				// workaround for the new doctest
+				const bool success = control.plan().change<Teardown>(transition.destination);
+
+				REQUIRE(success);
+			}
 
 			control.cancelPendingTransitions();
 			control.changeTo<Teardown>();

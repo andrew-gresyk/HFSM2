@@ -44,22 +44,6 @@ B_<TF>::widePostUpdate(Context& context) noexcept {
 	TF::	postUpdate(context);
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TF>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF>::widePreReverseUpdate(Context& context) noexcept {
-	TF::	preReverseUpdate(context);
-}
-
-template <typename TF>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF>::widePostReverseUpdate(Context& context) noexcept {
-	TF::postReverseUpdate(context);
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TF>
@@ -80,28 +64,6 @@ B_<TF>::widePostReact(const TEvent& event,
 					  Context& context) noexcept
 {
 	TF::	postReact(event, context);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TF>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF>::widePreReverseReact(const TEvent& event,
-							Context& context) noexcept
-{
-	TF::	preReverseReact(event, context);
-}
-
-template <typename TF>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-void
-B_<TF>::widePostReverseReact(const TEvent& event,
-							 Context& context) noexcept
-{
-	TF::postReverseReact(event, context);
 }
 
 //------------------------------------------------------------------------------
