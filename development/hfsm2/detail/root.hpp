@@ -26,7 +26,9 @@ protected:
 	using Forward				= RF_<TConfig, TApex>;
 	using StateList				= typename Forward::StateList;
 	using RegionList			= typename Forward::RegionList;
+
 	using Args					= typename Forward::Args;
+	using PureContext			= typename Args::PureContext;
 
 	static_assert(Args::STATE_COUNT <  (unsigned) -1, "Too many states in the FSM. Change 'Short' type.");
 	static_assert(Args::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
@@ -92,7 +94,18 @@ public:
 
 	HFSM2_CONSTEXPR(14)	explicit R_(Context& context
 								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr)) noexcept;
+								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	explicit R_(const PureContext& context
+								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	explicit R_(PureContext&& context
+								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+
+	HFSM2_CONSTEXPR(14) R_(const R_&  other)												  noexcept;
+	HFSM2_CONSTEXPR(14) R_(		 R_&& other)												  noexcept;
 
 	HFSM2_CONSTEXPR(20)	~R_() noexcept;
 
@@ -512,6 +525,7 @@ class RV_		   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, T
 
 protected:
 	using typename Base::Context;
+	using typename Base::PureContext;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using typename Base::RNG;
@@ -524,15 +538,16 @@ protected:
 public:
 	HFSM2_CONSTEXPR(14)	explicit RV_(Context& context
 								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept
-		: Base{context
-		HFSM2_IF_UTILITY_THEORY(, rng)
-		HFSM2_IF_LOG_INTERFACE(, logger)}
-	{
-		initialEnter();
-	}
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
-	HFSM2_CONSTEXPR(20)	~RV_()																  noexcept	{ finalExit();	}
+	HFSM2_CONSTEXPR(14)	explicit RV_(PureContext&& context
+								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
+
+	HFSM2_CONSTEXPR(14)	RV_(const RV_&  other)												  noexcept;
+	HFSM2_CONSTEXPR(14)	RV_(	  RV_&& other)												  noexcept;
+
+	HFSM2_CONSTEXPR(20)	~RV_()																  noexcept;
 
 private:
 	using Base::initialEnter;
@@ -935,6 +950,7 @@ public:
 	static constexpr FeatureTag FEATURE_TAG = Base::FEATURE_TAG;
 
 	using typename Base::Context;
+	using typename Base::PureContext;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using typename Base::RNG;
@@ -947,14 +963,16 @@ public:
 public:
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context& context
 								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept
-		: Base{context
-			 HFSM2_IF_UTILITY_THEORY(, rng)
-			 HFSM2_IF_LOG_INTERFACE(, logger)}
-	{}
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)	  noexcept { _context =			  context ; }
-	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)	  noexcept { _context = move(context); }
+	HFSM2_CONSTEXPR(14)	explicit RC_(PureContext&& context
+								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+
+	using Base::Base;
+
+	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)								  noexcept	{ _context =	  context ; }
+	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)								  noexcept	{ _context = move(context); }
 
 private:
 	using Base::_context;
@@ -999,13 +1017,7 @@ public:
 #endif
 
 public:
-	HFSM2_CONSTEXPR(11)	explicit RC_(Context context
-								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept
-		: Base{context
-			 HFSM2_IF_UTILITY_THEORY(, rng)
-			 HFSM2_IF_LOG_INTERFACE(, logger)}
-	{}
+	using Base::Base;
 
 	HFSM2_CONSTEXPR(14)	void setContext(Context context)	  noexcept { _context = context; }
 
@@ -1053,23 +1065,16 @@ public:
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context context
 								   , RNG& rng
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept
-		: Base{context
-			 , rng
-			 HFSM2_IF_LOG_INTERFACE(, logger)}
-	{}
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
 
 #else
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context context = nullptr
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept
-		: Base{context
-			 HFSM2_IF_LOG_INTERFACE(, logger)}
-	{}
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
 
 #endif
 
-	HFSM2_CONSTEXPR(14)	void setContext(Context context)	  noexcept { _context = context; }
+	HFSM2_CONSTEXPR(14)	void setContext(Context context)										  noexcept { _context = context; }
 
 private:
 	using Base::_context;
@@ -1113,18 +1118,11 @@ public:
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(RNG& rng
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept
-		: Base{static_cast<EmptyContext&>(*this)
-			 , rng
-			 HFSM2_IF_LOG_INTERFACE(, logger)}
-	{}
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
 
 #else
 
-	HFSM2_CONSTEXPR(14)	explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))	  noexcept
-		: Base{static_cast<EmptyContext&>(*this)
-			 HFSM2_IF_LOG_INTERFACE(, logger)}
-	{}
+	HFSM2_CONSTEXPR(14)	explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))	  noexcept;
 
 #endif
 };

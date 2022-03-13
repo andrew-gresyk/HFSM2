@@ -90,6 +90,11 @@ struct RemoveReferenceT<T&&> final {
 template <typename T>
 using RemoveReference = typename RemoveReferenceT<T>::Type;
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T>
+using Undecorate = RemoveConst<RemoveReference<T>>;
+
 //------------------------------------------------------------------------------
 
 template <typename T>

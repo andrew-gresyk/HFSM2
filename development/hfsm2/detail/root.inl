@@ -20,6 +20,86 @@ R_<TG, TA>::R_(Context& context
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+R_<TG, TA>::R_(const PureContext& context
+			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: _context{context}
+	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
+	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
+{
+	_apex.deepRegister(_registry, Parent{});
+
+	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+R_<TG, TA>::R_(PureContext&& context
+			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: _context{move(context)}
+	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
+	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
+{
+	_apex.deepRegister(_registry, Parent{});
+
+	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+R_<TG, TA>::R_(const R_& other) noexcept
+	: _context {other._context }
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	, _rng	   {other.rng	   }
+#endif
+	, _registry{other._registry}
+#if HFSM2_PLANS_AVAILABLE()
+	, _planData{other._planData}
+#endif
+	, _requests{other._requests}
+	, _apex	   {other._apex	   }
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
+	, _logger  {other.logger   }
+#endif
+{
+	_apex.deepRegister(_registry, Parent{});
+
+	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+R_<TG, TA>::R_(R_&& other) noexcept
+	: _context {move(other._context	)}
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	, _rng{move(other.rng)}
+#endif
+	, _registry{move(other._registry)}
+#if HFSM2_PLANS_AVAILABLE()
+	, _planData{move(other._planData)}
+#endif
+	, _requests{move(other._requests)}
+	, _apex	   {move(other._apex	)}
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
+	, _logger  {move(other.logger	)}
+#endif
+{
+	_apex.deepRegister(_registry, Parent{});
+
+	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
 HFSM2_CONSTEXPR(20)
 R_<TG, TA>::~R_() noexcept {
 	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
@@ -792,6 +872,62 @@ R_<TG, TA>::udpateActivity() noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RV_(Context& context
+																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: Base{context
+	HFSM2_IF_UTILITY_THEORY(, rng)
+	HFSM2_IF_LOG_INTERFACE(, logger)}
+{
+	initialEnter();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RV_(PureContext&& context
+																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: Base{move(context)
+	HFSM2_IF_UTILITY_THEORY(, rng)
+	HFSM2_IF_LOG_INTERFACE(, logger)}
+{
+	initialEnter();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RV_(const RV_& other) noexcept
+	: Base{other}
+{
+	initialEnter();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RV_(RV_&& other) noexcept
+	: Base{move(other)}
+{
+	initialEnter();
+}
+
+//------------------------------------------------------------------------------
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(20)
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::~RV_() noexcept {
+	finalExit();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
@@ -1035,6 +1171,80 @@ RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 
 	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RC_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(Context& context
+																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: Base{context
+	HFSM2_IF_UTILITY_THEORY(, rng)
+	HFSM2_IF_LOG_INTERFACE(, logger)}
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RC_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(PureContext&& context
+																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
+																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: Base{move(context)
+	HFSM2_IF_UTILITY_THEORY(, rng)
+	HFSM2_IF_LOG_INTERFACE(, logger)}
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+
+template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RC_<G_<NFT, TC*, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(Context context
+																		, RNG& rng
+																		HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: Base{context
+	, rng
+	HFSM2_IF_LOG_INTERFACE(, logger)}
+{}
+
+#else
+
+template <FeatureTag NFT, typename TC, typename TV, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RC_<G_<NFT, TC*, TV, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(Context context
+															HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: Base{context
+	HFSM2_IF_LOG_INTERFACE(, logger)}
+{}
+
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+
+template <FeatureTag NFT, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RC_<G_<NFT, EmptyContext, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(RNG& rng
+																				 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
+	: Base{static_cast<EmptyContext&>(*this)
+	, rng
+	HFSM2_IF_LOG_INTERFACE(, logger)}
+{}
+
+#else
+
+template <FeatureTag NFT, typename TV, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+RC_<G_<NFT, EmptyContext, TV, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger)) noexcept
+	: Base{static_cast<EmptyContext&>(*this)
+	HFSM2_IF_LOG_INTERFACE(, logger)}
+{}
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
