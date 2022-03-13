@@ -115,20 +115,11 @@ struct InjectionT
 	void preUpdate		  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_UPDATE);			}
 	void postUpdate		  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::POST_UPDATE);			}
 
-	void preReverseUpdate (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_REVERSE_UPDATE);	}
-	void postReverseUpdate(Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::POST_REVERSE_UPDATE);	}
-
 	void preReact		  (const Event&,
 						   Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_REACT);			}
 
 	void postReact		  (const Event&,
 						   Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::POST_REACT);			}
-
-	void preReverseReact  (const Event&,
-						   Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_REVERSE_REACT);	}
-
-	void postReverseReact (const Event&,
-						   Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::POST_REVERSE_REACT);	}
 
 	void preExitGuard	  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_EXIT_GUARD);		}
 
@@ -199,28 +190,12 @@ TEST_CASE("FSM.Manual Activation") {
 			{ FSM::stateId<B>(), Event::Type::POST_UPDATE  },
 		});
 
-		machine.reverseUpdate();
-		assertSequence(events, {
-			{ FSM::stateId<B>(), Event::Type::PRE_REVERSE_UPDATE },
-			{ FSM::stateId<B>(), Event::Type::POST_REVERSE_UPDATE },
-			{ FSM::stateId<R>(), Event::Type::PRE_REVERSE_UPDATE },
-			{ FSM::stateId<R>(), Event::Type::POST_REVERSE_UPDATE },
-		});
-
 		machine.react(Event::Type::COUNT);
 		assertSequence(events, {
 			{ FSM::stateId<R>(), Event::Type::PRE_REACT  },
 			{ FSM::stateId<R>(), Event::Type::POST_REACT  },
 			{ FSM::stateId<B>(), Event::Type::PRE_REACT  },
 			{ FSM::stateId<B>(), Event::Type::POST_REACT  },
-		});
-
-		machine.reverseReact(Event::Type::COUNT);
-		assertSequence(events, {
-			{ FSM::stateId<B>(), Event::Type::PRE_REVERSE_REACT },
-			{ FSM::stateId<B>(), Event::Type::POST_REVERSE_REACT },
-			{ FSM::stateId<R>(), Event::Type::PRE_REVERSE_REACT },
-			{ FSM::stateId<R>(), Event::Type::POST_REVERSE_REACT },
 		});
 
 		machine.exit();

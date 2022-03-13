@@ -117,12 +117,6 @@
     <ClCompile Include="..\..\test\reported\issue_49.cpp">
       <Filter>test\reported</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_reverse_transitions.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\test_reverse_payloads.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_injections.cpp">
       <Filter>test</Filter>
     </ClCompile>

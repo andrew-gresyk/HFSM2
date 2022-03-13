@@ -1,6 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="ASan|Win32">
+      <Configuration>ASan</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ASan|x64">
+      <Configuration>ASan</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -19,91 +27,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\main.cpp" />
-    <ClCompile Include="..\..\test\reported\issue_49.cpp" />
-    <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
-    <ClCompile Include="..\..\test\shared\test_bit_stream.cpp" />
-    <ClCompile Include="..\..\test\shared\test_random.cpp" />
-    <ClCompile Include="..\..\test\shared\test_task_list.cpp" />
-    <ClCompile Include="..\..\test\test_access.cpp" />
-    <ClCompile Include="..\..\test\test_composite_bst.cpp" />
-    <ClCompile Include="..\..\test\test_contexts.cpp" />
-    <ClCompile Include="..\..\test\test_contexts_random.cpp" />
-    <ClCompile Include="..\..\test\test_debug.cpp" />
-    <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
-    <ClCompile Include="..\..\test\test_guards.cpp" />
-    <ClCompile Include="..\..\test\test_injections.cpp" />
-    <ClCompile Include="..\..\test\test_internal_payloads.cpp" />
-    <ClCompile Include="..\..\test\test_internal_transitions.cpp" />
-    <ClCompile Include="..\..\test\test_manual_activation.cpp" />
-    <ClCompile Include="..\..\test\test_orthogonal_root.cpp" />
-    <ClCompile Include="..\..\test\test_ortho_units.cpp" />
-    <ClCompile Include="..\..\test\test_plans.cpp" />
-    <ClCompile Include="..\..\test\test_plans_payloads.cpp" />
-    <ClCompile Include="..\..\test\test_randomize.cpp" />
-    <ClCompile Include="..\..\test\test_replication.cpp" />
-    <ClCompile Include="..\..\test\test_resume.cpp" />
-    <ClCompile Include="..\..\test\test_self_transitions.cpp" />
-    <ClCompile Include="..\..\test\test_serialization.cpp" />
-    <ClCompile Include="..\..\test\test_stress.cpp" />
-    <ClCompile Include="..\..\test\test_utilize.cpp" />
-    <ClCompile Include="..\..\test\test_utility_regions.cpp" />
+    <ClCompile Include="..\..\examples\calculator\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\development\hfsm2\detail\containers\array.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_array.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\containers\task_list.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\features\common.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\features\logger_interface.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\features\structure_report.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\root.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\root\control.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\root\registry.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\shared\bit_stream.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\shared\iterator.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_off.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_on.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\shared\random.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\shared\type_list.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\shared\utility.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite_sub.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\structure\forward.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\structure\injections.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\structure\state.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\machine_dev.hpp" />
-    <ClInclude Include="..\..\test\tools.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\development\hfsm2\detail\containers\array.inl" />
-    <None Include="..\..\development\hfsm2\detail\containers\bit_array.inl" />
-    <None Include="..\..\development\hfsm2\detail\containers\task_list.inl" />
-    <None Include="..\..\development\hfsm2\detail\root.inl" />
-    <None Include="..\..\development\hfsm2\detail\root\control.inl" />
-    <None Include="..\..\development\hfsm2\detail\root\plan.inl" />
-    <None Include="..\..\development\hfsm2\detail\root\plan_data.inl" />
-    <None Include="..\..\development\hfsm2\detail\root\registry_1.inl" />
-    <None Include="..\..\development\hfsm2\detail\root\registry_2.inl" />
-    <None Include="..\..\development\hfsm2\detail\shared\bit_stream.inl" />
-    <None Include="..\..\development\hfsm2\detail\shared\random.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\composite.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\composite_sub_1.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\composite_sub_2.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\injections_1.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\injections_2.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\orthogonal.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_1.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_2.inl" />
-    <None Include="..\..\development\hfsm2\detail\structure\state.inl" />
-    <None Include="..\..\test\tools.inl" />
+    <Text Include="..\..\examples\calculator\CMakeLists.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{CCE21648-BED6-4180-A305-FF27932B9232}</ProjectGuid>
+    <ProjectGuid>{92461E0C-B41D-41DE-9D1B-504D01796B22}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -111,36 +42,61 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ASan|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>true</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ASan|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>true</EnableASAN>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="shared-vs-15.props" />
     <Import Project="doctest.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared-vs-15.props" />
+    <Import Project="doctest.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ASan|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="shared-vs-15.props" />
     <Import Project="doctest.props" />
@@ -155,6 +111,11 @@
     <Import Project="shared-vs-15.props" />
     <Import Project="doctest.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ASan|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="shared-vs-15.props" />
+    <Import Project="doctest.props" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -162,10 +123,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ASan|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ASan|x64'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -186,10 +153,23 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ASan|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions />
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -198,6 +178,21 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions />
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ASan|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

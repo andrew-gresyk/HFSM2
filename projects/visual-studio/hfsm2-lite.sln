@@ -1,22 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28714.193
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{6C15FC09-6C89-47F6-8C32-097568461C1F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{498EF6B0-5565-411A-839A-B41294202103}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\.editorconfig = ..\..\.editorconfig
 		..\..\.gitignore = ..\..\.gitignore
-		..\..\.travis.yml = ..\..\.travis.yml
-		..\..\appveyor.yml = ..\..\appveyor.yml
+		..\..\_config.yml = ..\..\_config.yml
 		..\..\CMakeLists.txt = ..\..\CMakeLists.txt
+		..\..\hfsm2.natvis = ..\..\hfsm2.natvis
 		..\..\README.md = ..\..\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{EDEB0687-3B3E-429D-9213-0A3EED99821D}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\hfsm2.natvis = ..\..\hfsm2.natvis
-	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-14", "test-14.vcxproj", "{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{FEAA94BA-655D-4761-B7CF-32DC0457499D}"
 EndProject
@@ -24,18 +25,18 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "tools", "tools.pyproj", "{2
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-clang", "test-clang.vcxproj", "{D2176F37-135E-4003-9A90-7A9E78E0371F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{F51AB3E5-170D-44B5-BE40-0DE29537C8BE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "temp-14", "temp-14.vcxproj", "{92997883-142C-4F51-8DEC-E9A998600054}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "temp-clang", "temp-clang.vcxproj", "{6DB92FC0-A25C-43A4-A081-C2D60848C90F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-14", "test-14.vcxproj", "{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "temp-14", "temp-14.vcxproj", "{92997883-142C-4F51-8DEC-E9A998600054}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C4BC0647-BC2A-4E23-87D0-4EB10BD3C994}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{0542152A-9571-4FAA-AC59-4C69C1762A05}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\.github\workflows\cmake-qemu-arm.yml = ..\..\.github\workflows\cmake-qemu-arm.yml
 		..\..\.github\workflows\cmake.yml = ..\..\.github\workflows\cmake.yml
+		..\..\.github\workflows\codeql-analysis.yml = ..\..\.github\workflows\codeql-analysis.yml
+		..\..\.github\workflows\flawfinder-analysis.yml = ..\..\.github\workflows\flawfinder-analysis.yml
 		..\..\.github\workflows\msbuild.yml = ..\..\.github\workflows\msbuild.yml
+		..\..\.github\workflows\msvc-analysis.yml = ..\..\.github\workflows\msvc-analysis.yml
 	EndProjectSection
 EndProject
 Global
@@ -48,6 +49,16 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.ASan|x64.ActiveCfg = Release|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.ASan|x86.ActiveCfg = Release|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x64.ActiveCfg = Debug|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x64.Build.0 = Debug|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x86.ActiveCfg = Debug|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x86.Build.0 = Debug|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x64.ActiveCfg = Release|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x64.Build.0 = Release|x64
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x86.ActiveCfg = Release|Win32
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x86.Build.0 = Release|Win32
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.ASan|x64.ActiveCfg = Release|Any CPU
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.ASan|x86.ActiveCfg = Release|Any CPU
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -66,28 +77,6 @@ Global
 		{D2176F37-135E-4003-9A90-7A9E78E0371F}.Release|x64.Build.0 = Release|x64
 		{D2176F37-135E-4003-9A90-7A9E78E0371F}.Release|x86.ActiveCfg = Release|Win32
 		{D2176F37-135E-4003-9A90-7A9E78E0371F}.Release|x86.Build.0 = Release|Win32
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.ASan|x64.ActiveCfg = Release|x64
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.ASan|x86.ActiveCfg = Release|Win32
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Debug|x64.ActiveCfg = Debug|x64
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Debug|x64.Build.0 = Debug|x64
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Debug|x86.ActiveCfg = Debug|Win32
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Debug|x86.Build.0 = Debug|Win32
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Release|x64.ActiveCfg = Release|x64
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Release|x64.Build.0 = Release|x64
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Release|x86.ActiveCfg = Release|Win32
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Release|x86.Build.0 = Release|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.ASan|x64.ActiveCfg = Debug|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.ASan|x64.Build.0 = Debug|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.ASan|x86.ActiveCfg = Debug|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.ASan|x86.Build.0 = Debug|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x64.ActiveCfg = Debug|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x64.Build.0 = Debug|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x86.ActiveCfg = Debug|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Debug|x86.Build.0 = Debug|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x64.ActiveCfg = Release|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x64.Build.0 = Release|x64
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x86.ActiveCfg = Release|Win32
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5}.Release|x86.Build.0 = Release|Win32
 		{92997883-142C-4F51-8DEC-E9A998600054}.ASan|x64.ActiveCfg = Debug|x64
 		{92997883-142C-4F51-8DEC-E9A998600054}.ASan|x64.Build.0 = Debug|x64
 		{92997883-142C-4F51-8DEC-E9A998600054}.ASan|x86.ActiveCfg = Debug|Win32
@@ -100,17 +89,29 @@ Global
 		{92997883-142C-4F51-8DEC-E9A998600054}.Release|x64.Build.0 = Release|x64
 		{92997883-142C-4F51-8DEC-E9A998600054}.Release|x86.ActiveCfg = Release|Win32
 		{92997883-142C-4F51-8DEC-E9A998600054}.Release|x86.Build.0 = Release|Win32
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.ASan|x64.ActiveCfg = Debug|x64
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.ASan|x64.Build.0 = Debug|x64
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.ASan|x86.ActiveCfg = Debug|Win32
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.ASan|x86.Build.0 = Debug|Win32
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Debug|x64.ActiveCfg = Debug|x64
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Debug|x64.Build.0 = Debug|x64
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Debug|x86.ActiveCfg = Debug|Win32
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Debug|x86.Build.0 = Debug|Win32
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Release|x64.ActiveCfg = Release|x64
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Release|x64.Build.0 = Release|x64
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Release|x86.ActiveCfg = Release|Win32
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5} = {58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B} = {FEAA94BA-655D-4761-B7CF-32DC0457499D}
 		{D2176F37-135E-4003-9A90-7A9E78E0371F} = {58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}
-		{6DB92FC0-A25C-43A4-A081-C2D60848C90F} = {F51AB3E5-170D-44B5-BE40-0DE29537C8BE}
-		{0895F78B-D3D4-4BEF-8E12-DAABE32686E5} = {58AC2401-48A7-4AFA-A6F4-5F00DFAF260A}
-		{92997883-142C-4F51-8DEC-E9A998600054} = {F51AB3E5-170D-44B5-BE40-0DE29537C8BE}
-		{C4BC0647-BC2A-4E23-87D0-4EB10BD3C994} = {6C15FC09-6C89-47F6-8C32-097568461C1F}
+		{92997883-142C-4F51-8DEC-E9A998600054} = {EDEB0687-3B3E-429D-9213-0A3EED99821D}
+		{6DB92FC0-A25C-43A4-A081-C2D60848C90F} = {EDEB0687-3B3E-429D-9213-0A3EED99821D}
+		{0542152A-9571-4FAA-AC59-4C69C1762A05} = {498EF6B0-5565-411A-839A-B41294202103}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3BE666E0-1098-42CF-B1FD-F0F0CA579F4C}

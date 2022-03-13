@@ -104,36 +104,6 @@ O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, typename TH, typename... TS>
-HFSM2_CONSTEXPR(14)
-Status
-O_<TN, TA, TH, TS...>::deepReverseUpdate(FullControl& control) noexcept {
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	if (const Status subStatus = SubStates::wideReverseUpdate(control)) {
-		ControlLock lock{control};
-		HeadState::deepReverseUpdate(control);
-
-		return subStatus;
-	} else {
-		const Status headStatus = HeadState::deepReverseUpdate(control);
-
-		if (headStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
-
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	#if HFSM2_PLANS_AVAILABLE()
-		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
-	#else
-		return headStatus;
-	#endif
-	}
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, typename TH, typename... TS>
@@ -163,39 +133,6 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
 	#else
 		return subStatus;
-	#endif
-	}
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, typename TH, typename... TS>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-Status
-O_<TN, TA, TH, TS...>::deepReverseReact(FullControl& control,
-										const TEvent& event) noexcept
-{
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	if (const Status subStatus = SubStates::wideReverseReact(control, event)) {
-		ControlLock lock{control};
-		HeadState::deepReverseReact(control, event);
-
-		return subStatus;
-	} else {
-		const Status headStatus = HeadState::deepReverseReact(control, event);
-
-		if (headStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
-
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	#if HFSM2_PLANS_AVAILABLE()
-		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
-	#else
-		return headStatus;
 	#endif
 	}
 }

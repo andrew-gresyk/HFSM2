@@ -28,11 +28,11 @@ jobs:
     - uses: actions/checkout@v2
 
     # install dependencies
-    - name: Install ARM GCC on ubuntu      
+    - name: Install ARM GCC on ubuntu
       run: |
         sudo apt-get update
         sudo apt-get install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf qemu-user
-               
+
     # main test
     - name: Configure Test
       run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}

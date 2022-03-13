@@ -38,23 +38,12 @@ public:
 	HFSM2_CONSTEXPR(14)	void preUpdate		  (Context&)	  noexcept	{}
 	HFSM2_CONSTEXPR(14)	void postUpdate		  (Context&)	  noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void preReverseUpdate (Context&)	  noexcept	{}
-	HFSM2_CONSTEXPR(14)	void postReverseUpdate(Context&)	  noexcept	{}
-
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void preReact		  (const TEvent&,
 											   Context&)	  noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void postReact		  (const TEvent&,
-											   Context&)	  noexcept	{}
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void preReverseReact  (const TEvent&,
-											   Context&)	  noexcept	{}
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void postReverseReact (const TEvent&,
 											   Context&)	  noexcept	{}
 
 	HFSM2_CONSTEXPR(14)	void preExitGuard	  (Context&)	  noexcept	{}
@@ -202,23 +191,12 @@ struct B_<TFirst>
 	HFSM2_CONSTEXPR(14)	void	widePreUpdate		 (Context& context)		  noexcept;
 	HFSM2_CONSTEXPR(14)	void	widePostUpdate		 (Context& context)		  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	widePreReverseUpdate (Context& context)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void	widePostReverseUpdate(Context& context)		  noexcept;
-
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	widePreReact		 (const TEvent& event,
 													  Context& context)		  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	widePostReact		 (const TEvent& event,
-													  Context& context)		  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void	widePreReverseReact  (const TEvent& event,
-													  Context& context)		  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void	widePostReverseReact (const TEvent& event,
 													  Context& context)		  noexcept;
 
 	HFSM2_CONSTEXPR(14)	void	widePreExitGuard	 (Context& context)		  noexcept;

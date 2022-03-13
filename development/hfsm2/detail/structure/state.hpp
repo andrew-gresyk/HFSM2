@@ -66,14 +66,9 @@ struct S_
 	HFSM2_CONSTEXPR(14)	void	deepReenter			 (PlanControl&	control)	  noexcept;
 
 	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 (FullControl&	control)	  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	deepReverseUpdate	 (FullControl&	control)	  noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	Status	deepReact			 (FullControl&	control,
-													  const TEvent&	event)		  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReverseReact	 (FullControl&	control,
 													  const TEvent&	event)		  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl&		   )	  noexcept	{ return false; }

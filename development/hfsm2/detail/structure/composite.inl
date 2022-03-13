@@ -179,39 +179,6 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 	}
 }
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-HFSM2_CONSTEXPR(14)
-Status
-C_<TN, TA, SG, TH, TS...>::deepReverseUpdate(FullControl& control) noexcept {
-	const Short active = compoActive(control);
-	HFSM2_ASSERT(active != INVALID_SHORT);
-
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	if (const Status subStatus = SubStates::wideReverseUpdate(control, active)) {
-		ControlLock lock{control};
-		HeadState::deepReverseUpdate(control);
-
-		return subStatus;
-	} else {
-		const Status headStatus = HeadState::deepReverseUpdate(control);
-
-		if (headStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
-
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
-
-	#if HFSM2_PLANS_AVAILABLE()
-		return headStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, headStatus) : headStatus;
-	#else
-		return headStatus;
-	#endif
-	}
-}
-
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>

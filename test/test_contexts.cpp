@@ -165,11 +165,11 @@ TEST_CASE("FSM.Contexts") {
 		REQUIRE(machine.context() == Context{8});
 
 		Instance recepient{hfsm2::move(Context{7})};
-		REQUIRE(recepient.context().value == primary.value);
+		REQUIRE(recepient.context().value == 7);
 		REQUIRE(recepient.context().moved);
 
 		Instance copy{machine};
-		REQUIRE(copy.context().value == primary.value);
+		REQUIRE(copy.context().value == 8);
 		REQUIRE(copy.context().moved == false);
 
 		const Instance moved = consume(hfsm2::move(Instance{primary}));
@@ -196,11 +196,11 @@ TEST_CASE("FSM.Contexts") {
 		REQUIRE(machine.context() == Context{8});
 
 		Instance recepient{hfsm2::move(Context{7})};
-		REQUIRE(recepient.context().value == primary.value);
+		REQUIRE(recepient.context().value == 7);
 		REQUIRE(recepient.context().moved);
 
 		Instance copy{machine};
-		REQUIRE(copy.context().value == primary.value);
+		REQUIRE(copy.context().value == 8);
 		REQUIRE(copy.context().moved == false);
 
 		const Instance moved = consume(hfsm2::move(Instance{primary}));
@@ -222,7 +222,7 @@ TEST_CASE("FSM.Contexts") {
 		REQUIRE(machine.context() == secondary);
 
 		Instance copy{machine};
-		REQUIRE(copy.context().value == primary.value);
+		REQUIRE(copy.context().value == secondary.value);
 		REQUIRE(copy.context().moved == false);
 
 		//const Instance moved = consume(hfsm2::move(Instance{primary}));
@@ -247,12 +247,8 @@ TEST_CASE("FSM.Contexts") {
 		REQUIRE(machine.context() == &secondary);
 
 		Instance copy{machine};
-		REQUIRE(copy.context()->value == primary.value);
+		REQUIRE(copy.context()->value == secondary.value);
 		REQUIRE(copy.context()->moved == false);
-
-		const Instance moved = consume(hfsm2::move(Instance{&primary}));
-		REQUIRE(moved.context()->value == primary.value);
-		REQUIRE(moved.context()->moved);
 	}
 
 	SUBCASE("empty context") {
