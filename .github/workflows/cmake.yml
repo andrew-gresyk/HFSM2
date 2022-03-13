@@ -17,12 +17,12 @@ jobs:
     strategy:
       matrix:
         PLATFORM:
-          #- {
-          #    OS: ubuntu-18.04,
-          #    CC: gcc-5,
-          #    CXX: g++-5,
-          #    INSTALL: true
-          #  }
+          - {
+              OS: ubuntu-18.04,
+              CC: gcc-5,
+              CXX: g++-5,
+              INSTALL: true
+            }
           - {
               OS: ubuntu-18.04,
               CC: gcc-6,
