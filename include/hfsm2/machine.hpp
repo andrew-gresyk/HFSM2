@@ -11873,6 +11873,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control,
 		deepRequestChangeResumable  (control, request);
 		break;
 
+	case Strategy::Selectable:
+		deepRequestChangeSelectable	(control, request);
+		break;
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	case Strategy::Utilitarian:

@@ -74,7 +74,6 @@
     <Topleveldir>/Work/HFSM2-experimental</Topleveldir>
   </Reconciliation>
   <VirtualDirectory Name="test">
-    <File Name="../../../test/wiki_utility-theory.cpp"/>
     <File Name="../../../test/wiki_tutorial.cpp"/>
     <File Name="../../../test/wiki_transitions-within-hierarchy.cpp"/>
     <File Name="../../../test/wiki_serialization.cpp"/>

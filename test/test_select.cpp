@@ -118,7 +118,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Utilize") {
+TEST_CASE("FSM.Select") {
 	Logger logger;
 
 	FSM::Instance machine{&logger};
@@ -234,7 +234,7 @@ TEST_CASE("FSM.Utilize") {
 		});
 	}
 
-	WHEN("Utilizing O") {
+	WHEN("Selecting O") {
 		machine.select<O>();
 		machine.update();
 
