@@ -134,9 +134,17 @@ TEST_CASE("FSM.Self Transition") {
 			logger.assertSequence({
 				{						 Event::Type::CHANGE,		FSM::stateId<A    >() },
 
+				{ hfsm2::StateID{0}, 	 Event::Type::PRE_UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<A_1  >(), Event::Type::PRE_UPDATE },
+
 				{ hfsm2::StateID{0}, 	 Event::Type::UPDATE },
 				{ FSM::stateId<A    >(), Event::Type::UPDATE },
 				{ FSM::stateId<A_1  >(), Event::Type::UPDATE },
+
+				{ FSM::stateId<A_1  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::POST_UPDATE },
+				{ hfsm2::StateID{0}, 	 Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<A    >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<A_1  >(), Event::Type::EXIT_GUARD },
@@ -164,9 +172,17 @@ TEST_CASE("FSM.Self Transition") {
 			logger.assertSequence({
 				{						 Event::Type::CHANGE, FSM::stateId<B    >() },
 
+				{ hfsm2::StateID{0}, 	 Event::Type::PRE_UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<A_1  >(), Event::Type::PRE_UPDATE },
+
 				{ hfsm2::StateID{0}, 	 Event::Type::UPDATE },
 				{ FSM::stateId<A    >(), Event::Type::UPDATE },
 				{ FSM::stateId<A_1  >(), Event::Type::UPDATE },
+
+				{ FSM::stateId<A_1  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<A    >(), Event::Type::POST_UPDATE },
+				{ hfsm2::StateID{0}, 	 Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<A    >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<A_1  >(), Event::Type::EXIT_GUARD },
@@ -208,12 +224,26 @@ TEST_CASE("FSM.Self Transition") {
 			logger.assertSequence({
 				{						 Event::Type::CHANGE, FSM::stateId<B    >() },
 
+				{ hfsm2::StateID{0}, 	 Event::Type::PRE_UPDATE },
+				{ FSM::stateId<B    >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<B_1  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<B_1_1>(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<B_2  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<B_2_1>(), Event::Type::PRE_UPDATE },
+
 				{ hfsm2::StateID{0}, 	 Event::Type::UPDATE },
 				{ FSM::stateId<B    >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_1  >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_1_1>(), Event::Type::UPDATE },
 				{ FSM::stateId<B_2  >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_2_1>(), Event::Type::UPDATE },
+
+				{ FSM::stateId<B_1_1>(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<B_1  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<B_2_1>(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<B_2  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<B    >(), Event::Type::POST_UPDATE },
+				{ hfsm2::StateID{0}, 	 Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<B    >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<B_1  >(), Event::Type::EXIT_GUARD },

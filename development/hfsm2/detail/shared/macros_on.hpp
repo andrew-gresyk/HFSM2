@@ -251,30 +251,34 @@
 	#define HFSM2_LOG_INTERFACE_MASK									(1 << 8)
 
 	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		   \
-		if (_logger)														   \
-			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
+		if (_core.logger)													   \
+			_core.logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
 
 #if HFSM2_PLANS_AVAILABLE()
 	#define HFSM2_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)			   \
-		if (_logger)														   \
-			_logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
+		if (_core.logger)													   \
+			_core.logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
 
 	#define HFSM2_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)					   \
-		if (_logger)														   \
-			_logger->recordPlanStatus(CONTEXT, REGION, STATUS)
+		if (_core.logger)													   \
+			_core.logger->recordPlanStatus(CONTEXT, REGION, STATUS)
 #endif
 
 	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)					   \
-		if (_logger)														   \
-			_logger->recordCancelledPending(CONTEXT, ORIGIN)
+		if (_core.logger)													   \
+			_core.logger->recordCancelledPending(CONTEXT, ORIGIN)
+
+	#define HFSM2_LOG_SELECT_RESOLUTION(CONTEXT, HEAD, PRONG)				   \
+		if (auto* const logger = control._core.logger)						   \
+			logger->recordSelectResolution(CONTEXT, HEAD, PRONG)
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)		   \
-		if (auto* const logger = control._logger)							   \
+		if (auto* const logger = control._core.logger)						   \
 			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 	#define HFSM2_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)		   \
-		if (auto* const logger = control._logger)							   \
+		if (auto* const logger = control._core.logger)						   \
 			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
 #endif
 
@@ -292,6 +296,7 @@
 #endif
 
 	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
+	#define HFSM2_LOG_SELECT_RESOLUTION(CONTEXT, HEAD, PRONG)
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
@@ -305,13 +310,13 @@
 #if HFSM2_VERBOSE_DEBUG_LOG_AVAILABLE()
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)						   \
-		if (auto* const logger = control._logger)							   \
+		if (auto* const logger = control._core.logger)						   \
 			logger->recordMethod(control.context(), STATE_ID, METHOD_ID)
 
 #elif HFSM2_LOG_INTERFACE_AVAILABLE()
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)						   \
-		if (auto* const logger = control._logger)							   \
+		if (auto* const logger = control._core.logger)						   \
 			log(METHOD, *logger, control.context(), METHOD_ID)
 
 #else

@@ -9,7 +9,7 @@ void
 OS_<TN, TA, NI, TI>::wideRegister(Registry& registry,
 								  const ForkID forkId) noexcept
 {
-	Initial::deepRegister(registry, Parent{forkId, PRONG_INDEX});
+	Initial		   ::deepRegister(			registry, Parent{forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
 										   const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial::deepForwardEntryGuard(control) : false;
+		Initial	   ::deepForwardEntryGuard(				 control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -30,7 +30,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) noexcept {
-	return Initial::deepForwardEntryGuard(control);
+	return Initial ::deepForwardEntryGuard(				 control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -39,7 +39,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) noexcept {
-	return Initial::deepEntryGuard(control);
+	return Initial ::deepEntryGuard(			  control);
 }
 
 //------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideEnter(PlanControl& control) noexcept {
-	Initial::deepEnter(control);
+	Initial		   ::deepEnter(				control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -57,7 +57,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) noexcept {
-	Initial::deepReenter(control);
+	Initial		   ::deepReenter(			  control);
 }
 
 //------------------------------------------------------------------------------
@@ -65,8 +65,26 @@ OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) noexcept {
 template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 Status
+OS_<TN, TA, NI, TI>::widePreUpdate(FullControl& control) noexcept {
+	return Initial ::deepPreUpdate(				control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+HFSM2_CONSTEXPR(14)
+Status
 OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) noexcept {
-	return Initial::deepUpdate(control);
+	return Initial ::deepUpdate(			 control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI>::widePostUpdate(FullControl& control) noexcept {
+	return Initial ::deepPostUpdate(			 control);
 }
 
 //------------------------------------------------------------------------------
@@ -75,11 +93,48 @@ template <typename TN, typename TA, Short NI, typename TI>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 Status
+OS_<TN, TA, NI, TI>::widePreReact(FullControl& control,
+								  const TEvent& event) noexcept
+{
+	return Initial ::deepPreReact(			   control, event);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
 OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
 							   const TEvent& event) noexcept
 {
-	return Initial::deepReact(control, event);
+	return Initial ::deepReact(				control, event);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI>::widePostReact(FullControl& control,
+								   const TEvent& event) noexcept
+{
+	return Initial ::deepPostReact(				control, event);
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Short NI, typename TI>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI>::wideUpdatePlans(FullControl& control) noexcept {
+	return Initial ::deepUpdatePlans(			  control);
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -90,7 +145,7 @@ OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
 										  const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial::deepForwardExitGuard(control) : false;
+		Initial	   ::deepForwardExitGuard(				control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -99,7 +154,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) noexcept {
-	return Initial::deepForwardExitGuard(control);
+	return Initial ::deepForwardExitGuard(				control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -108,7 +163,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) noexcept {
-	return Initial::deepExitGuard(control);
+	return Initial ::deepExitGuard(				 control);
 }
 
 //------------------------------------------------------------------------------
@@ -117,7 +172,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideExit(PlanControl& control) noexcept {
-	Initial::deepExit(control);
+	Initial		   ::deepExit(			   control);
 }
 
 //------------------------------------------------------------------------------
@@ -130,7 +185,7 @@ OS_<TN, TA, NI, TI>::wideForwardActive(Control& control,
 									   const ProngCBits prongs) noexcept
 {
 	if (prongs.get(PRONG_INDEX))
-		Initial::deepForwardActive(control, request);
+		Initial	   ::deepForwardActive(			control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -141,7 +196,7 @@ void
 OS_<TN, TA, NI, TI>::wideForwardRequest(Control& control,
 										const Request request) noexcept
 {
-	Initial::deepForwardRequest(control, request);
+	Initial		   ::deepForwardRequest(		 control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -152,7 +207,7 @@ void
 OS_<TN, TA, NI, TI>::wideRequestChange(Control& control,
 									   const Request request) noexcept
 {
-	Initial::deepRequestChange(control, request);
+	Initial		   ::deepRequestChange(			control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -163,7 +218,7 @@ void
 OS_<TN, TA, NI, TI>::wideRequestRestart(Control& control,
 										const Request request) noexcept
 {
-	Initial::deepRequestRestart(control, request);
+	Initial		   ::deepRequestRestart(		 control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -174,7 +229,18 @@ void
 OS_<TN, TA, NI, TI>::wideRequestResume(Control& control,
 									   const Request request) noexcept
 {
-	Initial::deepRequestResume(control, request);
+	Initial		   ::deepRequestResume(			control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+HFSM2_CONSTEXPR(14)
+void
+OS_<TN, TA, NI, TI>::wideRequestSelect(Control& control,
+									   const Request request) noexcept
+{
+	Initial		   ::deepRequestSelect(			control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -187,7 +253,7 @@ void
 OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control,
 										const Request request) noexcept
 {
-	Initial::deepRequestUtilize(control, request);
+	Initial		   ::deepRequestUtilize(		 control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -198,7 +264,7 @@ void
 OS_<TN, TA, NI, TI>::wideRequestRandomize(Control& control,
 										  const Request request) noexcept
 {
-	Initial::deepRequestRandomize(control, request);
+	Initial		   ::deepRequestRandomize(		   control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -240,7 +306,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) noexcept {
-	Initial::deepChangeToRequested(control);
+	Initial		   ::deepChangeToRequested(				control);
 }
 
 //------------------------------------------------------------------------------
@@ -253,7 +319,7 @@ void
 OS_<TN, TA, NI, TI>::wideSaveActive(const Registry& registry,
 									WriteStream& stream) const noexcept
 {
-	Initial::deepSaveActive(registry, stream);
+	Initial		   ::deepSaveActive(				registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -264,7 +330,7 @@ void
 OS_<TN, TA, NI, TI>::wideSaveResumable(const Registry& registry,
 									   WriteStream& stream) const noexcept
 {
-	Initial::deepSaveResumable(registry, stream);
+	Initial		   ::deepSaveResumable(				   registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -275,7 +341,7 @@ void
 OS_<TN, TA, NI, TI>::wideLoadRequested(Registry& registry,
 									   ReadStream& stream) const noexcept
 {
-	Initial::deepLoadRequested(registry, stream);
+	Initial		   ::deepLoadRequested(			 registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -286,7 +352,7 @@ void
 OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 									   ReadStream& stream) const noexcept
 {
-	Initial::deepLoadResumable(registry, stream);
+	Initial		   ::deepLoadResumable(			 registry, stream);
 }
 
 #endif
@@ -302,7 +368,7 @@ OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
 								  const Short depth,
 								  StructureStateInfos& _stateInfos) const
 {
-	Initial::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
+	Initial		   ::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
 }
 
 #endif

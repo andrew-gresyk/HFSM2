@@ -155,14 +155,20 @@ TEST_CASE("FSM.Randomize") {
 				logger.assertSequence({
 					{						 Event::Type::CHANGE,		FSM::stateId<O    >() },
 
+					{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
+					{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
+
 					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
 					{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-					{ FSM::stateId<N_000>(), Event::Type::RANK },
-					{ FSM::stateId<N_025>(), Event::Type::RANK },
-					{ FSM::stateId<N_050>(), Event::Type::RANK },
-					{ FSM::stateId<N_075>(), Event::Type::RANK },
-					{ FSM::stateId<N_100>(), Event::Type::RANK },
+					{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
+					{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
+
+					{ FSM::stateId<N_000>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_025>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_050>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_075>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_100>(), Event::Type::REPORT_RANK },
 
 					{ FSM::stateId<N_000>(), Event::Type::UTILITY },
 					{ FSM::stateId<N_025>(), Event::Type::UTILITY },
@@ -210,8 +216,14 @@ TEST_CASE("FSM.Randomize") {
 				logger.assertSequence({
 					{						 Event::Type::RESTART,	FSM::stateId<O    >() },
 
+					{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
+					{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
+
 					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
 					{ FSM::stateId<I    >(), Event::Type::UPDATE },
+
+					{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
+					{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 					{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
 					{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
@@ -255,14 +267,20 @@ TEST_CASE("FSM.Randomize") {
 				logger.assertSequence({
 					{						 Event::Type::RANDOMIZE,	FSM::stateId<O    >() },
 
+					{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
+					{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
+
 					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
 					{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-					{ FSM::stateId<N_000>(), Event::Type::RANK },
-					{ FSM::stateId<N_025>(), Event::Type::RANK },
-					{ FSM::stateId<N_050>(), Event::Type::RANK },
-					{ FSM::stateId<N_075>(), Event::Type::RANK },
-					{ FSM::stateId<N_100>(), Event::Type::RANK },
+					{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
+					{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
+
+					{ FSM::stateId<N_000>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_025>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_050>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_075>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_100>(), Event::Type::REPORT_RANK },
 
 					{ FSM::stateId<N_000>(), Event::Type::UTILITY },
 					{ FSM::stateId<N_025>(), Event::Type::UTILITY },
@@ -270,11 +288,11 @@ TEST_CASE("FSM.Randomize") {
 
 					{ FSM::stateId<N    >(), Event::Type::RANDOM_RESOLUTION, 3 },
 
-					{ FSM::stateId<C_000>(), Event::Type::RANK },
-					{ FSM::stateId<C_025>(), Event::Type::RANK },
-					{ FSM::stateId<C_050>(), Event::Type::RANK },
-					{ FSM::stateId<C_075>(), Event::Type::RANK },
-					{ FSM::stateId<C_100>(), Event::Type::RANK },
+					{ FSM::stateId<C_000>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<C_025>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<C_050>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<C_075>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<C_100>(), Event::Type::REPORT_RANK },
 
 					{ FSM::stateId<C_000>(), Event::Type::UTILITY },
 					{ FSM::stateId<C_025>(), Event::Type::UTILITY },
@@ -312,14 +330,20 @@ TEST_CASE("FSM.Randomize") {
 				logger.assertSequence({
 					{						 Event::Type::RANDOMIZE,	FSM::stateId<O    >() },
 
+					{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
+					{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
+
 					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
 					{ FSM::stateId<I    >(), Event::Type::UPDATE },
 
-					{ FSM::stateId<N_000>(), Event::Type::RANK },
-					{ FSM::stateId<N_025>(), Event::Type::RANK },
-					{ FSM::stateId<N_050>(), Event::Type::RANK },
-					{ FSM::stateId<N_075>(), Event::Type::RANK },
-					{ FSM::stateId<N_100>(), Event::Type::RANK },
+					{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
+					{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
+
+					{ FSM::stateId<N_000>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_025>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_050>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_075>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<N_100>(), Event::Type::REPORT_RANK },
 
 					{ FSM::stateId<N_000>(), Event::Type::UTILITY },
 					{ FSM::stateId<N_025>(), Event::Type::UTILITY },
@@ -327,11 +351,11 @@ TEST_CASE("FSM.Randomize") {
 
 					{ FSM::stateId<N    >(), Event::Type::RANDOM_RESOLUTION, 3 },
 
-					{ FSM::stateId<C_000>(), Event::Type::RANK },
-					{ FSM::stateId<C_025>(), Event::Type::RANK },
-					{ FSM::stateId<C_050>(), Event::Type::RANK },
-					{ FSM::stateId<C_075>(), Event::Type::RANK },
-					{ FSM::stateId<C_100>(), Event::Type::RANK },
+					{ FSM::stateId<C_000>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<C_025>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<C_050>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<C_075>(), Event::Type::REPORT_RANK },
+					{ FSM::stateId<C_100>(), Event::Type::REPORT_RANK },
 
 					{ FSM::stateId<C_000>(), Event::Type::UTILITY },
 					{ FSM::stateId<C_025>(), Event::Type::UTILITY },

@@ -1,9 +1,18 @@
-#if HFSM2_PLANS_AVAILABLE()
-
 namespace hfsm2 {
 namespace detail {
 
+//------------------------------------------------------------------------------
+
+HFSM2_CONSTEXPR(14)
+void
+Status::clear() noexcept {
+	result = Result::NONE;
+	outerTransition = false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
+
+#if HFSM2_PLANS_AVAILABLE()
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
 HFSM2_CONSTEXPR(14)
@@ -29,6 +38,16 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 	}
 
 #endif
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clearRegionStatuses() noexcept {
+	headStatuses.clear();
+	subStatuses	.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -120,6 +139,16 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 
 //------------------------------------------------------------------------------
 
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clearRegionStatuses() noexcept {
+	headStatuses.clear();
+	subStatuses	.clear();
+}
+
+//------------------------------------------------------------------------------
+
 #if HFSM2_ASSERT_AVAILABLE()
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
@@ -176,10 +205,9 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 }
 
 #endif
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
 }
 }
-
-#endif

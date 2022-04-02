@@ -15,7 +15,9 @@
 			&gt;
 		</DisplayString>
 		<DisplayString>{&amp;_Tptr->_Data._DecoratedName[4],[strchr(_Tptr->_Data._DecoratedName,'@') - _Tptr->_Data._DecoratedName - 4]sb}</DisplayString>
+		<!--
 		<Expand HideRawView="true" />
+		-->
 	</Type>
 
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -113,7 +115,7 @@
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::ControlT&lt;*&gt;">
-		<DisplayString>{_context}</DisplayString>
+		<DisplayString>{_core.context}</DisplayString>
 	</Type>
 
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
@@ -192,6 +194,7 @@
 				<If Condition="_bounds.first != INVALID_LONG &amp;&amp; _bounds.first == _bounds.last">
 					<Item>_planData.tasks._items[_bounds.last]</Item>
 				</If>
+
 			</CustomListItems>
 		</Expand>
 	</Type>
@@ -206,6 +209,8 @@
 		</Expand>
 	</Type>
 
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 	<Type Name="hfsm2::detail::S_&lt;*&gt;">
@@ -216,18 +221,18 @@
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::C_&lt;*&gt;">
-		<DisplayString>({TYPE})</DisplayString>
+		<DisplayString>({(HeadState) *this})</DisplayString>
 	</Type>
 
 	<Type Name="hfsm2::detail::CS_&lt;*&gt;">
 		<DisplayString Optional="true">{(LHalf) *this} {(RHalf) *this}</DisplayString>
-		<DisplayString Optional="true">{(State) *this}</DisplayString>
+		<DisplayString Optional="true">{(Single) *this}</DisplayString>
 	</Type>
 
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::O_&lt;*&gt;">
-		<DisplayString>[{TYPE}]</DisplayString>
+		<DisplayString>({(HeadState) *this})</DisplayString>
 	</Type>
 
 	<Type Name="hfsm2::detail::OS_&lt;*&gt;">

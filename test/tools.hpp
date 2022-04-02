@@ -25,18 +25,26 @@
 struct Event {
 	enum class Type {
 
+		REPORT_SELECT,
+
 	//#if HFSM2_UTILITY_THEORY_AVAILABLE()
-		RANK,
+		REPORT_RANK,
 		UTILITY,
 	//#endif
 
 		ENTRY_GUARD,
 		ENTER,
 		REENTER,
+		PRE_UPDATE,
 		UPDATE,
+		POST_UPDATE,
+		PRE_REACT,
 		REACT,
+		POST_REACT,
 		EXIT_GUARD,
 		EXIT,
+
+		SELECT_RESOLUTION,
 
 	//#if HFSM2_UTILITY_THEORY_AVAILABLE()
 		UTILITY_RESOLUTION,
@@ -56,6 +64,7 @@ struct Event {
 		CHANGE,
 		RESTART,
 		RESUME,
+		SELECT,
 
 	//#if HFSM2_UTILITY_THEORY_AVAILABLE()
 		UTILIZE,
@@ -141,6 +150,10 @@ struct LoggerT
 
 	void recordCancelledPending(Context& context,
 								const StateID origin) noexcept override;
+
+	void recordSelectResolution(Context& context,
+								const StateID head,
+								const StateID prong) noexcept override;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 

@@ -73,63 +73,81 @@ struct HFSM2_EMPTY_BASES O_
 
 	//----------------------------------------------------------------------
 
-	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Registry& registry)	  noexcept	{ return		  registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Registry& registry)	  noexcept	{ return		  registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Registry& registry)	  noexcept	{ return			   registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Registry& registry)	  noexcept	{ return			   registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Control&  control)	  noexcept	{ return control._registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Control&  control)	  noexcept	{ return control._registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Control&  control)	  noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Control&  control)	  noexcept	{ return control._core.registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	void	deepRegister		 (Registry& registry,
-													  const Parent parent)			  noexcept;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard(GuardControl& control)		  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard		 (GuardControl& control)		  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void	deepEnter			 (PlanControl&	control)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepReenter			 (PlanControl&	control)		  noexcept;
-
-	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 (FullControl&	control)		  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReact			 (FullControl&	control,
-													  const TEvent& event)			  noexcept;
-
-	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl& control)		  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	deepExitGuard		 (GuardControl& control)		  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void	deepExit			 (PlanControl&	control)		  noexcept;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	void	deepForwardActive	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepForwardRequest	 (Control& control, const Request request)	  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void	deepRequest			 (Control& control, const Request request)	  noexcept;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestRestart	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestResume	 (Control& control, const Request request)	  noexcept;
-
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize (Control& control, const Request request)	  noexcept;
-
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange	 (Control& control)				  noexcept;
-
-	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize	 (Control& control)				  noexcept;
-	HFSM2_CONSTEXPR(14)	Rank	deepReportRank		 (Control& control)				  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize  (Control& control)				  noexcept;
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(11)	static Status&	  headStatus	(	   Control&	 control)	  noexcept	{ return control._core.planData.headStatuses[REGION_ID];	}
+	HFSM2_CONSTEXPR(11)	static Status&	  subStatus		(	   Control&	 control)	  noexcept	{ return control._core.planData.subStatuses [REGION_ID];	}
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested(PlanControl&  control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRegister		 (Registry& registry, const Parent parent)		  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard(GuardControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard		 (GuardControl& control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepEnter			 ( PlanControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepReenter			 ( PlanControl& control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	Status	deepPreUpdate		 ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPostUpdate		 ( FullControl& control)						  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepPreReact		 ( FullControl& control, const TEvent& event)	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepReact			 ( FullControl& control, const TEvent& event)	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepPostReact		 ( FullControl& control, const TEvent& event)	  noexcept;
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	Status	deepUpdatePlans		 ( FullControl& control)						  noexcept;
+#endif
+
+	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepExitGuard		 (GuardControl& control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepExit			 ( PlanControl& control)						  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	deepForwardActive	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardRequest	 (	   Control& control, const Request request)	  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	deepRequest			 (	   Control& control, const Request request)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRestart	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestResume	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestSelect	 (	   Control& control, const Request request)	  noexcept;
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize (	   Control& control, const Request request)	  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange	 (	   Control& control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize	 (	   Control& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	deepReportRank		 (	   Control& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize  (	   Control& control)						  noexcept;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested( PlanControl& control)						  noexcept;
 
 	//----------------------------------------------------------------------
 

@@ -46,10 +46,10 @@ static_assert(FSM::stateId<Step3  >() ==  7, "");
 ////////////////////////////////////////////////////////////////////////////////
 
 class EntryGuardTracked
-	: public FSM::Injection
+	: public FSM::State
 {
 public:
-	void preEntryGuard(Context&)					{ ++_entryGuardCount;		}
+	void entryGuard(GuardControl&)					{ ++_entryGuardCount;		}
 
 	unsigned entryGuardCount() const				{ return _entryGuardCount;	}
 
@@ -60,10 +60,10 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class ExitGuardTracked
-	: public FSM::Injection
+	: public FSM::State
 {
 public:
-	void preExitGuard(Context&)						{ ++_exitGuardCount;		}
+	void exitGuard(GuardControl&)					{ ++_exitGuardCount;		}
 
 	unsigned exitGuardCount() const					{ return _exitGuardCount;	}
 
@@ -74,10 +74,10 @@ private:
 //------------------------------------------------------------------------------
 
 class UpdateTracked
-	: public FSM::Injection
+	: public FSM::State
 {
 public:
-	void preUpdate(Context&)						{ ++_updateCount;			}
+	void preUpdate(FullControl&)					{ ++_updateCount;			}
 
 	unsigned updateCount() const					{ return _updateCount;		}
 
@@ -319,10 +319,20 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
+				{ FSM::stateId<Apex   >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_1>(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex   >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1  >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_1>(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_2>(),	Event::Type::UPDATE },
+
+				{ FSM::stateId<Step1_1>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex   >(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1  >(),	Event::Type::CANCEL_PENDING },
@@ -346,10 +356,20 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
+				{ FSM::stateId<Apex   >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_1>(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex   >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1  >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_1>(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_2>(),	Event::Type::UPDATE },
+
+				{ FSM::stateId<Step1_1>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex   >(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
@@ -376,10 +396,20 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
+				{ FSM::stateId<Apex   >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_1>(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex   >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1  >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_1>(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_2>(),	Event::Type::UPDATE },
+
+				{ FSM::stateId<Step1_1>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex   >(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
@@ -406,10 +436,20 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
+				{ FSM::stateId<Apex   >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_1>(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex   >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1  >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_1>(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_2>(),	Event::Type::UPDATE },
+
+				{ FSM::stateId<Step1_1>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex   >(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
@@ -437,10 +477,20 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
+				{ FSM::stateId<Apex   >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_1>(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex   >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1  >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_1>(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_2>(),	Event::Type::UPDATE },
+
+				{ FSM::stateId<Step1_1>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex   >(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
@@ -471,10 +521,20 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
+				{ FSM::stateId<Apex   >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_1>(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex   >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1  >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_1>(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_2>(),	Event::Type::UPDATE },
+
+				{ FSM::stateId<Step1_1>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex   >(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
@@ -505,10 +565,20 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step3  >() },
 
+				{ FSM::stateId<Apex   >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_1>(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex   >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1  >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_1>(),	Event::Type::UPDATE },
 				{ FSM::stateId<Step1_2>(),	Event::Type::UPDATE },
+
+				{ FSM::stateId<Step1_1>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1_2>(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1  >(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex   >(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },

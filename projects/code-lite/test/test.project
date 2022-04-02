@@ -7,6 +7,9 @@
         <File Name="../../../development/hfsm2/detail/root.inl"/>
         <File Name="../../../development/hfsm2/detail/root.hpp"/>
         <VirtualDirectory Name="structure">
+          <File Name="../../../development/hfsm2/detail/structure/ancestors_2.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/ancestors_1.inl"/>
+          <File Name="../../../development/hfsm2/detail/structure/ancestors.hpp"/>
           <File Name="../../../development/hfsm2/detail/structure/state.inl"/>
           <File Name="../../../development/hfsm2/detail/structure/state.hpp"/>
           <File Name="../../../development/hfsm2/detail/structure/orthogonal_sub_2.inl"/>
@@ -14,9 +17,6 @@
           <File Name="../../../development/hfsm2/detail/structure/orthogonal_sub.hpp"/>
           <File Name="../../../development/hfsm2/detail/structure/orthogonal.inl"/>
           <File Name="../../../development/hfsm2/detail/structure/orthogonal.hpp"/>
-          <File Name="../../../development/hfsm2/detail/structure/injections_2.inl"/>
-          <File Name="../../../development/hfsm2/detail/structure/injections_1.inl"/>
-          <File Name="../../../development/hfsm2/detail/structure/injections.hpp"/>
           <File Name="../../../development/hfsm2/detail/structure/forward.hpp"/>
           <File Name="../../../development/hfsm2/detail/structure/composite_sub_2.inl"/>
           <File Name="../../../development/hfsm2/detail/structure/composite_sub_1.inl"/>
@@ -36,6 +36,8 @@
           <File Name="../../../development/hfsm2/detail/shared/bit_stream.hpp"/>
         </VirtualDirectory>
         <VirtualDirectory Name="root">
+          <File Name="../../../development/hfsm2/detail/root/core.inl"/>
+          <File Name="../../../development/hfsm2/detail/root/core.hpp"/>
           <File Name="../../../development/hfsm2/detail/root/registry_2.inl"/>
           <File Name="../../../development/hfsm2/detail/root/registry_1.inl"/>
           <File Name="../../../development/hfsm2/detail/root/registry.hpp"/>
@@ -69,10 +71,16 @@
     <Extensions>
       <![CDATA[*.cpp;*.hpp;*.inl]]>
     </Extensions>
-    <Topleveldir>/Work/HFSM2</Topleveldir>
+    <Topleveldir>/Work/HFSM2-experimental</Topleveldir>
   </Reconciliation>
   <VirtualDirectory Name="test">
-    <File Name="../../../test/test_injections.cpp"/>
+    <File Name="../../../test/wiki_utility-theory.cpp"/>
+    <File Name="../../../test/wiki_tutorial.cpp"/>
+    <File Name="../../../test/wiki_transitions-within-hierarchy.cpp"/>
+    <File Name="../../../test/wiki_serialization.cpp"/>
+    <File Name="../../../test/wiki_plans.cpp"/>
+    <File Name="../../../test/test_select.cpp"/>
+    <File Name="../../../test/test_ancestors.cpp"/>
     <File Name="../../../test/tools.inl"/>
     <VirtualDirectory Name="reported">
       <File Name="../../../test/reported/issue_49.cpp"/>

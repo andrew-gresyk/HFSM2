@@ -91,7 +91,10 @@ static_assert(FSM::stateId<Work_2    >() == 18, "");
 // TODO: make use of planFailed()
 // TODO: build a plan with re-entry
 
-struct Apex	  : FSM::State {};
+struct Apex
+	: FSM::State
+{
+};
 
 //------------------------------------------------------------------------------
 
@@ -313,11 +316,22 @@ TEST_CASE("FSM.Plan payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId<Apex      >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Planned   >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_BT  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId<Step1_1   >(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex      >(), Event::Type::UPDATE },
 				{ FSM::stateId<Planned   >(), Event::Type::UPDATE },
 				{ FSM::stateId<Step1_BT  >(), Event::Type::UPDATE },
 				{ FSM::stateId<Step1_1   >(), Event::Type::UPDATE },
+
 				{ FSM::stateId<Step1_1   >(), Event::Type::CHANGE, FSM::stateId<Step1_2  >() },
+
+				{ FSM::stateId<Step1_1   >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<Step1_BT  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<Planned   >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex      >(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId<Step1_2   >(), Event::Type::ENTRY_GUARD },
@@ -343,13 +357,24 @@ TEST_CASE("FSM.Plan payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId <Apex      >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step1_2   >(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId <Apex      >(), Event::Type::UPDATE },
 				{ FSM::stateId <Planned   >(), Event::Type::UPDATE },
 				{ FSM::stateId <Step1_BT  >(), Event::Type::UPDATE },
 				{ FSM::stateId <Step1_2   >(), Event::Type::UPDATE },
 
 				{ FSM::regionId<Step1_BT  >(), Event::Type::TASK_SUCCESS,	FSM::stateId<Step1_2  >() },
-				{ FSM::stateId <Step1_BT  >(), Event::Type::CHANGE,		FSM::stateId<Step1_3  >() },
+
+				{ FSM::stateId <Step1_2   >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Apex      >(), Event::Type::POST_UPDATE },
+
+				{ FSM::stateId <Step1_BT  >(), Event::Type::CHANGE,			FSM::stateId<Step1_3  >() },
 
 				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId <Step1_3   >(), Event::Type::ENTRY_GUARD },
@@ -376,16 +401,27 @@ TEST_CASE("FSM.Plan payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId <Apex      >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step1_3   >(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId <Apex      >(), Event::Type::UPDATE },
 				{ FSM::stateId <Planned   >(), Event::Type::UPDATE },
 				{ FSM::stateId <Step1_BT  >(), Event::Type::UPDATE },
 				{ FSM::stateId <Step1_3   >(), Event::Type::UPDATE },
 
 				{ FSM::regionId<Step1_BT  >(), Event::Type::TASK_SUCCESS,		FSM::stateId<Step1_3   >() },
+
+				{ FSM::stateId <Step1_3   >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Step1_BT  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Apex      >(), Event::Type::POST_UPDATE },
+
 				{ FSM::stateId <Step1_BT  >(), Event::Type::PLAN_SUCCEEDED },
 				{ FSM::regionId<Step1_BT  >(), Event::Type::TASK_SUCCESS,		FSM::stateId<Step1_BT  >() },
 				{ FSM::regionId<Step1_BT  >(), Event::Type::PLAN_SUCCESS },
-				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,			FSM::stateId<Hybrid    >() },
+				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,				FSM::stateId<Hybrid    >() },
 
 				{ FSM::stateId <Step1_BT  >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId <Step1_3   >(), Event::Type::EXIT_GUARD  },
@@ -426,6 +462,14 @@ TEST_CASE("FSM.Plan payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId <Apex      >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Hybrid    >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId <Apex      >(), Event::Type::UPDATE },
 				{ FSM::stateId <Planned   >(), Event::Type::UPDATE },
 				{ FSM::stateId <Hybrid    >(), Event::Type::UPDATE },
@@ -439,8 +483,16 @@ TEST_CASE("FSM.Plan payloads") {
 
 				{ FSM::regionId<Step2R_P  >(), Event::Type::TASK_SUCCESS,	FSM::stateId<Step2R_1  >() },
 
-				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,		FSM::stateId<Step2L_2  >() },
-				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,		FSM::stateId<Step2R_2  >() },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Hybrid    >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Apex      >(), Event::Type::POST_UPDATE },
+
+				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,			FSM::stateId<Step2L_2  >() },
+				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,			FSM::stateId<Step2R_2  >() },
 
 				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT_GUARD },
@@ -477,6 +529,14 @@ TEST_CASE("FSM.Plan payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId <Apex      >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Hybrid    >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step2L_2  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::PRE_UPDATE },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId <Apex      >(), Event::Type::UPDATE },
 				{ FSM::stateId <Planned   >(), Event::Type::UPDATE },
 				{ FSM::stateId <Hybrid    >(), Event::Type::UPDATE },
@@ -489,6 +549,14 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId <Step2R_2  >(), Event::Type::UPDATE },
 
 				{ FSM::regionId<Step2R_P  >(), Event::Type::TASK_FAILURE,	  FSM::stateId<Step2R_2 >() },
+
+				{ FSM::stateId <Step2L_2  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Hybrid    >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Planned   >(), Event::Type::POST_UPDATE },
+				{ FSM::stateId <Apex      >(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId <Hybrid    >(), Event::Type::PLAN_FAILED },
 				{ FSM::regionId<Hybrid    >(), Event::Type::TASK_SUCCESS,	  FSM::stateId<Hybrid   >()   },

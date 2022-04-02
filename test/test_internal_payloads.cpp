@@ -65,14 +65,14 @@ static_assert(FSM::stateId<B_2  >() == 10, "");
 static_assert(FSM::stateId<B_2_1>() == 11, "");
 static_assert(FSM::stateId<B_2_2>() == 12, "");
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 class Timed
-	: public FSM::Injection
+	: public FSM::State
 {
 public:
-	void preEnter(Context&)							{ _elapsed = 0.0f;			}
-	void preUpdate(Context& _)						{ _elapsed += _;			} //-V669
+	void enter(PlanControl&)						{ _elapsed = 0.0f;			}
+	void preUpdate(FullControl& control)			{ _elapsed += control._();	} //-V669
 
 	float elapsed() const							{ return _elapsed;			}
 
@@ -83,15 +83,15 @@ private:
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class Tracked
-	: public FSM::Injection
+	: public FSM::State
 {
 public:
-	void preEnter(Context&) {
+	void enter(PlanControl&) {
 		++_entryCount;
 		_currentUpdateCount = 0;
 	}
 
-	void preUpdate(Context&) {
+	void preUpdate(FullControl&) {
 		++_currentUpdateCount;
 		++_totalUpdateCount;
 	}
@@ -341,8 +341,14 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
+				{ FSM::stateId<A    >(), Event::Type::PRE_REACT },
+				{ FSM::stateId<A_1  >(), Event::Type::PRE_REACT },
+
 				{ FSM::stateId<A    >(), Event::Type::REACT },
 				{ FSM::stateId<A_1  >(), Event::Type::REACT },
+
+				{ FSM::stateId<A_1  >(), Event::Type::POST_REACT },
+				{ FSM::stateId<A    >(), Event::Type::POST_REACT },
 			});
 
 			assertActive(machine, all, {
@@ -364,8 +370,7 @@ TEST_CASE("FSM.Internal Payloads") {
 			logger.assertSequence({
 				{ FSM::stateId<A    >(), Event::Type::UPDATE },
 				{ FSM::stateId<A_1  >(), Event::Type::UPDATE },
-
-				{ FSM::stateId<A_1  >(), Event::Type::CHANGE,			FSM::stateId<A_2  >() },
+				{ FSM::stateId<A_1  >(), Event::Type::CHANGE,	FSM::stateId<A_2  >() },
 
 				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },
 
@@ -406,9 +411,17 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
+				{ FSM::stateId<A    >(), Event::Type::PRE_REACT },
+				{ FSM::stateId<A_2  >(), Event::Type::PRE_REACT },
+				{ FSM::stateId<A_2_1>(), Event::Type::PRE_REACT },
+
 				{ FSM::stateId<A    >(), Event::Type::REACT },
 				{ FSM::stateId<A_2  >(), Event::Type::REACT },
 				{ FSM::stateId<A_2_1>(), Event::Type::REACT },
+
+				{ FSM::stateId<A_2_1>(), Event::Type::POST_REACT },
+				{ FSM::stateId<A_2  >(), Event::Type::POST_REACT },
+				{ FSM::stateId<A    >(), Event::Type::POST_REACT },
 			});
 
 			assertActive(machine, all, {
@@ -431,12 +444,15 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId<A_2  >(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<A    >(), Event::Type::UPDATE },
 				{ FSM::stateId<A_2  >(), Event::Type::UPDATE },
-
-				{ FSM::stateId<A_2  >(), Event::Type::CHANGE,			FSM::stateId<B_2_2>() },
+				{ FSM::stateId<A_2  >(), Event::Type::CHANGE,	FSM::stateId<B_2_2>() },
 
 				{ FSM::stateId<A_2_1>(), Event::Type::UPDATE },
+
+				{ FSM::stateId<A_2  >(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<A_2  >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<B_2_2>(), Event::Type::ENTRY_GUARD },
@@ -493,11 +509,23 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.react(Action{});
 		{
 			logger.assertSequence({
+				{ FSM::stateId<B    >(), Event::Type::PRE_REACT },
+				{ FSM::stateId<B_1  >(), Event::Type::PRE_REACT },
+				{ FSM::stateId<B_1_1>(), Event::Type::PRE_REACT },
+				{ FSM::stateId<B_2  >(), Event::Type::PRE_REACT },
+				{ FSM::stateId<B_2_2>(), Event::Type::PRE_REACT },
+
 				{ FSM::stateId<B    >(), Event::Type::REACT },
 				{ FSM::stateId<B_1  >(), Event::Type::REACT },
 				{ FSM::stateId<B_1_1>(), Event::Type::REACT },
 				{ FSM::stateId<B_2  >(), Event::Type::REACT },
 				{ FSM::stateId<B_2_2>(), Event::Type::REACT },
+
+				{ FSM::stateId<B_1_1>(), Event::Type::POST_REACT },
+				{ FSM::stateId<B_1  >(), Event::Type::POST_REACT },
+				{ FSM::stateId<B_2_2>(), Event::Type::POST_REACT },
+				{ FSM::stateId<B_2  >(), Event::Type::POST_REACT },
+				{ FSM::stateId<B    >(), Event::Type::POST_REACT },
 			});
 
 			assertActive(machine, all, {
@@ -524,13 +552,17 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId<B_2_2>(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<B    >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_1  >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_1_1>(), Event::Type::UPDATE },
 				{ FSM::stateId<B_2  >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_2_2>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<B_2_2>(), Event::Type::RESUME,			FSM::stateId<A    >() },
+				{ FSM::stateId<B_2_2>(), Event::Type::RESUME,	FSM::stateId<A    >() },
+
+				{ FSM::stateId<B_2_2>(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },
@@ -583,12 +615,16 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId<A_2  >(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<A    >(), Event::Type::UPDATE },
 				{ FSM::stateId<A_2  >(), Event::Type::UPDATE },
 
-				{ FSM::stateId<A_2  >(), Event::Type::RESUME,			FSM::stateId<B    >() },
+				{ FSM::stateId<A_2  >(), Event::Type::RESUME,	FSM::stateId<B    >() },
 
 				{ FSM::stateId<A_2_1>(), Event::Type::UPDATE },
+
+				{ FSM::stateId<A_2  >(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<A_2  >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<B_2_2>(), Event::Type::ENTRY_GUARD },
@@ -645,20 +681,24 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId<B_2_2>(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<B    >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_1  >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_1_1>(), Event::Type::UPDATE },
 				{ FSM::stateId<B_2  >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_2_2>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<B_2_2>(), Event::Type::CHANGE,			FSM::stateId<B    >() },
+				{ FSM::stateId<B_2_2>(), Event::Type::CHANGE,	FSM::stateId<B    >() },
+
+				{ FSM::stateId<B_2_2>(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<B_2_1>(), Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<B_2_1>(), Event::Type::CANCEL_PENDING },
 
-				{ FSM::stateId<B_2_1>(), Event::Type::RESUME,			FSM::stateId<B_2_2>() },
+				{ FSM::stateId<B_2_1>(), Event::Type::RESUME,	FSM::stateId<B_2_2>() },
 
 				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<B_2_2>(), Event::Type::ENTRY_GUARD },
@@ -704,14 +744,18 @@ TEST_CASE("FSM.Internal Payloads") {
 		machine.update();
 		{
 			logger.assertSequence({
+				{ FSM::stateId<B_2_2>(), Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<B    >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_1  >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_1_1>(), Event::Type::UPDATE },
 				{ FSM::stateId<B_2  >(), Event::Type::UPDATE },
 				{ FSM::stateId<B_2_2>(), Event::Type::UPDATE },
 
-				{ FSM::stateId<B_2_2>(), Event::Type::SCHEDULE,		FSM::stateId<A_2_2>() },
-				{ FSM::stateId<B_2_2>(), Event::Type::RESUME,			FSM::stateId<A    >() },
+				{ FSM::stateId<B_2_2>(), Event::Type::SCHEDULE,	FSM::stateId<A_2_2>() },
+				{ FSM::stateId<B_2_2>(), Event::Type::RESUME,	FSM::stateId<A    >() },
+
+				{ FSM::stateId<B_2_2>(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },

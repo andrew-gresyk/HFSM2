@@ -9,7 +9,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideRegister(Registry& registry,
 										  const Parent parent) noexcept
 {
-	State::deepRegister(registry, Parent{parent.forkId, PRONG_INDEX});
+	Single::deepRegister(registry, Parent{parent.forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardEntryGuard(GuardControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepForwardEntryGuard(control);
+	return Single::deepForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -36,7 +36,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideEntryGuard(GuardControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepEntryGuard(control);
+	return Single::deepEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideEnter(PlanControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepEnter(control);
+	Single::deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -62,10 +62,23 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReenter(PlanControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepReenter(control);
+	Single::deepReenter(control);
 }
 
 //------------------------------------------------------------------------------
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::widePreUpdate(FullControl& control,
+										   const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepPreUpdate(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
@@ -75,10 +88,38 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideUpdate(FullControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepUpdate(control);
+	return Single::deepUpdate(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::widePostUpdate(FullControl& control,
+											const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepPostUpdate(control);
 }
 
 //------------------------------------------------------------------------------
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::widePreReact(FullControl& control,
+										  const TEvent& event,
+										  const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepPreReact(control, event);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 template <typename TEvent>
@@ -90,8 +131,40 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReact(FullControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepReact(control, event);
+	return Single::deepReact(control, event);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::widePostReact(FullControl& control,
+										   const TEvent& event,
+										   const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepPostReact(control, event);
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::wideUpdatePlans(FullControl& control,
+											 const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepUpdatePlans(control);
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -103,7 +176,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardExitGuard(GuardControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepForwardExitGuard(control);
+	return Single::deepForwardExitGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -117,7 +190,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideExitGuard(GuardControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepExitGuard(control);
+	return Single::deepExitGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -130,7 +203,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideExit(PlanControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepExit(control);
+	Single::deepExit(control);
 }
 
 //------------------------------------------------------------------------------
@@ -144,7 +217,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardActive(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepForwardActive(control, request);
+	Single::deepForwardActive(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -158,7 +231,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardRequest(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepForwardRequest(control, request);
+	Single::deepForwardRequest(control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -169,7 +242,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeComposite(Control& control,
 														const Request request) noexcept
 {
-	State::deepRequestChange(control, request);
+	Single::deepRequestChange(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -183,7 +256,21 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeResumable(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepRequestChange(control, request);
+	Single::deepRequestChange(control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeSelectable(Control& control,
+														 const Request request,
+														 const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	Single::deepRequestChange(control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -194,7 +281,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideRequestRestart(Control& control,
 												const Request request) noexcept
 {
-	State::deepRequestRestart(control, request);
+	Single::deepRequestRestart(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -208,7 +295,21 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideRequestResume(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepRequestResume(control, request);
+	Single::deepRequestResume(control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<T>>::wideRequestSelect(Control& control,
+											   const Request request,
+											   const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	Single::deepRequestSelect(control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -219,7 +320,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, TL_<T>>::wideReportUtilize(Control& control) noexcept {
-	return State::deepReportUtilize(control);
+	return Single::deepReportUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -232,7 +333,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportRank(Control& control,
 {
 	HFSM2_ASSERT(ranks);
 
-	*ranks = State::deepReportRank(control);
+	*ranks = Single::deepReportRank(control);
 
 	return *ranks;
 }
@@ -250,7 +351,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportRandomize(Control& control,
 	HFSM2_ASSERT(options && ranks);
 
 	*options = (*ranks == top) ?
-		State::deepReportRandomize(control) : Utility{0};
+		Single::deepReportRandomize(control) : Utility{0};
 
 	return *options;
 }
@@ -261,7 +362,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeComposite(Control& control) noexcept {
-	return State::deepReportChange(control);
+	return Single::deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -274,7 +375,20 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeResumable(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepReportChange(control);
+	return Single::deepReportChange(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+typename TA::UP
+CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeSelectable(Control& control,
+														const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -283,7 +397,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeUtilitarian(Control& control) noexcept {
-	return State::deepReportChange(control);
+	return Single::deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -299,7 +413,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeRandom(Control& control,
 	HFSM2_ASSERT(options && ranks);
 
 	*options = (*ranks == top) ?
-		State::deepReportChange(control).utility : Utility{0};
+		Single::deepReportChange(control).utility : Utility{0};
 
 	return *options;
 }
@@ -316,7 +430,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideChangeToRequested(PlanControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepChangeToRequested(control);
+	Single::deepChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
@@ -332,7 +446,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideSaveActive(const Registry& registry,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepSaveActive(registry, stream);
+	Single::deepSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -343,7 +457,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideSaveResumable(const Registry& registry,
 											   WriteStream& stream) const noexcept
 {
-	State::deepSaveResumable(registry, stream);
+	Single::deepSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -357,7 +471,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideLoadRequested(Registry& registry,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepLoadRequested(registry, stream);
+	Single::deepLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -368,7 +482,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideLoadResumable(Registry& registry,
 											   ReadStream& stream) const noexcept
 {
-	State::deepLoadResumable(registry, stream);
+	Single::deepLoadResumable(registry, stream);
 }
 
 #endif
@@ -385,7 +499,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideGetNames(const Long parent,
 										  const Short depth,
 										  StructureStateInfos& _stateInfos) const noexcept
 {
-	State::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
+	Single::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
 }
 
 #endif

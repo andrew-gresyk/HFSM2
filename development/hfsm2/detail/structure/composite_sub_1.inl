@@ -83,6 +83,21 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReenter(PlanControl& control,
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 HFSM2_CONSTEXPR(14)
 Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::widePreUpdate(FullControl& control,
+											   const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::widePreUpdate(control, prong) :
+		RHalf::widePreUpdate(control, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
 CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 											const Short prong) noexcept
 {
@@ -93,7 +108,39 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 		RHalf::wideUpdate(control, prong);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::widePostUpdate(FullControl& control,
+												const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::widePostUpdate(control, prong) :
+		RHalf::widePostUpdate(control, prong);
+}
+
 //------------------------------------------------------------------------------
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::widePreReact(FullControl& control,
+											  const TEvent& event,
+											  const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::widePreReact(control, event, prong) :
+		RHalf::widePreReact(control, event, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename TEvent>
@@ -109,6 +156,42 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReact(FullControl& control,
 		LHalf::wideReact(control, event, prong) :
 		RHalf::wideReact(control, event, prong);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::widePostReact(FullControl& control,
+											   const TEvent& event,
+											   const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::widePostReact(control, event, prong) :
+		RHalf::widePostReact(control, event, prong);
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdatePlans(FullControl& control,
+												 const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::wideUpdatePlans(control, prong) :
+		RHalf::wideUpdatePlans(control, prong);
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -221,6 +304,23 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeResumable(Control& control,
 		RHalf::wideRequestChangeResumable(control, request, prong);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeSelectable(Control& control,
+															 const Request request,
+															 const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	if (prong < R_PRONG)
+		LHalf::wideRequestChangeSelectable(control, request, prong);
+	else
+		RHalf::wideRequestChangeSelectable(control, request, prong);
+}
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
@@ -247,6 +347,23 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestResume(Control& control,
 		LHalf::wideRequestResume(control, request, prong);
 	else
 		RHalf::wideRequestResume(control, request, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestSelect(Control& control,
+												   const Request request,
+												   const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	if (prong < R_PRONG)
+		LHalf::wideRequestSelect(control, request, prong);
+	else
+		RHalf::wideRequestSelect(control, request, prong);
 }
 
 //------------------------------------------------------------------------------
@@ -277,7 +394,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportRank(Control& control,
 	const Rank l = LHalf::wideReportRank(control, ranks);
 	const Rank r = RHalf::wideReportRank(control, ranks + LStateList::SIZE);
 
-	return l > r?
+	return l >= r?
 		l : r;
 }
 
@@ -322,6 +439,22 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeResumable(Control& control,
 		return LHalf::wideReportChangeResumable(control, prong);
 	else
 		return RHalf::wideReportChangeResumable(control, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+typename TA::UP
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeSelectable(Control& control,
+															const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	if (prong < R_PRONG)
+		return LHalf::wideReportChangeSelectable(control, prong);
+	else
+		return RHalf::wideReportChangeSelectable(control, prong);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

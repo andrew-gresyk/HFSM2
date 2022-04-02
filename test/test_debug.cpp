@@ -238,15 +238,21 @@ TEST_CASE("FSM.Debug") {
 			logger.assertSequence({
 				{						Event::Type::CHANGE, FSM::stateId<O   >() },
 
+				{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
+				{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
+
 				{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
 				{ FSM::stateId<I   >(),	Event::Type::UPDATE },
+
+				{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
+				{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<U_1 >(),	Event::Type::UTILITY },
 				{ FSM::stateId<U_2 >(),	Event::Type::UTILITY },
 				{ FSM::stateId<U   >(),	Event::Type::UTILITY_RESOLUTION, 0 },
 
-				{ FSM::stateId<N_1 >(),	Event::Type::RANK },
-				{ FSM::stateId<N_2 >(),	Event::Type::RANK },
+				{ FSM::stateId<N_1 >(),	Event::Type::REPORT_RANK },
+				{ FSM::stateId<N_2 >(),	Event::Type::REPORT_RANK },
 				{ FSM::stateId<N_1 >(),	Event::Type::UTILITY },
 				{ FSM::stateId<N_2 >(),	Event::Type::UTILITY },
 				{ FSM::stateId<N   >(),	Event::Type::RANDOM_RESOLUTION, 1 },

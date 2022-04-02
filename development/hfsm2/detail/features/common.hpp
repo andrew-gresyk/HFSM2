@@ -5,6 +5,8 @@ namespace hfsm2 {
 enum class Method : uint8_t {
 	NONE,
 
+	SELECT,
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	RANK,
 	UTILITY,
@@ -13,8 +15,12 @@ enum class Method : uint8_t {
 	ENTRY_GUARD,
 	ENTER,
 	REENTER,
+	PRE_UPDATE,
 	UPDATE,
+	POST_UPDATE,
+	PRE_REACT,
 	REACT,
+	POST_REACT,
 	EXIT_GUARD,
 	EXIT,
 
@@ -32,6 +38,7 @@ enum class TransitionType : uint8_t {
 	CHANGE,
 	RESTART,
 	RESUME,
+	SELECT,
 
 //#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	UTILIZE,
@@ -95,6 +102,8 @@ const char*
 methodName(const Method method)										  noexcept {
 	switch (method) {
 
+	case Method::SELECT:		 return "select";
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	case Method::RANK:			 return "rank";
 	case Method::UTILITY:		 return "utility";
@@ -103,8 +112,12 @@ methodName(const Method method)										  noexcept {
 	case Method::ENTRY_GUARD:	 return "entryGuard";
 	case Method::ENTER:			 return "enter";
 	case Method::REENTER:		 return "reenter";
+	case Method::PRE_UPDATE:	 return "preUpdate";
 	case Method::UPDATE:		 return "update";
+	case Method::POST_UPDATE:	 return "postUpdate";
+	case Method::PRE_REACT:		 return "preReact";
 	case Method::REACT:			 return "react";
+	case Method::POST_REACT:	 return "postReact";
 	case Method::EXIT_GUARD:	 return "exitGuard";
 	case Method::EXIT:			 return "exit";
 
@@ -129,6 +142,7 @@ transitionName(const TransitionType type) noexcept {
 	case TransitionType::CHANGE:	return "changeTo";
 	case TransitionType::RESTART:	return "restart";
 	case TransitionType::RESUME:	return "resume";
+	case TransitionType::SELECT:	return "select";
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	case TransitionType::UTILIZE:	return "utilize";

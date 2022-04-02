@@ -3,6 +3,15 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+HFSM2_CONSTEXPR(11)
+T
+filler() noexcept {
+	return T{INVALID_SHORT};
+}
+
+//------------------------------------------------------------------------------
+
 template <typename T, Long NCapacity>
 class StaticArrayT final {
 	template <typename>
@@ -30,7 +39,7 @@ public:
 	HFSM2_CONSTEXPR(11)	Index count()									const noexcept	{ return CAPACITY;					}
 
 	HFSM2_CONSTEXPR(14)	void fill(const Item filler)						  noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()										  noexcept	{ fill(INVALID_SHORT);				}
+	HFSM2_CONSTEXPR(14)	void clear()										  noexcept	{ fill(filler<Item>());				}
 
 	HFSM2_CONSTEXPR(14)	 Iterator  begin()									  noexcept	{ return  Iterator(*this, first());	}
 	HFSM2_CONSTEXPR(11)	CIterator  begin()								const noexcept	{ return CIterator(*this, first());	}
