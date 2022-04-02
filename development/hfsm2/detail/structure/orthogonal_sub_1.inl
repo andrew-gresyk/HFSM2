@@ -78,9 +78,38 @@ OS_<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) noexcept {
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 HFSM2_CONSTEXPR(14)
 Status
+OS_<TN, TA, NI, TI, TR...>::widePreUpdate(FullControl& control) noexcept {
+	Status status;
+	status |= Initial	  ::deepPreUpdate(			   control);
+	status |= Remaining	  ::widePreUpdate(			   control);
+
+	return status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
+Status
 OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) noexcept {
-	const auto status =	   Initial	::deepUpdate(control);
-	return combine(status, Remaining::wideUpdate(control));
+	Status status;
+	status |= Initial	  ::deepUpdate(				control);
+	status |= Remaining	  ::wideUpdate(				control);
+
+	return status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI, TR...>::widePostUpdate(FullControl& control) noexcept {
+	Status status;
+	status |= Initial	  ::deepPostUpdate(				control);
+	status |= Remaining	  ::widePostUpdate(				control);
+
+	return status;
 }
 
 //------------------------------------------------------------------------------
@@ -89,12 +118,64 @@ template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 Status
+OS_<TN, TA, NI, TI, TR...>::widePreReact(FullControl& control,
+										 const TEvent& event) noexcept
+{
+	Status status;
+	status |= Initial	  ::deepPreReact(			  control, event);
+	status |= Remaining	  ::widePreReact(			  control, event);
+
+	return status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
 OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 									  const TEvent& event) noexcept
 {
-	const auto status =	   Initial	::deepReact(control, event);
-	return combine(status, Remaining::wideReact(control, event));
+	Status status;
+	status |= Initial	  ::deepReact(			   control, event);
+	status |= Remaining	  ::wideReact(			   control, event);
+
+	return status;
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI, TR...>::widePostReact(FullControl& control,
+										  const TEvent& event) noexcept
+{
+	Status status;
+	status |= Initial	  ::deepPostReact(			   control, event);
+	status |= Remaining	  ::widePostReact(			   control, event);
+
+	return status;
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI, TR...>::wideUpdatePlans(FullControl& control) noexcept {
+	Status status;
+	status |= Initial	  ::deepUpdatePlans(			 control);
+	status |= Remaining	  ::wideUpdatePlans(			 control);
+
+	return status;
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -207,6 +288,18 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestResume(Control& control,
 {
 	Initial	 ::deepRequestResume(control, request);
 	Remaining::wideRequestResume(control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
+void
+OS_<TN, TA, NI, TI, TR...>::wideRequestSelect(Control& control,
+											  const Request request) noexcept
+{
+	Initial	 ::deepRequestSelect(control, request);
+	Remaining::wideRequestSelect(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

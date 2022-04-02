@@ -67,6 +67,14 @@ struct LoggerInterfaceT {
 						   const StateID HFSM2_UNUSED(origin))		  noexcept
 	{}
 
+	HFSM2_CONSTEXPR(NO)
+	virtual
+	void
+	recordSelectResolution(Context& HFSM2_UNUSED(context),
+						   const StateID HFSM2_UNUSED(head),
+						   const StateID HFSM2_UNUSED(prong))		  noexcept
+	{}
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	HFSM2_CONSTEXPR(NO)

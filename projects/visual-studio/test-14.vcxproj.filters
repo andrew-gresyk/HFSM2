@@ -117,7 +117,22 @@
     <ClCompile Include="..\..\test\reported\issue_49.cpp">
       <Filter>test\reported</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_injections.cpp">
+    <ClCompile Include="..\..\test\test_select.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_ancestors.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\wiki_plans.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\wiki_serialization.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\wiki_transitions-within-hierarchy.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\wiki_tutorial.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
@@ -191,9 +206,6 @@
     <ClInclude Include="..\..\development\hfsm2\detail\structure\forward.hpp">
       <Filter>hfsm\detail\structure</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\structure\injections.hpp">
-      <Filter>hfsm\detail\structure</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal.hpp">
       <Filter>hfsm\detail\structure</Filter>
     </ClInclude>
@@ -201,6 +213,12 @@
       <Filter>hfsm\detail\structure</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\structure\state.hpp">
+      <Filter>hfsm\detail\structure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\root\core.hpp">
+      <Filter>hfsm\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\ancestors.hpp">
       <Filter>hfsm\detail\structure</Filter>
     </ClInclude>
   </ItemGroup>
@@ -262,11 +280,14 @@
     <None Include="..\..\development\hfsm2\detail\structure\state.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
-    <None Include="..\..\development\hfsm2\detail\structure\injections_2.inl">
+    <None Include="..\..\development\hfsm2\detail\structure\ancestors_1.inl">
       <Filter>hfsm\detail\structure</Filter>
     </None>
-    <None Include="..\..\development\hfsm2\detail\structure\injections_1.inl">
+    <None Include="..\..\development\hfsm2\detail\structure\ancestors_2.inl">
       <Filter>hfsm\detail\structure</Filter>
+    </None>
+    <None Include="..\..\development\hfsm2\detail\root\core.inl">
+      <Filter>hfsm\detail\root</Filter>
     </None>
   </ItemGroup>
 </Project>

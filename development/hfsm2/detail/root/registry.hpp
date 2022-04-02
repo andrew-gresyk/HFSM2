@@ -6,6 +6,7 @@ namespace detail {
 enum Strategy {
 	Composite,
 	Resumable,
+	Selectable,
 
 //#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	Utilitarian,
@@ -122,6 +123,10 @@ struct RegistryT<ArgsT<TContext
 	using OrthoBits		= typename OrthoForks::Bits;
 	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
 
+#if HFSM2_PLANS_AVAILABLE()
+	using CompoStatuses	= BitArrayT	  <COMPO_REGIONS>;
+#endif
+
 	using BackUp		= BackUpT<RegistryT>;
 
 	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
@@ -153,6 +158,10 @@ struct RegistryT<ArgsT<TContext
 	CompoForks compoResumable{INVALID_SHORT};
 
 	CompoRemains compoRemains;
+
+#if HFSM2_PLANS_AVAILABLE()
+	CompoStatuses compoStatuses;
+#endif
 };
 
 //------------------------------------------------------------------------------
@@ -194,6 +203,10 @@ struct RegistryT<ArgsT<TContext
 	using OrthoForks	= BitArrayT	  <0>;
 	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
 
+#if HFSM2_PLANS_AVAILABLE()
+	using CompoStatuses	= BitArrayT	  <COMPO_REGIONS>;
+#endif
+
 	using BackUp		= BackUpT<RegistryT>;
 
 	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
@@ -221,6 +234,10 @@ struct RegistryT<ArgsT<TContext
 	CompoForks compoResumable{INVALID_SHORT};
 
 	CompoRemains compoRemains;
+
+#if HFSM2_PLANS_AVAILABLE()
+	CompoStatuses compoStatuses;
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////

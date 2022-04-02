@@ -79,29 +79,62 @@ O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 Status
+O_<TN, TA, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	const Status h = HeadState::deepPreUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) = h;
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) =
+#endif
+	SubStates::widePreUpdate(control);
+
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
 O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const Status headStatus = HeadState::deepUpdate(control)) {
-		ControlLock lock{control};
-		SubStates::wideUpdate(control);
+	const Status h = HeadState::deepUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
 
-		return headStatus;
-	} else {
-		const Status subStatus = SubStates::wideUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::wideUpdate(control);
 
-		if (subStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
+	return h;
+}
 
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	#if HFSM2_PLANS_AVAILABLE()
-		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
-	#else
-		return subStatus;
-	#endif
-	}
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+O_<TN, TA, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::widePostUpdate(control);
+
+	const Status h = HeadState::deepPostUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
+
+	return h;
 }
 
 //------------------------------------------------------------------------------
@@ -110,32 +143,101 @@ template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 Status
+O_<TN, TA, TH, TS...>::deepPreReact(FullControl& control,
+									const TEvent& event) noexcept
+{
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	const Status h = HeadState::deepPreReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) = h;
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) =
+#endif
+	SubStates::widePreReact(control, event);
+
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
 O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 								 const TEvent& event) noexcept
 {
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const Status headStatus = HeadState::deepReact(control, event)) {
-		ControlLock lock{control};
-		SubStates::wideReact(control, event);
+	const Status h = HeadState::deepReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
 
-		return headStatus;
-	} else {
-		const Status subStatus = SubStates::wideReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::wideReact(control, event);
 
-		if (subStatus.outerTransition)
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+O_<TN, TA, TH, TS...>::deepPostReact(FullControl& control,
+									 const TEvent& event) noexcept
+{
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::widePostReact(control, event);
+
+	const Status h = HeadState::deepPostReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
+
+	return h;
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+O_<TN, TA, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
+	const Status h =	headStatus(control);
+
+	const Status s =	 subStatus(control) |
+		SubStates::wideUpdatePlans(control);
+
+	if (h)
+		return h;
+	else {
+		if (s.outerTransition)
 			return Status{Status::Result::NONE, true};
 
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+		ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	#if HFSM2_PLANS_AVAILABLE()
-		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
-	#else
-		return subStatus;
-	#endif
+		const bool planExists = control._core.planData.planExists.template get<REGION_ID>();
+
+		return s && planExists ?
+			control.updatePlan((HeadState&) *this, s) : s;
 	}
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -183,7 +285,7 @@ void
 O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 										 const Request request) noexcept
 {
-	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(control._core.registry.isActive(HEAD_ID));
 
 	const ProngCBits requested = orthoRequested(static_cast<const Control&>(control));
 	HFSM2_ASSERT(!!requested);
@@ -228,6 +330,10 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 
 	case TransitionType::RESUME:
 		deepRequestResume	(control, request);
+		break;
+
+	case TransitionType::SELECT:
+		deepRequestSelect	(control, request);
 		break;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
@@ -284,6 +390,19 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Control& control,
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	SubStates::wideRequestResume(control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+void
+O_<TN, TA, TH, TS...>::deepRequestSelect(Control& control,
+										 const Request request) noexcept
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
+	SubStates::wideRequestSelect(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

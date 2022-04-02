@@ -7,26 +7,31 @@
 
 #include "tools.hpp"
 
-namespace test_injections {
+namespace test_ancestors {
 
 //------------------------------------------------------------------------------
 
 struct Event {
 	enum class Type {
-		PRE_ENTRY_GUARD,
+		ENTRY_GUARD,
 
 		PRE_ENTER,
 		PRE_REENTER,
 
 		PRE_UPDATE,
+		UPDATE,
 		POST_UPDATE,
 
 		PRE_REACT,
+		REACT,
 		POST_REACT,
 
-		PRE_EXIT_GUARD,
+		PRE_REVERSE_REACT,
+		POST_REVERSE_REACT,
 
-		POST_EXIT,
+		EXIT_GUARD,
+
+		EXIT,
 
 		COUNT
 	};
@@ -98,32 +103,36 @@ static_assert(FSM::stateId<B>() == 2, "");
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct InjectionT
-	: FSM::Injection
+struct AncestorT
+	: FSM::State
 {
-	void preEntryGuard	  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_ENTRY_GUARD);		}
+	void entryGuard		  (GuardControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::ENTRY_GUARD);	}
 
-	void preEnter		  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_ENTER);			}
-	void preReenter		  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_REENTER);			}
+	void enter			  ( PlanControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::PRE_ENTER);		}
+	void reenter		  ( PlanControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::PRE_REENTER);	}
 
-	void preUpdate		  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_UPDATE);			}
-	void postUpdate		  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::POST_UPDATE);			}
+	void preUpdate		  ( FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::PRE_UPDATE);		}
+	void update			  ( FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::UPDATE);			}
+	void postUpdate		  ( FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::POST_UPDATE);	}
 
 	void preReact		  (const Event&,
-						   Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_REACT);			}
+							FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::PRE_REACT);		}
+
+	void react			  (const Event&,
+							FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::REACT);			}
 
 	void postReact		  (const Event&,
-						   Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::POST_REACT);			}
+							FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::POST_REACT);		}
 
-	void preExitGuard	  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::PRE_EXIT_GUARD);		}
+	void exitGuard		  (GuardControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::EXIT_GUARD);		}
 
-	void postExit		  (Events& events)	{ events.emplace_back(FSM::stateId<T>(), Event::Type::POST_EXIT);			}
+	void exit			  ( PlanControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::EXIT);			}
 };
 
 //------------------------------------------------------------------------------
 
 struct R
-	: FSM::StateT<InjectionT<R>>
+	: FSM::StateT<AncestorT<R>>
 {
 	void entryGuard(GuardControl& control) {
 		control.changeTo<B>();
@@ -133,13 +142,13 @@ struct R
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct A
-	: FSM::StateT<InjectionT<A>>
+	: FSM::StateT<AncestorT<A>>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B
-	: FSM::StateT<InjectionT<B>>
+	: FSM::StateT<AncestorT<B>>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +161,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Manual Activation") {
+TEST_CASE("FSM.Ancestors") {
 	Events events;
 
 	{
@@ -162,12 +171,12 @@ TEST_CASE("FSM.Manual Activation") {
 
 		machine.enter();
 		assertSequence(events, {
-			{ FSM::stateId<R>(), Event::Type::PRE_ENTRY_GUARD },
-			{ FSM::stateId<A>(), Event::Type::PRE_ENTRY_GUARD },
-			{ FSM::stateId<R>(), Event::Type::PRE_ENTRY_GUARD },
-			{ FSM::stateId<B>(), Event::Type::PRE_ENTRY_GUARD },
-			{ FSM::stateId<R>(), Event::Type::PRE_ENTER  },
-			{ FSM::stateId<B>(), Event::Type::PRE_ENTER  },
+			{ FSM::stateId<R>(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<A>(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<R>(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<B>(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<R>(), Event::Type::PRE_ENTER },
+			{ FSM::stateId<B>(), Event::Type::PRE_ENTER },
 		});
 
 		assertActive(machine, all, {
@@ -178,24 +187,28 @@ TEST_CASE("FSM.Manual Activation") {
 
 		machine.update();
 		assertSequence(events, {
-			{ FSM::stateId<R>(), Event::Type::PRE_UPDATE  },
-			{ FSM::stateId<R>(), Event::Type::POST_UPDATE  },
-			{ FSM::stateId<B>(), Event::Type::PRE_UPDATE  },
-			{ FSM::stateId<B>(), Event::Type::POST_UPDATE  },
+			{ FSM::stateId<R>(), Event::Type::PRE_UPDATE },
+			{ FSM::stateId<B>(), Event::Type::PRE_UPDATE },
+			{ FSM::stateId<R>(), Event::Type::UPDATE },
+			{ FSM::stateId<B>(), Event::Type::UPDATE },
+			{ FSM::stateId<B>(), Event::Type::POST_UPDATE },
+			{ FSM::stateId<R>(), Event::Type::POST_UPDATE },
 		});
 
 		machine.react(Event::Type::COUNT);
 		assertSequence(events, {
-			{ FSM::stateId<R>(), Event::Type::PRE_REACT  },
-			{ FSM::stateId<R>(), Event::Type::POST_REACT  },
-			{ FSM::stateId<B>(), Event::Type::PRE_REACT  },
-			{ FSM::stateId<B>(), Event::Type::POST_REACT  },
+			{ FSM::stateId<R>(), Event::Type::PRE_REACT },
+			{ FSM::stateId<B>(), Event::Type::PRE_REACT },
+			{ FSM::stateId<R>(), Event::Type::REACT },
+			{ FSM::stateId<B>(), Event::Type::REACT },
+			{ FSM::stateId<B>(), Event::Type::POST_REACT },
+			{ FSM::stateId<R>(), Event::Type::POST_REACT },
 		});
 
 		machine.exit();
 		assertSequence(events, {
-			{ FSM::stateId<B>(), Event::Type::POST_EXIT  },
-			{ FSM::stateId<R>(), Event::Type::POST_EXIT  },
+			{ FSM::stateId<B>(), Event::Type::EXIT },
+			{ FSM::stateId<R>(), Event::Type::EXIT },
 		});
 	}
 

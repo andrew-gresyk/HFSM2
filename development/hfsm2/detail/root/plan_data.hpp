@@ -1,9 +1,69 @@
-#if HFSM2_PLANS_AVAILABLE()
-
 namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#pragma pack(push, 1)
+
+struct Status final {
+	enum class Result {
+		NONE,
+		SUCCESS,
+		FAILURE
+	};
+
+	Result result = Result::NONE;
+	bool outerTransition = false;
+
+	HFSM2_CONSTEXPR(11)	Status(const Result result_ = Result::NONE,
+							   const bool outerTransition_ = false)	  noexcept
+		: result{result_}
+		, outerTransition{outerTransition_}
+	{}
+
+	HFSM2_CONSTEXPR(11)	explicit operator bool()				const noexcept	{ return result != Result::NONE || outerTransition;	}
+
+	HFSM2_CONSTEXPR(14)	void clear()								  noexcept;
+};
+
+#pragma pack(pop)
+
+//------------------------------------------------------------------------------
+
+HFSM2_CONSTEXPR(14)
+Status
+operator | (Status& lhs, const Status rhs)							  noexcept	{
+	const Status::Result result = lhs.result > rhs.result ?
+		lhs.result : rhs.result;
+
+	return Status{result, lhs.outerTransition || rhs.outerTransition};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+Status&
+operator |= (Status& lhs, const Status rhs)							  noexcept	{
+	const Status::Result result = lhs.result > rhs.result ?
+		lhs.result : rhs.result;
+
+	lhs = Status{result, lhs.outerTransition || rhs.outerTransition};
+
+	return lhs;
+}
+
+//------------------------------------------------------------------------------
+
+template <>
+HFSM2_CONSTEXPR(11)
+Status
+filler<Status>() noexcept {
+	return Status{};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if HFSM2_PLANS_AVAILABLE()
 
 #pragma pack(push, 2)
 
@@ -21,7 +81,7 @@ struct Bounds final {
 
 #pragma pack(pop)
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename
 		, typename
@@ -68,17 +128,18 @@ struct PlanDataT<ArgsT<TContext
 	using RegionList	= TRegionList;
 	using Payload		= TPayload;
 
-	static constexpr Short REGION_COUNT  = RegionList::SIZE;
-	static constexpr Short TASK_CAPACITY = NTaskCapacity;
+	static constexpr Short REGION_COUNT		= RegionList::SIZE;
+	static constexpr Short TASK_CAPACITY	= NTaskCapacity;
 
-	using Task			= TaskT<Payload>;
-	using Tasks			= TaskListT	  <Payload,  TASK_CAPACITY>;
-	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
-	using Payloads		= StaticArrayT<Payload,  TASK_CAPACITY>;
+	using Task			 = TaskT<Payload>;
+	using Tasks			 = TaskListT	  <Payload,  TASK_CAPACITY>;
+	using TaskLinks		 = StaticArrayT<TaskLink, TASK_CAPACITY>;
+	using Payloads		 = StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
-	using TasksBits		= BitArrayT<StateList::SIZE>;
-	using RegionBits	= BitArrayT<RegionList::SIZE>;
+	using TasksBounds	 = ArrayT   <Bounds,   RegionList::SIZE>;
+	using TasksBits		 = BitArrayT<StateList::SIZE>;
+	using RegionBits	 = BitArrayT<RegionList::SIZE>;
+	using RegionStatuses = StaticArrayT<Status, RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -89,9 +150,13 @@ struct PlanDataT<ArgsT<TContext
 	TasksBits tasksSuccesses;
 	TasksBits tasksFailures;
 	RegionBits planExists;
+	RegionStatuses headStatuses;
+	RegionStatuses subStatuses;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
@@ -126,8 +191,8 @@ struct PlanDataT<ArgsT<TContext
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr Short REGION_COUNT  = RegionList::SIZE;
-	static constexpr Short TASK_CAPACITY = NTaskCapacity;
+	static constexpr Short REGION_COUNT		= RegionList::SIZE;
+	static constexpr Short TASK_CAPACITY	= NTaskCapacity;
 
 	using Task			= TaskT<void>;
 	using Tasks			= TaskListT<void, TASK_CAPACITY>;
@@ -136,6 +201,7 @@ struct PlanDataT<ArgsT<TContext
 	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
 	using TasksBits		= BitArrayT<StateList::SIZE>;
 	using RegionBits	= BitArrayT<RegionList::SIZE>;
+	using RegionStatuses = StaticArrayT<Status, RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -144,9 +210,13 @@ struct PlanDataT<ArgsT<TContext
 	TasksBits tasksSuccesses;
 	TasksBits tasksFailures;
 	RegionBits planExists;
+	RegionStatuses headStatuses;
+	RegionStatuses subStatuses;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
@@ -180,10 +250,14 @@ struct PlanDataT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				  noexcept	{}
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)			const noexcept	{}
 
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept	{}
+
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept	{}
 #endif
 };
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -191,5 +265,3 @@ struct PlanDataT<ArgsT<TContext
 }
 
 #include "plan_data.inl"
-
-#endif

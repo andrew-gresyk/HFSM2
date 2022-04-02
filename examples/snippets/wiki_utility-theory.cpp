@@ -4,7 +4,7 @@
 #define HFSM2_ENABLE_LOG_INTERFACE
 #define HFSM2_ENABLE_UTILITY_THEORY
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
-#include <hfsm2/machine.hpp>
+#include <hfsm2/machine_dev.hpp>
 
 #include <doctest/doctest.h>
 

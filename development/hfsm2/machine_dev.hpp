@@ -1,5 +1,5 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.15.0 (2022-03-13)
+// 2.0.0 (2022-04-02)
 //
 // Created by Andrew Gresyk
 //
@@ -31,8 +31,8 @@
 
 #pragma once
 
-#define HFSM2_VERSION_MAJOR 1
-#define HFSM2_VERSION_MINOR 15
+#define HFSM2_VERSION_MAJOR 2
+#define HFSM2_VERSION_MINOR 0
 #define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
@@ -71,9 +71,10 @@
 #include "detail/root/plan_data.hpp"
 #include "detail/root/plan.hpp"
 #include "detail/root/registry.hpp"
+#include "detail/root/core.hpp"
 #include "detail/root/control.hpp"
 
-#include "detail/structure/injections.hpp"
+#include "detail/structure/ancestors.hpp"
 #include "detail/structure/state.hpp"
 #include "detail/structure/forward.hpp"
 #include "detail/structure/composite_sub.hpp"
@@ -258,6 +259,19 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Selectable region ('changeTo<>()' into the region acts as 'select<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
+	template <typename THead, typename... TSubStates>
+	using Selectable		  = CI_<Strategy::Selectable,  THead, TSubStates...>;
+
+	/// @brief Headless selectable region ('changeTo<>()' into the region acts as 'select<>()')
+	/// @tparam TSubStates Sub-states
+	template <				  typename... TSubStates>
+	using SelectablePeers	  = CI_<Strategy::Selectable,  void,  TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	/// @brief Utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
@@ -326,6 +340,19 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using ResumablePeerRoot	  = RF_<Cfg, ResumablePeers  <  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Selectable root ('changeTo<>()' into the region acts as 'select<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
+	template <typename THead, typename... TSubStates>
+	using SelectableRoot	  = RF_<Cfg, Selectable <THead, TSubStates...>>;
+
+	/// @brief Headless selectable root ('changeTo<>()' into the region acts as 'select<>()')
+	/// @tparam TSubStates Sub-states
+	template <				  typename... TSubStates>
+	using SelectablePeerRoot  = RF_<Cfg, SelectablePeers <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

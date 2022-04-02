@@ -33,6 +33,8 @@ protected:
 	static_assert(Args::STATE_COUNT <  (unsigned) -1, "Too many states in the FSM. Change 'Short' type.");
 	static_assert(Args::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
+	using Core					= CoreT<Args>;
+
 	using Apex					= MaterialT<I_<0, 0, 0, 0>, Args, TApex>;
 
 	using Registry				= RegistryT<Args>;
@@ -100,8 +102,8 @@ public:
 								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
 
-	HFSM2_CONSTEXPR(14) R_(const R_&  other)												  noexcept;
-	HFSM2_CONSTEXPR(14) R_(		 R_&& other)												  noexcept;
+	HFSM2_CONSTEXPR(NO) R_(const R_& )														  noexcept = default;
+	HFSM2_CONSTEXPR(NO) R_(		 R_&&)														  noexcept = default;
 
 	HFSM2_CONSTEXPR(20)	~R_() noexcept;
 
@@ -109,11 +111,11 @@ public:
 
 	/// @brief Access context
 	/// @return context
-	HFSM2_CONSTEXPR(14)		  Context& context()								  noexcept	{ return _context;									}
+	HFSM2_CONSTEXPR(14)		  Context& context()								  noexcept	{ return _core.context;								}
 
 	/// @brief Access context
 	/// @return context
-	HFSM2_CONSTEXPR(11)	const Context& context()							const noexcept	{ return _context;									}
+	HFSM2_CONSTEXPR(11)	const Context& context()							const noexcept	{ return _core.context;								}
 
 	//----------------------------------------------------------------------
 
@@ -150,7 +152,7 @@ public:
 	HFSM2_CONSTEXPR(14)	void update()											  noexcept;
 
 	/// @brief Have FSM react to an event (recursively call matching 'react<>()' from the root down to the leaf states,
-	///    on all active states, then process requested transitions)
+	///   on all active states, then process requested transitions)
 	/// @tparam TEvent Event type
 	/// @param event Event to react to
 	template <typename TEvent>
@@ -161,26 +163,26 @@ public:
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
 	/// @return State active status
-	HFSM2_CONSTEXPR(11)	bool isActive		 (const StateID stateId)		const noexcept	{ return _registry.isActive   (stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isActive		 (const StateID stateId)		const noexcept	{ return _core.registry.isActive   (stateId);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState Destination state type
 	/// @return State active status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept	{ return isActive	(stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept	{ return isActive	(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId Destination state identifier
 	/// @return State resumable status
-	HFSM2_CONSTEXPR(11)	bool isResumable	 (const StateID stateId)		const noexcept	{ return _registry.isResumable(stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isResumable	 (const StateID stateId)		const noexcept	{ return _core.registry.isResumable(stateId);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState Destination state type
 	/// @return State resumable status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isResumable	 ()								const noexcept	{ return isResumable(stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isResumable	 ()								const noexcept	{ return isResumable(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -198,7 +200,8 @@ public:
 	//------------------------------------------------------------------------------
 	// COMMON
 
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	HFSM2_CONSTEXPR(14)	void changeTo		 (const StateID stateId)			  noexcept;
 
@@ -210,7 +213,8 @@ public:
 	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	HFSM2_CONSTEXPR(14)	void restart		 (const StateID stateId)			  noexcept;
 
@@ -221,7 +225,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	HFSM2_CONSTEXPR(14)	void resume			 (const StateID stateId)			  noexcept;
 
@@ -232,16 +237,31 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId Destination state identifier
+	HFSM2_CONSTEXPR(14)	void select			 (const StateID stateId)			  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState Destination state type
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void select			 ()									  noexcept	{ select   (stateId<TState>());					}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilize		 (const StateID stateId)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///   with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
@@ -249,14 +269,16 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void randomize		 (const StateID stateId)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///   proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
@@ -280,39 +302,39 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)			const noexcept	{ return _registry.isPendingChange(stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)			const noexcept	{ return _core.registry.isPendingChange(stateId);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingChange()								const noexcept	{ return isPendingChange(stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange()								const noexcept	{ return isPendingChange(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be activated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)			const noexcept	{ return _registry.isPendingEnter (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)			const noexcept	{ return _core.registry.isPendingEnter (stateId);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState Destination state type
 	/// @return State pending activation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter ()								const noexcept	{ return isPendingEnter (stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter ()								const noexcept	{ return isPendingEnter (stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingExit	 (const StateID stateId)		const noexcept	{ return _registry.isPendingExit  (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	 (const StateID stateId)		const noexcept	{ return _core.registry.isPendingExit  (stateId);	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()								const noexcept	{ return isPendingExit  (stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()								const noexcept	{ return isPendingExit  (stateId<TState>());		}
 
 	//------------------------------------------------------------------------------
 
@@ -347,10 +369,10 @@ public:
 	/// @brief Get the list of transitions recorded during last 'update()'
 	/// @return Array of last recorded transitions
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	HFSM2_CONSTEXPR(11)	const TransitionSets& previousTransitions()						const noexcept	{ return _previousTransitions;					}
+	HFSM2_CONSTEXPR(11)	const TransitionSets& previousTransitions()						const noexcept	{ return _core.previousTransitions;				}
 
 	/// @brief Force process transitions (skips 'guard()' calls)
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transitions 'TransitionHistory' to replay
 	/// @param count Number of transitions
 	/// @return Success status
@@ -359,7 +381,7 @@ public:
 											   const Short count)							  noexcept;
 
 	/// @brief Force process transitions (skips 'guard()' calls)
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transitions Array of 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -367,7 +389,7 @@ public:
 	HFSM2_CONSTEXPR(14)	bool replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transition 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -419,7 +441,7 @@ public:
 	/// @brief Attach logger
 	/// @param logger A logger implementing 'hfsm2::LoggerInterfaceT<>' interface
 	/// @see HFSM2_ENABLE_LOG_INTERFACE
-	HFSM2_CONSTEXPR(14)	void attachLogger(Logger* const logger)								  noexcept	{ _logger = logger;								}
+	HFSM2_CONSTEXPR(14)	void attachLogger(Logger* const logger)								  noexcept	{ _core.logger = logger;								}
 
 #endif
 
@@ -429,6 +451,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	void initialEnter()													  noexcept;
 	HFSM2_CONSTEXPR(14)	void finalExit()													  noexcept;
 
+	HFSM2_CONSTEXPR(14)	void processRequest()												  noexcept;
 	HFSM2_CONSTEXPR(14)	void processTransitions(TransitionSets& currentTransitions)			  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool applyRequest(const TransitionSets& currentTransitions,
@@ -449,9 +472,6 @@ protected:
 	HFSM2_CONSTEXPR(14)	bool applyRequests(Control& control,
 										   const Transition* const transitions,
 										   const Short count)								  noexcept;
-
-	TransitionTargets _transitionTargets;
-	TransitionSets _previousTransitions;
 #endif
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
@@ -466,17 +486,9 @@ protected:
 #endif
 
 protected:
-	Context _context;
-	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
-
-	Registry _registry;
-	HFSM2_IF_PLANS(PlanData _planData);
-
-	TransitionSet _requests;
+	Core _core;
 
 	Apex _apex;
-
-	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -572,17 +584,17 @@ public:
 	using Base::Base;
 
 	/// @brief Manually start the FSM
-	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
+	///  Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_CONSTEXPR(14)	void enter()													  noexcept	{ initialEnter();	}
 
 	/// @brief Manually stop the FSM
-	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
+	///  Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_CONSTEXPR(14)	void exit()														  noexcept	{ finalExit();		}
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 	/// @brief Start the FSM from a specific state
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transitions 'TransitionHistory' to replay
 	/// @param count Number of transitions
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -590,14 +602,14 @@ public:
 										 const Short count)								  noexcept;
 
 	/// @brief Start the FSM from a specific state
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transitions Array of 'Transition' to replay
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
 	HFSM2_CONSTEXPR(14)	bool replayEnter(const ArrayT<Transition, NCount>& transitions)	  noexcept;
 
 	/// @brief Start the FSM from a specific state
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transition 'Transition' to replay
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	HFSM2_CONSTEXPR(14)	bool replayEnter(const Transition& transition)					  noexcept	{ return replayEnter(&transition, 1);	}
@@ -612,16 +624,8 @@ private:
 	using Base::applyRequests;
 	HFSM2_IF_STRUCTURE_REPORT(using Base::udpateActivity);
 
-	using Base::_transitionTargets;
-	using Base::_previousTransitions;
-
-	using Base::_context;
-	HFSM2_IF_UTILITY_THEORY(using Base::_rng);
-	using Base::_registry;
-	HFSM2_IF_PLANS(using Base::_planData);
-	using Base::_requests;
+	using Base::_core;
 	using Base::_apex;
-	HFSM2_IF_LOG_INTERFACE(using Base::_logger);
 #endif
 };
 
@@ -696,7 +700,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void changeWith   (const Payload& payload)			  noexcept	{ changeWith   (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void changeWith   (const Payload& payload)			  noexcept	{ changeWith   (stateId<TState>(),		payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
@@ -723,7 +727,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void restartWith  (const Payload& payload)			  noexcept	{ restartWith  (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void restartWith  (const Payload& payload)			  noexcept	{ restartWith  (stateId<TState>(),		payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
@@ -733,25 +737,29 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
 										   const Payload& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
 												Payload&& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const Payload& payload)			  noexcept	{ resumeWith   (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const Payload& payload)			  noexcept	{ resumeWith   (stateId<TState>(),		payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
@@ -759,34 +767,68 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+										   const Payload& payload)			  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+												Payload&& payload)			  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void selectWith   (const Payload& payload)			  noexcept	{ selectWith   (stateId<TState>(),		payload );	}
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void selectWith   (		Payload&& payload)			  noexcept	{ selectWith   (stateId<TState>(), move(payload));	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
 										   const Payload& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
 												Payload&& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const Payload& payload)			  noexcept	{ utilizeWith  (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const Payload& payload)			  noexcept	{ utilizeWith  (stateId<TState>(),		payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -795,32 +837,36 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
 										   const Payload& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
 												Payload&& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const Payload& payload)			  noexcept	{ randomizeWith(stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const Payload& payload)			  noexcept	{ randomizeWith(stateId<TState>(),		payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -847,7 +893,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const Payload& payload)			  noexcept	{ scheduleWith (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const Payload& payload)			  noexcept	{ scheduleWith (stateId<TState>(),		payload );	}
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
@@ -858,15 +904,7 @@ public:
 	//------------------------------------------------------------------------------
 
 protected:
-	using Base::_context;
-	using Base::_registry;
-
-private:
-	using Base::_requests;
-
-#if HFSM2_LOG_INTERFACE_AVAILABLE()
-	using Base::_logger;
-#endif
+	using Base::_core;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -948,20 +986,20 @@ public:
 public:
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context& context
 								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(PureContext&& context
 								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
-	HFSM2_CONSTEXPR(NO) RC_(const RC_& )														  noexcept = default;
-	HFSM2_CONSTEXPR(NO) RC_(	  RC_&&)														  noexcept = default;
+	HFSM2_CONSTEXPR(NO) RC_(const RC_& )													  noexcept = default;
+	HFSM2_CONSTEXPR(NO) RC_(	  RC_&&)													  noexcept = default;
 
-	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)								  noexcept	{ _context =	  context ; }
-	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)								  noexcept	{ _context = move(context); }
+	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)							  noexcept	{ _core.context =	  context ; }
+	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)							  noexcept	{ _core.context = move(context); }
 
 private:
-	using Base::_context;
+	using Base::_core;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1005,10 +1043,10 @@ public:
 public:
 	using Base::Base;
 
-	HFSM2_CONSTEXPR(14)	void setContext(Context context)	  noexcept { _context = context; }
+	HFSM2_CONSTEXPR(14)	void setContext(Context context)									  noexcept	{ _core.context = context; }
 
 private:
-	using Base::_context;
+	using Base::_core;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1051,19 +1089,22 @@ public:
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context context
 								   , RNG& rng
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
 #else
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context context = nullptr
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
 #endif
 
-	HFSM2_CONSTEXPR(14)	void setContext(Context context)										  noexcept { _context = context; }
+	HFSM2_CONSTEXPR(NO)	RC_(const RC_& )													  noexcept = default;
+	HFSM2_CONSTEXPR(NO)	RC_(	  RC_&&)													  noexcept = default;
+
+	HFSM2_CONSTEXPR(14)	void setContext(Context context)									  noexcept	{ _core.context = context; }
 
 private:
-	using Base::_context;
+	using Base::_core;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1104,13 +1145,16 @@ public:
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(RNG& rng
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
 #else
 
-	HFSM2_CONSTEXPR(14)	explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))	  noexcept;
+	HFSM2_CONSTEXPR(14)	explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))  noexcept;
 
 #endif
+
+	HFSM2_CONSTEXPR(NO)	RC_(const RC_& )													  noexcept = default;
+	HFSM2_CONSTEXPR(NO)	RC_(	  RC_&&)													  noexcept = default;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1163,7 +1207,7 @@ public:
 
 public:
 	HFSM2_CONSTEXPR(14)	explicit RR_(Context& context
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept
 		: Base{context
 			 , static_cast<RNGT<TUtility>&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
@@ -1200,7 +1244,7 @@ public:
 #endif
 
 public:
-	HFSM2_CONSTEXPR(14)	explicit RR_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))	  noexcept
+	HFSM2_CONSTEXPR(14)	explicit RR_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))  noexcept
 		: Base{static_cast<RNGT<TUtility>&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 		, RNGT<TUtility>{0}

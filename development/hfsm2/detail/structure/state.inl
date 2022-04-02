@@ -49,6 +49,18 @@ S_<TN_, TA, TH>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+Short
+S_<TN_, TA, TH>::wrapSelect(Control& control) noexcept {
+	HFSM2_LOG_STATE_METHOD(&Head::select,
+						   Method::SELECT);
+
+	return Head::select(static_cast<const Control&>(control));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 template <typename TN_, typename TA, typename TH>
@@ -89,8 +101,8 @@ S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) noexcept {
 
 	const bool cancelledBefore = control._cancelled;
 
-	Head::widePreEntryGuard(control.context());
-	Head::		 entryGuard(control);
+	Head::wideEntryGuard(control);
+	Head::	  entryGuard(control);
 
 	return !cancelledBefore && control._cancelled;
 }
@@ -101,15 +113,15 @@ template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
 void
 S_<TN_, TA, TH>::deepEnter(PlanControl& control) noexcept {
-	HFSM2_IF_PLANS(control._planData.verifyEmptyStatus(STATE_ID));
+	HFSM2_IF_PLANS(control._core.planData.verifyEmptyStatus(STATE_ID));
 
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
 						   Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head::widePreEnter(control.context());
-	Head::		 enter(control);
+	Head::wideEnter(control);
+	Head::	  enter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -118,18 +130,35 @@ template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
 void
 S_<TN_, TA, TH>::deepReenter(PlanControl& control) noexcept {
-	HFSM2_IF_PLANS(control._planData.verifyEmptyStatus(STATE_ID));
+	HFSM2_IF_PLANS(control._core.planData.verifyEmptyStatus(STATE_ID));
 
 	HFSM2_LOG_STATE_METHOD(&Head::reenter,
 						   Method::REENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head::widePreReenter(control.context());
-	Head::		 reenter(control);
+	Head::wideReenter(control);
+	Head::	  reenter(control);
 }
 
 //------------------------------------------------------------------------------
+
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepPreUpdate(FullControl& control) noexcept {
+	HFSM2_LOG_STATE_METHOD(&Head::preUpdate,
+						   Method::PRE_UPDATE);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	Head::widePreUpdate(control);
+	Head::	  preUpdate(control);
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
@@ -140,14 +169,52 @@ S_<TN_, TA, TH>::deepUpdate(FullControl& control) noexcept {
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head:: widePreUpdate(control.context());
-	Head::		  update(control);
-	Head::widePostUpdate(control.context());
+	Head::wideUpdate(control);
+	Head::	  update(control);
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepPostUpdate(FullControl& control) noexcept {
+	HFSM2_LOG_STATE_METHOD(&Head::postUpdate,
+						   Method::POST_UPDATE);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	Head::	  postUpdate(control);
+	Head::widePostUpdate(control);
 
 	return control._status;
 }
 
 //------------------------------------------------------------------------------
+
+template <typename TN_, typename TA, typename TH>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepPreReact(FullControl& control,
+							  const TEvent& event) noexcept
+{
+	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::preReact);
+
+	HFSM2_LOG_STATE_METHOD(reaction,
+						   Method::PRE_REACT);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	Head::widePreReact(event, control);
+	(this->*reaction) (event, control);
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA, typename TH>
 template <typename TEvent>
@@ -163,9 +230,30 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head:: widePreReact(event, control.context());
+	Head::	wideReact(event, control);
+	(this->*reaction)(event, control);
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepPostReact(FullControl& control,
+							   const TEvent& event) noexcept
+{
+	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::postReact);
+
+	HFSM2_LOG_STATE_METHOD(reaction,
+						   Method::POST_REACT);
+
+	ScopedOrigin origin{control, STATE_ID};
+
 	(this->*reaction)  (event, control);
-	Head::widePostReact(event, control.context());
+	Head::widePostReact(event, control);
 
 	return control._status;
 }
@@ -183,8 +271,8 @@ S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) noexcept {
 
 	const bool cancelledBefore = control._cancelled;
 
-	Head::widePreExitGuard(control.context());
-	Head::		 exitGuard(control);
+	Head::wideExitGuard(control);
+	Head::	  exitGuard(control);
 
 	return !cancelledBefore && control._cancelled;
 }
@@ -205,10 +293,10 @@ S_<TN_, TA, TH>::deepExit(PlanControl& control) noexcept {
 	// Clang - error : no member named 'exit' in 'Blah'
 	//
 	// .. inherit state 'Blah' from hfsm2::Machine::Instance::State
-	Head::		  exit(control);
-	Head::widePostExit(control.context());
+	Head::	  exit(control);
+	Head::wideExit(control);
 
-	HFSM2_IF_PLANS(control._planData.clearTaskStatus(STATE_ID));
+	HFSM2_IF_PLANS(control._core.planData.clearTaskStatus(STATE_ID));
 }
 
 //------------------------------------------------------------------------------
@@ -282,6 +370,17 @@ template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
 void
 S_<TN_, TA, TH>::deepRequestResume(Control& HFSM2_IF_TRANSITION_HISTORY(control),
+								   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+void
+S_<TN_, TA, TH>::deepRequestSelect(Control& HFSM2_IF_TRANSITION_HISTORY(control),
 								   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));

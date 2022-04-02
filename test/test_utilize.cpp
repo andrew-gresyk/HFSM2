@@ -124,16 +124,16 @@ TEST_CASE("FSM.Utilize") {
 	FSM::Instance machine{&logger};
 	{
 		logger.assertSequence({
-			{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
-			{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<Apex >(), Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<I    >(), Event::Type::ENTRY_GUARD },
 
-			{ FSM::stateId<Apex>(),	Event::Type::ENTER },
-			{ FSM::stateId<I   >(),	Event::Type::ENTER },
+			{ FSM::stateId<Apex >(), Event::Type::ENTER },
+			{ FSM::stateId<I    >(), Event::Type::ENTER },
 		});
 
 		assertActive(machine, all, {
-			FSM::stateId<Apex>(),
-			FSM::stateId<I   >(),
+			FSM::stateId<Apex >(),
+			FSM::stateId<I    >(),
 		});
 
 		assertResumable(machine, all, {});
@@ -146,8 +146,14 @@ TEST_CASE("FSM.Utilize") {
 		logger.assertSequence({
 			{						 Event::Type::CHANGE, FSM::stateId<O   >() },
 
+			{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
+			{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
+
 			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
 			{ FSM::stateId<I    >(), Event::Type::UPDATE },
+
+			{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
+			{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<U_000>(), Event::Type::UTILITY },
 			{ FSM::stateId<U_025>(), Event::Type::UTILITY },
@@ -194,8 +200,14 @@ TEST_CASE("FSM.Utilize") {
 		logger.assertSequence({
 			{						 Event::Type::RESTART, FSM::stateId<O   >() },
 
+			{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
+			{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
+
 			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
 			{ FSM::stateId<I    >(), Event::Type::UPDATE },
+
+			{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
+			{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
 			{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
@@ -234,8 +246,14 @@ TEST_CASE("FSM.Utilize") {
 		logger.assertSequence({
 			{						 Event::Type::UTILIZE, FSM::stateId<O   >() },
 
+			{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
+			{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
+
 			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
 			{ FSM::stateId<I    >(), Event::Type::UPDATE },
+
+			{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
+			{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<U_000>(), Event::Type::UTILITY },
 			{ FSM::stateId<U_025>(), Event::Type::UTILITY },

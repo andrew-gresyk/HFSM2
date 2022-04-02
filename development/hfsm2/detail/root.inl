@@ -8,11 +8,11 @@ HFSM2_CONSTEXPR(14)
 R_<TG, TA>::R_(Context& context
 			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
-	: _context{context}
-	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
-	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
+	: _core{context
+		  HFSM2_IF_UTILITY_THEORY(, rng)
+		  HFSM2_IF_LOG_INTERFACE(, logger)}
 {
-	_apex.deepRegister(_registry, Parent{});
+	_apex.deepRegister(_core.registry, Parent{});
 
 	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
 }
@@ -24,59 +24,11 @@ HFSM2_CONSTEXPR(14)
 R_<TG, TA>::R_(PureContext&& context
 			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
-	: _context{move(context)}
-	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
-	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
+	: _core{move(context)
+		  HFSM2_IF_UTILITY_THEORY(, rng)
+		  HFSM2_IF_LOG_INTERFACE(, logger)}
 {
-	_apex.deepRegister(_registry, Parent{});
-
-	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
-R_<TG, TA>::R_(const R_& other) noexcept
-	: _context {other._context }
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-	, _rng	   {other.rng	   }
-#endif
-	, _registry{other._registry}
-#if HFSM2_PLANS_AVAILABLE()
-	, _planData{other._planData}
-#endif
-	, _requests{other._requests}
-	, _apex	   {other._apex	   }
-#if HFSM2_LOG_INTERFACE_AVAILABLE()
-	, _logger  {other.logger   }
-#endif
-{
-	_apex.deepRegister(_registry, Parent{});
-
-	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
-R_<TG, TA>::R_(R_&& other) noexcept
-	: _context {move(other._context	)}
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-	, _rng{move(other.rng)}
-#endif
-	, _registry{move(other._registry)}
-#if HFSM2_PLANS_AVAILABLE()
-	, _planData{move(other._planData)}
-#endif
-	, _requests{move(other._requests)}
-	, _apex	   {move(other._apex	)}
-#if HFSM2_LOG_INTERFACE_AVAILABLE()
-	, _logger  {move(other.logger	)}
-#endif
-{
-	_apex.deepRegister(_registry, Parent{});
+	_apex.deepRegister(_core.registry, Parent{});
 
 	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
 }
@@ -86,7 +38,7 @@ R_<TG, TA>::R_(R_&& other) noexcept
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(20)
 R_<TG, TA>::~R_() noexcept {
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+	HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
 }
 
 //------------------------------------------------------------------------------
@@ -95,28 +47,20 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::update() noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	FullControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	FullControl control{_core};
 
-	_apex.deepUpdate(control);
+	_apex. deepPreUpdate(control);
+	_apex.	  deepUpdate(control);
+	_apex.deepPostUpdate(control);
 
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+#if HFSM2_PLANS_AVAILABLE()
+	_apex.deepUpdatePlans(control);
+	_core.planData.clearRegionStatuses();
+#endif
 
-	TransitionSets currentTransitions;
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-
-	if (_requests.count())
-		processTransitions(currentTransitions);
-
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
+	processRequest();
 }
 
 //------------------------------------------------------------------------------
@@ -126,28 +70,20 @@ template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::react(const TEvent& event) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	FullControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	FullControl control{_core};
 
-	_apex.deepReact(control, event);
+	_apex. deepPreReact(control, event);
+	_apex.	  deepReact(control, event);
+	_apex.deepPostReact(control, event);
 
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+#if HFSM2_PLANS_AVAILABLE()
+	_apex.deepUpdatePlans(control);
+	_core.planData.clearRegionStatuses();
+#endif
 
-	TransitionSets currentTransitions;
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-
-	if (_requests.count())
-		processTransitions(currentTransitions);
-
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
+	processRequest();
 }
 
 //------------------------------------------------------------------------------
@@ -156,11 +92,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::changeTo(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::CHANGE});
+	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -169,11 +105,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::restart(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESTART});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESTART});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -182,11 +118,24 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::resume(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESUME});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESUME});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+R_<TG, TA>::select(const StateID stateId) noexcept {
+	HFSM2_ASSERT(_core.registry.isActive());
+
+	_core.requests.emplace(Transition{stateId, TransitionType::SELECT});
+
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -197,11 +146,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::utilize(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::UTILIZE});
+	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -210,11 +159,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::randomize(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RANDOMIZE});
+	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
 #endif
@@ -225,11 +174,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::schedule(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::SCHEDULE});
+	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -238,26 +187,19 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::reset() noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	PlanControl control{_core};
 
 	_apex.deepExit(control);
 
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions.clear());
 
-	_registry.clear();
-	// TODO: clear _requests
-	// TODO: clear _rng					// HFSM2_IF_UTILITY_THEORY()
-	// TODO: clear _planData			// HFSM2_IF_PLANS()
+	_core.registry.clear();
+	// TODO: clear _core.requests
+	// TODO: clear _core.rng			// HFSM2_IF_UTILITY_THEORY()
+	// TODO: clear _core.planData		// HFSM2_IF_PLANS()
 	// TODO: clear _activityHistory		// HFSM2_IF_STRUCTURE_REPORT()
 
 	_apex.deepRequestChange(control, {TransitionType::RESTART, INVALID_SHORT});
@@ -272,18 +214,18 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::save(SerialBuffer& _buffer) const noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
 	WriteStream stream{_buffer};
 
-	// TODO: save _registry
-	// TODO: save _requests
-	// TODO: save _rng						// HFSM2_IF_UTILITY_THEORY()
-	// TODO: save _planData					// HFSM2_IF_PLANS()
-	// TODO: save _previousTransitions		// HFSM2_IF_TRANSITION_HISTORY()
-	// TODO: save _activityHistory			// HFSM2_IF_STRUCTURE_REPORT()
+	// TODO: save _core.registry
+	// TODO: save _core.requests
+	// TODO: save _core.rng						// HFSM2_IF_UTILITY_THEORY()
+	// TODO: save _core.planData				// HFSM2_IF_PLANS()
+	// TODO: save _core.previousTransitions		// HFSM2_IF_TRANSITION_HISTORY()
+	// TODO: save _activityHistory				// HFSM2_IF_STRUCTURE_REPORT()
 
-	_apex.deepSaveActive(_registry, stream);
+	_apex.deepSaveActive(_core.registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -292,37 +234,30 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.clear();
+	_core.requests.clear();
 
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	PlanControl control{_core};
 
 	_apex.deepExit(control);
 
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions.clear());
 
-	_registry.clear();
-	_requests.clear();
+	_core.registry.clear();
+	_core.requests.clear();
 
 	ReadStream stream{buffer};
 
-	// TODO: load _registry
-	// TODO: load _requests
-	// TODO: load _rng					// HFSM2_IF_UTILITY_THEORY()
-	// TODO: load _planData				// HFSM2_IF_PLANS()
-	// TODO: load _previousTransitions	// HFSM2_IF_TRANSITION_HISTORY()
-	// TODO: load _activityHistory		// HFSM2_IF_STRUCTURE_REPORT()
+	// TODO: load _core.registry
+	// TODO: load _core.requests
+	// TODO: load _core.rng					// HFSM2_IF_UTILITY_THEORY()
+	// TODO: load _core.planData			// HFSM2_IF_PLANS()
+	// TODO: load _core.previousTransitions	// HFSM2_IF_TRANSITION_HISTORY()
+	// TODO: load _activityHistory			// HFSM2_IF_STRUCTURE_REPORT()
 
-	_apex.deepLoadRequested(_registry, stream);
+	_apex.deepLoadRequested(_core.registry, stream);
 
 	_apex.deepEnter(control);
 }
@@ -340,30 +275,23 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 							  const Short count) noexcept
 {
 	HFSM2_ASSERT(transitions);
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_transitionTargets.clear();
-	_previousTransitions.clear();
+	_core.transitionTargets.clear();
+	_core.previousTransitions.clear();
 
 	if (HFSM2_CHECKED(transitions && count)) {
-		PlanControl control{_context
-						  , _registry
-						  , _requests
-						  HFSM2_IF_UTILITY_THEORY(, _rng)
-						  HFSM2_IF_PLANS(, _planData)
-						  , _transitionTargets
-						  , _previousTransitions
-						  HFSM2_IF_LOG_INTERFACE(, _logger)};
+		PlanControl control{_core};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)
-				_previousTransitions.emplace(transitions[i]);
+				_core.previousTransitions.emplace(transitions[i]);
 
 			_apex.deepChangeToRequested(control);
 
-			_registry.clearRequests();
+			_core.registry.clearRequests();
 
-			HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+			HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
 			HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 
 			return true;
@@ -393,13 +321,13 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 const typename R_<TG, TA>::Transition*
 R_<TG, TA>::lastTransitionTo(const StateID stateId) const noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
 	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
-		const Short index = _transitionTargets[stateId];
+		const Short index = _core.transitionTargets[stateId];
 
-		if (index < _previousTransitions.count())
-			return &_previousTransitions[index];
+		if (index < _core.previousTransitions.count())
+			return &_core.previousTransitions[index];
 	}
 
 	return nullptr;
@@ -413,21 +341,14 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::initialEnter() noexcept {
-	HFSM2_ASSERT(!_registry.isActive());
-	HFSM2_ASSERT(_requests.count() == 0);
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-	HFSM2_IF_TRANSITION_HISTORY(HFSM2_ASSERT(_previousTransitions.count() == 0));
+	HFSM2_ASSERT(!_core.registry.isActive());
+	HFSM2_ASSERT(_core.requests.count() == 0);
+	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+	HFSM2_IF_TRANSITION_HISTORY(HFSM2_ASSERT(_core.previousTransitions.count() == 0));
 
 	RegistryBackUp undo;
 
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	PlanControl control{_core};
 
 	TransitionSets currentTransitions;
 	TransitionSet  pendingTransitions;
@@ -438,38 +359,38 @@ R_<TG, TA>::initialEnter() noexcept {
 						   pendingTransitions);
 
 	for (Long i = 0;
-		 i < SUBSTITUTION_LIMIT && _requests.count();
+		 i < SUBSTITUTION_LIMIT && _core.requests.count();
 		 ++i)
 	{
-		backup(_registry, undo);
+		backup(_core.registry, undo);
 
 		if (applyRequests(currentTransitions,
 						  control))
 		{
-			pendingTransitions = _requests;
-			_requests.clear();
+			pendingTransitions = _core.requests;
+			_core.requests.clear();
 
 			if (cancelledByEntryGuards(currentTransitions,
 									   pendingTransitions))
 			{
 				HFSM2_BREAK();
 
-				restore(_registry, undo);
+				restore(_core.registry, undo);
 			} else
 				currentTransitions += pendingTransitions;
 
 			pendingTransitions.clear();
 		} else
-			_requests.clear();
+			_core.requests.clear();
 	}
-	HFSM2_ASSERT(_requests.count() == 0);
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
+	HFSM2_ASSERT(_core.requests.count() == 0);
+	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions = currentTransitions);
 
 	_apex.deepEnter(control);
 
-	_registry.clearRequests();
+	_core.registry.clearRequests();
 
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+	HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
@@ -479,16 +400,9 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::finalExit() noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	PlanControl control{_core};
 
 	_apex.deepExit(control);
 }
@@ -498,56 +412,65 @@ R_<TG, TA>::finalExit() noexcept {
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
+R_<TG, TA>::processRequest() noexcept {
+	HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
+
+	TransitionSets currentTransitions;
+	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+
+	if (_core.requests.count()) {
+		processTransitions(currentTransitions);
+
+		HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
+		HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
+	}
+
+	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions = currentTransitions);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+void
 R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
-	HFSM2_ASSERT(_requests.count());
+	HFSM2_ASSERT(_core.registry.isActive());
+	HFSM2_ASSERT(_core.requests.count());
 
 	RegistryBackUp registryUndo;
-
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
-
+	PlanControl control{_core};
 	TransitionSet pendingTransitions;
 
 	for (Long i = 0;
-		i < SUBSTITUTION_LIMIT && _requests.count();
+		i < SUBSTITUTION_LIMIT && _core.requests.count();
 		++i)
 	{
-		backup(_registry, registryUndo);
+		backup(_core.registry, registryUndo);
 
 		if (applyRequests(currentTransitions,
 						  control))
 		{
-			pendingTransitions = _requests;
-			_requests.clear();
+			pendingTransitions = _core.requests;
+			_core.requests.clear();
 
 			if (cancelledByGuards(currentTransitions,
 								  pendingTransitions))
 			{
-				HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-				restore(_registry, registryUndo);
+				HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+				restore(_core.registry, registryUndo);
 			} else
 				currentTransitions += pendingTransitions;
 
 			pendingTransitions.clear();
 		} else
-			_requests.clear();
+			_core.requests.clear();
 	}
-	HFSM2_ASSERT(_requests.count() == 0);
+	HFSM2_ASSERT(_core.requests.count() == 0);
 
 	if (currentTransitions.count())
 		_apex.deepChangeToRequested(control);
 
-	_registry.clearRequests();
-
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
-	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
+	_core.registry.clearRequests();
 }
 
 // COMMON
@@ -569,13 +492,14 @@ R_<TG, TA>::applyRequest(const TransitionSets& currentTransitions,
 	case TransitionType::CHANGE:
 	case TransitionType::RESTART:
 	case TransitionType::RESUME:
+	case TransitionType::SELECT:
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	case TransitionType::UTILIZE:
 	case TransitionType::RANDOMIZE:
 #endif
 
-		if (_registry.requestImmediate(request))
+		if (_core.registry.requestImmediate(request))
 			_apex.deepForwardActive(control, {request.type, index});
 		else
 			_apex.deepRequest	   (control, {request.type, index});
@@ -583,7 +507,7 @@ R_<TG, TA>::applyRequest(const TransitionSets& currentTransitions,
 		return true;
 
 	case TransitionType::SCHEDULE:
-		_registry.requestScheduled(request.destination);
+		_core.registry.requestScheduled(request.destination);
 
 		return false;
 
@@ -604,8 +528,8 @@ R_<TG, TA>::applyRequests(const TransitionSets& currentTransitions,
 {
 	bool changesMade = false;
 
-	for (Short i = 0; i < _requests.count(); ++i)
-		changesMade |= applyRequest(currentTransitions, control, _requests[i], i);
+	for (Short i = 0; i < _core.requests.count(); ++i)
+		changesMade |= applyRequest(currentTransitions, control, _core.requests[i], i);
 
 	return changesMade;
 }
@@ -619,16 +543,9 @@ bool
 R_<TG, TA>::cancelledByEntryGuards(const TransitionSets& currentTransitions,
 								   const TransitionSet&  pendingTransitions) noexcept
 {
-	GuardControl guardControl{_context
-							, _registry
-							, _requests
-							, currentTransitions
-							, pendingTransitions
-							HFSM2_IF_UTILITY_THEORY(, _rng)
-							HFSM2_IF_PLANS(, _planData)
-							HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-							HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-							HFSM2_IF_LOG_INTERFACE(, _logger)};
+	GuardControl guardControl{_core,
+							  currentTransitions,
+							  pendingTransitions};
 
 	return _apex.deepEntryGuard(guardControl);
 }
@@ -641,16 +558,9 @@ bool
 R_<TG, TA>::cancelledByGuards(const TransitionSets& currentTransitions,
 							  const TransitionSet&  pendingTransitions) noexcept
 {
-	GuardControl guardControl{_context
-							, _registry
-							, _requests
-							, currentTransitions
-							, pendingTransitions
-							HFSM2_IF_UTILITY_THEORY(, _rng)
-							HFSM2_IF_PLANS(, _planData)
-							HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-							HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-							HFSM2_IF_LOG_INTERFACE(, _logger)};
+	GuardControl guardControl{_core,
+							  currentTransitions,
+							  pendingTransitions};
 
 	return _apex.deepForwardExitGuard(guardControl) ||
 		   _apex.deepForwardEntryGuard(guardControl);
@@ -801,8 +711,8 @@ RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{context
-	HFSM2_IF_UTILITY_THEORY(, rng)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {
 	initialEnter();
 }
@@ -815,8 +725,8 @@ RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{move(context)
-	HFSM2_IF_UTILITY_THEORY(, rng)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {
 	initialEnter();
 }
@@ -859,31 +769,24 @@ bool
 RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const Transition* const transitions,
 																											   const Short count) noexcept
 {
-	HFSM2_ASSERT(!_registry.isActive());
-	HFSM2_ASSERT(_requests.count() == 0);
+	HFSM2_ASSERT(!_core.registry.isActive());
+	HFSM2_ASSERT(_core.requests.count() == 0);
 
-	_transitionTargets.clear();
-	HFSM2_ASSERT(_previousTransitions.count() == 0);
+	_core.transitionTargets.clear();
+	HFSM2_ASSERT(_core.previousTransitions.count() == 0);
 
 	if (HFSM2_CHECKED(transitions && count)) {
-		PlanControl control{_context
-						  , _registry
-						  , _requests
-						  HFSM2_IF_UTILITY_THEORY(, _rng)
-						  HFSM2_IF_PLANS(, _planData)
-						  , _transitionTargets
-						  , _previousTransitions
-						  HFSM2_IF_LOG_INTERFACE(, _logger)};
+		PlanControl control{_core};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)
-				_previousTransitions.emplace(transitions[i]);
+				_core.previousTransitions.emplace(transitions[i]);
 
 			_apex.deepEnter(control);
 
-			_registry.clearRequests();
+			_core.registry.clearRequests();
 
-			HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+			HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
 			HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 
 			return true;
@@ -918,11 +821,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
 																										  const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::CHANGE, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -933,11 +836,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
 																											   Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::CHANGE, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
 // COMMON
@@ -949,11 +852,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
 																										   const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESTART, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESTART, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -964,11 +867,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
 																												Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESTART, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESTART, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -979,11 +882,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
 																										  const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESUME, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESUME, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -994,11 +897,41 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
 																											   Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESUME, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESUME, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+}
+
+//------------------------------------------------------------------------------
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::selectWith(const StateID  stateId,
+																										  const Payload& payload) noexcept
+{
+	HFSM2_ASSERT(_core.registry.isActive());
+
+	_core.requests.emplace(Transition{stateId, TransitionType::SELECT, payload});
+
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::selectWith(const StateID  stateId,
+																											   Payload&& payload) noexcept
+{
+	HFSM2_ASSERT(_core.registry.isActive());
+
+	_core.requests.emplace(Transition{stateId, TransitionType::SELECT, move(payload)});
+
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -1011,11 +944,11 @@ void
 RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
 																				 const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::UTILIZE, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1026,11 +959,11 @@ void
 RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
 																					  Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::UTILIZE, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -1041,11 +974,11 @@ void
 RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
 																				   const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1056,11 +989,11 @@ void
 RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
 																						Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
 #endif
@@ -1073,11 +1006,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
 																											const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::SCHEDULE, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1088,11 +1021,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
 																												 Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::SCHEDULE, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1103,8 +1036,8 @@ RC_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{context
-	HFSM2_IF_UTILITY_THEORY(, rng)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1115,8 +1048,8 @@ RC_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{move(context)
-	HFSM2_IF_UTILITY_THEORY(, rng)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1129,8 +1062,8 @@ RC_<G_<NFT, TC*, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(Contex
 																		, RNG& rng
 																		HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{context
-	, rng
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 , rng
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 #else
@@ -1140,7 +1073,7 @@ HFSM2_CONSTEXPR(14)
 RC_<G_<NFT, TC*, TV, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(Context context
 															HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{context
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 #endif
@@ -1154,8 +1087,8 @@ HFSM2_CONSTEXPR(14)
 RC_<G_<NFT, EmptyContext, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(RNG& rng
 																				 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{static_cast<EmptyContext&>(*this)
-	, rng
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 , rng
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 #else
@@ -1164,7 +1097,7 @@ template <FeatureTag NFT, typename TV, Long NSL HFSM2_IF_PLANS(, Long NTC), type
 HFSM2_CONSTEXPR(14)
 RC_<G_<NFT, EmptyContext, TV, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger)) noexcept
 	: Base{static_cast<EmptyContext&>(*this)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 #endif

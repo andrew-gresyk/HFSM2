@@ -86,12 +86,3 @@ jobs:
     - name: Build 'examples/debug_logger_interface'
       run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
       working-directory: ${{ github.workspace }}/examples/debug_logger_interface
-
-    # examples/snippets
-    - name: Configure 'examples/snippets'
-      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/snippets
-
-    - name: Build 'examples/snippets'
-      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/snippets

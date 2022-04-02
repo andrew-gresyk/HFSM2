@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 1.15.0 (2022-03-13)
+// 2.0.0 (2022-04-02)
 //
 // Created by Andrew Gresyk
 //
@@ -31,8 +31,8 @@
 
 #pragma once
 
-#define HFSM2_VERSION_MAJOR 1
-#define HFSM2_VERSION_MINOR 15
+#define HFSM2_VERSION_MAJOR 2
+#define HFSM2_VERSION_MINOR 0
 #define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
@@ -305,30 +305,34 @@
 	#define HFSM2_LOG_INTERFACE_MASK									(1 << 8)
 
 	#define HFSM2_LOG_TRANSITION(CONTEXT, ORIGIN, TYPE, DESTINATION)		   \
-		if (_logger)														   \
-			_logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
+		if (_core.logger)													   \
+			_core.logger->recordTransition(CONTEXT, ORIGIN, TYPE, DESTINATION)
 
 #if HFSM2_PLANS_AVAILABLE()
 	#define HFSM2_LOG_TASK_STATUS(CONTEXT, REGION, ORIGIN, STATUS)			   \
-		if (_logger)														   \
-			_logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
+		if (_core.logger)													   \
+			_core.logger->recordTaskStatus(CONTEXT, REGION, ORIGIN, STATUS)
 
 	#define HFSM2_LOG_PLAN_STATUS(CONTEXT, REGION, STATUS)					   \
-		if (_logger)														   \
-			_logger->recordPlanStatus(CONTEXT, REGION, STATUS)
+		if (_core.logger)													   \
+			_core.logger->recordPlanStatus(CONTEXT, REGION, STATUS)
 #endif
 
 	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)					   \
-		if (_logger)														   \
-			_logger->recordCancelledPending(CONTEXT, ORIGIN)
+		if (_core.logger)													   \
+			_core.logger->recordCancelledPending(CONTEXT, ORIGIN)
+
+	#define HFSM2_LOG_SELECT_RESOLUTION(CONTEXT, HEAD, PRONG)				   \
+		if (auto* const logger = control._core.logger)						   \
+			logger->recordSelectResolution(CONTEXT, HEAD, PRONG)
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)		   \
-		if (auto* const logger = control._logger)							   \
+		if (auto* const logger = control._core.logger)						   \
 			logger->recordUtilityResolution(CONTEXT, HEAD, PRONG, UTILITY)
 
 	#define HFSM2_LOG_RANDOM_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)		   \
-		if (auto* const logger = control._logger)							   \
+		if (auto* const logger = control._core.logger)						   \
 			logger->recordRandomResolution(CONTEXT, HEAD, PRONG, UTILITY)
 #endif
 
@@ -346,6 +350,7 @@
 #endif
 
 	#define HFSM2_LOG_CANCELLED_PENDING(CONTEXT, ORIGIN)
+	#define HFSM2_LOG_SELECT_RESOLUTION(CONTEXT, HEAD, PRONG)
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	#define HFSM2_LOG_UTILITY_RESOLUTION(CONTEXT, HEAD, PRONG, UTILITY)
@@ -359,13 +364,13 @@
 #if HFSM2_VERBOSE_DEBUG_LOG_AVAILABLE()
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)						   \
-		if (auto* const logger = control._logger)							   \
+		if (auto* const logger = control._core.logger)						   \
 			logger->recordMethod(control.context(), STATE_ID, METHOD_ID)
 
 #elif HFSM2_LOG_INTERFACE_AVAILABLE()
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)						   \
-		if (auto* const logger = control._logger)							   \
+		if (auto* const logger = control._core.logger)						   \
 			log(METHOD, *logger, control.context(), METHOD_ID)
 
 #else
@@ -1818,6 +1823,8 @@ namespace hfsm2 {
 enum class Method : uint8_t {
 	NONE,
 
+	SELECT,
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	RANK,
 	UTILITY,
@@ -1826,8 +1833,12 @@ enum class Method : uint8_t {
 	ENTRY_GUARD,
 	ENTER,
 	REENTER,
+	PRE_UPDATE,
 	UPDATE,
+	POST_UPDATE,
+	PRE_REACT,
 	REACT,
+	POST_REACT,
 	EXIT_GUARD,
 	EXIT,
 
@@ -1845,6 +1856,7 @@ enum class TransitionType : uint8_t {
 	CHANGE,
 	RESTART,
 	RESUME,
+	SELECT,
 
 //#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	UTILIZE,
@@ -1908,6 +1920,8 @@ const char*
 methodName(const Method method)										  noexcept {
 	switch (method) {
 
+	case Method::SELECT:		 return "select";
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	case Method::RANK:			 return "rank";
 	case Method::UTILITY:		 return "utility";
@@ -1916,8 +1930,12 @@ methodName(const Method method)										  noexcept {
 	case Method::ENTRY_GUARD:	 return "entryGuard";
 	case Method::ENTER:			 return "enter";
 	case Method::REENTER:		 return "reenter";
+	case Method::PRE_UPDATE:	 return "preUpdate";
 	case Method::UPDATE:		 return "update";
+	case Method::POST_UPDATE:	 return "postUpdate";
+	case Method::PRE_REACT:		 return "preReact";
 	case Method::REACT:			 return "react";
+	case Method::POST_REACT:	 return "postReact";
 	case Method::EXIT_GUARD:	 return "exitGuard";
 	case Method::EXIT:			 return "exit";
 
@@ -1942,6 +1960,7 @@ transitionName(const TransitionType type) noexcept {
 	case TransitionType::CHANGE:	return "changeTo";
 	case TransitionType::RESTART:	return "restart";
 	case TransitionType::RESUME:	return "resume";
+	case TransitionType::SELECT:	return "select";
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	case TransitionType::UTILIZE:	return "utilize";
@@ -2224,6 +2243,14 @@ struct LoggerInterfaceT {
 						   const StateID HFSM2_UNUSED(origin))		  noexcept
 	{}
 
+	HFSM2_CONSTEXPR(NO)
+	virtual
+	void
+	recordSelectResolution(Context& HFSM2_UNUSED(context),
+						   const StateID HFSM2_UNUSED(head),
+						   const StateID HFSM2_UNUSED(prong))		  noexcept
+	{}
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	HFSM2_CONSTEXPR(NO)
@@ -2333,6 +2360,15 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+HFSM2_CONSTEXPR(11)
+T
+filler() noexcept {
+	return T{INVALID_SHORT};
+}
+
+//------------------------------------------------------------------------------
+
 template <typename T, Long NCapacity>
 class StaticArrayT final {
 	template <typename>
@@ -2360,7 +2396,7 @@ public:
 	HFSM2_CONSTEXPR(11)	Index count()									const noexcept	{ return CAPACITY;					}
 
 	HFSM2_CONSTEXPR(14)	void fill(const Item filler)						  noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()										  noexcept	{ fill(INVALID_SHORT);				}
+	HFSM2_CONSTEXPR(14)	void clear()										  noexcept	{ fill(filler<Item>());				}
 
 	HFSM2_CONSTEXPR(14)	 Iterator  begin()									  noexcept	{ return  Iterator(*this, first());	}
 	HFSM2_CONSTEXPR(11)	CIterator  begin()								const noexcept	{ return CIterator(*this, first());	}
@@ -3394,12 +3430,72 @@ TaskListT<TP, NC>::verifyStructure(const Index occupied) const noexcept {
 
 #endif
 
-#if HFSM2_PLANS_AVAILABLE()
-
 namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#pragma pack(push, 1)
+
+struct Status final {
+	enum class Result {
+		NONE,
+		SUCCESS,
+		FAILURE
+	};
+
+	Result result = Result::NONE;
+	bool outerTransition = false;
+
+	HFSM2_CONSTEXPR(11)	Status(const Result result_ = Result::NONE,
+							   const bool outerTransition_ = false)	  noexcept
+		: result{result_}
+		, outerTransition{outerTransition_}
+	{}
+
+	HFSM2_CONSTEXPR(11)	explicit operator bool()				const noexcept	{ return result != Result::NONE || outerTransition;	}
+
+	HFSM2_CONSTEXPR(14)	void clear()								  noexcept;
+};
+
+#pragma pack(pop)
+
+//------------------------------------------------------------------------------
+
+HFSM2_CONSTEXPR(14)
+Status
+operator | (Status& lhs, const Status rhs)							  noexcept	{
+	const Status::Result result = lhs.result > rhs.result ?
+		lhs.result : rhs.result;
+
+	return Status{result, lhs.outerTransition || rhs.outerTransition};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+Status&
+operator |= (Status& lhs, const Status rhs)							  noexcept	{
+	const Status::Result result = lhs.result > rhs.result ?
+		lhs.result : rhs.result;
+
+	lhs = Status{result, lhs.outerTransition || rhs.outerTransition};
+
+	return lhs;
+}
+
+//------------------------------------------------------------------------------
+
+template <>
+HFSM2_CONSTEXPR(11)
+Status
+filler<Status>() noexcept {
+	return Status{};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#if HFSM2_PLANS_AVAILABLE()
 
 #pragma pack(push, 2)
 
@@ -3417,7 +3513,7 @@ struct Bounds final {
 
 #pragma pack(pop)
 
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 
 template <typename
 		, typename
@@ -3464,17 +3560,18 @@ struct PlanDataT<ArgsT<TContext
 	using RegionList	= TRegionList;
 	using Payload		= TPayload;
 
-	static constexpr Short REGION_COUNT  = RegionList::SIZE;
-	static constexpr Short TASK_CAPACITY = NTaskCapacity;
+	static constexpr Short REGION_COUNT		= RegionList::SIZE;
+	static constexpr Short TASK_CAPACITY	= NTaskCapacity;
 
-	using Task			= TaskT<Payload>;
-	using Tasks			= TaskListT	  <Payload,  TASK_CAPACITY>;
-	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
-	using Payloads		= StaticArrayT<Payload,  TASK_CAPACITY>;
+	using Task			 = TaskT<Payload>;
+	using Tasks			 = TaskListT	  <Payload,  TASK_CAPACITY>;
+	using TaskLinks		 = StaticArrayT<TaskLink, TASK_CAPACITY>;
+	using Payloads		 = StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
-	using TasksBits		= BitArrayT<StateList::SIZE>;
-	using RegionBits	= BitArrayT<RegionList::SIZE>;
+	using TasksBounds	 = ArrayT   <Bounds,   RegionList::SIZE>;
+	using TasksBits		 = BitArrayT<StateList::SIZE>;
+	using RegionBits	 = BitArrayT<RegionList::SIZE>;
+	using RegionStatuses = StaticArrayT<Status, RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -3485,9 +3582,13 @@ struct PlanDataT<ArgsT<TContext
 	TasksBits tasksSuccesses;
 	TasksBits tasksFailures;
 	RegionBits planExists;
+	RegionStatuses headStatuses;
+	RegionStatuses subStatuses;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
@@ -3522,8 +3623,8 @@ struct PlanDataT<ArgsT<TContext
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr Short REGION_COUNT  = RegionList::SIZE;
-	static constexpr Short TASK_CAPACITY = NTaskCapacity;
+	static constexpr Short REGION_COUNT		= RegionList::SIZE;
+	static constexpr Short TASK_CAPACITY	= NTaskCapacity;
 
 	using Task			= TaskT<void>;
 	using Tasks			= TaskListT<void, TASK_CAPACITY>;
@@ -3532,6 +3633,7 @@ struct PlanDataT<ArgsT<TContext
 	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
 	using TasksBits		= BitArrayT<StateList::SIZE>;
 	using RegionBits	= BitArrayT<RegionList::SIZE>;
+	using RegionStatuses = StaticArrayT<Status, RegionList::SIZE>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -3540,9 +3642,13 @@ struct PlanDataT<ArgsT<TContext
 	TasksBits tasksSuccesses;
 	TasksBits tasksFailures;
 	RegionBits planExists;
+	RegionStatuses headStatuses;
+	RegionStatuses subStatuses;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
@@ -3576,22 +3682,35 @@ struct PlanDataT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				  noexcept	{}
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)			const noexcept	{}
 
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept	{}
+
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept	{}
 #endif
 };
 
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
 }
-
-#if HFSM2_PLANS_AVAILABLE()
 
 namespace hfsm2 {
 namespace detail {
 
+//------------------------------------------------------------------------------
+
+HFSM2_CONSTEXPR(14)
+void
+Status::clear() noexcept {
+	result = Result::NONE;
+	outerTransition = false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
+
+#if HFSM2_PLANS_AVAILABLE()
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
 HFSM2_CONSTEXPR(14)
@@ -3617,6 +3736,16 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 	}
 
 #endif
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clearRegionStatuses() noexcept {
+	headStatuses.clear();
+	subStatuses	.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -3708,6 +3837,16 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 
 //------------------------------------------------------------------------------
 
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clearRegionStatuses() noexcept {
+	headStatuses.clear();
+	subStatuses	.clear();
+}
+
+//------------------------------------------------------------------------------
+
 #if HFSM2_ASSERT_AVAILABLE()
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
@@ -3764,55 +3903,14 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 }
 
 #endif
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
 }
 }
-
-#endif
-
-#endif
 namespace hfsm2 {
 namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-#pragma pack(push, 1)
-
-struct Status final {
-	enum class Result {
-		NONE,
-		SUCCESS,
-		FAILURE
-	};
-
-	Result result = Result::NONE;
-	bool outerTransition = false;
-
-	HFSM2_CONSTEXPR(11)	Status(const Result result_ = Result::NONE,
-							   const bool outerTransition_ = false)	  noexcept
-		: result{result_}
-		, outerTransition{outerTransition_}
-	{}
-
-	HFSM2_CONSTEXPR(11)	explicit operator bool()				const noexcept	{ return result != Result::NONE || outerTransition;	}
-
-	HFSM2_CONSTEXPR(14)	void clear()								  noexcept;
-};
-
-#pragma pack(pop)
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-HFSM2_CONSTEXPR(14)
-Status
-combine(const Status lhs, const Status rhs) noexcept {
-	const Status::Result result = lhs.result > rhs.result ?
-									  lhs.result : rhs.result;
-
-	return {result, lhs.outerTransition || rhs.outerTransition};
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -3973,7 +4071,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -3981,7 +4079,7 @@ public:
 	HFSM2_CONSTEXPR(14)	bool change   (const StateID origin, const StateID destination)	  noexcept { return append (origin, destination, TransitionType::CHANGE);	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -3990,7 +4088,7 @@ public:
 	HFSM2_CONSTEXPR(14)	bool change   (const StateID destination)						  noexcept { return change (stateId<TOrigin>(), destination)			;	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4001,7 +4099,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4009,7 +4107,7 @@ public:
 	HFSM2_CONSTEXPR(14)	bool restart  (const StateID origin, const StateID destination)	  noexcept { return append (origin, destination, TransitionType::RESTART);	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4018,7 +4116,7 @@ public:
 	HFSM2_CONSTEXPR(14)	bool restart  (const StateID destination)						  noexcept { return restart(stateId<TOrigin>(), destination)			;	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4029,7 +4127,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4037,7 +4135,7 @@ public:
 	HFSM2_CONSTEXPR(14)	bool resume   (const StateID origin, const StateID destination)	  noexcept { return append(origin, destination, TransitionType::RESUME)	;	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4046,7 +4144,7 @@ public:
 	HFSM2_CONSTEXPR(14)	bool resume   (const StateID destination)						  noexcept { return resume   (stateId<TOrigin>(), destination)			;	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4056,10 +4154,39 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param origin Origin state identifier
+	/// @param destination Destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool select   (const StateID origin, const StateID destination)	  noexcept { return append(origin, destination, TransitionType::SELECT)	;	}
+
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TOrigin Origin state type
+	/// @param destination Destination state identifier
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool select   (const StateID destination)						  noexcept { return select   (stateId<TOrigin>(), destination)			;	}
+
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TOrigin Origin state type
+	/// @tparam TDestination Destination state type
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool select   ()												  noexcept { return select   (stateId<TOrigin>(), stateId<TDestination>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4068,7 +4195,8 @@ public:
 	HFSM2_CONSTEXPR(14)	bool utilize  (const StateID origin, const StateID destination)   noexcept { return append(origin, destination, TransitionType::UTILIZE);	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4078,7 +4206,8 @@ public:
 	HFSM2_CONSTEXPR(14)	bool utilize  (const StateID destination)						  noexcept { return utilize  (stateId<TOrigin>(), destination);				}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4090,7 +4219,8 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4099,7 +4229,8 @@ public:
 	HFSM2_CONSTEXPR(14)	bool randomize(const StateID origin, const StateID destination)	  noexcept { return append(origin, destination, TransitionType::RANDOMIZE);	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4109,7 +4240,8 @@ public:
 	HFSM2_CONSTEXPR(14)	bool randomize(const StateID destination)						  noexcept { return randomize(stateId<TOrigin>(), destination);				}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @return Seccess if FSM total number of tasks is below task capacity
@@ -4250,16 +4382,16 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::CHANGE   ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::CHANGE   ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4268,17 +4400,17 @@ public:
 	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID origin, const StateID destination,		  Payload&& payload) noexcept { return append(origin							  , destination								  , TransitionType::CHANGE   , move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool changeWith   (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::CHANGE   ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool changeWith   (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::CHANGE   ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4288,17 +4420,17 @@ public:
 	HFSM2_CONSTEXPR(14)	bool changeWith   (						 const StateID destination,		 Payload&& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::CHANGE   , move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool changeWith   (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::CHANGE   ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool changeWith   (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::CHANGE   ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, acts depending on the region type)
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
@@ -4310,16 +4442,16 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::RESTART  ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::RESTART  ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4328,17 +4460,17 @@ public:
 	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID origin, const StateID destination,		 Payload&& payload) noexcept { return append(origin								  , destination								  , TransitionType::RESTART  , move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool restartWith  (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RESTART  ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool restartWith  (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RESTART  ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4348,17 +4480,17 @@ public:
 	HFSM2_CONSTEXPR(14)	bool restartWith  (						 const StateID destination,		 Payload&& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RESTART  , move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool restartWith  (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESTART  ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool restartWith  (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESTART  ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the initial state)
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
@@ -4370,16 +4502,16 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::RESUME   ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::RESUME   ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4388,17 +4520,17 @@ public:
 	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID origin, const StateID destination,		 Payload&& payload) noexcept { return append(origin								  , destination								  , TransitionType::RESUME   , move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool resumeWith   (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RESUME   ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool resumeWith   (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RESUME   ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4408,17 +4540,17 @@ public:
 	HFSM2_CONSTEXPR(14)	bool resumeWith   (						 const StateID destination,		 Payload&& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RESUME   , move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool resumeWith   (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESUME   ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool resumeWith   (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESUME   ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state that was active previously)
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
@@ -4429,20 +4561,82 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param origin Origin state identifier
+	/// @param destination Destination state identifier
+	/// @param payload Payload
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool selectWith   (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::SELECT   ,		payload );	}
+
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param origin Origin state identifier
+	/// @param destination Destination state identifier
+	/// @param payload Payload
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool selectWith   (const StateID origin, const StateID destination,		 Payload&& payload) noexcept { return append(origin								  , destination								  , TransitionType::SELECT   , move(payload));	}
+
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TOrigin Origin state type
+	/// @param destination Destination state identifier
+	/// @param payload Payload
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool selectWith   (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::SELECT   ,		payload );	}
+
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TOrigin Origin state type
+	/// @param destination Destination state identifier
+	/// @param payload Payload
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool selectWith   (						 const StateID destination,		 Payload&& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::SELECT   , move(payload));	}
+
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TOrigin Origin state type
+	/// @tparam TDestination Destination state type
+	/// @param payload Payload
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool selectWith   (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SELECT   ,		payload );	}
+
+	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TOrigin Origin state type
+	/// @tparam TDestination Destination state type
+	/// @param payload Payload
+	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool selectWith   (														 Payload&& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SELECT   , move(payload));	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::UTILIZE  ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::UTILIZE  ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4452,7 +4646,8 @@ public:
 	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID origin, const StateID destination,		 Payload&& payload) noexcept { return append(origin								  , destination								  , TransitionType::UTILIZE  , move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4460,10 +4655,11 @@ public:
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool utilizeWith  (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::UTILIZE  ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool utilizeWith  (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::UTILIZE  ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4474,7 +4670,8 @@ public:
 	HFSM2_CONSTEXPR(14)	bool utilizeWith  (						const StateID destination,		 Payload&& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::UTILIZE  , move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
@@ -4482,10 +4679,11 @@ public:
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool utilizeWith  (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::UTILIZE  ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool utilizeWith  (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::UTILIZE  ,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, activates the state with the highest 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
@@ -4498,17 +4696,19 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::RANDOMIZE,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::RANDOMIZE,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param origin Origin state identifier
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4518,7 +4718,8 @@ public:
 	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID origin, const StateID destination,		 Payload&& payload) noexcept { return append(origin								  , destination								  , TransitionType::RANDOMIZE, move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4526,10 +4727,11 @@ public:
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool randomizeWith(						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RANDOMIZE,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool randomizeWith(						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RANDOMIZE,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @param destination Destination state identifier
 	/// @param payload Payload
@@ -4540,7 +4742,8 @@ public:
 	HFSM2_CONSTEXPR(14)	bool randomizeWith(						 const StateID destination,		 Payload&& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::RANDOMIZE, move(payload));	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
@@ -4548,10 +4751,11 @@ public:
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool randomizeWith(													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RANDOMIZE,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool randomizeWith(													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RANDOMIZE,		payload );	}
 
 	/// @brief Add a task to transition from 'origin' to 'destination' if 'origin' completes with 'success()'
-	///		(if transitioning into a region, uses weighted random to activate the state proportional to 'utility()' among those with the highest 'rank()')
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TOrigin Origin state type
 	/// @tparam TDestination Destination state type
 	/// @param payload Payload
@@ -4571,7 +4775,7 @@ public:
 	/// @param payload Payload
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool scheduleWith (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::SCHEDULE ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool scheduleWith (const StateID origin, const StateID destination, const Payload& payload) noexcept { return append(origin								  , destination								  , TransitionType::SCHEDULE ,		payload );	}
 
 	/// @brief Add a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
 	/// @param origin Origin state identifier
@@ -4588,7 +4792,7 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool scheduleWith (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::SCHEDULE ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool scheduleWith (						 const StateID destination, const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), destination								  , TransitionType::SCHEDULE ,		payload );	}
 
 	/// @brief Add a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
 	/// @tparam TOrigin Origin state type
@@ -4606,7 +4810,7 @@ public:
 	/// @return Seccess if FSM total number of tasks is below task capacity
 	/// @note use 'Config::TaskCapacityN<>' to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool scheduleWith (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SCHEDULE ,			 payload );	}
+	HFSM2_CONSTEXPR(14)	bool scheduleWith (													const Payload& payload) noexcept { return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SCHEDULE ,		payload );	}
 
 	/// @brief Add a task to schedule a transition to 'destination' if 'origin' completes with 'success()'
 	/// @tparam TOrigin Origin state type
@@ -4694,15 +4898,6 @@ class PlanT<ArgsT<TContext
 
 namespace hfsm2 {
 namespace detail {
-
-////////////////////////////////////////////////////////////////////////////////
-
-HFSM2_CONSTEXPR(14)
-void
-Status::clear() noexcept {
-	result = Result::NONE;
-	outerTransition = false;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -5054,6 +5249,7 @@ namespace detail {
 enum Strategy {
 	Composite,
 	Resumable,
+	Selectable,
 
 //#if HFSM2_UTILITY_THEORY_AVAILABLE()
 	Utilitarian,
@@ -5170,6 +5366,10 @@ struct RegistryT<ArgsT<TContext
 	using OrthoBits		= typename OrthoForks::Bits;
 	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
 
+#if HFSM2_PLANS_AVAILABLE()
+	using CompoStatuses	= BitArrayT	  <COMPO_REGIONS>;
+#endif
+
 	using BackUp		= BackUpT<RegistryT>;
 
 	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
@@ -5201,6 +5401,10 @@ struct RegistryT<ArgsT<TContext
 	CompoForks compoResumable{INVALID_SHORT};
 
 	CompoRemains compoRemains;
+
+#if HFSM2_PLANS_AVAILABLE()
+	CompoStatuses compoStatuses;
+#endif
 };
 
 //------------------------------------------------------------------------------
@@ -5242,6 +5446,10 @@ struct RegistryT<ArgsT<TContext
 	using OrthoForks	= BitArrayT	  <0>;
 	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
 
+#if HFSM2_PLANS_AVAILABLE()
+	using CompoStatuses	= BitArrayT	  <COMPO_REGIONS>;
+#endif
+
 	using BackUp		= BackUpT<RegistryT>;
 
 	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
@@ -5269,6 +5477,10 @@ struct RegistryT<ArgsT<TContext
 	CompoForks compoResumable{INVALID_SHORT};
 
 	CompoRemains compoRemains;
+
+#if HFSM2_PLANS_AVAILABLE()
+	CompoStatuses compoStatuses;
+#endif
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -5738,6 +5950,126 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
+struct CoreT {
+	using Context			= typename TArgs::Context;
+	using PureContext		= typename TArgs::PureContext;
+
+	using Registry			= RegistryT<TArgs>;
+
+	using Payload			= typename TArgs::Payload;
+	using Transition		= TransitionT<Payload>;
+	using TransitionSet		= ArrayT<Transition, TArgs::COMPO_REGIONS>;
+	using TransitionSets	= ArrayT<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
+
+#if HFSM2_PLANS_AVAILABLE()
+	using PlanData			= PlanDataT<TArgs>;
+#endif
+
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
+	using TransitionTargets	= StaticArrayT<Short, TArgs::STATE_COUNT>;
+#endif
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	using RNG				= typename TArgs::RNG;
+#endif
+
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
+	using Logger			= typename TArgs::Logger;
+#endif
+
+	HFSM2_CONSTEXPR(14)	explicit CoreT(Context& context_
+									 HFSM2_IF_UTILITY_THEORY(, RNG& rng_)
+									 HFSM2_IF_LOG_INTERFACE(, Logger* const logger_ = nullptr))	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	explicit CoreT(PureContext&& context_
+									 HFSM2_IF_UTILITY_THEORY(, RNG& rng_)
+									 HFSM2_IF_LOG_INTERFACE(, Logger* const logger_ = nullptr))	  noexcept;
+
+	HFSM2_CONSTEXPR(14) CoreT(const CoreT&  other)												  noexcept;
+	HFSM2_CONSTEXPR(14) CoreT(		CoreT&& other)												  noexcept;
+
+	Context context;
+	Registry registry;
+	TransitionSet requests;
+	HFSM2_IF_PLANS(PlanData planData);
+	HFSM2_IF_TRANSITION_HISTORY(TransitionTargets transitionTargets);
+	HFSM2_IF_TRANSITION_HISTORY(TransitionSets previousTransitions);
+	HFSM2_IF_UTILITY_THEORY(RNG& rng);
+	HFSM2_IF_LOG_INTERFACE(Logger* logger);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+CoreT<TArgs>::CoreT(Context& context_
+				  HFSM2_IF_UTILITY_THEORY(, RNG& rng_)
+				  HFSM2_IF_LOG_INTERFACE(, Logger* const logger_)) noexcept
+	: context{context_}
+	HFSM2_IF_UTILITY_THEORY(, rng{rng_})
+	HFSM2_IF_LOG_INTERFACE(, logger{logger_})
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+CoreT<TArgs>::CoreT(PureContext&& context_
+				  HFSM2_IF_UTILITY_THEORY(, RNG& rng_)
+				  HFSM2_IF_LOG_INTERFACE(, Logger* const logger_)) noexcept
+	: context{move(context_)}
+	HFSM2_IF_UTILITY_THEORY(, rng	{rng_	})
+	HFSM2_IF_LOG_INTERFACE (, logger{logger_})
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+CoreT<TArgs>::CoreT(const CoreT& other) noexcept
+	: context {other.context }
+	, registry{other.registry}
+	, requests{other.requests}
+	HFSM2_IF_PLANS			   (, planData			 {other.planData		   })
+	HFSM2_IF_TRANSITION_HISTORY(, transitionTargets  {other.transitionTargets  })
+	HFSM2_IF_TRANSITION_HISTORY(, previousTransitions{other.previousTransitions})
+	HFSM2_IF_UTILITY_THEORY	   (, rng				 {other.rng				   })
+	HFSM2_IF_LOG_INTERFACE	   (, logger			 {other.logger			   })
+{}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+CoreT<TArgs>::CoreT(CoreT&& other) noexcept
+	: context {move(other.context )}
+	, registry{move(other.registry)}
+	, requests{move(other.requests)}
+	HFSM2_IF_PLANS			   (, planData			 {move(other.planData			)})
+	HFSM2_IF_TRANSITION_HISTORY(, transitionTargets  {move(other.transitionTargets	)})
+	HFSM2_IF_TRANSITION_HISTORY(, previousTransitions{move(other.previousTransitions)})
+	HFSM2_IF_UTILITY_THEORY	   (, rng				 {move(other.rng				)})
+	HFSM2_IF_LOG_INTERFACE	   (, logger			 {move(other.logger				)})
+{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}
+}
+namespace hfsm2 {
+namespace detail {
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename TArgs>
 class ControlT {
 	template <typename, typename, typename>
 	friend struct S_;
@@ -5757,6 +6089,8 @@ protected:
 	using StateList			= typename TArgs::StateList;
 	using RegionList		= typename TArgs::RegionList;
 
+	using Core				= CoreT<TArgs>;
+
 	using Registry			= RegistryT<TArgs>;
 
 	using Payload			= typename TArgs::Payload;
@@ -5774,7 +6108,7 @@ protected:
 
 #if HFSM2_PLANS_AVAILABLE()
 	using PlanData			= PlanDataT<TArgs>;
-	using CPlan				= CPlanT<TArgs>;
+	using CPlan				= CPlanT   <TArgs>;
 #endif
 
 #if HFSM2_LOG_INTERFACE_AVAILABLE()
@@ -5797,7 +6131,7 @@ protected:
 
 	struct Region {
 		HFSM2_CONSTEXPR(14)	Region(ControlT& control,
-							const RegionID regionId)					  noexcept;
+								   const RegionID regionId)				  noexcept;
 
 		HFSM2_CONSTEXPR(20)	~Region()									  noexcept;
 
@@ -5807,22 +6141,8 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)	ControlT(Context& context
-							   , Registry& registry
-							   , TransitionSet& requests
-							   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-							   HFSM2_IF_PLANS(, PlanData& planData)
-							   HFSM2_IF_TRANSITION_HISTORY(, TransitionTargets& transitionTargets)
-							   HFSM2_IF_TRANSITION_HISTORY(, const TransitionSets& previousTransitions)
-							   HFSM2_IF_LOG_INTERFACE(, Logger* const logger))	  noexcept
-		: _context{context}
-		, _registry{registry}
-		, _requests{requests}
-		HFSM2_IF_PLANS(, _planData{planData})
-		HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets{transitionTargets})
-		HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions{previousTransitions})
-		HFSM2_IF_UTILITY_THEORY(, _rng{rng})
-		HFSM2_IF_LOG_INTERFACE(, _logger{logger})
+	HFSM2_CONSTEXPR(11)	ControlT(Core& core)							  noexcept
+		: _core{core}
 	{}
 
 	HFSM2_CONSTEXPR(14)	void setOrigin  (const StateID	 stateId)		  noexcept;
@@ -5853,35 +6173,35 @@ public:
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::context()
-	HFSM2_CONSTEXPR(14)		  Context& _()								  noexcept	{ return _context;									}
+	HFSM2_CONSTEXPR(14)		  Context& _()								  noexcept	{ return _core.context;								}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::context()
-	HFSM2_CONSTEXPR(11)	const Context& _()							const noexcept	{ return _context;									}
+	HFSM2_CONSTEXPR(11)	const Context& _()							const noexcept	{ return _core.context;								}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::_()
-	HFSM2_CONSTEXPR(14)		  Context& context()						  noexcept	{ return _context;									}
+	HFSM2_CONSTEXPR(14)		  Context& context()						  noexcept	{ return _core.context;								}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::_()
-	HFSM2_CONSTEXPR(11)	const Context& context()					const noexcept	{ return _context;									}
+	HFSM2_CONSTEXPR(11)	const Context& context()					const noexcept	{ return _core.context;								}
 
 	//----------------------------------------------------------------------
 
 	/// @brief Inspect current transition requests
 	/// @return Array of transition requests
-	HFSM2_CONSTEXPR(11)	const TransitionSet& requests()				const noexcept	{ return _requests;									}
+	HFSM2_CONSTEXPR(11)	const TransitionSet& requests()				const noexcept	{ return _core.requests;							}
 
 	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active
 	/// @param stateId State identifier
 	/// @return State active status
-	HFSM2_CONSTEXPR(11)	bool isActive   (const StateID stateId)		const noexcept	{ return _registry.isActive   (stateId);			}
+	HFSM2_CONSTEXPR(11)	bool isActive   (const StateID stateId)		const noexcept	{ return _core.registry.isActive   (stateId);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState State type
@@ -5894,7 +6214,7 @@ public:
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId State identifier
 	/// @return State resumable status
-	HFSM2_CONSTEXPR(11)	bool isResumable(const StateID stateId)		const noexcept	{ return _registry.isResumable(stateId);			}
+	HFSM2_CONSTEXPR(11)	bool isResumable(const StateID stateId)		const noexcept	{ return _core.registry.isResumable(stateId);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState State type
@@ -5921,24 +6241,24 @@ public:
 
 	/// @brief Access read-only plan for the current region
 	/// @return Plan for the current region
-	HFSM2_CONSTEXPR(11)	CPlan plan()								const noexcept	{ return CPlan{_planData, _regionId};				}
+	HFSM2_CONSTEXPR(11)	CPlan plan()								const noexcept	{ return CPlan{_core.planData, _regionId};				}
 
 	/// @brief Access read-only plan for a region
 	/// @param regionId Region identifier
 	/// @return Read-only plan for the region
-	HFSM2_CONSTEXPR(14)	CPlan plan(const RegionID regionId)			const noexcept	{ return CPlan{_planData, regionId};				}
+	HFSM2_CONSTEXPR(14)	CPlan plan(const RegionID regionId)			const noexcept	{ return CPlan{_core.planData, regionId};				}
 
 	/// @brief Access read-only plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Read-only plan for the region
 	template <typename TRegion>
-	HFSM2_CONSTEXPR(14)	CPlan plan()									  noexcept	{ return CPlan{_planData, regionId<TRegion>()};		}
+	HFSM2_CONSTEXPR(14)	CPlan plan()									  noexcept	{ return CPlan{_core.planData, regionId<TRegion>()};	}
 
 	/// @brief Access read-only plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Read-only Plan for the region
 	template <typename TRegion>
-	HFSM2_CONSTEXPR(14)	CPlan plan()								const noexcept	{ return CPlan{_planData, regionId<TRegion>()};		}
+	HFSM2_CONSTEXPR(14)	CPlan plan()								const noexcept	{ return CPlan{_core.planData, regionId<TRegion>()};	}
 
 #endif
 
@@ -5948,7 +6268,7 @@ public:
 
 	/// @brief Get transitions processed during last 'update()', 'react()' or 'replayTransitions()'
 	/// @return Array of last transition requests
-	HFSM2_CONSTEXPR(11)	const TransitionSets& previousTransitions()					const noexcept	{ return _previousTransitions;					}
+	HFSM2_CONSTEXPR(11)	const TransitionSets& previousTransitions()					const noexcept	{ return _core.previousTransitions;				}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -5972,16 +6292,9 @@ public:
 	//----------------------------------------------------------------------
 
 protected:
-	Context& _context;
-	Registry& _registry;
-	TransitionSet& _requests;
+	Core& _core;
 	StateID _originId = INVALID_STATE_ID;
 	RegionID _regionId = 0;
-	HFSM2_IF_PLANS(PlanData& _planData);
-	HFSM2_IF_TRANSITION_HISTORY(TransitionTargets& _transitionTargets);
-	HFSM2_IF_TRANSITION_HISTORY(const TransitionSets& _previousTransitions);
-	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
-	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
 
 //------------------------------------------------------------------------------
@@ -6022,11 +6335,11 @@ protected:
 
 	struct Region {
 		HFSM2_CONSTEXPR(14)	Region(PlanControlT& control,
-							const RegionID regionId,
-							const StateID index,
-							const Long size) noexcept;
+								   const RegionID regionId,
+								   const StateID index,
+								   const Long size)				  noexcept;
 
-		HFSM2_CONSTEXPR(20)	~Region() noexcept;
+		HFSM2_CONSTEXPR(20)	~Region()							  noexcept;
 
 		PlanControlT& control;
 		const RegionID prevId;
@@ -6038,59 +6351,62 @@ protected:
 
 	using Control::Control;
 
-	HFSM2_CONSTEXPR(14)	void   setRegion(const RegionID regionId, const StateID index, const Long size) noexcept;
-	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId, const StateID index, const Long size) noexcept;
+	HFSM2_CONSTEXPR(14)	void   setRegion(const RegionID regionId,
+										 const StateID index,
+										 const Long size)		  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId,
+										 const StateID index,
+										 const Long size)		  noexcept;
 
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if HFSM2_PLANS_AVAILABLE()
-// COMMON
 
 	/// @brief Access plan for the current region
 	/// @return Plan for the current region
-	HFSM2_CONSTEXPR(14)	  Plan plan()							  noexcept	{ return  Plan{_planData, _regionId};								}
+	HFSM2_CONSTEXPR(14)	  Plan plan()							  noexcept	{ return  Plan{_core.planData, _regionId};								}
 
 // COMMON
 
 	/// @brief Access plan for a region
 	/// @param regionId
 	/// @return Plan for the region
-	HFSM2_CONSTEXPR(14)	  Plan plan(const RegionID regionId)	  noexcept	{ return  Plan{_planData,  regionId};								}
+	HFSM2_CONSTEXPR(14)	  Plan plan(const RegionID regionId)	  noexcept	{ return  Plan{_core.planData,  regionId};								}
 
 	/// @brief Access plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Plan for the region
 	template <typename TRegion>
-	HFSM2_CONSTEXPR(14)	  Plan plan()							  noexcept	{ return  Plan{_planData, Control::template regionId<TRegion>()};	}
+	HFSM2_CONSTEXPR(14)	  Plan plan()							  noexcept	{ return  Plan{_core.planData, Control::template regionId<TRegion>()};	}
 
 // COMMON
 
 	/// @brief Access plan for the current region
 	/// @return Plan for the current region
-	HFSM2_CONSTEXPR(11)	CPlan plan()						const noexcept	{ return CPlan{_planData, _regionId};								}
+	HFSM2_CONSTEXPR(11)	CPlan plan()						const noexcept	{ return CPlan{_core.planData, _regionId};								}
 
 // COMMON
 
 	/// @brief Access plan for a region
 	/// @param regionId
 	/// @return Plan for the region
-	HFSM2_CONSTEXPR(11)	CPlan plan(const RegionID regionId)	const noexcept	{ return CPlan{_planData,  regionId};								}
+	HFSM2_CONSTEXPR(11)	CPlan plan(const RegionID regionId)	const noexcept	{ return CPlan{_core.planData,  regionId};								}
 
 	/// @brief Access plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Plan for the region
 	template <typename TRegion>
-	HFSM2_CONSTEXPR(11)	CPlan plan()						const noexcept	{ return CPlan{_planData, Control::template regionId<TRegion>()};	}
+	HFSM2_CONSTEXPR(11)	CPlan plan()						const noexcept	{ return CPlan{_core.planData, Control::template regionId<TRegion>()};	}
 
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 protected:
+	using Control::_core;
 	using Control::_regionId;
-	HFSM2_IF_PLANS(using Control::_planData);
-	HFSM2_IF_LOG_INTERFACE(using Control::_logger);
 
 	StateID _regionStateId = 0;
 	Long _regionSize = StateList::SIZE;
@@ -6153,11 +6469,13 @@ public:
 	//----------------------------------------------------------------------
 	// COMMON
 
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId State identifier
 	HFSM2_CONSTEXPR(14)	void changeTo (const StateID stateId)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState State type
 	template <typename TState>
 	HFSM2_CONSTEXPR(14)	void changeTo ()						  noexcept	{ changeTo (PlanControl::template stateId<TState>());	}
@@ -6165,38 +6483,57 @@ public:
 	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId State identifier
 	HFSM2_CONSTEXPR(14)	void restart  (const StateID stateId)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TState State type
 	template <typename TState>
 	HFSM2_CONSTEXPR(14)	void restart  ()						  noexcept	{ restart  (PlanControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId State identifier
 	HFSM2_CONSTEXPR(14)	void resume   (const StateID stateId)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState State type
 	template <typename TState>
 	HFSM2_CONSTEXPR(14)	void resume   ()						  noexcept	{ resume   (PlanControl::template stateId<TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId State identifier
+	HFSM2_CONSTEXPR(14)	void select   (const StateID stateId)	  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState State type
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void select   ()						  noexcept	{ select   (PlanControl::template stateId<TState>());	}
 
 	//----------------------------------------------------------------------
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId State identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilize  (const StateID stateId)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///   with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState State type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
@@ -6204,14 +6541,16 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId State identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void randomize(const StateID stateId)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///   proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState State type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
@@ -6245,12 +6584,10 @@ public:
 	//----------------------------------------------------------------------
 
 protected:
-	using PlanControl::_regionId;
-	using PlanControl::_requests;
-	HFSM2_IF_PLANS(using PlanControl::_planData);
-	HFSM2_IF_LOG_INTERFACE(using PlanControl::_logger);
-
+	using PlanControl::_core;
 	using PlanControl::_originId;
+	using PlanControl::_regionId;
+
 	using PlanControl::_regionStateId;
 	using PlanControl::_regionSize;
 	using PlanControl::_status;
@@ -6359,25 +6696,29 @@ public:
 	//------------------------------------------------------------------------------
 	// COMMON
 
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId,
 										   const Payload& payload)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId,
 												Payload&& payload)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
 	HFSM2_CONSTEXPR(14)	void changeWith   (const Payload& payload)	  noexcept { changeWith   (FullControlBase::template stateId<TState>(),		 payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
@@ -6386,25 +6727,29 @@ public:
 	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId,
 										   const Payload& payload)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId,
 												Payload&& payload)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
 	HFSM2_CONSTEXPR(14)	void restartWith  (const Payload& payload)	  noexcept { restartWith  (FullControlBase::template stateId<TState>(),		 payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
@@ -6412,60 +6757,98 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
 										   const Payload& payload)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
 												Payload&& payload)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
 	HFSM2_CONSTEXPR(14)	void resumeWith   (const Payload& payload)	  noexcept { resumeWith   (FullControlBase::template stateId<TState>(),		 payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
 	HFSM2_CONSTEXPR(14)	void resumeWith   (		Payload&& payload)	  noexcept { resumeWith   (FullControlBase::template stateId<TState>(), move(payload));	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+										   const Payload& payload)	  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+												Payload&& payload)	  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void selectWith   (const Payload& payload)	  noexcept { selectWith   (FullControlBase::template stateId<TState>(),		 payload );	}
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void selectWith   (		Payload&& payload)	  noexcept { selectWith   (FullControlBase::template stateId<TState>(), move(payload));	}
+
 	//------------------------------------------------------------------------------
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
 										   const Payload& payload)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
 												Payload&& payload)	  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
 	HFSM2_CONSTEXPR(14)	void utilizeWith  (const Payload& payload)	  noexcept { utilizeWith  (FullControlBase::template stateId<TState>(),		 payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -6475,7 +6858,7 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	///   proportional to 'utility()' among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -6483,7 +6866,7 @@ public:
 										   const Payload& payload)	  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	///   proportional to 'utility()' among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -6491,7 +6874,7 @@ public:
 												Payload&& payload)	  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	///   proportional to 'utility()' among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -6499,7 +6882,7 @@ public:
 	HFSM2_CONSTEXPR(14)	void randomizeWith(const Payload& payload)	  noexcept { randomizeWith(FullControlBase::template stateId<TState>(),		 payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	///   proportional to 'utility()' among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -6537,12 +6920,10 @@ public:
 	//------------------------------------------------------------------------------
 
 protected:
-	using FullControlBase::_regionId;
-	using FullControlBase::_requests;
-	HFSM2_IF_PLANS(using FullControlBase::_planData);
-	HFSM2_IF_LOG_INTERFACE(using FullControlBase::_logger);
-
+	using FullControlBase::_core;
 	using FullControlBase::_originId;
+	using FullControlBase::_regionId;
+
 	using FullControlBase::_regionStateId;
 	using FullControlBase::_regionSize;
 	using FullControlBase::_status;
@@ -6638,8 +7019,8 @@ public:
 	HFSM2_IF_PLANS(using FullControlBase::plan);
 
 protected:
+	using FullControlBase::_core;
 	using FullControlBase::_regionId;
-	HFSM2_IF_PLANS(using FullControlBase::_planData);
 
 	using FullControlBase::_status;
 };
@@ -6657,6 +7038,8 @@ class GuardControlT final
 	friend class R_;
 
 	using FullControl	= FullControlT<TArgs>;
+
+	using typename FullControl::Core;
 
 	using typename FullControl::Context;
 
@@ -6682,24 +7065,10 @@ class GuardControlT final
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)	GuardControlT(Context& context
-									, Registry& registry
-									, TransitionSet& requests
-									, const TransitionSets& currentTransitions
-									, const TransitionSet& pendingTransitions
-									HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-									HFSM2_IF_PLANS(, PlanData& planData)
-									HFSM2_IF_TRANSITION_HISTORY(, TransitionTargets& transitionTargets)
-									HFSM2_IF_TRANSITION_HISTORY(, const TransitionSets& previousTransitions)
-									HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
-		: FullControl{context
-					, registry
-					, requests
-					HFSM2_IF_UTILITY_THEORY(, rng)
-					HFSM2_IF_PLANS(, planData)
-					HFSM2_IF_TRANSITION_HISTORY(, transitionTargets)
-					HFSM2_IF_TRANSITION_HISTORY(, previousTransitions)
-					HFSM2_IF_LOG_INTERFACE(, logger)}
+	HFSM2_CONSTEXPR(11)	GuardControlT(Core& core,
+									  const TransitionSets& currentTransitions,
+									  const TransitionSet& pendingTransitions) noexcept
+		: FullControl{core}
 		, _currentTransitions{currentTransitions}
 		, _pendingTransitions{pendingTransitions}
 	{}
@@ -6714,7 +7083,7 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId State identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)	const noexcept { return _registry.isPendingChange(stateId);							}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)	const noexcept { return _core.registry.isPendingChange(stateId);					}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState State type
@@ -6727,7 +7096,7 @@ public:
 	/// @brief Check if a state is going to be activated
 	/// @param stateId State identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)	const noexcept { return _registry.isPendingEnter (stateId);							}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)	const noexcept { return _core.registry.isPendingEnter (stateId);					}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState State type
@@ -6740,7 +7109,7 @@ public:
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId State identifier
 	/// @return State pending deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingExit	(const StateID stateId)	const noexcept { return _registry.isPendingExit  (stateId);							}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	(const StateID stateId)	const noexcept { return _core.registry.isPendingExit  (stateId);					}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState State type
@@ -6760,14 +7129,12 @@ public:
 	HFSM2_CONSTEXPR(11)	const TransitionSet&  pendingTransitions()	const noexcept { return _pendingTransitions;										}
 
 	/// @brief Cancel pending transition requests
-	///		(can be used to substitute a transition into the current state with a different one)
+	///   (can be used to substitute a transition into the current state with a different one)
 	HFSM2_CONSTEXPR(14)	void cancelPendingTransitions()					  noexcept;
 
 private:
-	using FullControl::_registry;
+	using FullControl::_core;
 	using FullControl::_originId;
-
-	HFSM2_IF_LOG_INTERFACE(using FullControl::_logger);
 
 	const TransitionSets& _currentTransitions;
 	const TransitionSet&  _pendingTransitions;
@@ -6783,7 +7150,6 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
-// COMMON
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
@@ -6803,7 +7169,6 @@ ControlT<TArgs>::Origin::~Origin() noexcept {
 	control.resetOrigin(prevId);
 }
 
-// COMMON
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
@@ -6879,8 +7244,8 @@ ControlT<TArgs>::pinLastTransition(const StateID stateId,
 	if (index != INVALID_SHORT) {
 		HFSM2_ASSERT(index < TransitionSets::CAPACITY);
 
-		if (!_registry.isActive(stateId))
-			_transitionTargets[stateId] = index;
+		if (!_core.registry.isActive(stateId))
+			_core.transitionTargets[stateId] = index;
 	}
 }
 
@@ -6891,10 +7256,10 @@ HFSM2_CONSTEXPR(14)
 const typename ControlT<TArgs>::Transition*
 ControlT<TArgs>::lastTransitionTo(const StateID stateId) const noexcept {
 	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
-		const Short index = _transitionTargets[stateId];
+		const Short index = _core.transitionTargets[stateId];
 
-		if (index < _previousTransitions.count())
-			return &_previousTransitions[index];
+		if (index < _core.previousTransitions.count())
+			return &_core.previousTransitions[index];
 	}
 
 	return nullptr;
@@ -6906,7 +7271,7 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 const typename ControlT<TArgs>::Transition*
 ControlT<TArgs>::lastTransition() const noexcept {
-	HFSM2_ASSERT(_originId < _transitionTargets.CAPACITY);
+	HFSM2_ASSERT(_originId < _core.transitionTargets.CAPACITY);
 
 	return lastTransitionTo(_originId);
 }
@@ -6935,8 +7300,6 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(20)
 PlanControlT<TArgs>::Region::~Region() noexcept {
 	control.resetRegion(prevId, prevIndex, prevSize);
-
-	control._status.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -6971,10 +7334,11 @@ PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
 	_regionId	   = regionId;
 	_regionStateId = index;
 	_regionSize	   = size;
+
+	_status.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// COMMON
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
@@ -6994,7 +7358,6 @@ FullControlBaseT<TArgs>::Lock::~Lock() noexcept {
 		control->_locked = false;
 }
 
-// COMMON
 ////////////////////////////////////////////////////////////////////////////////
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -7004,8 +7367,7 @@ template <typename TState>
 HFSM2_CONSTEXPR(14)
 Status
 FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
-	using State = TState;
-	constexpr StateID STATE_ID = State::STATE_ID;
+	constexpr StateID STATE_ID = TState::STATE_ID;
 
 	switch (_status.result) {
 	case Status::Result::NONE:
@@ -7013,13 +7375,13 @@ FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
 		break;
 
 	case Status::Result::SUCCESS:
-		_planData.tasksSuccesses.template set<STATE_ID>();
+		_core.planData.tasksSuccesses.template set<STATE_ID>();
 
 		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
 		break;
 
 	case Status::Result::FAILURE:
-		_planData.tasksFailures .template set<STATE_ID>();
+		_core.planData.tasksFailures .template set<STATE_ID>();
 
 		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
 		break;
@@ -7034,14 +7396,13 @@ FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
 #endif
 
 //------------------------------------------------------------------------------
-// COMMON
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::changeTo(const StateID stateId) noexcept {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7050,7 +7411,6 @@ FullControlBaseT<TArgs>::changeTo(const StateID stateId) noexcept {
 	}
 }
 
-// COMMON
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
@@ -7058,7 +7418,7 @@ HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::restart(const StateID stateId) noexcept {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RESTART});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7074,12 +7434,28 @@ HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::resume(const StateID stateId) noexcept {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RESUME});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+FullControlBaseT<TArgs>::select(const StateID stateId) noexcept {
+	if (!_locked) {
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT});
+
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+			_status.outerTransition = true;
+
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
 	}
 }
 
@@ -7092,7 +7468,7 @@ HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::utilize(const StateID stateId) noexcept {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7108,7 +7484,7 @@ HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::randomize(const StateID stateId) noexcept {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7125,7 +7501,7 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::schedule(const StateID stateId) noexcept {
-	_requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE});
+	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE});
 
 	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
@@ -7140,13 +7516,13 @@ void
 FullControlBaseT<TArgs>::succeed() noexcept {
 	_status.result = Status::Result::SUCCESS;
 
-	_planData.tasksSuccesses.set(_originId);
+	_core.planData.tasksSuccesses.set(_originId);
 
 	// TODO: promote taskSuccess all the way up for all regions without plans
-	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
+	if (_regionId < RegionList::SIZE && !_core.planData.planExists.get(_regionId)) {
 		HFSM2_ASSERT(_regionStateId < StateList::SIZE);
 
-		_planData.tasksSuccesses.set(_regionStateId);
+		_core.planData.tasksSuccesses.set(_regionStateId);
 	}
 
 	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::SUCCEEDED);
@@ -7160,13 +7536,13 @@ void
 FullControlBaseT<TArgs>::fail() noexcept {
 	_status.result = Status::Result::FAILURE;
 
-	_planData.tasksFailures.set(_originId);
+	_core.planData.tasksFailures.set(_originId);
 
 	// TODO: promote taskFailure all the way up for all regions without plans
-	if (_regionId < RegionList::SIZE && !_planData.planExists.get(_regionId)) {
+	if (_regionId < RegionList::SIZE && !_core.planData.planExists.get(_regionId)) {
 		HFSM2_ASSERT(_regionStateId < StateList::SIZE);
 
-		_planData.tasksFailures.set(_regionStateId);
+		_core.planData.tasksFailures.set(_regionStateId);
 	}
 
 	HFSM2_LOG_TASK_STATUS(context(), _regionId, _originId, StatusEvent::FAILED);
@@ -7185,8 +7561,7 @@ Status
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::updatePlan(TState& headState,
 																											  const Status subStatus) noexcept
 {
-	using State = TState;
-	constexpr StateID STATE_ID = State::STATE_ID;
+	constexpr StateID STATE_ID = TState::STATE_ID;
 
 	HFSM2_ASSERT(subStatus);
 
@@ -7197,20 +7572,20 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 		if (Plan p = plan(_regionId))
 			p.clear();
 
-		return FullControlBase::template buildPlanStatus<State>();
+		return FullControlBase::template buildPlanStatus<TState>();
 	} else if (subStatus.result == Status::Result::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits processed;
 
 			for (auto it = p.first(); it; ++it) {
 				if (isActive(it->origin) &&
-					_planData.tasksSuccesses.get(it->origin) &&
+					_core.planData.tasksSuccesses.get(it->origin) &&
 					!processed.get(it->origin))
 				{
 					Origin origin{*this, STATE_ID};
 					changeTo(it->destination);
 
-					_planData.tasksSuccesses.clear(it->origin);
+					_core.planData.tasksSuccesses.clear(it->origin);
 					processed.set(it->origin);
 					it.remove();
 				}
@@ -7221,7 +7596,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 			_status.result = Status::Result::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
 
-			return FullControlBase::template buildPlanStatus<State>();
+			return FullControlBase::template buildPlanStatus<TState>();
 		}
 	} else
 		return Status{};
@@ -7230,7 +7605,6 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 #endif
 
 //------------------------------------------------------------------------------
-// COMMON
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
@@ -7239,7 +7613,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, payload});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, payload});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7257,7 +7631,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7266,7 +7640,6 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 	}
 }
 
-// COMMON
 //------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
@@ -7276,7 +7649,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, payload});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, payload});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7294,7 +7667,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	 Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7312,7 +7685,25 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, payload});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, payload});
+
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+			_status.outerTransition = true;
+
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+HFSM2_CONSTEXPR(14)
+void
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId,
+																																	Payload&& payload) noexcept
+{
+	if (!_locked) {
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7326,16 +7717,34 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId,
-																																	Payload&& payload) noexcept
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId,
+																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT, payload});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+HFSM2_CONSTEXPR(14)
+void
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId,
+																																	Payload&& payload) noexcept
+{
+	if (!_locked) {
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT, move(payload)});
+
+		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+			_status.outerTransition = true;
+
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
 	}
 }
 
@@ -7350,7 +7759,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, payload});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, payload});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7368,7 +7777,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	 Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7386,7 +7795,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																  const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, payload});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, payload});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7404,7 +7813,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 																																	   Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, move(payload)});
 
 		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
 			_status.outerTransition = true;
@@ -7423,7 +7832,7 @@ void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId,
 																																 const Payload& payload) noexcept
 {
-	_requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, payload});
+	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, payload});
 
 	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
@@ -7436,7 +7845,7 @@ void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId,
 																																	  Payload&& payload) noexcept
 {
-	_requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, move(payload)});
+	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, move(payload)});
 
 	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
 }
@@ -7452,8 +7861,7 @@ Status
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::updatePlan(TState& headState,
 																											   const Status subStatus) noexcept
 {
-	using State = TState;
-	constexpr StateID STATE_ID = State::STATE_ID;
+	constexpr StateID STATE_ID = TState::STATE_ID;
 
 	HFSM2_ASSERT(subStatus);
 
@@ -7464,20 +7872,20 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 		if (Plan p = plan(_regionId))
 			p.clear();
 
-		return FullControlBase::template buildPlanStatus<State>();
+		return FullControlBase::template buildPlanStatus<TState>();
 	} else if (subStatus.result == Status::Result::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits processed;
 
 			for (auto it = p.first(); it; ++it) {
 				if (isActive(it->origin) &&
-					_planData.tasksSuccesses.get(it->origin) &&
+					_core.planData.tasksSuccesses.get(it->origin) &&
 					!processed.get(it->origin))
 				{
 					Origin origin{*this, STATE_ID};
 					changeTo(it->destination);
 
-					_planData.tasksSuccesses.clear(it->origin);
+					_core.planData.tasksSuccesses.clear(it->origin);
 					processed.set(it->origin);
 					it.remove();
 				}
@@ -7488,7 +7896,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 			_status.result = Status::Result::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
 
-			return FullControlBase::template buildPlanStatus<State>();
+			return FullControlBase::template buildPlanStatus<TState>();
 		}
 	} else
 		return Status{};
@@ -7518,12 +7926,14 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TArgs>
-class InjectionT {
+class B_ {
 	template <typename...>
-	friend struct B_;
+	friend struct A_;
 
 protected:
 	using Context		= typename TArgs::Context;
+
+	using Short			= ::hfsm2::Short;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	using Rank			= typename TArgs::Rank;
@@ -7544,93 +7954,111 @@ protected:
 	using GuardControl	= GuardControlT<TArgs>;
 
 public:
-	HFSM2_CONSTEXPR(14)	void preEntryGuard	  (Context&)	  noexcept	{}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void preEnter		  (Context&)	  noexcept	{}
-	HFSM2_CONSTEXPR(14)	void preReenter		  (Context&)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	entryGuard	  (GuardControl&		)	  noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void preUpdate		  (Context&)	  noexcept	{}
-	HFSM2_CONSTEXPR(14)	void postUpdate		  (Context&)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	enter		  ( PlanControl&		)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	reenter		  ( PlanControl&		)	  noexcept	{}
+
+	HFSM2_CONSTEXPR(14)	void	preUpdate	  ( FullControl&		)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	update		  ( FullControl&		)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	postUpdate	  ( FullControl&		)	  noexcept	{}
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void preReact		  (const TEvent&,
-											   Context&)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	preReact	  (const TEvent&		,
+												FullControl&		)	  noexcept	{}
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void postReact		  (const TEvent&,
-											   Context&)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	react		  (const TEvent&		,
+												FullControl&		)	  noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void preExitGuard	  (Context&)	  noexcept	{}
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	void	postReact	  (const TEvent&		,
+												FullControl&		)	  noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void postExit		  (Context&)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	exitGuard	  (GuardControl&		)	  noexcept	{}
+
+	HFSM2_CONSTEXPR(14)	void	exit		  ( PlanControl&		)	  noexcept	{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename T>
-	static constexpr StateID  stateId()						  noexcept	{ return index<StateList, T>();				}
+	static constexpr StateID  stateId()									  noexcept	{ return index<StateList, T>();				}
 
 	template <typename T>
-	static constexpr RegionID regionId()					  noexcept	{ return (RegionID) index<RegionList, T>();	}
+	static constexpr RegionID regionId()								  noexcept	{ return (RegionID) index<RegionList, T>();	}
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename...>
+struct A_;
+
+//------------------------------------------------------------------------------
+
+template <typename TFirst, typename... TRest>
+struct HFSM2_EMPTY_BASES A_<TFirst, TRest...>
+	: TFirst
+	, A_<TRest...>
+{
+	using typename TFirst::Context;
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	using typename TFirst::Rank;
+	using typename TFirst::Utility;
+#endif
+
+	using typename TFirst::StateList;
+	using typename TFirst::RegionList;
+
+	using typename TFirst::Control;
+	using typename TFirst::PlanControl;
+
+#if HFSM2_PLANS_AVAILABLE()
+	using typename TFirst::Plan;
+#endif
+
+	using typename TFirst::FullControl;
+	using typename TFirst::GuardControl;
+
+	using TFirst::stateId;
+	using TFirst::regionId;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	wideEntryGuard(GuardControl& control)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	wideEnter	  ( PlanControl& control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReenter	  ( PlanControl& control)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	widePreUpdate ( FullControl& control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideUpdate	  ( FullControl& control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePostUpdate( FullControl& control)	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	void	widePreReact  (const TEvent& event,
+												FullControl& control)	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	void	wideReact	  (const TEvent& event,
+												FullControl& control)	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	void	widePostReact (const TEvent& event,
+												FullControl& control)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	wideExitGuard (GuardControl& control)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	wideExit	  ( PlanControl& control)	  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
 //------------------------------------------------------------------------------
 
-template <typename...>
-struct B_;
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TFirst, typename... TRest>
-struct HFSM2_EMPTY_BASES B_<TFirst, TRest...>
-	: TFirst
-	, B_<TRest...>
-{
-	using typename TFirst::Context;
-
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-	using typename TFirst::Rank;
-	using typename TFirst::Utility;
-#endif
-
-	using typename TFirst::StateList;
-	using typename TFirst::RegionList;
-
-	using typename TFirst::Control;
-	using typename TFirst::PlanControl;
-
-#if HFSM2_PLANS_AVAILABLE()
-	using typename TFirst::Plan;
-#endif
-
-	using typename TFirst::FullControl;
-	using typename TFirst::GuardControl;
-
-	using TFirst::stateId;
-	using TFirst::regionId;
-
-	HFSM2_CONSTEXPR(14)	void widePreEntryGuard	  (Context& context)	  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void widePreEnter		  (Context& context)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void widePreReenter		  (Context& context)	  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void widePreUpdate		  (Context& context)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void widePostUpdate		  (Context& context)	  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void widePreReact		  (const TEvent& event,
-												   Context& context)	  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void widePostReact		  (const TEvent& event,
-												   Context& context)	  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void widePreExitGuard	  (Context& context)	  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void widePostExit		  (Context& context)	  noexcept;
-};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 template <typename TFirst>
-struct B_<TFirst>
+struct A_<TFirst>
 	: TFirst
 {
 	using typename TFirst::Context;
@@ -7656,56 +8084,79 @@ struct B_<TFirst>
 	using TFirst::stateId;
 	using TFirst::regionId;
 
+	HFSM2_CONSTEXPR(14)	Short	select		  (const Control&		)	  noexcept	{ return 0;					}
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	Rank	rank				 (const Control&)		  noexcept	{ return Rank   {0};		}
-	HFSM2_CONSTEXPR(14)	Utility utility				 (const Control&)		  noexcept	{ return Utility{1};		}
+	HFSM2_CONSTEXPR(14)	Rank	rank		  (const Control&		)	  noexcept	{ return Rank   {0};		}
+	HFSM2_CONSTEXPR(14)	Utility utility		  (const Control&		)	  noexcept	{ return Utility{1};		}
 #endif
 
-	HFSM2_CONSTEXPR(14)	void	entryGuard			 (GuardControl&)		  noexcept	{}
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	enter				 (PlanControl&)			  noexcept	{}
-	HFSM2_CONSTEXPR(14)	void	reenter				 (PlanControl&)			  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	entryGuard	  (GuardControl&		)	  noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void	update				 (FullControl&)			  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	enter		  ( PlanControl&		)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	reenter		  ( PlanControl&		)	  noexcept	{}
+
+	HFSM2_CONSTEXPR(14)	void	preUpdate	  ( FullControl&		)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	update		  ( FullControl&		)	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	postUpdate	  ( FullControl&		)	  noexcept	{}
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void	react				 (const TEvent&,
-													  FullControl&)			  noexcept {}
+	HFSM2_CONSTEXPR(14)	void	preReact	  (const TEvent&		,
+											    FullControl&		)	  noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void	exitGuard			 (GuardControl&)		  noexcept	{}
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	void	react		  (const TEvent&		,
+											    FullControl&		)	  noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void	exit				 (PlanControl&)			  noexcept	{}
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	void	postReact	  (const TEvent&		,
+											    FullControl&		)	  noexcept	{}
+
+	HFSM2_CONSTEXPR(14)	void	exitGuard	  (GuardControl&		)	  noexcept	{}
+
+	HFSM2_CONSTEXPR(14)	void	exit		  ( PlanControl&		)	  noexcept	{}
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	planSucceeded		 (FullControl& control)	  noexcept	{ control.succeed();		}
-	HFSM2_CONSTEXPR(14)	void	planFailed			 (FullControl& control)	  noexcept	{ control.fail();			}
+	HFSM2_CONSTEXPR(14)	void	planSucceeded ( FullControl& control)	  noexcept	{ control.succeed();		}
+	HFSM2_CONSTEXPR(14)	void	planFailed	  ( FullControl& control)	  noexcept	{ control.fail();			}
 #endif
 
-	HFSM2_CONSTEXPR(14)	void	widePreEntryGuard	 (Context& context)		  noexcept;
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	widePreEnter		 (Context& context)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void	widePreReenter		 (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideEntryGuard(GuardControl& control)	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	widePreUpdate		 (Context& context)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void	widePostUpdate		 (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideEnter	  ( PlanControl& control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReenter	  ( PlanControl& control)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	widePreUpdate ( FullControl& control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideUpdate	  ( FullControl& control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePostUpdate( FullControl& control)	  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void	widePreReact		 (const TEvent& event,
-													  Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	widePreReact  (const TEvent& event,
+												FullControl& control)	  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	void	widePostReact		 (const TEvent& event,
-													  Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReact	  (const TEvent& event,
+												FullControl& control)	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	widePreExitGuard	 (Context& context)		  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	void	widePostReact (const TEvent& event,
+												FullControl& control)	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	widePostExit		 (Context& context)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideExitGuard (GuardControl& control)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	wideExit	  ( PlanControl& control)	  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-using EmptyT = B_<InjectionT<TArgs>>;
+using EmptyT = A_<B_<TArgs>>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -7720,9 +8171,9 @@ namespace detail {
 template <typename TF, typename... TR>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePreEntryGuard(Context& context) noexcept {
-	TF		 ::	   preEntryGuard(context);
-	B_<TR...>::widePreEntryGuard(context);
+A_<TF, TR...>::wideEntryGuard(GuardControl& control) noexcept {
+	TF		 ::	   entryGuard(				control);
+	A_<TR...>::wideEntryGuard(				control);
 }
 
 //------------------------------------------------------------------------------
@@ -7730,9 +8181,9 @@ B_<TF, TR...>::widePreEntryGuard(Context& context) noexcept {
 template <typename TF, typename... TR>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePreEnter(Context& context) noexcept {
-	TF		 ::	   preEnter(context);
-	B_<TR...>::widePreEnter(context);
+A_<TF, TR...>::wideEnter(PlanControl& control) noexcept {
+	TF		 ::	   enter(			  control);
+	A_<TR...>::wideEnter(			  control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7740,9 +8191,9 @@ B_<TF, TR...>::widePreEnter(Context& context) noexcept {
 template <typename TF, typename... TR>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePreReenter(Context& context) noexcept {
-	TF		 ::	   preReenter(context);
-	B_<TR...>::widePreReenter(context);
+A_<TF, TR...>::wideReenter(PlanControl& control) noexcept {
+	TF		 ::	   Reenter(				control);
+	A_<TR...>::wideReenter(				control);
 }
 
 //------------------------------------------------------------------------------
@@ -7750,17 +8201,29 @@ B_<TF, TR...>::widePreReenter(Context& context) noexcept {
 template <typename TF, typename... TR>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePreUpdate(Context& context) noexcept {
-	TF		 ::	   preUpdate(context);
-	B_<TR...>::widePreUpdate(context);
+A_<TF, TR...>::widePreUpdate(FullControl& control) noexcept {
+	TF		 ::	   preUpdate(			  control);
+	A_<TR...>::widePreUpdate(			  control);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TF, typename... TR>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePostUpdate(Context& context) noexcept {
-	TF		 ::	   postUpdate(context);
-	B_<TR...>::widePostUpdate(context);
+A_<TF, TR...>::wideUpdate(FullControl& control) noexcept {
+	TF		 ::	   update(			   control);
+	A_<TR...>::wideUpdate(			   control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TF, typename... TR>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF, TR...>::widePostUpdate(FullControl& control) noexcept {
+	A_<TR...>::widePostUpdate(			   control);
+	TF		 ::	   postUpdate(			   control);
 }
 
 //------------------------------------------------------------------------------
@@ -7769,22 +8232,37 @@ template <typename TF, typename... TR>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePreReact(const TEvent& event,
-							Context& context) noexcept
+A_<TF, TR...>::widePreReact(const TEvent& event,
+							FullControl& control) noexcept
 {
-	TF		 ::	   preReact(event, context);
-	B_<TR...>::widePreReact(event, context);
+	TF		 ::	   preReact(			  event, control);
+	A_<TR...>::widePreReact(			  event, control);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TF, typename... TR>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePostReact(const TEvent& event,
-							Context& context) noexcept
+A_<TF, TR...>::wideReact(const TEvent& event,
+						 FullControl& control) noexcept
 {
-	TF		 ::	   postReact(event, context);
-	B_<TR...>::widePostReact(event, context);
+	TF		 ::	   react(			   event, control);
+	A_<TR...>::wideReact(			   event, control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TF, typename... TR>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF, TR...>::widePostReact(const TEvent& event,
+							 FullControl& control) noexcept
+{
+	A_<TR...>::widePostReact(			   event, control);
+	TF		 ::	   postReact(			   event, control);
 }
 
 //------------------------------------------------------------------------------
@@ -7792,9 +8270,9 @@ B_<TF, TR...>::widePostReact(const TEvent& event,
 template <typename TF, typename... TR>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePreExitGuard(Context& context) noexcept {
-	TF		 ::	   preExitGuard(context);
-	B_<TR...>::widePreExitGuard(context);
+A_<TF, TR...>::wideExitGuard(GuardControl& control) noexcept {
+	A_<TR...>::wideExitGuard(			   control);
+	TF		 ::	   ExitGuard(			   control);
 }
 
 //------------------------------------------------------------------------------
@@ -7802,9 +8280,9 @@ B_<TF, TR...>::widePreExitGuard(Context& context) noexcept {
 template <typename TF, typename... TR>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF, TR...>::widePostExit(Context& context) noexcept {
-	TF		 ::	   postExit(context);
-	B_<TR...>::widePostExit(context);
+A_<TF, TR...>::wideExit(PlanControl& control) noexcept {
+	A_<TR...>::wideExit(			 control);
+	TF		 ::	   exit(			 control);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -7819,8 +8297,8 @@ namespace detail {
 template <typename TF>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePreEntryGuard(Context& context) noexcept {
-	TF::preEntryGuard(context);
+A_<TF>::wideEntryGuard(GuardControl& control) noexcept {
+	TF::	entryGuard(				 control);
 }
 
 //------------------------------------------------------------------------------
@@ -7828,8 +8306,8 @@ B_<TF>::widePreEntryGuard(Context& context) noexcept {
 template <typename TF>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePreEnter(Context& context) noexcept {
-	TF::preEnter(context);
+A_<TF>::wideEnter(PlanControl& control) noexcept {
+	TF::	enter(			   control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -7837,8 +8315,8 @@ B_<TF>::widePreEnter(Context& context) noexcept {
 template <typename TF>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePreReenter(Context& context) noexcept {
-	TF::preReenter(context);
+A_<TF>::wideReenter(PlanControl& control) noexcept {
+	TF::	reenter(			 control);
 }
 
 //------------------------------------------------------------------------------
@@ -7846,15 +8324,26 @@ B_<TF>::widePreReenter(Context& context) noexcept {
 template <typename TF>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePreUpdate(Context& context) noexcept {
-	TF::preUpdate(context);
+A_<TF>::widePreUpdate(FullControl& control) noexcept {
+	TF::	preUpdate(			   control);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TF>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePostUpdate(Context& context) noexcept {
-	TF::	postUpdate(context);
+A_<TF>::wideUpdate(FullControl& control) noexcept {
+	TF::	update(				control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TF>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF>::widePostUpdate(FullControl& control) noexcept {
+	TF::	postUpdate(				control);
 }
 
 //------------------------------------------------------------------------------
@@ -7863,20 +8352,34 @@ template <typename TF>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePreReact(const TEvent& event,
-					 Context& context) noexcept
+A_<TF>::widePreReact(const TEvent& event,
+					 FullControl& control) noexcept
 {
-	TF::preReact(event, context);
+	TF::	preReact(			   event, control);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TF>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePostReact(const TEvent& event,
-					  Context& context) noexcept
+A_<TF>::wideReact(const TEvent& event,
+				  FullControl& control) noexcept
 {
-	TF::	postReact(event, context);
+	TF::	react(				event, control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TF>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF>::widePostReact(const TEvent& event,
+					  FullControl& control) noexcept
+{
+	TF::	postReact(				event, control);
 }
 
 //------------------------------------------------------------------------------
@@ -7884,8 +8387,8 @@ B_<TF>::widePostReact(const TEvent& event,
 template <typename TF>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePreExitGuard(Context& context) noexcept {
-	TF::preExitGuard(context);
+A_<TF>::wideExitGuard(GuardControl& control) noexcept {
+	TF::	exitGuard(				control);
 }
 
 //------------------------------------------------------------------------------
@@ -7893,8 +8396,8 @@ B_<TF>::widePreExitGuard(Context& context) noexcept {
 template <typename TF>
 HFSM2_CONSTEXPR(14)
 void
-B_<TF>::widePostExit(Context& context) noexcept {
-	TF::postExit(context);
+A_<TF>::wideExit(PlanControl& control) noexcept {
+	TF::	exit(			  control);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -7948,68 +8451,81 @@ struct S_
 
 	//----------------------------------------------------------------------
 
-	HFSM2_CONSTEXPR(14)	Parent	stateParent			  (Control&  control)		  noexcept	{ return control._registry.stateParents[STATE_ID];	}
+	HFSM2_CONSTEXPR(14)	Parent	stateParent			 (	   Control& control)						  noexcept	{ return control._core.registry.stateParents[STATE_ID];	}
 
-	HFSM2_CONSTEXPR(14)	void	deepRegister		  (Registry& registry,
-													   const Parent parent)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRegister		 (	  Registry& registry, const Parent parent)						  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	HFSM2_CONSTEXPR(14)	Short	wrapSelect			 (	   Control& control)						  noexcept;
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	Rank	wrapRank			  (Control&  control)		  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wrapUtility			  (Control&  control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	wrapRank			 (	   Control& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wrapUtility			 (	   Control& control)						  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard(GuardControl&		   )	  noexcept	{ return false;	}
-	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard		 (GuardControl&	control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard(GuardControl&		   )						  noexcept	{ return false;		}
+	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard		 (GuardControl&	control)						  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	deepEnter			 (PlanControl&	control)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepReenter			 (PlanControl&	control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepEnter			 ( PlanControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepReenter			 ( PlanControl& control)						  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 (FullControl&	control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPreUpdate		 ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPostUpdate		 ( FullControl& control)						  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReact			 (FullControl&	control,
-													  const TEvent&	event)		  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPreReact		 ( FullControl& control, const TEvent&	event)	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl&		   )	  noexcept	{ return false; }
-	HFSM2_CONSTEXPR(14)	bool	deepExitGuard		 (GuardControl&	control)	  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepReact			 ( FullControl& control, const TEvent&	event)	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	deepExit			 (PlanControl&	control)	  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepPostReact		 ( FullControl& control, const TEvent&	event)	  noexcept;
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	Status	deepUpdatePlans		 ( FullControl&		   )						  noexcept	{ return Status{};	}
+#endif
+
+	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl&		   )						  noexcept	{ return false;		}
+	HFSM2_CONSTEXPR(14)	bool	deepExitGuard		 (GuardControl&	control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepExit			 ( PlanControl& control)						  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	wrapPlanSucceeded	 (FullControl&	control)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wrapPlanFailed		 (FullControl&	control)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wrapPlanSucceeded	 ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wrapPlanFailed		 ( FullControl& control)						  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepForwardActive	 (Control&,			const Request		 )	  noexcept	{}
-	HFSM2_CONSTEXPR(14)	void	deepForwardRequest	 (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardActive	 (	   Control&,		 const Request		  )	  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	deepForwardRequest	 (	   Control& control, const Request request)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestRestart	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestResume	 (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRestart	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestResume	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestSelect	 (	   Control& control, const Request request)	  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize (	   Control& control, const Request request)	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange	 (Control& control)							  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize	 (Control& control)							  noexcept;
-	HFSM2_CONSTEXPR(14)	Rank	deepReportRank		 (Control& control)							  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize  (Control& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange	 (	   Control& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize	 (	   Control& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	deepReportRank		 (	   Control& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize  (	   Control& control)						  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested(Control&)									  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested(	   Control&)								  noexcept	{}
 
 	//----------------------------------------------------------------------
 
@@ -8017,11 +8533,11 @@ struct S_
 	using WriteStream	= typename TArgs::WriteStream;
 	using ReadStream	= typename TArgs::ReadStream;
 
-	HFSM2_CONSTEXPR(14)	void	deepSaveActive		 (const Registry&, WriteStream&)		const noexcept	{}
-	HFSM2_CONSTEXPR(14)	void	deepSaveResumable	 (const Registry&, WriteStream&)		const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	deepSaveActive		 (const Registry&, WriteStream&)			const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	deepSaveResumable	 (const Registry&, WriteStream&)			const noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void	deepLoadRequested	 (		Registry&, ReadStream& )		const noexcept	{}
-	HFSM2_CONSTEXPR(14)	void	deepLoadResumable	 (		Registry&, ReadStream& )		const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	deepLoadRequested	 (		Registry&, ReadStream& )			const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void	deepLoadResumable	 (		Registry&, ReadStream& )			const noexcept	{}
 #endif
 
 	//----------------------------------------------------------------------
@@ -8036,7 +8552,7 @@ struct S_
 	HFSM2_CONSTEXPR(14)	void deepGetNames(const Long parent,
 										  const RegionType region,
 										  const Short depth,
-										  StructureStateInfos& stateInfos)					const noexcept;
+										  StructureStateInfos& stateInfos)						const noexcept;
 #endif
 
 	//----------------------------------------------------------------------
@@ -8062,7 +8578,7 @@ struct S_
 	void log(TReturn (THost::*)(TParams...),
 			 Logger& logger,
 			 Context& context,
-			 const Method method)											const noexcept
+			 const Method method)																const noexcept
 	{
 		logger.recordMethod(context, STATE_ID, method);
 	}
@@ -8074,10 +8590,12 @@ struct S_
 	void log(TReturn (Empty::*)(TParams...),
 			 Logger&,
 			 Context&,
-			 const Method)													const noexcept
+			 const Method)																		const noexcept
 	{}
 
 #endif
+
+	//----------------------------------------------------------------------
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -8136,6 +8654,18 @@ S_<TN_, TA, TH>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+Short
+S_<TN_, TA, TH>::wrapSelect(Control& control) noexcept {
+	HFSM2_LOG_STATE_METHOD(&Head::select,
+						   Method::SELECT);
+
+	return Head::select(static_cast<const Control&>(control));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 template <typename TN_, typename TA, typename TH>
@@ -8176,8 +8706,8 @@ S_<TN_, TA, TH>::deepEntryGuard(GuardControl& control) noexcept {
 
 	const bool cancelledBefore = control._cancelled;
 
-	Head::widePreEntryGuard(control.context());
-	Head::		 entryGuard(control);
+	Head::wideEntryGuard(control);
+	Head::	  entryGuard(control);
 
 	return !cancelledBefore && control._cancelled;
 }
@@ -8188,15 +8718,15 @@ template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
 void
 S_<TN_, TA, TH>::deepEnter(PlanControl& control) noexcept {
-	HFSM2_IF_PLANS(control._planData.verifyEmptyStatus(STATE_ID));
+	HFSM2_IF_PLANS(control._core.planData.verifyEmptyStatus(STATE_ID));
 
 	HFSM2_LOG_STATE_METHOD(&Head::enter,
 						   Method::ENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head::widePreEnter(control.context());
-	Head::		 enter(control);
+	Head::wideEnter(control);
+	Head::	  enter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -8205,18 +8735,35 @@ template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
 void
 S_<TN_, TA, TH>::deepReenter(PlanControl& control) noexcept {
-	HFSM2_IF_PLANS(control._planData.verifyEmptyStatus(STATE_ID));
+	HFSM2_IF_PLANS(control._core.planData.verifyEmptyStatus(STATE_ID));
 
 	HFSM2_LOG_STATE_METHOD(&Head::reenter,
 						   Method::REENTER);
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head::widePreReenter(control.context());
-	Head::		 reenter(control);
+	Head::wideReenter(control);
+	Head::	  reenter(control);
 }
 
 //------------------------------------------------------------------------------
+
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepPreUpdate(FullControl& control) noexcept {
+	HFSM2_LOG_STATE_METHOD(&Head::preUpdate,
+						   Method::PRE_UPDATE);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	Head::widePreUpdate(control);
+	Head::	  preUpdate(control);
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
@@ -8227,14 +8774,52 @@ S_<TN_, TA, TH>::deepUpdate(FullControl& control) noexcept {
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head:: widePreUpdate(control.context());
-	Head::		  update(control);
-	Head::widePostUpdate(control.context());
+	Head::wideUpdate(control);
+	Head::	  update(control);
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepPostUpdate(FullControl& control) noexcept {
+	HFSM2_LOG_STATE_METHOD(&Head::postUpdate,
+						   Method::POST_UPDATE);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	Head::	  postUpdate(control);
+	Head::widePostUpdate(control);
 
 	return control._status;
 }
 
 //------------------------------------------------------------------------------
+
+template <typename TN_, typename TA, typename TH>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepPreReact(FullControl& control,
+							  const TEvent& event) noexcept
+{
+	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::preReact);
+
+	HFSM2_LOG_STATE_METHOD(reaction,
+						   Method::PRE_REACT);
+
+	ScopedOrigin origin{control, STATE_ID};
+
+	Head::widePreReact(event, control);
+	(this->*reaction) (event, control);
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA, typename TH>
 template <typename TEvent>
@@ -8250,9 +8835,30 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head:: widePreReact(event, control.context());
+	Head::	wideReact(event, control);
+	(this->*reaction)(event, control);
+
+	return control._status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepPostReact(FullControl& control,
+							   const TEvent& event) noexcept
+{
+	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::postReact);
+
+	HFSM2_LOG_STATE_METHOD(reaction,
+						   Method::POST_REACT);
+
+	ScopedOrigin origin{control, STATE_ID};
+
 	(this->*reaction)  (event, control);
-	Head::widePostReact(event, control.context());
+	Head::widePostReact(event, control);
 
 	return control._status;
 }
@@ -8270,8 +8876,8 @@ S_<TN_, TA, TH>::deepExitGuard(GuardControl& control) noexcept {
 
 	const bool cancelledBefore = control._cancelled;
 
-	Head::widePreExitGuard(control.context());
-	Head::		 exitGuard(control);
+	Head::wideExitGuard(control);
+	Head::	  exitGuard(control);
 
 	return !cancelledBefore && control._cancelled;
 }
@@ -8292,10 +8898,10 @@ S_<TN_, TA, TH>::deepExit(PlanControl& control) noexcept {
 	// Clang - error : no member named 'exit' in 'Blah'
 	//
 	// .. inherit state 'Blah' from hfsm2::Machine::Instance::State
-	Head::		  exit(control);
-	Head::widePostExit(control.context());
+	Head::	  exit(control);
+	Head::wideExit(control);
 
-	HFSM2_IF_PLANS(control._planData.clearTaskStatus(STATE_ID));
+	HFSM2_IF_PLANS(control._core.planData.clearTaskStatus(STATE_ID));
 }
 
 //------------------------------------------------------------------------------
@@ -8369,6 +8975,17 @@ template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
 void
 S_<TN_, TA, TH>::deepRequestResume(Control& HFSM2_IF_TRANSITION_HISTORY(control),
+								   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+void
+S_<TN_, TA, TH>::deepRequestSelect(Control& HFSM2_IF_TRANSITION_HISTORY(control),
 								   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(STATE_ID, request.index));
@@ -8891,14 +9508,12 @@ struct RF_ final {
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using Injection		= InjectionT<Args>;
-
 	//----------------------------------------------------------------------
 
 	using State			= EmptyT<Args>;
 
 	template <typename... TInjections>
-	using StateT		= B_<TInjections...>;
+	using StateT		= A_<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -9121,50 +9736,65 @@ struct HFSM2_EMPTY_BASES CS_<TIndices, TArgs, TStrategy, NIndex, TL_<TStates...>
 	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard	   (GuardControl& control,						  const Short prong)  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard			   (GuardControl& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideEnter				   (PlanControl	& control,						  const Short prong)  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideReenter				   (PlanControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideEnter				   ( PlanControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReenter				   ( PlanControl& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   (FullControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePreUpdate			   ( FullControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   ( FullControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePostUpdate			   ( FullControl& control,						  const Short prong)  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReact				   (FullControl	& control, const TEvent& event,	  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePreReact			   ( FullControl& control, const TEvent& event,	  const Short prong)  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	wideReact				   ( FullControl& control, const TEvent& event,	  const Short prong)  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	widePostReact			   ( FullControl& control, const TEvent& event,	  const Short prong)  noexcept;
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	Status	wideUpdatePlans			   ( FullControl& control,						  const Short prong)  noexcept;
+#endif
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard	   (GuardControl& control,						  const Short prong)  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideExitGuard			   (GuardControl& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideExit				   (PlanControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideExit				   ( PlanControl& control,						  const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideForwardActive		   (Control		& control, const Request request, const Short prong)  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideForwardRequest		   (Control		& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardActive		   (	 Control& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardRequest		   (	 Control& control, const Request request, const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestChangeComposite (Control		& control, const Request request				   )  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestChangeResumable (Control		& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeComposite (	 Control& control, const Request request				   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeResumable (	 Control& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeSelectable(	 Control& control, const Request request, const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestRestart		   (Control		& control, const Request request				   )  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestResume		   (Control		& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestRestart		   (	 Control& control, const Request request				   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestResume		   (	 Control& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestSelect		   (	 Control& control, const Request request, const Short prong)  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeComposite  (Control		& control																  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeResumable  (Control		& control,						  const Short prong						  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeUtilitarian(Control		& control																  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportChangeRandom	   (Control		& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeComposite  (	 Control& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeResumable  (	 Control& control,						  const Short prong						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeSelectable (	 Control& control,						  const Short prong						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeUtilitarian(	 Control& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportChangeRandom	   (	 Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	UP		wideReportUtilize		   (Control		& control																  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Rank	wideReportRank			   (Control		& control,								 Rank* const ranks				  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize		   (Control		& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportUtilize		   (	 Control& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	wideReportRank			   (	 Control& control,								 Rank* const ranks				  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize		   (	 Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideChangeToRequested	   (PlanControl& control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideChangeToRequested	   ( PlanControl& control,						  const Short prong)  noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -9242,7 +9872,7 @@ struct CS_<TIndices,
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	using State			= MaterialT<Indices,
+	using Single		= MaterialT<Indices,
 									Args,
 									TState>;
 
@@ -9255,50 +9885,65 @@ struct CS_<TIndices,
 	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard	   (GuardControl& control,						  const Short prong)  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard			   (GuardControl& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideEnter				   (PlanControl	& control,						  const Short prong)  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideReenter				   (PlanControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideEnter				   ( PlanControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReenter				   ( PlanControl& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   (FullControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePreUpdate			   ( FullControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideUpdate				   ( FullControl& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePostUpdate			   ( FullControl& control,						  const Short prong)  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReact				   (FullControl	& control, const TEvent& event	, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePreReact			   ( FullControl& control, const TEvent& event,	  const Short prong)  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	wideReact				   ( FullControl& control, const TEvent& event,	  const Short prong)  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	widePostReact			   ( FullControl& control, const TEvent& event,	  const Short prong)  noexcept;
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	Status	wideUpdatePlans			   (FullControl	& control,						  const Short prong)  noexcept;
+#endif
 
 	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard	   (GuardControl& control,						  const Short prong)  noexcept;
 	HFSM2_CONSTEXPR(14)	bool	wideExitGuard			   (GuardControl& control,						  const Short prong)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideExit				   (PlanControl	& control,						  const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideExit				   ( PlanControl& control,						  const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideForwardActive		   (Control		& control, const Request request, const Short prong)  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideForwardRequest		   (Control		& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardActive		   (	 Control& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardRequest		   (	 Control& control, const Request request, const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestChangeComposite (Control		& control, const Request request				   )  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestChangeResumable (Control		& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeComposite (	 Control& control, const Request request				   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeResumable (	 Control& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChangeSelectable(	 Control& control, const Request request, const Short prong)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestRestart		   (Control		& control, const Request request				   )  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestResume		   (Control		& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestRestart		   (	 Control& control, const Request request				   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestResume		   (	 Control& control, const Request request, const Short prong)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestSelect		   (	 Control& control, const Request request, const Short prong)  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeComposite  (Control		& control																  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeResumable  (Control		& control						, const Short prong						  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		wideReportChangeUtilitarian(Control		& control																  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportChangeRandom	   (Control		& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeComposite  (	 Control& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeResumable  (	 Control& control						, const Short prong						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeSelectable (	 Control& control						, const Short prong						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportChangeUtilitarian(	 Control& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportChangeRandom	   (	 Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	UP		wideReportUtilize		   (Control		& control																  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Rank	wideReportRank			   (Control		& control,								 Rank* const ranks				  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize		   (Control		& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		wideReportUtilize		   (	 Control& control																  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	wideReportRank			   (	 Control& control,								 Rank* const ranks				  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize		   (	 Control& control, Utility* const options, const Rank* const ranks, const Rank top)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideChangeToRequested	   (PlanControl& control, const Short prong) noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideChangeToRequested	   ( PlanControl& control, const Short prong) noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -9319,7 +9964,7 @@ struct CS_<TIndices,
 	using StructureStateInfos = typename Args::StructureStateInfos;
 	using RegionType		  = typename StructureStateInfo::RegionType;
 
-	static constexpr Long NAME_COUNT = State::NAME_COUNT;
+	static constexpr Long NAME_COUNT = Single::NAME_COUNT;
 
 	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
 										  const RegionType region,
@@ -9420,6 +10065,21 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReenter(PlanControl& control,
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 HFSM2_CONSTEXPR(14)
 Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::widePreUpdate(FullControl& control,
+											   const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::widePreUpdate(control, prong) :
+		RHalf::widePreUpdate(control, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
 CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 											const Short prong) noexcept
 {
@@ -9430,7 +10090,39 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 		RHalf::wideUpdate(control, prong);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::widePostUpdate(FullControl& control,
+												const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::widePostUpdate(control, prong) :
+		RHalf::widePostUpdate(control, prong);
+}
+
 //------------------------------------------------------------------------------
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::widePreReact(FullControl& control,
+											  const TEvent& event,
+											  const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::widePreReact(control, event, prong) :
+		RHalf::widePreReact(control, event, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename TEvent>
@@ -9446,6 +10138,42 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReact(FullControl& control,
 		LHalf::wideReact(control, event, prong) :
 		RHalf::wideReact(control, event, prong);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::widePostReact(FullControl& control,
+											   const TEvent& event,
+											   const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::widePostReact(control, event, prong) :
+		RHalf::widePostReact(control, event, prong);
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdatePlans(FullControl& control,
+												 const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::wideUpdatePlans(control, prong) :
+		RHalf::wideUpdatePlans(control, prong);
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -9558,6 +10286,23 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeResumable(Control& control,
 		RHalf::wideRequestChangeResumable(control, request, prong);
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeSelectable(Control& control,
+															 const Request request,
+															 const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	if (prong < R_PRONG)
+		LHalf::wideRequestChangeSelectable(control, request, prong);
+	else
+		RHalf::wideRequestChangeSelectable(control, request, prong);
+}
+
 //------------------------------------------------------------------------------
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
@@ -9584,6 +10329,23 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestResume(Control& control,
 		LHalf::wideRequestResume(control, request, prong);
 	else
 		RHalf::wideRequestResume(control, request, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestSelect(Control& control,
+												   const Request request,
+												   const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	if (prong < R_PRONG)
+		LHalf::wideRequestSelect(control, request, prong);
+	else
+		RHalf::wideRequestSelect(control, request, prong);
 }
 
 //------------------------------------------------------------------------------
@@ -9614,7 +10376,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportRank(Control& control,
 	const Rank l = LHalf::wideReportRank(control, ranks);
 	const Rank r = RHalf::wideReportRank(control, ranks + LStateList::SIZE);
 
-	return l > r?
+	return l >= r?
 		l : r;
 }
 
@@ -9659,6 +10421,22 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeResumable(Control& control,
 		return LHalf::wideReportChangeResumable(control, prong);
 	else
 		return RHalf::wideReportChangeResumable(control, prong);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+HFSM2_CONSTEXPR(14)
+typename TA::UP
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeSelectable(Control& control,
+															const Short prong) noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	if (prong < R_PRONG)
+		return LHalf::wideReportChangeSelectable(control, prong);
+	else
+		return RHalf::wideReportChangeSelectable(control, prong);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9812,7 +10590,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideRegister(Registry& registry,
 										  const Parent parent) noexcept
 {
-	State::deepRegister(registry, Parent{parent.forkId, PRONG_INDEX});
+	Single::deepRegister(registry, Parent{parent.forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
@@ -9825,7 +10603,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardEntryGuard(GuardControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepForwardEntryGuard(control);
+	return Single::deepForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9839,7 +10617,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideEntryGuard(GuardControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepEntryGuard(control);
+	return Single::deepEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -9852,7 +10630,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideEnter(PlanControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepEnter(control);
+	Single::deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9865,10 +10643,23 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReenter(PlanControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepReenter(control);
+	Single::deepReenter(control);
 }
 
 //------------------------------------------------------------------------------
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::widePreUpdate(FullControl& control,
+										   const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepPreUpdate(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
@@ -9878,10 +10669,38 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideUpdate(FullControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepUpdate(control);
+	return Single::deepUpdate(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::widePostUpdate(FullControl& control,
+											const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepPostUpdate(control);
 }
 
 //------------------------------------------------------------------------------
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::widePreReact(FullControl& control,
+										  const TEvent& event,
+										  const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepPreReact(control, event);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 template <typename TEvent>
@@ -9893,8 +10712,40 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReact(FullControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepReact(control, event);
+	return Single::deepReact(control, event);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::widePostReact(FullControl& control,
+										   const TEvent& event,
+										   const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepPostReact(control, event);
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+Status
+CS_<TN, TA, SG, NI, TL_<T>>::wideUpdatePlans(FullControl& control,
+											 const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepUpdatePlans(control);
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -9906,7 +10757,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardExitGuard(GuardControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepForwardExitGuard(control);
+	return Single::deepForwardExitGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9920,7 +10771,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideExitGuard(GuardControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepExitGuard(control);
+	return Single::deepExitGuard(control);
 }
 
 //------------------------------------------------------------------------------
@@ -9933,7 +10784,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideExit(PlanControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepExit(control);
+	Single::deepExit(control);
 }
 
 //------------------------------------------------------------------------------
@@ -9947,7 +10798,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardActive(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepForwardActive(control, request);
+	Single::deepForwardActive(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9961,7 +10812,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardRequest(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepForwardRequest(control, request);
+	Single::deepForwardRequest(control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -9972,7 +10823,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeComposite(Control& control,
 														const Request request) noexcept
 {
-	State::deepRequestChange(control, request);
+	Single::deepRequestChange(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -9986,7 +10837,21 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeResumable(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepRequestChange(control, request);
+	Single::deepRequestChange(control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeSelectable(Control& control,
+														 const Request request,
+														 const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	Single::deepRequestChange(control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -9997,7 +10862,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideRequestRestart(Control& control,
 												const Request request) noexcept
 {
-	State::deepRequestRestart(control, request);
+	Single::deepRequestRestart(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10011,7 +10876,21 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideRequestResume(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepRequestResume(control, request);
+	Single::deepRequestResume(control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<T>>::wideRequestSelect(Control& control,
+											   const Request request,
+											   const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	Single::deepRequestSelect(control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -10022,7 +10901,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, TL_<T>>::wideReportUtilize(Control& control) noexcept {
-	return State::deepReportUtilize(control);
+	return Single::deepReportUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10035,7 +10914,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportRank(Control& control,
 {
 	HFSM2_ASSERT(ranks);
 
-	*ranks = State::deepReportRank(control);
+	*ranks = Single::deepReportRank(control);
 
 	return *ranks;
 }
@@ -10053,7 +10932,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportRandomize(Control& control,
 	HFSM2_ASSERT(options && ranks);
 
 	*options = (*ranks == top) ?
-		State::deepReportRandomize(control) : Utility{0};
+		Single::deepReportRandomize(control) : Utility{0};
 
 	return *options;
 }
@@ -10064,7 +10943,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeComposite(Control& control) noexcept {
-	return State::deepReportChange(control);
+	return Single::deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10077,7 +10956,20 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeResumable(Control& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	return State::deepReportChange(control);
+	return Single::deepReportChange(control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+HFSM2_CONSTEXPR(14)
+typename TA::UP
+CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeSelectable(Control& control,
+														const Short HFSM2_IF_ASSERT(prong)) noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10086,7 +10978,7 @@ template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
 CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeUtilitarian(Control& control) noexcept {
-	return State::deepReportChange(control);
+	return Single::deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10102,7 +10994,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeRandom(Control& control,
 	HFSM2_ASSERT(options && ranks);
 
 	*options = (*ranks == top) ?
-		State::deepReportChange(control).utility : Utility{0};
+		Single::deepReportChange(control).utility : Utility{0};
 
 	return *options;
 }
@@ -10119,7 +11011,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideChangeToRequested(PlanControl& control,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepChangeToRequested(control);
+	Single::deepChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
@@ -10135,7 +11027,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideSaveActive(const Registry& registry,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepSaveActive(registry, stream);
+	Single::deepSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10146,7 +11038,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideSaveResumable(const Registry& registry,
 											   WriteStream& stream) const noexcept
 {
-	State::deepSaveResumable(registry, stream);
+	Single::deepSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10160,7 +11052,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideLoadRequested(Registry& registry,
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
-	State::deepLoadRequested(registry, stream);
+	Single::deepLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10171,7 +11063,7 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideLoadResumable(Registry& registry,
 											   ReadStream& stream) const noexcept
 {
-	State::deepLoadResumable(registry, stream);
+	Single::deepLoadResumable(registry, stream);
 }
 
 #endif
@@ -10188,7 +11080,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideGetNames(const Long parent,
 										  const Short depth,
 										  StructureStateInfos& _stateInfos) const noexcept
 {
-	State::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
+	Single::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
 }
 
 #endif
@@ -10269,8 +11161,9 @@ struct HFSM2_EMPTY_BASES C_
 
 	using Info			= CI_<STRATEGY, Head, TSubStates...>;
 
-#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Short WIDTH		  = Info::WIDTH;
+
+#if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Short WIDTH_BITS	  = Info::WIDTH_BITS;
 #endif
 
@@ -10289,89 +11182,110 @@ struct HFSM2_EMPTY_BASES C_
 	HFSM2_CONSTEXPR(11)	static Short&	compoResumable		  (		 Registry& registry)  noexcept	{ return registry.compoResumable[COMPO_INDEX];	}
 #endif
 
-	HFSM2_CONSTEXPR(11)	static Short&	compoRequested		  (Control& control)		  noexcept	{ return control._registry.compoRequested[COMPO_INDEX];	}
-	HFSM2_CONSTEXPR(11)	static Short&	compoActive			  (Control& control)		  noexcept	{ return control._registry.compoActive	 [COMPO_INDEX];	}
-	HFSM2_CONSTEXPR(11)	static Short&	compoResumable		  (Control& control)		  noexcept	{ return control._registry.compoResumable[COMPO_INDEX];	}
+	HFSM2_CONSTEXPR(11)	static Short&	compoRequested		  (		Control& control)	  noexcept	{ return control._core.registry.compoRequested[COMPO_INDEX];	}
+	HFSM2_CONSTEXPR(11)	static Short&	compoActive			  (		Control& control)	  noexcept	{ return control._core.registry.compoActive	  [COMPO_INDEX];	}
+	HFSM2_CONSTEXPR(11)	static Short&	compoResumable		  (		Control& control)	  noexcept	{ return control._core.registry.compoResumable[COMPO_INDEX];	}
 
-	HFSM2_CONSTEXPR(11)	static bool	compoRemain				  (Control& control)		  noexcept	{ return control._registry.compoRemains.template get<COMPO_INDEX>(); }
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(11)	static Status&	headStatus			  (		Control& control)	  noexcept	{ return control._core.planData.headStatuses  [REGION_ID];		}
+	HFSM2_CONSTEXPR(11)	static Status&	subStatus			  (		Control& control)	  noexcept	{ return control._core.planData.subStatuses   [REGION_ID];		}
+#endif
+
+	HFSM2_CONSTEXPR(11)	static bool		compoRemain			  (		Control& control)	  noexcept	{ return control._core.registry.compoRemains.template get<COMPO_INDEX>(); }
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	Short	resolveRandom				  (Control& control,
-															   const Utility(& options)[Info::WIDTH], const Utility sum,
-															   const Rank	(& ranks)  [Info::WIDTH], const Rank	top)	const noexcept;
+	HFSM2_CONSTEXPR(14)	Short	resolveRandom				  (		Control& control,
+															   const Utility(& options)[WIDTH], const Utility sum,
+															   const Rank	(& ranks)  [WIDTH], const Rank	  top)	const noexcept;
 #endif
 
 	HFSM2_CONSTEXPR(14)	void	deepRegister				  (Registry& registry, const Parent parent)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard		  (GuardControl& control)					  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard				  (GuardControl& control)					  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard		  (GuardControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard				  (GuardControl& control)							  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	deepEnter					  (PlanControl&  control)					  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepReenter					  (PlanControl&  control)					  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepEnter					  ( PlanControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepReenter					  ( PlanControl& control)							  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	deepUpdate					  (FullControl&  control)					  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPreUpdate				  ( FullControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepUpdate					  ( FullControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPostUpdate				  ( FullControl& control)							  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReact					  (FullControl&  control,
-															   const TEvent& event)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPreReact				  ( FullControl& control, const TEvent& event)		  noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard		  (GuardControl& control)					  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	deepExitGuard				  (GuardControl& control)					  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepReact					  ( FullControl& control, const TEvent& event)		  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	deepExit					  (PlanControl&  control)					  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepPostReact				  ( FullControl& control, const TEvent& event)		  noexcept;
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	Status	deepUpdatePlans				  ( FullControl& control)							  noexcept;
+#endif
+
+	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard		  (GuardControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepExitGuard				  (GuardControl& control)							  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepExit					  ( PlanControl& control)							  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepForwardActive			  (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepForwardRequest			  (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardActive			  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardRequest			  (		Control& control, const Request request)	  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	deepRequest					  (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequest					  (		Control& control, const Request request)	  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <Strategy = STRATEGY>
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange			  (Control& control, const Request request, const Short = INVALID_SHORT)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange			  (		Control& control, const Request request, const Short = INVALID_SHORT)  noexcept;
 
 	template <>
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange<Composite>  (Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeComposite  (control, request); }
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange<Composite>  (		Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeComposite  (control, request); }
 
 	template <>
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange<Resumable>  (Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeResumable  (control, request); }
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange<Resumable>  (		Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeResumable  (control, request); }
+
+	template <>
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange<Selectable> (		Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeSelectable (control, request); }
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	template <>
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange<Utilitarian>(Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeUtilitarian(control, request); }
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange<Utilitarian>(		Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeUtilitarian(control, request); }
 
 	template <>
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange<RandomUtil> (Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeRandom	  (control, request); }
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange<RandomUtil> (		Control& control, const Request request, const Short)  noexcept	{ deepRequestChangeRandom	  (control, request); }
 #endif
 
 #else
 
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange			  (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange			  (		Control& control, const Request request)	  noexcept;
 
 #endif
 
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeComposite	  (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeResumable	  (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeComposite	  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeResumable	  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeSelectable	  (		Control& control, const Request request)	  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeUtilitarian  (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeRandom		  (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeUtilitarian  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeRandom		  (		Control& control, const Request request)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepRequestRestart			  (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestResume			  (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRestart			  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestResume			  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestSelect			  (		Control& control, const Request request)	  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize			  (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize		  (Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize			  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize		  (		Control& control, const Request request)	  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10380,42 +11294,46 @@ struct HFSM2_EMPTY_BASES C_
 #if HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
 	template <Strategy = STRATEGY>
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange			  (Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange			  (		Control& control)  noexcept;
 
 	template <>
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange<Composite>   (Control& control)  noexcept	{ return deepReportChangeComposite  (control); }
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange<Composite>   (		Control& control)  noexcept	{ return deepReportChangeComposite  (control); }
 
 	template <>
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange<Resumable>   (Control& control)  noexcept	{ return deepReportChangeResumable  (control); }
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange<Resumable>   (		Control& control)  noexcept	{ return deepReportChangeResumable  (control); }
 
 	template <>
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange<Utilitarian> (Control& control)  noexcept	{ return deepReportChangeUtilitarian(control); }
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange<Selectable>  (		Control& control)  noexcept	{ return deepReportChangeSelectable (control); }
 
 	template <>
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange<RandomUtil>  (Control& control)  noexcept	{ return deepReportChangeRandom		(control); }
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange<Utilitarian> (		Control& control)  noexcept	{ return deepReportChangeUtilitarian(control); }
+
+	template <>
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange<RandomUtil>  (		Control& control)  noexcept	{ return deepReportChangeRandom		(control); }
 
 #else
 
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange			  (Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange			  (		Control& control)  noexcept;
 
 #endif
 
-	HFSM2_CONSTEXPR(14)	UP		deepReportChangeComposite	  (Control& control)  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		deepReportChangeResumable	  (Control& control)  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		deepReportChangeUtilitarian   (Control& control)  noexcept;
-	HFSM2_CONSTEXPR(14)	UP		deepReportChangeRandom		  (Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChangeComposite	  (		Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChangeResumable	  (		Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChangeSelectable	  (		Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChangeUtilitarian   (		Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportChangeRandom		  (		Control& control)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize			  (Control& control)  noexcept;
-	HFSM2_CONSTEXPR(14)	Rank	deepReportRank				  (Control& control)  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize			  (Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize			  (		Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	deepReportRank				  (		Control& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize			  (		Control& control)  noexcept;
 
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested		  (PlanControl& control)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested		  ( PlanControl& control)  noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -10445,8 +11363,6 @@ struct HFSM2_EMPTY_BASES C_
 #endif
 
 	//----------------------------------------------------------------------
-
-	HFSM2_IF_DEBUG(static constexpr Info _info = Info{});
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -10465,12 +11381,12 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 Short
 C_<TN, TA, SG, TH, TS...>::resolveRandom(Control& control,
-										 const Utility(& options)[Info::WIDTH],
+										 const Utility(& options)[WIDTH],
 										 const Utility sum,
-										 const Rank(& ranks)[Info::WIDTH],
+										 const Rank(& ranks)[WIDTH],
 										 const Rank top) const noexcept
 {
-	const Utility random = control._rng.next();
+	const Utility random = control._core.rng.next();
 	HFSM2_ASSERT(0.0f <= random && random < 1.0f);
 
 	Utility cursor = random * sum;
@@ -10514,10 +11430,10 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 bool
 C_<TN, TA, SG, TH, TS...>::deepForwardEntryGuard(GuardControl& control) noexcept {
-	const Short active	  = compoActive   (control);
 	const Short requested = compoRequested(control);
 
-	HFSM2_ASSERT(active != INVALID_SHORT);
+	const Short active	  = compoActive   (control);
+	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -10534,7 +11450,7 @@ HFSM2_CONSTEXPR(14)
 bool
 C_<TN, TA, SG, TH, TS...>::deepEntryGuard(GuardControl& control) noexcept {
 	const Short requested = compoRequested(control);
-	HFSM2_ASSERT(requested != INVALID_SHORT);
+	HFSM2_ASSERT(requested < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -10548,12 +11464,12 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 void
 C_<TN, TA, SG, TH, TS...>::deepEnter(PlanControl& control) noexcept {
-	Short& active	 = compoActive   (control);
-	Short& resumable = compoResumable(control);
 	Short& requested = compoRequested(control);
+	Short& active	 = compoActive	 (control);
+	Short& resumable = compoResumable(control);
 
-	HFSM2_ASSERT(active	   == INVALID_SHORT);
-	HFSM2_ASSERT(requested != INVALID_SHORT);
+	HFSM2_ASSERT(requested < WIDTH);
+	HFSM2_ASSERT(active	  == INVALID_SHORT);
 
 	active	  = requested;
 
@@ -10578,8 +11494,8 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 	Short& resumable = compoResumable(control);
 	Short& requested = compoRequested(control);
 
-	HFSM2_ASSERT(active	   != INVALID_SHORT &&
-				 requested != INVALID_SHORT);
+	HFSM2_ASSERT(active	   < WIDTH &&
+				 requested < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -10590,7 +11506,7 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 	else {
 		SubStates::wideExit	  (control, active);
 
-		active	  = requested;
+		active  = requested;
 
 		if (requested == resumable)
 			resumable = INVALID_SHORT;
@@ -10607,32 +11523,77 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 Status
+C_<TN, TA, SG, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
+	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
+
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	const Status h = HeadState::deepPreUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) = h;
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) =
+#endif
+	SubStates::widePreUpdate(control, active);
+
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
 C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
-	const Short active = compoActive(control);
-	HFSM2_ASSERT(active != INVALID_SHORT);
+	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
 
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
 
-	if (const Status headStatus = HeadState::deepUpdate(control)) {
-		ControlLock lock{control};
-		SubStates::wideUpdate(control, active);
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-		return headStatus;
-	} else {
-		const Status subStatus = SubStates::wideUpdate(control, active);
+	const Status h = HeadState::deepUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
 
-		if (subStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::wideUpdate(control, active);
 
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	return h;
+}
 
-	#if HFSM2_PLANS_AVAILABLE()
-		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
-	#else
-		return subStatus;
-	#endif
-	}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+C_<TN, TA, SG, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
+	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
+
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::widePostUpdate(control, active);
+
+	const Status h = HeadState::deepPostUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
+
+	return h;
 }
 
 //------------------------------------------------------------------------------
@@ -10641,35 +11602,121 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 Status
+C_<TN, TA, SG, TH, TS...>::deepPreReact(FullControl& control,
+										const TEvent& event) noexcept
+{
+	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
+
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	const Status h = HeadState::deepPreReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) = h;
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) =
+#endif
+	SubStates::widePreReact(control, event, active);
+
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
 C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 									 const TEvent& event) noexcept
 {
-	const Short active = compoActive(control);
-	HFSM2_ASSERT(active != INVALID_SHORT);
+	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
 
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
 
-	if (const Status headStatus = HeadState::deepReact(control, event)) {
-		ControlLock lock{control};
-		SubStates::wideReact(control, event, active);
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-		return headStatus;
-	} else {
-		const Status subStatus = SubStates::wideReact(control, event, active);
+	const Status h = HeadState::deepReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
 
-		if (subStatus.outerTransition)
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::wideReact(control, event, active);
+
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+C_<TN, TA, SG, TH, TS...>::deepPostReact(FullControl& control,
+										 const TEvent& event) noexcept
+{
+	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
+
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::widePostReact(control, event, active);
+
+	const Status h = HeadState::deepPostReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
+
+	return h;
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+C_<TN, TA, SG, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
+	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
+
+	const Status h =	headStatus(control);
+
+	const Status s =	 subStatus(control) |
+		SubStates::wideUpdatePlans(control, active);
+
+	if (h)
+		return h;
+	else {
+		if (s.outerTransition)
 			return Status{Status::Result::NONE, true};
 
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+		ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	#if HFSM2_PLANS_AVAILABLE()
-		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
-	#else
-		return subStatus;
-	#endif
+		const bool planExists = control._core.planData.planExists.template get<REGION_ID>();
+
+		return s && planExists ?
+			control.updatePlan((HeadState&) *this, s) : s;
 	}
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -10677,8 +11724,8 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 bool
 C_<TN, TA, SG, TH, TS...>::deepForwardExitGuard(GuardControl& control) noexcept {
-	const Short active = compoActive(control);
-	HFSM2_ASSERT(active != INVALID_SHORT);
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -10694,8 +11741,8 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 bool
 C_<TN, TA, SG, TH, TS...>::deepExitGuard(GuardControl& control) noexcept {
-	const Short active = compoActive(control);
-	HFSM2_ASSERT(active != INVALID_SHORT);
+	const Short  active = compoActive(control);
+	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -10710,9 +11757,9 @@ HFSM2_CONSTEXPR(14)
 void
 C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) noexcept {
 	Short& active	 = compoActive   (control);
-	Short& resumable = compoResumable(control);
+	HFSM2_ASSERT(active < WIDTH);
 
-	HFSM2_ASSERT(active != INVALID_SHORT);
+	Short& resumable = compoResumable(control);
 
 	SubStates::wideExit(control, active);
 	HeadState::deepExit(control);
@@ -10735,7 +11782,7 @@ void
 C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
 											 const Request request) noexcept
 {
-	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(control._core.registry.isActive(HEAD_ID));
 
 	const Short requested = compoRequested(control);
 
@@ -10786,6 +11833,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
 		deepRequestResume	(control, request);
 		break;
 
+	case TransitionType::SELECT:
+		deepRequestSelect	(control, request);
+		break;
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	case TransitionType::UTILIZE:
@@ -10820,6 +11871,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control,
 
 	case Strategy::Resumable:
 		deepRequestChangeResumable  (control, request);
+		break;
+
+	case Strategy::Selectable:
+		deepRequestChangeSelectable	(control, request);
 		break;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
@@ -10874,7 +11929,27 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeResumable(Control& control,
 	requested = (resumable != INVALID_SHORT) ?
 		resumable : 0;
 
+	HFSM2_ASSERT(requested < WIDTH);
+
 	SubStates::wideRequestChangeResumable(control, request, requested);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+void
+C_<TN, TA, SG, TH, TS...>::deepRequestChangeSelectable(Control& control,
+													   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
+	Short& requested = compoRequested(control);
+	requested = HeadState::wrapSelect(control);
+
+	HFSM2_ASSERT(requested < WIDTH);
+
+	HFSM2_LOG_SELECT_RESOLUTION(control.context(), HEAD_ID, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10890,7 +11965,7 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeUtilitarian(Control& control,
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	const UP s = SubStates::wideReportChangeUtilitarian(control);
-	HFSM2_ASSERT(s.prong != INVALID_SHORT);
+	HFSM2_ASSERT(s.prong < WIDTH);
 
 	Short& requested = compoRequested(control);
 	requested = s.prong;
@@ -10908,15 +11983,15 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	Rank ranks[Info::WIDTH] = { Rank{} };
+	Rank ranks[WIDTH] = { Rank{} };
 	Rank top = SubStates::wideReportRank(control, ranks);
 
-	Utility options[Info::WIDTH] = { Utility{} };
+	Utility options[WIDTH] = { Utility{} };
 	const UP sum = SubStates::wideReportChangeRandom(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
-	HFSM2_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < WIDTH);
 }
 
 #endif
@@ -10954,7 +12029,27 @@ C_<TN, TA, SG, TH, TS...>::deepRequestResume(Control& control,
 	requested = (resumable != INVALID_SHORT) ?
 		resumable : 0;
 
+	HFSM2_ASSERT(requested < WIDTH);
+
 	SubStates::wideRequestResume(control, request, requested);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+void
+C_<TN, TA, SG, TH, TS...>::deepRequestSelect(Control& control,
+											 const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
+	Short& requested = compoRequested(control);
+	requested = HeadState::wrapSelect(control);
+
+	HFSM2_ASSERT(requested < WIDTH);
+
+	HFSM2_LOG_SELECT_RESOLUTION(control.context(), HEAD_ID, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -10974,6 +12069,8 @@ C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control,
 	Short& requested = compoRequested(control);
 	requested = s.prong;
 
+	HFSM2_ASSERT(s.prong < WIDTH);
+
 	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
 }
 
@@ -10987,15 +12084,15 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control,
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	Rank ranks[Info::WIDTH] = { Rank{} };
+	Rank ranks[WIDTH] = { Rank{} };
 	Rank top = SubStates::wideReportRank(control, ranks);
 
-	Utility options[Info::WIDTH] = { Utility{} };
+	Utility options[WIDTH] = { Utility{} };
 	const Utility sum = SubStates::wideReportRandomize(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum, ranks, top);
-	HFSM2_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < WIDTH);
 }
 
 #endif
@@ -11015,6 +12112,9 @@ C_<TN, TA, SG, TH, TS...>::deepReportChange(Control& control) noexcept {
 
 	case Strategy::Resumable:
 		return deepReportChangeResumable  (control);
+
+	case Strategy::Selectable:
+		return deepReportChangeSelectable (control);
 
 	case Strategy::Utilitarian:
 		return deepReportChangeUtilitarian(control);
@@ -11074,6 +12174,29 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeResumable(Control& control) noexcept 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 typename TA::UP
+C_<TN, TA, SG, TH, TS...>::deepReportChangeSelectable(Control& control) noexcept {
+	const Short  resumable = compoResumable(control);
+		  Short& requested = compoRequested(control);
+
+	requested = (resumable != INVALID_SHORT) ?
+		resumable : 0;
+
+	HFSM2_ASSERT(requested < WIDTH);
+
+	const UP h = HeadState::deepReportChange		  (control);
+	const UP s = SubStates::wideReportChangeSelectable(control, requested);
+
+	return {
+		h.utility * s.utility,
+		h.prong
+	};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+typename TA::UP
 C_<TN, TA, SG, TH, TS...>::deepReportChangeUtilitarian(Control& control) noexcept {
 	const UP h = HeadState::deepReportChange(control);
 	const UP s = SubStates::wideReportChangeUtilitarian(control);
@@ -11097,15 +12220,15 @@ typename TA::UP
 C_<TN, TA, SG, TH, TS...>::deepReportChangeRandom(Control& control) noexcept {
 	const UP h = HeadState::deepReportChange(control);
 
-	Rank ranks[Info::WIDTH] = { Rank{} };
+	Rank ranks[WIDTH] = { Rank{} };
 	Rank top = SubStates::wideReportRank(control, ranks);
 
-	Utility options[Info::WIDTH] = { Utility{} };
+	Utility options[WIDTH] = { Utility{} };
 	const UP sum = SubStates::wideReportChangeRandom(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum.utility, ranks, top);
-	HFSM2_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < WIDTH);
 
 	return {
 		h.utility * options[requested],
@@ -11150,15 +12273,15 @@ typename TA::Utility
 C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) noexcept {
 	const Utility h = HeadState::wrapUtility(control);
 
-	Rank ranks[Info::WIDTH] = { Rank{} };
+	Rank ranks[WIDTH] = { Rank{} };
 	Rank top = SubStates::wideReportRank(control, ranks);
 
-	Utility options[Info::WIDTH] = { Utility{} };
+	Utility options[WIDTH] = { Utility{} };
 	const Utility sum = SubStates::wideReportRandomize(control, options, ranks, top);
 
 	Short& requested = compoRequested(control);
 	requested = resolveRandom(control, options, sum, ranks, top);
-	HFSM2_ASSERT(requested < Info::WIDTH);
+	HFSM2_ASSERT(requested < WIDTH);
 
 	return h * options[requested];
 }
@@ -11172,16 +12295,18 @@ template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 void
 C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept {
+	Short& requested = compoRequested(control);
 	Short& active	 = compoActive	 (control);
 	Short& resumable = compoResumable(control);
-	Short& requested = compoRequested(control);
 
-	HFSM2_ASSERT(active != INVALID_SHORT);
+	HFSM2_ASSERT(active < WIDTH);
 
 	if (requested == INVALID_SHORT)
 		SubStates::wideChangeToRequested(control, active);
 	else if (requested != active) {
 		SubStates::wideExit   (control, active);
+
+		HFSM2_ASSERT(requested < WIDTH);
 
 		resumable = active;
 		active	  = requested;
@@ -11336,12 +12461,12 @@ struct HFSM2_EMPTY_BASES OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...>
 				  TRemaining...>
 {
 	using Indices		= TIndices;
-	static constexpr StateID INITIAL_ID	 = Indices::STATE_ID;
-	static constexpr Short	 COMPO_INDEX = Indices::COMPO_INDEX;
-	static constexpr Short	 ORTHO_INDEX = Indices::ORTHO_INDEX;
-	static constexpr Short	 ORTHO_UNIT	 = Indices::ORTHO_UNIT;
+	static constexpr StateID  INITIAL_ID  = Indices::STATE_ID;
+	static constexpr Short	  COMPO_INDEX = Indices::COMPO_INDEX;
+	static constexpr Short	  ORTHO_INDEX = Indices::ORTHO_INDEX;
+	static constexpr Short	  ORTHO_UNIT  = Indices::ORTHO_UNIT;
 
-	static constexpr Short	 PRONG_INDEX = NIndex;
+	static constexpr Short	  PRONG_INDEX = NIndex;
 
 	using Args			= TArgs;
 
@@ -11377,51 +12502,66 @@ struct HFSM2_EMPTY_BASES OS_<TIndices, TArgs, NIndex, TInitial, TRemaining...>
 
 	//----------------------------------------------------------------------
 
-	HFSM2_CONSTEXPR(14)	void	wideRegister		 (Registry& registry, const ForkID forkId)							  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRegister		 (Registry& registry, const ForkID forkId)								  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard(GuardControl& control,				   const ProngCBits prongs)	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard(GuardControl& control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard		 (GuardControl& control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard(GuardControl& control,						const ProngCBits prongs)  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard(GuardControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard		 (GuardControl& control												   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideEnter			 (PlanControl&	control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideReenter			 (PlanControl&	control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideEnter			 ( PlanControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReenter			 ( PlanControl& control												   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePreUpdate		 ( FullControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 ( FullControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePostUpdate		 ( FullControl& control												   )  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePreReact		 ( FullControl& control, const TEvent& event						   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideExitGuard		 (GuardControl& control											  )	  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	wideReact			 ( FullControl& control, const TEvent& event						   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideExit			 (PlanControl&	control											  )	  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	widePostReact		 ( FullControl& control, const TEvent& event						   )  noexcept;
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	Status	wideUpdatePlans		 ( FullControl& control												   )  noexcept;
+#endif
+
+	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,						const ProngCBits prongs)  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideExitGuard		 (GuardControl& control												   )  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	wideExit			 ( PlanControl& control												   )  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideForwardActive	 (Control& control, const Request request, const ProngCBits prongs)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideForwardRequest	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardActive	 (	   Control& control, const Request request, const ProngCBits prongs)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardRequest	 (	   Control& control, const Request request						   )  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestChange	 (Control& control, const Request request						  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestRestart	 (Control& control, const Request request						  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestResume	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChange	 (	   Control& control, const Request request						   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestRestart	 (	   Control& control, const Request request						   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestResume	 (	   Control& control, const Request request						   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestSelect	 (	   Control& control, const Request request						   )  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	wideRequestUtilize	 (Control& control, const Request request						  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestRandomize (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestUtilize	 (	   Control& control, const Request request						   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestRandomize (	   Control& control, const Request request						   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Utility wideReportChange	 (Control& control												  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportUtilize	 (Control& control												  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize  (Control& control												  )	  noexcept;
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	Utility wideReportChange	 (	   Control& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportUtilize	 (	   Control& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize  (	   Control& control												   )  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideChangeToRequested(PlanControl&  control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideChangeToRequested( PlanControl& control												   )  noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -11495,51 +12635,64 @@ struct OS_<TIndices, TArgs, NIndex, TInitial>
 
 	//----------------------------------------------------------------------
 
-	HFSM2_CONSTEXPR(14)	void	wideRegister		 (Registry& registry, const ForkID forkId)							  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRegister		 (Registry& registry, const ForkID forkId)								  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard(GuardControl& control,				   const ProngCBits prongs)	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard(GuardControl& control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard		 (GuardControl& control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard(GuardControl& control,						const ProngCBits prongs)  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardEntryGuard(GuardControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideEntryGuard		 (GuardControl& control												   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideEnter			 (PlanControl&	control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideReenter			 (PlanControl&	control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideEnter			 ( PlanControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideReenter			 ( PlanControl& control												   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 (FullControl&	control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePreUpdate		 ( FullControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	wideUpdate			 ( FullControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePostUpdate		 ( FullControl& control												   )  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	wideReact			 (FullControl&	control, const TEvent& event					  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	widePreReact		 ( FullControl& control, const TEvent& event						   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,				   const ProngCBits prongs)	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control											  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	wideExitGuard		 (GuardControl& control											  )	  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	wideReact			 ( FullControl& control, const TEvent& event						   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	wideExit			 (PlanControl&	control											  )	  noexcept;
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	widePostReact		 ( FullControl& control, const TEvent& event						   )  noexcept;
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	Status	wideUpdatePlans		 ( FullControl& control												   )  noexcept;
+#endif
+
+	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control,						const ProngCBits prongs)  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideForwardExitGuard (GuardControl& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	wideExitGuard		 (GuardControl& control												   )  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	wideExit			 ( PlanControl& control												   )  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideForwardActive	 (Control& control, const Request request, const ProngCBits prongs)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideForwardRequest	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardActive	 (	   Control& control, const Request request, const ProngCBits prongs)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideForwardRequest	 (	   Control& control, const Request request						   )  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideRequestChange	 (Control& control, const Request request						  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestRestart	 (Control& control, const Request request						  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestResume	 (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestChange	 (	   Control& control, const Request request						   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestRestart	 (	   Control& control, const Request request						   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestResume	 (	   Control& control, const Request request						   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestSelect	 (	   Control& control, const Request request						   )  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	wideRequestUtilize	 (Control& control, const Request request						  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	wideRequestRandomize (Control& control, const Request request						  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestUtilize	 (	   Control& control, const Request request						   )  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideRequestRandomize (	   Control& control, const Request request						   )  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Utility wideReportChange	 (Control& control												  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportUtilize	 (Control& control												  )	  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize  (Control& control												  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportChange	 (	   Control& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportUtilize	 (	   Control& control												   )  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility wideReportRandomize  (	   Control& control												   )  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	wideChangeToRequested(PlanControl&  control											  )	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	wideChangeToRequested( PlanControl& control												   )  noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -11654,9 +12807,38 @@ OS_<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) noexcept {
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 HFSM2_CONSTEXPR(14)
 Status
+OS_<TN, TA, NI, TI, TR...>::widePreUpdate(FullControl& control) noexcept {
+	Status status;
+	status |= Initial	  ::deepPreUpdate(			   control);
+	status |= Remaining	  ::widePreUpdate(			   control);
+
+	return status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
+Status
 OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) noexcept {
-	const auto status =	   Initial	::deepUpdate(control);
-	return combine(status, Remaining::wideUpdate(control));
+	Status status;
+	status |= Initial	  ::deepUpdate(				control);
+	status |= Remaining	  ::wideUpdate(				control);
+
+	return status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI, TR...>::widePostUpdate(FullControl& control) noexcept {
+	Status status;
+	status |= Initial	  ::deepPostUpdate(				control);
+	status |= Remaining	  ::widePostUpdate(				control);
+
+	return status;
 }
 
 //------------------------------------------------------------------------------
@@ -11665,12 +12847,64 @@ template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 Status
+OS_<TN, TA, NI, TI, TR...>::widePreReact(FullControl& control,
+										 const TEvent& event) noexcept
+{
+	Status status;
+	status |= Initial	  ::deepPreReact(			  control, event);
+	status |= Remaining	  ::widePreReact(			  control, event);
+
+	return status;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
 OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 									  const TEvent& event) noexcept
 {
-	const auto status =	   Initial	::deepReact(control, event);
-	return combine(status, Remaining::wideReact(control, event));
+	Status status;
+	status |= Initial	  ::deepReact(			   control, event);
+	status |= Remaining	  ::wideReact(			   control, event);
+
+	return status;
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI, TR...>::widePostReact(FullControl& control,
+										  const TEvent& event) noexcept
+{
+	Status status;
+	status |= Initial	  ::deepPostReact(			   control, event);
+	status |= Remaining	  ::widePostReact(			   control, event);
+
+	return status;
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI, TR...>::wideUpdatePlans(FullControl& control) noexcept {
+	Status status;
+	status |= Initial	  ::deepUpdatePlans(			 control);
+	status |= Remaining	  ::wideUpdatePlans(			 control);
+
+	return status;
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -11783,6 +13017,18 @@ OS_<TN, TA, NI, TI, TR...>::wideRequestResume(Control& control,
 {
 	Initial	 ::deepRequestResume(control, request);
 	Remaining::wideRequestResume(control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+HFSM2_CONSTEXPR(14)
+void
+OS_<TN, TA, NI, TI, TR...>::wideRequestSelect(Control& control,
+											  const Request request) noexcept
+{
+	Initial	 ::deepRequestSelect(control, request);
+	Remaining::wideRequestSelect(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11943,7 +13189,7 @@ void
 OS_<TN, TA, NI, TI>::wideRegister(Registry& registry,
 								  const ForkID forkId) noexcept
 {
-	Initial::deepRegister(registry, Parent{forkId, PRONG_INDEX});
+	Initial		   ::deepRegister(			registry, Parent{forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
@@ -11955,7 +13201,7 @@ OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
 										   const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial::deepForwardEntryGuard(control) : false;
+		Initial	   ::deepForwardEntryGuard(				 control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11964,7 +13210,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) noexcept {
-	return Initial::deepForwardEntryGuard(control);
+	return Initial ::deepForwardEntryGuard(				 control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11973,7 +13219,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) noexcept {
-	return Initial::deepEntryGuard(control);
+	return Initial ::deepEntryGuard(			  control);
 }
 
 //------------------------------------------------------------------------------
@@ -11982,7 +13228,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideEnter(PlanControl& control) noexcept {
-	Initial::deepEnter(control);
+	Initial		   ::deepEnter(				control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -11991,7 +13237,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) noexcept {
-	Initial::deepReenter(control);
+	Initial		   ::deepReenter(			  control);
 }
 
 //------------------------------------------------------------------------------
@@ -11999,8 +13245,26 @@ OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) noexcept {
 template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 Status
+OS_<TN, TA, NI, TI>::widePreUpdate(FullControl& control) noexcept {
+	return Initial ::deepPreUpdate(				control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+HFSM2_CONSTEXPR(14)
+Status
 OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) noexcept {
-	return Initial::deepUpdate(control);
+	return Initial ::deepUpdate(			 control);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI>::widePostUpdate(FullControl& control) noexcept {
+	return Initial ::deepPostUpdate(			 control);
 }
 
 //------------------------------------------------------------------------------
@@ -12009,11 +13273,48 @@ template <typename TN, typename TA, Short NI, typename TI>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 Status
+OS_<TN, TA, NI, TI>::widePreReact(FullControl& control,
+								  const TEvent& event) noexcept
+{
+	return Initial ::deepPreReact(			   control, event);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
 OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
 							   const TEvent& event) noexcept
 {
-	return Initial::deepReact(control, event);
+	return Initial ::deepReact(				control, event);
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI>::widePostReact(FullControl& control,
+								   const TEvent& event) noexcept
+{
+	return Initial ::deepPostReact(				control, event);
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, Short NI, typename TI>
+HFSM2_CONSTEXPR(14)
+Status
+OS_<TN, TA, NI, TI>::wideUpdatePlans(FullControl& control) noexcept {
+	return Initial ::deepUpdatePlans(			  control);
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -12024,7 +13325,7 @@ OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
 										  const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial::deepForwardExitGuard(control) : false;
+		Initial	   ::deepForwardExitGuard(				control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12033,7 +13334,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) noexcept {
-	return Initial::deepForwardExitGuard(control);
+	return Initial ::deepForwardExitGuard(				control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12042,7 +13343,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 bool
 OS_<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) noexcept {
-	return Initial::deepExitGuard(control);
+	return Initial ::deepExitGuard(				 control);
 }
 
 //------------------------------------------------------------------------------
@@ -12051,7 +13352,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideExit(PlanControl& control) noexcept {
-	Initial::deepExit(control);
+	Initial		   ::deepExit(			   control);
 }
 
 //------------------------------------------------------------------------------
@@ -12064,7 +13365,7 @@ OS_<TN, TA, NI, TI>::wideForwardActive(Control& control,
 									   const ProngCBits prongs) noexcept
 {
 	if (prongs.get(PRONG_INDEX))
-		Initial::deepForwardActive(control, request);
+		Initial	   ::deepForwardActive(			control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12075,7 +13376,7 @@ void
 OS_<TN, TA, NI, TI>::wideForwardRequest(Control& control,
 										const Request request) noexcept
 {
-	Initial::deepForwardRequest(control, request);
+	Initial		   ::deepForwardRequest(		 control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -12086,7 +13387,7 @@ void
 OS_<TN, TA, NI, TI>::wideRequestChange(Control& control,
 									   const Request request) noexcept
 {
-	Initial::deepRequestChange(control, request);
+	Initial		   ::deepRequestChange(			control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12097,7 +13398,7 @@ void
 OS_<TN, TA, NI, TI>::wideRequestRestart(Control& control,
 										const Request request) noexcept
 {
-	Initial::deepRequestRestart(control, request);
+	Initial		   ::deepRequestRestart(		 control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12108,7 +13409,18 @@ void
 OS_<TN, TA, NI, TI>::wideRequestResume(Control& control,
 									   const Request request) noexcept
 {
-	Initial::deepRequestResume(control, request);
+	Initial		   ::deepRequestResume(			control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, Short NI, typename TI>
+HFSM2_CONSTEXPR(14)
+void
+OS_<TN, TA, NI, TI>::wideRequestSelect(Control& control,
+									   const Request request) noexcept
+{
+	Initial		   ::deepRequestSelect(			control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12121,7 +13433,7 @@ void
 OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control,
 										const Request request) noexcept
 {
-	Initial::deepRequestUtilize(control, request);
+	Initial		   ::deepRequestUtilize(		 control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12132,7 +13444,7 @@ void
 OS_<TN, TA, NI, TI>::wideRequestRandomize(Control& control,
 										  const Request request) noexcept
 {
-	Initial::deepRequestRandomize(control, request);
+	Initial		   ::deepRequestRandomize(		   control, request);
 }
 
 //------------------------------------------------------------------------------
@@ -12174,7 +13486,7 @@ template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) noexcept {
-	Initial::deepChangeToRequested(control);
+	Initial		   ::deepChangeToRequested(				control);
 }
 
 //------------------------------------------------------------------------------
@@ -12187,7 +13499,7 @@ void
 OS_<TN, TA, NI, TI>::wideSaveActive(const Registry& registry,
 									WriteStream& stream) const noexcept
 {
-	Initial::deepSaveActive(registry, stream);
+	Initial		   ::deepSaveActive(				registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12198,7 +13510,7 @@ void
 OS_<TN, TA, NI, TI>::wideSaveResumable(const Registry& registry,
 									   WriteStream& stream) const noexcept
 {
-	Initial::deepSaveResumable(registry, stream);
+	Initial		   ::deepSaveResumable(				   registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12209,7 +13521,7 @@ void
 OS_<TN, TA, NI, TI>::wideLoadRequested(Registry& registry,
 									   ReadStream& stream) const noexcept
 {
-	Initial::deepLoadRequested(registry, stream);
+	Initial		   ::deepLoadRequested(			 registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -12220,7 +13532,7 @@ void
 OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 									   ReadStream& stream) const noexcept
 {
-	Initial::deepLoadResumable(registry, stream);
+	Initial		   ::deepLoadResumable(			 registry, stream);
 }
 
 #endif
@@ -12236,7 +13548,7 @@ OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
 								  const Short depth,
 								  StructureStateInfos& _stateInfos) const
 {
-	Initial::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
+	Initial		   ::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
 }
 
 #endif
@@ -12320,63 +13632,81 @@ struct HFSM2_EMPTY_BASES O_
 
 	//----------------------------------------------------------------------
 
-	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Registry& registry)	  noexcept	{ return		  registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Registry& registry)	  noexcept	{ return		  registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Registry& registry)	  noexcept	{ return			   registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Registry& registry)	  noexcept	{ return			   registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Control&  control)	  noexcept	{ return control._registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Control&  control)	  noexcept	{ return control._registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Control&  control)	  noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Control&  control)	  noexcept	{ return control._core.registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	void	deepRegister		 (Registry& registry,
-													  const Parent parent)			  noexcept;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard(GuardControl& control)		  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard		 (GuardControl& control)		  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void	deepEnter			 (PlanControl&	control)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepReenter			 (PlanControl&	control)		  noexcept;
-
-	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 (FullControl&	control)		  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReact			 (FullControl&	control,
-													  const TEvent& event)			  noexcept;
-
-	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl& control)		  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	deepExitGuard		 (GuardControl& control)		  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void	deepExit			 (PlanControl&	control)		  noexcept;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	void	deepForwardActive	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepForwardRequest	 (Control& control, const Request request)	  noexcept;
-
-	HFSM2_CONSTEXPR(14)	void	deepRequest			 (Control& control, const Request request)	  noexcept;
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestRestart	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestResume	 (Control& control, const Request request)	  noexcept;
-
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize	 (Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize (Control& control, const Request request)	  noexcept;
-
-	HFSM2_CONSTEXPR(14)	UP		deepReportChange	 (Control& control)				  noexcept;
-
-	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize	 (Control& control)				  noexcept;
-	HFSM2_CONSTEXPR(14)	Rank	deepReportRank		 (Control& control)				  noexcept;
-	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize  (Control& control)				  noexcept;
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(11)	static Status&	  headStatus	(	   Control&	 control)	  noexcept	{ return control._core.planData.headStatuses[REGION_ID];	}
+	HFSM2_CONSTEXPR(11)	static Status&	  subStatus		(	   Control&	 control)	  noexcept	{ return control._core.planData.subStatuses [REGION_ID];	}
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested(PlanControl&  control)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRegister		 (Registry& registry, const Parent parent)		  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard(GuardControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard		 (GuardControl& control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepEnter			 ( PlanControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepReenter			 ( PlanControl& control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	Status	deepPreUpdate		 ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepUpdate			 ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPostUpdate		 ( FullControl& control)						  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepPreReact		 ( FullControl& control, const TEvent& event)	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepReact			 ( FullControl& control, const TEvent& event)	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepPostReact		 ( FullControl& control, const TEvent& event)	  noexcept;
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	Status	deepUpdatePlans		 ( FullControl& control)						  noexcept;
+#endif
+
+	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard (GuardControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepExitGuard		 (GuardControl& control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepExit			 ( PlanControl& control)						  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	deepForwardActive	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardRequest	 (	   Control& control, const Request request)	  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	deepRequest			 (	   Control& control, const Request request)	  noexcept;
+
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRestart	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestResume	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestSelect	 (	   Control& control, const Request request)	  noexcept;
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize	 (	   Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize (	   Control& control, const Request request)	  noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	UP		deepReportChange	 (	   Control& control)						  noexcept;
+
+	HFSM2_CONSTEXPR(14)	UP		deepReportUtilize	 (	   Control& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Rank	deepReportRank		 (	   Control& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Utility deepReportRandomize  (	   Control& control)						  noexcept;
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)	void	deepChangeToRequested( PlanControl& control)						  noexcept;
 
 	//----------------------------------------------------------------------
 
@@ -12494,29 +13824,62 @@ O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
 Status
+O_<TN, TA, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	const Status h = HeadState::deepPreUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) = h;
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) =
+#endif
+	SubStates::widePreUpdate(control);
+
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
 O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const Status headStatus = HeadState::deepUpdate(control)) {
-		ControlLock lock{control};
-		SubStates::wideUpdate(control);
+	const Status h = HeadState::deepUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
 
-		return headStatus;
-	} else {
-		const Status subStatus = SubStates::wideUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::wideUpdate(control);
 
-		if (subStatus.outerTransition)
-			return Status{Status::Result::NONE, true};
+	return h;
+}
 
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	#if HFSM2_PLANS_AVAILABLE()
-		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
-	#else
-		return subStatus;
-	#endif
-	}
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+O_<TN, TA, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::widePostUpdate(control);
+
+	const Status h = HeadState::deepPostUpdate(control);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
+
+	return h;
 }
 
 //------------------------------------------------------------------------------
@@ -12525,32 +13888,101 @@ template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 Status
+O_<TN, TA, TH, TS...>::deepPreReact(FullControl& control,
+									const TEvent& event) noexcept
+{
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	const Status h = HeadState::deepPreReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) = h;
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) =
+#endif
+	SubStates::widePreReact(control, event);
+
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
 O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 								 const TEvent& event) noexcept
 {
-	ScopedRegion outer{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (const Status headStatus = HeadState::deepReact(control, event)) {
-		ControlLock lock{control};
-		SubStates::wideReact(control, event);
+	const Status h = HeadState::deepReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
 
-		return headStatus;
-	} else {
-		const Status subStatus = SubStates::wideReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::wideReact(control, event);
 
-		if (subStatus.outerTransition)
+	return h;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+Status
+O_<TN, TA, TH, TS...>::deepPostReact(FullControl& control,
+									 const TEvent& event) noexcept
+{
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+#if HFSM2_PLANS_AVAILABLE()
+	subStatus(control) |=
+#endif
+	SubStates::widePostReact(control, event);
+
+	const Status h = HeadState::deepPostReact(control, event);
+#if HFSM2_PLANS_AVAILABLE()
+	headStatus(control) |= h;
+#endif
+
+	return h;
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+Status
+O_<TN, TA, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
+	const Status h =	headStatus(control);
+
+	const Status s =	 subStatus(control) |
+		SubStates::wideUpdatePlans(control);
+
+	if (h)
+		return h;
+	else {
+		if (s.outerTransition)
 			return Status{Status::Result::NONE, true};
 
-		ScopedRegion inner{control, REGION_ID, HEAD_ID, REGION_SIZE};
+		ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	#if HFSM2_PLANS_AVAILABLE()
-		return subStatus && control._planData.planExists.template get<REGION_ID>() ?
-			control.updatePlan((HeadState&) *this, subStatus) : subStatus;
-	#else
-		return subStatus;
-	#endif
+		const bool planExists = control._core.planData.planExists.template get<REGION_ID>();
+
+		return s && planExists ?
+			control.updatePlan((HeadState&) *this, s) : s;
 	}
 }
+
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -12598,7 +14030,7 @@ void
 O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 										 const Request request) noexcept
 {
-	HFSM2_ASSERT(control._registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(control._core.registry.isActive(HEAD_ID));
 
 	const ProngCBits requested = orthoRequested(static_cast<const Control&>(control));
 	HFSM2_ASSERT(!!requested);
@@ -12643,6 +14075,10 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 
 	case TransitionType::RESUME:
 		deepRequestResume	(control, request);
+		break;
+
+	case TransitionType::SELECT:
+		deepRequestSelect	(control, request);
 		break;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
@@ -12699,6 +14135,19 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Control& control,
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	SubStates::wideRequestResume(control, request);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN, typename TA, typename TH, typename... TS>
+HFSM2_CONSTEXPR(14)
+void
+O_<TN, TA, TH, TS...>::deepRequestSelect(Control& control,
+										 const Request request) noexcept
+{
+	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
+
+	SubStates::wideRequestSelect(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13051,6 +14500,19 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Selectable region ('changeTo<>()' into the region acts as 'select<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
+	template <typename THead, typename... TSubStates>
+	using Selectable		  = CI_<Strategy::Selectable,  THead, TSubStates...>;
+
+	/// @brief Headless selectable region ('changeTo<>()' into the region acts as 'select<>()')
+	/// @tparam TSubStates Sub-states
+	template <				  typename... TSubStates>
+	using SelectablePeers	  = CI_<Strategy::Selectable,  void,  TSubStates...>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	/// @brief Utilitarian region ('changeTo<>()' into the region acts as 'utilize<>()')
@@ -13119,6 +14581,19 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 	/// @tparam TSubStates Sub-states
 	template <				  typename... TSubStates>
 	using ResumablePeerRoot	  = RF_<Cfg, ResumablePeers  <  TSubStates...>>;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Selectable root ('changeTo<>()' into the region acts as 'select<>()')
+	/// @tparam THead Head state
+	/// @tparam TSubStates Sub-states
+	template <typename THead, typename... TSubStates>
+	using SelectableRoot	  = RF_<Cfg, Selectable <THead, TSubStates...>>;
+
+	/// @brief Headless selectable root ('changeTo<>()' into the region acts as 'select<>()')
+	/// @tparam TSubStates Sub-states
+	template <				  typename... TSubStates>
+	using SelectablePeerRoot  = RF_<Cfg, SelectablePeers <  TSubStates...>>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13221,6 +14696,8 @@ protected:
 	static_assert(Args::STATE_COUNT <  (unsigned) -1, "Too many states in the FSM. Change 'Short' type.");
 	static_assert(Args::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
 
+	using Core					= CoreT<Args>;
+
 	using Apex					= MaterialT<I_<0, 0, 0, 0>, Args, TApex>;
 
 	using Registry				= RegistryT<Args>;
@@ -13288,8 +14765,8 @@ public:
 								  HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 								  HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
 
-	HFSM2_CONSTEXPR(14) R_(const R_&  other)												  noexcept;
-	HFSM2_CONSTEXPR(14) R_(		 R_&& other)												  noexcept;
+	HFSM2_CONSTEXPR(NO) R_(const R_& )														  noexcept = default;
+	HFSM2_CONSTEXPR(NO) R_(		 R_&&)														  noexcept = default;
 
 	HFSM2_CONSTEXPR(20)	~R_() noexcept;
 
@@ -13297,11 +14774,11 @@ public:
 
 	/// @brief Access context
 	/// @return context
-	HFSM2_CONSTEXPR(14)		  Context& context()								  noexcept	{ return _context;									}
+	HFSM2_CONSTEXPR(14)		  Context& context()								  noexcept	{ return _core.context;								}
 
 	/// @brief Access context
 	/// @return context
-	HFSM2_CONSTEXPR(11)	const Context& context()							const noexcept	{ return _context;									}
+	HFSM2_CONSTEXPR(11)	const Context& context()							const noexcept	{ return _core.context;								}
 
 	//----------------------------------------------------------------------
 
@@ -13338,7 +14815,7 @@ public:
 	HFSM2_CONSTEXPR(14)	void update()											  noexcept;
 
 	/// @brief Have FSM react to an event (recursively call matching 'react<>()' from the root down to the leaf states,
-	///    on all active states, then process requested transitions)
+	///   on all active states, then process requested transitions)
 	/// @tparam TEvent Event type
 	/// @param event Event to react to
 	template <typename TEvent>
@@ -13349,26 +14826,26 @@ public:
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
 	/// @return State active status
-	HFSM2_CONSTEXPR(11)	bool isActive		 (const StateID stateId)		const noexcept	{ return _registry.isActive   (stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isActive		 (const StateID stateId)		const noexcept	{ return _core.registry.isActive   (stateId);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState Destination state type
 	/// @return State active status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept	{ return isActive	(stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept	{ return isActive	(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId Destination state identifier
 	/// @return State resumable status
-	HFSM2_CONSTEXPR(11)	bool isResumable	 (const StateID stateId)		const noexcept	{ return _registry.isResumable(stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isResumable	 (const StateID stateId)		const noexcept	{ return _core.registry.isResumable(stateId);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState Destination state type
 	/// @return State resumable status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isResumable	 ()								const noexcept	{ return isResumable(stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isResumable	 ()								const noexcept	{ return isResumable(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -13386,7 +14863,8 @@ public:
 	//------------------------------------------------------------------------------
 	// COMMON
 
-	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	HFSM2_CONSTEXPR(14)	void changeTo		 (const StateID stateId)			  noexcept;
 
@@ -13398,7 +14876,8 @@ public:
 	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	HFSM2_CONSTEXPR(14)	void restart		 (const StateID stateId)			  noexcept;
 
@@ -13409,7 +14888,8 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	HFSM2_CONSTEXPR(14)	void resume			 (const StateID stateId)			  noexcept;
 
@@ -13420,16 +14900,31 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId Destination state identifier
+	HFSM2_CONSTEXPR(14)	void select			 (const StateID stateId)			  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState Destination state type
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void select			 ()									  noexcept	{ select   (stateId<TState>());					}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilize		 (const StateID stateId)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///   with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
@@ -13437,14 +14932,16 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void randomize		 (const StateID stateId)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///   proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
@@ -13468,39 +14965,39 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)			const noexcept	{ return _registry.isPendingChange(stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)			const noexcept	{ return _core.registry.isPendingChange(stateId);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingChange()								const noexcept	{ return isPendingChange(stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange()								const noexcept	{ return isPendingChange(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be activated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)			const noexcept	{ return _registry.isPendingEnter (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)			const noexcept	{ return _core.registry.isPendingEnter (stateId);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState Destination state type
 	/// @return State pending activation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter ()								const noexcept	{ return isPendingEnter (stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter ()								const noexcept	{ return isPendingEnter (stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingExit	 (const StateID stateId)		const noexcept	{ return _registry.isPendingExit  (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	 (const StateID stateId)		const noexcept	{ return _core.registry.isPendingExit  (stateId);	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()								const noexcept	{ return isPendingExit  (stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()								const noexcept	{ return isPendingExit  (stateId<TState>());		}
 
 	//------------------------------------------------------------------------------
 
@@ -13535,10 +15032,10 @@ public:
 	/// @brief Get the list of transitions recorded during last 'update()'
 	/// @return Array of last recorded transitions
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
-	HFSM2_CONSTEXPR(11)	const TransitionSets& previousTransitions()						const noexcept	{ return _previousTransitions;					}
+	HFSM2_CONSTEXPR(11)	const TransitionSets& previousTransitions()						const noexcept	{ return _core.previousTransitions;				}
 
 	/// @brief Force process transitions (skips 'guard()' calls)
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transitions 'TransitionHistory' to replay
 	/// @param count Number of transitions
 	/// @return Success status
@@ -13547,7 +15044,7 @@ public:
 											   const Short count)							  noexcept;
 
 	/// @brief Force process transitions (skips 'guard()' calls)
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transitions Array of 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -13555,7 +15052,7 @@ public:
 	HFSM2_CONSTEXPR(14)	bool replayTransitions(const ArrayT<Transition, NCount>& transitions) noexcept;
 
 	/// @brief Force process a transition (skips 'guard()' calls)
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transition 'Transition' to replay
 	/// @return Success status
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -13607,7 +15104,7 @@ public:
 	/// @brief Attach logger
 	/// @param logger A logger implementing 'hfsm2::LoggerInterfaceT<>' interface
 	/// @see HFSM2_ENABLE_LOG_INTERFACE
-	HFSM2_CONSTEXPR(14)	void attachLogger(Logger* const logger)								  noexcept	{ _logger = logger;								}
+	HFSM2_CONSTEXPR(14)	void attachLogger(Logger* const logger)								  noexcept	{ _core.logger = logger;								}
 
 #endif
 
@@ -13617,6 +15114,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	void initialEnter()													  noexcept;
 	HFSM2_CONSTEXPR(14)	void finalExit()													  noexcept;
 
+	HFSM2_CONSTEXPR(14)	void processRequest()												  noexcept;
 	HFSM2_CONSTEXPR(14)	void processTransitions(TransitionSets& currentTransitions)			  noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool applyRequest(const TransitionSets& currentTransitions,
@@ -13637,9 +15135,6 @@ protected:
 	HFSM2_CONSTEXPR(14)	bool applyRequests(Control& control,
 										   const Transition* const transitions,
 										   const Short count)								  noexcept;
-
-	TransitionTargets _transitionTargets;
-	TransitionSets _previousTransitions;
 #endif
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
@@ -13654,17 +15149,9 @@ protected:
 #endif
 
 protected:
-	Context _context;
-	HFSM2_IF_UTILITY_THEORY(RNG& _rng);
-
-	Registry _registry;
-	HFSM2_IF_PLANS(PlanData _planData);
-
-	TransitionSet _requests;
+	Core _core;
 
 	Apex _apex;
-
-	HFSM2_IF_LOG_INTERFACE(Logger* _logger);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -13760,17 +15247,17 @@ public:
 	using Base::Base;
 
 	/// @brief Manually start the FSM
-	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
+	///  Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_CONSTEXPR(14)	void enter()													  noexcept	{ initialEnter();	}
 
 	/// @brief Manually stop the FSM
-	///   Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
+	///  Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_CONSTEXPR(14)	void exit()														  noexcept	{ finalExit();		}
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 	/// @brief Start the FSM from a specific state
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transitions 'TransitionHistory' to replay
 	/// @param count Number of transitions
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
@@ -13778,14 +15265,14 @@ public:
 										 const Short count)								  noexcept;
 
 	/// @brief Start the FSM from a specific state
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transitions Array of 'Transition' to replay
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	template <Long NCount>
 	HFSM2_CONSTEXPR(14)	bool replayEnter(const ArrayT<Transition, NCount>& transitions)	  noexcept;
 
 	/// @brief Start the FSM from a specific state
-	///   Can be used to synchronize multiple FSMs
+	///  Can be used to synchronize multiple FSMs
 	/// @param transition 'Transition' to replay
 	/// @see HFSM2_ENABLE_TRANSITION_HISTORY
 	HFSM2_CONSTEXPR(14)	bool replayEnter(const Transition& transition)					  noexcept	{ return replayEnter(&transition, 1);	}
@@ -13800,16 +15287,8 @@ private:
 	using Base::applyRequests;
 	HFSM2_IF_STRUCTURE_REPORT(using Base::udpateActivity);
 
-	using Base::_transitionTargets;
-	using Base::_previousTransitions;
-
-	using Base::_context;
-	HFSM2_IF_UTILITY_THEORY(using Base::_rng);
-	using Base::_registry;
-	HFSM2_IF_PLANS(using Base::_planData);
-	using Base::_requests;
+	using Base::_core;
 	using Base::_apex;
-	HFSM2_IF_LOG_INTERFACE(using Base::_logger);
 #endif
 };
 
@@ -13884,7 +15363,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void changeWith   (const Payload& payload)			  noexcept	{ changeWith   (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void changeWith   (const Payload& payload)			  noexcept	{ changeWith   (stateId<TState>(),		payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
@@ -13911,7 +15390,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void restartWith  (const Payload& payload)			  noexcept	{ restartWith  (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void restartWith  (const Payload& payload)			  noexcept	{ restartWith  (stateId<TState>(),		payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
@@ -13921,25 +15400,29 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
 										   const Payload& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
 												Payload&& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const Payload& payload)			  noexcept	{ resumeWith   (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const Payload& payload)			  noexcept	{ resumeWith   (stateId<TState>(),		payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
@@ -13947,34 +15430,68 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+										   const Payload& payload)			  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @param stateId Destination state identifier
+	/// @param payload Payload
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+												Payload&& payload)			  noexcept;
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void selectWith   (const Payload& payload)			  noexcept	{ selectWith   (stateId<TState>(),		payload );	}
+
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
+	/// @tparam TState Destination state type
+	/// @param payload Payload
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	void selectWith   (		Payload&& payload)			  noexcept	{ selectWith   (stateId<TState>(), move(payload));	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
 										   const Payload& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
 												Payload&& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const Payload& payload)			  noexcept	{ utilizeWith  (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const Payload& payload)			  noexcept	{ utilizeWith  (stateId<TState>(),		payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, activates the state
-	///		with the highest 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, activates the state with the highest 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -13983,32 +15500,36 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
 										   const Payload& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
 												Payload&& payload)			  noexcept;
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const Payload& payload)			  noexcept	{ randomizeWith(stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const Payload& payload)			  noexcept	{ randomizeWith(stateId<TState>(),		payload );	}
 
-	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
-	///		proportional to 'utility()' among those with the highest 'rank()')
+	/// @brief Transition into a state
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
+	///   among those with the highest 'rank()')
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
@@ -14035,7 +15556,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const Payload& payload)			  noexcept	{ scheduleWith (stateId<TState>(),			 payload );	}
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const Payload& payload)			  noexcept	{ scheduleWith (stateId<TState>(),		payload );	}
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
@@ -14046,15 +15567,7 @@ public:
 	//------------------------------------------------------------------------------
 
 protected:
-	using Base::_context;
-	using Base::_registry;
-
-private:
-	using Base::_requests;
-
-#if HFSM2_LOG_INTERFACE_AVAILABLE()
-	using Base::_logger;
-#endif
+	using Base::_core;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14136,20 +15649,20 @@ public:
 public:
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context& context
 								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(PureContext&& context
 								   HFSM2_IF_UTILITY_THEORY(, RNG& rng)
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
-	HFSM2_CONSTEXPR(NO) RC_(const RC_& )														  noexcept = default;
-	HFSM2_CONSTEXPR(NO) RC_(	  RC_&&)														  noexcept = default;
+	HFSM2_CONSTEXPR(NO) RC_(const RC_& )													  noexcept = default;
+	HFSM2_CONSTEXPR(NO) RC_(	  RC_&&)													  noexcept = default;
 
-	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)								  noexcept	{ _context =	  context ; }
-	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)								  noexcept	{ _context = move(context); }
+	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)							  noexcept	{ _core.context =	  context ; }
+	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)							  noexcept	{ _core.context = move(context); }
 
 private:
-	using Base::_context;
+	using Base::_core;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14193,10 +15706,10 @@ public:
 public:
 	using Base::Base;
 
-	HFSM2_CONSTEXPR(14)	void setContext(Context context)	  noexcept { _context = context; }
+	HFSM2_CONSTEXPR(14)	void setContext(Context context)									  noexcept	{ _core.context = context; }
 
 private:
-	using Base::_context;
+	using Base::_core;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14239,19 +15752,22 @@ public:
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context context
 								   , RNG& rng
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
 #else
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(Context context = nullptr
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
 #endif
 
-	HFSM2_CONSTEXPR(14)	void setContext(Context context)										  noexcept { _context = context; }
+	HFSM2_CONSTEXPR(NO)	RC_(const RC_& )													  noexcept = default;
+	HFSM2_CONSTEXPR(NO)	RC_(	  RC_&&)													  noexcept = default;
+
+	HFSM2_CONSTEXPR(14)	void setContext(Context context)									  noexcept	{ _core.context = context; }
 
 private:
-	using Base::_context;
+	using Base::_core;
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14292,13 +15808,16 @@ public:
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	HFSM2_CONSTEXPR(14)	explicit RC_(RNG& rng
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept;
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept;
 
 #else
 
-	HFSM2_CONSTEXPR(14)	explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))	  noexcept;
+	HFSM2_CONSTEXPR(14)	explicit RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))  noexcept;
 
 #endif
+
+	HFSM2_CONSTEXPR(NO)	RC_(const RC_& )													  noexcept = default;
+	HFSM2_CONSTEXPR(NO)	RC_(	  RC_&&)													  noexcept = default;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -14351,7 +15870,7 @@ public:
 
 public:
 	HFSM2_CONSTEXPR(14)	explicit RR_(Context& context
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))	  noexcept
+								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept
 		: Base{context
 			 , static_cast<RNGT<TUtility>&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
@@ -14388,7 +15907,7 @@ public:
 #endif
 
 public:
-	HFSM2_CONSTEXPR(14)	explicit RR_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))	  noexcept
+	HFSM2_CONSTEXPR(14)	explicit RR_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))  noexcept
 		: Base{static_cast<RNGT<TUtility>&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 		, RNGT<TUtility>{0}
@@ -14412,11 +15931,11 @@ HFSM2_CONSTEXPR(14)
 R_<TG, TA>::R_(Context& context
 			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
-	: _context{context}
-	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
-	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
+	: _core{context
+		  HFSM2_IF_UTILITY_THEORY(, rng)
+		  HFSM2_IF_LOG_INTERFACE(, logger)}
 {
-	_apex.deepRegister(_registry, Parent{});
+	_apex.deepRegister(_core.registry, Parent{});
 
 	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
 }
@@ -14428,59 +15947,11 @@ HFSM2_CONSTEXPR(14)
 R_<TG, TA>::R_(PureContext&& context
 			 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 			 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
-	: _context{move(context)}
-	HFSM2_IF_UTILITY_THEORY(, _rng{rng})
-	HFSM2_IF_LOG_INTERFACE(, _logger{logger})
+	: _core{move(context)
+		  HFSM2_IF_UTILITY_THEORY(, rng)
+		  HFSM2_IF_LOG_INTERFACE(, logger)}
 {
-	_apex.deepRegister(_registry, Parent{});
-
-	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
-R_<TG, TA>::R_(const R_& other) noexcept
-	: _context {other._context }
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-	, _rng	   {other.rng	   }
-#endif
-	, _registry{other._registry}
-#if HFSM2_PLANS_AVAILABLE()
-	, _planData{other._planData}
-#endif
-	, _requests{other._requests}
-	, _apex	   {other._apex	   }
-#if HFSM2_LOG_INTERFACE_AVAILABLE()
-	, _logger  {other.logger   }
-#endif
-{
-	_apex.deepRegister(_registry, Parent{});
-
-	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
-R_<TG, TA>::R_(R_&& other) noexcept
-	: _context {move(other._context	)}
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-	, _rng{move(other.rng)}
-#endif
-	, _registry{move(other._registry)}
-#if HFSM2_PLANS_AVAILABLE()
-	, _planData{move(other._planData)}
-#endif
-	, _requests{move(other._requests)}
-	, _apex	   {move(other._apex	)}
-#if HFSM2_LOG_INTERFACE_AVAILABLE()
-	, _logger  {move(other.logger	)}
-#endif
-{
-	_apex.deepRegister(_registry, Parent{});
+	_apex.deepRegister(_core.registry, Parent{});
 
 	HFSM2_IF_STRUCTURE_REPORT(getStateNames());
 }
@@ -14490,7 +15961,7 @@ R_<TG, TA>::R_(R_&& other) noexcept
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(20)
 R_<TG, TA>::~R_() noexcept {
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+	HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
 }
 
 //------------------------------------------------------------------------------
@@ -14499,28 +15970,20 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::update() noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	FullControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	FullControl control{_core};
 
-	_apex.deepUpdate(control);
+	_apex. deepPreUpdate(control);
+	_apex.	  deepUpdate(control);
+	_apex.deepPostUpdate(control);
 
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+#if HFSM2_PLANS_AVAILABLE()
+	_apex.deepUpdatePlans(control);
+	_core.planData.clearRegionStatuses();
+#endif
 
-	TransitionSets currentTransitions;
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-
-	if (_requests.count())
-		processTransitions(currentTransitions);
-
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
+	processRequest();
 }
 
 //------------------------------------------------------------------------------
@@ -14530,28 +15993,20 @@ template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::react(const TEvent& event) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	FullControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	FullControl control{_core};
 
-	_apex.deepReact(control, event);
+	_apex. deepPreReact(control, event);
+	_apex.	  deepReact(control, event);
+	_apex.deepPostReact(control, event);
 
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+#if HFSM2_PLANS_AVAILABLE()
+	_apex.deepUpdatePlans(control);
+	_core.planData.clearRegionStatuses();
+#endif
 
-	TransitionSets currentTransitions;
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-
-	if (_requests.count())
-		processTransitions(currentTransitions);
-
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
+	processRequest();
 }
 
 //------------------------------------------------------------------------------
@@ -14560,11 +16015,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::changeTo(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::CHANGE});
+	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14573,11 +16028,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::restart(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESTART});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESTART});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14586,11 +16041,24 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::resume(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESUME});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESUME});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+R_<TG, TA>::select(const StateID stateId) noexcept {
+	HFSM2_ASSERT(_core.registry.isActive());
+
+	_core.requests.emplace(Transition{stateId, TransitionType::SELECT});
+
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14601,11 +16069,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::utilize(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::UTILIZE});
+	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14614,11 +16082,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::randomize(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RANDOMIZE});
+	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
 #endif
@@ -14629,11 +16097,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::schedule(const StateID stateId) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::SCHEDULE});
+	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -14642,26 +16110,19 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::reset() noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	PlanControl control{_core};
 
 	_apex.deepExit(control);
 
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions.clear());
 
-	_registry.clear();
-	// TODO: clear _requests
-	// TODO: clear _rng					// HFSM2_IF_UTILITY_THEORY()
-	// TODO: clear _planData			// HFSM2_IF_PLANS()
+	_core.registry.clear();
+	// TODO: clear _core.requests
+	// TODO: clear _core.rng			// HFSM2_IF_UTILITY_THEORY()
+	// TODO: clear _core.planData		// HFSM2_IF_PLANS()
 	// TODO: clear _activityHistory		// HFSM2_IF_STRUCTURE_REPORT()
 
 	_apex.deepRequestChange(control, {TransitionType::RESTART, INVALID_SHORT});
@@ -14676,18 +16137,18 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::save(SerialBuffer& _buffer) const noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
 	WriteStream stream{_buffer};
 
-	// TODO: save _registry
-	// TODO: save _requests
-	// TODO: save _rng						// HFSM2_IF_UTILITY_THEORY()
-	// TODO: save _planData					// HFSM2_IF_PLANS()
-	// TODO: save _previousTransitions		// HFSM2_IF_TRANSITION_HISTORY()
-	// TODO: save _activityHistory			// HFSM2_IF_STRUCTURE_REPORT()
+	// TODO: save _core.registry
+	// TODO: save _core.requests
+	// TODO: save _core.rng						// HFSM2_IF_UTILITY_THEORY()
+	// TODO: save _core.planData				// HFSM2_IF_PLANS()
+	// TODO: save _core.previousTransitions		// HFSM2_IF_TRANSITION_HISTORY()
+	// TODO: save _activityHistory				// HFSM2_IF_STRUCTURE_REPORT()
 
-	_apex.deepSaveActive(_registry, stream);
+	_apex.deepSaveActive(_core.registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14696,37 +16157,30 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.clear();
+	_core.requests.clear();
 
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	PlanControl control{_core};
 
 	_apex.deepExit(control);
 
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions.clear());
 
-	_registry.clear();
-	_requests.clear();
+	_core.registry.clear();
+	_core.requests.clear();
 
 	ReadStream stream{buffer};
 
-	// TODO: load _registry
-	// TODO: load _requests
-	// TODO: load _rng					// HFSM2_IF_UTILITY_THEORY()
-	// TODO: load _planData				// HFSM2_IF_PLANS()
-	// TODO: load _previousTransitions	// HFSM2_IF_TRANSITION_HISTORY()
-	// TODO: load _activityHistory		// HFSM2_IF_STRUCTURE_REPORT()
+	// TODO: load _core.registry
+	// TODO: load _core.requests
+	// TODO: load _core.rng					// HFSM2_IF_UTILITY_THEORY()
+	// TODO: load _core.planData			// HFSM2_IF_PLANS()
+	// TODO: load _core.previousTransitions	// HFSM2_IF_TRANSITION_HISTORY()
+	// TODO: load _activityHistory			// HFSM2_IF_STRUCTURE_REPORT()
 
-	_apex.deepLoadRequested(_registry, stream);
+	_apex.deepLoadRequested(_core.registry, stream);
 
 	_apex.deepEnter(control);
 }
@@ -14744,30 +16198,23 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 							  const Short count) noexcept
 {
 	HFSM2_ASSERT(transitions);
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_transitionTargets.clear();
-	_previousTransitions.clear();
+	_core.transitionTargets.clear();
+	_core.previousTransitions.clear();
 
 	if (HFSM2_CHECKED(transitions && count)) {
-		PlanControl control{_context
-						  , _registry
-						  , _requests
-						  HFSM2_IF_UTILITY_THEORY(, _rng)
-						  HFSM2_IF_PLANS(, _planData)
-						  , _transitionTargets
-						  , _previousTransitions
-						  HFSM2_IF_LOG_INTERFACE(, _logger)};
+		PlanControl control{_core};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)
-				_previousTransitions.emplace(transitions[i]);
+				_core.previousTransitions.emplace(transitions[i]);
 
 			_apex.deepChangeToRequested(control);
 
-			_registry.clearRequests();
+			_core.registry.clearRequests();
 
-			HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+			HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
 			HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 
 			return true;
@@ -14797,13 +16244,13 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 const typename R_<TG, TA>::Transition*
 R_<TG, TA>::lastTransitionTo(const StateID stateId) const noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
 	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
-		const Short index = _transitionTargets[stateId];
+		const Short index = _core.transitionTargets[stateId];
 
-		if (index < _previousTransitions.count())
-			return &_previousTransitions[index];
+		if (index < _core.previousTransitions.count())
+			return &_core.previousTransitions[index];
 	}
 
 	return nullptr;
@@ -14817,21 +16264,14 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::initialEnter() noexcept {
-	HFSM2_ASSERT(!_registry.isActive());
-	HFSM2_ASSERT(_requests.count() == 0);
-	HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-	HFSM2_IF_TRANSITION_HISTORY(HFSM2_ASSERT(_previousTransitions.count() == 0));
+	HFSM2_ASSERT(!_core.registry.isActive());
+	HFSM2_ASSERT(_core.requests.count() == 0);
+	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+	HFSM2_IF_TRANSITION_HISTORY(HFSM2_ASSERT(_core.previousTransitions.count() == 0));
 
 	RegistryBackUp undo;
 
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	PlanControl control{_core};
 
 	TransitionSets currentTransitions;
 	TransitionSet  pendingTransitions;
@@ -14842,38 +16282,38 @@ R_<TG, TA>::initialEnter() noexcept {
 						   pendingTransitions);
 
 	for (Long i = 0;
-		 i < SUBSTITUTION_LIMIT && _requests.count();
+		 i < SUBSTITUTION_LIMIT && _core.requests.count();
 		 ++i)
 	{
-		backup(_registry, undo);
+		backup(_core.registry, undo);
 
 		if (applyRequests(currentTransitions,
 						  control))
 		{
-			pendingTransitions = _requests;
-			_requests.clear();
+			pendingTransitions = _core.requests;
+			_core.requests.clear();
 
 			if (cancelledByEntryGuards(currentTransitions,
 									   pendingTransitions))
 			{
 				HFSM2_BREAK();
 
-				restore(_registry, undo);
+				restore(_core.registry, undo);
 			} else
 				currentTransitions += pendingTransitions;
 
 			pendingTransitions.clear();
 		} else
-			_requests.clear();
+			_core.requests.clear();
 	}
-	HFSM2_ASSERT(_requests.count() == 0);
-	HFSM2_IF_TRANSITION_HISTORY(_previousTransitions = currentTransitions);
+	HFSM2_ASSERT(_core.requests.count() == 0);
+	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions = currentTransitions);
 
 	_apex.deepEnter(control);
 
-	_registry.clearRequests();
+	_core.registry.clearRequests();
 
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+	HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
 	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
@@ -14883,16 +16323,9 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::finalExit() noexcept {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
+	PlanControl control{_core};
 
 	_apex.deepExit(control);
 }
@@ -14902,56 +16335,65 @@ R_<TG, TA>::finalExit() noexcept {
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
+R_<TG, TA>::processRequest() noexcept {
+	HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
+
+	TransitionSets currentTransitions;
+	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+
+	if (_core.requests.count()) {
+		processTransitions(currentTransitions);
+
+		HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
+		HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
+	}
+
+	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions = currentTransitions);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+void
 R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) noexcept {
-	HFSM2_ASSERT(_registry.isActive());
-	HFSM2_ASSERT(_requests.count());
+	HFSM2_ASSERT(_core.registry.isActive());
+	HFSM2_ASSERT(_core.requests.count());
 
 	RegistryBackUp registryUndo;
-
-	PlanControl control{_context
-					  , _registry
-					  , _requests
-					  HFSM2_IF_UTILITY_THEORY(, _rng)
-					  HFSM2_IF_PLANS(, _planData)
-					  HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-					  HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-					  HFSM2_IF_LOG_INTERFACE(, _logger)};
-
+	PlanControl control{_core};
 	TransitionSet pendingTransitions;
 
 	for (Long i = 0;
-		i < SUBSTITUTION_LIMIT && _requests.count();
+		i < SUBSTITUTION_LIMIT && _core.requests.count();
 		++i)
 	{
-		backup(_registry, registryUndo);
+		backup(_core.registry, registryUndo);
 
 		if (applyRequests(currentTransitions,
 						  control))
 		{
-			pendingTransitions = _requests;
-			_requests.clear();
+			pendingTransitions = _core.requests;
+			_core.requests.clear();
 
 			if (cancelledByGuards(currentTransitions,
 								  pendingTransitions))
 			{
-				HFSM2_IF_TRANSITION_HISTORY(_transitionTargets.clear());
-				restore(_registry, registryUndo);
+				HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+				restore(_core.registry, registryUndo);
 			} else
 				currentTransitions += pendingTransitions;
 
 			pendingTransitions.clear();
 		} else
-			_requests.clear();
+			_core.requests.clear();
 	}
-	HFSM2_ASSERT(_requests.count() == 0);
+	HFSM2_ASSERT(_core.requests.count() == 0);
 
 	if (currentTransitions.count())
 		_apex.deepChangeToRequested(control);
 
-	_registry.clearRequests();
-
-	HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
-	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
+	_core.registry.clearRequests();
 }
 
 // COMMON
@@ -14973,13 +16415,14 @@ R_<TG, TA>::applyRequest(const TransitionSets& currentTransitions,
 	case TransitionType::CHANGE:
 	case TransitionType::RESTART:
 	case TransitionType::RESUME:
+	case TransitionType::SELECT:
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 	case TransitionType::UTILIZE:
 	case TransitionType::RANDOMIZE:
 #endif
 
-		if (_registry.requestImmediate(request))
+		if (_core.registry.requestImmediate(request))
 			_apex.deepForwardActive(control, {request.type, index});
 		else
 			_apex.deepRequest	   (control, {request.type, index});
@@ -14987,7 +16430,7 @@ R_<TG, TA>::applyRequest(const TransitionSets& currentTransitions,
 		return true;
 
 	case TransitionType::SCHEDULE:
-		_registry.requestScheduled(request.destination);
+		_core.registry.requestScheduled(request.destination);
 
 		return false;
 
@@ -15008,8 +16451,8 @@ R_<TG, TA>::applyRequests(const TransitionSets& currentTransitions,
 {
 	bool changesMade = false;
 
-	for (Short i = 0; i < _requests.count(); ++i)
-		changesMade |= applyRequest(currentTransitions, control, _requests[i], i);
+	for (Short i = 0; i < _core.requests.count(); ++i)
+		changesMade |= applyRequest(currentTransitions, control, _core.requests[i], i);
 
 	return changesMade;
 }
@@ -15023,16 +16466,9 @@ bool
 R_<TG, TA>::cancelledByEntryGuards(const TransitionSets& currentTransitions,
 								   const TransitionSet&  pendingTransitions) noexcept
 {
-	GuardControl guardControl{_context
-							, _registry
-							, _requests
-							, currentTransitions
-							, pendingTransitions
-							HFSM2_IF_UTILITY_THEORY(, _rng)
-							HFSM2_IF_PLANS(, _planData)
-							HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-							HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-							HFSM2_IF_LOG_INTERFACE(, _logger)};
+	GuardControl guardControl{_core,
+							  currentTransitions,
+							  pendingTransitions};
 
 	return _apex.deepEntryGuard(guardControl);
 }
@@ -15045,16 +16481,9 @@ bool
 R_<TG, TA>::cancelledByGuards(const TransitionSets& currentTransitions,
 							  const TransitionSet&  pendingTransitions) noexcept
 {
-	GuardControl guardControl{_context
-							, _registry
-							, _requests
-							, currentTransitions
-							, pendingTransitions
-							HFSM2_IF_UTILITY_THEORY(, _rng)
-							HFSM2_IF_PLANS(, _planData)
-							HFSM2_IF_TRANSITION_HISTORY(, _transitionTargets)
-							HFSM2_IF_TRANSITION_HISTORY(, _previousTransitions)
-							HFSM2_IF_LOG_INTERFACE(, _logger)};
+	GuardControl guardControl{_core,
+							  currentTransitions,
+							  pendingTransitions};
 
 	return _apex.deepForwardExitGuard(guardControl) ||
 		   _apex.deepForwardEntryGuard(guardControl);
@@ -15205,8 +16634,8 @@ RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{context
-	HFSM2_IF_UTILITY_THEORY(, rng)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {
 	initialEnter();
 }
@@ -15219,8 +16648,8 @@ RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{move(context)
-	HFSM2_IF_UTILITY_THEORY(, rng)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {
 	initialEnter();
 }
@@ -15263,31 +16692,24 @@ bool
 RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::replayEnter(const Transition* const transitions,
 																											   const Short count) noexcept
 {
-	HFSM2_ASSERT(!_registry.isActive());
-	HFSM2_ASSERT(_requests.count() == 0);
+	HFSM2_ASSERT(!_core.registry.isActive());
+	HFSM2_ASSERT(_core.requests.count() == 0);
 
-	_transitionTargets.clear();
-	HFSM2_ASSERT(_previousTransitions.count() == 0);
+	_core.transitionTargets.clear();
+	HFSM2_ASSERT(_core.previousTransitions.count() == 0);
 
 	if (HFSM2_CHECKED(transitions && count)) {
-		PlanControl control{_context
-						  , _registry
-						  , _requests
-						  HFSM2_IF_UTILITY_THEORY(, _rng)
-						  HFSM2_IF_PLANS(, _planData)
-						  , _transitionTargets
-						  , _previousTransitions
-						  HFSM2_IF_LOG_INTERFACE(, _logger)};
+		PlanControl control{_core};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)
-				_previousTransitions.emplace(transitions[i]);
+				_core.previousTransitions.emplace(transitions[i]);
 
 			_apex.deepEnter(control);
 
-			_registry.clearRequests();
+			_core.registry.clearRequests();
 
-			HFSM2_IF_PLANS(HFSM2_IF_ASSERT(_planData.verifyPlans()));
+			HFSM2_IF_ASSERT(HFSM2_IF_PLANS(_core.planData.verifyPlans()));
 			HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 
 			return true;
@@ -15322,11 +16744,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
 																										  const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::CHANGE, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15337,11 +16759,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
 																											   Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::CHANGE, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
 }
 
 // COMMON
@@ -15353,11 +16775,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
 																										   const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESTART, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESTART, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15368,11 +16790,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
 																												Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESTART, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESTART, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -15383,11 +16805,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
 																										  const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESUME, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESUME, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15398,11 +16820,41 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
 																											   Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RESUME, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::RESUME, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+}
+
+//------------------------------------------------------------------------------
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::selectWith(const StateID  stateId,
+																										  const Payload& payload) noexcept
+{
+	HFSM2_ASSERT(_core.registry.isActive());
+
+	_core.requests.emplace(Transition{stateId, TransitionType::SELECT, payload});
+
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::selectWith(const StateID  stateId,
+																											   Payload&& payload) noexcept
+{
+	HFSM2_ASSERT(_core.registry.isActive());
+
+	_core.requests.emplace(Transition{stateId, TransitionType::SELECT, move(payload)});
+
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -15415,11 +16867,11 @@ void
 RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
 																				 const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::UTILIZE, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15430,11 +16882,11 @@ void
 RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
 																					  Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::UTILIZE, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
 }
 
 //------------------------------------------------------------------------------
@@ -15445,11 +16897,11 @@ void
 RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
 																				   const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15460,11 +16912,11 @@ void
 RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
 																						Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
 }
 
 #endif
@@ -15477,11 +16929,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
 																											const Payload& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::SCHEDULE, payload});
+	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE, payload});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15492,11 +16944,11 @@ void
 RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
 																												 Payload&& payload) noexcept
 {
-	HFSM2_ASSERT(_registry.isActive());
+	HFSM2_ASSERT(_core.registry.isActive());
 
-	_requests.emplace(Transition{stateId, TransitionType::SCHEDULE, move(payload)});
+	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15507,8 +16959,8 @@ RC_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{context
-	HFSM2_IF_UTILITY_THEORY(, rng)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -15519,8 +16971,8 @@ RC_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 																								 HFSM2_IF_UTILITY_THEORY(, RNG& rng)
 																								 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{move(context)
-	HFSM2_IF_UTILITY_THEORY(, rng)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_UTILITY_THEORY(, rng)
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15533,8 +16985,8 @@ RC_<G_<NFT, TC*, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(Contex
 																		, RNG& rng
 																		HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{context
-	, rng
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 , rng
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 #else
@@ -15544,7 +16996,7 @@ HFSM2_CONSTEXPR(14)
 RC_<G_<NFT, TC*, TV, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(Context context
 															HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{context
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 #endif
@@ -15558,8 +17010,8 @@ HFSM2_CONSTEXPR(14)
 RC_<G_<NFT, EmptyContext, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(RNG& rng
 																				 HFSM2_IF_LOG_INTERFACE(, Logger* const logger)) noexcept
 	: Base{static_cast<EmptyContext&>(*this)
-	, rng
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 , rng
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 #else
@@ -15568,7 +17020,7 @@ template <FeatureTag NFT, typename TV, Long NSL HFSM2_IF_PLANS(, Long NTC), type
 HFSM2_CONSTEXPR(14)
 RC_<G_<NFT, EmptyContext, TV, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RC_(HFSM2_IF_LOG_INTERFACE(Logger* const logger)) noexcept
 	: Base{static_cast<EmptyContext&>(*this)
-	HFSM2_IF_LOG_INTERFACE(, logger)}
+		 HFSM2_IF_LOG_INTERFACE(, logger)}
 {}
 
 #endif

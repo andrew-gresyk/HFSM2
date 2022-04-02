@@ -13,10 +13,14 @@ LoggerT<TConfig>::recordMethod(Context& /*context*/,
 
 	switch (method) {
 
+		case Method::SELECT:
+			history.emplace_back(origin, Event::Type::REPORT_SELECT);
+			break;
+
 	#if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 		case Method::RANK:
-			history.emplace_back(origin, Event::Type::RANK);
+			history.emplace_back(origin, Event::Type::REPORT_RANK);
 			break;
 
 		case Method::UTILITY:
@@ -37,12 +41,28 @@ LoggerT<TConfig>::recordMethod(Context& /*context*/,
 			history.emplace_back(origin, Event::Type::REENTER);
 			break;
 
+		case Method::PRE_UPDATE:
+			history.emplace_back(origin, Event::Type::PRE_UPDATE);
+			break;
+
 		case Method::UPDATE:
 			history.emplace_back(origin, Event::Type::UPDATE);
 			break;
 
+		case Method::POST_UPDATE:
+			history.emplace_back(origin, Event::Type::POST_UPDATE);
+			break;
+
+		case Method::PRE_REACT:
+			history.emplace_back(origin, Event::Type::PRE_REACT);
+			break;
+
 		case Method::REACT:
 			history.emplace_back(origin, Event::Type::REACT);
+			break;
+
+		case Method::POST_REACT:
+			history.emplace_back(origin, Event::Type::POST_REACT);
 			break;
 
 		case Method::EXIT_GUARD:
@@ -92,6 +112,10 @@ LoggerT<TConfig>::recordTransition(Context& /*context*/,
 
 		case TransitionType::RESUME:
 			history.emplace_back(origin, Event::Type::RESUME,    target);
+			break;
+
+		case TransitionType::SELECT:
+			history.emplace_back(origin, Event::Type::SELECT,    target);
 			break;
 
 	#if HFSM2_UTILITY_THEORY_AVAILABLE()
@@ -166,6 +190,27 @@ LoggerT<TConfig>::recordPlanStatus(Context& /*context*/,
 
 //------------------------------------------------------------------------------
 
+template <typename TConfig>
+void
+LoggerT<TConfig>::recordCancelledPending(Context& /*context*/,
+										 const StateID origin) noexcept
+{
+	history.emplace_back(origin, Event::Type::CANCEL_PENDING);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TConfig>
+void
+LoggerT<TConfig>::recordSelectResolution(Context& /*context*/,
+										 const StateID head,
+										 const StateID prong) noexcept
+{
+	history.emplace_back(head, Event::Type::SELECT_RESOLUTION, prong);
+}
+
+//------------------------------------------------------------------------------
+
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 template <typename TConfig>
@@ -191,16 +236,6 @@ LoggerT<TConfig>::recordRandomResolution(Context& /*context*/,
 }
 
 #endif
-
-//------------------------------------------------------------------------------
-
-template <typename TConfig>
-void
-LoggerT<TConfig>::recordCancelledPending(Context& /*context*/,
-										 const StateID origin) noexcept
-{
-	history.emplace_back(origin, Event::Type::CANCEL_PENDING);
-}
 
 //------------------------------------------------------------------------------
 
