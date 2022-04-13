@@ -76,12 +76,12 @@ struct HFSM2_EMPTY_BASES O_
 	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Registry& registry)	  noexcept	{ return			   registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
 	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Registry& registry)	  noexcept	{ return			   registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Control&  control)	  noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Control&  control)	  noexcept	{ return control._core.registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(		Control& control )	  noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const	Control& control )	  noexcept	{ return control._core.registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(11)	static Status&	  headStatus	(	   Control&	 control)	  noexcept	{ return control._core.planData.headStatuses[REGION_ID];	}
-	HFSM2_CONSTEXPR(11)	static Status&	  subStatus		(	   Control&	 control)	  noexcept	{ return control._core.planData.subStatuses [REGION_ID];	}
+	HFSM2_CONSTEXPR(11)	static Status&	  headStatus	(		Control& control )	  noexcept	{ return control._core.planData.headStatuses[REGION_ID];	}
+	HFSM2_CONSTEXPR(11)	static Status&	  subStatus		(		Control& control )	  noexcept	{ return control._core.planData.subStatuses [REGION_ID];	}
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

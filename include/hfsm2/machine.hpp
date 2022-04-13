@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.0.0 (2022-04-02)
+// 2.1.0 (2022-04-13)
 //
 // Created by Andrew Gresyk
 //
@@ -5372,6 +5372,8 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept;
+
 	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
 	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)		const noexcept;
 	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)		const noexcept;
@@ -5452,6 +5454,8 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept;
+
 	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
 	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)		const noexcept;
 	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)		const noexcept;
@@ -5518,6 +5522,28 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+HFSM2_CONSTEXPR(14)
+Short
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::activeSubState(const StateID stateId) const noexcept {
+	const StateID subStateId = stateId + 1;
+
+	if (HFSM2_CHECKED(	 stateId < STATE_COUNT) &&
+		HFSM2_CHECKED(subStateId < STATE_COUNT))
+	{
+		if (const Parent parent = stateParents[subStateId]) {
+			HFSM2_ASSERT(parent.forkId != 0);
+
+			if (parent.forkId > 0)
+				return compoActive[parent.forkId - 1];
+		}
+	}
+
+	return INVALID_SHORT;
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(11)
@@ -5755,6 +5781,28 @@ namespace hfsm2 {
 namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+HFSM2_CONSTEXPR(14)
+Short
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, 0, 0 HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::activeSubState(const StateID stateId) const noexcept {
+	const StateID subStateId = stateId + 1;
+
+	if (HFSM2_CHECKED(	 stateId < STATE_COUNT) &&
+		HFSM2_CHECKED(subStateId < STATE_COUNT))
+	{
+		if (const Parent parent = stateParents[subStateId]) {
+			HFSM2_ASSERT(parent.forkId != 0);
+
+			if (parent.forkId > 0)
+				return compoActive[parent.forkId - 1];
+		}
+	}
+
+	return INVALID_SHORT;
+}
+
+//------------------------------------------------------------------------------
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(11)
@@ -6119,9 +6167,9 @@ protected:
 
 	struct Origin final {
 		HFSM2_CONSTEXPR(14)	Origin(ControlT& control_,
-								   const StateID stateId)				  noexcept;
+								   const StateID stateId)					  noexcept;
 
-		HFSM2_CONSTEXPR(20)	~Origin()									  noexcept;
+		HFSM2_CONSTEXPR(20)	~Origin()										  noexcept;
 
 		ControlT& control;
 		const StateID prevId;
@@ -6131,9 +6179,9 @@ protected:
 
 	struct Region {
 		HFSM2_CONSTEXPR(14)	Region(ControlT& control,
-								   const RegionID regionId)				  noexcept;
+								   const RegionID regionId)					  noexcept;
 
-		HFSM2_CONSTEXPR(20)	~Region()									  noexcept;
+		HFSM2_CONSTEXPR(20)	~Region()										  noexcept;
 
 		ControlT& control;
 		const RegionID prevId;
@@ -6141,19 +6189,19 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)	ControlT(Core& core)							  noexcept
+	HFSM2_CONSTEXPR(11)	ControlT(Core& core)								  noexcept
 		: _core{core}
 	{}
 
-	HFSM2_CONSTEXPR(14)	void setOrigin  (const StateID	 stateId)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void resetOrigin(const StateID	 stateId)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void setOrigin  (const StateID	 stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void resetOrigin(const StateID	 stateId)			  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void setRegion	(const RegionID regionId)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId)		  noexcept;
+	HFSM2_CONSTEXPR(14)	void setRegion	(const RegionID regionId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId)			  noexcept;
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void pinLastTransition(const StateID stateId,
-											   const Short index)		  noexcept;
+											   const Short index)			  noexcept;
 #endif
 
 public:
@@ -6162,78 +6210,91 @@ public:
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID stateId()									  noexcept	{ return			index<StateList , TState>();	}
+	static constexpr StateID stateId()										  noexcept	{ return			index<StateList , TState>();	}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()								  noexcept	{ return (RegionID) index<RegionList, TState>();	}
+	static constexpr RegionID regionId()									  noexcept	{ return (RegionID) index<RegionList, TState>();	}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::context()
-	HFSM2_CONSTEXPR(14)		  Context& _()								  noexcept	{ return _core.context;								}
+	HFSM2_CONSTEXPR(14)		  Context& _()									  noexcept	{ return _core.context;								}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::context()
-	HFSM2_CONSTEXPR(11)	const Context& _()							const noexcept	{ return _core.context;								}
+	HFSM2_CONSTEXPR(11)	const Context& _()								const noexcept	{ return _core.context;								}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::_()
-	HFSM2_CONSTEXPR(14)		  Context& context()						  noexcept	{ return _core.context;								}
+	HFSM2_CONSTEXPR(14)		  Context& context()							  noexcept	{ return _core.context;								}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
 	/// @see Control::_()
-	HFSM2_CONSTEXPR(11)	const Context& context()					const noexcept	{ return _core.context;								}
+	HFSM2_CONSTEXPR(11)	const Context& context()						const noexcept	{ return _core.context;								}
 
 	//----------------------------------------------------------------------
 
 	/// @brief Inspect current transition requests
 	/// @return Array of transition requests
-	HFSM2_CONSTEXPR(11)	const TransitionSet& requests()				const noexcept	{ return _core.requests;							}
+	HFSM2_CONSTEXPR(11)	const TransitionSet& requests()					const noexcept	{ return _core.requests;							}
+
+	//----------------------------------------------------------------------
+
+	/// @brief Get region's active sub-state's index
+	/// @param stateId Region's head state ID
+	/// @return Region's active sub-state index
+	HFSM2_CONSTEXPR(14)	Short activeSubState(const StateID stateId)		const noexcept	{ return _core.registry.activeSubState(stateId			);	}
+
+	/// @brief Get region's active sub-state's index
+	/// @tparam TState Region's head state type
+	/// @return Region's active sub-state index
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	Short activeSubState()							const noexcept	{ return _core.registry.activeSubState(stateId<TState>());	}
 
 	//----------------------------------------------------------------------
 
 	/// @brief Check if a state is active
 	/// @param stateId State identifier
 	/// @return State active status
-	HFSM2_CONSTEXPR(11)	bool isActive   (const StateID stateId)		const noexcept	{ return _core.registry.isActive   (stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isActive   (const StateID stateId)			const noexcept	{ return _core.registry.isActive   (stateId);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState State type
 	/// @return State active status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isActive	()							const noexcept	{ return isActive	(stateId<TState>());			}
+	HFSM2_CONSTEXPR(11)	bool isActive	()								const noexcept	{ return isActive	(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId State identifier
 	/// @return State resumable status
-	HFSM2_CONSTEXPR(11)	bool isResumable(const StateID stateId)		const noexcept	{ return _core.registry.isResumable(stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isResumable(const StateID stateId)			const noexcept	{ return _core.registry.isResumable(stateId);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState State type
 	/// @return State resumable status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isResumable()							const noexcept	{ return isResumable(stateId<TState>());			}
+	HFSM2_CONSTEXPR(11)	bool isResumable()								const noexcept	{ return isResumable(stateId<TState>());			}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId State identifier
 	/// @return State scheduled status
-	HFSM2_CONSTEXPR(11)	bool isScheduled(const StateID stateId)		const noexcept	{ return isResumable(stateId);						}
+	HFSM2_CONSTEXPR(11)	bool isScheduled(const StateID stateId)			const noexcept	{ return isResumable(stateId);						}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState State type
 	/// @return State scheduled status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isScheduled()							const noexcept	{ return isResumable(stateId<TState>());			}
+	HFSM2_CONSTEXPR(11)	bool isScheduled()								const noexcept	{ return isResumable(stateId<TState>());			}
 
 	//----------------------------------------------------------------------
 
@@ -6241,24 +6302,24 @@ public:
 
 	/// @brief Access read-only plan for the current region
 	/// @return Plan for the current region
-	HFSM2_CONSTEXPR(11)	CPlan plan()								const noexcept	{ return CPlan{_core.planData, _regionId};				}
+	HFSM2_CONSTEXPR(11)	CPlan plan()									const noexcept	{ return CPlan{_core.planData, _regionId};				}
 
 	/// @brief Access read-only plan for a region
 	/// @param regionId Region identifier
 	/// @return Read-only plan for the region
-	HFSM2_CONSTEXPR(14)	CPlan plan(const RegionID regionId)			const noexcept	{ return CPlan{_core.planData, regionId};				}
+	HFSM2_CONSTEXPR(14)	CPlan plan(const RegionID regionId)				const noexcept	{ return CPlan{_core.planData, regionId};				}
 
 	/// @brief Access read-only plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Read-only plan for the region
 	template <typename TRegion>
-	HFSM2_CONSTEXPR(14)	CPlan plan()									  noexcept	{ return CPlan{_core.planData, regionId<TRegion>()};	}
+	HFSM2_CONSTEXPR(14)	CPlan plan()										  noexcept	{ return CPlan{_core.planData, regionId<TRegion>()};	}
 
 	/// @brief Access read-only plan for a region
 	/// @tparam TRegion Region head state type
 	/// @return Read-only Plan for the region
 	template <typename TRegion>
-	HFSM2_CONSTEXPR(14)	CPlan plan()								const noexcept	{ return CPlan{_core.planData, regionId<TRegion>()};	}
+	HFSM2_CONSTEXPR(14)	CPlan plan()									const noexcept	{ return CPlan{_core.planData, regionId<TRegion>()};	}
 
 #endif
 
@@ -11182,61 +11243,61 @@ struct HFSM2_EMPTY_BASES C_
 	HFSM2_CONSTEXPR(11)	static Short&	compoResumable		  (		 Registry& registry)  noexcept	{ return registry.compoResumable[COMPO_INDEX];	}
 #endif
 
-	HFSM2_CONSTEXPR(11)	static Short&	compoRequested		  (		Control& control)	  noexcept	{ return control._core.registry.compoRequested[COMPO_INDEX];	}
-	HFSM2_CONSTEXPR(11)	static Short&	compoActive			  (		Control& control)	  noexcept	{ return control._core.registry.compoActive	  [COMPO_INDEX];	}
-	HFSM2_CONSTEXPR(11)	static Short&	compoResumable		  (		Control& control)	  noexcept	{ return control._core.registry.compoResumable[COMPO_INDEX];	}
+	HFSM2_CONSTEXPR(11)	static Short&	compoRequested		  (		  Control& control )  noexcept	{ return control._core.registry.compoRequested[COMPO_INDEX];	}
+	HFSM2_CONSTEXPR(11)	static Short&	compoActive			  (		  Control& control )  noexcept	{ return control._core.registry.compoActive	  [COMPO_INDEX];	}
+	HFSM2_CONSTEXPR(11)	static Short&	compoResumable		  (		  Control& control )  noexcept	{ return control._core.registry.compoResumable[COMPO_INDEX];	}
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(11)	static Status&	headStatus			  (		Control& control)	  noexcept	{ return control._core.planData.headStatuses  [REGION_ID];		}
-	HFSM2_CONSTEXPR(11)	static Status&	subStatus			  (		Control& control)	  noexcept	{ return control._core.planData.subStatuses   [REGION_ID];		}
+	HFSM2_CONSTEXPR(11)	static Status&	headStatus			  (		  Control& control )  noexcept	{ return control._core.planData.headStatuses  [REGION_ID];		}
+	HFSM2_CONSTEXPR(11)	static Status&	subStatus			  (		  Control& control )  noexcept	{ return control._core.planData.subStatuses   [REGION_ID];		}
 #endif
 
-	HFSM2_CONSTEXPR(11)	static bool		compoRemain			  (		Control& control)	  noexcept	{ return control._core.registry.compoRemains.template get<COMPO_INDEX>(); }
+	HFSM2_CONSTEXPR(11)	static bool		compoRemain			  (		  Control& control )  noexcept	{ return control._core.registry.compoRemains.template get<COMPO_INDEX>(); }
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	Short	resolveRandom				  (		Control& control,
+	HFSM2_CONSTEXPR(14)	Short	resolveRandom				  (		  Control& control,
 															   const Utility(& options)[WIDTH], const Utility sum,
 															   const Rank	(& ranks)  [WIDTH], const Rank	  top)	const noexcept;
 #endif
 
-	HFSM2_CONSTEXPR(14)	void	deepRegister				  (Registry& registry, const Parent parent)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRegister				  (Registry& registry, const Parent parent)		  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard		  (GuardControl& control)							  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard				  (GuardControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepForwardEntryGuard		  (GuardControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepEntryGuard				  (GuardControl& control)						  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	deepEnter					  ( PlanControl& control)							  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepReenter					  ( PlanControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepEnter					  ( PlanControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepReenter					  ( PlanControl& control)						  noexcept;
 
-	HFSM2_CONSTEXPR(14)	Status	deepPreUpdate				  ( FullControl& control)							  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	deepUpdate					  ( FullControl& control)							  noexcept;
-	HFSM2_CONSTEXPR(14)	Status	deepPostUpdate				  ( FullControl& control)							  noexcept;
-
-	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepPreReact				  ( FullControl& control, const TEvent& event)		  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPreUpdate				  ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepUpdate					  ( FullControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPostUpdate				  ( FullControl& control)						  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepReact					  ( FullControl& control, const TEvent& event)		  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepPreReact				  ( FullControl& control, const TEvent& event)	  noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	Status	deepPostReact				  ( FullControl& control, const TEvent& event)		  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepReact					  ( FullControl& control, const TEvent& event)	  noexcept;
+
+	template <typename TEvent>
+	HFSM2_CONSTEXPR(14)	Status	deepPostReact				  ( FullControl& control, const TEvent& event)	  noexcept;
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	Status	deepUpdatePlans				  ( FullControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	Status	deepUpdatePlans				  ( FullControl& control)						  noexcept;
 #endif
 
-	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard		  (GuardControl& control)							  noexcept;
-	HFSM2_CONSTEXPR(14)	bool	deepExitGuard				  (GuardControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepForwardExitGuard		  (GuardControl& control)						  noexcept;
+	HFSM2_CONSTEXPR(14)	bool	deepExitGuard				  (GuardControl& control)						  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	deepExit					  ( PlanControl& control)							  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepExit					  ( PlanControl& control)						  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepForwardActive			  (		Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepForwardRequest			  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardActive			  (		Control& control, const Request request)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepForwardRequest			  (		Control& control, const Request request)  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void	deepRequest					  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequest					  (		Control& control, const Request request)  noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -11264,28 +11325,28 @@ struct HFSM2_EMPTY_BASES C_
 
 #else
 
-	HFSM2_CONSTEXPR(14)	void	deepRequestChange			  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChange			  (		Control& control, const Request request)  noexcept;
 
 #endif
 
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeComposite	  (		Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeResumable	  (		Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeSelectable	  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeComposite	  (		Control& control, const Request request)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeResumable	  (		Control& control, const Request request)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeSelectable	  (		Control& control, const Request request)  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeUtilitarian  (		Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestChangeRandom		  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeUtilitarian  (		Control& control, const Request request)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestChangeRandom		  (		Control& control, const Request request)  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void	deepRequestRestart			  (		Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestResume			  (		Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestSelect			  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRestart			  (		Control& control, const Request request)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestResume			  (		Control& control, const Request request)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestSelect			  (		Control& control, const Request request)  noexcept;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize			  (		Control& control, const Request request)	  noexcept;
-	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize		  (		Control& control, const Request request)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestUtilize			  (		Control& control, const Request request)  noexcept;
+	HFSM2_CONSTEXPR(14)	void	deepRequestRandomize		  (		Control& control, const Request request)  noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13635,12 +13696,12 @@ struct HFSM2_EMPTY_BASES O_
 	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Registry& registry)	  noexcept	{ return			   registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
 	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Registry& registry)	  noexcept	{ return			   registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(	   Control&  control)	  noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const Control&  control)	  noexcept	{ return control._core.registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested(		Control& control )	  noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested(const	Control& control )	  noexcept	{ return control._core.registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(11)	static Status&	  headStatus	(	   Control&	 control)	  noexcept	{ return control._core.planData.headStatuses[REGION_ID];	}
-	HFSM2_CONSTEXPR(11)	static Status&	  subStatus		(	   Control&	 control)	  noexcept	{ return control._core.planData.subStatuses [REGION_ID];	}
+	HFSM2_CONSTEXPR(11)	static Status&	  headStatus	(		Control& control )	  noexcept	{ return control._core.planData.headStatuses[REGION_ID];	}
+	HFSM2_CONSTEXPR(11)	static Status&	  subStatus		(		Control& control )	  noexcept	{ return control._core.planData.subStatuses [REGION_ID];	}
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -14823,6 +14884,19 @@ public:
 
 	//----------------------------------------------------------------------
 
+	/// @brief Get region's active sub-state's index
+	/// @param stateId Region's head state ID
+	/// @return Region's active sub-state index
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept	{ return _core.registry.activeSubState(stateId			);	}
+
+	/// @brief Get region's active sub-state's index
+	/// @tparam TState Region's head state type
+	/// @return Region's active sub-state index
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	Short activeSubState ()								const noexcept	{ return _core.registry.activeSubState(stateId<TState>());	}
+
+	//----------------------------------------------------------------------
+
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
 	/// @return State active status
@@ -14965,26 +15039,26 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)			const noexcept	{ return _core.registry.isPendingChange(stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange (const StateID stateId)		const noexcept	{ return _core.registry.isPendingChange(stateId);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingChange()								const noexcept	{ return isPendingChange(stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange ()								const noexcept	{ return isPendingChange(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be activated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)			const noexcept	{ return _core.registry.isPendingEnter (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter	 (const StateID stateId)			const noexcept	{ return _core.registry.isPendingEnter (stateId);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState Destination state type
 	/// @return State pending activation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter ()								const noexcept	{ return isPendingEnter (stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter	 ()								const noexcept	{ return isPendingEnter (stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -14997,7 +15071,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @return State pending deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()								const noexcept	{ return isPendingExit  (stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	 ()								const noexcept	{ return isPendingExit  (stateId<TState>());		}
 
 	//------------------------------------------------------------------------------
 

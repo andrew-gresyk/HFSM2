@@ -160,6 +160,19 @@ public:
 
 	//----------------------------------------------------------------------
 
+	/// @brief Get region's active sub-state's index
+	/// @param stateId Region's head state ID
+	/// @return Region's active sub-state index
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept	{ return _core.registry.activeSubState(stateId			);	}
+
+	/// @brief Get region's active sub-state's index
+	/// @tparam TState Region's head state type
+	/// @return Region's active sub-state index
+	template <typename TState>
+	HFSM2_CONSTEXPR(14)	Short activeSubState ()								const noexcept	{ return _core.registry.activeSubState(stateId<TState>());	}
+
+	//----------------------------------------------------------------------
+
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
 	/// @return State active status
@@ -302,26 +315,26 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)			const noexcept	{ return _core.registry.isPendingChange(stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange (const StateID stateId)		const noexcept	{ return _core.registry.isPendingChange(stateId);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState Destination state type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingChange()								const noexcept	{ return isPendingChange(stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange ()								const noexcept	{ return isPendingChange(stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be activated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)			const noexcept	{ return _core.registry.isPendingEnter (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter	 (const StateID stateId)			const noexcept	{ return _core.registry.isPendingEnter (stateId);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState Destination state type
 	/// @return State pending activation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter ()								const noexcept	{ return isPendingEnter (stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter	 ()								const noexcept	{ return isPendingEnter (stateId<TState>());		}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -334,7 +347,7 @@ public:
 	/// @tparam TState Destination state type
 	/// @return State pending deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()								const noexcept	{ return isPendingExit  (stateId<TState>());		}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	 ()								const noexcept	{ return isPendingExit  (stateId<TState>());		}
 
 	//------------------------------------------------------------------------------
 

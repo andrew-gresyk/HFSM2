@@ -324,6 +324,12 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
 			});
 
+			REQUIRE(machine.activeSubState<A  >() == 0);
+			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_SHORT);
+
 			assertActive(machine, all, {
 				FSM::stateId<A    >(),
 				FSM::stateId<A_1  >(),
@@ -379,6 +385,12 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<A_2  >(), Event::Type::ENTER },
 				{ FSM::stateId<A_2_1>(), Event::Type::ENTER },
 			});
+
+			REQUIRE(machine.activeSubState<A  >() == 1);
+			REQUIRE(machine.activeSubState<A_2>() == 0);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_SHORT);
 
 			assertActive(machine, all, {
 				FSM::stateId<A    >(),
@@ -467,6 +479,12 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<B_2  >(), Event::Type::ENTER },
 				{ FSM::stateId<B_2_2>(), Event::Type::ENTER },
 			});
+
+			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_1>() == 0);
+			REQUIRE(machine.activeSubState<B_2>() == 1);
 
 			assertActive(machine, all, {
 				FSM::stateId<B    >(),
@@ -578,6 +596,12 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<A_2_1>(), Event::Type::ENTER },
 			});
 
+			REQUIRE(machine.activeSubState<A  >() == 1);
+			REQUIRE(machine.activeSubState<A_2>() == 0);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_SHORT);
+
 			assertActive(machine, all, {
 				FSM::stateId<A    >(),
 				FSM::stateId<A_2  >(),
@@ -639,6 +663,12 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<B_2  >(), Event::Type::ENTER },
 				{ FSM::stateId<B_2_2>(), Event::Type::ENTER },
 			});
+
+			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_1>() == 0);
+			REQUIRE(machine.activeSubState<B_2>() == 1);
 
 			assertActive(machine, all, {
 				FSM::stateId<B    >(),
@@ -706,6 +736,12 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<B_2_2>(), Event::Type::REENTER },
 			});
 
+			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_1>() == 0);
+			REQUIRE(machine.activeSubState<B_2>() == 1);
+
 			assertActive(machine, all, {
 				FSM::stateId<B    >(),
 				FSM::stateId<B_1  >(),
@@ -770,6 +806,12 @@ TEST_CASE("FSM.Internal Payloads") {
 				{ FSM::stateId<A_2  >(), Event::Type::ENTER },
 				{ FSM::stateId<A_2_2>(), Event::Type::ENTER },
 			});
+
+			REQUIRE(machine.activeSubState<A  >() == 1);
+			REQUIRE(machine.activeSubState<A_2>() == 1);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_SHORT);
 
 			assertActive(machine, all, {
 				FSM::stateId<A    >(),
