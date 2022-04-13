@@ -129,6 +129,8 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept;
+
 	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
 	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)		const noexcept;
 	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)		const noexcept;
@@ -208,6 +210,8 @@ struct RegistryT<ArgsT<TContext
 #endif
 
 	using BackUp		= BackUpT<RegistryT>;
+
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept;
 
 	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
 	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)		const noexcept;
