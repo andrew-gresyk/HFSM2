@@ -3,8 +3,6 @@
 
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #define HFSM2_DISABLE_TYPEINDEX
-#include <hfsm2/machine.hpp>
-
 #include "tools.hpp"
 
 namespace test_ancestors {
@@ -15,8 +13,8 @@ struct Event {
 	enum class Type {
 		ENTRY_GUARD,
 
-		PRE_ENTER,
-		PRE_REENTER,
+		ENTER,
+		REENTER,
 
 		PRE_UPDATE,
 		UPDATE,
@@ -25,9 +23,6 @@ struct Event {
 		PRE_REACT,
 		REACT,
 		POST_REACT,
-
-		PRE_REVERSE_REACT,
-		POST_REVERSE_REACT,
 
 		EXIT_GUARD,
 
@@ -42,7 +37,7 @@ struct Event {
 		, type{type_}
 	{}
 
-	Event(const Type type_) noexcept
+	Event(const Type type_ = Type::COUNT) noexcept
 		: type{type_}
 	{}
 
@@ -106,33 +101,33 @@ template <typename T>
 struct AncestorT
 	: FSM::State
 {
-	void entryGuard		  (GuardControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::ENTRY_GUARD);	}
+	void entryGuard		  (GuardControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::ENTRY_GUARD);	REQUIRE(control.stateId() == control.stateId<T>());	}
 
-	void enter			  ( PlanControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::PRE_ENTER);		}
-	void reenter		  ( PlanControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::PRE_REENTER);	}
+	void enter			  ( PlanControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::ENTER);		REQUIRE(control.stateId() == control.stateId<T>());	}
+	void reenter		  ( PlanControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::REENTER);		REQUIRE(control.stateId() == control.stateId<T>());	}
 
-	void preUpdate		  ( FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::PRE_UPDATE);		}
-	void update			  ( FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::UPDATE);			}
-	void postUpdate		  ( FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::POST_UPDATE);	}
+	void preUpdate		  ( FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::PRE_UPDATE);	REQUIRE(control.stateId() == control.stateId<T>());	}
+	void update			  ( FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::UPDATE);		REQUIRE(control.stateId() == control.stateId<T>());	}
+	void postUpdate		  ( FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::POST_UPDATE);	REQUIRE(control.stateId() == control.stateId<T>());	}
 
 	void preReact		  (const Event&,
-							FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::PRE_REACT);		}
+							FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::PRE_REACT);	REQUIRE(control.stateId() == control.stateId<T>());	}
 
 	void react			  (const Event&,
-							FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::REACT);			}
+							FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::REACT);		REQUIRE(control.stateId() == control.stateId<T>());	}
 
 	void postReact		  (const Event&,
-							FullControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::POST_REACT);		}
+							FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::POST_REACT);	REQUIRE(control.stateId() == control.stateId<T>());	}
 
-	void exitGuard		  (GuardControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::EXIT_GUARD);		}
+	void exitGuard		  (GuardControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::EXIT_GUARD);	REQUIRE(control.stateId() == control.stateId<T>());	}
 
-	void exit			  ( PlanControl& control)	{ control._().emplace_back(FSM::stateId<T>(), Event::Type::EXIT);			}
+	void exit			  ( PlanControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::EXIT);		REQUIRE(control.stateId() == control.stateId<T>());	}
 };
 
 //------------------------------------------------------------------------------
 
 struct R
-	: FSM::StateT<AncestorT<R>>
+	: FSM::AncestorsT<AncestorT<R>>
 {
 	void entryGuard(GuardControl& control) {
 		control.changeTo<B>();
@@ -142,13 +137,13 @@ struct R
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct A
-	: FSM::StateT<AncestorT<A>>
+	: FSM::AncestorsT<AncestorT<A>>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B
-	: FSM::StateT<AncestorT<B>>
+	: FSM::AncestorsT<AncestorT<B>>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -175,8 +170,8 @@ TEST_CASE("FSM.Ancestors") {
 			{ FSM::stateId<A>(), Event::Type::ENTRY_GUARD },
 			{ FSM::stateId<R>(), Event::Type::ENTRY_GUARD },
 			{ FSM::stateId<B>(), Event::Type::ENTRY_GUARD },
-			{ FSM::stateId<R>(), Event::Type::PRE_ENTER },
-			{ FSM::stateId<B>(), Event::Type::PRE_ENTER },
+			{ FSM::stateId<R>(), Event::Type::ENTER },
+			{ FSM::stateId<B>(), Event::Type::ENTER },
 		});
 
 		assertActive(machine, all, {
@@ -195,7 +190,7 @@ TEST_CASE("FSM.Ancestors") {
 			{ FSM::stateId<R>(), Event::Type::POST_UPDATE },
 		});
 
-		machine.react(Event::Type::COUNT);
+		machine.react(Event{});
 		assertSequence(events, {
 			{ FSM::stateId<R>(), Event::Type::PRE_REACT },
 			{ FSM::stateId<B>(), Event::Type::PRE_REACT },
@@ -210,6 +205,8 @@ TEST_CASE("FSM.Ancestors") {
 			{ FSM::stateId<B>(), Event::Type::EXIT },
 			{ FSM::stateId<R>(), Event::Type::EXIT },
 		});
+
+		REQUIRE(machine.isActive() == false);
 	}
 
 	assertSequence(events, {});

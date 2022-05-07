@@ -14,7 +14,10 @@ using Config = hfsm2::Config
 
 using M = hfsm2::MachineT<Config>;
 
-using Action = bool;
+struct RegionStateIndex {
+	hfsm2::StateID stateId;
+	hfsm2::Short stateIndex;
+};
 
 using Logger = LoggerT<Config>;
 
@@ -96,6 +99,13 @@ public:
 		++_totalUpdateCount;
 	}
 
+	void react(const RegionStateIndex& event,
+			   FullControl& control)
+	{
+		if (control.stateId() == event.stateId)
+			REQUIRE(control.activeSubState() == event.stateIndex);
+	}
+
 	unsigned entryCount() const					{ return _entryCount;			}
 	unsigned currentUpdateCount() const			{ return _currentUpdateCount;	}
 	unsigned totalUpdateCount() const			{ return _totalUpdateCount;		}
@@ -114,7 +124,7 @@ struct A
 	//void entryGuard(GuardControl&)											{}
 	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	//void react(const Action&, FullControl&)									{}
+	//void react(const RegionStateIndex&, FullControl&)							{}
 	void exit(PlanControl&)														{}
 };
 
@@ -135,7 +145,7 @@ struct A_1
 //------------------------------------------------------------------------------
 
 struct A_2
-	: FSM::StateT<Tracked>
+	: FSM::AncestorsT<Tracked>
 {
 	void enter(PlanControl&)													{}
 
@@ -161,7 +171,7 @@ struct A_2_1
 {
 	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void react(const Action&, FullControl&)										{}
+	void react(const RegionStateIndex&, FullControl&)							{}
 	void exit(PlanControl&)														{}
 };
 
@@ -170,7 +180,7 @@ struct A_2_2
 {
 	void enter(PlanControl&)													{}
 	//void update(FullControl&)													{}
-	//void react(const Action&, FullControl&)									{}
+	//void react(const RegionStateIndex&, FullControl&)							{}
 	void exit(PlanControl&)														{}
 };
 
@@ -181,7 +191,7 @@ struct B
 {
 	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void react(const Action&, FullControl&)										{}
+	void react(const RegionStateIndex&, FullControl&)							{}
 	void exit(PlanControl&)														{}
 };
 
@@ -258,7 +268,7 @@ struct B_2_1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_2
-	: FSM::StateT<Tracked>
+	: FSM::AncestorsT<Tracked>
 {
 	void enter(PlanControl&)													{}
 
@@ -344,7 +354,7 @@ TEST_CASE("FSM.Internal Payloads") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.react(Action{});
+		machine.react(RegionStateIndex{machine.stateId<A_2>(), hfsm2::INVALID_SHORT});
 		{
 			logger.assertSequence({
 				{ FSM::stateId<A    >(), Event::Type::PRE_REACT },
@@ -420,7 +430,7 @@ TEST_CASE("FSM.Internal Payloads") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.react(Action{});
+		machine.react(RegionStateIndex{machine.stateId<A_2>(), 0});
 		{
 			logger.assertSequence({
 				{ FSM::stateId<A    >(), Event::Type::PRE_REACT },
@@ -524,7 +534,7 @@ TEST_CASE("FSM.Internal Payloads") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.react(Action{});
+		machine.react(RegionStateIndex{machine.stateId<A_2>(), hfsm2::INVALID_SHORT});
 		{
 			logger.assertSequence({
 				{ FSM::stateId<B    >(), Event::Type::PRE_REACT },

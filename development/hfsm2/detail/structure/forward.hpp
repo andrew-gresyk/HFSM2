@@ -393,7 +393,7 @@ struct RF_ final {
 	using State			= EmptyT<Args>;
 
 	template <typename... TInjections>
-	using StateT		= A_<TInjections...>;
+	using AncestorsT	= A_<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

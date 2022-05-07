@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.1.0 (2022-04-13)
+// 2.1.1 (2022-05-07)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 0
-#define HFSM2_VERSION_PATCH 0
+#define HFSM2_VERSION_MINOR 1
+#define HFSM2_VERSION_PATCH 1
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -5558,7 +5558,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long N
 HFSM2_CONSTEXPR(14)
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::isActive(const StateID stateId) const noexcept {
-	if (HFSM2_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -5569,7 +5569,10 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 				return parent.prong == compoActive[parent.forkId - 1];
 		}
 
-	return true;
+		return true;
+	}
+
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5610,7 +5613,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 					   compoActive	 [parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5631,7 +5634,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 					   parent.prong == compoRequested[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -5652,7 +5655,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 					   parent.prong != compoRequested[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 //------------------------------------------------------------------------------
@@ -6193,9 +6196,6 @@ protected:
 		: _core{core}
 	{}
 
-	HFSM2_CONSTEXPR(14)	void setOrigin  (const StateID	 stateId)			  noexcept;
-	HFSM2_CONSTEXPR(14)	void resetOrigin(const StateID	 stateId)			  noexcept;
-
 	HFSM2_CONSTEXPR(14)	void setRegion	(const RegionID regionId)			  noexcept;
 	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId)			  noexcept;
 
@@ -6205,6 +6205,10 @@ protected:
 #endif
 
 public:
+
+	/// @brief Get current state's identifier
+	/// @return Numeric state identifier
+	constexpr StateID stateId()											const noexcept	{ return _originId;									}
 
 	/// @brief Get state identifier for a state type
 	/// @tparam TState State type
@@ -6245,6 +6249,10 @@ public:
 	HFSM2_CONSTEXPR(11)	const TransitionSet& requests()					const noexcept	{ return _core.requests;							}
 
 	//----------------------------------------------------------------------
+
+	/// @brief Get active sub-state's index for the current region
+	/// @return Region's active sub-state index
+	HFSM2_CONSTEXPR(14)	Short activeSubState()							const noexcept	{ return _core.registry.activeSubState(_originId		);	}
 
 	/// @brief Get region's active sub-state's index
 	/// @param stateId Region's head state ID
@@ -7219,7 +7227,8 @@ ControlT<TArgs>::Origin::Origin(ControlT& control_,
 	: control{control_}
 	, prevId{control._originId}
 {
-	control.setOrigin(stateId);
+	HFSM2_ASSERT(stateId < StateList::SIZE);
+	control._originId = stateId;
 }
 
 //------------------------------------------------------------------------------
@@ -7227,7 +7236,7 @@ ControlT<TArgs>::Origin::Origin(ControlT& control_,
 template <typename TArgs>
 HFSM2_CONSTEXPR(20)
 ControlT<TArgs>::Origin::~Origin() noexcept {
-	control.resetOrigin(prevId);
+	control._originId = prevId;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -7251,26 +7260,6 @@ ControlT<TArgs>::Region::~Region() noexcept {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-ControlT<TArgs>::setOrigin(const StateID stateId) noexcept {
-	HFSM2_ASSERT(stateId < StateList::SIZE);
-
-	_originId = stateId;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-ControlT<TArgs>::resetOrigin(const StateID stateId) noexcept { //-V524
-	_originId = stateId;
-}
-
-//------------------------------------------------------------------------------
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
@@ -9574,7 +9563,7 @@ struct RF_ final {
 	using State			= EmptyT<Args>;
 
 	template <typename... TInjections>
-	using StateT		= A_<TInjections...>;
+	using AncestorsT	= A_<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -15320,6 +15309,12 @@ protected:
 public:
 	using Base::Base;
 
+	/// @brief Check if FSM is active
+	/// @return FSM active status
+	HFSM2_CONSTEXPR(11)	bool isActive()												const noexcept	{ return _core.registry.isActive();	}
+
+	using Base::isActive;
+
 	/// @brief Manually start the FSM
 	///  Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_CONSTEXPR(14)	void enter()													  noexcept	{ initialEnter();	}
@@ -15353,15 +15348,16 @@ public:
 
 #endif
 
-private:
+protected:
 	using Base::initialEnter;
 	using Base::finalExit;
+
+	using Base::_core;
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using Base::applyRequests;
 	HFSM2_IF_STRUCTURE_REPORT(using Base::udpateActivity);
 
-	using Base::_core;
 	using Base::_apex;
 #endif
 };

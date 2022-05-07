@@ -79,9 +79,6 @@ protected:
 		: _core{core}
 	{}
 
-	HFSM2_CONSTEXPR(14)	void setOrigin  (const StateID	 stateId)			  noexcept;
-	HFSM2_CONSTEXPR(14)	void resetOrigin(const StateID	 stateId)			  noexcept;
-
 	HFSM2_CONSTEXPR(14)	void setRegion	(const RegionID regionId)			  noexcept;
 	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId)			  noexcept;
 
@@ -91,6 +88,10 @@ protected:
 #endif
 
 public:
+
+	/// @brief Get current state's identifier
+	/// @return Numeric state identifier
+	constexpr StateID stateId()											const noexcept	{ return _originId;									}
 
 	/// @brief Get state identifier for a state type
 	/// @tparam TState State type
@@ -131,6 +132,10 @@ public:
 	HFSM2_CONSTEXPR(11)	const TransitionSet& requests()					const noexcept	{ return _core.requests;							}
 
 	//----------------------------------------------------------------------
+
+	/// @brief Get active sub-state's index for the current region
+	/// @return Region's active sub-state index
+	HFSM2_CONSTEXPR(14)	Short activeSubState()							const noexcept	{ return _core.registry.activeSubState(_originId		);	}
 
 	/// @brief Get region's active sub-state's index
 	/// @param stateId Region's head state ID

@@ -10,7 +10,8 @@ ControlT<TArgs>::Origin::Origin(ControlT& control_,
 	: control{control_}
 	, prevId{control._originId}
 {
-	control.setOrigin(stateId);
+	HFSM2_ASSERT(stateId < StateList::SIZE);
+	control._originId = stateId;
 }
 
 //------------------------------------------------------------------------------
@@ -18,7 +19,7 @@ ControlT<TArgs>::Origin::Origin(ControlT& control_,
 template <typename TArgs>
 HFSM2_CONSTEXPR(20)
 ControlT<TArgs>::Origin::~Origin() noexcept {
-	control.resetOrigin(prevId);
+	control._originId = prevId;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,26 +43,6 @@ ControlT<TArgs>::Region::~Region() noexcept {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-ControlT<TArgs>::setOrigin(const StateID stateId) noexcept {
-	HFSM2_ASSERT(stateId < StateList::SIZE);
-
-	_originId = stateId;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-ControlT<TArgs>::resetOrigin(const StateID stateId) noexcept { //-V524
-	_originId = stateId;
-}
-
-//------------------------------------------------------------------------------
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)

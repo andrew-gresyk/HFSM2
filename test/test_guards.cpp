@@ -92,7 +92,7 @@ struct Apex : FSM::State {};
 //------------------------------------------------------------------------------
 
 struct Step1
-	: FSM::StateT<ExitGuardTracked>
+	: FSM::AncestorsT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
 		REQUIRE(control.currentTransitions().count() == 0);
@@ -129,7 +129,7 @@ struct Step1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Step1_1
-	: FSM::StateT<ExitGuardTracked>
+	: FSM::AncestorsT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
 		REQUIRE(control.currentTransitions().count() == 0);
@@ -165,7 +165,7 @@ struct Step1_1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Step1_2
-	: FSM::StateT<ExitGuardTracked>
+	: FSM::AncestorsT<ExitGuardTracked>
 {
 	void exitGuard(GuardControl& control) {
 		REQUIRE(control.currentTransitions().count() == 0);
@@ -201,7 +201,7 @@ struct Step1_2
 //------------------------------------------------------------------------------
 
 struct Step2
-	: FSM::StateT<EntryGuardTracked>
+	: FSM::AncestorsT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
 		REQUIRE(control.currentTransitions().count() == 0);
@@ -219,7 +219,7 @@ struct Step2
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Step2_1
-	: FSM::StateT<EntryGuardTracked>
+	: FSM::AncestorsT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
 		REQUIRE(control.currentTransitions().count() == 0);
@@ -237,7 +237,7 @@ struct Step2_1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct Step2_2
-	: FSM::StateT<EntryGuardTracked>
+	: FSM::AncestorsT<EntryGuardTracked>
 {
 	void entryGuard(GuardControl& control) {
 		REQUIRE(control.currentTransitions().count() == 0);

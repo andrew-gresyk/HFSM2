@@ -596,6 +596,12 @@ protected:
 public:
 	using Base::Base;
 
+	/// @brief Check if FSM is active
+	/// @return FSM active status
+	HFSM2_CONSTEXPR(11)	bool isActive()												const noexcept	{ return _core.registry.isActive();	}
+
+	using Base::isActive;
+
 	/// @brief Manually start the FSM
 	///  Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_CONSTEXPR(14)	void enter()													  noexcept	{ initialEnter();	}
@@ -629,15 +635,16 @@ public:
 
 #endif
 
-private:
+protected:
 	using Base::initialEnter;
 	using Base::finalExit;
+
+	using Base::_core;
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using Base::applyRequests;
 	HFSM2_IF_STRUCTURE_REPORT(using Base::udpateActivity);
 
-	using Base::_core;
 	using Base::_apex;
 #endif
 };

@@ -38,7 +38,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long N
 HFSM2_CONSTEXPR(14)
 bool
 RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::isActive(const StateID stateId) const noexcept {
-	if (HFSM2_CHECKED(stateId < STATE_COUNT))
+	if (HFSM2_CHECKED(stateId < STATE_COUNT)) {
 		for (Parent parent = stateParents[stateId];
 			 parent;
 			 parent = forkParent(parent.forkId))
@@ -49,7 +49,10 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 				return parent.prong == compoActive[parent.forkId - 1];
 		}
 
-	return true;
+		return true;
+	}
+
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -90,7 +93,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 					   compoActive	 [parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -111,7 +114,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 					   parent.prong == compoRequested[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -132,7 +135,7 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 					   parent.prong != compoRequested[parent.forkId - 1];
 		}
 
-	return true;
+	return false;
 }
 
 //------------------------------------------------------------------------------

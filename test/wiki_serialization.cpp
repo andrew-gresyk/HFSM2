@@ -2,7 +2,6 @@
 // Created by Andrew Gresyk
 
 #define HFSM2_ENABLE_SERIALIZATION
-
 #include <hfsm2/machine.hpp>
 
 #include <doctest/doctest.h>
