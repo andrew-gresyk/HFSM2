@@ -1,4 +1,4 @@
-﻿// HFSM2 (hierarchical state machine for games and interactive applications)
+// HFSM2 (hierarchical state machine for games and interactive applications)
 // 2.1.1 (2022-05-07)
 //
 // Created by Andrew Gresyk
@@ -616,8 +616,8 @@ T0
 min(const T0 t0,
 	const T1 t1)									  noexcept
 {
-	return t0 < (T0) t1 ?
-		   t0 : (T0) t1;
+	return t0 < static_cast<T0>(t1) ?
+		   t0 : static_cast<T0>(t1);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -629,8 +629,8 @@ T0
 max(const T0 t0,
 	const T1 t1)									  noexcept
 {
-	return t0 > (T0) t1 ?
-		   t0 : (T0) t1;
+	return t0 > static_cast<T0>(t1) ?
+		   t0 : static_cast<T0>(t1);
 }
 
 //------------------------------------------------------------------------------
@@ -651,20 +651,20 @@ template <typename T,
 HFSM2_CONSTEXPR(11)
 T
 contain(const T x,
-		const TT to)								  noexcept	{ return (x + (T) to - 1) / (T) to;		}
+		const TT to)								  noexcept	{ return (x + static_cast<T>(to) - 1) / static_cast<T>(to);		}
 
 //------------------------------------------------------------------------------
 
 HFSM2_CONSTEXPR(11)
 uint64_t
-widen(const uint32_t x, const uint32_t y)			  noexcept	{ return (uint64_t) x << 32 | y;		}
+widen(const uint32_t x, const uint32_t y)			  noexcept	{ return static_cast<uint64_t>(x) << 32 | y;		}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 HFSM2_CONSTEXPR(14)
 void
-fill(T& a, const char value)						  noexcept { memset(&a, (int) value, sizeof(a));	}
+fill(T& a, const char value)						  noexcept { memset(&a, static_cast<int>(value), sizeof(a));	}
 
 //------------------------------------------------------------------------------
 
@@ -2517,7 +2517,7 @@ T&
 StaticArrayT<T, NC>::operator[] (const N index) noexcept	{
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
-	return _items[(Index) index];
+	return _items[static_cast<Index>(index)];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2529,7 +2529,7 @@ const T&
 StaticArrayT<T, NC>::operator[] (const N index) const noexcept	{
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
-	return _items[(Index) index];
+	return _items[static_cast<Index>(index)];
 }
 
 //------------------------------------------------------------------------------
@@ -2579,7 +2579,7 @@ typename ArrayT<T, NC>::Item&
 ArrayT<T, NC>::operator[] (const N index) noexcept {
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
-	return _items[(Index) index];
+	return _items[static_cast<Index>(index)];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2591,7 +2591,7 @@ const typename ArrayT<T, NC>::Item&
 ArrayT<T, NC>::operator[] (const N index) const noexcept {
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
-	return _items[(Index) index];
+	return _items[static_cast<Index>(index)];
 }
 
 //------------------------------------------------------------------------------
@@ -3004,8 +3004,8 @@ bool
 BitArrayT<NCapacity>::get(const TIndex index) const noexcept {
 	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = (Index) index / 8;
-	const Index bit  = (Index) index % 8;
+	const Index unit = static_cast<Index>(index) / 8;
+	const Index bit  = static_cast<Index>(index) % 8;
 	const uint8_t mask = 1 << bit;
 
 	return (_storage[unit] & mask) != 0;
@@ -3020,8 +3020,8 @@ void
 BitArrayT<NCapacity>::set(const TIndex index) noexcept {
 	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = (Index) index / 8;
-	const Index bit  = (Index) index % 8;
+	const Index unit = static_cast<Index>(index) / 8;
+	const Index bit  = static_cast<Index>(index) % 8;
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] |= mask;
@@ -3036,8 +3036,8 @@ void
 BitArrayT<NCapacity>::clear(const TIndex index) noexcept {
 	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = (Index) index / 8;
-	const Index bit  = (Index) index % 8;
+	const Index unit = static_cast<Index>(index) / 8;
+	const Index bit  = static_cast<Index>(index) % 8;
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] &= ~mask;
@@ -6220,7 +6220,7 @@ public:
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()									  noexcept	{ return (RegionID) index<RegionList, TState>();	}
+	static constexpr RegionID regionId()									  noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
@@ -8037,7 +8037,7 @@ public:
 	static constexpr StateID  stateId()									  noexcept	{ return index<StateList, T>();				}
 
 	template <typename T>
-	static constexpr RegionID regionId()								  noexcept	{ return (RegionID) index<RegionList, T>();	}
+	static constexpr RegionID regionId()								  noexcept	{ return static_cast<RegionID>(index<RegionList, T>());	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -9580,7 +9580,7 @@ struct RF_ final {
 	static constexpr StateID  stateId()	 noexcept	{ return index	 <StateList, T>();			}
 
 	template <typename T>
-	static constexpr RegionID regionId() noexcept	{ return (RegionID) index<RegionList, T>();	}
+	static constexpr RegionID regionId() noexcept	{ return static_cast<RegionID>(index<RegionList, T>());	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -13633,7 +13633,7 @@ struct HFSM2_EMPTY_BASES O_
 	static constexpr Short	 ORTHO_UNIT	 = Indices::ORTHO_UNIT;
 
 	static constexpr Short	 REGION_ID	 = COMPO_INDEX + ORTHO_INDEX;
-	static constexpr ForkID	 ORTHO_ID	 = (ForkID) -ORTHO_INDEX - 1;
+	static constexpr ForkID	 ORTHO_ID	 = static_cast<ForkID>(-ORTHO_INDEX - 1);
 
 	using Args			= TArgs;
 
@@ -14743,8 +14743,8 @@ protected:
 	using Args					= typename Forward::Args;
 	using PureContext			= typename Args::PureContext;
 
-	static_assert(Args::STATE_COUNT <  (unsigned) -1, "Too many states in the FSM. Change 'Short' type.");
-	static_assert(Args::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
+	static_assert(Args::STATE_COUNT <  static_cast<unsigned>(-1), "Too many states in the FSM. Change 'Short' type.");
+	static_assert(Args::STATE_COUNT == static_cast<unsigned>(StateList::SIZE), "STATE_COUNT != StateList::SIZE");
 
 	using Core					= CoreT<Args>;
 
@@ -14842,7 +14842,7 @@ public:
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()										  noexcept	{ return (RegionID) index<RegionList, TState>();	}
+	static constexpr RegionID regionId()										  noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
 
 	//----------------------------------------------------------------------
 
