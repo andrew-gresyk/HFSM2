@@ -2069,10 +2069,10 @@ struct alignas(4) TransitionT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT(const StateID destination,
-				const TransitionType type,
+	TransitionT(const StateID destination_,
+				const TransitionType type_,
 				const Payload& payload)								  noexcept
-		: TransitionBase{destination, type}
+		: TransitionBase{destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{payload};
@@ -2081,10 +2081,10 @@ struct alignas(4) TransitionT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT(const StateID destination,
-				const TransitionType type,
+	TransitionT(const StateID destination_,
+				const TransitionType type_,
 				Payload&& payload)									  noexcept
-		: TransitionBase{destination, type}
+		: TransitionBase{destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{move(payload)};
@@ -2093,11 +2093,11 @@ struct alignas(4) TransitionT final
 	//----------------------------------------------------------------------
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT(const StateID origin,
-				const StateID destination,
-				const TransitionType type,
+	TransitionT(const StateID origin_,
+				const StateID destination_,
+				const TransitionType type_,
 				const Payload& payload)								  noexcept
-		: TransitionBase{origin, destination, type}
+		: TransitionBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{payload};
@@ -2106,11 +2106,11 @@ struct alignas(4) TransitionT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT(const StateID origin,
-				const StateID destination,
-				const TransitionType type,
+	TransitionT(const StateID origin_,
+				const StateID destination_,
+				const TransitionType type_,
 				Payload&& payload)									  noexcept
-		: TransitionBase{origin, destination, type}
+		: TransitionBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{move(payload)};
