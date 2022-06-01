@@ -54,9 +54,9 @@ public:
 
 private:
 	HFSM2_CONSTEXPR(11)	CPlanT(const PlanData& planData,
-							   const RegionID regionId)			  noexcept
+							   const RegionID regionId_)		  noexcept
 		: _planData{planData}
-		, _bounds{planData.tasksBounds[regionId]}
+		, _bounds{planData.tasksBounds[regionId_]}
 	{}
 
 	template <typename TState>
@@ -137,7 +137,7 @@ public:
 
 protected:
 	HFSM2_CONSTEXPR(11)	PlanBaseT(PlanData& planData,
-								  const RegionID regionId)				  noexcept;
+								  const RegionID regionId_)				  noexcept;
 
 	template <typename TState>
 	static constexpr StateID  stateId()									  noexcept	{ return					   index<StateList , TState>() ;	}

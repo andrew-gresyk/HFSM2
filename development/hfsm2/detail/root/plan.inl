@@ -165,10 +165,10 @@ PlanBaseT<TArgs>::CIterator::next() const noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(11)
 PlanBaseT<TArgs>::PlanBaseT(PlanData& planData,
-							const RegionID regionId) noexcept
+							const RegionID regionId_) noexcept
 	: _planData{planData}
-	, _regionId{regionId}
-	, _bounds{planData.tasksBounds[regionId]}
+	, _regionId{regionId_}
+	, _bounds{planData.tasksBounds[regionId_]}
 {}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

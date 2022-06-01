@@ -27,11 +27,11 @@ ControlT<TArgs>::Origin::~Origin() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 ControlT<TArgs>::Region::Region(ControlT& control_,
-								const RegionID regionId) noexcept
+								const RegionID regionId_) noexcept
 	: control{control_}
 	, prevId{control._regionId}
 {
-	control.setRegion(regionId);
+	control.setRegion(regionId_);
 }
 
 //------------------------------------------------------------------------------
@@ -47,10 +47,10 @@ ControlT<TArgs>::Region::~Region() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-ControlT<TArgs>::setRegion(const RegionID regionId) noexcept {
-	HFSM2_ASSERT(_regionId <= regionId && regionId < RegionList::SIZE);
+ControlT<TArgs>::setRegion(const RegionID regionId_) noexcept {
+	HFSM2_ASSERT(_regionId <= regionId_ && regionId_ < RegionList::SIZE);
 
-	_regionId = regionId;
+	_regionId = regionId_;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -58,10 +58,10 @@ ControlT<TArgs>::setRegion(const RegionID regionId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-ControlT<TArgs>::resetRegion(const RegionID regionId) noexcept { //-V524
-	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
+ControlT<TArgs>::resetRegion(const RegionID regionId_) noexcept { //-V524
+	HFSM2_ASSERT(regionId_ <= _regionId && _regionId < RegionList::SIZE);
 
-	_regionId = regionId;
+	_regionId = regionId_;
 }
 
 //------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ ControlT<TArgs>::lastTransition() const noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
-									const RegionID regionId,
+									const RegionID regionId_,
 									const StateID index,
 									const Long size) noexcept
 	: control  {control_}
@@ -124,7 +124,7 @@ PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
 	, prevIndex{control._regionStateId}
 	, prevSize {control._regionSize}
 {
-	control.setRegion(regionId, index, size);
+	control.setRegion(regionId_, index, size);
 }
 
 //------------------------------------------------------------------------------
@@ -140,14 +140,14 @@ PlanControlT<TArgs>::Region::~Region() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-PlanControlT<TArgs>::setRegion(const RegionID regionId,
+PlanControlT<TArgs>::setRegion(const RegionID regionId_,
 							   const StateID index,
 							   const Long size) noexcept
 {
-	HFSM2_ASSERT(_regionId <= regionId && regionId <  RegionList::SIZE);
+	HFSM2_ASSERT(_regionId <= regionId_ && regionId_ <  RegionList::SIZE);
 	HFSM2_ASSERT(_regionStateId <= index && index + size <= _regionStateId + _regionSize);
 
-	_regionId	   = regionId;
+	_regionId	   = regionId_;
 	_regionStateId = index;
 	_regionSize	   = size;
 }
@@ -157,14 +157,14 @@ PlanControlT<TArgs>::setRegion(const RegionID regionId,
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
+PlanControlT<TArgs>::resetRegion(const RegionID regionId_, //-V524
 								 const StateID index,
 								 const Long size) noexcept
 {
-	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
+	HFSM2_ASSERT(regionId_ <= _regionId && _regionId < RegionList::SIZE);
 	HFSM2_ASSERT(index <= _regionStateId && _regionStateId + _regionSize <= index + size);
 
-	_regionId	   = regionId;
+	_regionId	   = regionId_;
 	_regionStateId = index;
 	_regionSize	   = size;
 

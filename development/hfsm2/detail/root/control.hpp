@@ -65,7 +65,7 @@ protected:
 
 	struct Region {
 		HFSM2_CONSTEXPR(14)	Region(ControlT& control,
-								   const RegionID regionId)					  noexcept;
+								   const RegionID regionId_)				  noexcept;
 
 		HFSM2_CONSTEXPR(20)	~Region()										  noexcept;
 
@@ -79,8 +79,8 @@ protected:
 		: _core{core}
 	{}
 
-	HFSM2_CONSTEXPR(14)	void setRegion	(const RegionID regionId)			  noexcept;
-	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void setRegion	(const RegionID regionId_)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId_)			  noexcept;
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void pinLastTransition(const StateID stateId_,
@@ -140,7 +140,7 @@ public:
 	/// @brief Get region's active sub-state's index
 	/// @param stateId Region's head state ID
 	/// @return Region's active sub-state index
-	HFSM2_CONSTEXPR(14)	Short activeSubState(const StateID stateId_)		const noexcept	{ return _core.registry.activeSubState(stateId_			);	}
+	HFSM2_CONSTEXPR(14)	Short activeSubState(const StateID stateId_)	const noexcept	{ return _core.registry.activeSubState(stateId_			);	}
 
 	/// @brief Get region's active sub-state's index
 	/// @tparam TState Region's head state type
@@ -153,7 +153,7 @@ public:
 	/// @brief Check if a state is active
 	/// @param stateId State identifier
 	/// @return State active status
-	HFSM2_CONSTEXPR(11)	bool isActive   (const StateID stateId_)			const noexcept	{ return _core.registry.isActive   (stateId_);		}
+	HFSM2_CONSTEXPR(11)	bool isActive   (const StateID stateId_)		const noexcept	{ return _core.registry.isActive   (stateId_);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState State type
@@ -166,7 +166,7 @@ public:
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId State identifier
 	/// @return State resumable status
-	HFSM2_CONSTEXPR(11)	bool isResumable(const StateID stateId_)			const noexcept	{ return _core.registry.isResumable(stateId_);		}
+	HFSM2_CONSTEXPR(11)	bool isResumable(const StateID stateId_)		const noexcept	{ return _core.registry.isResumable(stateId_);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState State type
@@ -179,7 +179,7 @@ public:
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId State identifier
 	/// @return State scheduled status
-	HFSM2_CONSTEXPR(11)	bool isScheduled(const StateID stateId_)			const noexcept	{ return isResumable(stateId_);						}
+	HFSM2_CONSTEXPR(11)	bool isScheduled(const StateID stateId_)		const noexcept	{ return isResumable(stateId_);						}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState State type
@@ -198,7 +198,7 @@ public:
 	/// @brief Access read-only plan for a region
 	/// @param regionId Region identifier
 	/// @return Read-only plan for the region
-	HFSM2_CONSTEXPR(14)	CPlan plan(const RegionID regionId)				const noexcept	{ return CPlan{_core.planData, regionId};				}
+	HFSM2_CONSTEXPR(14)	CPlan plan(const RegionID regionId_)			const noexcept	{ return CPlan{_core.planData, regionId_};				}
 
 	/// @brief Access read-only plan for a region
 	/// @tparam TRegion Region head state type
@@ -287,7 +287,7 @@ protected:
 
 	struct Region {
 		HFSM2_CONSTEXPR(14)	Region(PlanControlT& control,
-								   const RegionID regionId,
+								   const RegionID regionId_,
 								   const StateID index,
 								   const Long size)				  noexcept;
 
@@ -303,11 +303,11 @@ protected:
 
 	using Control::Control;
 
-	HFSM2_CONSTEXPR(14)	void   setRegion(const RegionID regionId,
+	HFSM2_CONSTEXPR(14)	void   setRegion(const RegionID regionId_,
 										 const StateID index,
 										 const Long size)		  noexcept;
 
-	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId,
+	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId_,
 										 const StateID index,
 										 const Long size)		  noexcept;
 
@@ -325,7 +325,7 @@ public:
 	/// @brief Access plan for a region
 	/// @param regionId
 	/// @return Plan for the region
-	HFSM2_CONSTEXPR(14)	  Plan plan(const RegionID regionId)	  noexcept	{ return  Plan{_core.planData,  regionId};								}
+	HFSM2_CONSTEXPR(14)	  Plan plan(const RegionID regionId_)	  noexcept	{ return  Plan{_core.planData,  regionId_};								}
 
 	/// @brief Access plan for a region
 	/// @tparam TRegion Region head state type
@@ -344,7 +344,7 @@ public:
 	/// @brief Access plan for a region
 	/// @param regionId
 	/// @return Plan for the region
-	HFSM2_CONSTEXPR(11)	CPlan plan(const RegionID regionId)	const noexcept	{ return CPlan{_core.planData,  regionId};								}
+	HFSM2_CONSTEXPR(11)	CPlan plan(const RegionID regionId_)	const noexcept	{ return CPlan{_core.planData,  regionId_};								}
 
 	/// @brief Access plan for a region
 	/// @tparam TRegion Region head state type
