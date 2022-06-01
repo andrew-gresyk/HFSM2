@@ -163,7 +163,7 @@ public:
 	/// @brief Get region's active sub-state's index
 	/// @param stateId Region's head state ID
 	/// @return Region's active sub-state index
-	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept	{ return _core.registry.activeSubState(stateId			);	}
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId_)		const noexcept	{ return _core.registry.activeSubState(stateId_			);	}
 
 	/// @brief Get region's active sub-state's index
 	/// @tparam TState Region's head state type
@@ -176,7 +176,7 @@ public:
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
 	/// @return State active status
-	HFSM2_CONSTEXPR(11)	bool isActive		 (const StateID stateId)		const noexcept	{ return _core.registry.isActive   (stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isActive		 (const StateID stateId_)		const noexcept	{ return _core.registry.isActive   (stateId_);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState Destination state type
@@ -189,7 +189,7 @@ public:
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId Destination state identifier
 	/// @return State resumable status
-	HFSM2_CONSTEXPR(11)	bool isResumable	 (const StateID stateId)		const noexcept	{ return _core.registry.isResumable(stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isResumable	 (const StateID stateId_)		const noexcept	{ return _core.registry.isResumable(stateId_);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState Destination state type
@@ -202,7 +202,7 @@ public:
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId Destination state identifier
 	/// @return State scheduled status
-	HFSM2_CONSTEXPR(11)	bool isScheduled	 (const StateID stateId)		const noexcept	{ return isResumable(stateId);					}
+	HFSM2_CONSTEXPR(11)	bool isScheduled	 (const StateID stateId_)		const noexcept	{ return isResumable(stateId_);					}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState Destination state type
@@ -216,7 +216,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void changeTo		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void changeTo		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
@@ -229,7 +229,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void restart		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void restart		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
@@ -241,7 +241,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void resume			 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void resume			 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
@@ -253,7 +253,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void select			 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void select			 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
@@ -270,7 +270,7 @@ public:
 	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilize		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void utilize		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state with the highest 'utility()'
@@ -287,7 +287,7 @@ public:
 	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomize		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void randomize		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
@@ -303,7 +303,7 @@ public:
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void schedule		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void schedule		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
@@ -315,7 +315,7 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange (const StateID stateId)		const noexcept	{ return _core.registry.isPendingChange(stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange (const StateID stateId_)		const noexcept	{ return _core.registry.isPendingChange(stateId_);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState Destination state type
@@ -328,7 +328,7 @@ public:
 	/// @brief Check if a state is going to be activated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter	 (const StateID stateId)			const noexcept	{ return _core.registry.isPendingEnter (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter	 (const StateID stateId_)		const noexcept	{ return _core.registry.isPendingEnter (stateId_);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState Destination state type
@@ -341,7 +341,7 @@ public:
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingExit	 (const StateID stateId)		const noexcept	{ return _core.registry.isPendingExit  (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	 (const StateID stateId_)		const noexcept	{ return _core.registry.isPendingExit  (stateId_);	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState Destination state type
@@ -413,7 +413,7 @@ public:
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	HFSM2_CONSTEXPR(14)	const Transition* lastTransitionTo(const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	const Transition* lastTransitionTo(const StateID stateId_)		const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
@@ -707,13 +707,13 @@ public:
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
@@ -734,13 +734,13 @@ public:
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
@@ -761,14 +761,14 @@ public:
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -791,14 +791,14 @@ public:
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -825,7 +825,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -834,7 +834,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -863,7 +863,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -872,7 +872,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -900,13 +900,13 @@ public:
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated

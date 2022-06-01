@@ -5494,7 +5494,7 @@ protected:
 
 	struct Origin final {
 		HFSM2_CONSTEXPR(14)	Origin(ControlT& control_,
-								   const StateID stateId)					  noexcept;
+								   const StateID stateId_)					  noexcept;
 
 		HFSM2_CONSTEXPR(20)	~Origin()										  noexcept;
 
@@ -5520,7 +5520,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	void resetRegion(const RegionID regionId)			  noexcept;
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void pinLastTransition(const StateID stateId,
+	HFSM2_CONSTEXPR(14)	void pinLastTransition(const StateID stateId_,
 											   const Short index)			  noexcept;
 #endif
 
@@ -5573,7 +5573,7 @@ public:
 	/// @brief Get region's active sub-state's index
 	/// @param stateId Region's head state ID
 	/// @return Region's active sub-state index
-	HFSM2_CONSTEXPR(14)	Short activeSubState(const StateID stateId)		const noexcept	{ return _core.registry.activeSubState(stateId			);	}
+	HFSM2_CONSTEXPR(14)	Short activeSubState(const StateID stateId_)		const noexcept	{ return _core.registry.activeSubState(stateId_			);	}
 
 	/// @brief Get region's active sub-state's index
 	/// @tparam TState Region's head state type
@@ -5584,7 +5584,7 @@ public:
 	/// @brief Check if a state is active
 	/// @param stateId State identifier
 	/// @return State active status
-	HFSM2_CONSTEXPR(11)	bool isActive   (const StateID stateId)			const noexcept	{ return _core.registry.isActive   (stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isActive   (const StateID stateId_)			const noexcept	{ return _core.registry.isActive   (stateId_);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState State type
@@ -5595,7 +5595,7 @@ public:
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId State identifier
 	/// @return State resumable status
-	HFSM2_CONSTEXPR(11)	bool isResumable(const StateID stateId)			const noexcept	{ return _core.registry.isResumable(stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isResumable(const StateID stateId_)			const noexcept	{ return _core.registry.isResumable(stateId_);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState State type
@@ -5606,7 +5606,7 @@ public:
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId State identifier
 	/// @return State scheduled status
-	HFSM2_CONSTEXPR(11)	bool isScheduled(const StateID stateId)			const noexcept	{ return isResumable(stateId);						}
+	HFSM2_CONSTEXPR(11)	bool isScheduled(const StateID stateId_)			const noexcept	{ return isResumable(stateId_);						}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState State type
@@ -5648,7 +5648,7 @@ public:
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	HFSM2_CONSTEXPR(14)	const Transition* lastTransitionTo(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	const Transition* lastTransitionTo(const StateID stateId_)	const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
@@ -5819,7 +5819,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId State identifier
-	HFSM2_CONSTEXPR(14)	void changeTo (const StateID stateId)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void changeTo (const StateID stateId_)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, acts depending on the region type)
@@ -5830,7 +5830,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId State identifier
-	HFSM2_CONSTEXPR(14)	void restart  (const StateID stateId)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void restart  (const StateID stateId_)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the initial state)
@@ -5841,7 +5841,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId State identifier
-	HFSM2_CONSTEXPR(14)	void resume   (const StateID stateId)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void resume   (const StateID stateId_)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state that was active previously)
@@ -5852,7 +5852,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId State identifier
-	HFSM2_CONSTEXPR(14)	void select   (const StateID stateId)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void select   (const StateID stateId_)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
@@ -5867,7 +5867,7 @@ public:
 	///   among those with the highest 'rank()')
 	/// @param stateId State identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilize  (const StateID stateId)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void utilize  (const StateID stateId_)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state with the highest 'utility()'
@@ -5882,7 +5882,7 @@ public:
 	///   among those with the highest 'rank()')
 	/// @param stateId State identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomize(const StateID stateId)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void randomize(const StateID stateId_)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
@@ -5896,7 +5896,7 @@ public:
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId State identifier
-	HFSM2_CONSTEXPR(14)	void schedule (const StateID stateId)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void schedule (const StateID stateId_)	  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState State type
@@ -6021,14 +6021,14 @@ public:
 	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId_,
 										   const Payload& payload)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId_,
 												Payload&& payload)	  noexcept;
 
 	/// @brief Transition into a state
@@ -6049,14 +6049,14 @@ public:
 	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId_,
 										   const Payload& payload)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId_,
 												Payload&& payload)	  noexcept;
 
 	/// @brief Transition into a state
@@ -6077,14 +6077,14 @@ public:
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId_,
 										   const Payload& payload)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId_,
 												Payload&& payload)	  noexcept;
 
 	/// @brief Transition into a state
@@ -6105,14 +6105,14 @@ public:
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId_,
 										   const Payload& payload)	  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId_,
 												Payload&& payload)	  noexcept;
 
 	/// @brief Transition into a state
@@ -6137,7 +6137,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId_,
 										   const Payload& payload)	  noexcept;
 
 	/// @brief Transition into a state
@@ -6146,7 +6146,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId_,
 												Payload&& payload)	  noexcept;
 
 	/// @brief Transition into a state
@@ -6172,7 +6172,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId_,
 										   const Payload& payload)	  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
@@ -6180,7 +6180,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId_,
 												Payload&& payload)	  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
@@ -6204,13 +6204,13 @@ public:
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId_,
 										   const Payload& payload)	  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId_,
 												Payload&& payload)	  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
@@ -6377,7 +6377,7 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId State identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)	const noexcept	{ return _core.registry.isPendingChange(stateId);					}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId_)	const noexcept	{ return _core.registry.isPendingChange(stateId_);					}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState State type
@@ -6388,7 +6388,7 @@ public:
 	/// @brief Check if a state is going to be activated
 	/// @param stateId State identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)	const noexcept	{ return _core.registry.isPendingEnter (stateId);					}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId_)	const noexcept	{ return _core.registry.isPendingEnter (stateId_);					}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState State type
@@ -6399,7 +6399,7 @@ public:
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId State identifier
 	/// @return State pending deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingExit	(const StateID stateId)	const noexcept	{ return _core.registry.isPendingExit  (stateId);					}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	(const StateID stateId_)	const noexcept	{ return _core.registry.isPendingExit  (stateId_);					}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState State type
@@ -6438,12 +6438,12 @@ namespace detail {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 ControlT<TArgs>::Origin::Origin(ControlT& control_,
-								const StateID stateId) noexcept
+								const StateID stateId_) noexcept
 	: control{control_}
 	, prevId{control._originId}
 {
-	HFSM2_ASSERT(stateId < StateList::SIZE);
-	control._originId = stateId;
+	HFSM2_ASSERT(stateId_ < StateList::SIZE);
+	control._originId = stateId_;
 }
 
 template <typename TArgs>
@@ -6491,23 +6491,23 @@ ControlT<TArgs>::resetRegion(const RegionID regionId) noexcept { //-V524
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-ControlT<TArgs>::pinLastTransition(const StateID stateId,
+ControlT<TArgs>::pinLastTransition(const StateID stateId_,
 								   const Short index) noexcept
 {
 	if (index != INVALID_SHORT) {
 		HFSM2_ASSERT(index < TransitionSets::CAPACITY);
 
-		if (!_core.registry.isActive(stateId))
-			_core.transitionTargets[stateId] = index;
+		if (!_core.registry.isActive(stateId_))
+			_core.transitionTargets[stateId_] = index;
 	}
 }
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 const typename ControlT<TArgs>::Transition*
-ControlT<TArgs>::lastTransitionTo(const StateID stateId) const noexcept {
-	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
-		const Short index = _core.transitionTargets[stateId];
+ControlT<TArgs>::lastTransitionTo(const StateID stateId_) const noexcept {
+	if (HFSM2_CHECKED(stateId_ < StateList::SIZE)) {
+		const Short index = _core.transitionTargets[stateId_];
 
 		if (index < _core.previousTransitions.count())
 			return &_core.previousTransitions[index];
@@ -6633,56 +6633,56 @@ FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::changeTo(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::changeTo(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId_);
 	}
 }
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::restart(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::restart(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId_);
 	}
 }
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::resume(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::resume(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId_);
 	}
 }
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::select(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::select(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId_);
 	}
 }
 
@@ -6691,28 +6691,28 @@ FullControlBaseT<TArgs>::select(const StateID stateId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::utilize(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::utilize(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId_);
 	}
 }
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::randomize(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::randomize(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId_);
 	}
 }
 
@@ -6721,10 +6721,10 @@ FullControlBaseT<TArgs>::randomize(const StateID stateId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::schedule(const StateID stateId) noexcept {
-	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE});
+FullControlBaseT<TArgs>::schedule(const StateID stateId_) noexcept {
+	_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SCHEDULE});
 
-	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId_);
 }
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -6822,128 +6822,128 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId_,
 																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId_,
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId_,
 																																const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId_,
 																																	 Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId_,
 																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId_,
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId_,
 																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId_,
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId_);
 	}
 }
 
@@ -6952,64 +6952,64 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId_,
 																																const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId_,
 																																	 Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId_,
 																																  const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId_);
 	}
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId_,
 																																	   Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId_);
 	}
 }
 
@@ -7018,23 +7018,23 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId_,
 																																 const Payload& payload) noexcept
 {
-	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, payload});
+	_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SCHEDULE, payload});
 
-	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId_);
 }
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId_,
 																																	  Payload&& payload) noexcept
 {
-	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, move(payload)});
+	_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SCHEDULE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId_);
 }
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -13155,7 +13155,7 @@ public:
 	/// @brief Get region's active sub-state's index
 	/// @param stateId Region's head state ID
 	/// @return Region's active sub-state index
-	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept	{ return _core.registry.activeSubState(stateId			);	}
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId_)		const noexcept	{ return _core.registry.activeSubState(stateId_			);	}
 
 	/// @brief Get region's active sub-state's index
 	/// @tparam TState Region's head state type
@@ -13166,7 +13166,7 @@ public:
 	/// @brief Check if a state is active
 	/// @param stateId Destination state identifier
 	/// @return State active status
-	HFSM2_CONSTEXPR(11)	bool isActive		 (const StateID stateId)		const noexcept	{ return _core.registry.isActive   (stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isActive		 (const StateID stateId_)		const noexcept	{ return _core.registry.isActive   (stateId_);		}
 
 	/// @brief Check if a state is active
 	/// @tparam TState Destination state type
@@ -13177,7 +13177,7 @@ public:
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @param stateId Destination state identifier
 	/// @return State resumable status
-	HFSM2_CONSTEXPR(11)	bool isResumable	 (const StateID stateId)		const noexcept	{ return _core.registry.isResumable(stateId);		}
+	HFSM2_CONSTEXPR(11)	bool isResumable	 (const StateID stateId_)		const noexcept	{ return _core.registry.isResumable(stateId_);		}
 
 	/// @brief Check if a state is resumable (activated then deactivated previously)
 	/// @tparam TState Destination state type
@@ -13188,7 +13188,7 @@ public:
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @param stateId Destination state identifier
 	/// @return State scheduled status
-	HFSM2_CONSTEXPR(11)	bool isScheduled	 (const StateID stateId)		const noexcept	{ return isResumable(stateId);					}
+	HFSM2_CONSTEXPR(11)	bool isScheduled	 (const StateID stateId_)		const noexcept	{ return isResumable(stateId_);					}
 
 	/// @brief Check if a state is scheduled to activate on the next transition to parent region
 	/// @tparam TState Destination state type
@@ -13199,7 +13199,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void changeTo		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void changeTo		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
@@ -13209,7 +13209,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void restart		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void restart		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
@@ -13219,7 +13219,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void resume			 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void resume			 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
@@ -13229,7 +13229,7 @@ public:
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void select			 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void select			 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
@@ -13244,7 +13244,7 @@ public:
 	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilize		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void utilize		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state with the highest 'utility()'
@@ -13259,7 +13259,7 @@ public:
 	///   among those with the highest 'rank()')
 	/// @param stateId Destination state identifier
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomize		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void randomize		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, uses weighted random to activate the state proportional to 'utility()'
@@ -13273,7 +13273,7 @@ public:
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
-	HFSM2_CONSTEXPR(14)	void schedule		 (const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void schedule		 (const StateID stateId_)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
@@ -13283,7 +13283,7 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange (const StateID stateId)		const noexcept	{ return _core.registry.isPendingChange(stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange (const StateID stateId_)		const noexcept	{ return _core.registry.isPendingChange(stateId_);	}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState Destination state type
@@ -13294,7 +13294,7 @@ public:
 	/// @brief Check if a state is going to be activated
 	/// @param stateId Destination state identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter	 (const StateID stateId)			const noexcept	{ return _core.registry.isPendingEnter (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter	 (const StateID stateId_)		const noexcept	{ return _core.registry.isPendingEnter (stateId_);	}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState Destination state type
@@ -13305,7 +13305,7 @@ public:
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId Destination state identifier
 	/// @return State pending deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingExit	 (const StateID stateId)		const noexcept	{ return _core.registry.isPendingExit  (stateId);	}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	 (const StateID stateId_)		const noexcept	{ return _core.registry.isPendingExit  (stateId_);	}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState Destination state type
@@ -13369,7 +13369,7 @@ public:
 	/// @brief Get the last transition that caused the state to be activated
 	/// @param stateId State identifier
 	/// @return Pointer to the last transition that activated the state
-	HFSM2_CONSTEXPR(14)	const Transition* lastTransitionTo(const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	const Transition* lastTransitionTo(const StateID stateId_)		const noexcept;
 
 	/// @brief Get the last transition that caused the state to be activated
 	/// @tparam TState State type
@@ -13647,13 +13647,13 @@ public:
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void changeWith   (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, acts depending on the region type)
@@ -13671,13 +13671,13 @@ public:
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void restartWith  (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state (if transitioning into a region, activates the initial state)
@@ -13696,14 +13696,14 @@ public:
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -13724,14 +13724,14 @@ public:
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void selectWith   (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -13756,7 +13756,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -13765,7 +13765,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -13792,7 +13792,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -13801,7 +13801,7 @@ public:
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Transition into a state
@@ -13827,13 +13827,13 @@ public:
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId_,
 										   const Payload& payload)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @param stateId Destination state identifier
 	/// @param payload Payload
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId,
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const StateID  stateId_,
 												Payload&& payload)			  noexcept;
 
 	/// @brief Schedule a state to be activated when its parent region is activated
@@ -14266,45 +14266,45 @@ R_<TG, TA>::react(const TEvent& event) noexcept {
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-R_<TG, TA>::changeTo(const StateID stateId) noexcept {
+R_<TG, TA>::changeTo(const StateID stateId_) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE});
+	_core.requests.emplace(Transition{stateId_, TransitionType::CHANGE});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId_);
 }
 
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-R_<TG, TA>::restart(const StateID stateId) noexcept {
+R_<TG, TA>::restart(const StateID stateId_) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RESTART});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RESTART});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId_);
 }
 
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-R_<TG, TA>::resume(const StateID stateId) noexcept {
+R_<TG, TA>::resume(const StateID stateId_) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RESUME});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RESUME});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId_);
 }
 
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-R_<TG, TA>::select(const StateID stateId) noexcept {
+R_<TG, TA>::select(const StateID stateId_) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::SELECT});
+	_core.requests.emplace(Transition{stateId_, TransitionType::SELECT});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId_);
 }
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
@@ -14312,23 +14312,23 @@ R_<TG, TA>::select(const StateID stateId) noexcept {
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-R_<TG, TA>::utilize(const StateID stateId) noexcept {
+R_<TG, TA>::utilize(const StateID stateId_) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE});
+	_core.requests.emplace(Transition{stateId_, TransitionType::UTILIZE});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId_);
 }
 
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-R_<TG, TA>::randomize(const StateID stateId) noexcept {
+R_<TG, TA>::randomize(const StateID stateId_) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RANDOMIZE});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId_);
 }
 
 #endif
@@ -14336,12 +14336,12 @@ R_<TG, TA>::randomize(const StateID stateId) noexcept {
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-R_<TG, TA>::schedule(const StateID stateId) noexcept {
+R_<TG, TA>::schedule(const StateID stateId_) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE});
+	_core.requests.emplace(Transition{stateId_, TransitionType::SCHEDULE});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId_);
 }
 
 template <typename TG, typename TA>
@@ -14471,11 +14471,11 @@ R_<TG, TA>::replayTransitions(const ArrayT<Transition, NCount>& transitions) noe
 template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 const typename R_<TG, TA>::Transition*
-R_<TG, TA>::lastTransitionTo(const StateID stateId) const noexcept {
+R_<TG, TA>::lastTransitionTo(const StateID stateId_) const noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
-		const Short index = _core.transitionTargets[stateId];
+	if (HFSM2_CHECKED(stateId_ < StateList::SIZE)) {
+		const Short index = _core.transitionTargets[stateId_];
 
 		if (index < _core.previousTransitions.count())
 			return &_core.previousTransitions[index];
@@ -14928,105 +14928,105 @@ RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId_,
 																										  const Payload& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE, payload});
+	_core.requests.emplace(Transition{stateId_, TransitionType::CHANGE, payload});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::changeWith(const StateID  stateId_,
 																											   Payload&& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::CHANGE, move(payload)});
+	_core.requests.emplace(Transition{stateId_, TransitionType::CHANGE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::CHANGE, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId_,
 																										   const Payload& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RESTART, payload});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RESTART, payload});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::restartWith(const StateID  stateId_,
 																												Payload&& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RESTART, move(payload)});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RESTART, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESTART, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId_,
 																										  const Payload& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RESUME, payload});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RESUME, payload});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::resumeWith(const StateID  stateId_,
 																											   Payload&& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RESUME, move(payload)});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RESUME, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RESUME, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::selectWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::selectWith(const StateID  stateId_,
 																										  const Payload& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::SELECT, payload});
+	_core.requests.emplace(Transition{stateId_, TransitionType::SELECT, payload});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::selectWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::selectWith(const StateID  stateId_,
 																											   Payload&& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::SELECT, move(payload)});
+	_core.requests.emplace(Transition{stateId_, TransitionType::SELECT, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SELECT, stateId_);
 }
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
@@ -15034,53 +15034,53 @@ RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId_,
 																				 const Payload& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE, payload});
+	_core.requests.emplace(Transition{stateId_, TransitionType::UTILIZE, payload});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::utilizeWith(const StateID  stateId_,
 																					  Payload&& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::UTILIZE, move(payload)});
+	_core.requests.emplace(Transition{stateId_, TransitionType::UTILIZE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::UTILIZE, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId_,
 																				   const Payload& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, payload});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RANDOMIZE, payload});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV, typename TR, typename TU, typename TG, Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWith(const StateID  stateId_,
 																						Payload&& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::RANDOMIZE, move(payload)});
+	_core.requests.emplace(Transition{stateId_, TransitionType::RANDOMIZE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::RANDOMIZE, stateId_);
 }
 
 #endif
@@ -15088,27 +15088,27 @@ RP_<G_<NFT, TC, TV, TR, TU, TG, NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::randomizeWi
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId_,
 																											const Payload& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE, payload});
+	_core.requests.emplace(Transition{stateId_, TransitionType::SCHEDULE, payload});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
 HFSM2_CONSTEXPR(14)
 void
-RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId,
+RP_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::scheduleWith(const StateID  stateId_,
 																												 Payload&& payload) noexcept
 {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	_core.requests.emplace(Transition{stateId, TransitionType::SCHEDULE, move(payload)});
+	_core.requests.emplace(Transition{stateId_, TransitionType::SCHEDULE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(_core.context, INVALID_STATE_ID, TransitionType::SCHEDULE, stateId_);
 }
 
 template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
