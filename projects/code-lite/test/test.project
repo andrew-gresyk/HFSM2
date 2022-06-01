@@ -129,7 +129,7 @@
   <Dependencies/>
   <Settings Type="Executable">
     <GlobalSettings>
-      <Compiler Options="-pedantic;-Wall;-Wextra;-std=c++11" C_Options="-pedantic;-Wall;-Wextra;" Assembler="">
+      <Compiler Options="-Werror -Wall -Wextra -Wpedantic -Wshadow -Wold-style-cast;-std=c++11" C_Options="-Werror -Wall -Wextra -Wpedantic -Wshadow -Wold-style-cast" Assembler="">
         <IncludePath Value="."/>
         <IncludePath Value="$(WorkspacePath)/../../development"/>
         <IncludePath Value="$(WorkspacePath)/../../external"/>

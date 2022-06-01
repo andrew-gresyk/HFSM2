@@ -2737,21 +2737,21 @@ struct TaskT final
 		new (&storage) Payload{};
 	}
 
-	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin,
-							  const StateID destination,
-							  const TransitionType type,
+	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin_,
+							  const StateID destination_,
+							  const TransitionType type_,
 							  const Payload& payload)			  noexcept
-		: TaskBase{origin, destination, type}
+		: TaskBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{payload};
 	}
 
-	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin,
-							  const StateID destination,
-							  const TransitionType type,
+	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin_,
+							  const StateID destination_,
+							  const TransitionType type_,
 							  Payload&& payload)				  noexcept
-		: TaskBase{origin, destination, type}
+		: TaskBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{move(payload)};
