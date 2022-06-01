@@ -8,7 +8,7 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct TaskBase {
-	HFSM2_CONSTEXPR(11)	TaskBase()								  noexcept {}
+	HFSM2_CONSTEXPR(11)	TaskBase()								  noexcept	{}
 
 	HFSM2_CONSTEXPR(11)	TaskBase(const StateID origin_,
 								 const StateID destination_,
@@ -58,7 +58,7 @@ struct TaskT final
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	TaskT()									  noexcept {
+	HFSM2_CONSTEXPR(14)	TaskT()									  noexcept	{
 		new (&storage) Payload{};
 	}
 

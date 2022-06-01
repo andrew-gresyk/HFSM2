@@ -601,9 +601,9 @@ HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::getStateNames() noexcept {
 	_stateInfos.clear();
-	_apex.deepGetNames((Long) -1, StructureStateInfo::RegionType::COMPOSITE, 0, _stateInfos);
+	_apex.deepGetNames(static_cast<Long>(-1), StructureStateInfo::RegionType::COMPOSITE, 0, _stateInfos);
 
-	Long margin = (Long) -1;
+	Long margin = static_cast<Long>(-1);
 	for (Long s = 0; s < _stateInfos.count(); ++s) {
 		const auto& state = _stateInfos[s];
 		auto& prefix      = _prefixes[s];
@@ -651,7 +651,7 @@ R_<TG, TA>::getStateNames() noexcept {
 
 		if (state.name[0] != L'\0') {
 			_structure.emplace(StructureEntry{false, &prefix[margin * 2], state.name});
-			_activityHistory.emplace((int8_t) 0);
+			_activityHistory.emplace(static_cast<int8_t>(0));
 		} else if (s + 1 < _stateInfos.count()) {
 			auto& nextPrefix = _prefixes[s + 1];
 

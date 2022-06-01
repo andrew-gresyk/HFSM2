@@ -30,8 +30,8 @@ protected:
 	using Args					= typename Forward::Args;
 	using PureContext			= typename Args::PureContext;
 
-	static_assert(Args::STATE_COUNT <  (unsigned) -1, "Too many states in the FSM. Change 'Short' type.");
-	static_assert(Args::STATE_COUNT == (unsigned) StateList::SIZE, "STATE_COUNT != StateList::SIZE");
+	static_assert(Args::STATE_COUNT <  static_cast<unsigned>(-1), "Too many states in the FSM. Change 'Short' type.");
+	static_assert(Args::STATE_COUNT == static_cast<unsigned>(StateList::SIZE), "STATE_COUNT != StateList::SIZE");
 
 	using Core					= CoreT<Args>;
 
@@ -123,13 +123,13 @@ public:
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID stateId()											  noexcept	{ return index<StateList, TState>();				}
+	static constexpr StateID stateId()											  noexcept	{ return					   index<StateList , TState>() ;	}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()										  noexcept	{ return (RegionID) index<RegionList, TState>();	}
+	static constexpr RegionID regionId()										  noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
 
 	//----------------------------------------------------------------------
 
@@ -1015,9 +1015,6 @@ public:
 	HFSM2_CONSTEXPR(NO) RC_(const RC_& )													  noexcept = default;
 	HFSM2_CONSTEXPR(NO) RC_(	  RC_&&)													  noexcept = default;
 
-	HFSM2_CONSTEXPR(14)	void setContext(const Context&  context)							  noexcept	{ _core.context =	  context ; }
-	HFSM2_CONSTEXPR(14)	void setContext(	  Context&& context)							  noexcept	{ _core.context = move(context); }
-
 private:
 	using Base::_core;
 };
@@ -1062,8 +1059,6 @@ public:
 
 public:
 	using Base::Base;
-
-	HFSM2_CONSTEXPR(14)	void setContext(Context context)									  noexcept	{ _core.context = context; }
 
 private:
 	using Base::_core;
@@ -1184,7 +1179,7 @@ public:
 /// @tparam TApex Root region type
 template <typename TConfig,
 		  typename TApex>
-class RR_ final
+class InstanceT final
 	: public	 RC_<TConfig, TApex>
 {
 	using Base = RC_<TConfig, TApex>;
@@ -1210,7 +1205,7 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RR_			<G_<NFeatureTag, TContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
+class InstanceT	    <G_<NFeatureTag, TContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
 	: public	 RC_<G_<NFeatureTag, TContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 	, public RNGT<TUtility>
 {
@@ -1226,8 +1221,8 @@ public:
 #endif
 
 public:
-	HFSM2_CONSTEXPR(14)	explicit RR_(Context& context
-								   HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept
+	HFSM2_CONSTEXPR(14)	explicit InstanceT(Context& context
+										 HFSM2_IF_LOG_INTERFACE(, Logger* const logger = nullptr))  noexcept
 		: Base{context
 			 , static_cast<RNGT<TUtility>&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
@@ -1250,7 +1245,7 @@ template <FeatureTag NFeatureTag
 		HFSM2_IF_PLANS(, Long NTaskCapacity)
 		, typename TPayload
 		, typename TApex>
-class RR_			<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
+class InstanceT		<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex> final
 	: public	 RC_<G_<NFeatureTag, EmptyContext, TActivation, TRank, TUtility, RNGT<TUtility>, NSubstitutionLimit HFSM2_IF_PLANS(, NTaskCapacity), TPayload>, TApex>
 	, public RNGT<TUtility>
 {
@@ -1264,7 +1259,7 @@ public:
 #endif
 
 public:
-	HFSM2_CONSTEXPR(14)	explicit RR_(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))  noexcept
+	HFSM2_CONSTEXPR(14)	explicit InstanceT(HFSM2_IF_LOG_INTERFACE(Logger* const logger = nullptr))  noexcept
 		: Base{static_cast<RNGT<TUtility>&>(*this)
 			 HFSM2_IF_LOG_INTERFACE(, logger)}
 		, RNGT<TUtility>{0}

@@ -92,7 +92,7 @@ struct Context {
 		PRINTCALL;
 		if (decimalFactor > 1.0)
 		{
-			operand1 += std::copysign((double)digit / decimalFactor, operand1);
+			operand1 += std::copysign(static_cast<double>(digit) / decimalFactor, operand1);
 			decimalFactor *= 10.0;
 		}
 		else

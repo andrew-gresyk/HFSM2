@@ -6,7 +6,7 @@ namespace detail {
 template <typename T>
 HFSM2_CONSTEXPR(11)
 T
-filler() noexcept {
+filler()																	  noexcept	{
 	return T{INVALID_SHORT};
 }
 
@@ -65,7 +65,7 @@ struct StaticArrayT<T, 0> final {
 	using Item		= T;
 
 	HFSM2_CONSTEXPR(11)	StaticArrayT() = default;
-	HFSM2_CONSTEXPR(11)	StaticArrayT(const Item) noexcept {}
+	HFSM2_CONSTEXPR(11)	StaticArrayT(const Item)							  noexcept	{}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

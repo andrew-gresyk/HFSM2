@@ -114,12 +114,6 @@ TEST_CASE("FSM.Contexts Random") {
 
 		Instance machine{primary, rng};
 		REQUIRE(machine.context() == primary);
-
-		machine.setContext(secondary);
-		REQUIRE(machine.context() == secondary);
-
-		machine.setContext(8);
-		REQUIRE(machine.context() == 8);
 	}
 
 	// context is a reference
@@ -132,9 +126,6 @@ TEST_CASE("FSM.Contexts Random") {
 
 		Instance machine{primary, rng};
 		REQUIRE(machine.context() == primary);
-
-		machine.setContext(secondary);
-		REQUIRE(machine.context() == secondary);
 	}
 
 	// context is a pointer

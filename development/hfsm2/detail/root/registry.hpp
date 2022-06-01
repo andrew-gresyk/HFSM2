@@ -35,7 +35,7 @@ struct alignas(2 * sizeof(Short)) Parent final {
 	{}
 
 	HFSM2_CONSTEXPR(11)
-	explicit operator bool()										const noexcept {
+	explicit operator bool()										const noexcept	{
 		return forkId != INVALID_FORK_ID &&
 			   prong  != INVALID_SHORT;
 	}

@@ -22,7 +22,7 @@ testUniformity(const int average) {
 		REQUIRE(real >= Type{0.0});
 		REQUIRE(real  < Type{1.0});
 
-		const unsigned n = (unsigned) (10.0f * real);
+		const unsigned n = static_cast<unsigned>(10.0f * real);
 		REQUIRE(n < hfsm2::count<unsigned>(histogram));
 
 		++histogram[n];

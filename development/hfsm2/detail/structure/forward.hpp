@@ -302,7 +302,7 @@ template <typename, typename, Short, typename...>
 struct OS_;
 
 template <typename, typename>
-class RR_;
+class InstanceT;
 
 //------------------------------------------------------------------------------
 
@@ -382,7 +382,7 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using Instance		= RR_<TConfig, Apex>;
+	using Instance		= InstanceT<TConfig, Apex>;
 
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;
@@ -403,14 +403,14 @@ struct RF_ final {
 
 	//----------------------------------------------------------------------
 
-	template <typename T>
-	static constexpr bool	  contains() noexcept	{ return contains<StateList, T>();			}
+	template <typename TState>
+	static constexpr bool	  contains()	  noexcept	{ return					contains<StateList , TState>() ;	}
 
-	template <typename T>
-	static constexpr StateID  stateId()	 noexcept	{ return index	 <StateList, T>();			}
+	template <typename TState>
+	static constexpr StateID  stateId()		  noexcept	{ return					   index<StateList , TState>() ;	}
 
-	template <typename T>
-	static constexpr RegionID regionId() noexcept	{ return (RegionID) index<RegionList, T>();	}
+	template <typename TState>
+	static constexpr RegionID regionId()	  noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

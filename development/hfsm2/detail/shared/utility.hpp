@@ -127,7 +127,7 @@ using UCapacity = Conditional<N < (1ull <<  8),  uint8_t,
 
 HFSM2_CONSTEXPR(11)
 Short
-bitContain(const Short v)							  noexcept {
+bitContain(const Short v)							  noexcept	{
 	return v <= 1 << 0 ? 0 :
 		   v <= 1 << 1 ? 1 :
 		   v <= 1 << 2 ? 2 :
@@ -185,8 +185,8 @@ T0
 min(const T0 t0,
 	const T1 t1)									  noexcept
 {
-	return t0 < (T0) t1 ?
-		   t0 : (T0) t1;
+	return t0 < static_cast<T0>(t1) ?
+		   t0 : static_cast<T0>(t1);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -198,8 +198,8 @@ T0
 max(const T0 t0,
 	const T1 t1)									  noexcept
 {
-	return t0 > (T0) t1 ?
-		   t0 : (T0) t1;
+	return t0 > static_cast<T0>(t1) ?
+		   t0 : static_cast<T0>(t1);
 }
 
 //------------------------------------------------------------------------------
@@ -220,20 +220,20 @@ template <typename T,
 HFSM2_CONSTEXPR(11)
 T
 contain(const T x,
-		const TT to)								  noexcept	{ return (x + (T) to - 1) / (T) to;		}
+		const TT to)								  noexcept	{ return (x + static_cast<T>(to) - 1) / static_cast<T>(to);	}
 
 //------------------------------------------------------------------------------
 
 HFSM2_CONSTEXPR(11)
 uint64_t
-widen(const uint32_t x, const uint32_t y)			  noexcept	{ return (uint64_t) x << 32 | y;		}
+widen(const uint32_t x, const uint32_t y)			  noexcept	{ return static_cast<uint64_t>(x) << 32 | y;	}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 HFSM2_CONSTEXPR(14)
 void
-fill(T& a, const char value)						  noexcept { memset(&a, (int) value, sizeof(a));	}
+fill(T& a, const char value)						  noexcept	{ memset(&a, static_cast<int>(value), sizeof(a));	}
 
 //------------------------------------------------------------------------------
 

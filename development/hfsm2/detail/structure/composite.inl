@@ -340,7 +340,7 @@ C_<TN, TA, SG, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
 		const bool planExists = control._core.planData.planExists.template get<REGION_ID>();
 
 		return s && planExists ?
-			control.updatePlan((HeadState&) *this, s) : s;
+			control.updatePlan(static_cast<HeadState&>(*this), s) : s;
 	}
 }
 

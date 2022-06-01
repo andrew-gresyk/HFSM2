@@ -10,7 +10,7 @@ T&
 StaticArrayT<T, NC>::operator[] (const N index) noexcept	{
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
-	return _items[(Index) index];
+	return _items[static_cast<Index>(index)];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -22,7 +22,7 @@ const T&
 StaticArrayT<T, NC>::operator[] (const N index) const noexcept	{
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
-	return _items[(Index) index];
+	return _items[static_cast<Index>(index)];
 }
 
 //------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ typename ArrayT<T, NC>::Item&
 ArrayT<T, NC>::operator[] (const N index) noexcept {
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
-	return _items[(Index) index];
+	return _items[static_cast<Index>(index)];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -84,7 +84,7 @@ const typename ArrayT<T, NC>::Item&
 ArrayT<T, NC>::operator[] (const N index) const noexcept {
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
-	return _items[(Index) index];
+	return _items[static_cast<Index>(index)];
 }
 
 //------------------------------------------------------------------------------

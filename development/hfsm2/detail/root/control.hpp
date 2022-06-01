@@ -97,13 +97,13 @@ public:
 	/// @tparam TState State type
 	/// @return Numeric state identifier
 	template <typename TState>
-	static constexpr StateID stateId()										  noexcept	{ return			index<StateList , TState>();	}
+	static constexpr StateID stateId()										  noexcept	{ return					   index<StateList , TState>() ;	}
 
 	/// @brief Get region identifier for a region type
 	/// @tparam TState Region head state type
 	/// @return Numeric region identifier
 	template <typename TState>
-	static constexpr RegionID regionId()									  noexcept	{ return (RegionID) index<RegionList, TState>();	}
+	static constexpr RegionID regionId()									  noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
 
 	/// @brief Access FSM context (data shared between states and/or data interface between FSM and external code)
 	/// @return context
@@ -667,14 +667,14 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void changeWith   (const Payload& payload)	  noexcept { changeWith   (FullControlBase::template stateId<TState>(),		 payload );	}
+	HFSM2_CONSTEXPR(14)	void changeWith   (const Payload& payload)	  noexcept	{ changeWith   (FullControlBase::template stateId<TState>(),	  payload );	}
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void changeWith   (		Payload&& payload)	  noexcept { changeWith   (FullControlBase::template stateId<TState>(), move(payload));	}
+	HFSM2_CONSTEXPR(14)	void changeWith   (		Payload&& payload)	  noexcept	{ changeWith   (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	// COMMON
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -698,14 +698,14 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void restartWith  (const Payload& payload)	  noexcept { restartWith  (FullControlBase::template stateId<TState>(),		 payload );	}
+	HFSM2_CONSTEXPR(14)	void restartWith  (const Payload& payload)	  noexcept	{ restartWith  (FullControlBase::template stateId<TState>(),	  payload );	}
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the initial state)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void restartWith  (		Payload&& payload)	  noexcept { restartWith  (FullControlBase::template stateId<TState>(), move(payload));	}
+	HFSM2_CONSTEXPR(14)	void restartWith  (		Payload&& payload)	  noexcept	{ restartWith  (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -728,14 +728,14 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void resumeWith   (const Payload& payload)	  noexcept { resumeWith   (FullControlBase::template stateId<TState>(),		 payload );	}
+	HFSM2_CONSTEXPR(14)	void resumeWith   (const Payload& payload)	  noexcept	{ resumeWith   (FullControlBase::template stateId<TState>(),	  payload );	}
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void resumeWith   (		Payload&& payload)	  noexcept { resumeWith   (FullControlBase::template stateId<TState>(), move(payload));	}
+	HFSM2_CONSTEXPR(14)	void resumeWith   (		Payload&& payload)	  noexcept	{ resumeWith   (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -758,14 +758,14 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void selectWith   (const Payload& payload)	  noexcept { selectWith   (FullControlBase::template stateId<TState>(),		 payload );	}
+	HFSM2_CONSTEXPR(14)	void selectWith   (const Payload& payload)	  noexcept	{ selectWith   (FullControlBase::template stateId<TState>(),	  payload );	}
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's 'select()' method)
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void selectWith   (		Payload&& payload)	  noexcept { selectWith   (FullControlBase::template stateId<TState>(), move(payload));	}
+	HFSM2_CONSTEXPR(14)	void selectWith   (		Payload&& payload)	  noexcept	{ selectWith   (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	//------------------------------------------------------------------------------
 
@@ -796,7 +796,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (const Payload& payload)	  noexcept { utilizeWith  (FullControlBase::template stateId<TState>(),		 payload );	}
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (const Payload& payload)	  noexcept	{ utilizeWith  (FullControlBase::template stateId<TState>(),	  payload );	}
 
 	/// @brief Transition into a state
 	///   (if transitioning into a region, activates the state with the highest 'utility()'
@@ -805,7 +805,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void utilizeWith  (		Payload&& payload)	  noexcept { utilizeWith  (FullControlBase::template stateId<TState>(), move(payload));	}
+	HFSM2_CONSTEXPR(14)	void utilizeWith  (		Payload&& payload)	  noexcept	{ utilizeWith  (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -831,7 +831,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void randomizeWith(const Payload& payload)	  noexcept { randomizeWith(FullControlBase::template stateId<TState>(),		 payload );	}
+	HFSM2_CONSTEXPR(14)	void randomizeWith(const Payload& payload)	  noexcept	{ randomizeWith(FullControlBase::template stateId<TState>(),	  payload );	}
 
 	/// @brief Transition into a state (if transitioning into a region, uses weighted random to activate the state
 	///   proportional to 'utility()' among those with the highest 'rank()')
@@ -839,7 +839,7 @@ public:
 	/// @param payload Payload
 	/// @see HFSM2_ENABLE_UTILITY_THEORY
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void randomizeWith(		Payload&& payload)	  noexcept { randomizeWith(FullControlBase::template stateId<TState>(), move(payload));	}
+	HFSM2_CONSTEXPR(14)	void randomizeWith(		Payload&& payload)	  noexcept	{ randomizeWith(FullControlBase::template stateId<TState>(), move(payload));	}
 
 #endif
 
@@ -861,13 +861,13 @@ public:
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void scheduleWith (const Payload& payload)	  noexcept { scheduleWith (FullControlBase::template stateId<TState>(),		 payload );	}
+	HFSM2_CONSTEXPR(14)	void scheduleWith (const Payload& payload)	  noexcept	{ scheduleWith (FullControlBase::template stateId<TState>(),	  payload );	}
 
 	/// @brief Schedule a state to be activated when its parent region is activated
 	/// @tparam TState Destination state type
 	/// @param payload Payload
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	void scheduleWith (		Payload&& payload)	  noexcept { scheduleWith (FullControlBase::template stateId<TState>(), move(payload));	}
+	HFSM2_CONSTEXPR(14)	void scheduleWith (		Payload&& payload)	  noexcept	{ scheduleWith (FullControlBase::template stateId<TState>(), move(payload));	}
 
 	//------------------------------------------------------------------------------
 
@@ -1035,50 +1035,50 @@ public:
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @param stateId State identifier
 	/// @return State pending activation/deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)	const noexcept { return _core.registry.isPendingChange(stateId);					}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange(const StateID stateId)	const noexcept	{ return _core.registry.isPendingChange(stateId);					}
 
 	/// @brief Check if a state is going to be activated or deactivated
 	/// @tparam TState State type
 	/// @return State pending activation/deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingChange()						const noexcept { return isPendingChange(FullControl::template stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingChange()						const noexcept	{ return isPendingChange(FullControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be activated
 	/// @param stateId State identifier
 	/// @return State pending activation status
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)	const noexcept { return _core.registry.isPendingEnter (stateId);					}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter (const StateID stateId)	const noexcept	{ return _core.registry.isPendingEnter (stateId);					}
 
 	/// @brief Check if a state is going to be activated
 	/// @tparam TState State type
 	/// @return State pending activation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingEnter ()						const noexcept { return isPendingEnter (FullControl::template stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingEnter ()						const noexcept	{ return isPendingEnter (FullControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if a state is going to be deactivated
 	/// @param stateId State identifier
 	/// @return State pending deactivation status
-	HFSM2_CONSTEXPR(11)	bool isPendingExit	(const StateID stateId)	const noexcept { return _core.registry.isPendingExit  (stateId);					}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit	(const StateID stateId)	const noexcept	{ return _core.registry.isPendingExit  (stateId);					}
 
 	/// @brief Check if a state is going to be deactivated
 	/// @tparam TState State type
 	/// @return State pending deactivation status
 	template <typename TState>
-	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()						const noexcept { return isPendingExit  (FullControl::template stateId<TState>());	}
+	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()						const noexcept	{ return isPendingExit  (FullControl::template stateId<TState>());	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	// COMMON
 
 	/// @brief Get current transition requests
 	/// @return ArrayT of pending transition requests
-	HFSM2_CONSTEXPR(11)	const TransitionSets& currentTransitions()	const noexcept { return _currentTransitions;										}
+	HFSM2_CONSTEXPR(11)	const TransitionSets& currentTransitions()	const noexcept	{ return _currentTransitions;										}
 
 	/// @brief Get pending transition requests
 	/// @return Array of pending transition requests
-	HFSM2_CONSTEXPR(11)	const TransitionSet&  pendingTransitions()	const noexcept { return _pendingTransitions;										}
+	HFSM2_CONSTEXPR(11)	const TransitionSet&  pendingTransitions()	const noexcept	{ return _pendingTransitions;										}
 
 	/// @brief Cancel pending transition requests
 	///   (can be used to substitute a transition into the current state with a different one)
