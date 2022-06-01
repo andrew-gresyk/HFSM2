@@ -6,12 +6,12 @@ namespace detail {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 ControlT<TArgs>::Origin::Origin(ControlT& control_,
-								const StateID stateId) noexcept
+								const StateID stateId_) noexcept
 	: control{control_}
 	, prevId{control._originId}
 {
-	HFSM2_ASSERT(stateId < StateList::SIZE);
-	control._originId = stateId;
+	HFSM2_ASSERT(stateId_ < StateList::SIZE);
+	control._originId = stateId_;
 }
 
 //------------------------------------------------------------------------------
@@ -27,11 +27,11 @@ ControlT<TArgs>::Origin::~Origin() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 ControlT<TArgs>::Region::Region(ControlT& control_,
-								const RegionID regionId) noexcept
+								const RegionID regionId_) noexcept
 	: control{control_}
 	, prevId{control._regionId}
 {
-	control.setRegion(regionId);
+	control.setRegion(regionId_);
 }
 
 //------------------------------------------------------------------------------
@@ -47,10 +47,10 @@ ControlT<TArgs>::Region::~Region() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-ControlT<TArgs>::setRegion(const RegionID regionId) noexcept {
-	HFSM2_ASSERT(_regionId <= regionId && regionId < RegionList::SIZE);
+ControlT<TArgs>::setRegion(const RegionID regionId_) noexcept {
+	HFSM2_ASSERT(_regionId <= regionId_ && regionId_ < RegionList::SIZE);
 
-	_regionId = regionId;
+	_regionId = regionId_;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -58,10 +58,10 @@ ControlT<TArgs>::setRegion(const RegionID regionId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-ControlT<TArgs>::resetRegion(const RegionID regionId) noexcept { //-V524
-	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
+ControlT<TArgs>::resetRegion(const RegionID regionId_) noexcept { //-V524
+	HFSM2_ASSERT(regionId_ <= _regionId && _regionId < RegionList::SIZE);
 
-	_regionId = regionId;
+	_regionId = regionId_;
 }
 
 //------------------------------------------------------------------------------
@@ -71,14 +71,14 @@ ControlT<TArgs>::resetRegion(const RegionID regionId) noexcept { //-V524
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-ControlT<TArgs>::pinLastTransition(const StateID stateId,
+ControlT<TArgs>::pinLastTransition(const StateID stateId_,
 								   const Short index) noexcept
 {
 	if (index != INVALID_SHORT) {
 		HFSM2_ASSERT(index < TransitionSets::CAPACITY);
 
-		if (!_core.registry.isActive(stateId))
-			_core.transitionTargets[stateId] = index;
+		if (!_core.registry.isActive(stateId_))
+			_core.transitionTargets[stateId_] = index;
 	}
 }
 
@@ -87,9 +87,9 @@ ControlT<TArgs>::pinLastTransition(const StateID stateId,
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 const typename ControlT<TArgs>::Transition*
-ControlT<TArgs>::lastTransitionTo(const StateID stateId) const noexcept {
-	if (HFSM2_CHECKED(stateId < StateList::SIZE)) {
-		const Short index = _core.transitionTargets[stateId];
+ControlT<TArgs>::lastTransitionTo(const StateID stateId_) const noexcept {
+	if (HFSM2_CHECKED(stateId_ < StateList::SIZE)) {
+		const Short index = _core.transitionTargets[stateId_];
 
 		if (index < _core.previousTransitions.count())
 			return &_core.previousTransitions[index];
@@ -116,7 +116,7 @@ ControlT<TArgs>::lastTransition() const noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
-									const RegionID regionId,
+									const RegionID regionId_,
 									const StateID index,
 									const Long size) noexcept
 	: control  {control_}
@@ -124,7 +124,7 @@ PlanControlT<TArgs>::Region::Region(PlanControlT& control_,
 	, prevIndex{control._regionStateId}
 	, prevSize {control._regionSize}
 {
-	control.setRegion(regionId, index, size);
+	control.setRegion(regionId_, index, size);
 }
 
 //------------------------------------------------------------------------------
@@ -140,14 +140,14 @@ PlanControlT<TArgs>::Region::~Region() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-PlanControlT<TArgs>::setRegion(const RegionID regionId,
+PlanControlT<TArgs>::setRegion(const RegionID regionId_,
 							   const StateID index,
 							   const Long size) noexcept
 {
-	HFSM2_ASSERT(_regionId <= regionId && regionId <  RegionList::SIZE);
+	HFSM2_ASSERT(_regionId <= regionId_ && regionId_ <  RegionList::SIZE);
 	HFSM2_ASSERT(_regionStateId <= index && index + size <= _regionStateId + _regionSize);
 
-	_regionId	   = regionId;
+	_regionId	   = regionId_;
 	_regionStateId = index;
 	_regionSize	   = size;
 }
@@ -157,14 +157,14 @@ PlanControlT<TArgs>::setRegion(const RegionID regionId,
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-PlanControlT<TArgs>::resetRegion(const RegionID regionId, //-V524
+PlanControlT<TArgs>::resetRegion(const RegionID regionId_, //-V524
 								 const StateID index,
 								 const Long size) noexcept
 {
-	HFSM2_ASSERT(regionId <= _regionId && _regionId < RegionList::SIZE);
+	HFSM2_ASSERT(regionId_ <= _regionId && _regionId < RegionList::SIZE);
 	HFSM2_ASSERT(index <= _regionStateId && _regionStateId + _regionSize <= index + size);
 
-	_regionId	   = regionId;
+	_regionId	   = regionId_;
 	_regionStateId = index;
 	_regionSize	   = size;
 
@@ -233,14 +233,14 @@ FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::changeTo(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::changeTo(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId_);
 	}
 }
 
@@ -249,14 +249,14 @@ FullControlBaseT<TArgs>::changeTo(const StateID stateId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::restart(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::restart(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId_);
 	}
 }
 
@@ -265,14 +265,14 @@ FullControlBaseT<TArgs>::restart(const StateID stateId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::resume(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::resume(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId_);
 	}
 }
 
@@ -281,14 +281,14 @@ FullControlBaseT<TArgs>::resume(const StateID stateId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::select(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::select(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId_);
 	}
 }
 
@@ -299,14 +299,14 @@ FullControlBaseT<TArgs>::select(const StateID stateId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::utilize(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::utilize(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId_);
 	}
 }
 
@@ -315,14 +315,14 @@ FullControlBaseT<TArgs>::utilize(const StateID stateId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::randomize(const StateID stateId) noexcept {
+FullControlBaseT<TArgs>::randomize(const StateID stateId_) noexcept {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId_);
 	}
 }
 
@@ -333,10 +333,10 @@ FullControlBaseT<TArgs>::randomize(const StateID stateId) noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-FullControlBaseT<TArgs>::schedule(const StateID stateId) noexcept {
-	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE});
+FullControlBaseT<TArgs>::schedule(const StateID stateId_) noexcept {
+	_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SCHEDULE});
 
-	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId_);
 }
 
 //------------------------------------------------------------------------------
@@ -442,16 +442,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId_,
 																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId_);
 	}
 }
 
@@ -460,16 +460,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId_,
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::CHANGE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId_);
 	}
 }
 
@@ -478,16 +478,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId_,
 																																const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId_);
 	}
 }
 
@@ -496,16 +496,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId_,
 																																	 Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESTART, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId_);
 	}
 }
 
@@ -514,16 +514,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId_,
 																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId_);
 	}
 }
 
@@ -532,16 +532,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId_,
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RESUME, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId_);
 	}
 }
 
@@ -550,16 +550,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId_,
 																															   const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId_);
 	}
 }
 
@@ -568,16 +568,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId_,
 																																	Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::SELECT, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId_);
 	}
 }
 
@@ -588,16 +588,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId_,
 																																const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId_);
 	}
 }
 
@@ -606,16 +606,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId_,
 																																	 Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::UTILIZE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId_);
 	}
 }
 
@@ -624,16 +624,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId_,
 																																  const Payload& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, payload});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE, payload});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId_);
 	}
 }
 
@@ -642,16 +642,16 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId_,
 																																	   Payload&& payload) noexcept
 {
 	if (!_locked) {
-		_core.requests.emplace(Transition{_originId, stateId, TransitionType::RANDOMIZE, move(payload)});
+		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE, move(payload)});
 
-		if (stateId < _regionStateId || _regionStateId + _regionSize <= stateId)
+		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
 			_status.outerTransition = true;
 
-		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId);
+		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId_);
 	}
 }
 
@@ -662,12 +662,12 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId_,
 																																 const Payload& payload) noexcept
 {
-	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, payload});
+	_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SCHEDULE, payload});
 
-	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId_);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -675,12 +675,12 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB)
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
 HFSM2_CONSTEXPR(14)
 void
-FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId,
+FullControlT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId_,
 																																	  Payload&& payload) noexcept
 {
-	_core.requests.emplace(Transition{_originId, stateId, TransitionType::SCHEDULE, move(payload)});
+	_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SCHEDULE, move(payload)});
 
-	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId);
+	HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SCHEDULE, stateId_);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

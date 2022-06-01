@@ -5,7 +5,7 @@
   </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalOptions>-Wpedantic %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Wshadow -Wold-style-cast -Wpedantic %(AdditionalOptions)</AdditionalOptions>
       <SupportJustMyCode>false</SupportJustMyCode>
     </ClCompile>
     <Link>

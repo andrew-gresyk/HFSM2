@@ -1,12 +1,19 @@
+import re
+
 #===============================================================================
 
-def mergeTo(folder, path, included, pragmaOnceCounter, output):
+def mergeTo(folder, path, included, commentRE, output):
 	pathTokens = path.split("/")
 
 	current = folder + "/" + pathTokens[-1]
 	with open(current, 'r', encoding='utf-8') as input:
-		for line in input:
+		lastLineEmpty = False
 
+		if included:
+			output.write("\n")
+			lastLineEmpty = True
+
+		for line in input:
 			if line.startswith('#include "'):
 				next = line[10 : -2]
 
@@ -17,25 +24,25 @@ def mergeTo(folder, path, included, pragmaOnceCounter, output):
 					#output.write("// inlined '" + pathTokens[-1] + "' -> '" + nextTokens[-1] + "'\n")
 
 					if len(nextTokens) == 1:
-						mergeTo(folder, next, included, pragmaOnceCounter, output)
+						mergeTo(folder, next, included, commentRE, output)
 					else:
 						name = nextTokens.pop()
-						mergeTo(folder + "/" + "/".join(nextTokens), name, included, pragmaOnceCounter, output)
+						mergeTo(folder + "/" + "/".join(nextTokens), name, included, commentRE, output)
+
 			else:
 				if line.startswith('\ufeff'):
 					line = line[1:]
 
-				if line.startswith('#pragma'):
-					pragma = line[8:]
+				if commentRE.match(line):
+					continue
 
-					if pragma.startswith('once'):
-						pragmaOnceCounter += 1
-
-						if pragmaOnceCounter > 1:
-							continue
-
-					elif pragma.startswith('region') or pragma.startswith('endregion'):
+				if line == "\n":
+					if lastLineEmpty:
 						continue
+
+					lastLineEmpty = True
+				else:
+					lastLineEmpty = False
 
 				output.write(line)
 
@@ -43,8 +50,9 @@ def mergeTo(folder, path, included, pragmaOnceCounter, output):
 
 output = open("../include/hfsm2/machine.hpp", 'w', encoding='utf-8-sig')
 included = []
-pragmaOnceCounter = 0
-mergeTo("../development/hfsm2", "machine_dev.hpp", included, pragmaOnceCounter, output)
+commentRE = re.compile("(?:\s*\/\/ COMMON)|(?:\s*\/\/ SPECIFIC)|(?:\s*\/\/\/\/)|(?:\s*\/\/--)|(?:\s*\/\/ -)")
+
+mergeTo("../development/hfsm2", "machine_dev.hpp", included, commentRE, output)
 
 output.close()
 

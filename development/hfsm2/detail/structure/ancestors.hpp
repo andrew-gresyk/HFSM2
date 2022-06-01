@@ -61,11 +61,11 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename T>
-	static constexpr StateID  stateId()									  noexcept	{ return index<StateList, T>();				}
+	template <typename TState>
+	static constexpr StateID  stateId()									  noexcept	{ return					   index<StateList , TState>() ;	}
 
-	template <typename T>
-	static constexpr RegionID regionId()								  noexcept	{ return (RegionID) index<RegionList, T>();	}
+	template <typename TState>
+	static constexpr RegionID regionId()								  noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

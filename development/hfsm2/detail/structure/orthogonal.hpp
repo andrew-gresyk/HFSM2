@@ -24,7 +24,7 @@ struct HFSM2_EMPTY_BASES O_
 	static constexpr Short	 ORTHO_UNIT	 = Indices::ORTHO_UNIT;
 
 	static constexpr Short	 REGION_ID	 = COMPO_INDEX + ORTHO_INDEX;
-	static constexpr ForkID	 ORTHO_ID	 = (ForkID) -ORTHO_INDEX - 1;
+	static constexpr ForkID	 ORTHO_ID	 = static_cast<ForkID>(-ORTHO_INDEX - 1);
 
 	using Args			= TArgs;
 

@@ -249,8 +249,8 @@ bool
 BitArrayT<NCapacity>::get(const TIndex index) const noexcept {
 	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = (Index) index / 8;
-	const Index bit  = (Index) index % 8;
+	const Index unit = static_cast<Index>(index) / 8;
+	const Index bit  = static_cast<Index>(index) % 8;
 	const uint8_t mask = 1 << bit;
 
 	return (_storage[unit] & mask) != 0;
@@ -265,8 +265,8 @@ void
 BitArrayT<NCapacity>::set(const TIndex index) noexcept {
 	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = (Index) index / 8;
-	const Index bit  = (Index) index % 8;
+	const Index unit = static_cast<Index>(index) / 8;
+	const Index bit  = static_cast<Index>(index) % 8;
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] |= mask;
@@ -281,8 +281,8 @@ void
 BitArrayT<NCapacity>::clear(const TIndex index) noexcept {
 	HFSM2_ASSERT(index < CAPACITY);
 
-	const Index unit = (Index) index / 8;
-	const Index bit  = (Index) index % 8;
+	const Index unit = static_cast<Index>(index) / 8;
+	const Index bit  = static_cast<Index>(index) % 8;
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] &= ~mask;

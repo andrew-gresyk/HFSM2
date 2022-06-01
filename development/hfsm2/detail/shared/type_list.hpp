@@ -128,10 +128,10 @@ struct Find<TL_<Ts...>, T> final
 }
 
 template <typename TList, typename T>
-constexpr Long index   () noexcept { return detail::Find<TList, T>::VALUE;		}
+constexpr Long index   () noexcept	{ return detail::Find<TList, T>::VALUE;		}
 
 template <typename TList, typename T>
-constexpr bool contains() noexcept { return index<TList, T>() != INVALID_LONG;	}
+constexpr bool contains() noexcept	{ return index<TList, T>() != INVALID_LONG;	}
 
 // SPECIFIC
 //------------------------------------------------------------------------------

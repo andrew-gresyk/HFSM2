@@ -70,7 +70,7 @@ enum class StatusEvent : uint8_t {
 static
 inline
 const char*
-stateName(const std::type_index stateType)							  noexcept {
+stateName(const std::type_index stateType)							  noexcept	{
 	const char* const raw = stateType.name();
 
 	#if defined(_MSC_VER)
@@ -99,7 +99,7 @@ stateName(const std::type_index stateType)							  noexcept {
 static
 HFSM2_CONSTEXPR(14)
 const char*
-methodName(const Method method)										  noexcept {
+methodName(const Method method)										  noexcept	{
 	switch (method) {
 
 	case Method::SELECT:		 return "select";
@@ -137,7 +137,7 @@ methodName(const Method method)										  noexcept {
 static
 HFSM2_CONSTEXPR(14)
 const char*
-transitionName(const TransitionType type) noexcept {
+transitionName(const TransitionType type)							  noexcept	{
 	switch (type) {
 	case TransitionType::CHANGE:	return "changeTo";
 	case TransitionType::RESTART:	return "restart";
@@ -198,7 +198,7 @@ struct alignas(4) TransitionBase {
 
 	HFSM2_CONSTEXPR(11)
 	bool
-	operator == (const TransitionBase& other)					const noexcept {
+	operator == (const TransitionBase& other)					const noexcept	{
 		return origin	   == other.origin &&
 			   destination == other.destination &&
 			   method	   == other.method &&
@@ -209,7 +209,7 @@ struct alignas(4) TransitionBase {
 
 	HFSM2_CONSTEXPR(11)
 	bool
-	operator != (const TransitionBase& other)					const noexcept {
+	operator != (const TransitionBase& other)					const noexcept	{
 		return origin	   != other.origin ||
 			   destination != other.destination ||
 			   method	   != other.method ||
@@ -244,17 +244,17 @@ struct alignas(4) TransitionT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT()													  noexcept {
+	TransitionT()													  noexcept	{
 		new (&storage) Payload{};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT(const StateID destination,
-				const TransitionType type,
+	TransitionT(const StateID destination_,
+				const TransitionType type_,
 				const Payload& payload)								  noexcept
-		: TransitionBase{destination, type}
+		: TransitionBase{destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{payload};
@@ -263,10 +263,10 @@ struct alignas(4) TransitionT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT(const StateID destination,
-				const TransitionType type,
+	TransitionT(const StateID destination_,
+				const TransitionType type_,
 				Payload&& payload)									  noexcept
-		: TransitionBase{destination, type}
+		: TransitionBase{destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{move(payload)};
@@ -275,11 +275,11 @@ struct alignas(4) TransitionT final
 	//----------------------------------------------------------------------
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT(const StateID origin,
-				const StateID destination,
-				const TransitionType type,
+	TransitionT(const StateID origin_,
+				const StateID destination_,
+				const TransitionType type_,
 				const Payload& payload)								  noexcept
-		: TransitionBase{origin, destination, type}
+		: TransitionBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{payload};
@@ -288,12 +288,11 @@ struct alignas(4) TransitionT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT(const StateID origin,
-				const StateID destination,
-				const TransitionType type,
+	TransitionT(const StateID origin_,
+				const StateID destination_,
+				const TransitionType type_,
 				Payload&& payload)									  noexcept
-		: TransitionBase{origin, destination, type}
-		, payloadSet{true}
+		: TransitionBase{origin_, destination_, type_}
 	{
 		new (&storage) Payload{move(payload)};
 	}
@@ -302,7 +301,7 @@ struct alignas(4) TransitionT final
 
 	HFSM2_CONSTEXPR(11)
 	bool
-	operator == (const TransitionT& other)						const noexcept {
+	operator == (const TransitionT& other)						const noexcept	{
 		return TransitionBase::operator == (other) &&
 			   (payloadSet ==  other.payloadSet);
 		//	  (!payloadSet && !other.payloadSet || payload ==  other.payload);
@@ -312,7 +311,7 @@ struct alignas(4) TransitionT final
 
 	HFSM2_CONSTEXPR(11)
 	bool
-	operator != (const TransitionT& other)						const noexcept {
+	operator != (const TransitionT& other)						const noexcept	{
 		return TransitionBase::operator != (other) ||
 			   (payloadSet != other.payloadSet);
 		//	   (payloadSet |= other.payloadSet || payload != other.payload);
@@ -322,7 +321,7 @@ struct alignas(4) TransitionT final
 
 	HFSM2_CONSTEXPR(11)
 	const Payload*
-	payload()													const noexcept {
+	payload()													const noexcept	{
 		return payloadSet ?
 			reinterpret_cast<const Payload*>(&storage) : nullptr;
 	}

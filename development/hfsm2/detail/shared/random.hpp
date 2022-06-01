@@ -19,7 +19,7 @@ class SimpleRandomT;
 template <>
 class SimpleRandomT<8> {
 public:
-	constexpr SimpleRandomT()								  noexcept {}
+	constexpr SimpleRandomT()								  noexcept	{}
 
 	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint64_t seed)	  noexcept;
 
@@ -39,7 +39,7 @@ private:
 template <>
 class SimpleRandomT<4> {
 public:
-	HFSM2_CONSTEXPR(11)	SimpleRandomT()						  noexcept {}
+	HFSM2_CONSTEXPR(11)	SimpleRandomT()						  noexcept	{}
 
 	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint32_t seed)	  noexcept;
 
@@ -126,7 +126,7 @@ public:
 	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
 
 	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept;
-	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept	{ return (uint32_t) uint64();		}
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept	{ return static_cast<uint32_t>(uint64());	}
 
 	HFSM2_CONSTEXPR(14)	float next()						  noexcept	{ return float32();					}
 	HFSM2_CONSTEXPR(14)	void  jump()						  noexcept;
@@ -175,7 +175,7 @@ public:
 	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
 
 	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept;
-	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept	{ return (uint32_t) uint64();		}
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept	{ return static_cast<uint32_t>(uint64());	}
 
 	HFSM2_CONSTEXPR(14)	void jump()							  noexcept;
 };

@@ -57,7 +57,7 @@ operator |= (Status& lhs, const Status rhs)							  noexcept	{
 template <>
 HFSM2_CONSTEXPR(11)
 Status
-filler<Status>() noexcept {
+filler<Status>()													  noexcept	{
 	return Status{};
 }
 
