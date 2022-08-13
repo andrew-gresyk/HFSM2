@@ -127,7 +127,7 @@ using UCapacity = Conditional<N < (1ull <<  8),  uint8_t,
 
 HFSM2_CONSTEXPR(11)
 Short
-bitContain(const Short v)							  noexcept	{
+bitContain(const Short v)												noexcept	{
 	return v <= 1 << 0 ? 0 :
 		   v <= 1 << 1 ? 1 :
 		   v <= 1 << 2 ? 2 :
@@ -152,7 +152,7 @@ using UBitWidth = Conditional<N <=  8,  uint8_t,
 template <typename T>
 HFSM2_CONSTEXPR(11)
 T&&
-forward(RemoveReference<T>& t)						  noexcept	{
+forward(RemoveReference<T>& t)											noexcept	{
 	return static_cast<T&&>(t);
 }
 
@@ -161,7 +161,7 @@ forward(RemoveReference<T>& t)						  noexcept	{
 template <typename T>
 HFSM2_CONSTEXPR(11)
 T&&
-forward(RemoveReference<T>&& t)						  noexcept	{
+forward(RemoveReference<T>&& t)											noexcept	{
 	static_assert(!IsValueReferenceT<T>::VALUE, "");
 
 	return static_cast<T&&>(t);
@@ -172,7 +172,7 @@ forward(RemoveReference<T>&& t)						  noexcept	{
 template <typename T>
 HFSM2_CONSTEXPR(11)
 RemoveReference<T>&&
-move(T&& t)											  noexcept	{
+move(T&& t)																noexcept	{
 	return static_cast<RemoveReference<T>&&>(t);
 }
 
@@ -183,7 +183,7 @@ template <typename T0,
 HFSM2_CONSTEXPR(11)
 T0
 min(const T0 t0,
-	const T1 t1)									  noexcept
+	const T1 t1)														noexcept
 {
 	return t0 < static_cast<T0>(t1) ?
 		   t0 : static_cast<T0>(t1);
@@ -196,7 +196,7 @@ template <typename T0,
 HFSM2_CONSTEXPR(11)
 T0
 max(const T0 t0,
-	const T1 t1)									  noexcept
+	const T1 t1)														noexcept
 {
 	return t0 > static_cast<T0>(t1) ?
 		   t0 : static_cast<T0>(t1);
@@ -209,7 +209,7 @@ template <typename TIndex,
 		  TIndex NCount>
 HFSM2_CONSTEXPR(11)
 TIndex
-count(const TElement(&)[NCount])					  noexcept	{
+count(const TElement(&)[NCount])										noexcept	{
 	return NCount;
 }
 
@@ -220,27 +220,27 @@ template <typename T,
 HFSM2_CONSTEXPR(11)
 T
 contain(const T x,
-		const TT to)								  noexcept	{ return (x + static_cast<T>(to) - 1) / static_cast<T>(to);	}
+		const TT to)													noexcept	{ return (x + static_cast<T>(to) - 1) / static_cast<T>(to);	}
 
 //------------------------------------------------------------------------------
 
 HFSM2_CONSTEXPR(11)
 uint64_t
-widen(const uint32_t x, const uint32_t y)			  noexcept	{ return static_cast<uint64_t>(x) << 32 | y;	}
+widen(const uint32_t x, const uint32_t y)								noexcept	{ return static_cast<uint64_t>(x) << 32 | y;	}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 HFSM2_CONSTEXPR(14)
 void
-fill(T& a, const char value)						  noexcept	{ memset(&a, static_cast<int>(value), sizeof(a));	}
+fill(T& a, const char value)											noexcept	{ memset(&a, static_cast<int>(value), sizeof(a));	}
 
 //------------------------------------------------------------------------------
 
 template <typename T>
 HFSM2_CONSTEXPR(14)
 void
-swap(T& l, T& r)									  noexcept	{
+swap(T& l, T& r)														noexcept	{
 	T t = move(l);
 	l = move(r);
 	r = move(t);
@@ -252,7 +252,7 @@ template <typename TTo,
 		  typename TFrom>
 HFSM2_CONSTEXPR(14)
 void
-overwrite(TTo& to, const TFrom& from)				  noexcept	{
+overwrite(TTo& to, const TFrom& from)									noexcept	{
 	static_assert(sizeof(TTo) == sizeof(TFrom), "");
 
 #if defined(__GNUC__) || defined(__GNUG__)
@@ -268,7 +268,7 @@ template <typename TO,
 		  typename TI>
 HFSM2_CONSTEXPR(14)
 TO
-reinterpret(const TI& in)							  noexcept	{
+reinterpret(const TI& in)												noexcept	{
 	TO out{};
 
 	overwrite(out, in);

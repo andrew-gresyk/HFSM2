@@ -151,6 +151,21 @@ CS_<TN, TA, SG, NI, TL_<T>>::widePostReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
+template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<T>>::wideQuery(ConstControl& control,
+									   TEvent& event,
+									   const Short HFSM2_IF_ASSERT(prong)) const noexcept
+{
+	HFSM2_ASSERT(prong == PRONG_INDEX);
+
+	return Single::deepQuery(control, event);
+}
+
+//------------------------------------------------------------------------------
+
 #if HFSM2_PLANS_AVAILABLE()
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>

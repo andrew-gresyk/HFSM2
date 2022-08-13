@@ -74,6 +74,9 @@
     <Topleveldir>/Work/HFSM2-experimental</Topleveldir>
   </Reconciliation>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_query.cpp"/>
+    <File Name="../../../test/test_plan_external_payloads.cpp"/>
+    <File Name="../../../test/test_plan_external.cpp"/>
     <File Name="../../../test/wiki_tutorial.cpp"/>
     <File Name="../../../test/wiki_transitions-within-hierarchy.cpp"/>
     <File Name="../../../test/wiki_serialization.cpp"/>

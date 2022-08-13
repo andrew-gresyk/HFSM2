@@ -37,7 +37,7 @@ struct alignas(alignof(void*)) StructureStateInfo final {
 	StructureStateInfo(const Long parent_,
 					   const RegionType regionType_,
 					   const Short depth_,
-					   const char* const name_)						  noexcept
+					   const char* const name_)							noexcept
 		: name{name_}
 		, parent{parent_}
 		, regionType{regionType_ }

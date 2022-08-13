@@ -78,7 +78,7 @@ struct Logger
 		}
 	}
 
-	void recordTransition(Context& /*context*/,
+	void recordTransition(const Context& /*context*/,
 						  const StateID origin,
 						  const TransitionType /*transition*/,
 						  const StateID target) noexcept override

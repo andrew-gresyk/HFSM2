@@ -235,29 +235,10 @@ TEST_CASE("FSM.Delayed Teardown") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.changeTo<Step2   >();
-		machine.update();
+		machine.immediateChangeTo<Step2   >();
 		{
 			logger.assertSequence({
 				{							Event::Type::CHANGE,		FSM::stateId<Step2>() },
-
-				{ FSM::stateId<Apex    >(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<Step1   >(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<Step1_1 >(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<Step1_2 >(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<Work    >(),	Event::Type::PRE_UPDATE },
-
-				{ FSM::stateId<Apex    >(),	Event::Type::UPDATE },
-				{ FSM::stateId<Step1   >(),	Event::Type::UPDATE },
-				{ FSM::stateId<Step1_1 >(),	Event::Type::UPDATE },
-				{ FSM::stateId<Step1_2 >(),	Event::Type::UPDATE },
-				{ FSM::stateId<Work    >(),	Event::Type::UPDATE },
-
-				{ FSM::stateId<Step1_1 >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Work    >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Step1_2 >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Step1   >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Apex    >(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<Step1   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1 >(),	Event::Type::EXIT_GUARD },

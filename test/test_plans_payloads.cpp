@@ -91,10 +91,7 @@ static_assert(FSM::stateId<Work_2    >() == 18, "");
 // TODO: make use of planFailed()
 // TODO: build a plan with re-entry
 
-struct Apex
-	: FSM::State
-{
-};
+struct Apex : FSM::State {};
 
 //------------------------------------------------------------------------------
 
@@ -281,7 +278,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Plan payloads") {
+TEST_CASE("FSM.Plan (payloads)") {
 	Logger logger;
 
 	{
@@ -336,7 +333,7 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId<Step1_2   >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT },
+				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT  },
 				{ FSM::stateId<Step1_2   >(), Event::Type::ENTER },
 			});
 
@@ -376,7 +373,7 @@ TEST_CASE("FSM.Plan payloads") {
 
 				{ FSM::stateId <Step1_BT  >(), Event::Type::CHANGE,			FSM::stateId<Step1_3  >() },
 
-				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId <Step1_3   >(), Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT },
@@ -494,15 +491,15 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,			FSM::stateId<Step2L_2  >() },
 				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,			FSM::stateId<Step2R_2  >() },
 
-				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT_GUARD },
-				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId <Step2L_2  >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId <Step2R_2  >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT  },
 				{ FSM::stateId <Step2L_2  >(), Event::Type::ENTER },
 
-				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT  },
 				{ FSM::stateId <Step2R_2  >(), Event::Type::ENTER },
 			});
 
@@ -559,7 +556,7 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId <Apex      >(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId <Hybrid    >(), Event::Type::PLAN_FAILED },
-				{ FSM::regionId<Hybrid    >(), Event::Type::TASK_SUCCESS,	  FSM::stateId<Hybrid   >()   },
+				{ FSM::regionId<Hybrid    >(), Event::Type::TASK_SUCCESS,	  FSM::stateId<Hybrid   >() },
 				{ FSM::regionId<Hybrid    >(), Event::Type::PLAN_SUCCESS },
 
 				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,			  FSM::stateId<Terminal >() },
@@ -573,15 +570,15 @@ TEST_CASE("FSM.Plan payloads") {
 				{ FSM::stateId <Terminal_L>(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId <Terminal_R>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step2L_2  >(), Event::Type::EXIT	},
-				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT	},
-				{ FSM::stateId <Step2R_2  >(), Event::Type::EXIT	},
-				{ FSM::stateId <Step2R_P  >(), Event::Type::EXIT	},
-				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT	},
+				{ FSM::stateId <Step2L_2  >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2R_2  >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2R_P  >(), Event::Type::EXIT },
+				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT },
 
-				{ FSM::stateId <Terminal  >(), Event::Type::ENTER	},
-				{ FSM::stateId <Terminal_L>(), Event::Type::ENTER	},
-				{ FSM::stateId <Terminal_R>(), Event::Type::ENTER	},
+				{ FSM::stateId <Terminal  >(), Event::Type::ENTER },
+				{ FSM::stateId <Terminal_L>(), Event::Type::ENTER },
+				{ FSM::stateId <Terminal_R>(), Event::Type::ENTER },
 			});
 
 			assertActive(machine, all, {

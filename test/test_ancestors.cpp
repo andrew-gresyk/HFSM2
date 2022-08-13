@@ -101,33 +101,33 @@ template <typename T>
 struct AncestorT
 	: FSM::State
 {
-	void entryGuard		  (GuardControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::ENTRY_GUARD);	REQUIRE(control.stateId() == control.stateId<T>());	}
+	void entryGuard		  (GuardControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::ENTRY_GUARD);	REQUIRE(control.stateId() == stateId<T>());	}
 
-	void enter			  ( PlanControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::ENTER);		REQUIRE(control.stateId() == control.stateId<T>());	}
-	void reenter		  ( PlanControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::REENTER);		REQUIRE(control.stateId() == control.stateId<T>());	}
+	void enter			  ( PlanControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::ENTER);		REQUIRE(control.stateId() == stateId<T>());	}
+	void reenter		  ( PlanControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::REENTER);		REQUIRE(control.stateId() == stateId<T>());	}
 
-	void preUpdate		  ( FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::PRE_UPDATE);	REQUIRE(control.stateId() == control.stateId<T>());	}
-	void update			  ( FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::UPDATE);		REQUIRE(control.stateId() == control.stateId<T>());	}
-	void postUpdate		  ( FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::POST_UPDATE);	REQUIRE(control.stateId() == control.stateId<T>());	}
+	void preUpdate		  ( FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::PRE_UPDATE);	REQUIRE(control.stateId() == stateId<T>());	}
+	void update			  ( FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::UPDATE);		REQUIRE(control.stateId() == stateId<T>());	}
+	void postUpdate		  ( FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::POST_UPDATE);	REQUIRE(control.stateId() == stateId<T>());	}
 
 	void preReact		  (const Event&,
-							FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::PRE_REACT);	REQUIRE(control.stateId() == control.stateId<T>());	}
+							FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::PRE_REACT);	REQUIRE(control.stateId() == stateId<T>());	}
 
 	void react			  (const Event&,
-							FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::REACT);		REQUIRE(control.stateId() == control.stateId<T>());	}
+							FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::REACT);		REQUIRE(control.stateId() == stateId<T>());	}
 
 	void postReact		  (const Event&,
-							FullControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::POST_REACT);	REQUIRE(control.stateId() == control.stateId<T>());	}
+							FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::POST_REACT);	REQUIRE(control.stateId() == stateId<T>());	}
 
-	void exitGuard		  (GuardControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::EXIT_GUARD);	REQUIRE(control.stateId() == control.stateId<T>());	}
+	void exitGuard		  (GuardControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::EXIT_GUARD);	REQUIRE(control.stateId() == stateId<T>());	}
 
-	void exit			  ( PlanControl& control)	{ control._().emplace_back(control.stateId<T>(), Event::Type::EXIT);		REQUIRE(control.stateId() == control.stateId<T>());	}
+	void exit			  ( PlanControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::EXIT);		REQUIRE(control.stateId() == stateId<T>());	}
 };
 
 //------------------------------------------------------------------------------
 
 struct R
-	: FSM::AncestorsT<AncestorT<R>>
+	: FSM::StateT<AncestorT<R>>
 {
 	void entryGuard(GuardControl& control) {
 		control.changeTo<B>();
@@ -137,13 +137,13 @@ struct R
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct A
-	: FSM::AncestorsT<AncestorT<A>>
+	: FSM::StateT<AncestorT<A>>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B
-	: FSM::AncestorsT<AncestorT<B>>
+	: FSM::StateT<AncestorT<B>>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////

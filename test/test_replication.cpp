@@ -226,7 +226,7 @@ static_assert(server::FSM::Instance::Info::ORTHO_UNITS   == client::FSM::Instanc
 TEST_CASE("FSM.Replication") {
 	Logger logger;
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	server::FSM::Instance authority {&logger};
 	client::FSM::Instance replicated{&logger};
@@ -238,7 +238,7 @@ TEST_CASE("FSM.Replication") {
 		assertResumable(replicated, client::all, {});
 	}
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	authority.enter();
 	{
@@ -254,8 +254,7 @@ TEST_CASE("FSM.Replication") {
 		assertLastTransitions(authority, client::all, {});
 	}
 
-	authority.changeTo<server::O2_C2_S2>();
-	authority.update();
+	authority.immediateChangeTo<server::O2_C2_S2>();
 	{
 		assertActive(authority,  server::all, {
 			server::FSM::stateId<server::O2      >(),
@@ -316,10 +315,9 @@ TEST_CASE("FSM.Replication") {
 		REQUIRE(replicated.lastTransitionTo<client::O2_C2_S2>() == &previousTransitions[0]);
 	}
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	authority.changeTo<server::O2_C1_S2>();
-	authority.update();
+	authority.immediateChangeTo<server::O2_C1_S2>();
 	{
 		assertActive(authority, server::all, {
 			server::FSM::stateId<server::O2      >(),
@@ -375,7 +373,7 @@ TEST_CASE("FSM.Replication") {
 		REQUIRE(replicated.lastTransitionTo<client::O2_C1_S2>() == &previousTransitions[0]);
 	}
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	authority.changeTo<server::O2_C1_S1>();
 	authority.changeTo<server::O2_C2_S2>();
@@ -439,7 +437,7 @@ TEST_CASE("FSM.Replication") {
 		REQUIRE(replicated.lastTransitionTo<client::O2_C1_S1>() == &previousTransitions[1]);
 	}
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	replicated.reset();
 	{
@@ -455,10 +453,9 @@ TEST_CASE("FSM.Replication") {
 		assertLastTransitions(replicated, client::all, {});
 	}
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	authority.changeTo<server::C1_C2_S2>();
-	authority.update();
+	authority.immediateChangeTo<server::C1_C2_S2>();
 	{
 		assertActive(authority,  server::all, {
 			server::FSM::stateId<server::O2      >(),
@@ -479,7 +476,7 @@ TEST_CASE("FSM.Replication") {
 		assertLastTransitions(authority, server::all, {});
 	}
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	authority .exit();
 	replicated.exit();
@@ -488,7 +485,7 @@ TEST_CASE("FSM.Replication") {
 		assertActive(replicated, client::all, {});
 	}
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 
 ////////////////////////////////////////////////////////////////////////////////

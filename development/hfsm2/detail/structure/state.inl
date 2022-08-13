@@ -201,15 +201,15 @@ Status
 S_<TN_, TA, TH>::deepPreReact(FullControl& control,
 							  const TEvent& event) noexcept
 {
-	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::preReact);
+	auto method = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::preReact);
 
-	HFSM2_LOG_STATE_METHOD(reaction,
+	HFSM2_LOG_STATE_METHOD(method,
 						   Method::PRE_REACT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
 	Head::widePreReact(event, control);
-	(this->*reaction) (event, control);
+	(this->*method) (event, control);
 
 	return control._status;
 }
@@ -223,15 +223,15 @@ Status
 S_<TN_, TA, TH>::deepReact(FullControl& control,
 						   const TEvent& event) noexcept
 {
-	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::react);
+	auto method = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::react);
 
-	HFSM2_LOG_STATE_METHOD(reaction,
+	HFSM2_LOG_STATE_METHOD(method,
 						   Method::REACT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	Head::	wideReact(event, control);
-	(this->*reaction)(event, control);
+	Head::wideReact(event, control);
+	(this->*method)(event, control);
 
 	return control._status;
 }
@@ -245,18 +245,57 @@ Status
 S_<TN_, TA, TH>::deepPostReact(FullControl& control,
 							   const TEvent& event) noexcept
 {
-	auto reaction = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::postReact);
+	auto method = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::postReact);
 
-	HFSM2_LOG_STATE_METHOD(reaction,
+	HFSM2_LOG_STATE_METHOD(method,
 						   Method::POST_REACT);
 
 	ScopedOrigin origin{control, STATE_ID};
 
-	(this->*reaction)  (event, control);
+	(this->*method)	   (event, control);
 	Head::widePostReact(event, control);
 
 	return control._status;
 }
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA, typename TH>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+void
+S_<TN_, TA, TH>::deepQuery(ConstControl& control,
+						   TEvent&  event) const noexcept
+{
+	auto method = static_cast<void (Head::*)(TEvent&, ConstControl&) const>(&Head::query);
+
+	HFSM2_LOG_STATE_METHOD(method,
+						   Method::QUERY);
+
+	ScopedCOrigin origin{control, STATE_ID};
+
+	(this->*method)(event, control);
+	Head::wideQuery(event, control);
+}
+
+//------------------------------------------------------------------------------
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TN_, typename TA, typename TH>
+HFSM2_CONSTEXPR(14)
+Status
+S_<TN_, TA, TH>::deepUpdatePlans(FullControl& control) noexcept {
+	if (control._core.planData.tasksFailures .get(STATE_ID))
+		return Status{Status::Result::FAILURE};
+	else
+	if (control._core.planData.tasksSuccesses.get(STATE_ID))
+		return Status{Status::Result::SUCCESS};
+	else
+		return Status{};
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 

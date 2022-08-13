@@ -1,6 +1,22 @@
 namespace hfsm2 {
 namespace detail {
 
+////////////////////////////////////////////////////////////////////////////////
+
+HFSM2_CONSTEXPR(11)
+Status::Status(const Result result_,
+			   const bool outerTransition_) noexcept
+	: result{result_}
+	, outerTransition{outerTransition_}
+{}
+
+//------------------------------------------------------------------------------
+
+HFSM2_CONSTEXPR(11)
+Status::operator bool() const noexcept	{
+	return result != Result::NONE || outerTransition;
+}
+
 //------------------------------------------------------------------------------
 
 HFSM2_CONSTEXPR(14)
@@ -8,6 +24,43 @@ void
 Status::clear() noexcept {
 	result = Result::NONE;
 	outerTransition = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+HFSM2_CONSTEXPR(14)
+Status
+operator | (Status& lhs,
+			const Status rhs) noexcept
+{
+	const Status::Result result = lhs.result > rhs.result ?
+		lhs.result : rhs.result;
+
+	return Status{result, lhs.outerTransition || rhs.outerTransition};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+HFSM2_CONSTEXPR(14)
+Status&
+operator |= (Status& lhs,
+			 const Status rhs) noexcept
+{
+	const Status::Result result = lhs.result > rhs.result ?
+		lhs.result : rhs.result;
+
+	lhs = Status{result, lhs.outerTransition || rhs.outerTransition};
+
+	return lhs;
+}
+
+//------------------------------------------------------------------------------
+
+template <>
+HFSM2_CONSTEXPR(11)
+Status
+filler<Status>() noexcept {
+	return Status{};
 }
 
 ////////////////////////////////////////////////////////////////////////////////

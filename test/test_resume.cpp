@@ -110,21 +110,11 @@ TEST_CASE("FSM.Resumable") {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		machine.changeTo<OR_2>();
-		machine.changeTo<OC_2>();
-		machine.update();
+		machine.immediateChangeTo<OC_2>();
 		{
 			logger.assertSequence({
 				{						Event::Type::CHANGE, FSM::stateId<OR_2>() },
 				{						Event::Type::CHANGE, FSM::stateId<OC_2>() },
-
-				{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
-
-				{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::UPDATE },
-
-				{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<O   >(),	Event::Type::ENTRY_GUARD },
@@ -157,32 +147,10 @@ TEST_CASE("FSM.Resumable") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.resume<Apex>();
-		machine.update();
+		machine.immediateResume<Apex>();
 		{
 			logger.assertSequence({
 				{						Event::Type::RESUME, FSM::stateId<Apex>() },
-
-				{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<O   >(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<OR  >(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<OR_2>(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<OC  >(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<OC_2>(),	Event::Type::PRE_UPDATE },
-
-				{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-				{ FSM::stateId<O   >(),	Event::Type::UPDATE },
-				{ FSM::stateId<OR  >(),	Event::Type::UPDATE },
-				{ FSM::stateId<OR_2>(),	Event::Type::UPDATE },
-				{ FSM::stateId<OC  >(),	Event::Type::UPDATE },
-				{ FSM::stateId<OC_2>(),	Event::Type::UPDATE },
-
-				{ FSM::stateId<OR_2>(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<OR  >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<OC_2>(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<OC  >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<O   >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<O   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<OR  >(),	Event::Type::EXIT_GUARD },
@@ -217,20 +185,10 @@ TEST_CASE("FSM.Resumable") {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		WHEN("Changing to Apex") {
-			machine.changeTo<Apex>();
-			machine.update();
+			machine.immediateChangeTo<Apex>();
 
 			logger.assertSequence({
 				{						Event::Type::CHANGE, FSM::stateId<Apex>() },
-
-				{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
-
-				{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::UPDATE },
-
-				{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<O   >(),	Event::Type::ENTRY_GUARD },
@@ -265,20 +223,10 @@ TEST_CASE("FSM.Resumable") {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		WHEN("Restarting O") {
-			machine.restart<O>();
-			machine.update();
+			machine.immediateRestart<O>();
 
 			logger.assertSequence({
 				{						Event::Type::RESTART, FSM::stateId<O   >() },
-
-				{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
-
-				{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::UPDATE },
-
-				{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<O   >(),	Event::Type::ENTRY_GUARD },
@@ -314,20 +262,10 @@ TEST_CASE("FSM.Resumable") {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		WHEN("Resuming Apex") {
-			machine.resume<Apex>();
-			machine.update();
+			machine.immediateResume<Apex>();
 
 			logger.assertSequence({
 				{						Event::Type::RESUME, FSM::stateId<Apex>() },
-
-				{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
-
-				{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::UPDATE },
-
-				{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<I   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<O   >(),	Event::Type::ENTRY_GUARD },

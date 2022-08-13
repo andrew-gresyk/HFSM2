@@ -140,20 +140,10 @@ TEST_CASE("FSM.Utilize") {
 	}
 
 	WHEN("Changing to O") {
-		machine.changeTo<O>();
-		machine.update();
+		machine.immediateChangeTo<O>();
 
 		logger.assertSequence({
 			{						 Event::Type::CHANGE, FSM::stateId<O   >() },
-
-			{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
-			{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
-
-			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
-			{ FSM::stateId<I    >(), Event::Type::UPDATE },
-
-			{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
-			{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<U_000>(), Event::Type::UTILITY },
 			{ FSM::stateId<U_025>(), Event::Type::UTILITY },
@@ -194,20 +184,10 @@ TEST_CASE("FSM.Utilize") {
 	}
 
 	WHEN("Restarting O") {
-		machine.restart<O>();
-		machine.update();
+		machine.immediateRestart<O>();
 
 		logger.assertSequence({
 			{						 Event::Type::RESTART, FSM::stateId<O   >() },
-
-			{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
-			{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
-
-			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
-			{ FSM::stateId<I    >(), Event::Type::UPDATE },
-
-			{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
-			{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
 			{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
@@ -240,20 +220,10 @@ TEST_CASE("FSM.Utilize") {
 	}
 
 	WHEN("Utilizing O") {
-		machine.utilize<O>();
-		machine.update();
+		machine.immediateUtilize<O>();
 
 		logger.assertSequence({
 			{						 Event::Type::UTILIZE, FSM::stateId<O   >() },
-
-			{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
-			{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
-
-			{ FSM::stateId<Apex >(), Event::Type::UPDATE },
-			{ FSM::stateId<I    >(), Event::Type::UPDATE },
-
-			{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
-			{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<U_000>(), Event::Type::UTILITY },
 			{ FSM::stateId<U_025>(), Event::Type::UTILITY },

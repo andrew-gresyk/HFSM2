@@ -204,20 +204,10 @@ TEST_CASE("FSM.Utility Regions") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.changeTo<F>();
-		machine.update();
+		machine.immediateChangeTo<F>();
 		{
 			logger.assertSequence({
 				{						Event::Type::CHANGE, FSM::stateId<F   >() },
-
-				{ FSM::stateId<Apex>(), Event::Type::PRE_UPDATE },
-				{ FSM::stateId<I   >(), Event::Type::PRE_UPDATE },
-
-				{ FSM::stateId<Apex>(), Event::Type::UPDATE },
-				{ FSM::stateId<I   >(), Event::Type::UPDATE },
-
-				{ FSM::stateId<I   >(), Event::Type::POST_UPDATE },
-				{ FSM::stateId<Apex>(), Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<C   >(), Event::Type::UTILITY },
 				{ FSM::stateId<C_1 >(), Event::Type::UTILITY },

@@ -125,6 +125,18 @@ OS_<TN, TA, NI, TI>::widePostReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
+template <typename TN, typename TA, Short NI, typename TI>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+void
+OS_<TN, TA, NI, TI>::wideQuery(ConstControl& control,
+							   TEvent& event) const noexcept
+{
+	Initial		   ::wideQuery(				 control, event);
+}
+
+//------------------------------------------------------------------------------
+
 #if HFSM2_PLANS_AVAILABLE()
 
 template <typename TN, typename TA, Short NI, typename TI>
@@ -366,7 +378,7 @@ HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
 								  const Short depth,
-								  StructureStateInfos& _stateInfos) const
+								  StructureStateInfos& _stateInfos) const noexcept
 {
 	Initial		   ::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
 }

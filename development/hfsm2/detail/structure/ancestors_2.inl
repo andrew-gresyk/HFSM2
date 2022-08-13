@@ -94,6 +94,18 @@ A_<TF>::widePostReact(const TEvent& event,
 //------------------------------------------------------------------------------
 
 template <typename TF>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF>::wideQuery(TEvent& event,
+				  ConstControl& control) const noexcept
+{
+	TF::	query(		  event, control);
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TF>
 HFSM2_CONSTEXPR(14)
 void
 A_<TF>::wideExitGuard(GuardControl& control) noexcept {

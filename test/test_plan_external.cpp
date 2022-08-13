@@ -6,7 +6,7 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
-namespace test_plans {
+namespace test_plan_external {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -81,21 +81,13 @@ static_assert(FSM::stateId<Work_2    >() == 18, "");
 // TODO: make use of planFailed()
 // TODO: build a plan with re-entry
 
-struct Apex	  : FSM::State {};
+struct Apex : FSM::State {};
 
 //------------------------------------------------------------------------------
 
 struct Planned
 	: FSM::State
 {
-	void enter(PlanControl& control) {
-		auto plan = control.plan<Planned>();
-		REQUIRE(!plan); //-V521
-
-		REQUIRE(plan.change<Step1_BT, Hybrid>());
-		REQUIRE(plan.restart<Hybrid, Terminal>());
-	}
-
 	void planFailed(FullControl& control) {
 		control.succeed();
 	}
@@ -103,16 +95,7 @@ struct Planned
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct Step1_BT
-	: FSM::State
-{
-	void enter(PlanControl& control) {
-		Plan plan = control.plan();
-		REQUIRE(!plan); //-V521
-
-		REQUIRE(plan.resume<Step1_2, Step1_3>());
-	}
-};
+struct Step1_BT : FSM::State {};
 
 struct Step1_1
 	: FSM::State
@@ -132,25 +115,13 @@ struct Step1_2
 
 struct Step1_3
 	: FSM::State
-{
-	void update(FullControl& control) {
-		control.succeed();
-	}
-};
+{};
 
 //------------------------------------------------------------------------------
 
 struct Hybrid
 	: FSM::State
 {
-	void enter(PlanControl& control) {
-		auto plan = control.plan();
-		REQUIRE(!plan); //-V521
-
-		REQUIRE(plan.utilize<Step2L_1, Step2L_2>());
-		REQUIRE(plan.randomize<Step2R_1, Step2R_2>());
-	}
-
 	void planFailed(FullControl& control) {
 		control.succeed();
 	}
@@ -197,10 +168,6 @@ struct Step2R_2
 {
 	Rank rank(const Control&) {
 		return 1;
-	}
-
-	void update(FullControl& control) {
-		control.fail();
 	}
 };
 
@@ -268,7 +235,7 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Plans") {
+TEST_CASE("FSM.External Plans") {
 	Logger logger;
 
 	{
@@ -323,7 +290,7 @@ TEST_CASE("FSM.Plans") {
 				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId<Step1_2   >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT  },
+				{ FSM::stateId<Step1_1   >(), Event::Type::EXIT },
 				{ FSM::stateId<Step1_2   >(), Event::Type::ENTER },
 			});
 
@@ -341,6 +308,12 @@ TEST_CASE("FSM.Plans") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+		{
+			auto plan = machine.plan<Step1_BT>();
+			REQUIRE(!plan);
+
+			REQUIRE(plan.resume<Step1_2, Step1_3>());
+		}
 		machine.update();
 		{
 			logger.assertSequence({
@@ -363,7 +336,7 @@ TEST_CASE("FSM.Plans") {
 
 				{ FSM::stateId <Step1_BT  >(), Event::Type::CHANGE,			FSM::stateId<Step1_3  >() },
 
-				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId <Step1_3   >(), Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId <Step1_2   >(), Event::Type::EXIT },
@@ -385,9 +358,19 @@ TEST_CASE("FSM.Plans") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+		{
+			auto plan = machine.plan();
+			REQUIRE(!plan);
+
+			REQUIRE(plan.change<Step1_BT, Hybrid>());
+			REQUIRE(plan.restart<Hybrid, Terminal>());
+		}
+		machine.succeed<Step1_3>();
 		machine.update();
 		{
 			logger.assertSequence({
+				{ hfsm2::INVALID_REGION_ID	 , Event::Type::TASK_SUCCESS,		FSM::stateId<Step1_3   >() },
+
 				{ FSM::stateId <Apex      >(), Event::Type::PRE_UPDATE },
 				{ FSM::stateId <Planned   >(), Event::Type::PRE_UPDATE },
 				{ FSM::stateId <Step1_BT  >(), Event::Type::PRE_UPDATE },
@@ -398,8 +381,6 @@ TEST_CASE("FSM.Plans") {
 				{ FSM::stateId <Step1_BT  >(), Event::Type::UPDATE },
 				{ FSM::stateId <Step1_3   >(), Event::Type::UPDATE },
 
-				{ FSM::regionId<Step1_BT  >(), Event::Type::TASK_SUCCESS,		FSM::stateId<Step1_3   >() },
-
 				{ FSM::stateId <Step1_3   >(), Event::Type::POST_UPDATE },
 				{ FSM::stateId <Step1_BT  >(), Event::Type::POST_UPDATE },
 				{ FSM::stateId <Planned   >(), Event::Type::POST_UPDATE },
@@ -408,7 +389,7 @@ TEST_CASE("FSM.Plans") {
 				{ FSM::stateId <Step1_BT  >(), Event::Type::PLAN_SUCCEEDED },
 				{ FSM::regionId<Step1_BT  >(), Event::Type::TASK_SUCCESS,		FSM::stateId<Step1_BT  >() },
 				{ FSM::regionId<Step1_BT  >(), Event::Type::PLAN_SUCCESS },
-				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,				FSM::stateId<Hybrid    >() },
+				{ FSM::stateId <Apex      >(), Event::Type::CHANGE,				FSM::stateId<Hybrid    >() },
 
 				{ FSM::stateId <Step1_BT  >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId <Step1_3   >(), Event::Type::EXIT_GUARD  },
@@ -446,6 +427,13 @@ TEST_CASE("FSM.Plans") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+		{
+			auto plan = machine.plan<Hybrid>();
+			REQUIRE(!plan);
+
+			REQUIRE(plan.utilize<Step2L_1, Step2L_2>());
+			REQUIRE(plan.randomize<Step2R_1, Step2R_2>());
+		}
 		machine.update();
 		{
 			logger.assertSequence({
@@ -481,15 +469,15 @@ TEST_CASE("FSM.Plans") {
 				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,			FSM::stateId<Step2L_2  >() },
 				{ FSM::stateId <Hybrid    >(), Event::Type::CHANGE,			FSM::stateId<Step2R_2  >() },
 
-				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT_GUARD  },
-				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT_GUARD  },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId <Step2L_2  >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId <Step2R_2  >(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT  },
+				{ FSM::stateId <Step2L_1  >(), Event::Type::EXIT },
 				{ FSM::stateId <Step2L_2  >(), Event::Type::ENTER },
 
-				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT  },
+				{ FSM::stateId <Step2R_1  >(), Event::Type::EXIT },
 				{ FSM::stateId <Step2R_2  >(), Event::Type::ENTER },
 			});
 
@@ -513,9 +501,12 @@ TEST_CASE("FSM.Plans") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+		machine.fail<Step2R_2>();
 		machine.update();
 		{
 			logger.assertSequence({
+				{ hfsm2::INVALID_REGION_ID	 , Event::Type::TASK_FAILURE,	  FSM::stateId<Step2R_2 >() },
+
 				{ FSM::stateId <Apex      >(), Event::Type::PRE_UPDATE },
 				{ FSM::stateId <Planned   >(), Event::Type::PRE_UPDATE },
 				{ FSM::stateId <Hybrid    >(), Event::Type::PRE_UPDATE },
@@ -535,8 +526,6 @@ TEST_CASE("FSM.Plans") {
 				{ FSM::stateId <Step2R_P  >(), Event::Type::UPDATE },
 				{ FSM::stateId <Step2R_2  >(), Event::Type::UPDATE },
 
-				{ FSM::regionId<Step2R_P  >(), Event::Type::TASK_FAILURE,	  FSM::stateId<Step2R_2 >() },
-
 				{ FSM::stateId <Step2L_2  >(), Event::Type::POST_UPDATE },
 				{ FSM::stateId <Step2L_P  >(), Event::Type::POST_UPDATE },
 				{ FSM::stateId <Step2R_2  >(), Event::Type::POST_UPDATE },
@@ -549,7 +538,7 @@ TEST_CASE("FSM.Plans") {
 				{ FSM::regionId<Hybrid    >(), Event::Type::TASK_SUCCESS,	  FSM::stateId<Hybrid   >() },
 				{ FSM::regionId<Hybrid    >(), Event::Type::PLAN_SUCCESS },
 
-				{ FSM::stateId <Planned   >(), Event::Type::CHANGE,			  FSM::stateId<Terminal >() },
+				{ FSM::stateId <Apex      >(), Event::Type::CHANGE,			  FSM::stateId<Terminal >() },
 
 				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT_GUARD  },
 				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT_GUARD  },
@@ -560,15 +549,15 @@ TEST_CASE("FSM.Plans") {
 				{ FSM::stateId <Terminal_L>(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId <Terminal_R>(), Event::Type::ENTRY_GUARD },
 
-				{ FSM::stateId <Step2L_2  >(), Event::Type::EXIT },
-				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT },
-				{ FSM::stateId <Step2R_2  >(), Event::Type::EXIT },
-				{ FSM::stateId <Step2R_P  >(), Event::Type::EXIT },
-				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT },
+				{ FSM::stateId <Step2L_2  >(), Event::Type::EXIT	},
+				{ FSM::stateId <Step2L_P  >(), Event::Type::EXIT	},
+				{ FSM::stateId <Step2R_2  >(), Event::Type::EXIT	},
+				{ FSM::stateId <Step2R_P  >(), Event::Type::EXIT	},
+				{ FSM::stateId <Hybrid    >(), Event::Type::EXIT	},
 
-				{ FSM::stateId <Terminal  >(), Event::Type::ENTER },
-				{ FSM::stateId <Terminal_L>(), Event::Type::ENTER },
-				{ FSM::stateId <Terminal_R>(), Event::Type::ENTER },
+				{ FSM::stateId <Terminal  >(), Event::Type::ENTER	},
+				{ FSM::stateId <Terminal_L>(), Event::Type::ENTER	},
+				{ FSM::stateId <Terminal_R>(), Event::Type::ENTER	},
 			});
 
 			assertActive(machine, all, {

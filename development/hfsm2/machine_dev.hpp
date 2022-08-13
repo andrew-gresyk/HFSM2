@@ -1,5 +1,5 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.1.2 (2022-06-01)
+// 2.0.0 (2022-08-13)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 1
-#define HFSM2_VERSION_PATCH 2
+#define HFSM2_VERSION_MINOR 2
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -68,9 +68,9 @@
 #include "detail/containers/bit_array.hpp"
 #include "detail/containers/task_list.hpp"
 
+#include "detail/root/registry.hpp"
 #include "detail/root/plan_data.hpp"
 #include "detail/root/plan.hpp"
-#include "detail/root/registry.hpp"
 #include "detail/root/core.hpp"
 #include "detail/root/control.hpp"
 
@@ -181,7 +181,7 @@ struct G_ final {
 
 	struct UP final {
 		HFSM2_CONSTEXPR(14)	UP(const Utility utility_ = Utility{1},
-							   const Short prong_ = INVALID_SHORT) noexcept
+							   const Short prong_ = INVALID_SHORT)		noexcept
 			: utility{utility_}
 			, prong{prong_}
 		{}
@@ -231,7 +231,7 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 	using LoggerInterface	= typename Cfg::LoggerInterface;
 #endif
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Composite region ('changeTo<>()' into the region acts as 'restart<>()')
 	/// @tparam THead Head state
@@ -313,7 +313,7 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 	template <				  typename... TSubStates>
 	using OrthogonalPeers	  = OI_<void,  TSubStates...>;
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	// COMMON
 
 	/// @brief Root ('changeTo<>()' into the root region acts as 'restart<>()')
@@ -397,7 +397,7 @@ struct M_	   <G_<NFeatureTag, TContext, TActivation HFSM2_IF_UTILITY_THEORY(, TR
 	template <				  typename... TSubStates>
 	using OrthogonalPeerRoot  = RF_<Cfg, OrthogonalPeers <  TSubStates...>>;
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
 ////////////////////////////////////////////////////////////////////////////////

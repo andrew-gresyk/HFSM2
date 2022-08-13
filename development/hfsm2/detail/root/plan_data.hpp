@@ -16,50 +16,22 @@ struct Status final {
 	bool outerTransition = false;
 
 	HFSM2_CONSTEXPR(11)	Status(const Result result_ = Result::NONE,
-							   const bool outerTransition_ = false)	  noexcept
-		: result{result_}
-		, outerTransition{outerTransition_}
-	{}
+							   const bool outerTransition_ = false)		noexcept;
 
-	HFSM2_CONSTEXPR(11)	explicit operator bool()				const noexcept	{ return result != Result::NONE || outerTransition;	}
+	HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clear()								  noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
 };
 
 #pragma pack(pop)
 
 //------------------------------------------------------------------------------
 
-HFSM2_CONSTEXPR(14)
-Status
-operator | (Status& lhs, const Status rhs)							  noexcept	{
-	const Status::Result result = lhs.result > rhs.result ?
-		lhs.result : rhs.result;
-
-	return Status{result, lhs.outerTransition || rhs.outerTransition};
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-HFSM2_CONSTEXPR(14)
-Status&
-operator |= (Status& lhs, const Status rhs)							  noexcept	{
-	const Status::Result result = lhs.result > rhs.result ?
-		lhs.result : rhs.result;
-
-	lhs = Status{result, lhs.outerTransition || rhs.outerTransition};
-
-	return lhs;
-}
-
-//------------------------------------------------------------------------------
+HFSM2_CONSTEXPR(14) Status  operator |  (Status& lhs, const Status rhs)	noexcept;
+HFSM2_CONSTEXPR(14) Status& operator |= (Status& lhs, const Status rhs)	noexcept;
 
 template <>
-HFSM2_CONSTEXPR(11)
-Status
-filler<Status>()													  noexcept	{
-	return Status{};
-}
+HFSM2_CONSTEXPR(11) Status  filler<Status>()							noexcept;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -124,22 +96,23 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , TPayload>> final
 {
-	using StateList		= TStateList;
-	using RegionList	= TRegionList;
-	using Payload		= TPayload;
+	using StateList		 = TStateList;
+	using RegionList	 = TRegionList;
+	using Payload		 = TPayload;
 
-	static constexpr Short REGION_COUNT		= RegionList::SIZE;
-	static constexpr Short TASK_CAPACITY	= NTaskCapacity;
+	static constexpr Long STATE_COUNT	= StateList ::SIZE;
+	static constexpr Long REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
 
 	using Task			 = TaskT<Payload>;
-	using Tasks			 = TaskListT	  <Payload,  TASK_CAPACITY>;
+	using Tasks			 = TaskListT   <Payload,  TASK_CAPACITY>;
 	using TaskLinks		 = StaticArrayT<TaskLink, TASK_CAPACITY>;
 	using Payloads		 = StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds	 = ArrayT   <Bounds,   RegionList::SIZE>;
-	using TasksBits		 = BitArrayT<StateList::SIZE>;
-	using RegionBits	 = BitArrayT<RegionList::SIZE>;
-	using RegionStatuses = StaticArrayT<Status, RegionList::SIZE>;
+	using TasksBounds	 = ArrayT	   <Bounds, REGION_COUNT>;
+	using TasksBits		 = BitArrayT   <		STATE_COUNT>;
+	using RegionBits	 = BitArrayT   <		REGION_COUNT>;
+	using RegionStatuses = StaticArrayT<Status,	REGION_COUNT>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -153,14 +126,14 @@ struct PlanDataT<ArgsT<TContext
 	RegionStatuses headStatuses;
 	RegionStatuses subStatuses;
 
-	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
-	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID stateId)			const noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
+	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID stateId)		  const noexcept;
 #endif
 };
 
@@ -191,16 +164,17 @@ struct PlanDataT<ArgsT<TContext
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
-	static constexpr Short REGION_COUNT		= RegionList::SIZE;
-	static constexpr Short TASK_CAPACITY	= NTaskCapacity;
+	static constexpr Long  STATE_COUNT	= StateList::SIZE;
+	static constexpr Long REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
 
 	using Task			= TaskT<void>;
-	using Tasks			= TaskListT<void, TASK_CAPACITY>;
+	using Tasks			= TaskListT	  <void,	 TASK_CAPACITY>;
 	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
-	using TasksBounds	= ArrayT   <Bounds,   RegionList::SIZE>;
-	using TasksBits		= BitArrayT<StateList::SIZE>;
-	using RegionBits	= BitArrayT<RegionList::SIZE>;
+	using TasksBounds	= ArrayT	   <Bounds, REGION_COUNT>;
+	using TasksBits		= BitArrayT	   <		STATE_COUNT>;
+	using RegionBits	= BitArrayT	   <		REGION_COUNT>;
 	using RegionStatuses = StaticArrayT<Status, RegionList::SIZE>;
 
 	Tasks tasks;
@@ -213,14 +187,14 @@ struct PlanDataT<ArgsT<TContext
 	RegionStatuses headStatuses;
 	RegionStatuses subStatuses;
 
-	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept;
-	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID stateId)			const noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
+	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID stateId)		  const noexcept;
 #endif
 };
 
@@ -247,13 +221,45 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , TPayload>> final
 {
-	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				  noexcept	{}
-	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)			const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							  noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept	{}
 
 #if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void verifyPlans()								const noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept	{}
+#endif
+};
+
+//------------------------------------------------------------------------------
+
+template <typename TContext
+		, typename TConfig
+		, typename TStateList
+		, typename TRegionList
+		, Long NOrthoCount
+		, Long NOrthoUnits
+		, Long NSubstitutionLimit
+		, Long NTaskCapacity>
+struct PlanDataT<ArgsT<TContext
+					 , TConfig
+					 , TStateList
+					 , TRegionList
+					 , 0
+					 , NOrthoCount
+					 , NOrthoUnits
+					 HFSM2_IF_SERIALIZATION(, 0)
+					 , NSubstitutionLimit
+					 , NTaskCapacity
+					 , void>> final
+{
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
+
+	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept	{}
+
+#if HFSM2_ASSERT_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept	{}
 #endif
 };
 
