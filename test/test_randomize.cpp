@@ -300,15 +300,6 @@ TEST_CASE("FSM.Randomize") {
 				logger.assertSequence({
 					{						 Event::Type::RANDOMIZE,	FSM::stateId<O    >() },
 
-					{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
-					{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
-
-					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
-					{ FSM::stateId<I    >(), Event::Type::UPDATE },
-
-					{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
-					{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
-
 					{ FSM::stateId<N_000>(), Event::Type::REPORT_RANK },
 					{ FSM::stateId<N_025>(), Event::Type::REPORT_RANK },
 					{ FSM::stateId<N_050>(), Event::Type::REPORT_RANK },
