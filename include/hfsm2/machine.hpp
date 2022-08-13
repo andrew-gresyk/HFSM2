@@ -10834,7 +10834,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportChange(Control& control) noexcept {
 
 	default:
 		HFSM2_BREAK();
-		return TA::UP{};
+		return UP{};
 	}
 }
 
@@ -13139,7 +13139,7 @@ public:
 
 #if HFSM2_PLANS_AVAILABLE()
 	using CPlan					= CPlanT<Args>;
-	using  Plan					=  PlanT<Args>;
+	using Plan					=  PlanT<Args>;
 
 	static constexpr Long TASK_CAPACITY = Forward::TASK_CAPACITY;
 #endif

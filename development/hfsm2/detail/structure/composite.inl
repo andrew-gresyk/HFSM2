@@ -752,7 +752,7 @@ C_<TN, TA, SG, TH, TS...>::deepReportChange(Control& control) noexcept {
 
 	default:
 		HFSM2_BREAK();
-		return TA::UP{};
+		return UP{};
 	}
 }
 
