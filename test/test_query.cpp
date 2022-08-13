@@ -37,10 +37,10 @@ template <typename T>
 struct BaseT
 	: public FSM::State
 {
-	void query(hfsm2::StateID& stateId,
+	void query(hfsm2::StateID& stateId_,
 			   ConstControl&) const
 	{
-		stateId = FSM::stateId<T>();
+		stateId_ = stateId<T>();
 	}
 };
 

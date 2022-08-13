@@ -354,7 +354,7 @@ TEST_CASE("FSM.Internal Payloads") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.react(RegionStateIndex{machine.stateId<A_2>(), hfsm2::INVALID_SHORT});
+		machine.react(RegionStateIndex{FSM::stateId<A_2>(), hfsm2::INVALID_SHORT});
 		{
 			logger.assertSequence({
 				{ FSM::stateId<A    >(), Event::Type::PRE_REACT },
@@ -430,7 +430,7 @@ TEST_CASE("FSM.Internal Payloads") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.react(RegionStateIndex{machine.stateId<A_2>(), 0});
+		machine.react(RegionStateIndex{FSM::stateId<A_2>(), 0});
 		{
 			logger.assertSequence({
 				{ FSM::stateId<A    >(), Event::Type::PRE_REACT },
@@ -534,7 +534,7 @@ TEST_CASE("FSM.Internal Payloads") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.react(RegionStateIndex{machine.stateId<A_2>(), hfsm2::INVALID_SHORT});
+		machine.react(RegionStateIndex{FSM::stateId<A_2>(), hfsm2::INVALID_SHORT});
 		{
 			logger.assertSequence({
 				{ FSM::stateId<B    >(), Event::Type::PRE_REACT },
