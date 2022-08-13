@@ -22,8 +22,7 @@ TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into States") {
     FSM::Instance fsm;
     REQUIRE(fsm.isActive<Origin>());
 
-    fsm.changeTo<Destination>();
-    fsm.update();
+    fsm.immediateChangeTo<Destination>();
     REQUIRE(fsm.isActive<Destination>());
 }
 
@@ -48,8 +47,7 @@ TEST_CASE("Wiki.Transitions within Hierarchy.Transitions into Regions") {
     FSM::Instance fsm;
     REQUIRE(fsm.isActive<Origin>());
 
-    fsm.changeTo<Destination>();
-    fsm.update();
+    fsm.immediateChangeTo<Destination>();
     REQUIRE(fsm.isActive<Destination>());
     REQUIRE(fsm.isActive<SubState1>());
 }
@@ -70,8 +68,7 @@ TEST_CASE("Wiki.Transitions within Hierarchy.External Transition Interface") {
     FSM::Instance fsm;
     REQUIRE(fsm.isActive<Origin>());
 
-    fsm.changeTo<Destination>(); // external transition
-    fsm.update();
+    fsm.immediateChangeTo<Destination>(); // external transition
     REQUIRE(fsm.isActive<Destination>());
 }
 
@@ -123,8 +120,7 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Restart' Transition") {
     FSM::Instance fsm;
     REQUIRE(fsm.isActive<State>());
 
-    fsm.changeTo<Region>();
-    fsm.update();
+    fsm.immediateChangeTo<Region>();
     REQUIRE(fsm.isActive<Initial>());
 }
 
@@ -149,20 +145,16 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Resume' Transition") {
     FSM::Instance fsm;
     REQUIRE(fsm.isActive<State>());
 
-    fsm.changeTo<Secondary>();
-    fsm.update();
+    fsm.immediateChangeTo<Secondary>();
     REQUIRE(fsm.isActive<Secondary>());
 
-    fsm.changeTo<State>();
-    fsm.update();
+    fsm.immediateChangeTo<State>();
     REQUIRE(fsm.isActive<State>());
 
-    fsm.resume<Region>();
-    fsm.update();
+    fsm.immediateResume<Region>();
     REQUIRE(fsm.isActive<Secondary>());
 
-    fsm.restart<Region>();
-    fsm.update();
+    fsm.immediateRestart<Region>();
     REQUIRE(fsm.isActive<Initial>());
 }
 
@@ -197,8 +189,7 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Utilize' Transition") {
     FSM::Instance fsm;
     REQUIRE(fsm.isActive<State>());
 
-    fsm.utilize<Region>();
-    fsm.update();
+    fsm.immediateUtilize<Region>();
     REQUIRE(fsm.isActive<HighRated>());
 }
 
@@ -246,8 +237,7 @@ TEST_CASE("Wiki.Transitions within Hierarchy.'Randomize' Transition") {
     FSM::Instance fsm;
     REQUIRE(fsm.isActive<State>());
 
-    fsm.randomize<Region>();
-    fsm.update();
+    fsm.immediateRandomize<Region>();
     REQUIRE(fsm.isActive<HighRated>()); // note, it could be LowRated if the PRNG is seeded differently
 }
 

@@ -17,7 +17,7 @@ TEST_CASE("Wiki.Plans.Traffic Light") {
                     struct Green       //      3
                 >;
 
-    //----------------------------------------------------------------------
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     struct Apex
         : FSM::State
@@ -51,7 +51,7 @@ TEST_CASE("Wiki.Plans.Traffic Light") {
         void update(FullControl& control) noexcept { control.succeed(); }
     };
 
-    //----------------------------------------------------------------------
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     FSM::Instance fsm;
 
@@ -95,7 +95,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo") {
                     >
                 >;
 
-    //----------------------------------------------------------------------
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     struct Apex : FSM::State {};
 
@@ -257,7 +257,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo") {
         : FSM::State
     {};
 
-    //----------------------------------------------------------------------
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     FSM::Instance fsm;
 

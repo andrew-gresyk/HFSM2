@@ -5,7 +5,7 @@
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordMethod(Context& /*context*/,
+LoggerT<TConfig>::recordMethod(const Context& /*context*/,
 							   const StateID origin,
 							   const Method method) noexcept
 {
@@ -94,7 +94,7 @@ LoggerT<TConfig>::recordMethod(Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordTransition(Context& /*context*/,
+LoggerT<TConfig>::recordTransition(const Context& /*context*/,
 								   const StateID origin,
 								   const TransitionType transitionType,
 								   const StateID target) noexcept
@@ -145,7 +145,7 @@ LoggerT<TConfig>::recordTransition(Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordTaskStatus(Context& /*context*/,
+LoggerT<TConfig>::recordTaskStatus(const Context& /*context*/,
 								   const RegionID region,
 								   const StateID origin,
 								   const StatusEvent event) noexcept
@@ -168,7 +168,7 @@ LoggerT<TConfig>::recordTaskStatus(Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordPlanStatus(Context& /*context*/,
+LoggerT<TConfig>::recordPlanStatus(const Context& /*context*/,
 								   const RegionID region,
 								   const StatusEvent event) noexcept
 {
@@ -192,7 +192,7 @@ LoggerT<TConfig>::recordPlanStatus(Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordCancelledPending(Context& /*context*/,
+LoggerT<TConfig>::recordCancelledPending(const Context& /*context*/,
 										 const StateID origin) noexcept
 {
 	history.emplace_back(origin, Event::Type::CANCEL_PENDING);
@@ -202,7 +202,7 @@ LoggerT<TConfig>::recordCancelledPending(Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordSelectResolution(Context& /*context*/,
+LoggerT<TConfig>::recordSelectResolution(const Context& /*context*/,
 										 const StateID head,
 										 const StateID prong) noexcept
 {
@@ -215,7 +215,7 @@ LoggerT<TConfig>::recordSelectResolution(Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordUtilityResolution(Context& /*context*/,
+LoggerT<TConfig>::recordUtilityResolution(const Context& /*context*/,
 										  const StateID head,
 										  const StateID prong,
 										  const Utilty utilty) noexcept
@@ -227,7 +227,7 @@ LoggerT<TConfig>::recordUtilityResolution(Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordRandomResolution(Context& /*context*/,
+LoggerT<TConfig>::recordRandomResolution(const Context& /*context*/,
 										 const StateID head,
 										 const StateID prong,
 										 const Utilty utilty) noexcept

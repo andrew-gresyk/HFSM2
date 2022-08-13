@@ -5,8 +5,8 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-HFSM2_CONSTEXPR(14)	float  uniform(const uint32_t uint)		  noexcept;
-HFSM2_CONSTEXPR(14)	double uniform(const uint64_t uint)		  noexcept;
+HFSM2_CONSTEXPR(14)	float  uniform(const uint32_t uint)					noexcept;
+HFSM2_CONSTEXPR(14)	double uniform(const uint64_t uint)					noexcept;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -19,14 +19,14 @@ class SimpleRandomT;
 template <>
 class SimpleRandomT<8> {
 public:
-	constexpr SimpleRandomT()								  noexcept	{}
+	constexpr SimpleRandomT()											noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint64_t seed)	  noexcept;
+	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint64_t seed)				noexcept;
 
-	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()								noexcept;
 
 private:
-	HFSM2_CONSTEXPR(14)	uint64_t raw64()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint64_t raw64()								noexcept;
 
 private:
 
@@ -39,14 +39,14 @@ private:
 template <>
 class SimpleRandomT<4> {
 public:
-	HFSM2_CONSTEXPR(11)	SimpleRandomT()						  noexcept	{}
+	HFSM2_CONSTEXPR(11)	SimpleRandomT()									noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint32_t seed)	  noexcept;
+	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint32_t seed)				noexcept;
 
-	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()								noexcept;
 
 private:
-	HFSM2_CONSTEXPR(14)	uint32_t raw32()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint32_t raw32()								noexcept;
 
 private:
 	uint32_t _state = 0;
@@ -64,18 +64,18 @@ class BaseRandomT<8> {
 protected:
 	using SimpleRandom = SimpleRandomT<8>;
 
-	HFSM2_CONSTEXPR(14)	BaseRandomT(SimpleRandom&& simple)	  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT(SimpleRandom&& simple)				noexcept;
 
-	HFSM2_CONSTEXPR(14)	void seed(SimpleRandom&& simple)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(SimpleRandom&& simple)				noexcept;
 
 public:
-	HFSM2_CONSTEXPR(14)	BaseRandomT()						  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT()									noexcept;
 
-	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint64_t s)		  noexcept;
-	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint64_t(& s)[4])	  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint64_t s)					noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint64_t(& s)[4])				noexcept;
 
-	HFSM2_CONSTEXPR(14)	void seed(const uint64_t s)			  noexcept;
-	HFSM2_CONSTEXPR(14)	void seed(const uint64_t(& s)[4])	  noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(const uint64_t s)						noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(const uint64_t(& s)[4])				noexcept;
 
 protected:
 	uint64_t _state[4];
@@ -88,18 +88,18 @@ class BaseRandomT<4> {
 protected:
 	using SimpleRandom = SimpleRandomT<4>;
 
-	HFSM2_CONSTEXPR(14)	BaseRandomT(SimpleRandom&& simple)	  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT(SimpleRandom&& simple)				noexcept;
 
-	HFSM2_CONSTEXPR(14)	void seed(SimpleRandom&& simple)	  noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(SimpleRandom&& simple)				noexcept;
 
 public:
-	HFSM2_CONSTEXPR(14)	BaseRandomT()						  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT()									noexcept;
 
-	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint32_t s)		  noexcept;
-	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint32_t(& s)[4])	  noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint32_t s)					noexcept;
+	HFSM2_CONSTEXPR(14)	BaseRandomT(const uint32_t(& s)[4])				noexcept;
 
-	HFSM2_CONSTEXPR(14)	void seed(const uint32_t s)			  noexcept;
-	HFSM2_CONSTEXPR(14)	void seed(const uint32_t(& s)[4])	  noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(const uint32_t s)						noexcept;
+	HFSM2_CONSTEXPR(14)	void seed(const uint32_t(& s)[4])				noexcept;
 
 protected:
 	uint32_t _state[4];
@@ -122,14 +122,14 @@ class FloatRandomT<8>
 public:
 	using Base::BaseRandomT;
 
-	HFSM2_CONSTEXPR(14)	double	float64()					  noexcept	{ return uniform(uint64());			}
-	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
+	HFSM2_CONSTEXPR(14)	double	float64()								noexcept	{ return uniform(uint64());					}
+	HFSM2_CONSTEXPR(14)	float	float32()								noexcept	{ return uniform(uint32());					}
 
-	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept;
-	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept	{ return static_cast<uint32_t>(uint64());	}
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()								noexcept;
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()								noexcept	{ return static_cast<uint32_t>(uint64());	}
 
-	HFSM2_CONSTEXPR(14)	float next()						  noexcept	{ return float32();					}
-	HFSM2_CONSTEXPR(14)	void  jump()						  noexcept;
+	HFSM2_CONSTEXPR(14)	float next()									noexcept	{ return float32();							}
+	HFSM2_CONSTEXPR(14)	void  jump()									noexcept;
 };
 
 //------------------------------------------------------------------------------
@@ -144,14 +144,14 @@ class FloatRandomT<4>
 public:
 	using Base::BaseRandomT;
 
-	HFSM2_CONSTEXPR(14)	double	float64()					  noexcept	{ return uniform(uint64());			}
-	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
+	HFSM2_CONSTEXPR(14)	double	float64()								noexcept	{ return uniform(uint64());					}
+	HFSM2_CONSTEXPR(14)	float	float32()								noexcept	{ return uniform(uint32());					}
 
-	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept	{ return widen(uint32(), uint32());	}
-	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()								noexcept	{ return widen(uint32(), uint32());			}
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()								noexcept;
 
-	HFSM2_CONSTEXPR(14)	float next()						  noexcept	{ return float32();					}
-	HFSM2_CONSTEXPR(14)	void  jump()						  noexcept;
+	HFSM2_CONSTEXPR(14)	float next()									noexcept	{ return float32();							}
+	HFSM2_CONSTEXPR(14)	void  jump()									noexcept;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,13 +171,13 @@ class IntRandomT<8>
 public:
 	using Base::BaseRandomT;
 
-	HFSM2_CONSTEXPR(14)	double	float64()					  noexcept	{ return uniform(uint64());			}
-	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
+	HFSM2_CONSTEXPR(14)	double	float64()								noexcept	{ return uniform(uint64());					}
+	HFSM2_CONSTEXPR(14)	float	float32()								noexcept	{ return uniform(uint32());					}
 
-	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept;
-	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept	{ return static_cast<uint32_t>(uint64());	}
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()								noexcept;
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()								noexcept	{ return static_cast<uint32_t>(uint64());	}
 
-	HFSM2_CONSTEXPR(14)	void jump()							  noexcept;
+	HFSM2_CONSTEXPR(14)	void jump()										noexcept;
 };
 
 //------------------------------------------------------------------------------
@@ -192,13 +192,13 @@ class IntRandomT<4>
 public:
 	using Base::BaseRandomT;
 
-	HFSM2_CONSTEXPR(14)	double	float64()					  noexcept	{ return uniform(uint64());			}
-	HFSM2_CONSTEXPR(14)	float	float32()					  noexcept	{ return uniform(uint32());			}
+	HFSM2_CONSTEXPR(14)	double	float64()								noexcept	{ return uniform(uint64());			}
+	HFSM2_CONSTEXPR(14)	float	float32()								noexcept	{ return uniform(uint32());			}
 
-	HFSM2_CONSTEXPR(14)	uint64_t uint64()					  noexcept	{ return widen(uint32(), uint32());	}
-	HFSM2_CONSTEXPR(14)	uint32_t uint32()					  noexcept;
+	HFSM2_CONSTEXPR(14)	uint64_t uint64()								noexcept	{ return widen(uint32(), uint32());	}
+	HFSM2_CONSTEXPR(14)	uint32_t uint32()								noexcept;
 
-	HFSM2_CONSTEXPR(14)	void jump()							  noexcept;
+	HFSM2_CONSTEXPR(14)	void jump()										noexcept;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

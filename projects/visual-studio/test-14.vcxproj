@@ -40,6 +40,9 @@
     <ClCompile Include="..\..\test\test_ortho_units.cpp" />
     <ClCompile Include="..\..\test\test_plans.cpp" />
     <ClCompile Include="..\..\test\test_plans_payloads.cpp" />
+    <ClCompile Include="..\..\test\test_plan_external.cpp" />
+    <ClCompile Include="..\..\test\test_plan_external_payloads.cpp" />
+    <ClCompile Include="..\..\test\test_query.cpp" />
     <ClCompile Include="..\..\test\test_randomize.cpp" />
     <ClCompile Include="..\..\test\test_replication.cpp" />
     <ClCompile Include="..\..\test\test_resume.cpp" />

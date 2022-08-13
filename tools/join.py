@@ -2,7 +2,7 @@ import re
 
 #===============================================================================
 
-def mergeTo(folder, path, included, commentRE, output):
+def merge(folder, path, included, commentRE, output):
 	pathTokens = path.split("/")
 
 	current = folder + "/" + pathTokens[-1]
@@ -24,10 +24,10 @@ def mergeTo(folder, path, included, commentRE, output):
 					#output.write("// inlined '" + pathTokens[-1] + "' -> '" + nextTokens[-1] + "'\n")
 
 					if len(nextTokens) == 1:
-						mergeTo(folder, next, included, commentRE, output)
+						merge(folder, next, included, commentRE, output)
 					else:
 						name = nextTokens.pop()
-						mergeTo(folder + "/" + "/".join(nextTokens), name, included, commentRE, output)
+						merge(folder + "/" + "/".join(nextTokens), name, included, commentRE, output)
 
 			else:
 				if line.startswith('\ufeff'):
@@ -52,7 +52,7 @@ output = open("../include/hfsm2/machine.hpp", 'w', encoding='utf-8-sig')
 included = []
 commentRE = re.compile("(?:\s*\/\/ COMMON)|(?:\s*\/\/ SPECIFIC)|(?:\s*\/\/\/\/)|(?:\s*\/\/--)|(?:\s*\/\/ -)")
 
-mergeTo("../development/hfsm2", "machine_dev.hpp", included, commentRE, output)
+merge("../development/hfsm2", "machine_dev.hpp", included, commentRE, output)
 
 output.close()
 

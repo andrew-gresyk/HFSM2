@@ -246,6 +246,7 @@ struct ArgsT final {
 	using RegionList	= TRegionList;
 
 	static constexpr Long  STATE_COUNT		  = StateList::SIZE;
+	static constexpr Short REGION_COUNT		  = RegionList::SIZE;
 	static constexpr Short COMPO_REGIONS	  = NCompoCount;
 	static constexpr Short ORTHO_REGIONS	  = NOrthoCount;
 	static constexpr Short ORTHO_UNITS		  = NOrthoUnits;
@@ -347,6 +348,12 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	using StateList		= typename Apex::StateList;
+	using RegionList	= typename Apex::RegionList;
+
+	static constexpr Long  STATE_COUNT			= Apex::STATE_COUNT;
+	static constexpr Short REGION_COUNT			= Apex::REGION_COUNT;
+
 	static constexpr Long  SUBSTITUTION_LIMIT	= TConfig::SUBSTITUTION_LIMIT;
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -365,9 +372,6 @@ struct RF_ final {
 	static constexpr Long  RESUMABLE_BITS		= Apex::RESUMABLE_BITS;
 #endif
 
-	using StateList		= typename Apex::StateList;
-	using RegionList	= typename Apex::RegionList;
-
 	using Args			= ArgsT<Context
 							  , TConfig
 							  , StateList
@@ -384,16 +388,17 @@ struct RF_ final {
 
 	using Instance		= InstanceT<TConfig, Apex>;
 
+	using ConstControl	= ConstControlT<Args>;
 	using Control		= ControlT	   <Args>;
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	using State			= EmptyT<Args>;
 
 	template <typename... TInjections>
-	using AncestorsT	= A_<TInjections...>;
+	using StateT		= A_<TInjections...>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -401,16 +406,16 @@ struct RF_ final {
 	using Logger		= typename TConfig::LoggerInterface;
 #endif
 
-	//----------------------------------------------------------------------
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	template <typename TState>
-	static constexpr bool	  contains()	  noexcept	{ return					contains<StateList , TState>() ;	}
+	static constexpr bool	  contains()		noexcept	{ return					contains<StateList , TState>() ;	}
 
 	template <typename TState>
-	static constexpr StateID  stateId()		  noexcept	{ return					   index<StateList , TState>() ;	}
+	static constexpr StateID  stateId()			noexcept	{ return					   index<StateList , TState>() ;	}
 
 	template <typename TState>
-	static constexpr RegionID regionId()	  noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
+	static constexpr RegionID regionId()		noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

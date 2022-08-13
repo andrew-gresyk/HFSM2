@@ -25,18 +25,19 @@ struct LoggerInterfaceT {
 
 	HFSM2_CONSTEXPR(NO)
 	virtual
-	void recordMethod(Context& HFSM2_UNUSED(context),
-					  const StateID HFSM2_UNUSED(origin),
-					  const Method HFSM2_UNUSED(method))			  noexcept
+	void
+	recordMethod(const Context& HFSM2_UNUSED(context),
+				 const StateID HFSM2_UNUSED(origin),
+				 const Method HFSM2_UNUSED(method))						noexcept
 	{}
 
 	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
-	recordTransition(Context& HFSM2_UNUSED(context),
+	recordTransition(const Context& HFSM2_UNUSED(context),
 					 const StateID HFSM2_UNUSED(origin),
 					 const TransitionType HFSM2_UNUSED(transitionType),
-					 const StateID HFSM2_UNUSED(target))			  noexcept
+					 const StateID HFSM2_UNUSED(target))				noexcept
 	{}
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -44,18 +45,18 @@ struct LoggerInterfaceT {
 	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
-	recordTaskStatus(Context& HFSM2_UNUSED(context),
+	recordTaskStatus(const Context& HFSM2_UNUSED(context),
 					 const RegionID HFSM2_UNUSED(region),
 					 const StateID HFSM2_UNUSED(origin),
-					 const StatusEvent HFSM2_UNUSED(event))			  noexcept
+					 const StatusEvent HFSM2_UNUSED(event))				noexcept
 	{}
 
 	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
-	recordPlanStatus(Context& HFSM2_UNUSED(context),
+	recordPlanStatus(const Context& HFSM2_UNUSED(context),
 					 const RegionID HFSM2_UNUSED(region),
-					 const StatusEvent HFSM2_UNUSED(event))			  noexcept
+					 const StatusEvent HFSM2_UNUSED(event))				noexcept
 	{}
 
 #endif
@@ -63,16 +64,16 @@ struct LoggerInterfaceT {
 	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
-	recordCancelledPending(Context& HFSM2_UNUSED(context),
-						   const StateID HFSM2_UNUSED(origin))		  noexcept
+	recordCancelledPending(const Context& HFSM2_UNUSED(context),
+						   const StateID HFSM2_UNUSED(origin))			noexcept
 	{}
 
 	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
-	recordSelectResolution(Context& HFSM2_UNUSED(context),
+	recordSelectResolution(const Context& HFSM2_UNUSED(context),
 						   const StateID HFSM2_UNUSED(head),
-						   const StateID HFSM2_UNUSED(prong))		  noexcept
+						   const StateID HFSM2_UNUSED(prong))			noexcept
 	{}
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
@@ -80,19 +81,19 @@ struct LoggerInterfaceT {
 	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
-	recordUtilityResolution(Context& HFSM2_UNUSED(context),
+	recordUtilityResolution(const Context& HFSM2_UNUSED(context),
 							const StateID HFSM2_UNUSED(head),
 							const StateID HFSM2_UNUSED(prong),
-							const Utilty HFSM2_UNUSED(utilty))		  noexcept
+							const Utilty HFSM2_UNUSED(utilty))			noexcept
 	{}
 
 	HFSM2_CONSTEXPR(NO)
 	virtual
 	void
-	recordRandomResolution(Context& HFSM2_UNUSED(context),
+	recordRandomResolution(const Context& HFSM2_UNUSED(context),
 						   const StateID HFSM2_UNUSED(head),
 						   const StateID HFSM2_UNUSED(prong),
-						   const Utilty HFSM2_UNUSED(utilty))		  noexcept
+						   const Utilty HFSM2_UNUSED(utilty))			noexcept
 	{}
 
 #endif

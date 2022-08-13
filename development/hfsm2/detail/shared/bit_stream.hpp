@@ -27,10 +27,10 @@ public:
 
 	using Data = uint8_t[BYTE_COUNT];
 
-	HFSM2_CONSTEXPR(14)	void clear()										  noexcept	{ fill(_data, 0);	}
+	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(_data, 0);	}
 
-	HFSM2_CONSTEXPR(14)		  Data& data()									  noexcept	{ return _data;		}
-	HFSM2_CONSTEXPR(11)	const Data& data()								const noexcept	{ return _data;		}
+	HFSM2_CONSTEXPR(14)		  Data& data()								noexcept	{ return _data;		}
+	HFSM2_CONSTEXPR(11)	const Data& data()						  const noexcept	{ return _data;		}
 
 private:
 	Data _data;
@@ -47,7 +47,7 @@ public:
 
 public:
 	HFSM2_CONSTEXPR(14)	explicit BitWriteStreamT(Buffer& buffer,
-												 const Long cursor = 0)		  noexcept
+												 const Long cursor = 0)	noexcept
 		: _buffer{buffer}
 		, _cursor{cursor}
 	{
@@ -55,9 +55,9 @@ public:
 	}
 
 	template <Short NBitWidth>
-	HFSM2_CONSTEXPR(14)	void write(const UBitWidth<NBitWidth> item)			  noexcept;
+	HFSM2_CONSTEXPR(14)	void write(const UBitWidth<NBitWidth> item)		noexcept;
 
-	HFSM2_CONSTEXPR(11)	Long cursor()									const noexcept	{ return _cursor;	}
+	HFSM2_CONSTEXPR(11)	Long cursor()							  const noexcept	{ return _cursor;	}
 
 private:
 	Buffer& _buffer;
@@ -76,15 +76,15 @@ public:
 
 public:
 	HFSM2_CONSTEXPR(11)	explicit BitReadStreamT(const Buffer& buffer,
-												const Long cursor = 0)		  noexcept
+												const Long cursor = 0)	noexcept
 		: _buffer{buffer}
 		, _cursor{cursor}
 	{}
 
 	template <Short NBitWidth>
-	HFSM2_CONSTEXPR(14)	UBitWidth<NBitWidth> read()							  noexcept;
+	HFSM2_CONSTEXPR(14)	UBitWidth<NBitWidth> read()						noexcept;
 
-	HFSM2_CONSTEXPR(11)	Long cursor()									const noexcept	{ return _cursor;	}
+	HFSM2_CONSTEXPR(11)	Long cursor()							  const noexcept	{ return _cursor;	}
 
 private:
 	const Buffer& _buffer;

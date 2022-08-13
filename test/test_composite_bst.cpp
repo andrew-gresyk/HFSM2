@@ -110,20 +110,10 @@ TEST_CASE("FSM.Composite BST") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.changeTo<S1>();
-		machine.update();
+		machine.immediateChangeTo<S1>();
 		{
 			logger.assertSequence({
 				{						 Event::Type::CHANGE, FSM::stateId<S1>() },
-
-				{ hfsm2::StateID{0},	 Event::Type::PRE_UPDATE },
-				{ FSM::stateId<S0>(),	 Event::Type::PRE_UPDATE },
-
-				{ hfsm2::StateID{0},	 Event::Type::UPDATE },
-				{ FSM::stateId<S0>(),	 Event::Type::UPDATE },
-
-				{ FSM::stateId<S0>(),	 Event::Type::POST_UPDATE },
-				{ hfsm2::StateID{0},	 Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<S0>(),	 Event::Type::EXIT_GUARD },
 				{ FSM::stateId<S1>(),	 Event::Type::ENTRY_GUARD },

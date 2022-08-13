@@ -176,6 +176,23 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::widePostReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
+template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+void
+CS_<TN, TA, SG, NI, TL_<TS...>>::wideQuery(ConstControl& control,
+										   TEvent& event,
+										   const Short prong) const noexcept
+{
+	HFSM2_ASSERT(prong != INVALID_SHORT);
+
+	return prong < R_PRONG ?
+		LHalf::wideQuery(control, event, prong) :
+		RHalf::wideQuery(control, event, prong);
+}
+
+//------------------------------------------------------------------------------
+
 #if HFSM2_PLANS_AVAILABLE()
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>

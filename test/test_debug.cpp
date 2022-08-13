@@ -232,20 +232,10 @@ TEST_CASE("FSM.Debug") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		machine.changeTo<O   >();
-		machine.update();
+		machine.immediateChangeTo<O   >();
 		{
 			logger.assertSequence({
 				{						Event::Type::CHANGE, FSM::stateId<O   >() },
-
-				{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
-
-				{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-				{ FSM::stateId<I   >(),	Event::Type::UPDATE },
-
-				{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
-				{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 				{ FSM::stateId<U_1 >(),	Event::Type::UTILITY },
 				{ FSM::stateId<U_2 >(),	Event::Type::UTILITY },

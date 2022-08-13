@@ -23,19 +23,19 @@ struct alignas(2 * sizeof(Short)) Parent final {
 	Parent() = default;
 
 	HFSM2_CONSTEXPR(11)
-	Parent(const ForkID forkId_)										  noexcept
+	Parent(const ForkID forkId_)										noexcept
 		: forkId{forkId_}
 	{}
 
 	HFSM2_CONSTEXPR(11)
 	Parent(const ForkID forkId_,
-		   const Short prong_)											  noexcept
+		   const Short prong_)											noexcept
 		: forkId{forkId_}
 		, prong{prong_}
 	{}
 
 	HFSM2_CONSTEXPR(11)
-	explicit operator bool()										const noexcept	{
+	explicit operator bool()									  const noexcept	{
 		return forkId != INVALID_FORK_ID &&
 			   prong  != INVALID_SHORT;
 	}
@@ -105,6 +105,7 @@ struct RegistryT<ArgsT<TContext
 	using RegionList	= TRegionList;
 
 	static constexpr Long  STATE_COUNT		= StateList::SIZE;
+	static constexpr Long  REGION_COUNT		= RegionList::SIZE;
 	static constexpr Short COMPO_REGIONS	= NCompoCount;
 	static constexpr Short ORTHO_REGIONS	= NOrthoCount;
 	static constexpr Short ORTHO_UNITS		= NOrthoUnits;
@@ -117,6 +118,7 @@ struct RegistryT<ArgsT<TContext
 	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
 	using OrthoParents	= StaticArrayT<Parent, ORTHO_REGIONS>;
 	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
+	using RegionSizes	= StaticArrayT<Short,  REGION_COUNT>;
 
 	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
 	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
@@ -129,30 +131,31 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
-	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(11)	bool isActive		 ()							  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool isPendingChange (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingEnter	 (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingExit	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingChange (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingEnter	 (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingExit	 (const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	const Parent&	  forkParent(const ForkID forkId)	const noexcept;
+	HFSM2_CONSTEXPR(14)	const Parent&	  forkParent(const ForkID forkId) const noexcept;
 
-	HFSM2_CONSTEXPR(14)	OrthoBits requestedOrthoFork(const ForkID forkId)		  noexcept;
+	HFSM2_CONSTEXPR(14)	OrthoBits requestedOrthoFork(const ForkID forkId)		noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		noexcept;
+	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests()									  noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()											  noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests()									noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()											noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
 	OrthoParents orthoParents;
-	OrthoUnits orthoUnits;
+	OrthoUnits	 orthoUnits;
+	RegionSizes	 regionSizes;
 
 	CompoForks compoRequested{INVALID_SHORT};
 	OrthoForks orthoRequested;
@@ -193,6 +196,7 @@ struct RegistryT<ArgsT<TContext
 	using RegionList	= TRegionList;
 
 	static constexpr Long  STATE_COUNT		= StateList::SIZE;
+	static constexpr Long  REGION_COUNT		= RegionList::SIZE;
 	static constexpr Short COMPO_REGIONS	= NCompoCount;
 
 	using Payload		= TPayload;
@@ -200,6 +204,7 @@ struct RegistryT<ArgsT<TContext
 
 	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
 	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
+	using RegionSizes	= StaticArrayT<Short,  REGION_COUNT>;
 
 	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
 	using OrthoForks	= BitArrayT	  <0>;
@@ -211,26 +216,27 @@ struct RegistryT<ArgsT<TContext
 
 	using BackUp		= BackUpT<RegistryT>;
 
-	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	bool isActive		 ()								const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(11)	bool isActive		 ()							  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool isPendingChange (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingEnter	 (const StateID stateId)		const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingExit	 (const StateID stateId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingChange (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingEnter	 (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingExit	 (const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	const Parent& forkParent(const ForkID forkId)		const noexcept;
+	HFSM2_CONSTEXPR(14)	const Parent& forkParent(const ForkID forkId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		  noexcept;
-	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			  noexcept;
+	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		noexcept;
+	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests()									  noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()											  noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests()									noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()											noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
+	RegionSizes	 regionSizes;
 
 	CompoForks compoRequested{INVALID_SHORT};
 	OrthoForks orthoRequested;

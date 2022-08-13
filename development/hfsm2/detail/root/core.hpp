@@ -33,14 +33,14 @@ struct CoreT {
 
 	HFSM2_CONSTEXPR(14)	explicit CoreT(Context& context_
 									 HFSM2_IF_UTILITY_THEORY(, RNG& rng_)
-									 HFSM2_IF_LOG_INTERFACE(, Logger* const logger_ = nullptr))	  noexcept;
+									 HFSM2_IF_LOG_INTERFACE(, Logger* const logger_ = nullptr))		noexcept;
 
 	HFSM2_CONSTEXPR(14)	explicit CoreT(PureContext&& context_
 									 HFSM2_IF_UTILITY_THEORY(, RNG& rng_)
-									 HFSM2_IF_LOG_INTERFACE(, Logger* const logger_ = nullptr))	  noexcept;
+									 HFSM2_IF_LOG_INTERFACE(, Logger* const logger_ = nullptr))		noexcept;
 
-	HFSM2_CONSTEXPR(14) CoreT(const CoreT&  other)												  noexcept;
-	HFSM2_CONSTEXPR(14) CoreT(		CoreT&& other)												  noexcept;
+	HFSM2_CONSTEXPR(14) CoreT(const CoreT&  other)													noexcept;
+	HFSM2_CONSTEXPR(14) CoreT(		CoreT&& other)													noexcept;
 
 	Context context;
 	Registry registry;

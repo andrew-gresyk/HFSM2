@@ -26,20 +26,19 @@ TEST_CASE("Docs.Serialization") {
 	FSM::Instance::SerialBuffer buffer;
 
 	{
-		FSM::Instance fsm;              // Create a new FSM instance
-		fsm.changeTo<State2>();         // Request a transition to 'State2'
-		fsm.update();                   // Process transitions
-		REQUIRE(fsm.isActive<State2>()); // Check if transition completed
+		FSM::Instance fsm;                  // Create a new FSM instance
+		fsm.immediateChangeTo<State2>();    // Transition to 'State2'
+		REQUIRE(fsm.isActive<State2>());    // Check if transition completed
 
-		fsm.save(buffer);               // Serialize FSM configuration into 'buffer'
+		fsm.save(buffer);                   // Serialize FSM configuration into 'buffer'
 	}
 
 	{
-		FSM::Instance fsm;              // Create a fresh FSM instance
-		REQUIRE(fsm.isActive<State1>()); // Initial 'State1' is activated by default
+		FSM::Instance fsm;                  // Create a fresh FSM instance
+		REQUIRE(fsm.isActive<State1>());    // Initial 'State1' is activated by default
 
-		fsm.load(buffer);               // De-serialize FSM from 'buffer'
-		REQUIRE(fsm.isActive<State2>()); // Check its configuration is restored
+		fsm.load(buffer);                   // De-serialize FSM from 'buffer'
+		REQUIRE(fsm.isActive<State2>());    // Check its configuration is restored
 	}
 }
 

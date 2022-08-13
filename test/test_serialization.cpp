@@ -250,8 +250,7 @@ TEST_CASE("FSM.Serialization") {
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-		authority.changeTo<server::O2_C1_S2>();
-		authority.update();
+		authority.immediateChangeTo<server::O2_C1_S2>();
 		{
 			assertActive(authority,  server::all, {
 				server::FSM::stateId<server::O2      >(),

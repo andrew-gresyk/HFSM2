@@ -1,4 +1,9 @@
-theme: jekyll-theme-minimal
 title: HFSM2
 description: High-Performance Hierarchical Finite State Machine Framework
+url: "http://hfsm.dev"
+twitter_username: andrew_gresyk
+github_username:  andrew-gresyk
+google_analytics: G-8CBZLEMT7W
+
+theme: jekyll-theme-minimal # https://github.com/pages-themes/minimal / https://pages.github.com/themes/
 logo: assets/logos/hfsm2-logo-jekyll.png

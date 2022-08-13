@@ -127,7 +127,7 @@ struct AncestorT
 //------------------------------------------------------------------------------
 
 struct R
-	: FSM::AncestorsT<AncestorT<R>>
+	: FSM::StateT<AncestorT<R>>
 {
 	void entryGuard(GuardControl& control) {
 		control.changeTo<B>();
@@ -137,13 +137,13 @@ struct R
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct A
-	: FSM::AncestorsT<AncestorT<A>>
+	: FSM::StateT<AncestorT<A>>
 {};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B
-	: FSM::AncestorsT<AncestorT<B>>
+	: FSM::StateT<AncestorT<B>>
 {};
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -149,20 +149,10 @@ TEST_CASE("FSM.Randomize") {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		WHEN("Changing to O") {
-			machine.changeTo<O>();
-			machine.update();
+			machine.immediateChangeTo<O>();
 			{
 				logger.assertSequence({
 					{						 Event::Type::CHANGE,		FSM::stateId<O    >() },
-
-					{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
-					{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
-
-					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
-					{ FSM::stateId<I    >(), Event::Type::UPDATE },
-
-					{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
-					{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 					{ FSM::stateId<N_000>(), Event::Type::REPORT_RANK },
 					{ FSM::stateId<N_025>(), Event::Type::REPORT_RANK },
@@ -210,20 +200,10 @@ TEST_CASE("FSM.Randomize") {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		WHEN("Restarting O") {
-			machine.restart<O>();
-			machine.update();
+			machine.immediateRestart<O>();
 			{
 				logger.assertSequence({
 					{						 Event::Type::RESTART,	FSM::stateId<O    >() },
-
-					{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
-					{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
-
-					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
-					{ FSM::stateId<I    >(), Event::Type::UPDATE },
-
-					{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
-					{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 					{ FSM::stateId<I    >(), Event::Type::EXIT_GUARD },
 					{ FSM::stateId<O    >(), Event::Type::ENTRY_GUARD },
@@ -259,22 +239,12 @@ TEST_CASE("FSM.Randomize") {
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 		WHEN("Randomizing O") {
-			machine.randomize<O>();
-			machine.update();
+			machine.immediateRandomize<O>();
 			{
 			#if HFSM2_ARCHITECTURE(64)
 
 				logger.assertSequence({
 					{						 Event::Type::RANDOMIZE,	FSM::stateId<O    >() },
-
-					{ FSM::stateId<Apex >(), Event::Type::PRE_UPDATE },
-					{ FSM::stateId<I    >(), Event::Type::PRE_UPDATE },
-
-					{ FSM::stateId<Apex >(), Event::Type::UPDATE },
-					{ FSM::stateId<I    >(), Event::Type::UPDATE },
-
-					{ FSM::stateId<I    >(), Event::Type::POST_UPDATE },
-					{ FSM::stateId<Apex >(), Event::Type::POST_UPDATE },
 
 					{ FSM::stateId<N_000>(), Event::Type::REPORT_RANK },
 					{ FSM::stateId<N_025>(), Event::Type::REPORT_RANK },

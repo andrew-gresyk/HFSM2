@@ -162,6 +162,19 @@ OS_<TN, TA, NI, TI, TR...>::widePostReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
+template <typename TN, typename TA, Short NI, typename TI, typename... TR>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+void
+OS_<TN, TA, NI, TI, TR...>::wideQuery(ConstControl& control,
+									  TEvent& event) const noexcept
+{
+	Initial				  ::wideQuery(				control, event);
+	Remaining			  ::wideQuery(				control, event);
+}
+
+//------------------------------------------------------------------------------
+
 #if HFSM2_PLANS_AVAILABLE()
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>

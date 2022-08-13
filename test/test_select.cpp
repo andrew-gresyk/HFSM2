@@ -140,20 +140,10 @@ TEST_CASE("FSM.Select") {
 	}
 
 	WHEN("Changing to O") {
-		machine.changeTo<O>();
-		machine.update();
+		machine.immediateChangeTo<O>();
 
 		logger.assertSequence({
 			{						Event::Type::CHANGE, FSM::stateId<O   >() },
-
-			{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-			{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
-
-			{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-			{ FSM::stateId<I   >(),	Event::Type::UPDATE },
-
-			{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
-			{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<S   >(), Event::Type::REPORT_SELECT },
 			{ FSM::stateId<S   >(), Event::Type::SELECT_RESOLUTION, 1 },
@@ -189,20 +179,10 @@ TEST_CASE("FSM.Select") {
 	}
 
 	WHEN("Restarting O") {
-		machine.restart<O>();
-		machine.update();
+		machine.immediateRestart<O>();
 
 		logger.assertSequence({
 			{						Event::Type::RESTART, FSM::stateId<O   >() },
-
-			{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-			{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
-
-			{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-			{ FSM::stateId<I   >(),	Event::Type::UPDATE },
-
-			{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
-			{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<I   >(), Event::Type::EXIT_GUARD },
 			{ FSM::stateId<O   >(), Event::Type::ENTRY_GUARD },
@@ -235,20 +215,10 @@ TEST_CASE("FSM.Select") {
 	}
 
 	WHEN("Selecting O") {
-		machine.select<O>();
-		machine.update();
+		machine.immediateSelect<O>();
 
 		logger.assertSequence({
 			{						Event::Type::SELECT, FSM::stateId<O   >() },
-
-			{ FSM::stateId<Apex>(),	Event::Type::PRE_UPDATE },
-			{ FSM::stateId<I   >(),	Event::Type::PRE_UPDATE },
-
-			{ FSM::stateId<Apex>(),	Event::Type::UPDATE },
-			{ FSM::stateId<I   >(),	Event::Type::UPDATE },
-
-			{ FSM::stateId<I   >(),	Event::Type::POST_UPDATE },
-			{ FSM::stateId<Apex>(),	Event::Type::POST_UPDATE },
 
 			{ FSM::stateId<S   >(), Event::Type::REPORT_SELECT },
 			{ FSM::stateId<S   >(), Event::Type::SELECT_RESOLUTION, 1 },

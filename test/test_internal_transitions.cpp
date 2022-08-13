@@ -134,7 +134,7 @@ struct A_1
 //------------------------------------------------------------------------------
 
 struct A_2
-	: FSM::AncestorsT<Tracked>
+	: FSM::StateT<Tracked>
 {
 	void enter(PlanControl&)													{}
 
@@ -255,7 +255,7 @@ struct B_2_1
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 struct B_2_2
-	: FSM::AncestorsT<Tracked>
+	: FSM::StateT<Tracked>
 {
 	void enter(PlanControl&)													{}
 

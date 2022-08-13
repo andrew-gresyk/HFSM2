@@ -8,11 +8,11 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct TaskBase {
-	HFSM2_CONSTEXPR(11)	TaskBase()								  noexcept	{}
+	HFSM2_CONSTEXPR(11)	TaskBase()										noexcept	{}
 
 	HFSM2_CONSTEXPR(11)	TaskBase(const StateID origin_,
 								 const StateID destination_,
-								 const TransitionType type_)	  noexcept
+								 const TransitionType type_)			noexcept
 		: origin{origin_}
 		, destination{destination_}
 		, type{type_}
@@ -38,7 +38,7 @@ struct TaskBase {
 HFSM2_CONSTEXPR(11)
 bool
 operator == (const TaskBase& lhs,
-			 const TaskBase& rhs)								  noexcept
+			 const TaskBase& rhs)										noexcept
 {
 	return lhs.origin	   == rhs.origin &&
 		   lhs.destination == rhs.destination &&
@@ -58,7 +58,7 @@ struct TaskT final
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	TaskT()									  noexcept	{
+	HFSM2_CONSTEXPR(14)	TaskT()											noexcept	{
 		new (&storage) Payload{};
 	}
 
@@ -67,23 +67,11 @@ struct TaskT final
 	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin_,
 							  const StateID destination_,
 							  const TransitionType type_,
-							  const Payload& payload)			  noexcept
+							  const Payload& payload)					noexcept
 		: TaskBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
 		new (&storage) Payload{payload};
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin_,
-							  const StateID destination_,
-							  const TransitionType type_,
-							  Payload&& payload)				  noexcept
-		: TaskBase{origin_, destination_, type_}
-		, payloadSet{true}
-	{
-		new (&storage) Payload{move(payload)};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -119,17 +107,17 @@ private:
 
 public:
 	template <typename... TArgs>
-	HFSM2_CONSTEXPR(14)	Index emplace(TArgs&&... args)							  noexcept;
+	HFSM2_CONSTEXPR(14)	Index emplace(TArgs&&... args)							noexcept;
 
-	HFSM2_CONSTEXPR(14)	void remove(const Index i)								  noexcept;
+	HFSM2_CONSTEXPR(14)	void remove(const Index i)								noexcept;
 
-	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index i)					  noexcept;
-	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index i)				const noexcept;
+	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index i)					noexcept;
+	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index i)			  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	Index count()										const noexcept	{ return _count;	}
+	HFSM2_CONSTEXPR(11)	Index count()									  const noexcept	{ return _count;	}
 
 private:
-	HFSM2_IF_ASSERT(void verifyStructure(const Index occupied = INVALID)	const noexcept);
+	HFSM2_IF_ASSERT(void verifyStructure(const Index occupied = INVALID)  const noexcept);
 
 private:
 	Index _vacantHead = 0;
