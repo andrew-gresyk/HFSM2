@@ -848,9 +848,7 @@ template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typ
 HFSM2_CONSTEXPR(14)
 RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RV_(const RV_& other) noexcept
 	: Base{other}
-{
-	initialEnter();
-}
+{}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -858,9 +856,7 @@ template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typ
 HFSM2_CONSTEXPR(14)
 RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::RV_(RV_&& other) noexcept
 	: Base{move(other)}
-{
-	initialEnter();
-}
+{}
 
 //------------------------------------------------------------------------------
 
