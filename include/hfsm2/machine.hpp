@@ -1826,7 +1826,7 @@ struct TransitionT final
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
 #endif
 
-	alignas(Payload) Storage storage;
+	alignas(Payload) Storage storage {};
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
@@ -2745,7 +2745,7 @@ struct TaskT final
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
 #endif
 
-	alignas(Payload) Storage storage;
+	alignas(Payload) Storage storage {};
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
