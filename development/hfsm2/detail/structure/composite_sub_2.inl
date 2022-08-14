@@ -512,9 +512,9 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideGetNames(const Long parent,
 										  const RegionType /*region*/,
 										  const Short depth,
-										  StructureStateInfos& _stateInfos) const noexcept
+										  StructureStateInfos& stateInfos) const noexcept
 {
-	Single::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
+	Single::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
 }
 
 #endif

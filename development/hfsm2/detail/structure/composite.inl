@@ -396,7 +396,7 @@ C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) noexcept {
 	active	  = INVALID_SHORT;
 
 #if HFSM2_PLANS_AVAILABLE()
-	auto plan = control.plan(REGION_ID);
+	Plan plan = control.plan(REGION_ID);
 	plan.clear();
 #endif
 }
@@ -1051,10 +1051,10 @@ void
 C_<TN, TA, SG, TH, TS...>::deepGetNames(const Long parent,
 										const RegionType regionType,
 										const Short depth,
-										StructureStateInfos& _stateInfos) const noexcept
+										StructureStateInfos& stateInfos) const noexcept
 {
-	HeadState::deepGetNames(parent,					 regionType,								depth,	   _stateInfos);
-	SubStates::wideGetNames(_stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, _stateInfos);
+	HeadState::deepGetNames(parent,					regionType,								   depth,	  stateInfos);
+	SubStates::wideGetNames(stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, stateInfos);
 }
 
 #endif

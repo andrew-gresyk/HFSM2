@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.2.0 (2022-08-13)
+// 2.2.1 (2022-08-15)
 //
 // Created by Andrew Gresyk
 //
@@ -33,7 +33,7 @@
 
 #define HFSM2_VERSION_MAJOR 2
 #define HFSM2_VERSION_MINOR 2
-#define HFSM2_VERSION_PATCH 0
+#define HFSM2_VERSION_PATCH 1
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -1627,7 +1627,7 @@ stateName(const std::type_index stateType)								noexcept	{
 
 	#if defined(_MSC_VER)
 
-		auto first =
+		const uint8_t first =
 			raw[0] == 's' ? 7 : // Struct
 			raw[0] == 'c' ? 6 : // Class
 							0;
@@ -1715,7 +1715,7 @@ namespace detail {
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
 #endif
 
-struct alignas(4) TransitionBase {
+struct TransitionBase {
 	HFSM2_CONSTEXPR(11)
 	TransitionBase()													noexcept = default;
 
@@ -1764,11 +1764,11 @@ struct alignas(4) TransitionBase {
 #endif
 
 template <typename TPayload>
-struct alignas(4) TransitionT final
+struct TransitionT final
 	: TransitionBase
 {
 	using Payload = TPayload;
-	using Storage = typename std::aligned_storage<sizeof(Payload), 4>::type;
+	using Storage = uint8_t[sizeof(Payload)];
 
 	using TransitionBase::TransitionBase;
 
@@ -1821,12 +1821,22 @@ struct alignas(4) TransitionT final
 			reinterpret_cast<const Payload*>(&storage) : nullptr;
 	}
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	alignas(Payload) Storage storage {};
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
 	bool payloadSet = false;
-	Storage storage;
 };
 
 template <>
-struct alignas(4) TransitionT<void> final
+struct TransitionT<void> final
 	: TransitionBase
 {
 	using TransitionBase::TransitionBase;
@@ -2131,7 +2141,7 @@ private:
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
 #endif
 
-	Item _items[CAPACITY] {}; // warning 4324 triggers for 'StructureStateInfo'
+	Item _items[CAPACITY] {};
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
@@ -2712,7 +2722,7 @@ struct TaskT final
 	: TaskBase
 {
 	using Payload = TPayload;
-	using Storage = typename std::aligned_storage<sizeof(Payload), 2>::type;
+	using Storage = uint8_t[sizeof(Payload)];
 
 	using TaskBase::TaskBase;
 
@@ -2730,7 +2740,17 @@ struct TaskT final
 		new (&storage) Payload{payload};
 	}
 
-	Storage storage;
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	alignas(Payload) Storage storage {};
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
 	bool payloadSet = false;
 };
 
@@ -4008,7 +4028,7 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), N
 	if (bounds.first != INVALID_LONG) {
 		HFSM2_ASSERT(bounds.last != INVALID_LONG);
 
-		for (auto slow = bounds.first, fast = slow; ; ) {
+		for (Long slow = bounds.first, fast = slow; ; ) {
 			++length;
 			const TaskLink& task = taskLinks[slow];
 
@@ -5039,12 +5059,12 @@ PlanBaseT<TArgs>::linkTask(const Long index) noexcept {
 			HFSM2_ASSERT(_bounds.first < TaskLinks::CAPACITY);
 			HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
 
-			auto& lastLink = _planData.taskLinks[_bounds.last];
+			TaskLink& lastLink = _planData.taskLinks[_bounds.last];
 			HFSM2_ASSERT(lastLink.next == INVALID_LONG);
 
 			lastLink.next  = index;
 
-			auto& currLink = _planData.taskLinks[index];
+			TaskLink& currLink = _planData.taskLinks[index];
 			HFSM2_ASSERT(currLink.prev == INVALID_LONG);
 
 			currLink.prev  = _bounds.last;
@@ -5070,7 +5090,7 @@ PlanBaseT<TArgs>::clearTasks() noexcept {
 		{
 			HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
-			const auto& link = _planData.taskLinks[index];
+			const TaskLink& link = _planData.taskLinks[index];
 			HFSM2_ASSERT(index == _bounds.first ?
 							 link.prev == INVALID_LONG :
 							 link.prev <  TaskLinks::CAPACITY);
@@ -7459,7 +7479,7 @@ template <typename TIndices,
 struct S_
 	: THead
 {
-	static constexpr auto STATE_ID	 = TIndices::STATE_ID;
+	static constexpr StateID STATE_ID = TIndices::STATE_ID;
 
 	using Context		= typename TArgs::Context;
 
@@ -7653,7 +7673,7 @@ struct RegisterT final {
 	execute(StateParents& stateParents,
 			const Parent parent) noexcept
 	{
-		constexpr auto HEAD_ID = index<StateList, TH>();
+		constexpr StateID HEAD_ID = index<StateList, TH>();
 		static_assert(STATE_ID == HEAD_ID, "");
 
 		stateParents[STATE_ID] = parent;
@@ -8082,12 +8102,12 @@ S_<TN_, TA, TH>::name() noexcept {
 
 	#if defined(_MSC_VER)
 
-		auto first =
+		Short first =
 			raw[0] == 's' ? 7 : // Struct
 			raw[0] == 'c' ? 6 : // Class
 							0;
 
-		for (auto c = first; raw[c]; ++c)
+		for (Short c = first; raw[c]; ++c)
 			if (raw[c] == ':')
 				first = c + 1;
 
@@ -8111,9 +8131,9 @@ void
 S_<TN_, TA, TH>::deepGetNames(const Long parent,
 							  const RegionType region,
 							  const Short depth,
-							  StructureStateInfos& _stateInfos) const noexcept
+							  StructureStateInfos& stateInfos) const noexcept
 {
-	_stateInfos.emplace(StructureStateInfo{parent, region, depth, name()});
+	stateInfos.emplace(StructureStateInfo{parent, region, depth, name()});
 }
 
 #endif
@@ -9427,10 +9447,10 @@ void
 CS_<TN, TA, SG, NI, TL_<TS...>>::wideGetNames(const Long parent,
 											  const RegionType /*region*/,
 											  const Short depth,
-											  StructureStateInfos& _stateInfos) const noexcept
+											  StructureStateInfos& stateInfos) const noexcept
 {
-	LHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
-	RHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
+	LHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
+	RHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
 }
 
 #endif
@@ -9874,9 +9894,9 @@ void
 CS_<TN, TA, SG, NI, TL_<T>>::wideGetNames(const Long parent,
 										  const RegionType /*region*/,
 										  const Short depth,
-										  StructureStateInfos& _stateInfos) const noexcept
+										  StructureStateInfos& stateInfos) const noexcept
 {
-	Single::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
+	Single::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
 }
 
 #endif
@@ -9934,6 +9954,10 @@ struct HFSM2_EMPTY_BASES C_
 
 	using PlanControl	= PlanControlT <Args>;
 	using ScopedRegion	= typename PlanControl::Region;
+
+#if HFSM2_PLANS_AVAILABLE()
+	using Plan			= typename PlanControl::Plan;
+#endif
 
 	using FullControl	= FullControlT <Args>;
 	using ControlLock	= typename FullControl::Lock;
@@ -10509,7 +10533,7 @@ C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) noexcept {
 	active	  = INVALID_SHORT;
 
 #if HFSM2_PLANS_AVAILABLE()
-	auto plan = control.plan(REGION_ID);
+	Plan plan = control.plan(REGION_ID);
 	plan.clear();
 #endif
 }
@@ -11104,10 +11128,10 @@ void
 C_<TN, TA, SG, TH, TS...>::deepGetNames(const Long parent,
 										const RegionType regionType,
 										const Short depth,
-										StructureStateInfos& _stateInfos) const noexcept
+										StructureStateInfos& stateInfos) const noexcept
 {
-	HeadState::deepGetNames(parent,					 regionType,								depth,	   _stateInfos);
-	SubStates::wideGetNames(_stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, _stateInfos);
+	HeadState::deepGetNames(parent,					regionType,								   depth,	  stateInfos);
+	SubStates::wideGetNames(stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, stateInfos);
 }
 
 #endif
@@ -12079,9 +12103,9 @@ HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
 								  const Short depth,
-								  StructureStateInfos& _stateInfos) const noexcept
+								  StructureStateInfos& stateInfos) const noexcept
 {
-	Initial		   ::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
+	Initial		   ::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, stateInfos);
 }
 
 #endif
@@ -13090,6 +13114,9 @@ protected:
 	using StateList				= typename Forward::StateList;
 	using RegionList			= typename Forward::RegionList;
 
+	static constexpr Long STATE_COUNT	= StateList ::SIZE;
+	static constexpr Long REGION_COUNT	= RegionList::SIZE;
+
 	using Args					= typename Forward::Args;
 	using PureContext			= typename Args::PureContext;
 
@@ -13150,7 +13177,9 @@ public:
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using Prefix				= StaticArrayT<wchar_t, Info::REVERSE_DEPTH * 2 + 2>;
-	using Prefixes				= StaticArrayT<Prefix, Info::STATE_COUNT>;
+	using Prefixes				= StaticArrayT<Prefix, STATE_COUNT>;
+
+	using NamedStates			= BitArrayT<STATE_COUNT>;
 
 	using StructureStateInfos	= typename Args::StructureStateInfos;
 #endif
@@ -13641,7 +13670,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	void udpateActivity()													noexcept;
 
 	Prefixes _prefixes;
-	StructureStateInfos _stateInfos;
+	NamedStates _namedStates;
 
 	Structure _structure;
 	ActivityHistory _activityHistory;
@@ -15017,35 +15046,38 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::getStateNames() noexcept {
-	_stateInfos.clear();
-	_apex.deepGetNames(static_cast<Long>(-1), StructureStateInfo::RegionType::COMPOSITE, 0, _stateInfos);
+	StructureStateInfos stateInfos;
+	_apex.deepGetNames(static_cast<Long>(-1), StructureStateInfo::RegionType::COMPOSITE, 0, stateInfos);
 
 	Long margin = static_cast<Long>(-1);
-	for (Long s = 0; s < _stateInfos.count(); ++s) {
-		const auto& state = _stateInfos[s];
-		auto& prefix      = _prefixes[s];
+	for (Long s = 0; s < stateInfos.count(); ++s) {
+		const StructureStateInfo& stateInfo = stateInfos[s];
+		Prefix& prefix = _prefixes[s];
 
-		if (margin > state.depth && state.name[0] != '\0')
-			margin = state.depth;
+		if (stateInfo.name[0] != '\0')
+			_namedStates.set(s);
 
-		if (state.depth == 0)
+		if (margin > stateInfo.depth && stateInfo.name[0] != '\0')
+			margin = stateInfo.depth;
+
+		if (stateInfo.depth == 0)
 			prefix[0] = L'\0';
 		else {
-			const Long mark = state.depth * 2 - 1;
+			const Long mark = stateInfo.depth * 2 - 1;
 
-			prefix[mark + 0] = state.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'└' : L'╙';
+			prefix[mark + 0] = stateInfo.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'└' : L'╙';
 			prefix[mark + 1] = L' ';
 			prefix[mark + 2] = L'\0';
 
-			for (auto d = mark; d > 0; --d)
+			for (Long d = mark; d > 0; --d)
 				prefix[d - 1] = L' ';
 
-			for (auto r = s; r > state.parent; --r) {
-				auto& prefixAbove = _prefixes[r - 1];
+			for (Long r = s; r > stateInfo.parent; --r) {
+				Prefix& prefixAbove = _prefixes[r - 1];
 
 				switch (prefixAbove[mark]) {
 				case L' ':
-					prefixAbove[mark] = state.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'│' : L'║';
+					prefixAbove[mark] = stateInfo.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'│' : L'║';
 					break;
 				case L'└':
 					prefixAbove[mark] = L'├';
@@ -15061,16 +15093,16 @@ R_<TG, TA>::getStateNames() noexcept {
 		margin -= 1;
 
 	_structure.clear();
-	for (Long s = 0; s < _stateInfos.count(); ++s) {
-		const auto& state = _stateInfos[s];
-		auto& prefix = _prefixes[s];
-		const Long space = state.depth * 2;
+	for (Long s = 0; s < stateInfos.count(); ++s) {
+		const StructureStateInfo& stateInfo = stateInfos[s];
+		Prefix& prefix = _prefixes[s];
+		const Long space = stateInfo.depth * 2;
 
-		if (state.name[0] != L'\0') {
-			_structure.emplace(StructureEntry{false, &prefix[margin * 2], state.name});
+		if (stateInfo.name[0] != L'\0') {
+			_structure.emplace(StructureEntry{false, &prefix[margin * 2], stateInfo.name});
 			_activityHistory.emplace(static_cast<int8_t>(0));
-		} else if (s + 1 < _stateInfos.count()) {
-			auto& nextPrefix = _prefixes[s + 1];
+		} else if (s + 1 < stateInfos.count()) {
+			Prefix& nextPrefix = _prefixes[s + 1];
 
 			if (s > 0)
 				for (Long c = 0; c <= space; ++c)
@@ -15080,10 +15112,10 @@ R_<TG, TA>::getStateNames() noexcept {
 
 			switch (nextPrefix[mark]) {
 			case L'├':
-				nextPrefix[mark] = state.depth == margin ? L'┌' : L'┬';
+				nextPrefix[mark] = stateInfo.depth == margin ? L'┌' : L'┬';
 				break;
 			case L'╟':
-				nextPrefix[mark] = state.depth == margin ? L'╓' : L'╥';
+				nextPrefix[mark] = stateInfo.depth == margin ? L'╓' : L'╥';
 				break;
 			}
 		}
@@ -15094,11 +15126,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::udpateActivity() noexcept {
-	for (Long s = 0, i = 0; s < _stateInfos.count(); ++s)
-		if (_stateInfos[s].name[0] != L'\0') {
+	for (Long s = 0, i = 0; s < STATE_COUNT; ++s)
+		if (_namedStates.get(s)) {
 			_structure[i].isActive = isActive(s);
 
-			auto& activity = _activityHistory[i];
+			typename ActivityHistory::Item& activity = _activityHistory[i];
 
 			if (_structure[i].isActive) {
 				if (activity < 0)

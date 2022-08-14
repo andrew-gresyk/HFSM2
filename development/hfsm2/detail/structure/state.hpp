@@ -17,7 +17,7 @@ template <typename TIndices,
 struct S_
 	: THead
 {
-	static constexpr auto STATE_ID	 = TIndices::STATE_ID;
+	static constexpr StateID STATE_ID = TIndices::STATE_ID;
 
 	using Context		= typename TArgs::Context;
 

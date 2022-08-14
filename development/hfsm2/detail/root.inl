@@ -711,35 +711,38 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::getStateNames() noexcept {
-	_stateInfos.clear();
-	_apex.deepGetNames(static_cast<Long>(-1), StructureStateInfo::RegionType::COMPOSITE, 0, _stateInfos);
+	StructureStateInfos stateInfos;
+	_apex.deepGetNames(static_cast<Long>(-1), StructureStateInfo::RegionType::COMPOSITE, 0, stateInfos);
 
 	Long margin = static_cast<Long>(-1);
-	for (Long s = 0; s < _stateInfos.count(); ++s) {
-		const auto& state = _stateInfos[s];
-		auto& prefix      = _prefixes[s];
+	for (Long s = 0; s < stateInfos.count(); ++s) {
+		const StructureStateInfo& stateInfo = stateInfos[s];
+		Prefix& prefix = _prefixes[s];
 
-		if (margin > state.depth && state.name[0] != '\0')
-			margin = state.depth;
+		if (stateInfo.name[0] != '\0')
+			_namedStates.set(s);
 
-		if (state.depth == 0)
+		if (margin > stateInfo.depth && stateInfo.name[0] != '\0')
+			margin = stateInfo.depth;
+
+		if (stateInfo.depth == 0)
 			prefix[0] = L'\0';
 		else {
-			const Long mark = state.depth * 2 - 1;
+			const Long mark = stateInfo.depth * 2 - 1;
 
-			prefix[mark + 0] = state.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'└' : L'╙';
+			prefix[mark + 0] = stateInfo.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'└' : L'╙';
 			prefix[mark + 1] = L' ';
 			prefix[mark + 2] = L'\0';
 
-			for (auto d = mark; d > 0; --d)
+			for (Long d = mark; d > 0; --d)
 				prefix[d - 1] = L' ';
 
-			for (auto r = s; r > state.parent; --r) {
-				auto& prefixAbove = _prefixes[r - 1];
+			for (Long r = s; r > stateInfo.parent; --r) {
+				Prefix& prefixAbove = _prefixes[r - 1];
 
 				switch (prefixAbove[mark]) {
 				case L' ':
-					prefixAbove[mark] = state.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'│' : L'║';
+					prefixAbove[mark] = stateInfo.regionType == StructureStateInfo::RegionType::COMPOSITE ? L'│' : L'║';
 					break;
 				case L'└':
 					prefixAbove[mark] = L'├';
@@ -755,16 +758,16 @@ R_<TG, TA>::getStateNames() noexcept {
 		margin -= 1;
 
 	_structure.clear();
-	for (Long s = 0; s < _stateInfos.count(); ++s) {
-		const auto& state = _stateInfos[s];
-		auto& prefix = _prefixes[s];
-		const Long space = state.depth * 2;
+	for (Long s = 0; s < stateInfos.count(); ++s) {
+		const StructureStateInfo& stateInfo = stateInfos[s];
+		Prefix& prefix = _prefixes[s];
+		const Long space = stateInfo.depth * 2;
 
-		if (state.name[0] != L'\0') {
-			_structure.emplace(StructureEntry{false, &prefix[margin * 2], state.name});
+		if (stateInfo.name[0] != L'\0') {
+			_structure.emplace(StructureEntry{false, &prefix[margin * 2], stateInfo.name});
 			_activityHistory.emplace(static_cast<int8_t>(0));
-		} else if (s + 1 < _stateInfos.count()) {
-			auto& nextPrefix = _prefixes[s + 1];
+		} else if (s + 1 < stateInfos.count()) {
+			Prefix& nextPrefix = _prefixes[s + 1];
 
 			if (s > 0)
 				for (Long c = 0; c <= space; ++c)
@@ -774,10 +777,10 @@ R_<TG, TA>::getStateNames() noexcept {
 
 			switch (nextPrefix[mark]) {
 			case L'├':
-				nextPrefix[mark] = state.depth == margin ? L'┌' : L'┬';
+				nextPrefix[mark] = stateInfo.depth == margin ? L'┌' : L'┬';
 				break;
 			case L'╟':
-				nextPrefix[mark] = state.depth == margin ? L'╓' : L'╥';
+				nextPrefix[mark] = stateInfo.depth == margin ? L'╓' : L'╥';
 				break;
 			}
 		}
@@ -790,11 +793,11 @@ template <typename TG, typename TA>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG, TA>::udpateActivity() noexcept {
-	for (Long s = 0, i = 0; s < _stateInfos.count(); ++s)
-		if (_stateInfos[s].name[0] != L'\0') {
+	for (Long s = 0, i = 0; s < STATE_COUNT; ++s)
+		if (_namedStates.get(s)) {
 			_structure[i].isActive = isActive(s);
 
-			auto& activity = _activityHistory[i];
+			typename ActivityHistory::Item& activity = _activityHistory[i];
 
 			if (_structure[i].isActive) {
 				if (activity < 0)

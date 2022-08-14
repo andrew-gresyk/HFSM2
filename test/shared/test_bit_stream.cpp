@@ -8,8 +8,8 @@ namespace test_bit_stream {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using WriteStream  = hfsm2::detail::BitWriteStreamT<46>;
-using ReadStream   = hfsm2::detail::BitReadStreamT <46>;
+using WriteStream  = hfsm2::detail::BitWriteStreamT<45>;
+using ReadStream   = hfsm2::detail::BitReadStreamT <45>;
 using StreamBuffer = typename WriteStream::Buffer;
 
 //------------------------------------------------------------------------------

@@ -125,7 +125,7 @@ private:
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
 #endif
 
-	Item _items[CAPACITY] {}; // warning 4324 triggers for 'StructureStateInfo'
+	Item _items[CAPACITY] {};
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

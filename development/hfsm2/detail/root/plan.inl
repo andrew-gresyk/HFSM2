@@ -208,12 +208,12 @@ PlanBaseT<TArgs>::linkTask(const Long index) noexcept {
 			HFSM2_ASSERT(_bounds.first < TaskLinks::CAPACITY);
 			HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
 
-			auto& lastLink = _planData.taskLinks[_bounds.last];
+			TaskLink& lastLink = _planData.taskLinks[_bounds.last];
 			HFSM2_ASSERT(lastLink.next == INVALID_LONG);
 
 			lastLink.next  = index;
 
-			auto& currLink = _planData.taskLinks[index];
+			TaskLink& currLink = _planData.taskLinks[index];
 			HFSM2_ASSERT(currLink.prev == INVALID_LONG);
 
 			currLink.prev  = _bounds.last;
@@ -241,7 +241,7 @@ PlanBaseT<TArgs>::clearTasks() noexcept {
 		{
 			HFSM2_ASSERT(index < TaskLinks::CAPACITY);
 
-			const auto& link = _planData.taskLinks[index];
+			const TaskLink& link = _planData.taskLinks[index];
 			HFSM2_ASSERT(index == _bounds.first ?
 							 link.prev == INVALID_LONG :
 							 link.prev <  TaskLinks::CAPACITY);

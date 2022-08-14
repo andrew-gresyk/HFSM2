@@ -378,9 +378,9 @@ HFSM2_CONSTEXPR(14)
 void
 OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
 								  const Short depth,
-								  StructureStateInfos& _stateInfos) const noexcept
+								  StructureStateInfos& stateInfos) const noexcept
 {
-	Initial		   ::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, _stateInfos);
+	Initial		   ::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, stateInfos);
 }
 
 #endif

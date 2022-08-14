@@ -76,7 +76,7 @@ stateName(const std::type_index stateType)								noexcept	{
 
 	#if defined(_MSC_VER)
 
-		auto first =
+		const uint8_t first =
 			raw[0] == 's' ? 7 : // Struct
 			raw[0] == 'c' ? 6 : // Class
 							0;
@@ -172,7 +172,7 @@ namespace detail {
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
 #endif
 
-struct alignas(4) TransitionBase {
+struct TransitionBase {
 	HFSM2_CONSTEXPR(11)
 	TransitionBase()													noexcept = default;
 
@@ -233,11 +233,11 @@ struct alignas(4) TransitionBase {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TPayload>
-struct alignas(4) TransitionT final
+struct TransitionT final
 	: TransitionBase
 {
 	using Payload = TPayload;
-	using Storage = typename std::aligned_storage<sizeof(Payload), 4>::type;
+	using Storage = uint8_t[sizeof(Payload)];
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -306,14 +306,24 @@ struct alignas(4) TransitionT final
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	alignas(Payload) Storage storage {};
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
 	bool payloadSet = false;
-	Storage storage;
 };
 
 //------------------------------------------------------------------------------
 
 template <>
-struct alignas(4) TransitionT<void> final
+struct TransitionT<void> final
 	: TransitionBase
 {
 	using TransitionBase::TransitionBase;
