@@ -177,7 +177,7 @@
 
 	<Type Name="hfsm2::detail::PlanT&lt;*&gt;">
 		<DisplayString Condition="_bounds.first == INVALID_LONG">&lt;Empty&gt;</DisplayString>
-		<DisplayString>_bounds</DisplayString>
+		<DisplayString>{_bounds}</DisplayString>
 		<Expand HideRawView="true">
 			<CustomListItems MaxItemsPerView="100">
 				<Variable Name="i" InitialValue="_bounds.first" />

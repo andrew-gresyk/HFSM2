@@ -16,7 +16,7 @@ struct RegisterT final {
 	execute(StateParents& stateParents,
 			const Parent parent) noexcept
 	{
-		constexpr auto HEAD_ID = index<StateList, TH>();
+		constexpr StateID HEAD_ID = index<StateList, TH>();
 		static_assert(STATE_ID == HEAD_ID, "");
 
 		stateParents[STATE_ID] = parent;
@@ -510,12 +510,12 @@ S_<TN_, TA, TH>::name() noexcept {
 
 	#if defined(_MSC_VER)
 
-		auto first =
+		Short first =
 			raw[0] == 's' ? 7 : // Struct
 			raw[0] == 'c' ? 6 : // Class
 							0;
 
-		for (auto c = first; raw[c]; ++c)
+		for (Short c = first; raw[c]; ++c)
 			if (raw[c] == ':')
 				first = c + 1;
 
@@ -541,9 +541,9 @@ void
 S_<TN_, TA, TH>::deepGetNames(const Long parent,
 							  const RegionType region,
 							  const Short depth,
-							  StructureStateInfos& _stateInfos) const noexcept
+							  StructureStateInfos& stateInfos) const noexcept
 {
-	_stateInfos.emplace(StructureStateInfo{parent, region, depth, name()});
+	stateInfos.emplace(StructureStateInfo{parent, region, depth, name()});
 }
 
 #endif

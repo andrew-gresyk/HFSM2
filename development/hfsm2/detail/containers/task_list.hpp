@@ -52,7 +52,7 @@ struct TaskT final
 	: TaskBase
 {
 	using Payload = TPayload;
-	using Storage = typename std::aligned_storage<sizeof(Payload), 2>::type;
+	using Storage = uint8_t[sizeof(Payload)];
 
 	using TaskBase::TaskBase;
 
@@ -76,7 +76,17 @@ struct TaskT final
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	Storage storage;
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	alignas(Payload) Storage storage;
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
 	bool payloadSet = false;
 };
 

@@ -27,6 +27,9 @@ protected:
 	using StateList				= typename Forward::StateList;
 	using RegionList			= typename Forward::RegionList;
 
+	static constexpr Long STATE_COUNT	= StateList ::SIZE;
+	static constexpr Long REGION_COUNT	= RegionList::SIZE;
+
 	using Args					= typename Forward::Args;
 	using PureContext			= typename Args::PureContext;
 
@@ -87,7 +90,9 @@ public:
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using Prefix				= StaticArrayT<wchar_t, Info::REVERSE_DEPTH * 2 + 2>;
-	using Prefixes				= StaticArrayT<Prefix, Info::STATE_COUNT>;
+	using Prefixes				= StaticArrayT<Prefix, STATE_COUNT>;
+
+	using NamedStates			= BitArrayT<STATE_COUNT>;
 
 	using StructureStateInfos	= typename Args::StructureStateInfos;
 #endif
@@ -648,7 +653,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	void udpateActivity()													noexcept;
 
 	Prefixes _prefixes;
-	StructureStateInfos _stateInfos;
+	NamedStates _namedStates;
 
 	Structure _structure;
 	ActivityHistory _activityHistory;

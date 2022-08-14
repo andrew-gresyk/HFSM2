@@ -602,10 +602,10 @@ void
 CS_<TN, TA, SG, NI, TL_<TS...>>::wideGetNames(const Long parent,
 											  const RegionType /*region*/,
 											  const Short depth,
-											  StructureStateInfos& _stateInfos) const noexcept
+											  StructureStateInfos& stateInfos) const noexcept
 {
-	LHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
-	RHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, _stateInfos);
+	LHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
+	RHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
 }
 
 #endif
