@@ -41,6 +41,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 ## See Also
 
 - **[FFSM2](https://flat.hfsm.dev)**: High-Performance **Flat** Finite State Machine
+- **[HFSM Mono](https://font.hfsm.dev/)**: Monospaced bitmap Unicode fonts for HFSM2 and FFSM2 libraries
 
 ---
 
