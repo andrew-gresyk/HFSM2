@@ -75,7 +75,7 @@ jobs:
               VERSION: '5.0'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-6.0,
               CXX: clang++-6.0,
               VERSION: '6.0'
