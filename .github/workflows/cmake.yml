@@ -116,8 +116,12 @@ jobs:
           - {
               OS: ubuntu-latest,
               CC: clang-13,
-              CXX: clang++-13,
-              VERSION: '13'
+              CXX: clang++-13
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-14,
+              CXX: clang++-14
             }
           - {
               OS: macos-10.15,
