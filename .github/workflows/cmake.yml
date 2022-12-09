@@ -81,13 +81,13 @@ jobs:
               VERSION: '6.0'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-7,
               CXX: clang++-7,
               VERSION: '7'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-8,
               CXX: clang++-8,
               VERSION: '8'
