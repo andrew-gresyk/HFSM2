@@ -101,7 +101,8 @@ jobs:
           - {
               OS: ubuntu-latest,
               CC: clang-10,
-              CXX: clang++-10
+              CXX: clang++-10,
+              VERSION: '10'
             }
           - {
               OS: ubuntu-latest,
