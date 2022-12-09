@@ -75,36 +75,36 @@ jobs:
               VERSION: '5.0'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-6.0,
               CXX: clang++-6.0,
               VERSION: '6.0'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-7,
               CXX: clang++-7,
               VERSION: '7'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-8,
               CXX: clang++-8,
               VERSION: '8'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-9,
               CXX: clang++-9,
               VERSION: '9'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-10,
               CXX: clang++-10
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-11,
               CXX: clang++-11
             }
@@ -116,8 +116,12 @@ jobs:
           - {
               OS: ubuntu-latest,
               CC: clang-13,
-              CXX: clang++-13,
-              VERSION: '13'
+              CXX: clang++-13
+            }
+          - {
+              OS: ubuntu-latest,
+              CC: clang-14,
+              CXX: clang++-14
             }
           - {
               OS: macos-10.15,
