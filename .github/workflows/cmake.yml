@@ -99,10 +99,9 @@ jobs:
               VERSION: '9'
             }
           - {
-              OS: ubuntu-latest,
+              OS: ubuntu-20.04,
               CC: clang-10,
-              CXX: clang++-10,
-              VERSION: '10'
+              CXX: clang++-10
             }
           - {
               OS: ubuntu-latest,
