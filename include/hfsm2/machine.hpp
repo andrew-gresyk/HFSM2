@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.2.1 (2022-08-15)
+// 2.2.3 (2023-02-07)
 //
 // Created by Andrew Gresyk
 //
@@ -9,7 +9,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2022
+// Copyright (c) 2023
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@
 
 #define HFSM2_VERSION_MAJOR 2
 #define HFSM2_VERSION_MINOR 2
-#define HFSM2_VERSION_PATCH 2
+#define HFSM2_VERSION_PATCH 3
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -2738,6 +2738,13 @@ struct TaskT final
 		, payloadSet{true}
 	{
 		new (&storage) Payload{payload};
+	}
+
+	HFSM2_CONSTEXPR(11)
+	const Payload*
+	payload()													  const noexcept	{
+		return payloadSet ?
+			reinterpret_cast<const Payload*>(&storage) : nullptr;
 	}
 
 #ifdef _MSC_VER
@@ -5757,6 +5764,10 @@ protected:
 	using typename Control::StateList;
 	using typename Control::RegionList;
 
+	using typename Control::Core;
+
+	using TransitionSets	= typename Core::TransitionSets;
+
 #if HFSM2_PLANS_AVAILABLE()
 	using typename Control::PlanData;
 #endif
@@ -5775,7 +5786,11 @@ protected:
 		const Long prevSize;
 	};
 
-	using Control::Control;
+	HFSM2_CONSTEXPR(11)	PlanControlT(Core& core,
+									 const TransitionSets& currentTransitions)	noexcept
+		: Control{core}
+		, _currentTransitions{currentTransitions}
+	{}
 
 	HFSM2_CONSTEXPR(14)	void   setRegion(const RegionID regionId_,
 										 const StateID index,
@@ -5824,9 +5839,15 @@ public:
 
 #endif
 
+	/// @brief Get current transition requests
+	/// @return ArrayT of pending transition requests
+	HFSM2_CONSTEXPR(11)	const TransitionSets& currentTransitions()	  const noexcept	{ return _currentTransitions;															}
+
 protected:
 	using Control::_core;
 	using Control::_regionId;
+
+	const TransitionSets& _currentTransitions;
 
 	StateID _regionStateId = 0;
 	Long _regionSize = StateList::SIZE;
@@ -6346,8 +6367,7 @@ class GuardControlT final
 	HFSM2_CONSTEXPR(11)	GuardControlT(Core& core,
 									  const TransitionSets& currentTransitions,
 									  const TransitionSet& pendingTransitions) noexcept
-		: FullControl{core}
-		, _currentTransitions{currentTransitions}
+		: FullControl{core, currentTransitions}
 		, _pendingTransitions{pendingTransitions}
 	{}
 
@@ -6387,10 +6407,6 @@ public:
 	template <typename TState>
 	HFSM2_CONSTEXPR(11)	bool isPendingExit  ()						  const noexcept	{ return isPendingExit  (FullControl::template stateId<TState>());	}
 
-	/// @brief Get current transition requests
-	/// @return ArrayT of pending transition requests
-	HFSM2_CONSTEXPR(11)	const TransitionSets& currentTransitions()	  const noexcept	{ return _currentTransitions;										}
-
 	/// @brief Get pending transition requests
 	/// @return Array of pending transition requests
 	HFSM2_CONSTEXPR(11)	const TransitionSet&  pendingTransitions()	  const noexcept	{ return _pendingTransitions;										}
@@ -6403,8 +6419,7 @@ private:
 	using FullControl::_core;
 	using FullControl::_originId;
 
-	const TransitionSets& _currentTransitions;
-	const TransitionSet&  _pendingTransitions;
+	const TransitionSet& _pendingTransitions;
 	bool _cancelled = false;
 };
 
@@ -6787,7 +6802,7 @@ template <typename TState>
 HFSM2_CONSTEXPR(14)
 Status
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::updatePlan(TState& headState,
-																											  const Status subStatus) noexcept
+																											   const Status subStatus) noexcept
 {
 	constexpr StateID STATE_ID = TState::STATE_ID;
 
@@ -6810,7 +6825,11 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 					!processed.get(it->origin))
 				{
 					Origin origin{*this, STATE_ID};
-					changeTo(it->destination);
+
+					if (const Payload* const payload = it->payload())
+						changeWith(it->destination, *it->payload());
+					else
+						changeTo  (it->destination);
 
 					_core.planData.tasksSuccesses.clear(it->origin);
 					processed.set(it->origin);
@@ -6837,7 +6856,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long 
 HFSM2_CONSTEXPR(14)
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::changeWith(const StateID  stateId_,
-																															   const Payload& payload) noexcept
+																																const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE, payload});
@@ -6853,7 +6872,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long 
 HFSM2_CONSTEXPR(14)
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::restartWith(const StateID  stateId_,
-																																const Payload& payload) noexcept
+																																 const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART, payload});
@@ -6869,7 +6888,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long 
 HFSM2_CONSTEXPR(14)
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::resumeWith(const StateID  stateId_,
-																															   const Payload& payload) noexcept
+																																const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME, payload});
@@ -6885,7 +6904,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long 
 HFSM2_CONSTEXPR(14)
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::selectWith(const StateID  stateId_,
-																															   const Payload& payload) noexcept
+																																const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT, payload});
@@ -6903,7 +6922,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long 
 HFSM2_CONSTEXPR(14)
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::utilizeWith(const StateID  stateId_,
-																																const Payload& payload) noexcept
+																																 const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE, payload});
@@ -6919,7 +6938,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long 
 HFSM2_CONSTEXPR(14)
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::randomizeWith(const StateID  stateId_,
-																																  const Payload& payload) noexcept
+																																   const Payload& payload) noexcept
 {
 	if (!_locked) {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE, payload});
@@ -6937,7 +6956,7 @@ template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long 
 HFSM2_CONSTEXPR(14)
 void
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::scheduleWith(const StateID  stateId_,
-																																 const Payload& payload) noexcept
+																																  const Payload& payload) noexcept
 {
 	_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SCHEDULE, payload});
 
@@ -6951,7 +6970,7 @@ template <typename TState>
 HFSM2_CONSTEXPR(14)
 Status
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::updatePlan(TState& headState,
-																											   const Status subStatus) noexcept
+																												const Status subStatus) noexcept
 {
 	constexpr StateID STATE_ID = TState::STATE_ID;
 
@@ -13764,7 +13783,10 @@ public:
 protected:
 	HFSM2_IF_UTILITY_THEORY(using typename Base::RNG);
 
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using typename Base::PlanControl;
+	using typename Base::TransitionSets;
+#endif
 
 public:
 	using Base::Base;
@@ -14452,7 +14474,8 @@ void
 R_<TG, TA>::update() noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	FullControl control{_core};
+	TransitionSets emptyTransitions;
+	FullControl control{_core, emptyTransitions};
 
 	_apex. deepPreUpdate(control);
 	_apex.	  deepUpdate(control);
@@ -14473,7 +14496,8 @@ void
 R_<TG, TA>::react(const TEvent& event) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	FullControl control{_core};
+	TransitionSets emptyTransitions;
+	FullControl control{_core, emptyTransitions};
 
 	_apex. deepPreReact(control, event);
 	_apex.	  deepReact(control, event);
@@ -14666,7 +14690,8 @@ void
 R_<TG, TA>::reset() noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	PlanControl control{_core};
+	TransitionSets currentTransitions;
+	PlanControl control{_core, currentTransitions};
 
 	_apex.deepExit(control);
 
@@ -14711,7 +14736,8 @@ R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
 
 	_core.requests.clear();
 
-	PlanControl control{_core};
+	TransitionSets emptyTransitions;
+	PlanControl control{_core, emptyTransitions};
 
 	_apex.deepExit(control);
 
@@ -14752,7 +14778,8 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 	_core.previousTransitions.clear();
 
 	if (HFSM2_CHECKED(transitions && count)) {
-		PlanControl control{_core};
+		TransitionSets currentTransitions;
+		PlanControl control{_core, currentTransitions};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)
@@ -14811,12 +14838,11 @@ R_<TG, TA>::initialEnter() noexcept {
 	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
 	HFSM2_IF_TRANSITION_HISTORY(HFSM2_ASSERT(_core.previousTransitions.count() == 0));
 
-	RegistryBackUp undo;
-
-	PlanControl control{_core};
-
 	TransitionSets currentTransitions;
 	TransitionSet  pendingTransitions;
+
+	RegistryBackUp undo;
+	PlanControl control{_core, currentTransitions};
 
 	_apex.deepRequestChange(control, {TransitionType::RESTART, INVALID_SHORT});
 
@@ -14865,7 +14891,8 @@ void
 R_<TG, TA>::finalExit() noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	PlanControl control{_core};
+	TransitionSets emptyTransitions;
+	PlanControl control{_core, emptyTransitions};
 
 	_apex.deepExit(control);
 }
@@ -14896,9 +14923,10 @@ R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 	HFSM2_ASSERT(_core.requests.count());
 
-	RegistryBackUp registryUndo;
-	PlanControl control{_core};
 	TransitionSet pendingTransitions;
+
+	RegistryBackUp registryUndo;
+	PlanControl control{_core, currentTransitions};
 
 	for (Long i = 0;
 		i < SUBSTITUTION_LIMIT && _core.requests.count();
@@ -15207,7 +15235,8 @@ RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS
 	HFSM2_ASSERT(_core.previousTransitions.count() == 0);
 
 	if (HFSM2_CHECKED(transitions && count)) {
-		PlanControl control{_core};
+		TransitionSets emptyTransitions;
+		PlanControl control{_core, emptyTransitions};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)

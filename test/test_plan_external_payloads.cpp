@@ -10,13 +10,8 @@ namespace test_plan_external_payloads {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Payload {
-	int i0;
-	int i1;
-};
-
 using Config = hfsm2::Config
-					::PayloadT<Payload>;
+					::PayloadT<int>;
 
 using M = hfsm2::MachineT<Config>;
 
@@ -330,7 +325,7 @@ TEST_CASE("FSM.External Plans (payloads)") {
 			auto plan = machine.plan<Step1_BT>();
 			REQUIRE(!plan);
 
-			REQUIRE(plan.resumeWith<Step1_2, Step1_3>(Payload{3, 4}));
+			REQUIRE(plan.resumeWith<Step1_2, Step1_3>(1));
 		}
 		machine.update();
 		{
@@ -380,8 +375,8 @@ TEST_CASE("FSM.External Plans (payloads)") {
 			auto plan = machine.plan();
 			REQUIRE(!plan);
 
-			REQUIRE(plan.changeWith<Step1_BT, Hybrid>(Payload{1, 2}));
-			REQUIRE(plan.restartWith<Hybrid, Terminal>(Payload{2, 3}));
+			REQUIRE(plan.changeWith<Step1_BT, Hybrid>(2));
+			REQUIRE(plan.restartWith<Hybrid, Terminal>(3));
 		}
 		machine.update();
 		{
@@ -448,8 +443,8 @@ TEST_CASE("FSM.External Plans (payloads)") {
 			auto plan = machine.plan<Hybrid>();
 			REQUIRE(!plan);
 
-			REQUIRE(plan.utilizeWith<Step2L_1, Step2L_2>(Payload{4, 5}));
-			REQUIRE(plan.randomizeWith<Step2R_1, Step2R_2>(Payload{5, 6}));
+			REQUIRE(plan.utilizeWith<Step2L_1, Step2L_2>(4));
+			REQUIRE(plan.randomizeWith<Step2R_1, Step2R_2>(5));
 		}
 		machine.update();
 		{

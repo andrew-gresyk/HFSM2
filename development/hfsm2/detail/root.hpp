@@ -751,7 +751,10 @@ public:
 protected:
 	HFSM2_IF_UTILITY_THEORY(using typename Base::RNG);
 
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using typename Base::PlanControl;
+	using typename Base::TransitionSets;
+#endif
 
 public:
 	using Base::Base;

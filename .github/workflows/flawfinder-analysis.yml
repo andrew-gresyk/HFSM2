@@ -12,7 +12,7 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ master ]
   schedule:
-    - cron: '45 8 * * 6'
+    - cron: '21 21 * * 6'
 
 jobs:
   flawfinder:
@@ -24,7 +24,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: flawfinder_scan
         uses: david-a-wheeler/flawfinder@8e4a779ad59dbfaee5da586aa9210853b701959c
