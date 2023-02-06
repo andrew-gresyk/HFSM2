@@ -123,6 +123,7 @@ struct A
 {
 	//void entryGuard(GuardControl&)											{}
 	void enter(PlanControl&)													{}
+	void reenter(PlanControl&)													{}
 	void update(FullControl&)													{}
 	//void react(const RegionStateIndex&, FullControl&)							{}
 	void exit(PlanControl&)														{}
@@ -133,7 +134,15 @@ struct A
 struct A_1
 	: FSM::State
 {
-	void enter(PlanControl&)													{}
+	void entryGuard(GuardControl& control) {
+		REQUIRE(control.pendingTransitions().count() == 0);
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE(currentTransitions.count() == 0);
+	}
 
 	void update(FullControl& control) {
 		control.changeWith<A_2>(1);
@@ -147,7 +156,66 @@ struct A_1
 struct A_2
 	: FSM::StateT<Tracked>
 {
-	void enter(PlanControl&)													{}
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+
+		switch (entryCount()) {
+		case 0:
+			REQUIRE( pendingTransitions.count() == 1);
+			REQUIRE( pendingTransitions[0].payload());
+			REQUIRE(*pendingTransitions[0].payload() == 1);
+			break;
+
+		case 1:
+			REQUIRE( pendingTransitions.count() == 1);
+			REQUIRE( pendingTransitions[0].payload());
+			REQUIRE(*pendingTransitions[0].payload() == 5);
+			break;
+
+		case 2:
+			REQUIRE( pendingTransitions.count() == 2);
+			REQUIRE( pendingTransitions[0].payload());
+			REQUIRE(*pendingTransitions[0].payload() == 7);
+			REQUIRE( pendingTransitions[1].payload());
+			REQUIRE(*pendingTransitions[1].payload() == 8);
+			break;
+
+		default:
+			REQUIRE(false);
+		}
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		const M::Transition& transition = currentTransitions[0];
+
+		switch (entryCount()) {
+		case 1:
+			REQUIRE( currentTransitions.count() == 1);
+			REQUIRE( transition.payload());
+			REQUIRE(*transition.payload() == 1);
+			break;
+
+		case 2:
+			REQUIRE( currentTransitions.count() == 1);
+			REQUIRE( currentTransitions[0].payload());
+			REQUIRE(*currentTransitions[0].payload() == 5);
+			break;
+
+		case 3:
+			REQUIRE( currentTransitions.count() == 2);
+			REQUIRE( currentTransitions[0].payload());
+			REQUIRE(*currentTransitions[0].payload() == 7);
+			REQUIRE( currentTransitions[1].payload());
+			REQUIRE(*currentTransitions[1].payload() == 8);
+			break;
+
+		default:
+			REQUIRE(false);
+		}
+	}
 
 	void update(FullControl& control) {
 		switch (entryCount()) {
@@ -178,7 +246,24 @@ struct A_2_1
 struct A_2_2
 	: FSM::State
 {
-	void enter(PlanControl&)													{}
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 7);
+		REQUIRE( pendingTransitions[1].payload());
+		REQUIRE(*pendingTransitions[1].payload() == 8);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 7);
+		REQUIRE( currentTransitions[1].payload());
+		REQUIRE(*currentTransitions[1].payload() == 8);
+	}
+
 	//void update(FullControl&)													{}
 	//void react(const RegionStateIndex&, FullControl&)							{}
 	void exit(PlanControl&)														{}
@@ -330,6 +415,8 @@ TEST_CASE("FSM.Internal Payloads") {
 		FSM::Instance machine{_, &logger};
 		{
 			logger.assertSequence({
+				{ FSM::stateId<A_1  >(), Event::Type::ENTRY_GUARD },
+
 				{ FSM::stateId<A    >(), Event::Type::ENTER },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
 			});
@@ -805,6 +892,7 @@ TEST_CASE("FSM.Internal Payloads") {
 
 				{ FSM::stateId<B_2_2>(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<A_2  >(), Event::Type::ENTRY_GUARD },
+				{ FSM::stateId<A_2_2>(), Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<B_1_1>(), Event::Type::EXIT },
 				{ FSM::stateId<B_1  >(), Event::Type::EXIT },

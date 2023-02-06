@@ -25,7 +25,7 @@ jobs:
         BUILD_CONFIG: [ Release, Debug ]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     # install dependencies
     - name: Install ARM GCC on ubuntu

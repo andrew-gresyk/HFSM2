@@ -49,7 +49,8 @@ void
 R_<TG, TA>::update() noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	FullControl control{_core};
+	TransitionSets emptyTransitions;
+	FullControl control{_core, emptyTransitions};
 
 	_apex. deepPreUpdate(control);
 	_apex.	  deepUpdate(control);
@@ -72,7 +73,8 @@ void
 R_<TG, TA>::react(const TEvent& event) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	FullControl control{_core};
+	TransitionSets emptyTransitions;
+	FullControl control{_core, emptyTransitions};
 
 	_apex. deepPreReact(control, event);
 	_apex.	  deepReact(control, event);
@@ -299,7 +301,8 @@ void
 R_<TG, TA>::reset() noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	PlanControl control{_core};
+	TransitionSets currentTransitions;
+	PlanControl control{_core, currentTransitions};
 
 	_apex.deepExit(control);
 
@@ -348,7 +351,8 @@ R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
 
 	_core.requests.clear();
 
-	PlanControl control{_core};
+	TransitionSets emptyTransitions;
+	PlanControl control{_core, emptyTransitions};
 
 	_apex.deepExit(control);
 
@@ -391,7 +395,8 @@ R_<TG, TA>::replayTransitions(const Transition* const transitions,
 	_core.previousTransitions.clear();
 
 	if (HFSM2_CHECKED(transitions && count)) {
-		PlanControl control{_core};
+		TransitionSets currentTransitions;
+		PlanControl control{_core, currentTransitions};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)
@@ -456,12 +461,11 @@ R_<TG, TA>::initialEnter() noexcept {
 	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
 	HFSM2_IF_TRANSITION_HISTORY(HFSM2_ASSERT(_core.previousTransitions.count() == 0));
 
-	RegistryBackUp undo;
-
-	PlanControl control{_core};
-
 	TransitionSets currentTransitions;
 	TransitionSet  pendingTransitions;
+
+	RegistryBackUp undo;
+	PlanControl control{_core, currentTransitions};
 
 	_apex.deepRequestChange(control, {TransitionType::RESTART, INVALID_SHORT});
 
@@ -512,7 +516,8 @@ void
 R_<TG, TA>::finalExit() noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
-	PlanControl control{_core};
+	TransitionSets emptyTransitions;
+	PlanControl control{_core, emptyTransitions};
 
 	_apex.deepExit(control);
 }
@@ -547,9 +552,10 @@ R_<TG, TA>::processTransitions(TransitionSets& currentTransitions) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 	HFSM2_ASSERT(_core.requests.count());
 
-	RegistryBackUp registryUndo;
-	PlanControl control{_core};
 	TransitionSet pendingTransitions;
+
+	RegistryBackUp registryUndo;
+	PlanControl control{_core, currentTransitions};
 
 	for (Long i = 0;
 		i < SUBSTITUTION_LIMIT && _core.requests.count();
@@ -886,7 +892,8 @@ RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS
 	HFSM2_ASSERT(_core.previousTransitions.count() == 0);
 
 	if (HFSM2_CHECKED(transitions && count)) {
-		PlanControl control{_core};
+		TransitionSets emptyTransitions;
+		PlanControl control{_core, emptyTransitions};
 
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)

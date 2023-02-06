@@ -14,7 +14,7 @@ on:
   pull_request:
     branches: [ master ]
   schedule:
-    - cron: '41 2 * * 3'
+    - cron: '22 3 * * 3'
 
 env:
   # Path to the CMake build directory.
@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Configure CMake
         run: cmake -B ${{ env.build }}
@@ -37,7 +37,7 @@ jobs:
       #   run: cmake --build ${{ env.build }}
 
       - name: Initialize MSVC Code Analysis
-        uses: microsoft/msvc-code-analysis-action@04825f6d9e00f87422d6bf04e1a38b1f3ed60d99
+        uses: microsoft/msvc-code-analysis-action@24c285ab36952c9e9182f4b78dfafbac38a7e5ee
         # Provide a unique ID to access the sarif output path
         id: run-analysis
         with:

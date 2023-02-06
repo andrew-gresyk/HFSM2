@@ -514,6 +514,10 @@ protected:
 	using typename Control::StateList;
 	using typename Control::RegionList;
 
+	using typename Control::Core;
+
+	using TransitionSets	= typename Core::TransitionSets;
+
 #if HFSM2_PLANS_AVAILABLE()
 	using typename Control::PlanData;
 #endif
@@ -536,7 +540,11 @@ protected:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using Control::Control;
+	HFSM2_CONSTEXPR(11)	PlanControlT(Core& core,
+									 const TransitionSets& currentTransitions)	noexcept
+		: Control{core}
+		, _currentTransitions{currentTransitions}
+	{}
 
 	HFSM2_CONSTEXPR(14)	void   setRegion(const RegionID regionId_,
 										 const StateID index,
@@ -594,9 +602,17 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	/// @brief Get current transition requests
+	/// @return ArrayT of pending transition requests
+	HFSM2_CONSTEXPR(11)	const TransitionSets& currentTransitions()	  const noexcept	{ return _currentTransitions;															}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 protected:
 	using Control::_core;
 	using Control::_regionId;
+
+	const TransitionSets& _currentTransitions;
 
 	StateID _regionStateId = 0;
 	Long _regionSize = StateList::SIZE;
@@ -1174,8 +1190,7 @@ class GuardControlT final
 	HFSM2_CONSTEXPR(11)	GuardControlT(Core& core,
 									  const TransitionSets& currentTransitions,
 									  const TransitionSet& pendingTransitions) noexcept
-		: FullControl{core}
-		, _currentTransitions{currentTransitions}
+		: FullControl{core, currentTransitions}
 		, _pendingTransitions{pendingTransitions}
 	{}
 
@@ -1226,10 +1241,6 @@ public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	// COMMON
 
-	/// @brief Get current transition requests
-	/// @return ArrayT of pending transition requests
-	HFSM2_CONSTEXPR(11)	const TransitionSets& currentTransitions()	  const noexcept	{ return _currentTransitions;										}
-
 	/// @brief Get pending transition requests
 	/// @return Array of pending transition requests
 	HFSM2_CONSTEXPR(11)	const TransitionSet&  pendingTransitions()	  const noexcept	{ return _pendingTransitions;										}
@@ -1242,8 +1253,7 @@ private:
 	using FullControl::_core;
 	using FullControl::_originId;
 
-	const TransitionSets& _currentTransitions;
-	const TransitionSet&  _pendingTransitions;
+	const TransitionSet& _pendingTransitions;
 	bool _cancelled = false;
 };
 

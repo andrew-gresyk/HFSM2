@@ -76,6 +76,15 @@ struct TaskT final
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	HFSM2_CONSTEXPR(11)
+	const Payload*
+	payload()													  const noexcept	{
+		return payloadSet ?
+			reinterpret_cast<const Payload*>(&storage) : nullptr;
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier

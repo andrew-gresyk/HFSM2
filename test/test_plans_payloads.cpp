@@ -10,13 +10,8 @@ namespace test_plans_payloads {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Payload {
-	int i0;
-	int i1;
-};
-
 using Config = hfsm2::Config
-					::PayloadT<Payload>;
+					::PayloadT<int>;
 
 using M = hfsm2::MachineT<Config>;
 
@@ -102,8 +97,8 @@ struct Planned
 		auto plan = control.plan<Planned>();
 		REQUIRE(!plan); //-V521
 
-		REQUIRE(plan.changeWith<Step1_BT, Hybrid>(Payload{1, 2}));
-		REQUIRE(plan.restartWith<Hybrid, Terminal>(Payload{2, 3}));
+		REQUIRE(plan.changeWith<Step1_BT, Hybrid>(1));
+		REQUIRE(plan.restartWith<Hybrid, Terminal>(2));
 	}
 
 	void planFailed(FullControl& control) {
@@ -120,7 +115,7 @@ struct Step1_BT
 		Plan plan = control.plan();
 		REQUIRE(!plan); //-V521
 
-		REQUIRE(plan.resumeWith<Step1_2, Step1_3>(Payload{3, 4}));
+		REQUIRE(plan.resumeWith<Step1_2, Step1_3>(3));
 	}
 };
 
@@ -128,13 +123,29 @@ struct Step1_1
 	: FSM::State
 {
 	void update(FullControl& control) {
-		control.changeTo<Step1_2  >();
+		control.changeWith<Step1_2  >(4);
 	}
 };
 
 struct Step1_2
 	: FSM::State
 {
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 1);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 4);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 1);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 4);
+	}
+
 	void update(FullControl& control) {
 		control.succeed();
 	}
@@ -143,6 +154,22 @@ struct Step1_2
 struct Step1_3
 	: FSM::State
 {
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 1);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 3);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 1);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 3);
+	}
+
 	void update(FullControl& control) {
 		control.succeed();
 	}
@@ -153,12 +180,26 @@ struct Step1_3
 struct Hybrid
 	: FSM::State
 {
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 1);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 1);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
 	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 1);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 1);
+
 		auto plan = control.plan();
 		REQUIRE(!plan); //-V521
 
-		REQUIRE(plan.utilizeWith<Step2L_1, Step2L_2>(Payload{4, 5}));
-		REQUIRE(plan.randomizeWith<Step2R_1, Step2R_2>(Payload{5, 6}));
+		REQUIRE(plan.utilizeWith<Step2L_1, Step2L_2>(4));
+		REQUIRE(plan.randomizeWith<Step2R_1, Step2R_2>(5));
 	}
 
 	void planFailed(FullControl& control) {
@@ -173,6 +214,22 @@ struct Step2L_P : FSM::State {};
 struct Step2L_1
 	: FSM::State
 {
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 1);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 1);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 1);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 1);
+	}
+
 	void update(FullControl& control) {
 		control.succeed();
 	}
@@ -183,6 +240,26 @@ struct Step2L_2
 {
 	Utility utility(const Control&) {
 		return 2.0f;
+	}
+
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 2);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 4);
+		REQUIRE( pendingTransitions[1].payload());
+		REQUIRE(*pendingTransitions[1].payload() == 5);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 2);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 4);
+		REQUIRE( currentTransitions[1].payload());
+		REQUIRE(*currentTransitions[1].payload() == 5);
 	}
 
 	void update(FullControl& control) {
@@ -197,6 +274,22 @@ struct Step2R_P : FSM::State {};
 struct Step2R_1
 	: FSM::State
 {
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 1);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 1);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 1);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 1);
+	}
+
 	void update(FullControl& control) {
 		control.succeed();
 	}
@@ -209,6 +302,26 @@ struct Step2R_2
 		return 1;
 	}
 
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 2);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 4);
+		REQUIRE( pendingTransitions[1].payload());
+		REQUIRE(*pendingTransitions[1].payload() == 5);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 2);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 4);
+		REQUIRE( currentTransitions[1].payload());
+		REQUIRE(*currentTransitions[1].payload() == 5);
+	}
+
 	void update(FullControl& control) {
 		control.fail();
 	}
@@ -219,6 +332,22 @@ struct Step2R_2
 struct Terminal
 	: FSM::State
 {
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 1);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 2);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 1);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 2);
+	}
+
 	void planSucceeded(FullControl& control) {
 		control.fail();
 	}
@@ -227,6 +356,22 @@ struct Terminal
 struct Terminal_L
 	: FSM::State
 {
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 1);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 2);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 1);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 2);
+	}
+
 	void update(FullControl& control) {
 		control.succeed();
 	}
@@ -235,6 +380,22 @@ struct Terminal_L
 struct Terminal_R
 	: FSM::State
 {
+	void entryGuard(GuardControl& control) {
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE( pendingTransitions.count() == 1);
+		REQUIRE( pendingTransitions[0].payload());
+		REQUIRE(*pendingTransitions[0].payload() == 2);
+
+		REQUIRE(control.currentTransitions().count() == 0);
+	}
+
+	void enter(PlanControl& control) {
+		const auto& currentTransitions = control.currentTransitions();
+		REQUIRE( currentTransitions.count() == 1);
+		REQUIRE( currentTransitions[0].payload());
+		REQUIRE(*currentTransitions[0].payload() == 2);
+	}
+
 	void update(FullControl& control) {
 		control.succeed();
 	}

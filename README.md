@@ -1,6 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![GitHub Release Date](https://img.shields.io/github/release-date/andrew-gresyk/HFSM2)](https://github.com/andrew-gresyk/HFSM2/releases)  
-[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/andrew-gresyk/HFSM2.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/andrew-gresyk/HFSM2/context:cpp)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5335/badge)](https://bestpractices.coreinfrastructure.org/projects/5335)  
 [![GCC, Clang](https://github.com/andrew-gresyk/HFSM2/actions/workflows/cmake.yml/badge.svg)](https://github.com/andrew-gresyk/HFSM2/actions/workflows/cmake.yml)
 [![ARM GCC](https://github.com/andrew-gresyk/HFSM2/actions/workflows/cmake-qemu-arm.yml/badge.svg)](https://github.com/andrew-gresyk/HFSM2/actions/workflows/cmake-qemu-arm.yml)
@@ -22,12 +21,12 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 ## Compiler Support
 
 - Visual Studio: 2015, **2017, 2019, 2022**
-- GCC: **5, 6, 7, 8, 9, 10, 11**
+- GCC: **5, 6, 7, 8, 9, 10, 11, 12**
 - ARM GCC: **9**
-- Clang: 3.7, 3.8, **3.9, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14**
-- AppleClang: **12, 13**
+- Clang: **3.9, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15**
+- AppleClang: **12, 13, 13**
 
-(Currently CI-tested toolchains are in **bold**)
+(Currently CI-tested toolchains in **bold**)
 
 ---
 
@@ -60,6 +59,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - Fully static, no dynamic allocations
 - Uses inline-friendly compile-time polymorphism, no virtual methods are used
 - Type-safe transitions: `FSM.changeTo<TargetState>()` with optional payloads
+- Flexible configuration using `HFSM2_ENABLE_*` macros
 - Scaleable, supports robust state re-use via state injections
 - **[Hierarchical](https://github.com/andrew-gresyk/HFSM2/wiki/Transitions-within-Hierarchy)**, with a selection of composite (sub-machine) and orthogonal regions
 - Gamedev-friendly, supports explicit `State::update()`
