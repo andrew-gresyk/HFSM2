@@ -32,8 +32,8 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## Quick Start
 
-- **[Minimal Example](../../wiki/Overview-Minimal-Example)**
-- **[Extended Tutorial](../../wiki/Overview-Extended-Tutorial)**
+- **[Minimal Example](https://github.com/andrew-gresyk/HFSM2/wiki/Overview-Minimal-Example)**
+- **[Extended Tutorial](https://github.com/andrew-gresyk/HFSM2/wiki/Overview-Extended-Tutorial)**
 
 ---
 
@@ -46,7 +46,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## Documentation
 
-- **[Wiki](../../wiki)**
+- **[Wiki](https://github.com/andrew-gresyk/HFSM2/wiki)**
 
 ---
 
