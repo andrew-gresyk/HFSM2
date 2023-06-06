@@ -708,15 +708,19 @@ public:
 	static constexpr Long BIT_CAPACITY	= NBitCapacity;
 	static constexpr Long BYTE_COUNT	= contain(BIT_CAPACITY, 8u);
 
-	using Data = uint8_t[BYTE_COUNT];
+	using StreamBuffer	= StreamBufferT<BIT_CAPACITY>;
+	using Data			= uint8_t	   [BYTE_COUNT	];
 
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(_data, 0);	}
 
 	HFSM2_CONSTEXPR(14)		  Data& data()								noexcept	{ return _data;		}
 	HFSM2_CONSTEXPR(11)	const Data& data()						  const noexcept	{ return _data;		}
 
+	HFSM2_CONSTEXPR(14) bool operator == (const StreamBuffer& s)  const noexcept;
+	HFSM2_CONSTEXPR(14) bool operator != (const StreamBuffer& s)  const noexcept;
+
 private:
-	Data _data;
+	Data _data {};
 };
 
 template <Long NBitCapacity>
@@ -780,6 +784,28 @@ private:
 namespace hfsm2 {
 namespace detail {
 
+template <Long NBitCapacity>
+HFSM2_CONSTEXPR(14)
+bool
+StreamBufferT<NBitCapacity>::operator == (const StreamBuffer& buffer) const noexcept {
+	for (hfsm2::Long i = 0; i < BYTE_COUNT; ++i)
+		if (_data[i] != buffer._data[i])
+			return false;
+
+	return true;
+}
+
+template <Long NBitCapacity>
+HFSM2_CONSTEXPR(14)
+bool
+StreamBufferT<NBitCapacity>::operator != (const StreamBuffer& buffer) const noexcept {
+	for (hfsm2::Long i = 0; i < BYTE_COUNT; ++i)
+		if (_data[i] != buffer._data[i])
+			return true;
+
+	return false;
+}
+
 template <Long NBC>
 template <Short NBitWidth>
 HFSM2_CONSTEXPR(14)
@@ -818,30 +844,29 @@ BitReadStreamT<NBC>::read() noexcept {
 	constexpr Short BIT_WIDTH = NBitWidth;
 	static_assert(BIT_WIDTH > 0, "STATIC ASSERT");
 
-	HFSM2_ASSERT(_cursor <= BIT_CAPACITY);
+	HFSM2_ASSERT(_cursor + BIT_WIDTH <= BIT_CAPACITY);
 
 	using Item = UBitWidth<BIT_WIDTH>;
 
 	Item item = 0;
-	Short itemCursor = 0;
 
-	for (Short itemWidth = BIT_WIDTH; itemWidth; )
-		if (HFSM2_CHECKED(_cursor + itemWidth <= BIT_CAPACITY)) {
-			const Long	byteIndex		= _cursor >> 3;
-			const uint8_t& byte			= _buffer._data[byteIndex];
+	for (Short itemCursor = 0, itemWidth = BIT_WIDTH; itemWidth; ) {
+		const Long	byteIndex		= _cursor >> 3;
+		const uint8_t& byte			= _buffer._data[byteIndex];
 
-			const Short byteChunkStart	= _cursor & 0x7;
-			const Short byteDataWidth	= 8 - byteChunkStart;
-			const Short byteChunkWidth	= min(byteDataWidth, itemWidth);
-			const Short byteChunkMask	= (1 << byteChunkWidth) - 1;
-			const Item	byteChunk		= (byte >> byteChunkStart) & byteChunkMask;
-			const Item	itemChunk		= byteChunk << itemCursor;
+		const Short byteChunkStart	= _cursor & 0x7;
+		const Short byteDataWidth	= 8 - byteChunkStart;
+		const Short byteChunkWidth	= min(byteDataWidth, itemWidth);
+		const Short byteChunkMask	= (1 << byteChunkWidth) - 1;
 
-			item		|= itemChunk;
-			itemCursor	+= byteChunkWidth;
-			itemWidth	-= byteChunkWidth;
-			_cursor		+= byteChunkWidth;
-		}
+		const Item	byteChunk		= (byte >> byteChunkStart) & byteChunkMask;
+		const Item	itemChunk		= byteChunk << itemCursor;
+
+		item		|= itemChunk;
+		itemCursor	+= byteChunkWidth;
+		itemWidth	-= byteChunkWidth;
+		_cursor		+= byteChunkWidth;
+	}
 
 	return item;
 }
@@ -2060,6 +2085,7 @@ public:
 
 	HFSM2_CONSTEXPR(14)	void fill(const Item filler)					noexcept;
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(filler<Item>());				}
+	HFSM2_CONSTEXPR(14)	bool empty()							  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	 Iterator  begin()								noexcept	{ return  Iterator(*this, first());	}
 	HFSM2_CONSTEXPR(11)	CIterator  begin()						  const noexcept	{ return CIterator(*this, first());	}
@@ -2101,8 +2127,6 @@ public:
 	static constexpr Index CAPACITY	= NCapacity;
 
 public:
-	HFSM2_CONSTEXPR(14)	 void clear()										noexcept	{ _count = 0;						}
-
 	template <typename... TArgs>
 	HFSM2_CONSTEXPR(14)	Index emplace(const TArgs &... args)				noexcept;
 
@@ -2115,7 +2139,10 @@ public:
 	template <typename N>
 	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)		  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	Index  count()								  const noexcept	{ return _count;					}
+	HFSM2_CONSTEXPR(11)	Index count()								  const noexcept	{ return _count;					}
+
+	HFSM2_CONSTEXPR(14)	 void clear()										noexcept	{ _count = 0;						}
+	HFSM2_CONSTEXPR(11)	 bool empty()								  const noexcept	{ return _count == 0;				}
 
 	template <Long N>
 	HFSM2_CONSTEXPR(14)	ArrayT& operator += (const ArrayT<Item, N>& other)	noexcept;
@@ -2193,6 +2220,17 @@ StaticArrayT<T, NC>::fill(const Item filler) noexcept {
 }
 
 template <typename T, Long NC>
+HFSM2_CONSTEXPR(14)
+bool
+StaticArrayT<T, NC>::empty() const noexcept {
+	for (const Item& item : _items)
+		if (item != filler<Item>())
+			return false;
+
+	return true;
+}
+
+template <typename T, Long NC>
 template <typename... TArgs>
 HFSM2_CONSTEXPR(14)
 typename ArrayT<T, NC>::Index
@@ -2267,7 +2305,7 @@ struct Units final {
 template <unsigned NCapacity>
 class BitArrayT final {
 public:
-	using Index	= UCapacity<NCapacity>;
+	using Index		= UCapacity<NCapacity>;
 
 	static constexpr Index CAPACITY   = NCapacity;
 	static constexpr Index UNIT_COUNT = contain(CAPACITY, 8);
@@ -2344,6 +2382,8 @@ public:
 	template <Short NIndex>
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
 
+	HFSM2_CONSTEXPR(14)	bool empty()							  const noexcept;
+
 	template <typename TIndex>
 	HFSM2_CONSTEXPR(14)	bool get  (const TIndex index)			  const noexcept;
 
@@ -2363,13 +2403,15 @@ public:
 	HFSM2_CONSTEXPR(14)	CBits cbits(const Units& units)			  const noexcept;
 
 private:
-	uint8_t _storage[UNIT_COUNT];
+	uint8_t _storage[UNIT_COUNT] {};
 };
 
 template <>
 class BitArrayT<0> final {
 public:
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{}
+
+	HFSM2_CONSTEXPR(11)	bool empty()							  const noexcept	{ return true;	}
 };
 
 }
@@ -2540,6 +2582,17 @@ void
 BitArrayT<NCapacity>::clear() noexcept {
 	for (uint8_t& unit : _storage)
 		unit = uint8_t{0};
+}
+
+template <unsigned NCapacity>
+HFSM2_CONSTEXPR(14)
+bool
+BitArrayT<NCapacity>::empty() const noexcept {
+	for (const uint8_t& unit : _storage)
+		if (unit != uint8_t{0})
+			return false;
+
+	return true;
 }
 
 template <unsigned NCapacity>
@@ -2783,6 +2836,8 @@ private:
 	using Item		= TaskT<Payload>;
 
 public:
+	HFSM2_CONSTEXPR(14)	 void clear()											noexcept;
+
 	template <typename... TArgs>
 	HFSM2_CONSTEXPR(14)	Index emplace(TArgs&&... args)							noexcept;
 
@@ -2791,7 +2846,8 @@ public:
 	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index i)					noexcept;
 	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index i)			  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	Index count()									  const noexcept	{ return _count;	}
+	HFSM2_CONSTEXPR(11)	Index count()									  const noexcept	{ return _count;		}
+	HFSM2_CONSTEXPR(11)	bool  empty()									  const noexcept	{ return _count == 0;	}
 
 private:
 	HFSM2_IF_ASSERT(void verifyStructure(const Index occupied = INVALID)  const noexcept);
@@ -2799,9 +2855,9 @@ private:
 private:
 	Index _vacantHead = 0;
 	Index _vacantTail = 0;
-	Index _last  = 0;
-	Index _count = 0;
-	Item _items[CAPACITY];
+	Index _last		  = 0;
+	Index _count	  = 0;
+	Item _items[CAPACITY] {};
 };
 
 template <typename TItem>
@@ -2815,6 +2871,16 @@ class TaskListT<TItem, 0> {};
 
 namespace hfsm2 {
 namespace detail {
+
+template <typename TP, Long NC>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<TP, NC>::clear() noexcept {
+	_vacantHead	= 0;
+	_vacantTail	= 0;
+	_last		= 0;
+	_count		= 0;
+}
 
 template <typename TP, Long NC>
 template <typename... TA>
@@ -3120,8 +3186,10 @@ struct RegistryT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		noexcept;
 	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests()									noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()											noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests	 ()									noexcept;
+	HFSM2_CONSTEXPR(14)	void clear			 ()									noexcept;
+
+	HFSM2_CONSTEXPR(11)	bool empty			 ()							  const noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -3201,8 +3269,10 @@ struct RegistryT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		noexcept;
 	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests()									noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()											noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests	 ()									noexcept;
+	HFSM2_CONSTEXPR(14)	void clear			 ()									noexcept;
+
+	HFSM2_CONSTEXPR(11)	bool empty			 ()							  const noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -3478,6 +3548,17 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 	compoResumable.clear();
 }
 
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+HFSM2_CONSTEXPR(11)
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::empty() const noexcept {
+	return compoRequested.empty()
+		&& orthoRequested.empty()
+		&& compoRemains	 .empty()
+		&& compoActive	 .empty()
+		&& compoResumable.empty();
+}
+
 }
 }
 
@@ -3668,6 +3749,17 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC_, 0, 0 HFSM2_IF_SERIALIZATION(, NSB), NSL 
 	compoResumable.clear();
 }
 
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_ HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+HFSM2_CONSTEXPR(11)
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC_, 0, 0 HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::empty() const noexcept {
+	return compoRequested.empty()
+		&& orthoRequested.empty()
+		&& compoRemains	 .empty()
+		&& compoActive	 .empty()
+		&& compoResumable.empty();
+}
+
 }
 }
 
@@ -3710,6 +3802,13 @@ struct TaskLink final {
 	Long prev		= INVALID_LONG;
 	Long next		= INVALID_LONG;
 };
+
+template <>
+HFSM2_CONSTEXPR(11)
+TaskLink
+filler<TaskLink>()														noexcept	{
+	return TaskLink{};
+}
 
 struct Bounds final {
 	Long first		= INVALID_LONG;
@@ -3757,23 +3856,23 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , TPayload>> final
 {
-	using StateList		 = TStateList;
-	using RegionList	 = TRegionList;
-	using Payload		 = TPayload;
+	using StateList			= TStateList;
+	using RegionList		= TRegionList;
+	using Payload			= TPayload;
 
 	static constexpr Long STATE_COUNT	= StateList ::SIZE;
 	static constexpr Long REGION_COUNT	= RegionList::SIZE;
 	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
 
-	using Task			 = TaskT<Payload>;
-	using Tasks			 = TaskListT   <Payload,  TASK_CAPACITY>;
-	using TaskLinks		 = StaticArrayT<TaskLink, TASK_CAPACITY>;
-	using Payloads		 = StaticArrayT<Payload,  TASK_CAPACITY>;
+	using Task				= TaskT		  <Payload>;
+	using Tasks				= TaskListT   <Payload,  TASK_CAPACITY>;
+	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
+	using Payloads			= StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds	 = ArrayT	   <Bounds, REGION_COUNT>;
-	using TasksBits		 = BitArrayT   <		STATE_COUNT>;
-	using RegionBits	 = BitArrayT   <		REGION_COUNT>;
-	using RegionStatuses = StaticArrayT<Status,	REGION_COUNT>;
+	using TasksBounds		= ArrayT	  <Bounds, REGION_COUNT>;
+	using TasksBits			= BitArrayT   <			STATE_COUNT>;
+	using RegionBits		= BitArrayT   <		   REGION_COUNT>;
+	using RegionStatuses	= StaticArrayT<Status, REGION_COUNT>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -3791,6 +3890,7 @@ struct PlanDataT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
 
 	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
@@ -3820,21 +3920,21 @@ struct PlanDataT<ArgsT<TContext
 					 , NTaskCapacity
 					 , void>> final
 {
-	using StateList		= TStateList;
-	using RegionList	= TRegionList;
+	using StateList			= TStateList;
+	using RegionList		= TRegionList;
 
-	static constexpr Long  STATE_COUNT	= StateList::SIZE;
+	static constexpr Long  STATE_COUNT	= StateList ::SIZE;
 	static constexpr Long REGION_COUNT	= RegionList::SIZE;
 	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
 
-	using Task			= TaskT<void>;
-	using Tasks			= TaskListT	  <void,	 TASK_CAPACITY>;
-	using TaskLinks		= StaticArrayT<TaskLink, TASK_CAPACITY>;
+	using Task				= TaskT		  <void>;
+	using Tasks				= TaskListT	  <void,	 TASK_CAPACITY>;
+	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
-	using TasksBounds	= ArrayT	   <Bounds, REGION_COUNT>;
-	using TasksBits		= BitArrayT	   <		STATE_COUNT>;
-	using RegionBits	= BitArrayT	   <		REGION_COUNT>;
-	using RegionStatuses = StaticArrayT<Status, RegionList::SIZE>;
+	using TasksBounds		= ArrayT	  <Bounds, REGION_COUNT>;
+	using TasksBits			= BitArrayT	  <			STATE_COUNT>;
+	using RegionBits		= BitArrayT	  <		   REGION_COUNT>;
+	using RegionStatuses	= StaticArrayT<Status, REGION_COUNT>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -3850,6 +3950,7 @@ struct PlanDataT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
 
 	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
@@ -3882,6 +3983,7 @@ struct PlanDataT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
 
 	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{}
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept	{}
@@ -3912,6 +4014,7 @@ struct PlanDataT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
 
 	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{}
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept	{}
@@ -4011,6 +4114,23 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 	subStatuses	.clear();
 }
 
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clear() noexcept {
+	tasks		  .clear();
+	taskLinks	  .clear();
+	taskPayloads  .clear();
+	payloadExists .clear();
+
+	tasksBounds	  .clear();
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+	planExists	  .clear();
+
+	clearRegionStatuses();
+}
+
 #if HFSM2_ASSERT_AVAILABLE()
 
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
@@ -4096,6 +4216,21 @@ void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clearRegionStatuses() noexcept {
 	headStatuses.clear();
 	subStatuses	.clear();
+}
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clear() noexcept {
+	tasks		  .clear();
+	taskLinks	  .clear();
+
+	tasksBounds	  .clear();
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+	planExists	  .clear();
+
+	clearRegionStatuses();
 }
 
 #if HFSM2_ASSERT_AVAILABLE()
@@ -8502,6 +8637,7 @@ struct RF_ final {
 #if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS			= Apex::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS		= Apex::RESUMABLE_BITS;
+	static constexpr Long  SERIAL_BITS			= 1 + ACTIVE_BITS + RESUMABLE_BITS;
 #endif
 
 	using Args			= ArgsT<Context
@@ -8511,7 +8647,7 @@ struct RF_ final {
 							  , COMPO_REGIONS
 							  , ORTHO_REGIONS
 							  , ORTHO_UNITS
-							  HFSM2_IF_SERIALIZATION(, ACTIVE_BITS + RESUMABLE_BITS)
+							  HFSM2_IF_SERIALIZATION(, SERIAL_BITS)
 							  , SUBSTITUTION_LIMIT
 							  HFSM2_IF_PLANS(, TASK_CAPACITY)
 							  , Payload>;
@@ -13563,25 +13699,6 @@ public:
 	/// @brief Reset FSM to initial state (recursively 'exit()' currently active states, 'enter()' initial states)
 	HFSM2_CONSTEXPR(14)	void reset()															noexcept;
 
-#if HFSM2_SERIALIZATION_AVAILABLE()
-
-	/// @brief Buffer for serialization
-	/// @see https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization
-	/// @see HFSM2_ENABLE_SERIALIZATION
-	using SerialBuffer			= typename Args::SerialBuffer;
-
-	/// @brief Serialize FSM into 'buffer'
-	/// @param buffer 'SerialBuffer' to serialize to
-	/// @see HFSM2_ENABLE_SERIALIZATION
-	HFSM2_CONSTEXPR(14)	void save(		SerialBuffer& buffer)							  const noexcept;
-
-	/// @brief De-serialize FSM from 'buffer'
-	/// @param buffer 'SerialBuffer' to de-serialize from
-	/// @see HFSM2_ENABLE_SERIALIZATION
-	HFSM2_CONSTEXPR(14)	void load(const SerialBuffer& buffer)									noexcept;
-
-#endif
-
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 	/// @brief Get the list of transitions recorded during last 'update()'
@@ -13678,6 +13795,11 @@ protected:
 	HFSM2_CONSTEXPR(14)	bool cancelledByGuards(const TransitionSets& currentTransitions,
 											   const TransitionSet&  pendingTransitions)		noexcept;
 
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void save(WriteStream& stream)									  const noexcept;
+	HFSM2_CONSTEXPR(14)	void load( ReadStream& stream)											noexcept;
+#endif
+
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	bool applyRequests(Control& control,
 										   const Transition* const transitions,
@@ -13734,6 +13856,12 @@ protected:
 	using typename Base::RNG;
 #endif
 
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	using typename Base::Args;
+	using typename Base::WriteStream;
+	using typename Base::ReadStream;
+#endif
+
 #if HFSM2_LOG_INTERFACE_AVAILABLE()
 	using typename Base::Logger;
 #endif
@@ -13751,6 +13879,30 @@ public:
 	HFSM2_CONSTEXPR(14)	RV_(	  RV_&& other)													noexcept;
 
 	HFSM2_CONSTEXPR(20)	~RV_()																	noexcept;
+
+#if HFSM2_SERIALIZATION_AVAILABLE()
+
+	/// @brief Buffer for serialization
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	using SerialBuffer			= typename Args::SerialBuffer;
+
+	/// @brief Serialize FSM into 'buffer'
+	/// @param buffer `SerialBuffer` to serialize to
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	HFSM2_CONSTEXPR(14)	void save(		SerialBuffer& buffer)							  const noexcept;
+
+	/// @brief De-serialize FSM from 'buffer'
+	/// @param buffer `SerialBuffer` to de-serialize from
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	HFSM2_CONSTEXPR(14)	void load(const SerialBuffer& buffer)									noexcept;
+
+#endif
+
+private:
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	using Base::save;
+	using Base::load;
+#endif
 
 private:
 	using Base::initialEnter;
@@ -13783,6 +13935,15 @@ public:
 protected:
 	HFSM2_IF_UTILITY_THEORY(using typename Base::RNG);
 
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	using typename Base::PlanControl;
+	using typename Base::TransitionSets;
+
+	using typename Base::Args;
+	using typename Base::WriteStream;
+	using typename Base::ReadStream;
+#endif
+
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using typename Base::PlanControl;
 	using typename Base::TransitionSets;
@@ -13804,6 +13965,24 @@ public:
 	/// @brief Manually stop the FSM
 	///  Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_CONSTEXPR(14)	void exit()															noexcept	{ finalExit();		}
+
+#if HFSM2_SERIALIZATION_AVAILABLE()
+
+	/// @brief Buffer for serialization
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	using SerialBuffer			= typename Args::SerialBuffer;
+
+	/// @brief Serialize FSM into 'buffer'
+	/// @param buffer `SerialBuffer` to serialize to
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	HFSM2_CONSTEXPR(14)	void save(		SerialBuffer& buffer)							  const noexcept;
+
+	/// @brief De-serialize FSM from 'buffer'
+	/// @param buffer `SerialBuffer` to de-serialize from
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	HFSM2_CONSTEXPR(14)	void load(const SerialBuffer& buffer)									noexcept;
+
+#endif
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
@@ -13830,17 +14009,27 @@ public:
 
 #endif
 
+private:
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	using Base::save;
+	using Base::load;
+
+	HFSM2_CONSTEXPR(14)	void loadEnter(ReadStream& stream)										noexcept;
+#endif
+
 protected:
 	using Base::initialEnter;
 	using Base::finalExit;
 
 	using Base::_core;
 
+#if HFSM2_SERIALIZATION_AVAILABLE() || HFSM2_TRANSITION_HISTORY_AVAILABLE()
+	using Base::_apex;
+#endif
+
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using Base::applyRequests;
 	HFSM2_IF_STRUCTURE_REPORT(using Base::udpateActivity);
-
-	using Base::_apex;
 #endif
 };
 
@@ -14708,61 +14897,6 @@ R_<TG, TA>::reset() noexcept {
 	_apex.deepEnter(control);
 }
 
-#if HFSM2_SERIALIZATION_AVAILABLE()
-
-template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
-void
-R_<TG, TA>::save(SerialBuffer& _buffer) const noexcept {
-	HFSM2_ASSERT(_core.registry.isActive());
-
-	WriteStream stream{_buffer};
-
-	// TODO: save _core.registry
-	// TODO: save _core.requests
-	// TODO: save _core.rng						// HFSM2_IF_UTILITY_THEORY()
-	// TODO: save _core.planData				// HFSM2_IF_PLANS()
-	// TODO: save _core.previousTransitions		// HFSM2_IF_TRANSITION_HISTORY()
-	// TODO: save _activityHistory				// HFSM2_IF_STRUCTURE_REPORT()
-
-	_apex.deepSaveActive(_core.registry, stream);
-}
-
-template <typename TG, typename TA>
-HFSM2_CONSTEXPR(14)
-void
-R_<TG, TA>::load(const SerialBuffer& buffer) noexcept {
-	HFSM2_ASSERT(_core.registry.isActive());
-
-	_core.requests.clear();
-
-	TransitionSets emptyTransitions;
-	PlanControl control{_core, emptyTransitions};
-
-	_apex.deepExit(control);
-
-	HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
-	HFSM2_IF_TRANSITION_HISTORY(_core.previousTransitions.clear());
-
-	_core.registry.clear();
-	_core.requests.clear();
-
-	ReadStream stream{buffer};
-
-	// TODO: load _core.registry
-	// TODO: load _core.requests
-	// TODO: load _core.rng					// HFSM2_IF_UTILITY_THEORY()
-	// TODO: load _core.planData			// HFSM2_IF_PLANS()
-	// TODO: load _core.previousTransitions	// HFSM2_IF_TRANSITION_HISTORY()
-	// TODO: load _activityHistory			// HFSM2_IF_STRUCTURE_REPORT()
-
-	_apex.deepLoadRequested(_core.registry, stream);
-
-	_apex.deepEnter(control);
-}
-
-#endif
-
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 template <typename TG, typename TA>
@@ -14895,6 +15029,24 @@ R_<TG, TA>::finalExit() noexcept {
 	PlanControl control{_core, emptyTransitions};
 
 	_apex.deepExit(control);
+
+	_core.registry.clear();
+	_core.requests.clear();
+
+#if HFSM2_PLANS_AVAILABLE()
+	_core.planData.clear();
+#endif
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	// TODO: _core.rng.clear();
+#endif
+
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
+	_core.transitionTargets  .clear();
+	_core.previousTransitions.clear();
+#endif
+
+	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
 template <typename TG, typename TA>
@@ -15043,6 +15195,77 @@ R_<TG, TA>::cancelledByGuards(const TransitionSets& currentTransitions,
 	return _apex.deepForwardExitGuard(guardControl) ||
 		   _apex.deepForwardEntryGuard(guardControl);
 }
+
+#if HFSM2_SERIALIZATION_AVAILABLE()
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+R_<TG, TA>::save(WriteStream& stream) const noexcept {
+	HFSM2_ASSERT(_core.registry.isActive());
+
+	_apex.deepSaveActive(_core.registry, stream);
+
+	// TODO: save(stream, _core.requests);
+
+#if HFSM2_PLANS_AVAILABLE()
+	// TODO: save(stream, _core.planData);
+#endif
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	// TODO: save(stream, _core.rng);
+#endif
+
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
+	// TODO: save(stream, _core.transitionTargets);
+	// TODO: save(stream, _core.previousTransitions);
+#endif
+
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
+	// TODO: save(stream, _activityHistory);
+#endif
+}
+
+template <typename TG, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+R_<TG, TA>::load(ReadStream& stream) noexcept {
+	HFSM2_ASSERT(_core.registry.isActive());
+
+	_core.registry.clearRequests();
+	_core.registry.compoResumable.clear();
+	_apex.deepLoadRequested(_core.registry, stream);
+
+	_core.requests.clear();
+	// TODO: load(stream, _core.requests);
+
+#if HFSM2_PLANS_AVAILABLE()
+	_core.planData.clear();
+	// TODO: load(stream, _core.planData);
+#endif
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	// TODO: load(stream, _core.rng);
+#endif
+
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
+	_core.transitionTargets  .clear();
+	_core.previousTransitions.clear();
+#endif
+
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
+	// TODO: load(stream, _activityHistory);
+#endif
+
+	TransitionSets emptyTransitions;
+	PlanControl control{_core, emptyTransitions};
+
+	_apex.deepChangeToRequested(control);
+
+	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
+}
+
+#endif
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
@@ -15220,6 +15443,66 @@ RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, N
 	finalExit();
 }
 
+#if HFSM2_SERIALIZATION_AVAILABLE()
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::save(SerialBuffer& buffer) const noexcept {
+	WriteStream stream{buffer};
+
+	stream.template write<1>(1);
+	save(stream);
+}
+
+template <FeatureTag NFT, typename TC, typename TV HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RV_<G_<NFT, TC, TV HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::load(const SerialBuffer& buffer) noexcept {
+	ReadStream stream{buffer};
+
+	if (HFSM2_CHECKED(stream.template read<1>()))
+		Base::load(stream);
+}
+
+#endif
+
+#if HFSM2_SERIALIZATION_AVAILABLE()
+
+template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::save(SerialBuffer& buffer) const noexcept {
+	WriteStream stream{buffer};
+
+	if (isActive()) {
+		stream.template write<1>(1);
+
+		save(stream);
+	}
+	else
+		stream.template write<1>(0);
+}
+
+template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::load(const SerialBuffer& buffer) noexcept {
+	ReadStream stream{buffer};
+
+	if (stream.template read<1>()) {
+		if (isActive())
+			Base::load(stream);
+		else
+			loadEnter (stream);
+	}
+	else
+		if (isActive())
+			finalExit();
+}
+
+#endif
+
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
@@ -15266,6 +15549,40 @@ RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS
 						   transitions.count());
 	else
 		return false;
+}
+
+#endif
+
+#if HFSM2_SERIALIZATION_AVAILABLE()
+
+template <FeatureTag NFT, typename TC HFSM2_IF_UTILITY_THEORY(, typename TR, typename TU, typename TG), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TP, typename TA>
+HFSM2_CONSTEXPR(14)
+void
+RV_<G_<NFT, TC, Manual HFSM2_IF_UTILITY_THEORY(, TR, TU, TG), NSL HFSM2_IF_PLANS(, NTC), TP>, TA>::loadEnter(ReadStream& stream) noexcept {
+	HFSM2_ASSERT(_core.registry.empty());
+	_apex.deepLoadRequested(_core.registry, stream);
+
+	HFSM2_ASSERT(_core.requests.empty());
+
+#if HFSM2_PLANS_AVAILABLE()
+	HFSM2_ASSERT(_core.planData.empty() == 0);
+#endif
+
+#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
+	HFSM2_ASSERT(_core.transitionTargets  .empty());
+	HFSM2_ASSERT(_core.previousTransitions.empty());
+#endif
+
+#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
+	//HFSM2_ASSERT(_activityHistory.empty());
+#endif
+
+	TransitionSets emptyTransitions;
+	PlanControl control{_core, emptyTransitions};
+
+	_apex.deepEnter(control);
+
+	HFSM2_IF_STRUCTURE_REPORT(udpateActivity());
 }
 
 #endif

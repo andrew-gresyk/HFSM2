@@ -19,7 +19,7 @@ struct Units final {
 template <unsigned NCapacity>
 class BitArrayT final {
 public:
-	using Index	= UCapacity<NCapacity>;
+	using Index		= UCapacity<NCapacity>;
 
 	static constexpr Index CAPACITY   = NCapacity;
 	static constexpr Index UNIT_COUNT = contain(CAPACITY, 8);
@@ -102,6 +102,8 @@ public:
 	template <Short NIndex>
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
 
+	HFSM2_CONSTEXPR(14)	bool empty()							  const noexcept;
+
 	template <typename TIndex>
 	HFSM2_CONSTEXPR(14)	bool get  (const TIndex index)			  const noexcept;
 
@@ -121,7 +123,7 @@ public:
 	HFSM2_CONSTEXPR(14)	CBits cbits(const Units& units)			  const noexcept;
 
 private:
-	uint8_t _storage[UNIT_COUNT];
+	uint8_t _storage[UNIT_COUNT] {};
 };
 
 //------------------------------------------------------------------------------
@@ -130,6 +132,8 @@ template <>
 class BitArrayT<0> final {
 public:
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{}
+
+	HFSM2_CONSTEXPR(11)	bool empty()							  const noexcept	{ return true;	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

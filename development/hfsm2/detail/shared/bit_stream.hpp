@@ -25,15 +25,19 @@ public:
 	static constexpr Long BIT_CAPACITY	= NBitCapacity;
 	static constexpr Long BYTE_COUNT	= contain(BIT_CAPACITY, 8u);
 
-	using Data = uint8_t[BYTE_COUNT];
+	using StreamBuffer	= StreamBufferT<BIT_CAPACITY>;
+	using Data			= uint8_t	   [BYTE_COUNT	];
 
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(_data, 0);	}
 
 	HFSM2_CONSTEXPR(14)		  Data& data()								noexcept	{ return _data;		}
 	HFSM2_CONSTEXPR(11)	const Data& data()						  const noexcept	{ return _data;		}
 
+	HFSM2_CONSTEXPR(14) bool operator == (const StreamBuffer& s)  const noexcept;
+	HFSM2_CONSTEXPR(14) bool operator != (const StreamBuffer& s)  const noexcept;
+
 private:
-	Data _data;
+	Data _data {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////

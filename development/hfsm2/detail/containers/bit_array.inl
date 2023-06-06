@@ -192,6 +192,19 @@ BitArrayT<NCapacity>::clear() noexcept {
 //------------------------------------------------------------------------------
 
 template <unsigned NCapacity>
+HFSM2_CONSTEXPR(14)
+bool
+BitArrayT<NCapacity>::empty() const noexcept {
+	for (const uint8_t& unit : _storage)
+		if (unit != uint8_t{0})
+			return false;
+
+	return true;
+}
+
+//------------------------------------------------------------------------------
+
+template <unsigned NCapacity>
 template <Short NIndex>
 HFSM2_CONSTEXPR(14)
 bool

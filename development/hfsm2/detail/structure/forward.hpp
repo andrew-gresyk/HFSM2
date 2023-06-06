@@ -370,6 +370,7 @@ struct RF_ final {
 #if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Long  ACTIVE_BITS			= Apex::ACTIVE_BITS;
 	static constexpr Long  RESUMABLE_BITS		= Apex::RESUMABLE_BITS;
+	static constexpr Long  SERIAL_BITS			= 1 + ACTIVE_BITS + RESUMABLE_BITS;
 #endif
 
 	using Args			= ArgsT<Context
@@ -379,7 +380,7 @@ struct RF_ final {
 							  , COMPO_REGIONS
 							  , ORTHO_REGIONS
 							  , ORTHO_UNITS
-							  HFSM2_IF_SERIALIZATION(, ACTIVE_BITS + RESUMABLE_BITS)
+							  HFSM2_IF_SERIALIZATION(, SERIAL_BITS)
 							  , SUBSTITUTION_LIMIT
 							  HFSM2_IF_PLANS(, TASK_CAPACITY)
 							  , Payload>;

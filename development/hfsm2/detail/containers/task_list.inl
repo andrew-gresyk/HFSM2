@@ -6,6 +6,18 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TP, Long NC>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<TP, NC>::clear() noexcept {
+	_vacantHead	= 0;
+	_vacantTail	= 0;
+	_last		= 0;
+	_count		= 0;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TP, Long NC>
 template <typename... TA>
 HFSM2_CONSTEXPR(14)
 Long

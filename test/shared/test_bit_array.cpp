@@ -12,8 +12,7 @@ using Bits	   = typename BitArray::Bits;
 
 TEST_CASE("Shared.BitArrayT<>") {
 	BitArray bitArray;
-
-	bitArray.clear();
+	REQUIRE(bitArray.empty());
 
 	WHEN("Static methods") {
 		{
@@ -68,6 +67,9 @@ TEST_CASE("Shared.BitArrayT<>") {
 			REQUIRE(!bits.get<5>());
 			REQUIRE(!bits.get<6>());
 		}
+
+		bitArray.clear();
+		REQUIRE(bitArray.empty());
 	}
 
 	WHEN("Dynamic methods") {
@@ -123,6 +125,9 @@ TEST_CASE("Shared.BitArrayT<>") {
 			REQUIRE(!bits.get(5));
 			REQUIRE(!bits.get(6));
 		}
+
+		bitArray.clear();
+		REQUIRE(bitArray.empty());
 	}
 }
 

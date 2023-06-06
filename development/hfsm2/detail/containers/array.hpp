@@ -7,7 +7,16 @@ template <typename T>
 HFSM2_CONSTEXPR(11)
 T
 filler()																noexcept	{
-	return T{INVALID_SHORT};
+	return T{};
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <>
+HFSM2_CONSTEXPR(11)
+Short
+filler<Short>()															noexcept	{
+	return INVALID_SHORT;
 }
 
 //------------------------------------------------------------------------------
@@ -40,6 +49,7 @@ public:
 
 	HFSM2_CONSTEXPR(14)	void fill(const Item filler)					noexcept;
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(filler<Item>());				}
+	HFSM2_CONSTEXPR(14)	bool empty()							  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	 Iterator  begin()								noexcept	{ return  Iterator(*this, first());	}
 	HFSM2_CONSTEXPR(11)	CIterator  begin()						  const noexcept	{ return CIterator(*this, first());	}
@@ -85,8 +95,6 @@ public:
 	static constexpr Index CAPACITY	= NCapacity;
 
 public:
-	HFSM2_CONSTEXPR(14)	 void clear()										noexcept	{ _count = 0;						}
-
 	template <typename... TArgs>
 	HFSM2_CONSTEXPR(14)	Index emplace(const TArgs &... args)				noexcept;
 
@@ -99,7 +107,10 @@ public:
 	template <typename N>
 	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)		  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	Index  count()								  const noexcept	{ return _count;					}
+	HFSM2_CONSTEXPR(11)	Index count()								  const noexcept	{ return _count;					}
+
+	HFSM2_CONSTEXPR(14)	 void clear()										noexcept	{ _count = 0;						}
+	HFSM2_CONSTEXPR(11)	 bool empty()								  const noexcept	{ return _count == 0;				}
 
 	template <Long N>
 	HFSM2_CONSTEXPR(14)	ArrayT& operator += (const ArrayT<Item, N>& other)	noexcept;
@@ -132,7 +143,7 @@ private:
 #endif
 };
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <typename T>
 class ArrayT<T, 0> final {
