@@ -256,6 +256,19 @@ RegistryT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 	compoResumable.clear();
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL HFSM2_IF_PLANS(, Long NTC), typename TTP>
+HFSM2_CONSTEXPR(11)
+bool
+RegistryT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL HFSM2_IF_PLANS(, NTC), TTP>>::empty() const noexcept {
+	return compoRequested.empty()
+		&& orthoRequested.empty()
+		&& compoRemains	 .empty()
+		&& compoActive	 .empty()
+		&& compoResumable.empty();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }

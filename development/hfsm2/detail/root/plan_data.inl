@@ -54,15 +54,6 @@ operator |= (Status& lhs,
 	return lhs;
 }
 
-//------------------------------------------------------------------------------
-
-template <>
-HFSM2_CONSTEXPR(11)
-Status
-filler<Status>() noexcept {
-	return Status{};
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -101,6 +92,25 @@ void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clearRegionStatuses() noexcept {
 	headStatuses.clear();
 	subStatuses	.clear();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clear() noexcept {
+	tasks		  .clear();
+	taskLinks	  .clear();
+	taskPayloads  .clear();
+	payloadExists .clear();
+
+	tasksBounds	  .clear();
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+	planExists	  .clear();
+
+	clearRegionStatuses();
 }
 
 //------------------------------------------------------------------------------
@@ -198,6 +208,23 @@ void
 PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clearRegionStatuses() noexcept {
 	headStatuses.clear();
 	subStatuses	.clear();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clear() noexcept {
+	tasks		  .clear();
+	taskLinks	  .clear();
+
+	tasksBounds	  .clear();
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+	planExists	  .clear();
+
+	clearRegionStatuses();
 }
 
 //------------------------------------------------------------------------------

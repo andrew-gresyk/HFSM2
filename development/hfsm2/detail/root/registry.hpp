@@ -148,8 +148,10 @@ struct RegistryT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		noexcept;
 	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests()									noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()											noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests	 ()									noexcept;
+	HFSM2_CONSTEXPR(14)	void clear			 ()									noexcept;
+
+	HFSM2_CONSTEXPR(11)	bool empty			 ()							  const noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -231,8 +233,10 @@ struct RegistryT<ArgsT<TContext
 	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		noexcept;
 	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests()									noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()											noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests	 ()									noexcept;
+	HFSM2_CONSTEXPR(14)	void clear			 ()									noexcept;
+
+	HFSM2_CONSTEXPR(11)	bool empty			 ()							  const noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;

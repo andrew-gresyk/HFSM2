@@ -517,27 +517,6 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if HFSM2_SERIALIZATION_AVAILABLE()
-
-	/// @brief Buffer for serialization
-	/// @see https://doc.hfsm.dev/user-guide/debugging-and-tools/serialization
-	/// @see HFSM2_ENABLE_SERIALIZATION
-	using SerialBuffer			= typename Args::SerialBuffer;
-
-	/// @brief Serialize FSM into 'buffer'
-	/// @param buffer 'SerialBuffer' to serialize to
-	/// @see HFSM2_ENABLE_SERIALIZATION
-	HFSM2_CONSTEXPR(14)	void save(		SerialBuffer& buffer)							  const noexcept;
-
-	/// @brief De-serialize FSM from 'buffer'
-	/// @param buffer 'SerialBuffer' to de-serialize from
-	/// @see HFSM2_ENABLE_SERIALIZATION
-	HFSM2_CONSTEXPR(14)	void load(const SerialBuffer& buffer)									noexcept;
-
-#endif
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
 	/// @brief Get the list of transitions recorded during last 'update()'
@@ -642,6 +621,11 @@ protected:
 	HFSM2_CONSTEXPR(14)	bool cancelledByGuards(const TransitionSets& currentTransitions,
 											   const TransitionSet&  pendingTransitions)		noexcept;
 
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void save(WriteStream& stream)									  const noexcept;
+	HFSM2_CONSTEXPR(14)	void load( ReadStream& stream)											noexcept;
+#endif
+
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	bool applyRequests(Control& control,
 										   const Transition* const transitions,
@@ -701,6 +685,12 @@ protected:
 	using typename Base::RNG;
 #endif
 
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	using typename Base::Args;
+	using typename Base::WriteStream;
+	using typename Base::ReadStream;
+#endif
+
 #if HFSM2_LOG_INTERFACE_AVAILABLE()
 	using typename Base::Logger;
 #endif
@@ -718,6 +708,34 @@ public:
 	HFSM2_CONSTEXPR(14)	RV_(	  RV_&& other)													noexcept;
 
 	HFSM2_CONSTEXPR(20)	~RV_()																	noexcept;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if HFSM2_SERIALIZATION_AVAILABLE()
+
+	/// @brief Buffer for serialization
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	using SerialBuffer			= typename Args::SerialBuffer;
+
+	/// @brief Serialize FSM into 'buffer'
+	/// @param buffer `SerialBuffer` to serialize to
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	HFSM2_CONSTEXPR(14)	void save(		SerialBuffer& buffer)							  const noexcept;
+
+	/// @brief De-serialize FSM from 'buffer'
+	/// @param buffer `SerialBuffer` to de-serialize from
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	HFSM2_CONSTEXPR(14)	void load(const SerialBuffer& buffer)									noexcept;
+
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+private:
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	using Base::save;
+	using Base::load;
+#endif
 
 private:
 	using Base::initialEnter;
@@ -751,6 +769,15 @@ public:
 protected:
 	HFSM2_IF_UTILITY_THEORY(using typename Base::RNG);
 
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	using typename Base::PlanControl;
+	using typename Base::TransitionSets;
+
+	using typename Base::Args;
+	using typename Base::WriteStream;
+	using typename Base::ReadStream;
+#endif
+
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using typename Base::PlanControl;
 	using typename Base::TransitionSets;
@@ -758,6 +785,8 @@ protected:
 
 public:
 	using Base::Base;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/// @brief Check if FSM is active
 	/// @return FSM active status
@@ -772,6 +801,28 @@ public:
 	/// @brief Manually stop the FSM
 	///  Can be used with UE4 to start / stop the FSM in BeginPlay() / EndPlay()
 	HFSM2_CONSTEXPR(14)	void exit()															noexcept	{ finalExit();		}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if HFSM2_SERIALIZATION_AVAILABLE()
+
+	/// @brief Buffer for serialization
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	using SerialBuffer			= typename Args::SerialBuffer;
+
+	/// @brief Serialize FSM into 'buffer'
+	/// @param buffer `SerialBuffer` to serialize to
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	HFSM2_CONSTEXPR(14)	void save(		SerialBuffer& buffer)							  const noexcept;
+
+	/// @brief De-serialize FSM from 'buffer'
+	/// @param buffer `SerialBuffer` to de-serialize from
+	/// @see `HFSM2_ENABLE_SERIALIZATION`
+	HFSM2_CONSTEXPR(14)	void load(const SerialBuffer& buffer)									noexcept;
+
+#endif
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 
@@ -798,17 +849,29 @@ public:
 
 #endif
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+private:
+#if HFSM2_SERIALIZATION_AVAILABLE()
+	using Base::save;
+	using Base::load;
+
+	HFSM2_CONSTEXPR(14)	void loadEnter(ReadStream& stream)										noexcept;
+#endif
+
 protected:
 	using Base::initialEnter;
 	using Base::finalExit;
 
 	using Base::_core;
 
+#if HFSM2_SERIALIZATION_AVAILABLE() || HFSM2_TRANSITION_HISTORY_AVAILABLE()
+	using Base::_apex;
+#endif
+
 #if HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using Base::applyRequests;
 	HFSM2_IF_STRUCTURE_REPORT(using Base::udpateActivity);
-
-	using Base::_apex;
 #endif
 };
 

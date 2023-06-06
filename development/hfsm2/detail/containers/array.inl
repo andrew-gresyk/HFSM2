@@ -35,6 +35,19 @@ StaticArrayT<T, NC>::fill(const Item filler) noexcept {
 		item = filler;
 }
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T, Long NC>
+HFSM2_CONSTEXPR(14)
+bool
+StaticArrayT<T, NC>::empty() const noexcept {
+	for (const Item& item : _items)
+		if (item != filler<Item>())
+			return false;
+
+	return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, Long NC>

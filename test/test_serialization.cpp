@@ -9,7 +9,10 @@ namespace test_serialization {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using M = hfsm2::Machine;
+using Config = hfsm2::Config
+					::ManualActivation;
+
+using M = hfsm2::MachineT<Config>;
 
 //------------------------------------------------------------------------------
 
@@ -212,92 +215,165 @@ static_assert(server::FSM::Instance::Info::RESUMABLE_BITS == client::FSM::Instan
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void step1(server::FSM::Instance& authority,
+		   client::FSM::Instance& replicated,
+		   Logger& logger)
+{
+	server::FSM::Instance::SerialBuffer buffer;
+	authority .save(buffer);
+	replicated.load(buffer);
+
+	logger.assertSequence({});
+
+	assertActive(authority,  server::all, {});
+	assertActive(replicated, client::all, {});
+
+	assertResumable(authority,  server::all, {});
+	assertResumable(replicated, client::all, {});
+}
+
+//------------------------------------------------------------------------------
+
+void step2(server::FSM::Instance& authority,
+		   client::FSM::Instance& replicated,
+		   Logger& logger)
+{
+	authority.enter();
+
+	server::FSM::Instance::SerialBuffer buffer;
+	authority .save(buffer);
+	replicated.load(buffer);
+
+	logger.assertSequence({
+		{ hfsm2::StateID{0},						Event::Type::ENTER },
+		{ client::FSM::stateId<client::C1      >(),	Event::Type::ENTER },
+		{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::ENTER },
+	});
+
+	assertActive(authority,  server::all, {
+		server::FSM::stateId<server::C1      >(),
+		server::FSM::stateId<server::C1_S1   >(),
+	});
+
+	assertActive(replicated, client::all, {
+		client::FSM::stateId<client::C1      >(),
+		client::FSM::stateId<client::C1_S1   >(),
+	});
+
+	assertResumable(authority,  server::all, {});
+	assertResumable(replicated, client::all, {});
+}
+
+//------------------------------------------------------------------------------
+
+void step3(server::FSM::Instance& authority,
+		   client::FSM::Instance& replicated)
+{
+	server::FSM::Instance::SerialBuffer serverBuffer;
+	server::FSM::Instance::SerialBuffer clientBuffer;
+
+	authority .save(serverBuffer);
+	replicated.save(clientBuffer);
+
+	REQUIRE		 (clientBuffer == serverBuffer);
+	REQUIRE_FALSE(clientBuffer != serverBuffer);
+}
+
+//------------------------------------------------------------------------------
+
+void step4(server::FSM::Instance& authority,
+		   client::FSM::Instance& replicated,
+		   Logger& logger)
+{
+	authority.immediateChangeTo<server::O2_C1_S2>();
+
+	server::FSM::Instance::SerialBuffer buffer;
+	authority .save(buffer);
+	replicated.load(buffer);
+
+	logger.assertSequence({
+		{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::EXIT },
+		{ client::FSM::stateId<client::C1      >(),	Event::Type::EXIT },
+
+		{ client::FSM::stateId<client::O2      >(),	Event::Type::ENTER },
+		{ client::FSM::stateId<client::O2_C1   >(),	Event::Type::ENTER },
+		{ client::FSM::stateId<client::O2_C1_S2>(),	Event::Type::ENTER },
+		{ client::FSM::stateId<client::O2_C2   >(),	Event::Type::ENTER },
+		{ client::FSM::stateId<client::O2_C2_S1>(),	Event::Type::ENTER },
+	});
+
+	assertActive(authority,  server::all, {
+		server::FSM::stateId<server::O2      >(),
+		server::FSM::stateId<server::O2_C1   >(),
+		server::FSM::stateId<server::O2_C1_S2>(),
+		server::FSM::stateId<server::O2_C2   >(),
+		server::FSM::stateId<server::O2_C2_S1>(),
+	});
+
+	assertActive(replicated, client::all, {
+		client::FSM::stateId<client::O2      >(),
+		client::FSM::stateId<client::O2_C1   >(),
+		client::FSM::stateId<client::O2_C1_S2>(),
+		client::FSM::stateId<client::O2_C2   >(),
+		client::FSM::stateId<client::O2_C2_S1>(),
+	});
+
+	assertResumable(authority,  server::all, {
+		server::FSM::stateId<server::C1      >(),
+		server::FSM::stateId<server::C1_S1   >(),
+	});
+
+	assertResumable(replicated, client::all, {
+		client::FSM::stateId<client::C1      >(),
+		client::FSM::stateId<client::C1_S1   >(),
+	});
+}
+
+//------------------------------------------------------------------------------
+
+void step5(server::FSM::Instance& authority,
+		   client::FSM::Instance& replicated,
+		   Logger& logger)
+{
+	authority.exit();
+
+	server::FSM::Instance::SerialBuffer buffer;
+	authority .save(buffer);
+	replicated.load(buffer);
+
+	logger.assertSequence({
+		{ client::FSM::stateId<client::O2_C1_S2>(),	Event::Type::EXIT },
+		{ client::FSM::stateId<client::O2_C1   >(),	Event::Type::EXIT },
+		{ client::FSM::stateId<client::O2_C2_S1>(),	Event::Type::EXIT },
+		{ client::FSM::stateId<client::O2_C2   >(),	Event::Type::EXIT },
+		{ client::FSM::stateId<client::O2      >(),	Event::Type::EXIT },
+		{ hfsm2::StateID{0},						Event::Type::EXIT },
+	});
+
+	assertActive(authority,  server::all, {});
+	assertActive(replicated, client::all, {});
+
+	assertResumable(authority,  server::all, {});
+	assertResumable(replicated, client::all, {});
+}
+
+//------------------------------------------------------------------------------
+
 TEST_CASE("FSM.Serialization") {
 	Logger logger;
 
-	server::FSM::Instance::SerialBuffer buffer;
-
 	{
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 		server::FSM::Instance authority;
 		client::FSM::Instance replicated{&logger};
-		{
-			logger.assertSequence({
-				{ hfsm2::StateID{0},						Event::Type::ENTRY_GUARD },
-				{ client::FSM::stateId<client::C1      >(),	Event::Type::ENTRY_GUARD },
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0}, 						Event::Type::ENTER },
-				{ client::FSM::stateId<client::C1      >(),	Event::Type::ENTER },
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::ENTER },
-			});
-
-			assertActive(authority,  server::all, {
-				server::FSM::stateId<server::C1      >(),
-				server::FSM::stateId<server::C1_S1   >(),
-			});
-
-			assertActive(replicated, client::all, {
-				client::FSM::stateId<client::C1      >(),
-				client::FSM::stateId<client::C1_S1   >(),
-			});
-
-			assertResumable(authority,  server::all, {});
-
-			assertResumable(replicated, client::all, {});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		authority.immediateChangeTo<server::O2_C1_S2>();
-		{
-			assertActive(authority,  server::all, {
-				server::FSM::stateId<server::O2      >(),
-				server::FSM::stateId<server::O2_C1   >(),
-				server::FSM::stateId<server::O2_C1_S2>(),
-				server::FSM::stateId<server::O2_C2   >(),
-				server::FSM::stateId<server::O2_C2_S1>(),
-			});
-
-			assertResumable(authority,  server::all, {
-				server::FSM::stateId<server::C1      >(),
-				server::FSM::stateId<server::C1_S1   >(),
-			});
-		}
-		authority.save(buffer);
-
-		replicated.load(buffer);
-		{
-			logger.assertSequence({
-				{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::EXIT },
-				{ client::FSM::stateId<client::C1      >(),	Event::Type::EXIT },
-				{ hfsm2::StateID{0},						Event::Type::EXIT },
-
-				{ hfsm2::StateID{0}, 						Event::Type::ENTER },
-				{ client::FSM::stateId<client::O2      >(),	Event::Type::ENTER },
-				{ client::FSM::stateId<client::O2_C1   >(),	Event::Type::ENTER },
-				{ client::FSM::stateId<client::O2_C1_S2>(),	Event::Type::ENTER },
-				{ client::FSM::stateId<client::O2_C2   >(),	Event::Type::ENTER },
-				{ client::FSM::stateId<client::O2_C2_S1>(),	Event::Type::ENTER },
-			});
-
-			assertActive(replicated, client::all, {
-				client::FSM::stateId<client::O2      >(),
-				client::FSM::stateId<client::O2_C1   >(),
-				client::FSM::stateId<client::O2_C1_S2>(),
-				client::FSM::stateId<client::O2_C2   >(),
-				client::FSM::stateId<client::O2_C2_S1>(),
-			});
-
-			assertResumable(replicated, client::all, {
-				client::FSM::stateId<client::C1      >(),
-				client::FSM::stateId<client::C1_S1   >(),
-			});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		step1(authority, replicated, logger);
+		step2(authority, replicated, logger);
+		step3(authority, replicated);
+		step4(authority, replicated, logger);
+		step5(authority, replicated, logger);
 	}
+
+	logger.assertSequence({});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
