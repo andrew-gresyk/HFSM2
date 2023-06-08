@@ -39,7 +39,9 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## See Also
 
+- **[HFSM2 UPlugin](https://github.com/andrew-gresyk/HFSM2-uplugin)**: Unreal Engine plugin for [HFSM2](https://hfsm.dev) library
 - **[FFSM2](https://flat.hfsm.dev)**: High-Performance **Flat** Finite State Machine
+- **[FFSM2 UPlugin](https://github.com/andrew-gresyk/FFSM2-uplugin)**: Unreal Engine plugin for [FFSM2](https://flat.hfsm.dev) library
 - **[HFSM Mono](https://font.hfsm.dev/)**: Monospaced bitmap Unicode fonts for HFSM2 and FFSM2 libraries
 
 ---
