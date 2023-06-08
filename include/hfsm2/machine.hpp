@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.2.3 (2023-02-07)
+// 2.3.0 (2023-06-08)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 2
-#define HFSM2_VERSION_PATCH 3
+#define HFSM2_VERSION_MINOR 3
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -2054,7 +2054,14 @@ template <typename T>
 HFSM2_CONSTEXPR(11)
 T
 filler()																noexcept	{
-	return T{INVALID_SHORT};
+	return T{};
+}
+
+template <>
+HFSM2_CONSTEXPR(11)
+Short
+filler<Short>()															noexcept	{
+	return INVALID_SHORT;
 }
 
 template <typename T, Long NCapacity>
@@ -3791,9 +3798,6 @@ struct Status final {
 HFSM2_CONSTEXPR(14) Status  operator |  (Status& lhs, const Status rhs)	noexcept;
 HFSM2_CONSTEXPR(14) Status& operator |= (Status& lhs, const Status rhs)	noexcept;
 
-template <>
-HFSM2_CONSTEXPR(11) Status  filler<Status>()							noexcept;
-
 #if HFSM2_PLANS_AVAILABLE()
 
 #pragma pack(push, 2)
@@ -3802,13 +3806,6 @@ struct TaskLink final {
 	Long prev		= INVALID_LONG;
 	Long next		= INVALID_LONG;
 };
-
-template <>
-HFSM2_CONSTEXPR(11)
-TaskLink
-filler<TaskLink>()														noexcept	{
-	return TaskLink{};
-}
 
 struct Bounds final {
 	Long first		= INVALID_LONG;
@@ -4071,13 +4068,6 @@ operator |= (Status& lhs,
 	lhs = Status{result, lhs.outerTransition || rhs.outerTransition};
 
 	return lhs;
-}
-
-template <>
-HFSM2_CONSTEXPR(11)
-Status
-filler<Status>() noexcept {
-	return Status{};
 }
 
 #if HFSM2_PLANS_AVAILABLE()
