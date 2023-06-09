@@ -62,7 +62,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - Uses inline-friendly compile-time polymorphism, no virtual methods are used
 - Type-safe transitions: `FSM.changeTo<TargetState>()` with optional payloads
 - Flexible configuration using `HFSM2_ENABLE_*` macros
-- Scaleable, supports robust state re-use via state injections
+- Scalable, supports robust state re-use via state injections
 - **[Hierarchical](https://github.com/andrew-gresyk/HFSM2/wiki/Transitions-within-Hierarchy)**, with a selection of composite (sub-machine) and orthogonal regions
 - Gamedev-friendly, supports explicit `State::update()`
 - Also supports traditional event-based workflow with `State::react()`
