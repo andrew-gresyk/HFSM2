@@ -114,7 +114,7 @@ jobs:
         BUILD_CONFIG: [ Release, Debug ]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     # install dependencies
     - name: Install GCC on ubuntu
