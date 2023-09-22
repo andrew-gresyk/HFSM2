@@ -770,15 +770,12 @@ protected:
 	HFSM2_IF_UTILITY_THEORY(using typename Base::RNG);
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
-	using typename Base::PlanControl;
-	using typename Base::TransitionSets;
-
 	using typename Base::Args;
 	using typename Base::WriteStream;
 	using typename Base::ReadStream;
 #endif
 
-#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
+#if HFSM2_SERIALIZATION_AVAILABLE() || HFSM2_TRANSITION_HISTORY_AVAILABLE()
 	using typename Base::PlanControl;
 	using typename Base::TransitionSets;
 #endif

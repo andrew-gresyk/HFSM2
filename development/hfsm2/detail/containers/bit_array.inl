@@ -184,6 +184,16 @@ BitArrayT<NCapacity>::CBits::get(const Index index) const noexcept {
 template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 void
+BitArrayT<NCapacity>::set() noexcept {
+	for (uint8_t& unit : _storage)
+		unit = UINT8_MAX;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <unsigned NCapacity>
+HFSM2_CONSTEXPR(14)
+void
 BitArrayT<NCapacity>::clear() noexcept {
 	for (uint8_t& unit : _storage)
 		unit = uint8_t{0};
@@ -299,6 +309,29 @@ BitArrayT<NCapacity>::clear(const TIndex index) noexcept {
 	const uint8_t mask = 1 << bit;
 
 	_storage[unit] &= ~mask;
+}
+
+//------------------------------------------------------------------------------
+
+template <unsigned NCapacity>
+HFSM2_CONSTEXPR(14)
+bool
+BitArrayT<NCapacity>::operator & (const BitArray& other) const noexcept {
+	for (Index i = 0; i < UNIT_COUNT; ++i)
+		if ((_storage[i] & other._storage[i]) == 0)
+			return false;
+
+	return true;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <unsigned NCapacity>
+HFSM2_CONSTEXPR(14)
+void
+BitArrayT<NCapacity>::operator &= (const BitArray& other) noexcept {
+	for (Index i = 0; i < UNIT_COUNT; ++i)
+		_storage[i] &= other._storage[i];
 }
 
 //------------------------------------------------------------------------------

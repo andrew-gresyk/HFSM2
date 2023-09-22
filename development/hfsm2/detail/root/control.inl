@@ -209,7 +209,7 @@ PlanControlT<TArgs>::resetRegion(const RegionID regionId_, //-V524
 	_regionStateId = index;
 	_regionSize	   = size;
 
-	_status.clear();
+	_taskStatus.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -239,22 +239,22 @@ FullControlBaseT<TArgs>::Lock::~Lock() noexcept {
 template <typename TArgs>
 template <typename TState>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
 	constexpr StateID STATE_ID = TState::STATE_ID;
 
-	switch (_status.result) {
-	case Status::Result::NONE:
+	switch (_taskStatus.result) {
+	case TaskStatus::NONE:
 		HFSM2_BREAK();
 		break;
 
-	case Status::Result::SUCCESS:
+	case TaskStatus::SUCCESS:
 		_core.planData.tasksSuccesses.template set<STATE_ID>();
 
 		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
 		break;
 
-	case Status::Result::FAILURE:
+	case TaskStatus::FAILURE:
 		_core.planData.tasksFailures .template set<STATE_ID>();
 
 		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
@@ -264,7 +264,7 @@ FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
 		HFSM2_BREAK();
 	}
 
-	return {_status.result};
+	return {_taskStatus.result};
 }
 
 #endif
@@ -279,7 +279,7 @@ FullControlBaseT<TArgs>::changeTo(const StateID stateId_) noexcept {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId_);
 	}
@@ -295,7 +295,7 @@ FullControlBaseT<TArgs>::restart(const StateID stateId_) noexcept {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId_);
 	}
@@ -311,7 +311,7 @@ FullControlBaseT<TArgs>::resume(const StateID stateId_) noexcept {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId_);
 	}
@@ -327,7 +327,7 @@ FullControlBaseT<TArgs>::select(const StateID stateId_) noexcept {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId_);
 	}
@@ -345,7 +345,7 @@ FullControlBaseT<TArgs>::utilize(const StateID stateId_) noexcept {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId_);
 	}
@@ -361,7 +361,7 @@ FullControlBaseT<TArgs>::randomize(const StateID stateId_) noexcept {
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId_);
 	}
@@ -388,7 +388,7 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::succeed(const StateID stateId_) noexcept {
-	_status.result = Status::Result::SUCCESS;
+	_taskStatus.result = TaskStatus::SUCCESS;
 
 	_core.planData.tasksSuccesses.set(stateId_);
 
@@ -408,7 +408,7 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::fail(const StateID stateId_) noexcept {
-	_status.result = Status::Result::FAILURE;
+	_taskStatus.result = TaskStatus::FAILURE;
 
 	_core.planData.tasksFailures.set(stateId_);
 
@@ -431,46 +431,52 @@ FullControlBaseT<TArgs>::fail(const StateID stateId_) noexcept {
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
 template <typename TState>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::updatePlan(TState& headState,
-																											   const Status subStatus) noexcept
+																											   const TaskStatus subStatus) noexcept
 {
-	constexpr StateID STATE_ID = TState::STATE_ID;
+	constexpr StateID STATE_ID = TState::STATE_ID; // SPECIFIC
 
 	HFSM2_ASSERT(subStatus);
 
-	if (subStatus.result == Status::Result::FAILURE) {
-		_status.result = Status::Result::FAILURE;
+	if (subStatus.result == TaskStatus::FAILURE) {
+		_taskStatus.result = TaskStatus::FAILURE;
 		headState.wrapPlanFailed(*this);
 
 		plan().clear();
 
 		return FullControlBase::template buildPlanStatus<TState>();
-	} else if (subStatus.result == Status::Result::SUCCESS) {
+	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
-			TasksBits processed;
+			TasksBits successesToClear;
+			successesToClear.set();
 
-			for (auto it = p.first(); it; ++it) {
-				if (isActive(it->origin) &&
-					_core.planData.tasksSuccesses.get(it->origin) &&
-					!processed.get(it->origin))
-				{
-					Origin origin{*this, STATE_ID};
+			for (auto it = p.first();
+				 it && isActive(it->origin);
+				 ++it)
+			{
+				if (_core.planData.tasksSuccesses.get(it->origin)) {
+					Origin origin{*this, STATE_ID}; // SPECIFIC
 
 					if (const Payload* const payload = it->payload())
 						changeWith(it->destination, *it->payload());
 					else
 						changeTo  (it->destination);
 
-					_core.planData.tasksSuccesses.clear(it->origin);
-					processed.set(it->origin);
+					if (it->cyclic())
+						_core.planData.tasksSuccesses.clear(it->origin); // SPECIFIC
+					else
+						successesToClear.clear(it->origin);
+
 					it.remove();
 				}
 			}
 
-			return Status{};
+			_core.planData.tasksSuccesses &= successesToClear;
+
+			return TaskStatus{};
 		} else {
-			_status.result = Status::Result::SUCCESS;
+			_taskStatus.result = TaskStatus::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
 
 			plan().clear();
@@ -478,7 +484,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 			return FullControlBase::template buildPlanStatus<TState>();
 		}
 	} else
-		return Status{};
+		return TaskStatus{};
 }
 
 #endif
@@ -495,7 +501,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::CHANGE, payload});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::CHANGE, stateId_);
 	}
@@ -513,7 +519,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESTART, payload});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESTART, stateId_);
 	}
@@ -531,7 +537,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RESUME, payload});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RESUME, stateId_);
 	}
@@ -549,7 +555,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::SELECT, payload});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::SELECT, stateId_);
 	}
@@ -569,7 +575,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::UTILIZE, payload});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::UTILIZE, stateId_);
 	}
@@ -587,7 +593,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 		_core.requests.emplace(Transition{_originId, stateId_, TransitionType::RANDOMIZE, payload});
 
 		if (stateId_ < _regionStateId || _regionStateId + _regionSize <= stateId_)
-			_status.outerTransition = true;
+			_taskStatus.outerTransition = true;
 
 		HFSM2_LOG_TRANSITION(context(), _originId, TransitionType::RANDOMIZE, stateId_);
 	}
@@ -615,49 +621,57 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
 template <typename TState>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::updatePlan(TState& headState,
-																												const Status subStatus) noexcept
+																												const TaskStatus subStatus) noexcept
 {
-	constexpr StateID STATE_ID = TState::STATE_ID;
+	constexpr StateID STATE_ID = TState::STATE_ID; // SPECIFIC
 
 	HFSM2_ASSERT(subStatus);
 
-	if (subStatus.result == Status::Result::FAILURE) {
-		_status.result = Status::Result::FAILURE;
+	if (subStatus.result == TaskStatus::FAILURE) {
+		_taskStatus.result = TaskStatus::FAILURE;
 		headState.wrapPlanFailed(*this);
 
-		if (Plan p = plan(_regionId))
-			p.clear();
+		plan().clear();
 
 		return FullControlBase::template buildPlanStatus<TState>();
-	} else if (subStatus.result == Status::Result::SUCCESS) {
+	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
-			TasksBits processed;
+			TasksBits successesToClear;
+			successesToClear.set();
 
-			for (auto it = p.first(); it; ++it) {
-				if (isActive(it->origin) &&
-					_core.planData.tasksSuccesses.get(it->origin) &&
-					!processed.get(it->origin))
-				{
-					Origin origin{*this, STATE_ID};
+			for (auto it = p.first();
+				 it && isActive(it->origin);
+				 ++it)
+			{
+				if (_core.planData.tasksSuccesses.get(it->origin)) {
+					Origin origin{*this, STATE_ID}; // SPECIFIC
+
 					changeTo(it->destination);
 
-					_core.planData.tasksSuccesses.clear(it->origin);
-					processed.set(it->origin);
+					if (it->cyclic())
+						_core.planData.tasksSuccesses.clear(it->origin); // SPECIFIC
+					else
+						successesToClear.clear(it->origin);
+
 					it.remove();
 				}
 			}
 
-			return Status{};
+			_core.planData.tasksSuccesses &= successesToClear;
+
+			return TaskStatus{};
 		} else {
-			_status.result = Status::Result::SUCCESS;
+			_taskStatus.result = TaskStatus::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
+
+			plan().clear();
 
 			return FullControlBase::template buildPlanStatus<TState>();
 		}
 	} else
-		return Status{};
+		return TaskStatus{};
 }
 
 #endif

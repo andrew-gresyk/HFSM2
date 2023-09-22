@@ -616,7 +616,7 @@ protected:
 
 	StateID _regionStateId = 0;
 	Long _regionSize = StateList::SIZE;
-	Status _status;
+	TaskStatus _taskStatus;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -665,7 +665,7 @@ protected:
 #if HFSM2_PLANS_AVAILABLE()
 
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	Status buildPlanStatus() noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus buildPlanStatus()				noexcept;
 
 #endif
 
@@ -814,7 +814,7 @@ protected:
 
 	using PlanControl::_regionStateId;
 	using PlanControl::_regionSize;
-	using PlanControl::_status;
+	using PlanControl::_taskStatus;
 
 	bool _locked = false;
 };
@@ -904,8 +904,8 @@ protected:
 #if HFSM2_PLANS_AVAILABLE()
 
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	Status updatePlan(TState& headState,
-										  const Status subStatus)		noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus updatePlan(TState& headState,
+											  const TaskStatus subStatus)	noexcept;
 
 #endif
 
@@ -1048,7 +1048,7 @@ protected:
 
 	using FullControlBase::_regionStateId;
 	using FullControlBase::_regionSize;
-	using FullControlBase::_status;
+	using FullControlBase::_taskStatus;
 
 	using FullControlBase::_locked;
 };
@@ -1129,8 +1129,8 @@ protected:
 #if HFSM2_PLANS_AVAILABLE()
 
 	template <typename TState>
-	HFSM2_CONSTEXPR(14)	Status updatePlan(TState& headState,
-										  const Status subStatus)		noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus updatePlan(TState& headState,
+											  const TaskStatus subStatus)	noexcept;
 
 #endif
 
@@ -1144,7 +1144,7 @@ protected:
 	using FullControlBase::_core;
 	using FullControlBase::_regionId;
 
-	using FullControlBase::_status;
+	using FullControlBase::_taskStatus;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

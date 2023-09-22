@@ -77,9 +77,9 @@ OS_<TN, TA, NI, TI, TR...>::wideReenter(PlanControl& control) noexcept {
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI, TR...>::widePreUpdate(FullControl& control) noexcept {
-	Status status;
+	TaskStatus status;
 	status |= Initial	  ::deepPreUpdate(			   control);
 	status |= Remaining	  ::widePreUpdate(			   control);
 
@@ -90,9 +90,9 @@ OS_<TN, TA, NI, TI, TR...>::widePreUpdate(FullControl& control) noexcept {
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) noexcept {
-	Status status;
+	TaskStatus status;
 	status |= Initial	  ::deepUpdate(				control);
 	status |= Remaining	  ::wideUpdate(				control);
 
@@ -103,9 +103,9 @@ OS_<TN, TA, NI, TI, TR...>::wideUpdate(FullControl& control) noexcept {
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI, TR...>::widePostUpdate(FullControl& control) noexcept {
-	Status status;
+	TaskStatus status;
 	status |= Initial	  ::deepPostUpdate(				control);
 	status |= Remaining	  ::widePostUpdate(				control);
 
@@ -117,11 +117,11 @@ OS_<TN, TA, NI, TI, TR...>::widePostUpdate(FullControl& control) noexcept {
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI, TR...>::widePreReact(FullControl& control,
 										 const TEvent& event) noexcept
 {
-	Status status;
+	TaskStatus status;
 	status |= Initial	  ::deepPreReact(			  control, event);
 	status |= Remaining	  ::widePreReact(			  control, event);
 
@@ -133,11 +133,11 @@ OS_<TN, TA, NI, TI, TR...>::widePreReact(FullControl& control,
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 									  const TEvent& event) noexcept
 {
-	Status status;
+	TaskStatus status;
 	status |= Initial	  ::deepReact(			   control, event);
 	status |= Remaining	  ::wideReact(			   control, event);
 
@@ -149,11 +149,11 @@ OS_<TN, TA, NI, TI, TR...>::wideReact(FullControl& control,
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI, TR...>::widePostReact(FullControl& control,
 										  const TEvent& event) noexcept
 {
-	Status status;
+	TaskStatus status;
 	status |= Initial	  ::deepPostReact(			   control, event);
 	status |= Remaining	  ::widePostReact(			   control, event);
 
@@ -179,9 +179,9 @@ OS_<TN, TA, NI, TI, TR...>::wideQuery(ConstControl& control,
 
 template <typename TN, typename TA, Short NI, typename TI, typename... TR>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI, TR...>::wideUpdatePlans(FullControl& control) noexcept {
-	Status status;
+	TaskStatus status;
 	status |= Initial	  ::deepUpdatePlans(			 control);
 	status |= Remaining	  ::wideUpdatePlans(			 control);
 
