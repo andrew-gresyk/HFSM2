@@ -435,7 +435,7 @@ TaskStatus
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::updatePlan(TState& headState,
 																											   const TaskStatus subStatus) noexcept
 {
-	constexpr StateID STATE_ID = TState::STATE_ID;
+	constexpr StateID STATE_ID = TState::STATE_ID; // SPECIFIC
 
 	HFSM2_ASSERT(subStatus);
 
@@ -445,28 +445,34 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 
 		plan().clear();
 
-		return FullControlBase::template buildPlanStatus<TState>();
+		return buildPlanStatus<TState>();
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
-			TasksBits processed;
+			TasksBits successesToClear;
+			successesToClear.set();
 
-			for (auto it = p.first(); it; ++it) {
-				if (isActive(it->origin) &&
-					_core.planData.tasksSuccesses.get(it->origin) &&
-					!processed.get(it->origin))
-				{
-					Origin origin{*this, STATE_ID};
+			for (auto it = p.first();
+				 it && isActive(it->origin);
+				 ++it)
+			{
+				if (_core.planData.tasksSuccesses.get(it->origin)) {
+					Origin origin{*this, STATE_ID}; // SPECIFIC
 
 					if (const Payload* const payload = it->payload())
 						changeWith(it->destination, *it->payload());
 					else
 						changeTo  (it->destination);
 
-					_core.planData.tasksSuccesses.clear(it->origin);
-					processed.set(it->origin);
+					if (it->cyclic())
+						_core.planData.tasksSuccesses.clear(it->origin); // SPECIFIC
+					else
+						successesToClear.clear(it->origin);
+
 					it.remove();
 				}
 			}
+
+			_core.planData.tasksSuccesses &= successesToClear;
 
 			return TaskStatus{};
 		} else {
@@ -475,7 +481,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 
 			plan().clear();
 
-			return FullControlBase::template buildPlanStatus<TState>();
+			return buildPlanStatus<TState>();
 		}
 	} else
 		return TaskStatus{};
@@ -619,7 +625,7 @@ TaskStatus
 FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::updatePlan(TState& headState,
 																												const TaskStatus subStatus) noexcept
 {
-	constexpr StateID STATE_ID = TState::STATE_ID;
+	constexpr StateID STATE_ID = TState::STATE_ID; // SPECIFIC
 
 	HFSM2_ASSERT(subStatus);
 
@@ -627,34 +633,42 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 		_taskStatus.result = TaskStatus::FAILURE;
 		headState.wrapPlanFailed(*this);
 
-		if (Plan p = plan(_regionId))
-			p.clear();
+		plan().clear();
 
-		return FullControlBase::template buildPlanStatus<TState>();
+		return buildPlanStatus<TState>();
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
-			TasksBits processed;
+			TasksBits successesToClear;
+			successesToClear.set();
 
-			for (auto it = p.first(); it; ++it) {
-				if (isActive(it->origin) &&
-					_core.planData.tasksSuccesses.get(it->origin) &&
-					!processed.get(it->origin))
-				{
-					Origin origin{*this, STATE_ID};
+			for (auto it = p.first();
+				 it && isActive(it->origin);
+				 ++it)
+			{
+				if (_core.planData.tasksSuccesses.get(it->origin)) {
+					Origin origin{*this, STATE_ID}; // SPECIFIC
+
 					changeTo(it->destination);
 
-					_core.planData.tasksSuccesses.clear(it->origin);
-					processed.set(it->origin);
+					if (it->cyclic())
+						_core.planData.tasksSuccesses.clear(it->origin); // SPECIFIC
+					else
+						successesToClear.clear(it->origin);
+
 					it.remove();
 				}
 			}
+
+			_core.planData.tasksSuccesses &= successesToClear;
 
 			return TaskStatus{};
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
 
-			return FullControlBase::template buildPlanStatus<TState>();
+			plan().clear();
+
+			return buildPlanStatus<TState>();
 		}
 	} else
 		return TaskStatus{};

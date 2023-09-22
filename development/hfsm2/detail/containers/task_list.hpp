@@ -8,6 +8,8 @@ namespace detail {
 #pragma pack(push, 1)
 
 struct TaskBase {
+	static_assert(sizeof(Long) == sizeof(StateID), "");
+
 	HFSM2_CONSTEXPR(11)	TaskBase()										noexcept	{}
 
 	HFSM2_CONSTEXPR(11)	TaskBase(const StateID origin_,
@@ -18,7 +20,7 @@ struct TaskBase {
 		, type{type_}
 	{}
 
-	static_assert(sizeof(Long) == sizeof(StateID), "");
+	HFSM2_CONSTEXPR(11) bool cyclic()							  const noexcept	{ return origin == destination;	}
 
 	union {
 		StateID origin		= INVALID_STATE_ID;

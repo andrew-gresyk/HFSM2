@@ -24,6 +24,8 @@ public:
 	static constexpr Index CAPACITY   = NCapacity;
 	static constexpr Index UNIT_COUNT = contain(CAPACITY, 8);
 
+	using BitArray	= BitArrayT<CAPACITY>;
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	class Bits {
@@ -91,6 +93,8 @@ public:
 public:
 	HFSM2_CONSTEXPR(14)	BitArrayT()										noexcept	{ clear();	}
 
+	HFSM2_CONSTEXPR(14)	void set()										noexcept;
+
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
 
 	template <Short NIndex>
@@ -112,6 +116,10 @@ public:
 
 	template <typename TIndex>
 	HFSM2_CONSTEXPR(14)	void clear(const TIndex index)					noexcept;
+
+	HFSM2_CONSTEXPR(14)	bool operator &  (const BitArray& other)  const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void operator &= (const BitArray& other)		noexcept;
 
 	template <Short NUnit, Short NWidth>
 	HFSM2_CONSTEXPR(14)	 Bits  bits()									noexcept;
