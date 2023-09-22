@@ -69,7 +69,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReenter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<T>>::widePreUpdate(FullControl& control,
 										   const Short HFSM2_IF_ASSERT(prong)) noexcept
 {
@@ -82,7 +82,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::widePreUpdate(FullControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<T>>::wideUpdate(FullControl& control,
 										const Short HFSM2_IF_ASSERT(prong)) noexcept
 {
@@ -95,7 +95,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideUpdate(FullControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<T>>::widePostUpdate(FullControl& control,
 											const Short HFSM2_IF_ASSERT(prong)) noexcept
 {
@@ -109,7 +109,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::widePostUpdate(FullControl& control,
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<T>>::widePreReact(FullControl& control,
 										  const TEvent& event,
 										  const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -124,7 +124,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::widePreReact(FullControl& control,
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<T>>::wideReact(FullControl& control,
 									   const TEvent& event,
 									   const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -139,7 +139,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReact(FullControl& control,
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<T>>::widePostReact(FullControl& control,
 										   const TEvent& event,
 										   const Short HFSM2_IF_ASSERT(prong)) noexcept
@@ -170,7 +170,7 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideQuery(ConstControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename T>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<T>>::wideUpdatePlans(FullControl& control,
 											 const Short HFSM2_IF_ASSERT(prong)) noexcept
 {

@@ -64,7 +64,7 @@ OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) noexcept {
 
 template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI>::widePreUpdate(FullControl& control) noexcept {
 	return Initial ::deepPreUpdate(				control);
 }
@@ -73,7 +73,7 @@ OS_<TN, TA, NI, TI>::widePreUpdate(FullControl& control) noexcept {
 
 template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) noexcept {
 	return Initial ::deepUpdate(			 control);
 }
@@ -82,7 +82,7 @@ OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) noexcept {
 
 template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI>::widePostUpdate(FullControl& control) noexcept {
 	return Initial ::deepPostUpdate(			 control);
 }
@@ -92,7 +92,7 @@ OS_<TN, TA, NI, TI>::widePostUpdate(FullControl& control) noexcept {
 template <typename TN, typename TA, Short NI, typename TI>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI>::widePreReact(FullControl& control,
 								  const TEvent& event) noexcept
 {
@@ -104,7 +104,7 @@ OS_<TN, TA, NI, TI>::widePreReact(FullControl& control,
 template <typename TN, typename TA, Short NI, typename TI>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
 							   const TEvent& event) noexcept
 {
@@ -116,7 +116,7 @@ OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
 template <typename TN, typename TA, Short NI, typename TI>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI>::widePostReact(FullControl& control,
 								   const TEvent& event) noexcept
 {
@@ -141,7 +141,7 @@ OS_<TN, TA, NI, TI>::wideQuery(ConstControl& control,
 
 template <typename TN, typename TA, Short NI, typename TI>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 OS_<TN, TA, NI, TI>::wideUpdatePlans(FullControl& control) noexcept {
 	return Initial ::deepUpdatePlans(			  control);
 }

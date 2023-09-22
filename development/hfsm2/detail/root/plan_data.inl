@@ -4,8 +4,8 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 HFSM2_CONSTEXPR(11)
-Status::Status(const Result result_,
-			   const bool outerTransition_) noexcept
+TaskStatus::TaskStatus(const Result result_,
+					   const bool outerTransition_) noexcept
 	: result{result_}
 	, outerTransition{outerTransition_}
 {}
@@ -13,7 +13,7 @@ Status::Status(const Result result_,
 //------------------------------------------------------------------------------
 
 HFSM2_CONSTEXPR(11)
-Status::operator bool() const noexcept	{
+TaskStatus::operator bool() const noexcept	{
 	return result != Result::NONE || outerTransition;
 }
 
@@ -21,7 +21,7 @@ Status::operator bool() const noexcept	{
 
 HFSM2_CONSTEXPR(14)
 void
-Status::clear() noexcept {
+TaskStatus::clear() noexcept {
 	result = Result::NONE;
 	outerTransition = false;
 }
@@ -29,27 +29,27 @@ Status::clear() noexcept {
 ////////////////////////////////////////////////////////////////////////////////
 
 HFSM2_CONSTEXPR(14)
-Status
-operator | (Status& lhs,
-			const Status rhs) noexcept
+TaskStatus
+operator | (TaskStatus& lhs,
+			const TaskStatus rhs) noexcept
 {
-	const Status::Result result = lhs.result > rhs.result ?
+	const TaskStatus::Result result = lhs.result > rhs.result ?
 		lhs.result : rhs.result;
 
-	return Status{result, lhs.outerTransition || rhs.outerTransition};
+	return TaskStatus{result, lhs.outerTransition || rhs.outerTransition};
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 HFSM2_CONSTEXPR(14)
-Status&
-operator |= (Status& lhs,
-			 const Status rhs) noexcept
+TaskStatus&
+operator |= (TaskStatus& lhs,
+			 const TaskStatus rhs) noexcept
 {
-	const Status::Result result = lhs.result > rhs.result ?
+	const TaskStatus::Result result = lhs.result > rhs.result ?
 		lhs.result : rhs.result;
 
-	lhs = Status{result, lhs.outerTransition || rhs.outerTransition};
+	lhs = TaskStatus{result, lhs.outerTransition || rhs.outerTransition};
 
 	return lhs;
 }

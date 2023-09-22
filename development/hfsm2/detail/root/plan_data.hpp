@@ -5,8 +5,8 @@ namespace detail {
 
 #pragma pack(push, 1)
 
-struct Status final {
-	enum class Result {
+struct TaskStatus final {
+	enum Result {
 		NONE,
 		SUCCESS,
 		FAILURE
@@ -15,8 +15,8 @@ struct Status final {
 	Result result = Result::NONE;
 	bool outerTransition = false;
 
-	HFSM2_CONSTEXPR(11)	Status(const Result result_ = Result::NONE,
-							   const bool outerTransition_ = false)		noexcept;
+	HFSM2_CONSTEXPR(11)	TaskStatus(const Result result_ = Result::NONE,
+								   const bool outerTransition_ = false)	noexcept;
 
 	HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept;
 
@@ -27,8 +27,8 @@ struct Status final {
 
 //------------------------------------------------------------------------------
 
-HFSM2_CONSTEXPR(14) Status  operator |  (Status& lhs, const Status rhs)	noexcept;
-HFSM2_CONSTEXPR(14) Status& operator |= (Status& lhs, const Status rhs)	noexcept;
+HFSM2_CONSTEXPR(14) TaskStatus  operator |  (TaskStatus& l, const TaskStatus r)	noexcept;
+HFSM2_CONSTEXPR(14) TaskStatus& operator |= (TaskStatus& l, const TaskStatus r)	noexcept;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -106,10 +106,10 @@ struct PlanDataT<ArgsT<TContext
 	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
 	using Payloads			= StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds		= ArrayT	  <Bounds, REGION_COUNT>;
-	using TasksBits			= BitArrayT   <			STATE_COUNT>;
-	using RegionBits		= BitArrayT   <		   REGION_COUNT>;
-	using RegionStatuses	= StaticArrayT<Status, REGION_COUNT>;
+	using TasksBounds		= ArrayT	  <Bounds,	   REGION_COUNT>;
+	using TasksBits			= BitArrayT   <				STATE_COUNT>;
+	using RegionBits		= BitArrayT   <			   REGION_COUNT>;
+	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
@@ -170,10 +170,10 @@ struct PlanDataT<ArgsT<TContext
 	using Tasks				= TaskListT	  <void,	 TASK_CAPACITY>;
 	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
-	using TasksBounds		= ArrayT	  <Bounds, REGION_COUNT>;
-	using TasksBits			= BitArrayT	  <			STATE_COUNT>;
-	using RegionBits		= BitArrayT	  <		   REGION_COUNT>;
-	using RegionStatuses	= StaticArrayT<Status, REGION_COUNT>;
+	using TasksBounds		= ArrayT	  <Bounds,	   REGION_COUNT>;
+	using TasksBits			= BitArrayT	  <				STATE_COUNT>;
+	using RegionBits		= BitArrayT	  <			   REGION_COUNT>;
+	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;

@@ -79,11 +79,11 @@ O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 O_<TN, TA, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepPreUpdate(control);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -97,11 +97,11 @@ O_<TN, TA, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepUpdate(control);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -115,14 +115,14 @@ O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 
 template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 O_<TN, TA, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	HFSM2_IF_PLANS(subStatus(control) |=)
 		SubStates::widePostUpdate(control);
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepPostUpdate(control);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -134,13 +134,13 @@ O_<TN, TA, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
 template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 O_<TN, TA, TH, TS...>::deepPreReact(FullControl& control,
 									const TEvent& event) noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepPreReact(control, event);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -155,13 +155,13 @@ O_<TN, TA, TH, TS...>::deepPreReact(FullControl& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 								 const TEvent& event) noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepReact(control, event);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -176,7 +176,7 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 template <typename TN, typename TA, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 O_<TN, TA, TH, TS...>::deepPostReact(FullControl& control,
 									 const TEvent& event) noexcept
 {
@@ -185,7 +185,7 @@ O_<TN, TA, TH, TS...>::deepPostReact(FullControl& control,
 	HFSM2_IF_PLANS(subStatus(control) |=)
 		SubStates::widePostReact(control, event);
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepPostReact(control, event);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -212,19 +212,19 @@ O_<TN, TA, TH, TS...>::deepQuery(ConstControl& control,
 
 template <typename TN, typename TA, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 O_<TN, TA, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
-	const Status h =	headStatus(control) |
-		HeadState::deepUpdatePlans(control);
+	const TaskStatus h = headStatus(control) |
+		HeadState::deepUpdatePlans (control);
 
-	const Status s =	 subStatus(control) |
-		SubStates::wideUpdatePlans(control);
+	const TaskStatus s =  subStatus(control) |
+		SubStates::wideUpdatePlans (control);
 
 	if (h)
 		return h;
 	else {
 		if (s.outerTransition)
-			return Status{Status::Result::NONE, true};
+			return TaskStatus{TaskStatus::NONE, true};
 
 		ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 

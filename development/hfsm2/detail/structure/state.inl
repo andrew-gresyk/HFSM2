@@ -145,7 +145,7 @@ S_<TN_, TA, TH>::deepReenter(PlanControl& control) noexcept {
 
 template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 S_<TN_, TA, TH>::deepPreUpdate(FullControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::preUpdate,
 						   Method::PRE_UPDATE);
@@ -155,14 +155,14 @@ S_<TN_, TA, TH>::deepPreUpdate(FullControl& control) noexcept {
 	Head::widePreUpdate(control);
 	Head::	  preUpdate(control);
 
-	return control._status;
+	return control._taskStatus;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 S_<TN_, TA, TH>::deepUpdate(FullControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::update,
 						   Method::UPDATE);
@@ -172,14 +172,14 @@ S_<TN_, TA, TH>::deepUpdate(FullControl& control) noexcept {
 	Head::wideUpdate(control);
 	Head::	  update(control);
 
-	return control._status;
+	return control._taskStatus;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 S_<TN_, TA, TH>::deepPostUpdate(FullControl& control) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Head::postUpdate,
 						   Method::POST_UPDATE);
@@ -189,7 +189,7 @@ S_<TN_, TA, TH>::deepPostUpdate(FullControl& control) noexcept {
 	Head::	  postUpdate(control);
 	Head::widePostUpdate(control);
 
-	return control._status;
+	return control._taskStatus;
 }
 
 //------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ S_<TN_, TA, TH>::deepPostUpdate(FullControl& control) noexcept {
 template <typename TN_, typename TA, typename TH>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 S_<TN_, TA, TH>::deepPreReact(FullControl& control,
 							  const TEvent& event) noexcept
 {
@@ -211,7 +211,7 @@ S_<TN_, TA, TH>::deepPreReact(FullControl& control,
 	Head::widePreReact(event, control);
 	(this->*method) (event, control);
 
-	return control._status;
+	return control._taskStatus;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -219,7 +219,7 @@ S_<TN_, TA, TH>::deepPreReact(FullControl& control,
 template <typename TN_, typename TA, typename TH>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 S_<TN_, TA, TH>::deepReact(FullControl& control,
 						   const TEvent& event) noexcept
 {
@@ -233,7 +233,7 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 	Head::wideReact(event, control);
 	(this->*method)(event, control);
 
-	return control._status;
+	return control._taskStatus;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -241,7 +241,7 @@ S_<TN_, TA, TH>::deepReact(FullControl& control,
 template <typename TN_, typename TA, typename TH>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 S_<TN_, TA, TH>::deepPostReact(FullControl& control,
 							   const TEvent& event) noexcept
 {
@@ -255,7 +255,7 @@ S_<TN_, TA, TH>::deepPostReact(FullControl& control,
 	(this->*method)	   (event, control);
 	Head::widePostReact(event, control);
 
-	return control._status;
+	return control._taskStatus;
 }
 
 //------------------------------------------------------------------------------
@@ -284,15 +284,15 @@ S_<TN_, TA, TH>::deepQuery(ConstControl& control,
 
 template <typename TN_, typename TA, typename TH>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 S_<TN_, TA, TH>::deepUpdatePlans(FullControl& control) noexcept {
 	if (control._core.planData.tasksFailures .get(STATE_ID))
-		return Status{Status::Result::FAILURE};
+		return TaskStatus{TaskStatus::FAILURE};
 	else
 	if (control._core.planData.tasksSuccesses.get(STATE_ID))
-		return Status{Status::Result::SUCCESS};
+		return TaskStatus{TaskStatus::SUCCESS};
 	else
-		return Status{};
+		return TaskStatus{};
 }
 
 #endif

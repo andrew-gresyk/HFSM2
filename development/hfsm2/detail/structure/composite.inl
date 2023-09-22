@@ -151,7 +151,7 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 C_<TN, TA, SG, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
 	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
 
@@ -160,7 +160,7 @@ C_<TN, TA, SG, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepPreUpdate(control);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -174,7 +174,7 @@ C_<TN, TA, SG, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
 
@@ -183,7 +183,7 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepUpdate(control);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -197,7 +197,7 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 C_<TN, TA, SG, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
 	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
 
@@ -209,7 +209,7 @@ C_<TN, TA, SG, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
 	HFSM2_IF_PLANS(subStatus(control) |=)
 		SubStates::widePostUpdate(control, active);
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepPostUpdate(control);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -221,7 +221,7 @@ C_<TN, TA, SG, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 C_<TN, TA, SG, TH, TS...>::deepPreReact(FullControl& control,
 										const TEvent& event) noexcept
 {
@@ -232,7 +232,7 @@ C_<TN, TA, SG, TH, TS...>::deepPreReact(FullControl& control,
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepPreReact(control, event);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -247,7 +247,7 @@ C_<TN, TA, SG, TH, TS...>::deepPreReact(FullControl& control,
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 									 const TEvent& event) noexcept
 {
@@ -258,7 +258,7 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepReact(control, event);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -273,7 +273,7 @@ C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 C_<TN, TA, SG, TH, TS...>::deepPostReact(FullControl& control,
 										 const TEvent& event) noexcept
 {
@@ -287,7 +287,7 @@ C_<TN, TA, SG, TH, TS...>::deepPostReact(FullControl& control,
 	HFSM2_IF_PLANS(subStatus(control) |=)
 		SubStates::widePostReact(control, event, active);
 
-	const Status h =
+	const TaskStatus h =
 		HeadState::deepPostReact(control, event);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
@@ -316,24 +316,24 @@ C_<TN, TA, SG, TH, TS...>::deepQuery(ConstControl& control,
 
 template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 C_<TN, TA, SG, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
 	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
 
 	const Short  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
-	const Status h =	headStatus(control) |
+	const TaskStatus h =	headStatus(control) |
 		HeadState::deepUpdatePlans(control);
 
-	const Status s =	 subStatus(control) |
+	const TaskStatus s =	 subStatus(control) |
 		SubStates::wideUpdatePlans(control, active);
 
 	if (h)
 		return h;
 	else {
 		if (s.outerTransition)
-			return Status{Status::Result::NONE, true};
+			return TaskStatus{TaskStatus::NONE, true};
 
 		ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 

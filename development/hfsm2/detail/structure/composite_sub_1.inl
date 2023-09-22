@@ -82,7 +82,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReenter(PlanControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<TS...>>::widePreUpdate(FullControl& control,
 											   const Short prong) noexcept
 {
@@ -97,7 +97,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::widePreUpdate(FullControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 											const Short prong) noexcept
 {
@@ -112,7 +112,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<TS...>>::widePostUpdate(FullControl& control,
 												const Short prong) noexcept
 {
@@ -128,7 +128,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::widePostUpdate(FullControl& control,
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<TS...>>::widePreReact(FullControl& control,
 											  const TEvent& event,
 											  const Short prong) noexcept
@@ -145,7 +145,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::widePreReact(FullControl& control,
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<TS...>>::wideReact(FullControl& control,
 										   const TEvent& event,
 										   const Short prong) noexcept
@@ -162,7 +162,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReact(FullControl& control,
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<TS...>>::widePostReact(FullControl& control,
 											   const TEvent& event,
 											   const Short prong) noexcept
@@ -197,7 +197,7 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideQuery(ConstControl& control,
 
 template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
 HFSM2_CONSTEXPR(14)
-Status
+TaskStatus
 CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdatePlans(FullControl& control,
 												 const Short prong) noexcept
 {
