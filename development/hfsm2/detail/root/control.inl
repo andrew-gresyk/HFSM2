@@ -445,7 +445,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 
 		plan().clear();
 
-		return buildPlanStatus<TState>();
+		return FullControlBase::template buildPlanStatus<TState>();
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
@@ -481,7 +481,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 
 			plan().clear();
 
-			return buildPlanStatus<TState>();
+			return FullControlBase::template buildPlanStatus<TState>();
 		}
 	} else
 		return TaskStatus{};
@@ -635,7 +635,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 
 		plan().clear();
 
-		return buildPlanStatus<TState>();
+		return FullControlBase::template buildPlanStatus<TState>();
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
@@ -668,7 +668,7 @@ FullControlT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB
 
 			plan().clear();
 
-			return buildPlanStatus<TState>();
+			return FullControlBase::template buildPlanStatus<TState>();
 		}
 	} else
 		return TaskStatus{};
