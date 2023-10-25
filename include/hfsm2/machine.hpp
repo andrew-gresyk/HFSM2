@@ -33,7 +33,7 @@
 
 #define HFSM2_VERSION_MAJOR 2
 #define HFSM2_VERSION_MINOR 3
-#define HFSM2_VERSION_PATCH 1
+#define HFSM2_VERSION_PATCH 2
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -406,6 +406,22 @@ template <bool B,
 		  typename TT,
 		  typename TF>
 using Conditional = typename ConditionalT<B, TT, TF>::Type;
+
+template <typename, typename>
+struct IsSameT final {
+	static constexpr bool Value = false;
+};
+
+template <typename T>
+struct IsSameT<T, T> final {
+	static constexpr bool Value = true;
+};
+
+template <
+	typename T0,
+	typename T1
+>
+static constexpr bool IsSame = IsSameT<T0, T1>::Value;
 
 template <typename T>
 struct RemoveConstT final {
@@ -7797,7 +7813,7 @@ struct S_
 
 	using Empty			= EmptyT<TArgs>;
 
-	static HFSM2_CONSTEXPR(11)	bool isBare()																noexcept	{ return std::is_base_of<Head, Empty>::value;	}
+	static HFSM2_CONSTEXPR(11)	bool isBare()																noexcept	{ return IsSame<Head, Empty>;	}
 
 	HFSM2_IF_TYPEINDEX(const std::type_index TYPE = isBare() ? typeid(None) : typeid(Head));
 

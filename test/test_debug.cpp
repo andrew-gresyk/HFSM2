@@ -33,7 +33,7 @@ using FSM = M::Root<S(Apex),
 						S(R_1),
 						S(R_2)
 					>,
-					M::Composite<S(C),
+					M::CompositePeers<
 						S(C_1),
 						S(C_2)
 					>,
@@ -55,7 +55,6 @@ using FSM = M::Root<S(Apex),
 static_assert(FSM::regionId<Apex>()	==  0, "");
 static_assert(FSM::regionId<O	>()	==  1, "");
 static_assert(FSM::regionId<R	>()	==  2, "");
-static_assert(FSM::regionId<C	>()	==  3, "");
 static_assert(FSM::regionId<U	>()	==  4, "");
 static_assert(FSM::regionId<N	>()	==  5, "");
 
@@ -65,7 +64,6 @@ static_assert(FSM::stateId<O   >() ==  2, "");
 static_assert(FSM::stateId<R   >() ==  3, "");
 static_assert(FSM::stateId<R_1 >() ==  4, "");
 static_assert(FSM::stateId<R_2 >() ==  5, "");
-static_assert(FSM::stateId<C   >() ==  6, "");
 static_assert(FSM::stateId<C_1 >() ==  7, "");
 static_assert(FSM::stateId<C_2 >() ==  8, "");
 static_assert(FSM::stateId<U   >() ==  9, "");
@@ -83,7 +81,6 @@ struct O	: FSM::State {};
 struct R	: FSM::State {};
 struct R_1	: FSM::State {};
 struct R_2	: FSM::State {};
-struct C	: FSM::State {};
 struct C_1	: FSM::State {};
 struct C_2	: FSM::State {};
 struct U	: FSM::State {};
@@ -159,7 +156,6 @@ const Types all = {
 	FSM::stateId<R  >(),
 	FSM::stateId<R_1>(),
 	FSM::stateId<R_2>(),
-	FSM::stateId<C  >(),
 	FSM::stateId<C_1>(),
 	FSM::stateId<C_2>(),
 	FSM::stateId<U  >(),
@@ -200,8 +196,7 @@ TEST_CASE("FSM.Debug") {
 				hfsm2::StructureEntry{ false, L"   ╟ ", "R"},
 				hfsm2::StructureEntry{ false, L"   ║ ├ ", "R_1"},
 				hfsm2::StructureEntry{ false, L"   ║ └ ", "R_2"},
-				hfsm2::StructureEntry{ false, L"   ╟ ", "C"},
-				hfsm2::StructureEntry{ false, L"   ║ ├ ", "C_1"},
+				hfsm2::StructureEntry{ false, L"   ╟ ┬ ", "C_1"},
 				hfsm2::StructureEntry{ false, L"   ║ └ ", "C_2"},
 				hfsm2::StructureEntry{ false, L"   ╟ ", "U"},
 				hfsm2::StructureEntry{ false, L"   ║ ├ ", "U_1"},
@@ -214,7 +209,6 @@ TEST_CASE("FSM.Debug") {
 			assertActivity(machine.activityHistory(), {
 				+1,
 				+1,
-				-1,
 				-1,
 				-1,
 				-1,
@@ -252,7 +246,7 @@ TEST_CASE("FSM.Debug") {
 				{ FSM::stateId<O   >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<R   >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<R_1 >(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<C   >(),	Event::Type::ENTRY_GUARD },
+				{ hfsm2::StateID{6}	  ,	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<C_1 >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<U   >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<U_1 >(),	Event::Type::ENTRY_GUARD },
@@ -264,7 +258,7 @@ TEST_CASE("FSM.Debug") {
 				{ FSM::stateId<O   >(),	Event::Type::ENTER },
 				{ FSM::stateId<R   >(),	Event::Type::ENTER },
 				{ FSM::stateId<R_1 >(),	Event::Type::ENTER },
-				{ FSM::stateId<C   >(),	Event::Type::ENTER },
+				{ hfsm2::StateID{6}	  ,	Event::Type::ENTER },
 				{ FSM::stateId<C_1 >(),	Event::Type::ENTER },
 				{ FSM::stateId<U   >(),	Event::Type::ENTER },
 				{ FSM::stateId<U_1 >(),	Event::Type::ENTER },
@@ -276,7 +270,7 @@ TEST_CASE("FSM.Debug") {
 				FSM::stateId<O   >(),
 				FSM::stateId<R   >(),
 				FSM::stateId<R_1 >(),
-				FSM::stateId<C   >(),
+				hfsm2::StateID{6}	,
 				FSM::stateId<C_1 >(),
 				FSM::stateId<U   >(),
 				FSM::stateId<U_1 >(),
@@ -288,24 +282,6 @@ TEST_CASE("FSM.Debug") {
 				FSM::stateId<I   >(),
 			});
 
-			assertStructure(machine.structure(), {
-				hfsm2::StructureEntry{ true,  L"", "Apex"},
-				hfsm2::StructureEntry{ false, L" ├ ", "I"},
-				hfsm2::StructureEntry{ true,  L" └ ", "O"},
-				hfsm2::StructureEntry{ true,  L"   ╟ ", "R"},
-				hfsm2::StructureEntry{ true,  L"   ║ ├ ", "R_1"},
-				hfsm2::StructureEntry{ false, L"   ║ └ ", "R_2"},
-				hfsm2::StructureEntry{ true,  L"   ╟ ", "C"},
-				hfsm2::StructureEntry{ true,  L"   ║ ├ ", "C_1"},
-				hfsm2::StructureEntry{ false, L"   ║ └ ", "C_2"},
-				hfsm2::StructureEntry{ true,  L"   ╟ ", "U"},
-				hfsm2::StructureEntry{ true,  L"   ║ ├ ", "U_1"},
-				hfsm2::StructureEntry{ false, L"   ║ └ ", "U_2"},
-				hfsm2::StructureEntry{ true,  L"   ╙ ", "N"},
-				hfsm2::StructureEntry{ false, L"     ├ ", "N_1"},
-				hfsm2::StructureEntry{ true,  L"     └ ", "N_2"},
-			});
-
 			assertActivity(machine.activityHistory(), {
 				+2,
 				-1,
@@ -313,7 +289,6 @@ TEST_CASE("FSM.Debug") {
 				+1,
 				+1,
 				-2,
-				+1,
 				+1,
 				-2,
 				+1,
@@ -332,7 +307,7 @@ TEST_CASE("FSM.Debug") {
 		{ FSM::stateId<R_1 >(),	Event::Type::EXIT },
 		{ FSM::stateId<R   >(),	Event::Type::EXIT },
 		{ FSM::stateId<C_1 >(),	Event::Type::EXIT },
-		{ FSM::stateId<C   >(),	Event::Type::EXIT },
+		{ hfsm2::StateID{6}	  ,	Event::Type::EXIT },
 		{ FSM::stateId<U_1 >(),	Event::Type::EXIT },
 		{ FSM::stateId<U   >(),	Event::Type::EXIT },
 		{ FSM::stateId<N_2 >(),	Event::Type::EXIT },
