@@ -63,12 +63,6 @@ struct IsSameT<T, T> final {
 	static constexpr bool Value = true;
 };
 
-template <
-	typename T0,
-	typename T1
->
-static constexpr bool IsSame = IsSameT<T0, T1>::Value;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>

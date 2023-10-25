@@ -417,12 +417,6 @@ struct IsSameT<T, T> final {
 	static constexpr bool Value = true;
 };
 
-template <
-	typename T0,
-	typename T1
->
-static constexpr bool IsSame = IsSameT<T0, T1>::Value;
-
 template <typename T>
 struct RemoveConstT final {
 	using Type = T;
@@ -7813,7 +7807,7 @@ struct S_
 
 	using Empty			= EmptyT<TArgs>;
 
-	static HFSM2_CONSTEXPR(11)	bool isBare()																noexcept	{ return IsSame<Head, Empty>;	}
+	static HFSM2_CONSTEXPR(11)	bool isBare()																noexcept	{ return IsSameT<Head, Empty>::Value;	}
 
 	HFSM2_IF_TYPEINDEX(const std::type_index TYPE = isBare() ? typeid(None) : typeid(Head));
 

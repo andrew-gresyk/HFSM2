@@ -161,7 +161,7 @@ struct S_
 
 	using Empty			= EmptyT<TArgs>;
 
-	static HFSM2_CONSTEXPR(11)	bool isBare()																noexcept	{ return IsSame<Head, Empty>;	}
+	static HFSM2_CONSTEXPR(11)	bool isBare()																noexcept	{ return IsSameT<Head, Empty>::Value;	}
 
 	HFSM2_IF_TYPEINDEX(const std::type_index TYPE = isBare() ? typeid(None) : typeid(Head));
 
