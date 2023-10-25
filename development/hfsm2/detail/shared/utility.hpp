@@ -51,6 +51,18 @@ template <bool B,
 		  typename TF>
 using Conditional = typename ConditionalT<B, TT, TF>::Type;
 
+//------------------------------------------------------------------------------
+
+template <typename, typename>
+struct IsSameT final {
+	static constexpr bool Value = false;
+};
+
+template <typename T>
+struct IsSameT<T, T> final {
+	static constexpr bool Value = true;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
