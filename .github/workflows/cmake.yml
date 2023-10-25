@@ -80,7 +80,7 @@ jobs:
               VERSION: '11'
             }
           - {
-              OS: ubuntu-22.04,
+              OS: ubuntu-20.04,
               CC: clang-12,
               CXX: clang++-12
             }
