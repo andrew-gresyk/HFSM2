@@ -10,6 +10,7 @@
 #include <doctest/doctest.h>
 
 #include <assert.h>
+#include <wchar.h> // wcscmp()
 
 #include <algorithm>
 #include <vector>
