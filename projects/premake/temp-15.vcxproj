@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="debug 32|Win32">
+      <Configuration>debug 32</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug 32|x64">
+      <Configuration>debug 32</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug 64|Win32">
+      <Configuration>debug 64</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug 64|x64">
+      <Configuration>debug 64</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release 32|Win32">
+      <Configuration>release 32</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release 32|x64">
+      <Configuration>release 32</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release 64|Win32">
+      <Configuration>release 64</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release 64|x64">
+      <Configuration>release 64</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AECBAED8-1AAB-2D74-23C3-B84A8F2194D5}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>temp-15</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug 32|Win32'" Label="Globals">
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug 64|x64'" Label="Globals">
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release 32|Win32'" Label="Globals">
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release 64|x64'" Label="Globals">
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug 32|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug 64|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release 32|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release 64|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='debug 32|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='debug 64|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='release 32|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='release 64|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug 32|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\binaries-$(PlatformArchitecture)\</OutDir>
+    <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\32\debug\temp-15\</IntDir>
+    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformArchitecture)</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug 64|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\..\binaries-$(PlatformArchitecture)\</OutDir>
+    <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\64\debug\temp-15\</IntDir>
+    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformArchitecture)</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release 32|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\binaries-$(PlatformArchitecture)\</OutDir>
+    <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\32\release\temp-15\</IntDir>
+    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformArchitecture)</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release 64|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\..\binaries-$(PlatformArchitecture)\</OutDir>
+    <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\64\release\temp-15\</IntDir>
+    <TargetName>$(ProjectName)-$(Configuration)-$(PlatformArchitecture)</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug 32|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\development;..\..\include;..\..\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug 64|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\development;..\..\include;..\..\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release 32|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\development;..\..\include;..\..\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release 64|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\development;..\..\include;..\..\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\development\hfsm2\detail\config.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\array.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\array.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_array.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_array.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\features\logger_interface.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\features\structure_report.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\features\task.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\features\task_list.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\features\task_list.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\features\transition.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_0.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_0.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_1.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_2.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_3.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_3.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_4.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_4.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\control_5.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\core.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\core.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_0.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_0.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_1.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_2.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\registry.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\registry_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\registry_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_0.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_0.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_1.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_2.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_3.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_3.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root_4.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\bit_stream.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\bit_stream.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\iterator.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_off.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_on.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\random.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\random.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\type_list.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\utility.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\ancestors_1.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\ancestors_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\ancestors_2.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\ancestors_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\base.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite_sub_1.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite_sub_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite_sub_2.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\composite_sub_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\forward.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_1.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_2.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\state_1.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\state_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\state_2.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\state_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\machine_dev.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

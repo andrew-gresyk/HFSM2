@@ -17,7 +17,7 @@ LoggerT<TConfig>::recordMethod(const Context& /*context*/,
 			history.emplace_back(origin, Event::Type::REPORT_SELECT);
 			break;
 
-	#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 		case Method::RANK:
 			history.emplace_back(origin, Event::Type::REPORT_RANK);
@@ -27,7 +27,7 @@ LoggerT<TConfig>::recordMethod(const Context& /*context*/,
 			history.emplace_back(origin, Event::Type::UTILITY);
 			break;
 
-	#endif
+	//#endif
 
 		case Method::ENTRY_GUARD:
 			history.emplace_back(origin, Event::Type::ENTRY_GUARD);
@@ -37,9 +37,13 @@ LoggerT<TConfig>::recordMethod(const Context& /*context*/,
 			history.emplace_back(origin, Event::Type::ENTER);
 			break;
 
+	//#ifdef HFSM2_ENABLE_REENTER
+
 		case Method::REENTER:
 			history.emplace_back(origin, Event::Type::REENTER);
 			break;
+
+	//#endif
 
 		case Method::PRE_UPDATE:
 			history.emplace_back(origin, Event::Type::PRE_UPDATE);
@@ -73,7 +77,7 @@ LoggerT<TConfig>::recordMethod(const Context& /*context*/,
 			history.emplace_back(origin, Event::Type::EXIT);
 			break;
 
-	#if HFSM2_PLANS_AVAILABLE()
+	//#ifdef HFSM2_ENABLE_PLANS
 
 		case Method::PLAN_SUCCEEDED:
 			history.emplace_back(origin, Event::Type::PLAN_SUCCEEDED);
@@ -83,10 +87,10 @@ LoggerT<TConfig>::recordMethod(const Context& /*context*/,
 			history.emplace_back(origin, Event::Type::PLAN_FAILED);
 			break;
 
-	#endif
+	//#endif
 
 		default:
-			HFSM2_BREAK();
+			assert(false);
 	}
 }
 
@@ -94,7 +98,7 @@ LoggerT<TConfig>::recordMethod(const Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordTransition(const Context& /*context*/,
+LoggerT<TConfig>::recordTransition(const Context& UNUSED(context),
 								   const StateID origin,
 								   const TransitionType transitionType,
 								   const StateID target) noexcept
@@ -118,7 +122,7 @@ LoggerT<TConfig>::recordTransition(const Context& /*context*/,
 			history.emplace_back(origin, Event::Type::SELECT,    target);
 			break;
 
-	#if HFSM2_UTILITY_THEORY_AVAILABLE()
+	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 		case TransitionType::UTILIZE:
 			history.emplace_back(origin, Event::Type::UTILIZE,   target);
@@ -128,24 +132,24 @@ LoggerT<TConfig>::recordTransition(const Context& /*context*/,
 			history.emplace_back(origin, Event::Type::RANDOMIZE, target);
 			break;
 
-	#endif
+	//#endif
 
 		case TransitionType::SCHEDULE:
 			history.emplace_back(origin, Event::Type::SCHEDULE,  target);
 			break;
 
 		default:
-			HFSM2_BREAK();
+			assert(false);
 	}
 }
 
 //------------------------------------------------------------------------------
 
-#if HFSM2_PLANS_AVAILABLE()
+#ifdef HFSM2_ENABLE_PLANS
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordTaskStatus(const Context& /*context*/,
+LoggerT<TConfig>::recordTaskStatus(const Context& UNUSED(context),
 								   const RegionID region,
 								   const StateID origin,
 								   const StatusEvent event) noexcept
@@ -160,7 +164,7 @@ LoggerT<TConfig>::recordTaskStatus(const Context& /*context*/,
 			break;
 
 		default:
-			HFSM2_BREAK();
+			assert(false);
 	}
 }
 
@@ -168,7 +172,7 @@ LoggerT<TConfig>::recordTaskStatus(const Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordPlanStatus(const Context& /*context*/,
+LoggerT<TConfig>::recordPlanStatus(const Context& UNUSED(context),
 								   const RegionID region,
 								   const StatusEvent event) noexcept
 {
@@ -182,7 +186,7 @@ LoggerT<TConfig>::recordPlanStatus(const Context& /*context*/,
 			break;
 
 		default:
-			HFSM2_BREAK();
+			assert(false);
 	}
 }
 
@@ -192,7 +196,7 @@ LoggerT<TConfig>::recordPlanStatus(const Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordCancelledPending(const Context& /*context*/,
+LoggerT<TConfig>::recordCancelledPending(const Context& UNUSED(context),
 										 const StateID origin) noexcept
 {
 	history.emplace_back(origin, Event::Type::CANCEL_PENDING);
@@ -202,34 +206,34 @@ LoggerT<TConfig>::recordCancelledPending(const Context& /*context*/,
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordSelectResolution(const Context& /*context*/,
+LoggerT<TConfig>::recordSelectResolution(const Context& UNUSED(context),
 										 const StateID head,
-										 const StateID prong) noexcept
+										 const Prong prong) noexcept
 {
 	history.emplace_back(head, Event::Type::SELECT_RESOLUTION, prong);
 }
 
 //------------------------------------------------------------------------------
 
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
+#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordUtilityResolution(const Context& /*context*/,
+LoggerT<TConfig>::recordUtilityResolution(const Context& UNUSED(context),
 										  const StateID head,
-										  const StateID prong,
+										  const Prong prong,
 										  const Utilty utilty) noexcept
 {
 	history.emplace_back(head, Event::Type::UTILITY_RESOLUTION, prong, utilty);
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordRandomResolution(const Context& /*context*/,
+LoggerT<TConfig>::recordRandomResolution(const Context& UNUSED(context),
 										 const StateID head,
-										 const StateID prong,
+										 const Prong prong,
 										 const Utilty utilty) noexcept
 {
 	history.emplace_back(head, Event::Type::RANDOM_RESOLUTION, prong, utilty);
@@ -245,15 +249,15 @@ LoggerT<TConfig>::assertSequence(const Events& reference) noexcept {
 	const auto count = std::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {
-		REQUIRE(i < history.size()); //-V521
-		REQUIRE(i < reference.size()); //-V521
+		REQUIRE(i < history.size());
+		REQUIRE(i < reference.size());
 
 		if (i < history.size() &&
 			i < reference.size())
 		{
-			REQUIRE(history[i].type	  == reference[i].type); //-V521
-			REQUIRE(history[i].origin == reference[i].origin); //-V521
-			REQUIRE(history[i].target == reference[i].target); //-V521
+			REQUIRE(history[i].type	  == reference[i].type	);
+			REQUIRE(history[i].origin == reference[i].origin);
+			REQUIRE(history[i].target == reference[i].target);
 		}
 	}
 
@@ -270,9 +274,9 @@ assertActive(TMachine& machine,
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.isActive(type)); //-V521
+			REQUIRE( machine.isActive(type));
 		else
-			REQUIRE(!machine.isActive(type)); //-V521
+			REQUIRE(!machine.isActive(type));
 	}
 }
 
@@ -286,27 +290,79 @@ assertResumable(TMachine& machine,
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.isResumable(type)); //-V521
+			REQUIRE( machine.isResumable(type));
 		else
-			REQUIRE(!machine.isResumable(type)); //-V521
+			REQUIRE(!machine.isResumable(type));
+	}
+}
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+
+template <typename TStructure>
+void
+assertStructure(const TStructure& structure,
+				const StructureReference& reference) noexcept
+{
+	const std::size_t count = std::max(static_cast<std::size_t>(structure.count()), reference.size());
+
+	for (std::size_t i = 0; i < count; ++i) {
+		REQUIRE(i < structure.count());
+		REQUIRE(i < reference.size());
+
+		if (i < structure.count() &&
+			i < reference.size())
+		{
+			REQUIRE(structure[i].isActive == reference[i].isActive);
+			REQUIRE(wcscmp(structure[i].prefix, reference[i].prefix) == 0);
+
+		#ifdef _MSC_VER
+			REQUIRE(strcmp(structure[i].name,   reference[i].name)	 == 0);
+		#endif
+		}
 	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if HFSM2_TRANSITION_HISTORY_AVAILABLE()
+template <typename TActivityHistory>
+void
+assertActivity(const TActivityHistory& activity,
+			   const ActivityReference& reference) noexcept
+{
+	REQUIRE(static_cast<size_t>(activity.count()) == reference.size());
+	const size_t count = std::max(static_cast<size_t>(activity.count()), reference.size());
+
+	for (size_t i = 0; i < count; ++i) {
+		REQUIRE(i < activity.count());
+		REQUIRE(i < reference.size());
+
+		if (i < activity.count() &&
+			i < reference.size())
+		{
+			REQUIRE(activity[i] == reference[i]);
+		}
+	}
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
 
 template <typename TMachine>
 void
 assertLastTransitions(TMachine& machine,
-						const Types& all,
-						const Types& toCheck) noexcept
+					  const Types& all,
+					  const Types& toCheck) noexcept
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.lastTransitionTo(type)); //-V521
+			REQUIRE( machine.lastTransitionTo(type));
 		else
-			REQUIRE(!machine.lastTransitionTo(type)); //-V521
+			REQUIRE(!machine.lastTransitionTo(type));
 	}
 }
 

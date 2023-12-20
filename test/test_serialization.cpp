@@ -16,7 +16,7 @@ using M = hfsm2::MachineT<Config>;
 
 //------------------------------------------------------------------------------
 
-namespace server{
+namespace server {
 
 #define S(s) struct s
 
@@ -82,9 +82,9 @@ struct O2_C2_S2	: FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS  ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	  ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS  ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	  ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
 static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "ACTIVE_BITS");
 static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "RESUMABLE_BITS");
@@ -176,9 +176,9 @@ struct O2_C2_S2	: FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS  ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	  ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS  ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	  ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
 static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "ACTIVE_BITS");
 static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "RESUMABLE_BITS");
@@ -206,9 +206,9 @@ const Types all = {
 
 static_assert(server::FSM::Instance::Info::STATE_COUNT	  == client::FSM::Instance::Info::STATE_COUNT	, "STATE_COUNT");
 static_assert(server::FSM::Instance::Info::REGION_COUNT	  == client::FSM::Instance::Info::REGION_COUNT	, "REGION_COUNT");
-static_assert(server::FSM::Instance::Info::COMPO_REGIONS  == client::FSM::Instance::Info::COMPO_REGIONS	, "COMPO_REGIONS");
+static_assert(server::FSM::Instance::Info::COMPO_COUNT	  == client::FSM::Instance::Info::COMPO_COUNT	, "COMPO_COUNT");
 static_assert(server::FSM::Instance::Info::COMPO_PRONGS	  == client::FSM::Instance::Info::COMPO_PRONGS	, "COMPO_PRONGS");
-static_assert(server::FSM::Instance::Info::ORTHO_REGIONS  == client::FSM::Instance::Info::ORTHO_REGIONS	, "ORTHO_REGIONS");
+static_assert(server::FSM::Instance::Info::ORTHO_COUNT	  == client::FSM::Instance::Info::ORTHO_COUNT	, "ORTHO_COUNT");
 static_assert(server::FSM::Instance::Info::ORTHO_UNITS	  == client::FSM::Instance::Info::ORTHO_UNITS	, "ORTHO_UNITS");
 static_assert(server::FSM::Instance::Info::ACTIVE_BITS	  == client::FSM::Instance::Info::ACTIVE_BITS	, "ACTIVE_BITS");
 static_assert(server::FSM::Instance::Info::RESUMABLE_BITS == client::FSM::Instance::Info::RESUMABLE_BITS, "RESUMABLE_BITS");
@@ -240,9 +240,9 @@ void step2(server::FSM::Instance& authority,
 {
 	authority.enter();
 
-	server::FSM::Instance::SerialBuffer buffer;
-	authority .save(buffer);
-	replicated.load(buffer);
+	server::FSM::Instance::SerialBuffer serverBuffer;
+	authority .save(serverBuffer);
+	replicated.load(serverBuffer);
 
 	logger.assertSequence({
 		{ hfsm2::StateID{0},						Event::Type::ENTER },

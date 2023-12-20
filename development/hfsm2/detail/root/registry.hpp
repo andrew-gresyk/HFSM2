@@ -1,24 +1,11 @@
 namespace hfsm2 {
 namespace detail {
 
-//------------------------------------------------------------------------------
-
-enum Strategy {
-	Composite,
-	Resumable,
-	Selectable,
-
-//#if HFSM2_UTILITY_THEORY_AVAILABLE()
-	Utilitarian,
-	RandomUtil,
-//#endif
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(push, 1)
 
-struct alignas(2 * sizeof(Short)) Parent final {
+struct alignas(2 * sizeof(Prong)) Parent final {
 	HFSM2_CONSTEXPR(11)
 	Parent() = default;
 
@@ -29,7 +16,7 @@ struct alignas(2 * sizeof(Short)) Parent final {
 
 	HFSM2_CONSTEXPR(11)
 	Parent(const ForkID forkId_,
-		   const Short prong_)											noexcept
+		   const Prong prong_)											noexcept
 		: forkId{forkId_}
 		, prong{prong_}
 	{}
@@ -37,11 +24,11 @@ struct alignas(2 * sizeof(Short)) Parent final {
 	HFSM2_CONSTEXPR(11)
 	explicit operator bool()									  const noexcept	{
 		return forkId != INVALID_FORK_ID &&
-			   prong  != INVALID_SHORT;
+			   prong  != INVALID_PRONG;
 	}
 
 	ForkID forkId = INVALID_FORK_ID;
-	Short  prong  = INVALID_SHORT;
+	Prong  prong  = INVALID_PRONG;
 };
 
 #pragma pack(pop)
@@ -60,17 +47,17 @@ struct BackUpT final {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename
-		, typename
-		, typename
-		, typename
-		, Long
-		, Long
-		, Long
-		HFSM2_IF_SERIALIZATION(, Long)
-		, Long
-		HFSM2_IF_PLANS(, Long)
-		, typename>
+template <
+	typename
+  , typename
+  , typename
+  , Long
+  , Long
+  , Long
+  HFSM2_IF_SERIALIZATION(, Long)
+  HFSM2_IF_PLANS(, Long)
+  , typename
+>
 struct ArgsT;
 
 template <typename>
@@ -78,36 +65,38 @@ struct RegistryT;
 
 //------------------------------------------------------------------------------
 
-template <typename TContext
-		, typename TConfig
-		, typename TStateList
-		, typename TRegionList
-		, Long NCompoCount
-		, Long NOrthoCount
-		, Long NOrthoUnits
-		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-		, Long NSubstitutionLimit
-		HFSM2_IF_PLANS(, Long NTaskCapacity)
-		, typename TPayload>
-struct RegistryT<ArgsT<TContext
-					 , TConfig
-					 , TStateList
-					 , TRegionList
-					 , NCompoCount
-					 , NOrthoCount
-					 , NOrthoUnits
-					 HFSM2_IF_SERIALIZATION(, NSerialBits)
-					 , NSubstitutionLimit
-					 HFSM2_IF_PLANS(, NTaskCapacity)
-					 , TPayload>> final
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  HFSM2_IF_PLANS(, Long NTaskCapacity)
+  , typename TPayload
+>
+struct RegistryT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , NCompoCount
+			 , NOrthoCount
+			 , NOrthoUnits
+			 HFSM2_IF_SERIALIZATION(, NSerialBits)
+			 HFSM2_IF_PLANS(, NTaskCapacity)
+			 , TPayload
+		   >
+	   > final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
 	static constexpr Long  STATE_COUNT		= StateList::SIZE;
 	static constexpr Long  REGION_COUNT		= RegionList::SIZE;
-	static constexpr Short COMPO_REGIONS	= NCompoCount;
-	static constexpr Short ORTHO_REGIONS	= NOrthoCount;
+	static constexpr Short COMPO_COUNT		= NCompoCount;
+	static constexpr Short ORTHO_COUNT		= NOrthoCount;
 	static constexpr Short ORTHO_UNITS		= NOrthoUnits;
 
 	using Payload		= TPayload;
@@ -115,43 +104,43 @@ struct RegistryT<ArgsT<TContext
 
 	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
 
-	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
-	using OrthoParents	= StaticArrayT<Parent, ORTHO_REGIONS>;
+	using CompoParents	= StaticArrayT<Parent, COMPO_COUNT>;
+	using OrthoParents	= StaticArrayT<Parent, ORTHO_COUNT>;
 	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
 	using RegionSizes	= StaticArrayT<Short,  REGION_COUNT>;
 
-	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
+	using CompoForks	= StaticArrayT<Prong,  COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
 	using OrthoBits		= typename OrthoForks::Bits;
-	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
+	using CompoRemains	= BitArrayT	  <COMPO_COUNT>;
+
+	using BackUp		= BackUpT	  <RegistryT>;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using CompoStatuses	= BitArrayT	  <COMPO_REGIONS>;
+	using CompoStatuses	= BitArrayT	  <COMPO_COUNT>;
 #endif
 
-	using BackUp		= BackUpT<RegistryT>;
+	HFSM2_CONSTEXPR(14)	Prong activeSubState		(const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(11)	bool isActive				()						  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isActive				(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isResumable			(const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	bool isActive		 ()							  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingChange		(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingEnter			(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingExit			(const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool isPendingChange (const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingEnter	 (const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingExit	 (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	const Parent& forkParent	(const ForkID forkId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	const Parent&	  forkParent(const ForkID forkId) const noexcept;
+	HFSM2_CONSTEXPR(14)	OrthoBits requestedOrthoFork(const ForkID forkId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	OrthoBits requestedOrthoFork(const ForkID forkId)		noexcept;
+	HFSM2_CONSTEXPR(14)	bool requestImmediate		(const Transition& request)		noexcept;
+	HFSM2_CONSTEXPR(14)	void requestScheduled		(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		noexcept;
-	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests			()								noexcept;
+	HFSM2_CONSTEXPR(14)	void clear					()								noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests	 ()									noexcept;
-	HFSM2_CONSTEXPR(14)	void clear			 ()									noexcept;
-
-	HFSM2_CONSTEXPR(11)	bool empty			 ()							  const noexcept;
+	HFSM2_CONSTEXPR(11)	bool empty					()						  const noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
@@ -159,10 +148,10 @@ struct RegistryT<ArgsT<TContext
 	OrthoUnits	 orthoUnits;
 	RegionSizes	 regionSizes;
 
-	CompoForks compoRequested{INVALID_SHORT};
+	CompoForks compoRequested{INVALID_PRONG};
 	OrthoForks orthoRequested;
-	CompoForks compoActive	 {INVALID_SHORT};
-	CompoForks compoResumable{INVALID_SHORT};
+	CompoForks compoActive	 {INVALID_PRONG};
+	CompoForks compoResumable{INVALID_PRONG};
 
 	CompoRemains compoRemains;
 
@@ -173,79 +162,81 @@ struct RegistryT<ArgsT<TContext
 
 //------------------------------------------------------------------------------
 
-template <typename TContext
-		, typename TConfig
-		, typename TStateList
-		, typename TRegionList
-		, Long NCompoCount
-		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-		, Long NSubstitutionLimit
-		HFSM2_IF_PLANS(, Long NTaskCapacity)
-		, typename TPayload>
-struct RegistryT<ArgsT<TContext
-					 , TConfig
-					 , TStateList
-					 , TRegionList
-					 , NCompoCount
-					 , 0
-					 , 0
-					 HFSM2_IF_SERIALIZATION(, NSerialBits)
-					 , NSubstitutionLimit
-					 HFSM2_IF_PLANS(, NTaskCapacity)
-					 , TPayload>> final
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  HFSM2_IF_PLANS(, Long NTaskCapacity)
+  , typename TPayload
+>
+struct RegistryT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , NCompoCount
+			 , 0
+			 , 0
+			 HFSM2_IF_SERIALIZATION(, NSerialBits)
+			 HFSM2_IF_PLANS(, NTaskCapacity)
+			 , TPayload
+		   >
+	   > final
 {
 	using StateList		= TStateList;
 	using RegionList	= TRegionList;
 
 	static constexpr Long  STATE_COUNT		= StateList::SIZE;
 	static constexpr Long  REGION_COUNT		= RegionList::SIZE;
-	static constexpr Short COMPO_REGIONS	= NCompoCount;
+	static constexpr Short COMPO_COUNT		= NCompoCount;
 
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
 	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
-	using CompoParents	= StaticArrayT<Parent, COMPO_REGIONS>;
+	using CompoParents	= StaticArrayT<Parent, COMPO_COUNT>;
 	using RegionSizes	= StaticArrayT<Short,  REGION_COUNT>;
 
-	using CompoForks	= StaticArrayT<Short,  COMPO_REGIONS>;
+	using CompoForks	= StaticArrayT<Prong,  COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <0>;
-	using CompoRemains	= BitArrayT	  <COMPO_REGIONS>;
+	using CompoRemains	= BitArrayT	  <COMPO_COUNT>;
+
+	using BackUp		= BackUpT	  <RegistryT>;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using CompoStatuses	= BitArrayT	  <COMPO_REGIONS>;
+	using CompoStatuses	= BitArrayT	  <COMPO_COUNT>;
 #endif
 
-	using BackUp		= BackUpT<RegistryT>;
+	HFSM2_CONSTEXPR(14)	Prong activeSubState	(const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	Short activeSubState (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(11)	bool isActive			()						  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isActive			(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isResumable		(const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	bool isActive		 ()							  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isActive		 (const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isResumable	 (const StateID stateId)	  const noexcept;
-
-	HFSM2_CONSTEXPR(14)	bool isPendingChange (const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingEnter	 (const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingExit	 (const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingChange	(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingEnter		(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool isPendingExit		(const StateID stateId)	  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	const Parent& forkParent(const ForkID forkId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool requestImmediate(const Transition& request)		noexcept;
-	HFSM2_CONSTEXPR(14)	void requestScheduled(const StateID stateId)			noexcept;
+	HFSM2_CONSTEXPR(14)	bool requestImmediate	(const Transition& request)		noexcept;
+	HFSM2_CONSTEXPR(14)	void requestScheduled	(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests	 ()									noexcept;
-	HFSM2_CONSTEXPR(14)	void clear			 ()									noexcept;
+	HFSM2_CONSTEXPR(14)	void clearRequests		()								noexcept;
+	HFSM2_CONSTEXPR(14)	void clear				()								noexcept;
 
-	HFSM2_CONSTEXPR(11)	bool empty			 ()							  const noexcept;
+	HFSM2_CONSTEXPR(11)	bool empty				()						  const noexcept;
 
 	StateParents stateParents;
 	CompoParents compoParents;
 	RegionSizes	 regionSizes;
 
-	CompoForks compoRequested{INVALID_SHORT};
+	CompoForks compoRequested{INVALID_PRONG};
 	OrthoForks orthoRequested;
-	CompoForks compoActive	 {INVALID_SHORT};
-	CompoForks compoResumable{INVALID_SHORT};
+	CompoForks compoActive	 {INVALID_PRONG};
+	CompoForks compoResumable{INVALID_PRONG};
 
 	CompoRemains compoRemains;
 

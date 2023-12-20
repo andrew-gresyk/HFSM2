@@ -12,8 +12,8 @@ struct CoreT {
 
 	using Payload			= typename TArgs::Payload;
 	using Transition		= TransitionT<Payload>;
-	using TransitionSet		= ArrayT<Transition, TArgs::COMPO_REGIONS>;
-	using TransitionSets	= ArrayT<Transition, TArgs::COMPO_REGIONS * TArgs::SUBSTITUTION_LIMIT>;
+	using TransitionSet		= DynamicArrayT<Transition, TArgs::COMPO_COUNT>;
+	using TransitionSets	= DynamicArrayT<Transition, TArgs::COMPO_COUNT * TArgs::SUBSTITUTION_LIMIT>;
 
 #if HFSM2_PLANS_AVAILABLE()
 	using PlanData			= PlanDataT<TArgs>;

@@ -79,13 +79,13 @@
 #define HFSM2_ARCHITECTURE(A)							HFSM2_ARCHITECTURE_##A()
 
 #if INTPTR_MAX == INT64_MAX
-	#define HFSM2_ARCHITECTURE_64()											true
-	#define HFSM2_ARCHITECTURE_32()										   false
+	#define HFSM2_ARCHITECTURE_64BIT()										true
+	#define HFSM2_ARCHITECTURE_32BIT()									   false
 
 	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p64
 #elif INTPTR_MAX == INT32_MAX
-	#define HFSM2_ARCHITECTURE_64()										   false
-	#define HFSM2_ARCHITECTURE_32()											true
+	#define HFSM2_ARCHITECTURE_64BIT()									   false
+	#define HFSM2_ARCHITECTURE_32BIT()										true
 
 	#define HFSM2_64BIT_OR_32BIT(p64, p32)									 p32
 #else
@@ -305,7 +305,7 @@
 
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if HFSM2_VERBOSE_DEBUG_LOG_AVAILABLE()
 
@@ -313,15 +313,29 @@
 		if (auto* const logger = control._core.logger)						   \
 			logger->recordMethod(control.context(), STATE_ID, METHOD_ID)
 
+	#define HFSM2_IF_LOG_STATE_METHOD(...)							 __VA_ARGS__
+	#define HFSM2_IF_PLANS_OR_LOG_STATE_METHOD(...)					 __VA_ARGS__
+
 #elif HFSM2_LOG_INTERFACE_AVAILABLE()
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)						   \
 		if (auto* const logger = control._core.logger)						   \
 			log(METHOD, *logger, control.context(), METHOD_ID)
 
+	#define HFSM2_IF_LOG_STATE_METHOD(...)							 __VA_ARGS__
+	#define HFSM2_IF_PLANS_OR_LOG_STATE_METHOD(...)					 __VA_ARGS__
+
 #else
 
 	#define HFSM2_LOG_STATE_METHOD(METHOD, METHOD_ID)
+
+	#define HFSM2_IF_LOG_STATE_METHOD(...)
+
+	#if HFSM2_PLANS_AVAILABLE()
+		#define HFSM2_IF_PLANS_OR_LOG_STATE_METHOD(...)				 __VA_ARGS__
+	#else
+		#define HFSM2_IF_PLANS_OR_LOG_STATE_METHOD(...)
+	#endif
 
 #endif
 

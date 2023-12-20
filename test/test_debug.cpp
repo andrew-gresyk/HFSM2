@@ -94,59 +94,10 @@ struct N_2	: FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 15, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
-
-////////////////////////////////////////////////////////////////////////////////
-
-using StructureReference = std::vector<hfsm2::StructureEntry>;
-
-void
-assertStructure(const FSM::Instance::Structure& structure,
-				const StructureReference& reference)
-{
-	const std::size_t count = std::max(static_cast<std::size_t>(structure.count()), reference.size());
-
-	for (std::size_t i = 0; i < count; ++i) {
-		REQUIRE(i < structure.count());
-		REQUIRE(i < reference.size());
-
-		if (i < structure.count() &&
-			i < reference.size())
-		{
-			REQUIRE(structure[i].isActive == reference[i].isActive);
-			REQUIRE(wcscmp(structure[i].prefix, reference[i].prefix) == 0);
-
-		#ifdef _MSC_VER
-			REQUIRE(strcmp(structure[i].name,   reference[i].name)	 == 0);
-		#endif
-		}
-	}
-}
-
-//------------------------------------------------------------------------------
-
-using ActivityReference = std::vector<int8_t>;
-
-void
-assertActivity(const FSM::Instance::ActivityHistory& activity,
-			   const ActivityReference& reference)
-{
-	const std::size_t count = std::max(static_cast<std::size_t>(activity.count()), reference.size());
-
-	for (std::size_t i = 0; i < count; ++i) {
-		REQUIRE(i < activity.count());
-		REQUIRE(i < reference.size());
-
-		if (i < activity.count() &&
-			i < reference.size())
-		{
-			REQUIRE(activity[i] == reference[i]);
-		}
-	}
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 

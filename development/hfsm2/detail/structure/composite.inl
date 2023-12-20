@@ -3,48 +3,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
-HFSM2_CONSTEXPR(14)
-Short
-C_<TN, TA, SG, TH, TS...>::resolveRandom(Control& control,
-										 const Utility(& options)[WIDTH],
-										 const Utility sum,
-										 const Rank(& ranks)[WIDTH],
-										 const Rank top) const noexcept
-{
-	const Utility random = control._core.rng.next();
-	HFSM2_ASSERT(0.0f <= random && random < 1.0f);
-
-	Utility cursor = random * sum;
-
-	for (Short i = 0; i < count<Short>(ranks); ++i)
-		if (ranks[i] == top) {
-			HFSM2_ASSERT(options[i] >= 0.0f);
-
-			if (cursor >= options[i])
-				cursor -= options[i];
-			else {
-				HFSM2_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, i, random);
-
-				return i;
-			}
-		}
-
-	HFSM2_BREAK();
-	return INVALID_SHORT;
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRegister(Registry& registry,
-										const Parent parent) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRegister(Registry& registry,
+											 const Parent parent) noexcept
 {
 	registry.compoParents[COMPO_INDEX] = parent;
 	registry.regionSizes [REGION_ID]   = REGION_SIZE;
@@ -55,18 +18,18 @@ C_<TN, TA, SG, TH, TS...>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-C_<TN, TA, SG, TH, TS...>::deepForwardEntryGuard(GuardControl& control) noexcept {
-	const Short requested = compoRequested(control);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepForwardEntryGuard(GuardControl& control) noexcept {
+	const Prong	 requested	= compoRequested(control);
 
-	const Short active	  = compoActive   (control);
-	HFSM2_ASSERT(active < WIDTH);
+	const Prong	 active		= compoActive   (control);
+	HFSM2_ASSERT(active		< WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (requested == INVALID_SHORT)
+	if (requested == INVALID_PRONG)
 		return SubStates::wideForwardEntryGuard(control, active);
 	else
 		return SubStates::wideEntryGuard	   (control, requested);
@@ -74,11 +37,11 @@ C_<TN, TA, SG, TH, TS...>::deepForwardEntryGuard(GuardControl& control) noexcept
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-C_<TN, TA, SG, TH, TS...>::deepEntryGuard(GuardControl& control) noexcept {
-	const Short requested = compoRequested(control);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepEntryGuard(GuardControl& control) noexcept {
+	const Prong  requested = compoRequested(control);
 	HFSM2_ASSERT(requested < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -89,23 +52,23 @@ C_<TN, TA, SG, TH, TS...>::deepEntryGuard(GuardControl& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepEnter(PlanControl& control) noexcept {
-	Short& requested = compoRequested(control);
-	Short& active	 = compoActive	 (control);
-	Short& resumable = compoResumable(control);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepEnter(PlanControl& control) noexcept {
+	Prong& requested = compoRequested(control);
+	Prong& active	 = compoActive	 (control);
+	Prong& resumable = compoResumable(control);
 
 	HFSM2_ASSERT(requested < WIDTH);
-	HFSM2_ASSERT(active	  == INVALID_SHORT);
+	HFSM2_ASSERT(active	  == INVALID_PRONG);
 
 	active	  = requested;
 
 	if (requested == resumable)
-		resumable = INVALID_SHORT;
+		resumable = INVALID_PRONG;
 
-	requested = INVALID_SHORT;
+	requested = INVALID_PRONG;
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -115,13 +78,13 @@ C_<TN, TA, SG, TH, TS...>::deepEnter(PlanControl& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
-	Short& active	 = compoActive   (control);
-	Short& resumable = compoResumable(control);
-	Short& requested = compoRequested(control);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReenter(PlanControl& control) noexcept {
+	Prong& requested = compoRequested(control);
+	Prong& active	 = compoActive   (control);
+	Prong& resumable = compoResumable(control);
 
 	HFSM2_ASSERT(active	   < WIDTH &&
 				 requested < WIDTH);
@@ -138,33 +101,33 @@ C_<TN, TA, SG, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 		active  = requested;
 
 		if (requested == resumable)
-			resumable = INVALID_SHORT;
+			resumable = INVALID_PRONG;
 
 		SubStates::wideEnter  (control, active);
 	}
 
-	requested = INVALID_SHORT;
+	requested = INVALID_PRONG;
 }
 
 //------------------------------------------------------------------------------
 // COMMON
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN, TA, SG, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
-	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepPreUpdate(FullControl& control) noexcept {
+	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
 
-	const Short  active = compoActive(control);
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	const TaskStatus h =
 		HeadState::deepPreUpdate(control);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
+	HFSM2_IF_PLANS(headStatus	(control) |= h);
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
+	HFSM2_IF_PLANS( subStatus	(control) |=)
 		SubStates::widePreUpdate(control, active);
 
 	return h;
@@ -172,13 +135,13 @@ C_<TN, TA, SG, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
-	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepUpdate(FullControl& control) noexcept {
+	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
 
-	const Short  active = compoActive(control);
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -187,7 +150,7 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 		HeadState::deepUpdate(control);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
+	HFSM2_IF_PLANS( subStatus(control) |=)
 		SubStates::wideUpdate(control, active);
 
 	return h;
@@ -195,39 +158,39 @@ C_<TN, TA, SG, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN, TA, SG, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
-	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepPostUpdate(FullControl& control) noexcept {
+	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
 
-	const Short  active = compoActive(control);
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
+	HFSM2_IF_PLANS( subStatus	 (control) |=)
 		SubStates::widePostUpdate(control, active);
 
 	const TaskStatus h =
 		HeadState::deepPostUpdate(control);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
+	HFSM2_IF_PLANS(headStatus	 (control) |= h);
 
 	return h;
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN, TA, SG, TH, TS...>::deepPreReact(FullControl& control,
-										const TEvent& event) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepPreReact(FullControl& control,
+											 const TEvent& event) noexcept
 {
-	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
 
-	const Short  active = compoActive(control);
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -244,66 +207,66 @@ C_<TN, TA, SG, TH, TS...>::deepPreReact(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN, TA, SG, TH, TS...>::deepReact(FullControl& control,
-									 const TEvent& event) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReact(FullControl& control,
+										  const TEvent& event) noexcept
 {
-	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
 
-	const Short  active = compoActive(control);
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	const TaskStatus h =
-		HeadState::deepReact(control, event);
+		HeadState::deepReact (control, event);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
-		SubStates::wideReact(control, event, active);
+	HFSM2_IF_PLANS( subStatus(control) |=)
+		SubStates::wideReact (control, event, active);
 
 	return h;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN, TA, SG, TH, TS...>::deepPostReact(FullControl& control,
-										 const TEvent& event) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepPostReact(FullControl& control,
+											  const TEvent& event) noexcept
 {
-	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
 
-	const Short  active = compoActive(control);
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
+	HFSM2_IF_PLANS( subStatus	(control) |=)
 		SubStates::widePostReact(control, event, active);
 
 	const TaskStatus h =
 		HeadState::deepPostReact(control, event);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
+	HFSM2_IF_PLANS(headStatus	(control) |= h);
 
 	return h;
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepQuery(ConstControl& control,
-									 TEvent& event) const noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepQuery(ConstControl& control,
+										  TEvent& event) const noexcept
 {
-	const Short  active = compoActive(control);
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	HeadState::deepQuery(control, event);
@@ -314,20 +277,20 @@ C_<TN, TA, SG, TH, TS...>::deepQuery(ConstControl& control,
 
 #if HFSM2_PLANS_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN, TA, SG, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
-	HFSM2_ASSERT(compoRequested(control) == INVALID_SHORT);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepUpdatePlans(FullControl& control) noexcept {
+	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
 
-	const Short  active = compoActive(control);
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
-	const TaskStatus h =	headStatus(control) |
-		HeadState::deepUpdatePlans(control);
+	const TaskStatus h = headStatus(control) |
+		HeadState::deepUpdatePlans (control);
 
-	const TaskStatus s =	 subStatus(control) |
-		SubStates::wideUpdatePlans(control, active);
+	const TaskStatus s =  subStatus(control) |
+		SubStates::wideUpdatePlans (control, active);
 
 	if (h)
 		return h;
@@ -348,16 +311,16 @@ C_<TN, TA, SG, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-C_<TN, TA, SG, TH, TS...>::deepForwardExitGuard(GuardControl& control) noexcept {
-	const Short  active = compoActive(control);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepForwardExitGuard(GuardControl& control) noexcept {
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	if (compoRequested(control) == INVALID_SHORT)
+	if (compoRequested(control) == INVALID_PRONG)
 		return SubStates::wideForwardExitGuard(control, active);
 	else
 		return SubStates::wideExitGuard		  (control, active);
@@ -365,11 +328,11 @@ C_<TN, TA, SG, TH, TS...>::deepForwardExitGuard(GuardControl& control) noexcept 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-C_<TN, TA, SG, TH, TS...>::deepExitGuard(GuardControl& control) noexcept {
-	const Short  active = compoActive(control);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
+	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -380,20 +343,20 @@ C_<TN, TA, SG, TH, TS...>::deepExitGuard(GuardControl& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) noexcept {
-	Short& active	 = compoActive   (control);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepExit(PlanControl& control) noexcept {
+	Prong& active	 = compoActive   (control);
 	HFSM2_ASSERT(active < WIDTH);
 
-	Short& resumable = compoResumable(control);
+	Prong& resumable = compoResumable(control);
 
 	SubStates::wideExit(control, active);
 	HeadState::deepExit(control);
 
 	resumable = active;
-	active	  = INVALID_SHORT;
+	active	  = INVALID_PRONG;
 
 #if HFSM2_PLANS_AVAILABLE()
 	Plan plan = control.plan(REGION_ID);
@@ -404,18 +367,18 @@ C_<TN, TA, SG, TH, TS...>::deepExit(PlanControl& control) noexcept {
 // COMMON
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
-											 const Request request) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepForwardActive(Control& control,
+												  const Request request) noexcept
 {
 	HFSM2_ASSERT(control._core.registry.isActive(HEAD_ID));
 
-	const Short requested = compoRequested(control);
+	const Prong requested = compoRequested(control);
 
 	if (requested == INVALID_SHORT) {
-		const Short active = compoActive(control);
+		const Prong active = compoActive(control);
 
 		SubStates::wideForwardActive (control, request, active);
 	} else
@@ -424,17 +387,17 @@ C_<TN, TA, SG, TH, TS...>::deepForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepForwardRequest(Control& control,
-											  const Request request) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepForwardRequest(Control& control,
+												   const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	const Short requested = compoRequested(control);
+	const Prong requested = compoRequested(control);
 
-	if (requested != INVALID_SHORT)
+	if (requested != INVALID_PRONG)
 		SubStates::wideForwardRequest(control, request, requested);
 	else
 		deepRequest					 (control, request);
@@ -442,11 +405,11 @@ C_<TN, TA, SG, TH, TS...>::deepForwardRequest(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 void
 HFSM2_CONSTEXPR(14)
-C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
-									   const Request request) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequest(Control& control,
+											const Request request) noexcept
 {
 	switch (request.type) {
 	case TransitionType::CHANGE:
@@ -486,11 +449,11 @@ C_<TN, TA, SG, TH, TS...>::deepRequest(Control& control,
 
 #if !HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control,
-											 const Request request) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestChange(Control& control,
+												  const Request request) noexcept
 {
 	switch (STRATEGY) {
 	case Strategy::Composite:
@@ -526,15 +489,15 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChange(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestChangeComposite(Control& control,
-													  const Request request) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestChangeComposite(Control& control,
+														   const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	Short& requested = compoRequested(control);
+	Prong& requested = compoRequested(control);
 
 	requested = 0;
 
@@ -543,18 +506,18 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeComposite(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestChangeResumable(Control& control,
-													  const Request request) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestChangeResumable(Control& control,
+														   const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	const Short  resumable = compoResumable(control);
-		  Short& requested = compoRequested(control);
+		  Prong& requested = compoRequested(control);
+	const Prong  resumable = compoResumable(control);
 
-	requested = (resumable != INVALID_SHORT) ?
+	requested = (resumable != INVALID_PRONG) ?
 		resumable : 0;
 
 	HFSM2_ASSERT(requested < WIDTH);
@@ -564,15 +527,15 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeResumable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestChangeSelectable(Control& control,
-													   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestChangeSelectable(Control& control,
+															const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	Short& requested = compoRequested(control);
+	Prong& requested = compoRequested(control);
 	requested = HeadState::wrapSelect(control);
 
 	HFSM2_ASSERT(requested < WIDTH);
@@ -584,18 +547,18 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeSelectable(Control& control,
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestChangeUtilitarian(Control& control,
-														const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestChangeUtilitarian(Control& control,
+															 const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	const UP s = SubStates::wideReportChangeUtilitarian(control);
 	HFSM2_ASSERT(s.prong < WIDTH);
 
-	Short& requested = compoRequested(control);
+	Prong& requested = compoRequested(control);
 	requested = s.prong;
 
 	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
@@ -603,22 +566,22 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeUtilitarian(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control,
-												   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestChangeRandom(Control& control,
+														const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	Rank ranks[WIDTH] = { Rank{} };
 	Rank top = SubStates::wideReportRank(control, ranks);
 
-	Utility options[WIDTH] = { Utility{} };
-	const UP sum = SubStates::wideReportChangeRandom(control, options, ranks, top);
+	Utility utilities[WIDTH] = { Utility{} };
+	const UP sum = SubStates::wideReportChangeRandom(control, utilities, ranks, top);
 
-	Short& requested = compoRequested(control);
-	requested = resolveRandom(control, options, sum.utility, ranks, top);
+	Prong& requested = compoRequested(control);
+	requested = resolveRandom(control, utilities, sum.utility, ranks, top);
 	HFSM2_ASSERT(requested < WIDTH);
 }
 
@@ -626,15 +589,15 @@ C_<TN, TA, SG, TH, TS...>::deepRequestChangeRandom(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestRestart(Control& control,
-											  const Request request) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestRestart(Control& control,
+												   const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	Short& requested = compoRequested(control);
+	Prong& requested = compoRequested(control);
 
 	requested = 0;
 
@@ -643,18 +606,18 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRestart(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestResume(Control& control,
-											 const Request request) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestResume(Control& control,
+												  const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	const Short  resumable = compoResumable(control);
-		  Short& requested = compoRequested(control);
+		  Prong& requested = compoRequested(control);
+	const Prong  resumable = compoResumable(control);
 
-	requested = (resumable != INVALID_SHORT) ?
+	requested = (resumable != INVALID_PRONG) ?
 		resumable : 0;
 
 	HFSM2_ASSERT(requested < WIDTH);
@@ -664,15 +627,15 @@ C_<TN, TA, SG, TH, TS...>::deepRequestResume(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestSelect(Control& control,
-											 const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestSelect(Control& control,
+												  const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
-	Short& requested = compoRequested(control);
+	Prong& requested = compoRequested(control);
 	requested = HeadState::wrapSelect(control);
 
 	HFSM2_ASSERT(requested < WIDTH);
@@ -684,17 +647,17 @@ C_<TN, TA, SG, TH, TS...>::deepRequestSelect(Control& control,
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control,
-											  const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestUtilize(Control& control,
+												   const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	const UP s = SubStates::wideReportUtilize(control);
 
-	Short& requested = compoRequested(control);
+	Prong& requested = compoRequested(control);
 	requested = s.prong;
 
 	HFSM2_ASSERT(s.prong < WIDTH);
@@ -704,22 +667,22 @@ C_<TN, TA, SG, TH, TS...>::deepRequestUtilize(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control,
-												const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepRequestRandomize(Control& control,
+													 const Request HFSM2_IF_TRANSITION_HISTORY(request)) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
 	Rank ranks[WIDTH] = { Rank{} };
 	Rank top = SubStates::wideReportRank(control, ranks);
 
-	Utility options[WIDTH] = { Utility{} };
-	const Utility sum = SubStates::wideReportRandomize(control, options, ranks, top);
+	Utility utilities[WIDTH] = { Utility{} };
+	const Utility sum = SubStates::wideReportRandomize(control, utilities, ranks, top);
 
-	Short& requested = compoRequested(control);
-	requested = resolveRandom(control, options, sum, ranks, top);
+	Prong& requested = compoRequested(control);
+	requested = resolveRandom(control, utilities, sum, ranks, top);
 	HFSM2_ASSERT(requested < WIDTH);
 }
 
@@ -730,10 +693,10 @@ C_<TN, TA, SG, TH, TS...>::deepRequestRandomize(Control& control,
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 #if !HFSM2_EXPLICIT_MEMBER_SPECIALIZATION_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-C_<TN, TA, SG, TH, TS...>::deepReportChange(Control& control) noexcept {
+typename TA_::UP
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportChange(Control& control) noexcept {
 	switch (STRATEGY) {
 	case Strategy::Composite:
 		return deepReportChangeComposite  (control);
@@ -760,11 +723,11 @@ C_<TN, TA, SG, TH, TS...>::deepReportChange(Control& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-C_<TN, TA, SG, TH, TS...>::deepReportChangeComposite(Control& control) noexcept {
-	Short& requested = compoRequested(control);
+typename TA_::UP
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportChangeComposite(Control& control) noexcept {
+	Prong& requested = compoRequested(control);
 	requested = 0;
 
 	const UP h = HeadState::deepReportChange(control);
@@ -776,16 +739,49 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeComposite(Control& control) noexcept 
 	};
 }
 
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
+HFSM2_CONSTEXPR(14)
+Short
+C_<TN_, TA_, SG_, TH_, TS_...>::resolveRandom(Control& control,
+											  const Utilities& utilities,
+											  const Utility sum,
+											  const Ranks& ranks,
+											  const Rank top) const noexcept
+{
+	const Utility random = control._core.rng.next();
+	HFSM2_ASSERT(0.0f <= random && random < 1.0f);
+
+	Utility cursor = random * sum;
+
+	for (Prong i = 0; i < count<Prong>(ranks); ++i)
+		if (ranks[i] == top) {
+			HFSM2_ASSERT(utilities[i] >= 0.0f);
+
+			if (cursor >= utilities[i])
+				cursor -= utilities[i];
+			else {
+				HFSM2_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, i, random);
+
+				return i;
+			}
+		}
+
+	HFSM2_BREAK();
+	return INVALID_PRONG;
+}
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-C_<TN, TA, SG, TH, TS...>::deepReportChangeResumable(Control& control) noexcept {
-	const Short  resumable = compoResumable(control);
-		  Short& requested = compoRequested(control);
+typename TA_::UP
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportChangeResumable(Control& control) noexcept {
+	const Prong  resumable = compoResumable(control);
+		  Prong& requested = compoRequested(control);
 
-	requested = (resumable != INVALID_SHORT) ?
+	requested = (resumable != INVALID_PRONG) ?
 		resumable : 0;
 
 	const UP h = HeadState::deepReportChange(control);
@@ -799,14 +795,14 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeResumable(Control& control) noexcept 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-C_<TN, TA, SG, TH, TS...>::deepReportChangeSelectable(Control& control) noexcept {
-	const Short  resumable = compoResumable(control);
-		  Short& requested = compoRequested(control);
+typename TA_::UP
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportChangeSelectable(Control& control) noexcept {
+	const Prong  resumable = compoResumable(control);
+		  Prong& requested = compoRequested(control);
 
-	requested = (resumable != INVALID_SHORT) ?
+	requested = (resumable != INVALID_PRONG) ?
 		resumable : 0;
 
 	HFSM2_ASSERT(requested < WIDTH);
@@ -822,14 +818,14 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeSelectable(Control& control) noexcept
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-C_<TN, TA, SG, TH, TS...>::deepReportChangeUtilitarian(Control& control) noexcept {
+typename TA_::UP
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportChangeUtilitarian(Control& control) noexcept {
 	const UP h = HeadState::deepReportChange(control);
 	const UP s = SubStates::wideReportChangeUtilitarian(control);
 
-	Short& requested = compoRequested(control);
+	Prong& requested = compoRequested(control);
 	requested = s.prong;
 
 	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
@@ -842,38 +838,38 @@ C_<TN, TA, SG, TH, TS...>::deepReportChangeUtilitarian(Control& control) noexcep
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-C_<TN, TA, SG, TH, TS...>::deepReportChangeRandom(Control& control) noexcept {
+typename TA_::UP
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportChangeRandom(Control& control) noexcept {
 	const UP h = HeadState::deepReportChange(control);
 
 	Rank ranks[WIDTH] = { Rank{} };
 	Rank top = SubStates::wideReportRank(control, ranks);
 
-	Utility options[WIDTH] = { Utility{} };
-	const UP sum = SubStates::wideReportChangeRandom(control, options, ranks, top);
+	Utility utilities[WIDTH] = { Utility{} };
+	const UP sum = SubStates::wideReportChangeRandom(control, utilities, ranks, top);
 
-	Short& requested = compoRequested(control);
-	requested = resolveRandom(control, options, sum.utility, ranks, top);
+	Prong& requested = compoRequested(control);
+	requested = resolveRandom(control, utilities, sum.utility, ranks, top);
 	HFSM2_ASSERT(requested < WIDTH);
 
 	return {
-		h.utility * options[requested],
+		h.utility * utilities[requested],
 		h.prong
 	};
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-C_<TN, TA, SG, TH, TS...>::deepReportUtilize(Control& control) noexcept {
+typename TA_::UP
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportUtilize(Control& control) noexcept {
 	const UP h = HeadState::deepReportUtilize(control);
 	const UP s = SubStates::wideReportUtilize(control);
 
-	Short& requested = compoRequested(control);
+	Prong& requested = compoRequested(control);
 	requested = s.prong;
 
 	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, requested, s.utility);
@@ -886,32 +882,32 @@ C_<TN, TA, SG, TH, TS...>::deepReportUtilize(Control& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::Rank
-C_<TN, TA, SG, TH, TS...>::deepReportRank(Control& control) noexcept {
+typename TA_::Rank
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportRank(Control& control) noexcept {
 	return HeadState::wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) noexcept {
+typename TA_::Utility
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReportRandomize(Control& control) noexcept {
 	const Utility h = HeadState::wrapUtility(control);
 
 	Rank ranks[WIDTH] = { Rank{} };
 	Rank top = SubStates::wideReportRank(control, ranks);
 
-	Utility options[WIDTH] = { Utility{} };
-	const Utility sum = SubStates::wideReportRandomize(control, options, ranks, top);
+	Utility utilities[WIDTH] = { Utility{} };
+	const Utility sum = SubStates::wideReportRandomize(control, utilities, ranks, top);
 
-	Short& requested = compoRequested(control);
-	requested = resolveRandom(control, options, sum, ranks, top);
+	Prong& requested = compoRequested(control);
+	requested = resolveRandom(control, utilities, sum, ranks, top);
 	HFSM2_ASSERT(requested < WIDTH);
 
-	return h * options[requested];
+	return h * utilities[requested];
 }
 
 #endif
@@ -919,37 +915,40 @@ C_<TN, TA, SG, TH, TS...>::deepReportRandomize(Control& control) noexcept {
 //------------------------------------------------------------------------------
 // COMMON
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept {
-	Short& requested = compoRequested(control);
-	Short& active	 = compoActive	 (control);
-	Short& resumable = compoResumable(control);
+C_<TN_, TA_, SG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) noexcept {
+	Prong& requested = compoRequested(control);
+	Prong& active	 = compoActive	 (control);
+	Prong& resumable = compoResumable(control);
 
 	HFSM2_ASSERT(active < WIDTH);
 
-	if (requested == INVALID_SHORT)
+	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+
+	if (requested == INVALID_PRONG)
 		SubStates::wideChangeToRequested(control, active);
 	else if (requested != active) {
-		SubStates::wideExit   (control, active);
+		SubStates::wideExit	  (control, active);
 
 		HFSM2_ASSERT(requested < WIDTH);
 
 		resumable = active;
 		active	  = requested;
-		requested = INVALID_SHORT;
+		requested = INVALID_PRONG;
 
 		SubStates::wideEnter  (control, active);
 	} else if (compoRemain(control)) {
 		SubStates::wideExit   (control, active);
 
-		requested = INVALID_SHORT;
+		requested = INVALID_PRONG;
 
 		SubStates::wideEnter  (control, active);
 	} else {
-		requested = INVALID_SHORT;
+		requested = INVALID_PRONG;
 
+		// reconstruction done in S_::reenter()
 		SubStates::wideReenter(control, active);
 	}
 }
@@ -958,18 +957,18 @@ C_<TN, TA, SG, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept 
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepSaveActive(const Registry& registry,
-										  WriteStream& stream) const noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepSaveActive(const Registry& registry,
+											   WriteStream& stream) const noexcept
 {
-	const Short active	  = compoActive   (registry);
-	const Short resumable = compoResumable(registry);
+	const Prong active	  = compoActive   (registry);
+	const Prong resumable = compoResumable(registry);
 
 	stream.template write<WIDTH_BITS>(active);
 
-	if (resumable != INVALID_SHORT) {
+	if (resumable != INVALID_PRONG) {
 		stream.template write<1>(1);
 		stream.template write<WIDTH_BITS>(resumable);
 	} else
@@ -980,15 +979,15 @@ C_<TN, TA, SG, TH, TS...>::deepSaveActive(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepSaveResumable(const Registry& registry,
-											 WriteStream& stream) const noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
+												  WriteStream& stream) const noexcept
 {
-	const Short resumable = compoResumable(registry);
+	const Prong resumable = compoResumable(registry);
 
-	if (resumable != INVALID_SHORT) {
+	if (resumable != INVALID_PRONG) {
 		stream.template write<1>(1);
 		stream.template write<WIDTH_BITS>(resumable);
 	} else
@@ -999,14 +998,14 @@ C_<TN, TA, SG, TH, TS...>::deepSaveResumable(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepLoadRequested(Registry& registry,
-											 ReadStream& stream) const noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepLoadRequested(Registry& registry,
+												  ReadStream& stream) const noexcept
 {
-	Short& resumable = compoResumable(registry);
-	Short& requested = compoRequested(registry);
+	Prong& resumable = compoResumable(registry);
+	Prong& requested = compoRequested(registry);
 
 	requested = stream.template read<WIDTH_BITS>();
 	HFSM2_ASSERT(requested < WIDTH);
@@ -1015,26 +1014,26 @@ C_<TN, TA, SG, TH, TS...>::deepLoadRequested(Registry& registry,
 		resumable = stream.template read<WIDTH_BITS>();
 		HFSM2_ASSERT(resumable < WIDTH);
 	} else
-		resumable = INVALID_SHORT;
+		resumable = INVALID_PRONG;
 
 	SubStates::wideLoadRequested(registry, stream, requested);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
-											 ReadStream& stream) const noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepLoadResumable(Registry& registry,
+												  ReadStream& stream) const noexcept
 {
-	Short& resumable = compoResumable(registry);
+	Prong& resumable = compoResumable(registry);
 
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
 		HFSM2_ASSERT(resumable < WIDTH);
 	} else
-		resumable = INVALID_SHORT;
+		resumable = INVALID_PRONG;
 
 	SubStates::wideLoadResumable(registry, stream);
 }
@@ -1045,16 +1044,16 @@ C_<TN, TA, SG, TH, TS...>::deepLoadResumable(Registry& registry,
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, typename TH, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-C_<TN, TA, SG, TH, TS...>::deepGetNames(const Long parent,
-										const RegionType regionType,
-										const Short depth,
-										StructureStateInfos& stateInfos) const noexcept
+C_<TN_, TA_, SG_, TH_, TS_...>::deepGetNames(const Long parent,
+											 const RegionType regionType,
+											 const Short depth,
+											 StructureStateInfos& stateInfos) const noexcept
 {
-	HeadState::deepGetNames(parent,					regionType,								   depth,	  stateInfos);
-	SubStates::wideGetNames(stateInfos.count() - 1, StructureStateInfo::RegionType::COMPOSITE, depth + 1, stateInfos);
+	HeadState::deepGetNames(parent,					regionType,			   depth,	  stateInfos);
+	SubStates::wideGetNames(stateInfos.count() - 1, RegionType::COMPOSITE, depth + 1, stateInfos);
 }
 
 #endif

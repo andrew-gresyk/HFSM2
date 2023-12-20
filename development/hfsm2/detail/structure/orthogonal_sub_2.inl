@@ -3,288 +3,288 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideRegister(Registry& registry,
-								  const ForkID forkId) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideRegister(Registry& registry,
+									  const ForkID forkId) noexcept
 {
-	Initial		   ::deepRegister(			registry, Parent{forkId, PRONG_INDEX});
+	Initial::deepRegister(registry, Parent{forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control,
-										   const ProngCBits prongs) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideForwardEntryGuard(GuardControl& control,
+											   const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial	   ::deepForwardEntryGuard(				 control) : false;
+		Initial::deepForwardEntryGuard(control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI>::wideForwardEntryGuard(GuardControl& control) noexcept {
-	return Initial ::deepForwardEntryGuard(				 control);
+OS_<TN_, TA_, NP_, TI_>::wideForwardEntryGuard(GuardControl& control) noexcept {
+	return Initial::deepForwardEntryGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI>::wideEntryGuard(GuardControl& control) noexcept {
-	return Initial ::deepEntryGuard(			  control);
+OS_<TN_, TA_, NP_, TI_>::wideEntryGuard(GuardControl& control) noexcept {
+	return Initial::deepEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideEnter(PlanControl& control) noexcept {
-	Initial		   ::deepEnter(				control);
+OS_<TN_, TA_, NP_, TI_>::wideEnter(PlanControl& control) noexcept {
+	Initial::deepEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideReenter(PlanControl& control) noexcept {
-	Initial		   ::deepReenter(			  control);
+OS_<TN_, TA_, NP_, TI_>::wideReenter(PlanControl& control) noexcept {
+	Initial::deepReenter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN, TA, NI, TI>::widePreUpdate(FullControl& control) noexcept {
-	return Initial ::deepPreUpdate(				control);
+OS_<TN_, TA_, NP_, TI_>::widePreUpdate(FullControl& control) noexcept {
+	return Initial::deepPreUpdate(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN, TA, NI, TI>::wideUpdate(FullControl& control) noexcept {
-	return Initial ::deepUpdate(			 control);
+OS_<TN_, TA_, NP_, TI_>::wideUpdate(FullControl& control) noexcept {
+	return Initial::deepUpdate(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN, TA, NI, TI>::widePostUpdate(FullControl& control) noexcept {
-	return Initial ::deepPostUpdate(			 control);
+OS_<TN_, TA_, NP_, TI_>::widePostUpdate(FullControl& control) noexcept {
+	return Initial::deepPostUpdate(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN, TA, NI, TI>::widePreReact(FullControl& control,
-								  const TEvent& event) noexcept
+OS_<TN_, TA_, NP_, TI_>::widePreReact(FullControl& control,
+									  const TEvent& event) noexcept
 {
-	return Initial ::deepPreReact(			   control, event);
+	return Initial::deepPreReact(control, event);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN, TA, NI, TI>::wideReact(FullControl& control,
-							   const TEvent& event) noexcept
-{
-	return Initial ::deepReact(				control, event);
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TN, typename TA, Short NI, typename TI>
-template <typename TEvent>
-HFSM2_CONSTEXPR(14)
-TaskStatus
-OS_<TN, TA, NI, TI>::widePostReact(FullControl& control,
+OS_<TN_, TA_, NP_, TI_>::wideReact(FullControl& control,
 								   const TEvent& event) noexcept
 {
-	return Initial ::deepPostReact(				control, event);
+	return Initial::deepReact(control, event);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
+template <typename TEvent>
+HFSM2_CONSTEXPR(14)
+TaskStatus
+OS_<TN_, TA_, NP_, TI_>::widePostReact(FullControl& control,
+									   const TEvent& event) noexcept
+{
+	return Initial::deepPostReact(control, event);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideQuery(ConstControl& control,
-							   TEvent& event) const noexcept
+OS_<TN_, TA_, NP_, TI_>::wideQuery(ConstControl& control,
+								   TEvent& event) const noexcept
 {
-	Initial		   ::wideQuery(				 control, event);
+	Initial::deepQuery(control, event);
 }
 
 //------------------------------------------------------------------------------
 
 #if HFSM2_PLANS_AVAILABLE()
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN, TA, NI, TI>::wideUpdatePlans(FullControl& control) noexcept {
-	return Initial ::deepUpdatePlans(			  control);
+OS_<TN_, TA_, NP_, TI_>::wideUpdatePlans(FullControl& control) noexcept {
+	return Initial::deepUpdatePlans(control);
 }
 
 #endif
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control,
-										  const ProngCBits prongs) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideForwardExitGuard(GuardControl& control,
+											  const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial	   ::deepForwardExitGuard(				control) : false;
+		Initial::deepForwardExitGuard(control) : false;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI>::wideForwardExitGuard(GuardControl& control) noexcept {
-	return Initial ::deepForwardExitGuard(				control);
+OS_<TN_, TA_, NP_, TI_>::wideForwardExitGuard(GuardControl& control) noexcept {
+	return Initial::deepForwardExitGuard(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 bool
-OS_<TN, TA, NI, TI>::wideExitGuard(GuardControl& control) noexcept {
-	return Initial ::deepExitGuard(				 control);
+OS_<TN_, TA_, NP_, TI_>::wideExitGuard(GuardControl& control) noexcept {
+	return Initial::deepExitGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideExit(PlanControl& control) noexcept {
-	Initial		   ::deepExit(			   control);
+OS_<TN_, TA_, NP_, TI_>::wideExit(PlanControl& control) noexcept {
+	Initial::deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideForwardActive(Control& control,
-									   const Request request,
-									   const ProngCBits prongs) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideForwardActive(Control& control,
+										   const Request request,
+										   const ProngCBits prongs) noexcept
 {
 	if (prongs.get(PRONG_INDEX))
-		Initial	   ::deepForwardActive(			control, request);
+		Initial::deepForwardActive(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideForwardRequest(Control& control,
-										const Request request) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideForwardRequest(Control& control,
+											const Request request) noexcept
 {
-	Initial		   ::deepForwardRequest(		 control, request);
+	Initial::deepForwardRequest(control, request);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideRequestChange(Control& control,
-									   const Request request) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideRequestChange(Control& control,
+										   const Request request) noexcept
 {
-	Initial		   ::deepRequestChange(			control, request);
+	Initial::deepRequestChange(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideRequestRestart(Control& control,
-										const Request request) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideRequestRestart(Control& control,
+											const Request request) noexcept
 {
-	Initial		   ::deepRequestRestart(		 control, request);
+	Initial::deepRequestRestart(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideRequestResume(Control& control,
-									   const Request request) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideRequestResume(Control& control,
+										   const Request request) noexcept
 {
-	Initial		   ::deepRequestResume(			control, request);
+	Initial::deepRequestResume(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideRequestSelect(Control& control,
-									   const Request request) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideRequestSelect(Control& control,
+										   const Request request) noexcept
 {
-	Initial		   ::deepRequestSelect(			control, request);
+	Initial::deepRequestSelect(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideRequestUtilize(Control& control,
-										const Request request) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideRequestUtilize(Control& control,
+											const Request request) noexcept
 {
-	Initial		   ::deepRequestUtilize(		 control, request);
+	Initial::deepRequestUtilize(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideRequestRandomize(Control& control,
-										  const Request request) noexcept
+OS_<TN_, TA_, NP_, TI_>::wideRequestRandomize(Control& control,
+											  const Request request) noexcept
 {
-	Initial		   ::deepRequestRandomize(		   control, request);
+	Initial::deepRequestRandomize(control, request);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-OS_<TN, TA, NI, TI>::wideReportChange(Control& control) noexcept {
+typename TA_::Utility
+OS_<TN_, TA_, NP_, TI_>::wideReportChange(Control& control) noexcept {
 	const UP i = Initial::deepReportChange(control);
 
 	return i.utility;
@@ -292,10 +292,10 @@ OS_<TN, TA, NI, TI>::wideReportChange(Control& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-OS_<TN, TA, NI, TI>::wideReportUtilize(Control& control) noexcept {
+typename TA_::Utility
+OS_<TN_, TA_, NP_, TI_>::wideReportUtilize(Control& control) noexcept {
 	const UP i = Initial::deepReportUtilize(control);
 
 	return i.utility;
@@ -303,10 +303,10 @@ OS_<TN, TA, NI, TI>::wideReportUtilize(Control& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-OS_<TN, TA, NI, TI>::wideReportRandomize(Control& control) noexcept {
+typename TA_::Utility
+OS_<TN_, TA_, NP_, TI_>::wideReportRandomize(Control& control) noexcept {
 	return Initial::deepReportRandomize(control);
 }
 
@@ -314,57 +314,57 @@ OS_<TN, TA, NI, TI>::wideReportRandomize(Control& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideChangeToRequested(PlanControl& control) noexcept {
-	Initial		   ::deepChangeToRequested(				control);
+OS_<TN_, TA_, NP_, TI_>::wideChangeToRequested(PlanControl& control) noexcept {
+	Initial::deepChangeToRequested(control);
 }
 
 //------------------------------------------------------------------------------
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideSaveActive(const Registry& registry,
-									WriteStream& stream) const noexcept
+OS_<TN_, TA_, NP_, TI_>::wideSaveActive(const Registry& registry,
+										WriteStream& stream) const noexcept
 {
-	Initial		   ::deepSaveActive(				registry, stream);
+	Initial::deepSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideSaveResumable(const Registry& registry,
-									   WriteStream& stream) const noexcept
+OS_<TN_, TA_, NP_, TI_>::wideSaveResumable(const Registry& registry,
+										   WriteStream& stream) const noexcept
 {
-	Initial		   ::deepSaveResumable(				   registry, stream);
+	Initial::deepSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideLoadRequested(Registry& registry,
-									   ReadStream& stream) const noexcept
+OS_<TN_, TA_, NP_, TI_>::wideLoadRequested(Registry& registry,
+										   ReadStream& stream) const noexcept
 {
-	Initial		   ::deepLoadRequested(			 registry, stream);
+	Initial::deepLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
-									   ReadStream& stream) const noexcept
+OS_<TN_, TA_, NP_, TI_>::wideLoadResumable(Registry& registry,
+										   ReadStream& stream) const noexcept
 {
-	Initial		   ::deepLoadResumable(			 registry, stream);
+	Initial::deepLoadResumable(registry, stream);
 }
 
 #endif
@@ -373,14 +373,14 @@ OS_<TN, TA, NI, TI>::wideLoadResumable(Registry& registry,
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
-template <typename TN, typename TA, Short NI, typename TI>
+template <typename TN_, typename TA_, Prong NP_, typename TI_>
 HFSM2_CONSTEXPR(14)
 void
-OS_<TN, TA, NI, TI>::wideGetNames(const Long parent,
-								  const Short depth,
-								  StructureStateInfos& stateInfos) const noexcept
+OS_<TN_, TA_, NP_, TI_>::wideGetNames(const Long parent,
+									  const Short depth,
+									  StructureStateInfos& stateInfos) const noexcept
 {
-	Initial		   ::deepGetNames(parent, StructureStateInfo::RegionType::ORTHOGONAL, depth, stateInfos);
+	Initial::deepGetNames(parent, RegionType::ORTHOGONAL, depth, stateInfos);
 }
 
 #endif

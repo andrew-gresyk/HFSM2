@@ -186,13 +186,13 @@ TEST_CASE("Wiki.Plans.Detailed Demo") {
             REQUIRE(plan);
 
             // inspect the plan
-            auto taskIterator = plan.first();
+            auto taskIterator = plan.begin();
             REQUIRE(taskIterator);
             REQUIRE(taskIterator->origin == stateId<ReplanTask>());
             REQUIRE(taskIterator->destination == stateId<End>());
 
             // loop over plan task sequence
-            for (auto it = plan.first(); it; ++it) {
+            for (auto it = plan.begin(); it; ++it) {
                 if (it->destination == stateId<End>())
                     // and remove task links
                     it.remove();

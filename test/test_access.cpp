@@ -76,9 +76,9 @@ struct B_2_2 : FSM::State { const hfsm2::StateID id = FSM::stateId<B_2_2>(); };
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////

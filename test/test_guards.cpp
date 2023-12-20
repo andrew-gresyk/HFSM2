@@ -104,7 +104,7 @@ struct Step1
 			break;
 
 		default:
-			HFSM2_BREAK();
+			assert(false);
 		}
 
 		if (exitGuardCount() == 1)
@@ -140,7 +140,7 @@ struct Step1_1
 			break;
 
 		default:
-			HFSM2_BREAK();
+			assert(false);
 		}
 
 		if (exitGuardCount() == 1)
@@ -176,7 +176,7 @@ struct Step1_2
 			break;
 
 		default:
-			HFSM2_BREAK();
+			assert(false);
 		}
 
 		if (exitGuardCount() == 2)
@@ -246,9 +246,9 @@ struct Step3 : FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 8, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  == 3, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS == 1, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 == 1, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 3, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS == 2, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 == 2, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   == 2, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////

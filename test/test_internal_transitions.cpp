@@ -283,9 +283,9 @@ struct B_2_2
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -322,10 +322,10 @@ TEST_CASE("FSM.Internal Transition") {
 			});
 
 			REQUIRE(machine.activeSubState<A  >() == 0);
-			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_PRONG);
 
 			assertActive(machine, all, {
 				FSM::stateId<A    >(),
@@ -385,9 +385,9 @@ TEST_CASE("FSM.Internal Transition") {
 
 			REQUIRE(machine.activeSubState<A  >() == 1);
 			REQUIRE(machine.activeSubState<A_2>() == 0);
-			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_PRONG);
 
 			assertActive(machine, all, {
 				FSM::stateId<A    >(),
@@ -476,9 +476,9 @@ TEST_CASE("FSM.Internal Transition") {
 				{ FSM::stateId<B_2_2>(), Event::Type::ENTER },
 			});
 
-			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_PRONG);
 			REQUIRE(machine.activeSubState<B_1>() == 0);
 			REQUIRE(machine.activeSubState<B_2>() == 1);
 
@@ -593,9 +593,9 @@ TEST_CASE("FSM.Internal Transition") {
 
 			REQUIRE(machine.activeSubState<A  >() == 1);
 			REQUIRE(machine.activeSubState<A_2>() == 0);
-			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_PRONG);
 
 			assertActive(machine, all, {
 				FSM::stateId<A    >(),
@@ -658,9 +658,9 @@ TEST_CASE("FSM.Internal Transition") {
 				{ FSM::stateId<B_2_2>(), Event::Type::ENTER },
 			});
 
-			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_PRONG);
 			REQUIRE(machine.activeSubState<B_1>() == 0);
 			REQUIRE(machine.activeSubState<B_2>() == 1);
 
@@ -729,9 +729,9 @@ TEST_CASE("FSM.Internal Transition") {
 				{ FSM::stateId<B_2_2>(), Event::Type::REENTER },
 			});
 
-			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<A  >() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<A_2>() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_PRONG);
 			REQUIRE(machine.activeSubState<B_1>() == 0);
 			REQUIRE(machine.activeSubState<B_2>() == 1);
 
@@ -801,9 +801,9 @@ TEST_CASE("FSM.Internal Transition") {
 
 			REQUIRE(machine.activeSubState<A  >() == 1);
 			REQUIRE(machine.activeSubState<A_2>() == 1);
-			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_SHORT);
-			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_SHORT);
+			REQUIRE(machine.activeSubState<B  >() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B_1>() == hfsm2::INVALID_PRONG);
+			REQUIRE(machine.activeSubState<B_2>() == hfsm2::INVALID_PRONG);
 
 			assertActive(machine, all, {
 				FSM::stateId<A    >(),

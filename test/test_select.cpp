@@ -92,9 +92,9 @@ struct C_4 : FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 15, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  4, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  3, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  3, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 12, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////

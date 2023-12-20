@@ -75,9 +75,9 @@ struct O2_C2_S2 : FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  3, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  3, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  ==  6, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  3, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  3, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  3, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////

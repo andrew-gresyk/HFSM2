@@ -3,10 +3,10 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepRegister(Registry& registry,
+O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
 										const Parent parent) noexcept
 {
 	registry.orthoParents[ORTHO_INDEX] = parent;
@@ -19,10 +19,10 @@ O_<TN, TA, TH, TS...>::deepRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepForwardEntryGuard(GuardControl& control) noexcept {
 	const ProngCBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -35,10 +35,10 @@ O_<TN, TA, TH, TS...>::deepForwardEntryGuard(GuardControl& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return HeadState::deepEntryGuard(control) ||
@@ -47,10 +47,10 @@ O_<TN, TA, TH, TS...>::deepEntryGuard(GuardControl& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepEnter(PlanControl& control) noexcept {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
@@ -62,10 +62,10 @@ O_<TN, TA, TH, TS...>::deepEnter(PlanControl& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepReenter(PlanControl& control) noexcept {
 	ProngBits requested = orthoRequested(control);
 	requested.clear();
 
@@ -77,17 +77,17 @@ O_<TN, TA, TH, TS...>::deepReenter(PlanControl& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN, TA, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepPreUpdate(FullControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	const TaskStatus h =
 		HeadState::deepPreUpdate(control);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
+	HFSM2_IF_PLANS(headStatus	(control) |= h);
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
+	HFSM2_IF_PLANS(subStatus	(control) |=)
 		SubStates::widePreUpdate(control);
 
 	return h;
@@ -95,17 +95,17 @@ O_<TN, TA, TH, TS...>::deepPreUpdate(FullControl& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepUpdate(FullControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	const TaskStatus h =
 		HeadState::deepUpdate(control);
 	HFSM2_IF_PLANS(headStatus(control) |= h);
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
+	HFSM2_IF_PLANS(subStatus (control) |=)
 		SubStates::wideUpdate(control);
 
 	return h;
@@ -113,30 +113,30 @@ O_<TN, TA, TH, TS...>::deepUpdate(FullControl& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN, TA, TH, TS...>::deepPostUpdate(FullControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepPostUpdate(FullControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
+	HFSM2_IF_PLANS(subStatus	 (control) |=)
 		SubStates::widePostUpdate(control);
 
 	const TaskStatus h =
 		HeadState::deepPostUpdate(control);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
+	HFSM2_IF_PLANS(headStatus	 (control) |= h);
 
 	return h;
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN, TA, TH, TS...>::deepPreReact(FullControl& control,
-									const TEvent& event) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepPreReact(FullControl& control,
+										const TEvent& event) noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -152,12 +152,12 @@ O_<TN, TA, TH, TS...>::deepPreReact(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
-								 const TEvent& event) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepReact(FullControl& control,
+									 const TEvent& event) noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -173,12 +173,12 @@ O_<TN, TA, TH, TS...>::deepReact(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN, TA, TH, TS...>::deepPostReact(FullControl& control,
-									 const TEvent& event) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepPostReact(FullControl& control,
+										 const TEvent& event) noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -194,12 +194,12 @@ O_<TN, TA, TH, TS...>::deepPostReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepQuery(ConstControl& control,
-								 TEvent& event) const noexcept
+O_<TN_, TA_, TH_, TS_...>::deepQuery(ConstControl& control,
+									 TEvent& event) const noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
@@ -210,10 +210,10 @@ O_<TN, TA, TH, TS...>::deepQuery(ConstControl& control,
 
 #if HFSM2_PLANS_AVAILABLE()
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN, TA, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepUpdatePlans(FullControl& control) noexcept {
 	const TaskStatus h = headStatus(control) |
 		HeadState::deepUpdatePlans (control);
 
@@ -239,10 +239,10 @@ O_<TN, TA, TH, TS...>::deepUpdatePlans(FullControl& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepForwardExitGuard(GuardControl& control) noexcept {
 	const ProngCBits requested = orthoRequested(static_cast<const GuardControl&>(control));
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
@@ -255,10 +255,10 @@ O_<TN, TA, TH, TS...>::deepForwardExitGuard(GuardControl& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
 	return HeadState::deepExitGuard(control) ||
@@ -267,21 +267,21 @@ O_<TN, TA, TH, TS...>::deepExitGuard(GuardControl& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepExit(PlanControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepExit(PlanControl& control) noexcept {
 	SubStates::wideExit(control);
 	HeadState::deepExit(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
-										 const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepForwardActive(Control& control,
+											 const Request request) noexcept
 {
 	HFSM2_ASSERT(control._core.registry.isActive(HEAD_ID));
 
@@ -293,11 +293,11 @@ O_<TN, TA, TH, TS...>::deepForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
-										  const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepForwardRequest(Control& control,
+											  const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
@@ -311,11 +311,11 @@ O_<TN, TA, TH, TS...>::deepForwardRequest(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepRequest(Control& control,
-								   const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepRequest(Control& control,
+									   const Request request) noexcept
 {
 	switch (request.type) {
 	case TransitionType::CHANGE:
@@ -353,11 +353,11 @@ O_<TN, TA, TH, TS...>::deepRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepRequestChange(Control& control,
-										 const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepRequestChange(Control& control,
+											 const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
@@ -366,11 +366,11 @@ O_<TN, TA, TH, TS...>::deepRequestChange(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepRequestRestart(Control& control,
-										  const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepRequestRestart(Control& control,
+											  const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
@@ -379,11 +379,11 @@ O_<TN, TA, TH, TS...>::deepRequestRestart(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepRequestResume(Control& control,
-										 const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepRequestResume(Control& control,
+											 const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
@@ -392,11 +392,11 @@ O_<TN, TA, TH, TS...>::deepRequestResume(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepRequestSelect(Control& control,
-										 const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepRequestSelect(Control& control,
+											 const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
@@ -407,11 +407,11 @@ O_<TN, TA, TH, TS...>::deepRequestSelect(Control& control,
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control,
-										  const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepRequestUtilize(Control& control,
+											  const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
@@ -420,11 +420,11 @@ O_<TN, TA, TH, TS...>::deepRequestUtilize(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepRequestRandomize(Control& control,
-											const Request request) noexcept
+O_<TN_, TA_, TH_, TS_...>::deepRequestRandomize(Control& control,
+												const Request request) noexcept
 {
 	HFSM2_IF_TRANSITION_HISTORY(control.pinLastTransition(HEAD_ID, request.index));
 
@@ -433,16 +433,16 @@ O_<TN, TA, TH, TS...>::deepRequestRandomize(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-O_<TN, TA, TH, TS...>::deepReportChange(Control& control) noexcept {
+typename TA_::UP
+O_<TN_, TA_, TH_, TS_...>::deepReportChange(Control& control) noexcept {
 	const UP	  h = HeadState::deepReportChange(control);
 	const Utility s = SubStates::wideReportChange(control);
 
 	const Utility sub = s / WIDTH;
 
-	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_SHORT, sub);
 
 	return {
 		h.utility * sub,
@@ -452,16 +452,16 @@ O_<TN, TA, TH, TS...>::deepReportChange(Control& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) noexcept {
+typename TA_::UP
+O_<TN_, TA_, TH_, TS_...>::deepReportUtilize(Control& control) noexcept {
 	const UP	  h = HeadState::deepReportUtilize(control);
 	const Utility s = SubStates::wideReportUtilize(control);
 
 	const Utility sub = s / WIDTH;
 
-	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_UTILITY_RESOLUTION(control.context(), HEAD_ID, INVALID_SHORT, sub);
 
 	return {
 		h.utility * sub,
@@ -471,25 +471,25 @@ O_<TN, TA, TH, TS...>::deepReportUtilize(Control& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::Rank
-O_<TN, TA, TH, TS...>::deepReportRank(Control& control) noexcept {
+typename TA_::Rank
+O_<TN_, TA_, TH_, TS_...>::deepReportRank(Control& control) noexcept {
 	return HeadState::wrapRank(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) noexcept {
+typename TA_::Utility
+O_<TN_, TA_, TH_, TS_...>::deepReportRandomize(Control& control) noexcept {
 	const Utility h = HeadState::wrapUtility(control);
 	const Utility s = SubStates::wideReportRandomize(control);
 
 	const Utility sub = s / WIDTH;
 
-	HFSM2_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, INVALID_STATE_ID, sub);
+	HFSM2_LOG_RANDOM_RESOLUTION(control.context(), HEAD_ID, INVALID_SHORT, sub);
 
 	return h * sub;
 }
@@ -498,10 +498,10 @@ O_<TN, TA, TH, TS...>::deepReportRandomize(Control& control) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept {
+O_<TN_, TA_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) noexcept {
 	SubStates::wideChangeToRequested(control);
 }
 
@@ -509,44 +509,44 @@ O_<TN, TA, TH, TS...>::deepChangeToRequested(PlanControl& control) noexcept {
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepSaveActive(const Registry& registry,
-									  WriteStream& stream) const noexcept
+O_<TN_, TA_, TH_, TS_...>::deepSaveActive(const Registry& registry,
+										  WriteStream& stream) const noexcept
 {
 	SubStates::wideSaveActive(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepSaveResumable(const Registry& registry,
-										 WriteStream& stream) const noexcept
+O_<TN_, TA_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
+											 WriteStream& stream) const noexcept
 {
 	SubStates::wideSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepLoadRequested(Registry& registry,
-										 ReadStream& stream) const noexcept
+O_<TN_, TA_, TH_, TS_...>::deepLoadRequested(Registry& registry,
+											 ReadStream& stream) const noexcept
 {
 	SubStates::wideLoadRequested(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
-										 ReadStream& stream) const noexcept
+O_<TN_, TA_, TH_, TS_...>::deepLoadResumable(Registry& registry,
+											 ReadStream& stream) const noexcept
 {
 	SubStates::wideLoadResumable(registry, stream);
 }
@@ -557,13 +557,13 @@ O_<TN, TA, TH, TS...>::deepLoadResumable(Registry& registry,
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
-template <typename TN, typename TA, typename TH, typename... TS>
+template <typename TN_, typename TA_, typename TH_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-O_<TN, TA, TH, TS...>::deepGetNames(const Long parent,
-									const RegionType region,
-									const Short depth,
-									StructureStateInfos& stateInfos) const noexcept
+O_<TN_, TA_, TH_, TS_...>::deepGetNames(const Long parent,
+										const RegionType region,
+										const Short depth,
+										StructureStateInfos& stateInfos) const noexcept
 {
 	HeadState::deepGetNames(parent, region,			depth,	   stateInfos);
 	SubStates::wideGetNames(stateInfos.count() - 1, depth + 1, stateInfos);

@@ -11,7 +11,7 @@ public:
 	using Index		= typename Container::Index;
 
 	template <typename, Long>
-	friend class ArrayT;
+	friend class DynamicArrayT;
 
 private:
 	HFSM2_CONSTEXPR(11)	IteratorT(Container& container,
@@ -55,7 +55,7 @@ public:
 	using Index		= typename Container::Index;
 
 	template <typename, Long>
-	friend class ArrayT;
+	friend class DynamicArrayT;
 
 private:
 	HFSM2_CONSTEXPR(11)	IteratorT(const Container& container,

@@ -11,24 +11,18 @@ HFSM2_CONSTEXPR(14)	double uniform(const uint64_t uint)					noexcept;
 ////////////////////////////////////////////////////////////////////////////////
 
 template <unsigned>
-class SimpleRandomT;
+struct SimpleRandomT;
 
 //------------------------------------------------------------------------------
 // SplitMix64 (http://xoshiro.di.unimi.it/splitmix64.c)
 
 template <>
-class SimpleRandomT<8> {
-public:
-	constexpr SimpleRandomT()											noexcept	{}
-
+struct SimpleRandomT<8> {
+	HFSM2_CONSTEXPR(11) SimpleRandomT()									noexcept	{}
 	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint64_t seed)				noexcept;
 
 	HFSM2_CONSTEXPR(14)	uint64_t uint64()								noexcept;
-
-private:
 	HFSM2_CONSTEXPR(14)	uint64_t raw64()								noexcept;
-
-private:
 
 	uint64_t _state = 0;
 };
@@ -37,18 +31,13 @@ private:
 // SplitMix32 (https://groups.google.com/forum/#!topic/prng/VFjdFmbMgZI)
 
 template <>
-class SimpleRandomT<4> {
-public:
+struct SimpleRandomT<4> {
 	HFSM2_CONSTEXPR(11)	SimpleRandomT()									noexcept	{}
-
 	HFSM2_CONSTEXPR(14)	SimpleRandomT(const uint32_t seed)				noexcept;
 
 	HFSM2_CONSTEXPR(14)	uint32_t uint32()								noexcept;
-
-private:
 	HFSM2_CONSTEXPR(14)	uint32_t raw32()								noexcept;
 
-private:
 	uint32_t _state = 0;
 };
 
@@ -78,7 +67,7 @@ public:
 	HFSM2_CONSTEXPR(14)	void seed(const uint64_t(& s)[4])				noexcept;
 
 protected:
-	uint64_t _state[4];
+	uint64_t _state[4] {};
 };
 
 //------------------------------------------------------------------------------
@@ -102,7 +91,7 @@ public:
 	HFSM2_CONSTEXPR(14)	void seed(const uint32_t(& s)[4])				noexcept;
 
 protected:
-	uint32_t _state[4];
+	uint32_t _state[4] {};
 };
 
 ////////////////////////////////////////////////////////////////////////////////

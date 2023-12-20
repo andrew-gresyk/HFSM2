@@ -103,8 +103,8 @@ struct FindImpl
 {};
 
 template<Long N, typename T, typename TFirst, typename... TRest>
-struct FindImpl<N, T, TFirst, TRest...>
-	: FindImpl<N + 1, T, TRest...>
+struct FindImpl<N	 , T, TFirst, TRest...>
+	:  FindImpl<N + 1, T,		  TRest...>
 {};
 
 template<Long N, typename T, typename... Ts>

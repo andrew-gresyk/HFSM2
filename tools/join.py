@@ -2,20 +2,20 @@ import re
 
 #===============================================================================
 
-def merge(folder, path, included, commentRE, output):
+def merge(path, folder, lastLineEmpty, included, output, commentRE):
 	pathTokens = path.split("/")
 
 	current = folder + "/" + pathTokens[-1]
 	with open(current, 'r', encoding='utf-8') as input:
-		lastLineEmpty = False
-
-		if included:
+		if not lastLineEmpty:
 			output.write("\n")
 			lastLineEmpty = True
 
 		for line in input:
-			if line.startswith('#include "'):
-				next = line[10 : -2]
+			hashIndex = line.find('#include "')
+
+			if hashIndex != -1:
+				next = line[hashIndex + 10 : -2]
 
 				if next not in included:
 					nextTokens = next.split("/")
@@ -24,10 +24,11 @@ def merge(folder, path, included, commentRE, output):
 					#output.write("// inlined '" + pathTokens[-1] + "' -> '" + nextTokens[-1] + "'\n")
 
 					if len(nextTokens) == 1:
-						merge(folder, next, included, commentRE, output)
+						lastLineEmpty = merge(next, folder,    lastLineEmpty, included, output, commentRE)
 					else:
 						name = nextTokens.pop()
-						merge(folder + "/" + "/".join(nextTokens), name, included, commentRE, output)
+						subFolder = folder + "/" + "/".join(nextTokens)
+						lastLineEmpty = merge(name, subFolder, lastLineEmpty, included, output, commentRE)
 
 			else:
 				if line.startswith('\ufeff'):
@@ -46,14 +47,14 @@ def merge(folder, path, included, commentRE, output):
 
 				output.write(line)
 
+	return lastLineEmpty
+
 #-------------------------------------------------------------------------------
 
-output = open("../include/hfsm2/machine.hpp", 'w', encoding='utf-8-sig')
-included = []
 commentRE = re.compile("(?:\s*\/\/ COMMON)|(?:\s*\/\/ SPECIFIC)|(?:\s*\/\/\/\/)|(?:\s*\/\/--)|(?:\s*\/\/ -)")
 
-merge("../development/hfsm2", "machine_dev.hpp", included, commentRE, output)
-
+output = open("../include/hfsm2/machine.hpp"	 , 'w', encoding='utf-8-sig')
+merge("machine_dev.hpp"		, "../development/hfsm2", True, [], output, commentRE)
 output.close()
 
 #===============================================================================
