@@ -3,11 +3,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideRegister(Registry& registry,
-											  const Parent parent) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideRegister(Registry& registry,
+												   const Parent parent) noexcept
 {
 	LHalf::wideRegister(registry, Parent{parent.forkId, L_PRONG});
 	RHalf::wideRegister(registry, Parent{parent.forkId, R_PRONG});
@@ -15,11 +15,11 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRegister(Registry& registry,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideForwardEntryGuard(GuardControl& control,
-													   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideForwardEntryGuard(GuardControl& control,
+															const Prong prong) noexcept
 {
 	HFSM2_ASSERT(prong != INVALID_SHORT);
 
@@ -32,13 +32,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideForwardEntryGuard(GuardControl& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // COMMON
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideEntryGuard(GuardControl& control,
-												const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideEntryGuard(GuardControl& control,
+													 const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		return LHalf::wideEntryGuard(control, prong);
@@ -48,13 +48,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideEntryGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideEnter(PlanControl& control,
-										   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideEnter(PlanControl& control,
+												const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideEnter(control, prong);
@@ -64,13 +64,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideEnter(PlanControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReenter(PlanControl& control,
-											 const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReenter(PlanControl& control,
+												  const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideReenter(control, prong);
@@ -80,13 +80,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReenter(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<TS...>>::widePreUpdate(FullControl& control,
-											   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::widePreUpdate(FullControl& control,
+													const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	return prong < R_PRONG ?
 		LHalf::widePreUpdate(control, prong) :
@@ -95,13 +95,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::widePreUpdate(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
-											const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideUpdate(FullControl& control,
+												 const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	return prong < R_PRONG ?
 		LHalf::wideUpdate(control, prong) :
@@ -110,13 +110,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdate(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<TS...>>::widePostUpdate(FullControl& control,
-												const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::widePostUpdate(FullControl& control,
+													 const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	return prong < R_PRONG ?
 		LHalf::widePostUpdate(control, prong) :
@@ -125,15 +125,15 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::widePostUpdate(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<TS...>>::widePreReact(FullControl& control,
-											  const TEvent& event,
-											  const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::widePreReact(FullControl& control,
+												   const TEvent& event,
+												   const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	return prong < R_PRONG ?
 		LHalf::widePreReact(control, event, prong) :
@@ -142,15 +142,15 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::widePreReact(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReact(FullControl& control,
-										   const TEvent& event,
-										   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReact(FullControl& control,
+												const TEvent& event,
+												const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	return prong < R_PRONG ?
 		LHalf::wideReact(control, event, prong) :
@@ -159,15 +159,15 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReact(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<TS...>>::widePostReact(FullControl& control,
-											   const TEvent& event,
-											   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::widePostReact(FullControl& control,
+													const TEvent& event,
+													const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	return prong < R_PRONG ?
 		LHalf::widePostReact(control, event, prong) :
@@ -176,15 +176,15 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::widePostReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideQuery(ConstControl& control,
-										   TEvent& event,
-										   const Short prong) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideQuery(ConstControl& control,
+												TEvent& event,
+												const Prong prong) const noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	return prong < R_PRONG ?
 		LHalf::wideQuery(control, event, prong) :
@@ -195,13 +195,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideQuery(ConstControl& control,
 
 #if HFSM2_PLANS_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdatePlans(FullControl& control,
-												 const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideUpdatePlans(FullControl& control,
+													  const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	return prong < R_PRONG ?
 		LHalf::wideUpdatePlans(control, prong) :
@@ -212,13 +212,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideUpdatePlans(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideForwardExitGuard(GuardControl& control,
-													  const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideForwardExitGuard(GuardControl& control,
+														   const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		return LHalf::wideForwardExitGuard(control, prong);
@@ -229,13 +229,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideForwardExitGuard(GuardControl& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // COMMON
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 bool
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideExitGuard(GuardControl& control,
-											   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideExitGuard(GuardControl& control,
+													const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		return LHalf::wideExitGuard(control, prong);
@@ -245,13 +245,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideExitGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideExit(PlanControl& control,
-										  const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideExit(PlanControl& control,
+											   const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideExit(control, prong);
@@ -261,14 +261,14 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideExit(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideForwardActive(Control& control,
-												   const Request request,
-												   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideForwardActive(Control& control,
+														const Request request,
+														const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideForwardActive(control, request, prong);
@@ -278,14 +278,14 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideForwardRequest(Control& control,
-													const Request request,
-													const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideForwardRequest(Control& control,
+														 const Request request,
+														 const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideForwardRequest(control, request, prong);
@@ -295,25 +295,25 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeComposite(Control& control,
-															const Request request) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideRequestChangeComposite(Control& control,
+																 const Request request) noexcept
 {
 	LHalf::wideRequestChangeComposite(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeResumable(Control& control,
-															const Request request,
-															const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideRequestChangeResumable(Control& control,
+																 const Request request,
+																 const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideRequestChangeResumable(control, request, prong);
@@ -323,14 +323,14 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeResumable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeSelectable(Control& control,
-															 const Request request,
-															 const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideRequestChangeSelectable(Control& control,
+																  const Request request,
+																  const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideRequestChangeSelectable(control, request, prong);
@@ -340,25 +340,25 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestChangeSelectable(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestRestart(Control& control,
-													const Request request) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideRequestRestart(Control& control,
+														 const Request request) noexcept
 {
 	LHalf::wideRequestRestart(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestResume(Control& control,
-												   const Request request,
-												   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideRequestResume(Control& control,
+														const Request request,
+														const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideRequestResume(control, request, prong);
@@ -368,14 +368,14 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestResume(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestSelect(Control& control,
-												   const Request request,
-												   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideRequestSelect(Control& control,
+														const Request request,
+														const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideRequestSelect(control, request, prong);
@@ -387,10 +387,10 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideRequestSelect(Control& control,
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportUtilize(Control& control) noexcept {
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReportUtilize(Control& control) noexcept {
 	const UP l = LHalf::wideReportUtilize(control);
 	const UP r = RHalf::wideReportUtilize(control);
 
@@ -400,57 +400,57 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportUtilize(Control& control) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::Rank
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportRank(Control& control,
-												Rank* const ranks) noexcept
+typename TA_::Rank
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReportRank(Control& control,
+													 Rank* const ranks) noexcept
 {
 	HFSM2_ASSERT(ranks);
 
 	const Rank l = LHalf::wideReportRank(control, ranks);
 	const Rank r = RHalf::wideReportRank(control, ranks + LStateList::SIZE);
 
-	return l >= r?
+	return l >= r ?
 		l : r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportRandomize(Control& control,
-													 Utility* const options,
-													 const Rank* const ranks,
-													 const Rank top) noexcept
+typename TA_::Utility
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReportRandomize(Control& control,
+														  Utility* const utilities,
+														  const Rank* const ranks,
+														  const Rank top) noexcept
 {
-	HFSM2_ASSERT(options && ranks);
+	HFSM2_ASSERT(utilities && ranks);
 
-	const Utility l = LHalf::wideReportRandomize(control, options,					  ranks,					top);
-	const Utility r = RHalf::wideReportRandomize(control, options + LStateList::SIZE, ranks + LStateList::SIZE, top);
+	const Utility l = LHalf::wideReportRandomize(control, utilities,					ranks,					  top);
+	const Utility r = RHalf::wideReportRandomize(control, utilities + LStateList::SIZE, ranks + LStateList::SIZE, top);
 
 	return { l + r };
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeComposite(Control& control) noexcept {
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReportChangeComposite(Control& control) noexcept {
 	return LHalf::wideReportChangeComposite(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeResumable(Control& control,
-														   const Short prong) noexcept
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReportChangeResumable(Control& control,
+																const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		return LHalf::wideReportChangeResumable(control, prong);
@@ -460,13 +460,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeResumable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeSelectable(Control& control,
-															const Short prong) noexcept
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReportChangeSelectable(Control& control,
+																 const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		return LHalf::wideReportChangeSelectable(control, prong);
@@ -476,10 +476,10 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeSelectable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeUtilitarian(Control& control) noexcept {
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReportChangeUtilitarian(Control& control) noexcept {
 	const UP l = LHalf::wideReportChangeUtilitarian(control);
 	const UP r = RHalf::wideReportChangeUtilitarian(control);
 
@@ -489,18 +489,18 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeUtilitarian(Control& control) n
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeRandom(Control& control,
-														Utility* const options,
-														const Rank* const ranks,
-														const Rank top) noexcept
+typename TA_::Utility
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReportChangeRandom(Control& control,
+															 Utility* const utilities,
+															 const Rank* const ranks,
+															 const Rank top) noexcept
 {
-	HFSM2_ASSERT(options && ranks);
+	HFSM2_ASSERT(utilities && ranks);
 
-	const Utility l = LHalf::wideReportChangeRandom(control, options,					 ranks,					   top);
-	const Utility r = RHalf::wideReportChangeRandom(control, options + LStateList::SIZE, ranks + LStateList::SIZE, top);
+	const Utility l = LHalf::wideReportChangeRandom(control, utilities,					   ranks,					 top);
+	const Utility r = RHalf::wideReportChangeRandom(control, utilities + LStateList::SIZE, ranks + LStateList::SIZE, top);
 
 	return { l + r };
 }
@@ -510,13 +510,13 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideReportChangeRandom(Control& control,
 //------------------------------------------------------------------------------
 // COMMON
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideChangeToRequested(PlanControl& control,
-													   const Short prong) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideChangeToRequested(PlanControl& control,
+															const Prong prong) noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG)
 		LHalf::wideChangeToRequested(control, prong);
@@ -528,14 +528,14 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideChangeToRequested(PlanControl& control,
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideSaveActive(const Registry& registry,
-												WriteStream& stream,
-												const Short prong) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideSaveActive(const Registry& registry,
+													 WriteStream& stream,
+													 const Prong prong) const noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG) {
 		LHalf::wideSaveActive   (registry, stream, prong);
@@ -548,11 +548,11 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideSaveActive(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideSaveResumable(const Registry& registry,
-												   WriteStream& stream) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideSaveResumable(const Registry& registry,
+														WriteStream& stream) const noexcept
 {
 	LHalf::wideSaveResumable(registry, stream);
 	RHalf::wideSaveResumable(registry, stream);
@@ -560,14 +560,14 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideSaveResumable(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideLoadRequested(Registry& registry,
-												   ReadStream& stream,
-												   const Short prong) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideLoadRequested(Registry& registry,
+														ReadStream& stream,
+														const Prong prong) const noexcept
 {
-	HFSM2_ASSERT(prong != INVALID_SHORT);
+	HFSM2_ASSERT(prong != INVALID_PRONG);
 
 	if (prong < R_PRONG) {
 		LHalf::wideLoadRequested(registry, stream, prong);
@@ -580,11 +580,11 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideLoadRequested(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideLoadResumable(Registry& registry,
-												   ReadStream& stream) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideLoadResumable(Registry& registry,
+														ReadStream& stream) const noexcept
 {
 	LHalf::wideLoadResumable(registry, stream);
 	RHalf::wideLoadResumable(registry, stream);
@@ -596,16 +596,16 @@ CS_<TN, TA, SG, NI, TL_<TS...>>::wideLoadResumable(Registry& registry,
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename... TS>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<TS...>>::wideGetNames(const Long parent,
-											  const RegionType /*region*/,
-											  const Short depth,
-											  StructureStateInfos& stateInfos) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideGetNames(const Long parent,
+												   const RegionType /*region*/,
+												   const Short depth,
+												   StructureStateInfos& stateInfos) const noexcept
 {
-	LHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
-	RHalf::wideGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
+	LHalf::wideGetNames(parent, RegionType::COMPOSITE, depth, stateInfos);
+	RHalf::wideGetNames(parent, RegionType::COMPOSITE, depth, stateInfos);
 }
 
 #endif

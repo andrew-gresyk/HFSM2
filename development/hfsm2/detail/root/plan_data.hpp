@@ -34,8 +34,6 @@ HFSM2_CONSTEXPR(14) TaskStatus& operator |= (TaskStatus& l, const TaskStatus r)	
 
 #if HFSM2_PLANS_AVAILABLE()
 
-#pragma pack(push, 2)
-
 struct TaskLink final {
 	Long prev		= INVALID_LONG;
 	Long next		= INVALID_LONG;
@@ -48,21 +46,19 @@ struct Bounds final {
 	Long last		= INVALID_LONG;
 };
 
-#pragma pack(pop)
-
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename
-		, typename
-		, typename
-		, typename
-		, Long
-		, Long
-		, Long
-		HFSM2_IF_SERIALIZATION(, Long)
-		, Long
-		, Long
-		, typename>
+template <
+	typename
+  , typename
+  , typename
+  , Long
+  , Long
+  , Long
+  HFSM2_IF_SERIALIZATION(, Long)
+  , Long
+  , typename
+>
 struct ArgsT;
 
 template <typename>
@@ -70,28 +66,30 @@ struct PlanDataT;
 
 //------------------------------------------------------------------------------
 
-template <typename TContext
-		, typename TConfig
-		, typename TStateList
-		, typename TRegionList
-		, Long NCompoCount
-		, Long NOrthoCount
-		, Long NOrthoUnits
-		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-		, Long NSubstitutionLimit
-		, Long NTaskCapacity
-		, typename TPayload>
-struct PlanDataT<ArgsT<TContext
-					 , TConfig
-					 , TStateList
-					 , TRegionList
-					 , NCompoCount
-					 , NOrthoCount
-					 , NOrthoUnits
-					 HFSM2_IF_SERIALIZATION(, NSerialBits)
-					 , NSubstitutionLimit
-					 , NTaskCapacity
-					 , TPayload>> final
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  , Long NTaskCapacity
+  , typename TPayload
+>
+struct PlanDataT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , NCompoCount
+			 , NOrthoCount
+			 , NOrthoUnits
+			 HFSM2_IF_SERIALIZATION(, NSerialBits)
+			 , NTaskCapacity
+			 , TPayload
+		   >
+	   > final
 {
 	using StateList			= TStateList;
 	using RegionList		= TRegionList;
@@ -106,7 +104,7 @@ struct PlanDataT<ArgsT<TContext
 	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
 	using Payloads			= StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds		= ArrayT	  <Bounds,	   REGION_COUNT>;
+	using TasksBounds		= StaticArrayT<Bounds,	   REGION_COUNT>;
 	using TasksBits			= BitArrayT   <				STATE_COUNT>;
 	using RegionBits		= BitArrayT   <			   REGION_COUNT>;
 	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
@@ -137,27 +135,29 @@ struct PlanDataT<ArgsT<TContext
 
 //------------------------------------------------------------------------------
 
-template <typename TContext
-		, typename TConfig
-		, typename TStateList
-		, typename TRegionList
-		, Long NCompoCount
-		, Long NOrthoCount
-		, Long NOrthoUnits
-		HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-		, Long NSubstitutionLimit
-		, Long NTaskCapacity>
-struct PlanDataT<ArgsT<TContext
-					 , TConfig
-					 , TStateList
-					 , TRegionList
-					 , NCompoCount
-					 , NOrthoCount
-					 , NOrthoUnits
-					 HFSM2_IF_SERIALIZATION(, NSerialBits)
-					 , NSubstitutionLimit
-					 , NTaskCapacity
-					 , void>> final
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  , Long NTaskCapacity
+>
+struct PlanDataT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , NCompoCount
+			 , NOrthoCount
+			 , NOrthoUnits
+			 HFSM2_IF_SERIALIZATION(, NSerialBits)
+			 , NTaskCapacity
+			 , void
+		   >
+	   > final
 {
 	using StateList			= TStateList;
 	using RegionList		= TRegionList;
@@ -170,7 +170,7 @@ struct PlanDataT<ArgsT<TContext
 	using Tasks				= TaskListT	  <void,	 TASK_CAPACITY>;
 	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
-	using TasksBounds		= ArrayT	  <Bounds,	   REGION_COUNT>;
+	using TasksBounds		= StaticArrayT<Bounds,	   REGION_COUNT>;
 	using TasksBits			= BitArrayT	  <				STATE_COUNT>;
 	using RegionBits		= BitArrayT	  <			   REGION_COUNT>;
 	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
@@ -199,26 +199,28 @@ struct PlanDataT<ArgsT<TContext
 
 //------------------------------------------------------------------------------
 
-template <typename TContext
-		, typename TConfig
-		, typename TStateList
-		, typename TRegionList
-		, Long NOrthoCount
-		, Long NOrthoUnits
-		, Long NSubstitutionLimit
-		, Long NTaskCapacity
-		, typename TPayload>
-struct PlanDataT<ArgsT<TContext
-					 , TConfig
-					 , TStateList
-					 , TRegionList
-					 , 0
-					 , NOrthoCount
-					 , NOrthoUnits
-					 HFSM2_IF_SERIALIZATION(, 0)
-					 , NSubstitutionLimit
-					 , NTaskCapacity
-					 , TPayload>> final
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  , Long NTaskCapacity
+  , typename TPayload
+>
+struct PlanDataT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , 0
+			 , NOrthoCount
+			 , NOrthoUnits
+			 HFSM2_IF_SERIALIZATION(, 0)
+			 , NTaskCapacity
+			 , TPayload
+		   >
+	   > final
 {
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
@@ -233,25 +235,27 @@ struct PlanDataT<ArgsT<TContext
 
 //------------------------------------------------------------------------------
 
-template <typename TContext
-		, typename TConfig
-		, typename TStateList
-		, typename TRegionList
-		, Long NOrthoCount
-		, Long NOrthoUnits
-		, Long NSubstitutionLimit
-		, Long NTaskCapacity>
-struct PlanDataT<ArgsT<TContext
-					 , TConfig
-					 , TStateList
-					 , TRegionList
-					 , 0
-					 , NOrthoCount
-					 , NOrthoUnits
-					 HFSM2_IF_SERIALIZATION(, 0)
-					 , NSubstitutionLimit
-					 , NTaskCapacity
-					 , void>> final
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  , Long NTaskCapacity
+>
+struct PlanDataT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , 0
+			 , NOrthoCount
+			 , NOrthoUnits
+			 HFSM2_IF_SERIALIZATION(, 0)
+			 , NTaskCapacity
+			 , void
+		   >
+	   > final
 {
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}

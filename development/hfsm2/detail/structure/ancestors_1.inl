@@ -3,134 +3,134 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::wideEntryGuard(GuardControl& control) noexcept {
-	TF		 ::	   entryGuard(				control);
-	A_<TR...>::wideEntryGuard(				control);
+A_<TF_, TR_...>::wideEntryGuard(GuardControl& control) noexcept {
+	First::	   entryGuard(control);
+	Rest ::wideEntryGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::wideEnter(PlanControl& control) noexcept {
-	TF		 ::	   enter(			  control);
-	A_<TR...>::wideEnter(			  control);
+A_<TF_, TR_...>::wideEnter(PlanControl& control) noexcept {
+	First::	   enter(control);
+	Rest ::wideEnter(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::wideReenter(PlanControl& control) noexcept {
-	TF		 ::	   Reenter(				control);
-	A_<TR...>::wideReenter(				control);
+A_<TF_, TR_...>::wideReenter(PlanControl& control) noexcept {
+	First::	   reenter(control);
+	Rest ::wideReenter(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::widePreUpdate(FullControl& control) noexcept {
-	TF		 ::	   preUpdate(			  control);
-	A_<TR...>::widePreUpdate(			  control);
+A_<TF_, TR_...>::widePreUpdate(FullControl& control) noexcept {
+	First::	   preUpdate(control);
+	Rest ::widePreUpdate(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::wideUpdate(FullControl& control) noexcept {
-	TF		 ::	   update(			   control);
-	A_<TR...>::wideUpdate(			   control);
+A_<TF_, TR_...>::wideUpdate(FullControl& control) noexcept {
+	First::	   update(control);
+	Rest ::wideUpdate(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::widePostUpdate(FullControl& control) noexcept {
-	A_<TR...>::widePostUpdate(			   control);
-	TF		 ::	   postUpdate(			   control);
+A_<TF_, TR_...>::widePostUpdate(FullControl& control) noexcept {
+	Rest ::widePostUpdate(control);
+	First::	   postUpdate(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::widePreReact(const TEvent& event,
-							FullControl& control) noexcept
+A_<TF_, TR_...>::widePreReact(const TEvent& event,
+							  FullControl& control) noexcept
 {
-	TF		 ::	   preReact(			  event, control);
-	A_<TR...>::widePreReact(			  event, control);
+	First::	   preReact(event, control);
+	Rest ::widePreReact(event, control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::wideReact(const TEvent& event,
-						 FullControl& control) noexcept
+A_<TF_, TR_...>::wideReact(const TEvent& event,
+						   FullControl& control) noexcept
 {
-	TF		 ::	   react(			   event, control);
-	A_<TR...>::wideReact(			   event, control);
+	First::	   react(event, control);
+	Rest ::wideReact(event, control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::widePostReact(const TEvent& event,
-							 FullControl& control) noexcept
+A_<TF_, TR_...>::widePostReact(const TEvent& event,
+							   FullControl& control) noexcept
 {
-	A_<TR...>::widePostReact(			   event, control);
-	TF		 ::	   postReact(			   event, control);
+	Rest ::widePostReact(event, control);
+	First::	   postReact(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::wideQuery(TEvent& event,
-						 ConstControl& control) const noexcept
+A_<TF_, TR_...>::wideQuery(TEvent& event,
+						   ConstControl& control) const noexcept
 {
-	A_<TR...>::wideQuery(		 event, control);
-	TF		 ::	   query(		 event, control);
+	First::	   query(event, control);
+	Rest ::wideQuery(event, control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::wideExitGuard(GuardControl& control) noexcept {
-	A_<TR...>::wideExitGuard(			   control);
-	TF		 ::	   exitGuard(			   control);
+A_<TF_, TR_...>::wideExitGuard(GuardControl& control) noexcept {
+	Rest ::wideExitGuard(control);
+	First::	   exitGuard(control);
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TF, typename... TR>
+template <typename TF_, typename... TR_>
 HFSM2_CONSTEXPR(14)
 void
-A_<TF, TR...>::wideExit(PlanControl& control) noexcept {
-	A_<TR...>::wideExit(			 control);
-	TF		 ::	   exit(			 control);
+A_<TF_, TR_...>::wideExit(PlanControl& control) noexcept {
+	Rest ::wideExit(control);
+	First::	   exit(control);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

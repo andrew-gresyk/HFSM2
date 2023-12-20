@@ -95,7 +95,7 @@ struct Planned
 {
 	void enter(PlanControl& control) {
 		auto plan = control.plan<Planned>();
-		REQUIRE(!plan); //-V521
+		REQUIRE(!plan);
 
 		REQUIRE(plan.changeWith<Step1_BT, Hybrid>(1));
 		REQUIRE(plan.restartWith<Hybrid, Terminal>(2));
@@ -113,7 +113,7 @@ struct Step1_BT
 {
 	void enter(PlanControl& control) {
 		Plan plan = control.plan();
-		REQUIRE(!plan); //-V521
+		REQUIRE(!plan);
 
 		REQUIRE(plan.resumeWith<Step1_2, Step1_3>(3));
 	}
@@ -196,7 +196,7 @@ struct Hybrid
 		REQUIRE(*currentTransitions[0].payload() == 1);
 
 		auto plan = control.plan();
-		REQUIRE(!plan); //-V521
+		REQUIRE(!plan);
 
 		REQUIRE(plan.utilizeWith<Step2L_1, Step2L_2>(4));
 		REQUIRE(plan.randomizeWith<Step2R_1, Step2R_2>(5));
@@ -411,9 +411,9 @@ struct Work_2	  : FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 19, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  8, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  6, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  6, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 14, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  2, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  2, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  2, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////

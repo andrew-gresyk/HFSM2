@@ -93,16 +93,16 @@ struct Yellow
     : FSM::State
 {
     void update(FullControl& control) noexcept {
-        control.succeed();                                    // plan will advance to the 'Green' state on the first entry
-                                                              // and 'Red' state on the second one
+        control.succeed();                                     // plan will advance to the 'Green' state on the first entry
+                                                               // and 'Red' state on the second one
     }
 };
 
 struct Green
     : FSM::State
 {
-    void react(const Event&, FullControl& control) noexcept { // called on external events
-        control.succeed();                                    // advance to the next plan step
+    void react(const Event&, FullControl& control) noexcept {  // called on external events
+        control.succeed();                                     // advance to the next plan step
     }
 };
 

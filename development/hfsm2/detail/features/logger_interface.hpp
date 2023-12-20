@@ -1,12 +1,18 @@
 namespace hfsm2 {
 
+//------------------------------------------------------------------------------
+
+struct HFSM2_EMPTY_BASES EmptyContext {};
+
 #if HFSM2_LOG_INTERFACE_AVAILABLE()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <FeatureTag NFeatureTag = HFSM2_FEATURE_TAG
-		, typename TContext = EmptyContext
-		HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)>
+template <
+	FeatureTag NFeatureTag = HFSM2_FEATURE_TAG
+  , typename TContext = EmptyContext
+  HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)
+>
 struct LoggerInterfaceT {
 	using Context		 = TContext;
 
@@ -15,6 +21,7 @@ struct LoggerInterfaceT {
 #endif
 
 	using Method		 = ::hfsm2::Method;
+	using Prong			 = ::hfsm2::Prong;
 	using StateID		 = ::hfsm2::StateID;
 	using RegionID		 = ::hfsm2::RegionID;
 	using TransitionType = ::hfsm2::TransitionType;
@@ -73,7 +80,7 @@ struct LoggerInterfaceT {
 	void
 	recordSelectResolution(const Context& HFSM2_UNUSED(context),
 						   const StateID HFSM2_UNUSED(head),
-						   const StateID HFSM2_UNUSED(prong))			noexcept
+						   const Prong HFSM2_UNUSED(prong))				noexcept
 	{}
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
@@ -83,7 +90,7 @@ struct LoggerInterfaceT {
 	void
 	recordUtilityResolution(const Context& HFSM2_UNUSED(context),
 							const StateID HFSM2_UNUSED(head),
-							const StateID HFSM2_UNUSED(prong),
+							const Prong HFSM2_UNUSED(prong),
 							const Utilty HFSM2_UNUSED(utilty))			noexcept
 	{}
 
@@ -92,7 +99,7 @@ struct LoggerInterfaceT {
 	void
 	recordRandomResolution(const Context& HFSM2_UNUSED(context),
 						   const StateID HFSM2_UNUSED(head),
-						   const StateID HFSM2_UNUSED(prong),
+						   const Prong HFSM2_UNUSED(prong),
 						   const Utilty HFSM2_UNUSED(utilty))			noexcept
 	{}
 
@@ -103,9 +110,11 @@ struct LoggerInterfaceT {
 
 #else
 
-template <FeatureTag NFeatureTag = HFSM2_FEATURE_TAG
-		, typename TContext = EmptyContext
-		HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)>
+template <
+	FeatureTag NFeatureTag = HFSM2_FEATURE_TAG
+  , typename TContext = EmptyContext
+  HFSM2_IF_UTILITY_THEORY(, typename TUtilty = float)
+>
 using LoggerInterfaceT = void;
 
 #endif

@@ -96,9 +96,9 @@ struct O2_C2_S2	: FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 //------------------------------------------------------------------------------
@@ -188,9 +188,9 @@ struct O2_C2_S2	: FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 //------------------------------------------------------------------------------
@@ -216,9 +216,9 @@ const Types all = {
 
 static_assert(server::FSM::Instance::Info::STATE_COUNT   == client::FSM::Instance::Info::STATE_COUNT  , "STATE_COUNT");
 static_assert(server::FSM::Instance::Info::REGION_COUNT  == client::FSM::Instance::Info::REGION_COUNT , "REGION_COUNT");
-static_assert(server::FSM::Instance::Info::COMPO_REGIONS == client::FSM::Instance::Info::COMPO_REGIONS, "COMPO_REGIONS");
+static_assert(server::FSM::Instance::Info::COMPO_COUNT == client::FSM::Instance::Info::COMPO_COUNT, "COMPO_COUNT");
 static_assert(server::FSM::Instance::Info::COMPO_PRONGS  == client::FSM::Instance::Info::COMPO_PRONGS , "COMPO_PRONGS");
-static_assert(server::FSM::Instance::Info::ORTHO_REGIONS == client::FSM::Instance::Info::ORTHO_REGIONS, "ORTHO_REGIONS");
+static_assert(server::FSM::Instance::Info::ORTHO_COUNT == client::FSM::Instance::Info::ORTHO_COUNT, "ORTHO_COUNT");
 static_assert(server::FSM::Instance::Info::ORTHO_UNITS   == client::FSM::Instance::Info::ORTHO_UNITS  , "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////

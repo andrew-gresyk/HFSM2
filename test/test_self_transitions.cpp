@@ -76,9 +76,9 @@ struct B_2_2 : FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,11 +109,11 @@ TEST_CASE("FSM.Self Transition") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0}, 	 Event::Type::ENTRY_GUARD },
+				{ hfsm2::StateID{0},	 Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<A    >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0}, 	 Event::Type::ENTER },
+				{ hfsm2::StateID{0},	 Event::Type::ENTER },
 				{ FSM::stateId<A    >(), Event::Type::ENTER },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
 			});
@@ -238,7 +238,7 @@ TEST_CASE("FSM.Self Transition") {
 		{ FSM::stateId<B_2_1>(), Event::Type::EXIT },
 		{ FSM::stateId<B_2  >(), Event::Type::EXIT },
 		{ FSM::stateId<B    >(), Event::Type::EXIT },
-		{ hfsm2::StateID{0}, 	 Event::Type::EXIT },
+		{ hfsm2::StateID{0},	 Event::Type::EXIT },
 	};
 	logger.assertSequence(reference);
 }

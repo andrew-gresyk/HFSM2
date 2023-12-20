@@ -47,7 +47,7 @@ operator |= (TaskStatus& lhs,
 			 const TaskStatus rhs) noexcept
 {
 	const TaskStatus::Result result = lhs.result > rhs.result ?
-		lhs.result : rhs.result;
+										  lhs.result : rhs.result;
 
 	lhs = TaskStatus{result, lhs.outerTransition || rhs.outerTransition};
 
@@ -58,10 +58,10 @@ operator |= (TaskStatus& lhs,
 
 #if HFSM2_PLANS_AVAILABLE()
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clearTaskStatus(const StateID stateId) noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearTaskStatus(const StateID stateId) noexcept {
 	if (stateId != INVALID_STATE_ID) {
 		tasksSuccesses.clear(stateId);
 		tasksFailures .clear(stateId);
@@ -70,10 +70,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
 #if HFSM2_ASSERT_AVAILABLE()
 
 	if (stateId != INVALID_STATE_ID) {
@@ -86,20 +86,20 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clearRegionStatuses() noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearRegionStatuses() noexcept {
 	headStatuses.clear();
 	subStatuses	.clear();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::clear() noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clear() noexcept {
 	tasks		  .clear();
 	taskLinks	  .clear();
 	taskPayloads  .clear();
@@ -117,10 +117,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 #if HFSM2_ASSERT_AVAILABLE()
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::verifyPlans() const noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlans() const noexcept {
 	Long planCount = 0;
 
 	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
@@ -131,10 +131,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC, typename TTP>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 Long
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, TTP>>::verifyPlan(const RegionID regionId) const noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlan(const RegionID regionId) const noexcept {
 	Long length = 0;
 	const Bounds& bounds = tasksBounds[regionId];
 
@@ -174,10 +174,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clearTaskStatus(const StateID stateId) noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearTaskStatus(const StateID stateId) noexcept {
 	if (stateId != INVALID_STATE_ID) {
 		tasksSuccesses.clear(stateId);
 		tasksFailures .clear(stateId);
@@ -186,10 +186,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
 #if HFSM2_ASSERT_AVAILABLE()
 
 	if (stateId != INVALID_STATE_ID) {
@@ -202,20 +202,20 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clearRegionStatuses() noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearRegionStatuses() noexcept {
 	headStatuses.clear();
 	subStatuses	.clear();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::clear() noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clear() noexcept {
 	tasks		  .clear();
 	taskLinks	  .clear();
 
@@ -231,10 +231,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 #if HFSM2_ASSERT_AVAILABLE()
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::verifyPlans() const noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlans() const noexcept {
 	Long planCount = 0;
 
 	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
@@ -245,10 +245,10 @@ PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), 
 
 //------------------------------------------------------------------------------
 
-template <typename TC, typename TG, typename TSL, typename TRL, Long NCC_, Long NOC, Long NOU HFSM2_IF_SERIALIZATION(, Long NSB), Long NSL, Long NTC>
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 Long
-PlanDataT<ArgsT<TC, TG, TSL, TRL, NCC_, NOC, NOU HFSM2_IF_SERIALIZATION(, NSB), NSL, NTC, void>>::verifyPlan(const RegionID regionId) const noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlan(const RegionID regionId) const noexcept {
 	Long length = 0;
 	const Bounds& bounds = tasksBounds[regionId];
 

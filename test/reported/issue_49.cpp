@@ -13,7 +13,8 @@ using Config = hfsm2::Config
 
 using M = hfsm2::MachineT<Config>;
 
-using FSM = M::PeerRoot<struct Disabled,
+using FSM = M::PeerRoot<
+				struct Disabled,
 				M::Composite<struct Enabled,
 					M::Composite<struct Active,
 						struct A,
@@ -99,7 +100,7 @@ struct D : FSM::State
 	void update(FullControl& control) noexcept { control.succeed(); }
 };
 
-TEST_CASE("test")
+TEST_CASE("FSM.Reported.issue_49")
 {
 	FSM::Instance fsm;
 

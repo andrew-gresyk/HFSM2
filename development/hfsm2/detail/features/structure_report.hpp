@@ -14,21 +14,16 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
+enum class RegionType {
+	COMPOSITE,
+	ORTHOGONAL,
 
-#pragma pack(push, 1)
+	COUNT
+};
 
-struct alignas(alignof(void*)) StructureStateInfo final {
-	enum class RegionType : Short {
-		COMPOSITE,
-		ORTHOGONAL,
+//------------------------------------------------------------------------------
 
-		COUNT
-	};
-
+struct StructureStateInfo final {
 	StructureStateInfo() noexcept = default;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -51,12 +46,6 @@ struct alignas(alignof(void*)) StructureStateInfo final {
 	RegionType regionType = RegionType::COUNT;
 	Short depth			  = INVALID_SHORT;
 };
-
-#pragma pack(pop)
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 

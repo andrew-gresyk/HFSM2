@@ -139,9 +139,9 @@ struct OU_3 : FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 28, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  9, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  8, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  8, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 24, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -178,97 +178,99 @@ const Types all = {
 
 //------------------------------------------------------------------------------
 
+void step1(FSM::Instance& machine, Logger& logger) {
+	logger.assertSequence({
+		{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
+
+		{ FSM::stateId<Apex>(),	Event::Type::ENTER },
+		{ FSM::stateId<I   >(),	Event::Type::ENTER },
+	});
+
+	assertActive(machine, all, {
+		FSM::stateId<Apex>(),
+		FSM::stateId<I   >(),
+	});
+
+	assertResumable(machine, all, {});
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+void step2(FSM::Instance& machine, Logger& logger) {
+	machine.immediateChangeTo<F>();
+
+	logger.assertSequence({
+		{						Event::Type::CHANGE, FSM::stateId<F   >() },
+
+		{ FSM::stateId<C   >(), Event::Type::UTILITY },
+		{ FSM::stateId<C_1 >(), Event::Type::UTILITY },
+
+		{ FSM::stateId<R   >(), Event::Type::UTILITY },
+		{ FSM::stateId<R_1 >(), Event::Type::UTILITY },
+
+		{ FSM::stateId<U   >(), Event::Type::UTILITY },
+		{ FSM::stateId<U_1 >(), Event::Type::UTILITY },
+		{ FSM::stateId<U_2 >(), Event::Type::UTILITY },
+		{ FSM::stateId<U_3 >(), Event::Type::UTILITY },
+		{ FSM::stateId<U   >(), Event::Type::UTILITY_RESOLUTION, 0 },
+
+		{ FSM::stateId<O   >(), Event::Type::UTILITY },
+
+		{ FSM::stateId<OC  >(), Event::Type::UTILITY },
+		{ FSM::stateId<OC_1>(), Event::Type::UTILITY },
+
+		{ FSM::stateId<OR  >(), Event::Type::UTILITY },
+		{ FSM::stateId<OR_1>(), Event::Type::UTILITY },
+
+		{ FSM::stateId<OU  >(), Event::Type::UTILITY },
+		{ FSM::stateId<OU_1>(), Event::Type::UTILITY },
+		{ FSM::stateId<OU_2>(), Event::Type::UTILITY },
+		{ FSM::stateId<OU_3>(), Event::Type::UTILITY },
+		{ FSM::stateId<OU  >(), Event::Type::UTILITY_RESOLUTION, 0 },
+
+		{ FSM::stateId<O   >(), Event::Type::UTILITY_RESOLUTION, hfsm2::INVALID_PRONG },
+		{ FSM::stateId<F   >(), Event::Type::UTILITY_RESOLUTION, 0 },
+
+		{ FSM::stateId<I   >(), Event::Type::EXIT_GUARD },
+		{ FSM::stateId<F   >(), Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<C   >(), Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<C_1 >(), Event::Type::ENTRY_GUARD },
+
+		{ FSM::stateId<I   >(), Event::Type::EXIT },
+
+		{ FSM::stateId<F   >(), Event::Type::ENTER },
+		{ FSM::stateId<C   >(), Event::Type::ENTER },
+		{ FSM::stateId<C_1 >(), Event::Type::ENTER },
+	});
+
+	assertActive(machine, all, {
+		FSM::stateId<F   >(),
+		FSM::stateId<C   >(),
+		FSM::stateId<C_1 >(),
+	});
+
+	assertResumable(machine, all, {
+		FSM::stateId<I   >(),
+	});
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 TEST_CASE("FSM.Utility Regions") {
 	Logger logger;
 
 	{
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 		FSM::Instance machine{&logger};
-		{
-			logger.assertSequence({
-				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
-
-				{ FSM::stateId<Apex>(),	Event::Type::ENTER },
-				{ FSM::stateId<I   >(),	Event::Type::ENTER },
-			});
-
-			assertActive(machine, all, {
-				FSM::stateId<Apex>(),
-				FSM::stateId<I   >(),
-			});
-
-			assertResumable(machine, all, {});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		machine.immediateChangeTo<F>();
-		{
-			logger.assertSequence({
-				{						Event::Type::CHANGE, FSM::stateId<F   >() },
-
-				{ FSM::stateId<C   >(), Event::Type::UTILITY },
-				{ FSM::stateId<C_1 >(), Event::Type::UTILITY },
-
-				{ FSM::stateId<R   >(), Event::Type::UTILITY },
-				{ FSM::stateId<R_1 >(), Event::Type::UTILITY },
-
-				{ FSM::stateId<U   >(), Event::Type::UTILITY },
-				{ FSM::stateId<U_1 >(), Event::Type::UTILITY },
-				{ FSM::stateId<U_2 >(), Event::Type::UTILITY },
-				{ FSM::stateId<U_3 >(), Event::Type::UTILITY },
-				{ FSM::stateId<U   >(), Event::Type::UTILITY_RESOLUTION, 0 },
-
-				{ FSM::stateId<O   >(), Event::Type::UTILITY },
-
-				{ FSM::stateId<OC  >(), Event::Type::UTILITY },
-				{ FSM::stateId<OC_1>(), Event::Type::UTILITY },
-
-				{ FSM::stateId<OR  >(), Event::Type::UTILITY },
-				{ FSM::stateId<OR_1>(), Event::Type::UTILITY },
-
-				{ FSM::stateId<OU  >(), Event::Type::UTILITY },
-				{ FSM::stateId<OU_1>(), Event::Type::UTILITY },
-				{ FSM::stateId<OU_2>(), Event::Type::UTILITY },
-				{ FSM::stateId<OU_3>(), Event::Type::UTILITY },
-				{ FSM::stateId<OU  >(), Event::Type::UTILITY_RESOLUTION, 0 },
-
-				{ FSM::stateId<O   >(), Event::Type::UTILITY_RESOLUTION },
-				{ FSM::stateId<F   >(), Event::Type::UTILITY_RESOLUTION, 0 },
-
-				{ FSM::stateId<I   >(), Event::Type::EXIT_GUARD },
-				{ FSM::stateId<F   >(), Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<C   >(), Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<C_1 >(), Event::Type::ENTRY_GUARD },
-
-				{ FSM::stateId<I   >(), Event::Type::EXIT },
-
-				{ FSM::stateId<F   >(), Event::Type::ENTER },
-				{ FSM::stateId<C   >(), Event::Type::ENTER },
-				{ FSM::stateId<C_1 >(), Event::Type::ENTER },
-			});
-
-			assertActive(machine, all, {
-				FSM::stateId<F   >(),
-				FSM::stateId<C   >(),
-				FSM::stateId<C_1 >(),
-			});
-
-			assertResumable(machine, all, {
-				FSM::stateId<I   >(),
-			});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		step1(machine, logger);
+		step2(machine, logger);
 	}
 
 	logger.assertSequence({
 		{ FSM::stateId<C_1 >(),	 Event::Type::EXIT },
 		{ FSM::stateId<C   >(),	 Event::Type::EXIT },
 		{ FSM::stateId<F   >(),	 Event::Type::EXIT },
-		{ hfsm2::StateID{0}, 	 Event::Type::EXIT },
+		{ hfsm2::StateID{0},	 Event::Type::EXIT },
 	});
 }
 

@@ -3,22 +3,22 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideRegister(Registry& registry,
-										  const Parent parent) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideRegister(Registry& registry,
+											   const Parent parent) noexcept
 {
 	Single::deepRegister(registry, Parent{parent.forkId, PRONG_INDEX});
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 bool
-CS_<TN, TA, SG, NI, TL_<T>>::wideForwardEntryGuard(GuardControl& control,
-												   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideForwardEntryGuard(GuardControl& control,
+														const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -28,11 +28,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardEntryGuard(GuardControl& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // COMMON
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 bool
-CS_<TN, TA, SG, NI, TL_<T>>::wideEntryGuard(GuardControl& control,
-											const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideEntryGuard(GuardControl& control,
+												 const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -41,11 +41,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideEntryGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideEnter(PlanControl& control,
-									   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideEnter(PlanControl& control,
+											const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -54,11 +54,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideEnter(PlanControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideReenter(PlanControl& control,
-										 const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReenter(PlanControl& control,
+											  const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -67,11 +67,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReenter(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<T>>::widePreUpdate(FullControl& control,
-										   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::widePreUpdate(FullControl& control,
+												const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -80,11 +80,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::widePreUpdate(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<T>>::wideUpdate(FullControl& control,
-										const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideUpdate(FullControl& control,
+											 const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -93,11 +93,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideUpdate(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<T>>::widePostUpdate(FullControl& control,
-											const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::widePostUpdate(FullControl& control,
+												 const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -106,13 +106,13 @@ CS_<TN, TA, SG, NI, TL_<T>>::widePostUpdate(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<T>>::widePreReact(FullControl& control,
-										  const TEvent& event,
-										  const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::widePreReact(FullControl& control,
+											   const TEvent& event,
+											   const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -121,13 +121,13 @@ CS_<TN, TA, SG, NI, TL_<T>>::widePreReact(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<T>>::wideReact(FullControl& control,
-									   const TEvent& event,
-									   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReact(FullControl& control,
+											const TEvent& event,
+											const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -136,13 +136,13 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReact(FullControl& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<T>>::widePostReact(FullControl& control,
-										   const TEvent& event,
-										   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::widePostReact(FullControl& control,
+												const TEvent& event,
+												const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -151,13 +151,13 @@ CS_<TN, TA, SG, NI, TL_<T>>::widePostReact(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideQuery(ConstControl& control,
-									   TEvent& event,
-									   const Short HFSM2_IF_ASSERT(prong)) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideQuery(ConstControl& control,
+											TEvent& event,
+											const Prong HFSM2_IF_ASSERT(prong)) const noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -168,11 +168,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideQuery(ConstControl& control,
 
 #if HFSM2_PLANS_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN, TA, SG, NI, TL_<T>>::wideUpdatePlans(FullControl& control,
-											 const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideUpdatePlans(FullControl& control,
+												  const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -183,11 +183,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideUpdatePlans(FullControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 bool
-CS_<TN, TA, SG, NI, TL_<T>>::wideForwardExitGuard(GuardControl& control,
-												  const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideForwardExitGuard(GuardControl& control,
+													   const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -197,11 +197,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardExitGuard(GuardControl& control,
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // COMMON
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 bool
-CS_<TN, TA, SG, NI, TL_<T>>::wideExitGuard(GuardControl& control,
-										   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideExitGuard(GuardControl& control,
+												const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -210,11 +210,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideExitGuard(GuardControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideExit(PlanControl& control,
-									  const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideExit(PlanControl& control,
+										   const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -223,12 +223,12 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideExit(PlanControl& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideForwardActive(Control& control,
-											   const Request request,
-											   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideForwardActive(Control& control,
+													const Request request,
+													const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -237,12 +237,12 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardActive(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideForwardRequest(Control& control,
-												const Request request,
-												const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideForwardRequest(Control& control,
+													 const Request request,
+													 const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -251,23 +251,23 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideForwardRequest(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeComposite(Control& control,
-														const Request request) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideRequestChangeComposite(Control& control,
+															 const Request request) noexcept
 {
 	Single::deepRequestChange(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeResumable(Control& control,
-														const Request request,
-														const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideRequestChangeResumable(Control& control,
+															 const Request request,
+															 const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -276,12 +276,12 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeResumable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeSelectable(Control& control,
-														 const Request request,
-														 const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideRequestChangeSelectable(Control& control,
+															  const Request request,
+															  const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -290,23 +290,23 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideRequestChangeSelectable(Control& control,
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideRequestRestart(Control& control,
-												const Request request) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideRequestRestart(Control& control,
+													 const Request request) noexcept
 {
 	Single::deepRequestRestart(control, request);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideRequestResume(Control& control,
-											   const Request request,
-											   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideRequestResume(Control& control,
+													const Request request,
+													const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -315,12 +315,12 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideRequestResume(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideRequestSelect(Control& control,
-											   const Request request,
-											   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideRequestSelect(Control& control,
+													const Request request,
+													const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -331,20 +331,20 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideRequestSelect(Control& control,
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<T>>::wideReportUtilize(Control& control) noexcept {
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReportUtilize(Control& control) noexcept {
 	return Single::deepReportUtilize(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
-typename TA::Rank
-CS_<TN, TA, SG, NI, TL_<T>>::wideReportRank(Control& control,
-											Rank* const ranks) noexcept
+typename TA_::Rank
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReportRank(Control& control,
+												 Rank* const ranks) noexcept
 {
 	HFSM2_ASSERT(ranks);
 
@@ -355,38 +355,38 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportRank(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-CS_<TN, TA, SG, NI, TL_<T>>::wideReportRandomize(Control& control,
-												 Utility* const options,
-												 const Rank* const ranks,
-												 const Rank top) noexcept
+typename TA_::Utility
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReportRandomize(Control& control,
+													  Utility* const utilities,
+													  const Rank* const ranks,
+													  const Rank top) noexcept
 {
-	HFSM2_ASSERT(options && ranks);
+	HFSM2_ASSERT(utilities && ranks);
 
-	*options = (*ranks == top) ?
+	*utilities = (*ranks == top) ?
 		Single::deepReportRandomize(control) : Utility{0};
 
-	return *options;
+	return *utilities;
 }
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeComposite(Control& control) noexcept {
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReportChangeComposite(Control& control) noexcept {
 	return Single::deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeResumable(Control& control,
-													   const Short HFSM2_IF_ASSERT(prong)) noexcept
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReportChangeResumable(Control& control,
+															const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -395,11 +395,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeResumable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeSelectable(Control& control,
-														const Short HFSM2_IF_ASSERT(prong)) noexcept
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReportChangeSelectable(Control& control,
+															 const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -408,40 +408,40 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeSelectable(Control& control,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
-typename TA::UP
-CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeUtilitarian(Control& control) noexcept {
+typename TA_::UP
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReportChangeUtilitarian(Control& control) noexcept {
 	return Single::deepReportChange(control);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
-typename TA::Utility
-CS_<TN, TA, SG, NI, TL_<T>>::wideReportChangeRandom(Control& control,
-													Utility* const options,
-													const Rank* const ranks,
-													const Rank top) noexcept
+typename TA_::Utility
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideReportChangeRandom(Control& control,
+														 Utility* const utilities,
+														 const Rank* const ranks,
+														 const Rank top) noexcept
 {
-	HFSM2_ASSERT(options && ranks);
+	HFSM2_ASSERT(utilities && ranks);
 
-	*options = (*ranks == top) ?
+	*utilities = (*ranks == top) ?
 		Single::deepReportChange(control).utility : Utility{0};
 
-	return *options;
+	return *utilities;
 }
 
 #endif
 
 //------------------------------------------------------------------------------
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideChangeToRequested(PlanControl& control,
-												   const Short HFSM2_IF_ASSERT(prong)) noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideChangeToRequested(PlanControl& control,
+														const Prong HFSM2_IF_ASSERT(prong)) noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -452,12 +452,12 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideChangeToRequested(PlanControl& control,
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideSaveActive(const Registry& registry,
-											WriteStream& stream,
-											const Short HFSM2_IF_ASSERT(prong)) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideSaveActive(const Registry& registry,
+												 WriteStream& stream,
+												 const Prong HFSM2_IF_ASSERT(prong)) const noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -466,23 +466,23 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideSaveActive(const Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideSaveResumable(const Registry& registry,
-											   WriteStream& stream) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideSaveResumable(const Registry& registry,
+													WriteStream& stream) const noexcept
 {
 	Single::deepSaveResumable(registry, stream);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideLoadRequested(Registry& registry,
-											   ReadStream& stream,
-											   const Short HFSM2_IF_ASSERT(prong)) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideLoadRequested(Registry& registry,
+													ReadStream& stream,
+													const Prong HFSM2_IF_ASSERT(prong)) const noexcept
 {
 	HFSM2_ASSERT(prong == PRONG_INDEX);
 
@@ -491,11 +491,11 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideLoadRequested(Registry& registry,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideLoadResumable(Registry& registry,
-											   ReadStream& stream) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideLoadResumable(Registry& registry,
+													ReadStream& stream) const noexcept
 {
 	Single::deepLoadResumable(registry, stream);
 }
@@ -506,15 +506,15 @@ CS_<TN, TA, SG, NI, TL_<T>>::wideLoadResumable(Registry& registry,
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 
-template <typename TN, typename TA, Strategy SG, Short NI, typename T>
+template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename T_>
 HFSM2_CONSTEXPR(14)
 void
-CS_<TN, TA, SG, NI, TL_<T>>::wideGetNames(const Long parent,
-										  const RegionType /*region*/,
-										  const Short depth,
-										  StructureStateInfos& stateInfos) const noexcept
+CS_<TN_, TA_, SG_, NP_, TL_<T_>>::wideGetNames(const Long parent,
+											   const RegionType /*region*/,
+											   const Short depth,
+											   StructureStateInfos& stateInfos) const noexcept
 {
-	Single::deepGetNames(parent, StructureStateInfo::RegionType::COMPOSITE, depth, stateInfos);
+	Single::deepGetNames(parent, RegionType::COMPOSITE, depth, stateInfos);
 }
 
 #endif

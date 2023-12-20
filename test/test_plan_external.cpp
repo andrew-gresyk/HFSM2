@@ -207,9 +207,9 @@ struct Work_2	  : FSM::State {};
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 19, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  8, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  6, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  6, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 14, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  2, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  2, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  2, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////

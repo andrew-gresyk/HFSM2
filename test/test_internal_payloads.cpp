@@ -16,7 +16,7 @@ using M = hfsm2::MachineT<Config>;
 
 struct RegionStateIndex {
 	hfsm2::StateID stateId;
-	hfsm2::Short stateIndex;
+	hfsm2::Prong prong;
 };
 
 using Logger = LoggerT<Config>;
@@ -90,7 +90,7 @@ class Tracked
 {
 public:
 	void enter(PlanControl&) {
-		++_entryCount;
+		++_entryAttemptCount;
 		_currentUpdateCount = 0;
 	}
 
@@ -103,17 +103,17 @@ public:
 			   FullControl& control)
 	{
 		if (control.stateId() == event.stateId)
-			REQUIRE(control.activeSubState() == event.stateIndex);
+			REQUIRE(control.activeSubState() == event.prong);
 	}
 
-	unsigned entryCount() const					{ return _entryCount;			}
+	unsigned entryAttemptCount()  const			{ return _entryAttemptCount;	}
 	unsigned currentUpdateCount() const			{ return _currentUpdateCount;	}
-	unsigned totalUpdateCount() const			{ return _totalUpdateCount;		}
+	unsigned totalUpdateCount()	  const			{ return _totalUpdateCount;		}
 
 private:
-	unsigned _entryCount = 0;
+	unsigned _entryAttemptCount	 = 0;
 	unsigned _currentUpdateCount = 0;
-	unsigned _totalUpdateCount = 0;
+	unsigned _totalUpdateCount	 = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -121,12 +121,10 @@ private:
 struct A
 	: FSM::State
 {
-	//void entryGuard(GuardControl&)											{}
-	void enter(PlanControl&)													{}
+	void enter	(PlanControl&)													{}
 	void reenter(PlanControl&)													{}
-	void update(FullControl&)													{}
-	//void react(const RegionStateIndex&, FullControl&)							{}
-	void exit(PlanControl&)														{}
+	void update	(FullControl&)													{}
+	void exit	(PlanControl&)													{}
 };
 
 //------------------------------------------------------------------------------
@@ -135,7 +133,9 @@ struct A_1
 	: FSM::State
 {
 	void entryGuard(GuardControl& control) {
-		REQUIRE(control.pendingTransitions().count() == 0);
+		const auto& pendingTransitions = control.pendingTransitions();
+		REQUIRE(pendingTransitions.count() == 0);
+
 		REQUIRE(control.currentTransitions().count() == 0);
 	}
 
@@ -159,7 +159,7 @@ struct A_2
 	void entryGuard(GuardControl& control) {
 		const auto& pendingTransitions = control.pendingTransitions();
 
-		switch (entryCount()) {
+		switch (entryAttemptCount()) {
 		case 0:
 			REQUIRE( pendingTransitions.count() == 1);
 			REQUIRE( pendingTransitions[0].payload());
@@ -189,9 +189,9 @@ struct A_2
 
 	void enter(PlanControl& control) {
 		const auto& currentTransitions = control.currentTransitions();
-		const M::Transition& transition = currentTransitions[0];
+		const Transition& transition = currentTransitions[0];
 
-		switch (entryCount()) {
+		switch (entryAttemptCount()) {
 		case 1:
 			REQUIRE( currentTransitions.count() == 1);
 			REQUIRE( transition.payload());
@@ -218,7 +218,7 @@ struct A_2
 	}
 
 	void update(FullControl& control) {
-		switch (entryCount()) {
+		switch (entryAttemptCount()) {
 		case 1:
 			control.changeWith<B_2_2>(2);
 			break;
@@ -335,7 +335,7 @@ struct B_2_1
 													   hfsm2::TransitionType::CHANGE,
 													   6});
 
-		REQUIRE(control.lastTransition());
+		REQUIRE( control.lastTransition());
 		REQUIRE(*control.lastTransition() == M::Transition{FSM::stateId<A_2  >(),
 														   FSM::stateId<B    >(),
 														   hfsm2::TransitionType::RESUME,
@@ -381,9 +381,9 @@ struct B_2_2
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  5, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////

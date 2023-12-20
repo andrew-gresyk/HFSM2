@@ -3,11 +3,11 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 template <typename N>
 HFSM2_CONSTEXPR(14)
 T&
-StaticArrayT<T, NC>::operator[] (const N index) noexcept	{
+StaticArrayT<T, NC_>::operator[] (const N index) noexcept	{
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
 	return _items[static_cast<Index>(index)];
@@ -15,11 +15,11 @@ StaticArrayT<T, NC>::operator[] (const N index) noexcept	{
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 template <typename N>
 HFSM2_CONSTEXPR(14)
 const T&
-StaticArrayT<T, NC>::operator[] (const N index) const noexcept	{
+StaticArrayT<T, NC_>::operator[] (const N index) const noexcept	{
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
 	return _items[static_cast<Index>(index)];
@@ -27,20 +27,20 @@ StaticArrayT<T, NC>::operator[] (const N index) const noexcept	{
 
 //------------------------------------------------------------------------------
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 HFSM2_CONSTEXPR(14)
 void
-StaticArrayT<T, NC>::fill(const Item filler) noexcept {
+StaticArrayT<T, NC_>::fill(const Item filler) noexcept {
 	for (Item& item : _items)
 		item = filler;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 HFSM2_CONSTEXPR(14)
 bool
-StaticArrayT<T, NC>::empty() const noexcept {
+StaticArrayT<T, NC_>::empty() const noexcept {
 	for (const Item& item : _items)
 		if (item != filler<Item>())
 			return false;
@@ -50,11 +50,11 @@ StaticArrayT<T, NC>::empty() const noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 template <typename... TArgs>
 HFSM2_CONSTEXPR(14)
-typename ArrayT<T, NC>::Index
-ArrayT<T, NC>::emplace(const TArgs&... args) noexcept {
+typename DynamicArrayT<T, NC_>::Index
+DynamicArrayT<T, NC_>::emplace(const TArgs&... args) noexcept {
 	HFSM2_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{args...};
@@ -64,11 +64,11 @@ ArrayT<T, NC>::emplace(const TArgs&... args) noexcept {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 template <typename... TArgs>
 HFSM2_CONSTEXPR(14)
-typename ArrayT<T, NC>::Index
-ArrayT<T, NC>::emplace(TArgs&&... args) noexcept {
+typename DynamicArrayT<T, NC_>::Index
+DynamicArrayT<T, NC_>::emplace(TArgs&&... args) noexcept {
 	HFSM2_ASSERT(_count < CAPACITY);
 
 	new (&_items[_count]) Item{forward<TArgs>(args)...};
@@ -78,24 +78,24 @@ ArrayT<T, NC>::emplace(TArgs&&... args) noexcept {
 
 //------------------------------------------------------------------------------
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 template <typename N>
 HFSM2_CONSTEXPR(14)
-typename ArrayT<T, NC>::Item&
-ArrayT<T, NC>::operator[] (const N index) noexcept {
-	HFSM2_ASSERT(0 <= index && index < CAPACITY);
+typename DynamicArrayT<T, NC_>::Item&
+DynamicArrayT<T, NC_>::operator[] (const N index) noexcept {
+	HFSM2_ASSERT(0 <= index && index < _count);
 
 	return _items[static_cast<Index>(index)];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 template <typename N>
 HFSM2_CONSTEXPR(14)
-const typename ArrayT<T, NC>::Item&
-ArrayT<T, NC>::operator[] (const N index) const noexcept {
-	HFSM2_ASSERT(0 <= index && index < CAPACITY);
+const typename DynamicArrayT<T, NC_>::Item&
+DynamicArrayT<T, NC_>::operator[] (const N index) const noexcept {
+	HFSM2_ASSERT(0 <= index && index < _count);
 
 	return _items[static_cast<Index>(index)];
 }
@@ -105,11 +105,11 @@ ArrayT<T, NC>::operator[] (const N index) const noexcept {
 // SPECIFIC
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T, Long NC>
+template <typename T, Long NC_>
 template <Long N>
 HFSM2_CONSTEXPR(14)
-ArrayT<T, NC>&
-ArrayT<T, NC>::operator += (const ArrayT<T, N>& other) noexcept {
+DynamicArrayT<T, NC_>&
+DynamicArrayT<T, NC_>::operator += (const DynamicArrayT<T, N>& other) noexcept {
 	for (const auto& item : other)
 		emplace(item);
 

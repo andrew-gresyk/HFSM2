@@ -3,28 +3,34 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename TIndices,
-		  typename TArgs,
-		  typename THead,
-		  typename... TSubStates>
+template <
+	typename TIndices
+  , typename TArgs
+  , typename THead
+  , typename... TSubStates
+>
 struct HFSM2_EMPTY_BASES O_
 	: S_<TIndices, TArgs, THead>
-	, OS_<I_<TIndices::STATE_ID + 1,
-			 TIndices::COMPO_INDEX,
-			 TIndices::ORTHO_INDEX + 1,
-			 TIndices::ORTHO_UNIT + contain(OI_<THead, TSubStates...>::WIDTH, 8)>,
-		  TArgs,
-		  0,
-		  TSubStates...>
+	, OS_<
+		  I_<
+			  TIndices::STATE_ID + 1
+			, TIndices::COMPO_INDEX
+			, TIndices::ORTHO_INDEX + 1
+			, TIndices::ORTHO_UNIT + contain(OI_<THead, TSubStates...>::WIDTH, 8)
+		  >
+		, TArgs
+		, 0
+		, TSubStates...
+	>
 {
 	using Indices		= TIndices;
-	static constexpr StateID HEAD_ID	 = Indices::STATE_ID;
-	static constexpr Short	 COMPO_INDEX = Indices::COMPO_INDEX;
-	static constexpr Short	 ORTHO_INDEX = Indices::ORTHO_INDEX;
-	static constexpr Short	 ORTHO_UNIT	 = Indices::ORTHO_UNIT;
+	static constexpr StateID  HEAD_ID	  = Indices::STATE_ID;
+	static constexpr Short	  COMPO_INDEX = Indices::COMPO_INDEX;
+	static constexpr Short	  ORTHO_INDEX = Indices::ORTHO_INDEX;
+	static constexpr Short	  ORTHO_UNIT  = Indices::ORTHO_UNIT;
 
-	static constexpr Short	 REGION_ID	 = COMPO_INDEX + ORTHO_INDEX;
-	static constexpr ForkID	 ORTHO_ID	 = static_cast<ForkID>(-ORTHO_INDEX - 1);
+	static constexpr RegionID REGION_ID	  = COMPO_INDEX + ORTHO_INDEX;
+	static constexpr ForkID	  ORTHO_ID	  = static_cast<ForkID>(-ORTHO_INDEX - 1);
 
 	using Args			= TArgs;
 
@@ -36,13 +42,6 @@ struct HFSM2_EMPTY_BASES O_
 
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
-
-	using Head			= THead;
-
-	using Info			= OI_<Head, TSubStates...>;
-	static constexpr Short WIDTH		= Info::WIDTH;
-	static constexpr Short REGION_SIZE	= Info::STATE_COUNT;
-	static constexpr Short ORTHO_UNITS	= Info::ORTHO_UNITS;
 
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
@@ -62,32 +61,42 @@ struct HFSM2_EMPTY_BASES O_
 
 	using GuardControl	= GuardControlT<Args>;
 
+	using Head			= THead;
 	using HeadState		= S_<Indices, Args, Head>;
 
-	using SubStates		= OS_<I_<HEAD_ID + 1,
-								 COMPO_INDEX,
-								 ORTHO_INDEX + 1,
-								 ORTHO_UNIT + contain(WIDTH, 8)>,
+	using Info			= OI_<Head, TSubStates...>;
+	static constexpr Short WIDTH		= Info::WIDTH;
+	static constexpr Short REGION_SIZE	= Info::STATE_COUNT;
+	static constexpr Short ORTHO_UNITS	= Info::ORTHO_UNITS;
+
+	using SubStates		= OS_<
+							  I_<
+								  HEAD_ID + 1,
+								  COMPO_INDEX,
+								  ORTHO_INDEX + 1,
+								  ORTHO_UNIT + contain(WIDTH, 8)
+							  >,
 							  Args,
 							  0,
-							  TSubStates...>;
+							  TSubStates...
+						  >;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)	static ProngBits	  orthoRequested(	   Registry& registry)		noexcept	{ return			   registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11)	static ProngCBits	  orthoRequested(const Registry& registry)		noexcept	{ return			   registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested (	   Registry& registry)		noexcept	{ return			   registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested (const Registry& registry)		noexcept	{ return			   registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
-	HFSM2_CONSTEXPR(11)	static ProngBits	  orthoRequested(		Control& control )		noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
-	HFSM2_CONSTEXPR(11)	static ProngCBits	  orthoRequested(const	Control& control )		noexcept	{ return control._core.registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested (		Control& control )		noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested (const	Control& control )		noexcept	{ return control._core.registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(11)	static TaskStatus&	  headStatus	(		Control& control )		noexcept	{ return control._core.planData.headStatuses[REGION_ID];	}
-	HFSM2_CONSTEXPR(11)	static TaskStatus&	   subStatus	(		Control& control )		noexcept	{ return control._core.planData.subStatuses [REGION_ID];	}
+	HFSM2_CONSTEXPR(11)	static TaskStatus& headStatus	 (		Control& control )		noexcept	{ return control._core.planData.headStatuses[REGION_ID];	}
+	HFSM2_CONSTEXPR(11)	static TaskStatus&  subStatus	 (		Control& control )		noexcept	{ return control._core.planData.subStatuses [REGION_ID];	}
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	void		deepRegister		 (Registry& registry, const Parent parent)				noexcept;
+	HFSM2_CONSTEXPR(14)	void		deepRegister		 (	  Registry& registry, const Parent parent )			noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -170,7 +179,6 @@ struct HFSM2_EMPTY_BASES O_
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
-	using RegionType		  = typename StructureStateInfo::RegionType;
 
 	static constexpr Long NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
 

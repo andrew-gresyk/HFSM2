@@ -95,9 +95,9 @@ struct C_100 : FSM::State { Rank rank(const Control&) {return 1; } Utility utili
 
 static_assert(FSM::Instance::Info::STATE_COUNT   == 15, "STATE_COUNT");
 static_assert(FSM::Instance::Info::REGION_COUNT  ==  4, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_REGIONS ==  3, "COMPO_REGIONS");
+static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  3, "COMPO_COUNT");
 static_assert(FSM::Instance::Info::COMPO_PRONGS  == 12, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_REGIONS ==  1, "ORTHO_REGIONS");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
 static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -241,7 +241,7 @@ TEST_CASE("FSM.Randomize") {
 		WHEN("Randomizing O") {
 			machine.immediateRandomize<O>();
 			{
-			#if HFSM2_ARCHITECTURE(64)
+			#if HFSM2_ARCHITECTURE(64BIT)
 
 				logger.assertSequence({
 					{						 Event::Type::RANDOMIZE,	FSM::stateId<O    >() },
@@ -295,7 +295,7 @@ TEST_CASE("FSM.Randomize") {
 					FSM::stateId<C_025>(),
 				});
 
-			#elif HFSM2_ARCHITECTURE(32)
+			#elif HFSM2_ARCHITECTURE(32BIT)
 
 				logger.assertSequence({
 					{						 Event::Type::RANDOMIZE,	FSM::stateId<O    >() },
