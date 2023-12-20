@@ -430,22 +430,6 @@ template <
 >
 using Conditional = typename ConditionalT<B, TT, TF>::Type;
 
-template <typename, typename>
-struct IsSameT final {
-	static constexpr bool Value = false;
-};
-
-template <typename T>
-struct IsSameT<T, T> final {
-	static constexpr bool Value = true;
-};
-
-template <
-	typename T0,
-	typename T1
->
-static constexpr bool IsSame = IsSameT<T0, T1>::Value;
-
 template <typename T>
 struct RemoveConstT final {
 	using Type = T;
