@@ -203,7 +203,7 @@ PlanT<TArgs>::clearTasks() noexcept {
 //------------------------------------------------------------------------------
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 PlanT<TArgs>::operator bool() const noexcept {
 	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
 				 _bounds.last  < TASK_CAPACITY ||

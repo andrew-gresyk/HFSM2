@@ -91,7 +91,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	void clearTasks()								noexcept;
 
 public:
-	HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept;
+	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;
 
 	/// @brief Clear all tasks from the plan
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept;

@@ -4357,7 +4357,7 @@ public:
 	struct Iterator final {
 		HFSM2_CONSTEXPR(14)	Iterator(const CPlanT& plan)				noexcept;
 
-		HFSM2_CONSTEXPR(11)	explicit operator bool()			  const noexcept;
+		HFSM2_CONSTEXPR(14)	explicit operator bool()			  const noexcept;
 
 		HFSM2_CONSTEXPR(14)	void operator ++()							noexcept;
 
@@ -4389,7 +4389,7 @@ private:
 	HFSM2_CONSTEXPR(11)	RegionID regionId()								noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
 
 public:
-	HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept;
+	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;
 
 	/// @brief Begin iteration over plan tasks
 	/// @return CIterator to the first task
@@ -4432,7 +4432,7 @@ CPlanT<TArgs>::Iterator::Iterator(const CPlanT& plan) noexcept
 }
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 CPlanT<TArgs>::Iterator::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < CPlanT::TASK_CAPACITY ||
 				 _curr == INVALID_LONG);
@@ -4464,7 +4464,7 @@ CPlanT<TArgs>::Iterator::next() const noexcept {
 }
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 CPlanT<TArgs>::operator bool() const noexcept {
 	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
 				 _bounds.last  < TASK_CAPACITY ||
@@ -4581,7 +4581,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	void clearTasks()								noexcept;
 
 public:
-	HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept;
+	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;
 
 	/// @brief Clear all tasks from the plan
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
@@ -4990,7 +4990,7 @@ PlanT<TArgs>::clearTasks() noexcept {
 }
 
 template <typename TArgs>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 PlanT<TArgs>::operator bool() const noexcept {
 	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
 				 _bounds.last  < TASK_CAPACITY ||
