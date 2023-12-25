@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 env:
-  SOLUTION_FILE_PATH: projects\visual-studio\hfsm2-vs.sln
+  SOLUTION_FILE_PATH: projects\premake\hfsm2-vs.sln
 
 jobs:
   build:
@@ -15,8 +15,8 @@ jobs:
 
     strategy:
       matrix:
-        BUILD_CONFIG: [ Release, Debug ]
-        BUILD_PLATFORM: [ x86, x64 ]
+        BUILD_CONFIG: [ release, debug ]
+        BUILD_PLATFORM: [ 32, 64 ]
 
     steps:
     - uses: actions/checkout@v4
