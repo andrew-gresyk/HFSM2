@@ -39,7 +39,7 @@ fsm(const Actor::FsmHost& fsmHost) { return *reinterpret_cast<const FSM::Instanc
 
 Actor::Actor() {
 	//hfsm2::StaticPrintConstT<alignof(actor_fsm::FSM::Instance)> alignment;
-	static_assert(alignof(actor_fsm::FSM::Instance) >= alignof(FsmHost),
+	static_assert(alignof(actor_fsm::FSM::Instance) <= alignof(FsmHost),
 				  "Uncomment the line above to find out the alignment of the `FsmHost` needed");
 
 	//hfsm2::StaticPrintConstT<sizeof(actor_fsm::FSM::Instance)> size;
