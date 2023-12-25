@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "temp-14", "temp-14.vcxproj", "{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "temp-clang", "temp-clang.vcxproj", "{2DF246B5-19AA-8802-82B1-615E6E8823F3}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-14", "test-14.vcxproj", "{37901DD9-A36F-9C74-AC87-274B18E602D6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-clang", "test-clang.vcxproj", "{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}"
@@ -19,6 +23,26 @@ Global
 		release|Any CPU = release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.debug|32.ActiveCfg = debug 32|Win32
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.debug|32.Build.0 = debug 32|Win32
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.debug|64.ActiveCfg = debug 64|x64
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.debug|64.Build.0 = debug 64|x64
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.debug|Any CPU.ActiveCfg = debug 64|x64
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.release|32.ActiveCfg = release 32|Win32
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.release|32.Build.0 = release 32|Win32
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.release|64.ActiveCfg = release 64|x64
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.release|64.Build.0 = release 64|x64
+		{ADCBAED8-19AB-2D74-22C3-B84A8E2194D5}.release|Any CPU.ActiveCfg = release 64|x64
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.debug|32.ActiveCfg = debug 32|Win32
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.debug|32.Build.0 = debug 32|Win32
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.debug|64.ActiveCfg = debug 64|x64
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.debug|64.Build.0 = debug 64|x64
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.debug|Any CPU.ActiveCfg = debug 64|x64
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.release|32.ActiveCfg = release 32|Win32
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.release|32.Build.0 = release 32|Win32
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.release|64.ActiveCfg = release 64|x64
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.release|64.Build.0 = release 64|x64
+		{2DF246B5-19AA-8802-82B1-615E6E8823F3}.release|Any CPU.ActiveCfg = release 64|x64
 		{37901DD9-A36F-9C74-AC87-274B18E602D6}.debug|32.ActiveCfg = debug 32|Win32
 		{37901DD9-A36F-9C74-AC87-274B18E602D6}.debug|32.Build.0 = debug 32|Win32
 		{37901DD9-A36F-9C74-AC87-274B18E602D6}.debug|64.ActiveCfg = debug 64|x64
@@ -35,14 +59,12 @@ Global
 		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.debug|32.Build.0 = debug 32|Win32
 		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.debug|64.ActiveCfg = debug 64|x64
 		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.debug|64.Build.0 = debug 64|x64
-		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.debug|Any CPU.ActiveCfg = debug 32|x64
-		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.debug|Any CPU.Build.0 = debug 32|x64
+		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.debug|Any CPU.ActiveCfg = debug 64|x64
 		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.release|32.ActiveCfg = release 32|Win32
 		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.release|32.Build.0 = release 32|Win32
 		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.release|64.ActiveCfg = release 64|x64
 		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.release|64.Build.0 = release 64|x64
-		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.release|Any CPU.ActiveCfg = release 32|x64
-		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.release|Any CPU.Build.0 = release 32|x64
+		{77E2BA72-639A-FCBF-CCA1-D51BB87897B0}.release|Any CPU.ActiveCfg = release 64|x64
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.debug|32.ActiveCfg = Debug|Any CPU
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.debug|64.ActiveCfg = Debug|Any CPU
 		{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}.debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -54,6 +76,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {5FB237B4-D908-4F4D-8FF9-792682CE9CF4}
+		SolutionGuid = {23E72198-B68B-4F17-A37E-402D29635CD4}
 	EndGlobalSection
 EndGlobal

@@ -108,12 +108,12 @@ using Undecorate = RemoveConst<RemoveReference<T>>;
 
 template <typename T>
 struct IsValueReferenceT final {
-	static constexpr bool VALUE = false;
+	static const bool VALUE = false;
 };
 
 template <typename T>
 struct IsValueReferenceT<T&> final {
-	static constexpr bool VALUE = true;
+	static const bool VALUE = true;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,8 +187,10 @@ move(T&& t)																noexcept	{
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T0,
-		  typename T1>
+template <
+	typename T0
+  , typename T1
+>
 HFSM2_CONSTEXPR(11)
 T0
 min(const T0 t0,
@@ -200,8 +202,10 @@ min(const T0 t0,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-template <typename T0,
-		  typename T1>
+template <
+	typename T0
+  , typename T1
+>
 HFSM2_CONSTEXPR(11)
 T0
 max(const T0 t0,
@@ -213,9 +217,11 @@ max(const T0 t0,
 
 //------------------------------------------------------------------------------
 
-template <typename TIndex,
-		  typename TElement,
-		  TIndex NCount>
+template <
+	typename TIndex
+  , typename TElement
+  , TIndex NCount
+>
 HFSM2_CONSTEXPR(11)
 TIndex
 count(const TElement (&)[NCount])										noexcept	{
@@ -224,8 +230,10 @@ count(const TElement (&)[NCount])										noexcept	{
 
 //------------------------------------------------------------------------------
 
-template <typename T,
-		  typename TT>
+template <
+	typename T
+  , typename TT
+>
 HFSM2_CONSTEXPR(11)
 T
 contain(const T x,
@@ -238,8 +246,7 @@ contain(const T x,
 
 HFSM2_CONSTEXPR(11)
 uint64_t
-widen(const uint32_t x, const uint32_t y)								noexcept
-{
+widen(const uint32_t x, const uint32_t y)								noexcept	{
 	return static_cast<uint64_t>(x) << 32 | y;
 }
 
@@ -295,6 +302,14 @@ reinterpret(const TI& in)												noexcept	{
 	overwrite(out, in);
 
 	return out;
+}
+
+//------------------------------------------------------------------------------
+
+template<class T>
+HFSM2_CONSTEXPR(14)
+void destroy(T& t)														noexcept	{
+	t.~T();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

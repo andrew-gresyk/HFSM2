@@ -275,6 +275,7 @@
     <ClInclude Include="..\..\development\hfsm2\machine_dev.hpp" />
     <ClInclude Include="..\..\test\tools.hpp" />
     <ClInclude Include="..\..\test\tools.inl" />
+    <ClInclude Include="..\..\test\wiki_class_member.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp" />
@@ -310,9 +311,10 @@
     <ClCompile Include="..\..\test\test_stress.cpp" />
     <ClCompile Include="..\..\test\test_utility_regions.cpp" />
     <ClCompile Include="..\..\test\test_utilize.cpp" />
+    <ClCompile Include="..\..\test\wiki_class_member.cpp" />
     <ClCompile Include="..\..\test\wiki_plans.cpp" />
     <ClCompile Include="..\..\test\wiki_serialization.cpp" />
-    <ClCompile Include="..\..\test\wiki_transitions-within-hierarchy.cpp" />
+    <ClCompile Include="..\..\test\wiki_transitions_within_hierarchy.cpp" />
     <ClCompile Include="..\..\test\wiki_tutorial.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
