@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         BUILD_CONFIG: [ Release, Debug ]
-        BUILD_PLATFORM: [ x86, x64 ]
+        BUILD_PLATFORM: [ Win32, x64 ]
 
     steps:
     - uses: actions/checkout@v4
