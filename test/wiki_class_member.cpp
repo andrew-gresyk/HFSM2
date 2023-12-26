@@ -3,9 +3,9 @@
 
 #include "wiki_class_member.hpp"
 
-#include "hfsm2/machine.hpp"
+#include <hfsm2/machine.hpp>
 
-#include "doctest/doctest.h"
+#include <doctest/doctest.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace actor_fsm {
