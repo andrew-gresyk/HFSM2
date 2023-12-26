@@ -7,7 +7,7 @@ template <typename TConfig>
 void
 LoggerT<TConfig>::recordMethod(const Context& /*context*/,
 							   const StateID origin,
-							   const Method method) noexcept
+							   const Method method)
 {
 	REQUIRE(hfsm2::methodName(method));
 
@@ -101,7 +101,7 @@ void
 LoggerT<TConfig>::recordTransition(const Context& UNUSED(context),
 								   const StateID origin,
 								   const TransitionType transitionType,
-								   const StateID target) noexcept
+								   const StateID target)
 {
 	REQUIRE(hfsm2::transitionName(transitionType));
 
@@ -152,7 +152,7 @@ void
 LoggerT<TConfig>::recordTaskStatus(const Context& UNUSED(context),
 								   const RegionID region,
 								   const StateID origin,
-								   const StatusEvent event) noexcept
+								   const StatusEvent event)
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -174,7 +174,7 @@ template <typename TConfig>
 void
 LoggerT<TConfig>::recordPlanStatus(const Context& UNUSED(context),
 								   const RegionID region,
-								   const StatusEvent event) noexcept
+								   const StatusEvent event)
 {
 	switch (event) {
 		case StatusEvent::SUCCEEDED:
@@ -197,7 +197,7 @@ LoggerT<TConfig>::recordPlanStatus(const Context& UNUSED(context),
 template <typename TConfig>
 void
 LoggerT<TConfig>::recordCancelledPending(const Context& UNUSED(context),
-										 const StateID origin) noexcept
+										 const StateID origin)
 {
 	history.emplace_back(origin, Event::Type::CANCEL_PENDING);
 }
@@ -208,7 +208,7 @@ template <typename TConfig>
 void
 LoggerT<TConfig>::recordSelectResolution(const Context& UNUSED(context),
 										 const StateID head,
-										 const Prong prong) noexcept
+										 const Prong prong)
 {
 	history.emplace_back(head, Event::Type::SELECT_RESOLUTION, prong);
 }
@@ -222,7 +222,7 @@ void
 LoggerT<TConfig>::recordUtilityResolution(const Context& UNUSED(context),
 										  const StateID head,
 										  const Prong prong,
-										  const Utilty utilty) noexcept
+										  const Utilty utilty)
 {
 	history.emplace_back(head, Event::Type::UTILITY_RESOLUTION, prong, utilty);
 }
@@ -234,7 +234,7 @@ void
 LoggerT<TConfig>::recordRandomResolution(const Context& UNUSED(context),
 										 const StateID head,
 										 const Prong prong,
-										 const Utilty utilty) noexcept
+										 const Utilty utilty)
 {
 	history.emplace_back(head, Event::Type::RANDOM_RESOLUTION, prong, utilty);
 }
@@ -245,7 +245,7 @@ LoggerT<TConfig>::recordRandomResolution(const Context& UNUSED(context),
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::assertSequence(const Events& reference) noexcept {
+LoggerT<TConfig>::assertSequence(const Events& reference) {
 	const auto count = std::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {
@@ -270,7 +270,7 @@ template <typename TMachine>
 void
 assertActive(TMachine& machine,
 			 const Types& all,
-			 const Types& toCheck) noexcept
+			 const Types& toCheck)
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
@@ -286,7 +286,7 @@ template <typename TMachine>
 void
 assertResumable(TMachine& machine,
 				const Types& all,
-				const Types& toCheck) noexcept
+				const Types& toCheck)
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
@@ -303,7 +303,7 @@ assertResumable(TMachine& machine,
 template <typename TStructure>
 void
 assertStructure(const TStructure& structure,
-				const StructureReference& reference) noexcept
+				const StructureReference& reference)
 {
 	const std::size_t count = std::max(static_cast<std::size_t>(structure.count()), reference.size());
 
@@ -329,7 +329,7 @@ assertStructure(const TStructure& structure,
 template <typename TActivityHistory>
 void
 assertActivity(const TActivityHistory& activity,
-			   const ActivityReference& reference) noexcept
+			   const ActivityReference& reference)
 {
 	REQUIRE(static_cast<size_t>(activity.count()) == reference.size());
 	const size_t count = std::max(static_cast<size_t>(activity.count()), reference.size());
@@ -356,7 +356,7 @@ template <typename TMachine>
 void
 assertLastTransitions(TMachine& machine,
 					  const Types& all,
-					  const Types& toCheck) noexcept
+					  const Types& toCheck)
 {
 	for (const auto& type : all) {
 		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())

@@ -32,12 +32,12 @@ struct Disable {};
 
 struct Disabled : FSM::State
 {
-	void update(FullControl& control) noexcept
+	void update(FullControl& control)
 	{
 		control.changeTo<Enabled>();
 	}
 
-	void react(const Enable&, FullControl& control) noexcept
+	void react(const Enable&, FullControl& control)
 	{
 		control.changeTo<Enabled>();
 	}
@@ -47,7 +47,7 @@ struct Disabled : FSM::State
 
 struct Enabled : FSM::State
 {
-	void react(const Disable&, FullControl& control) noexcept
+	void react(const Disable&, FullControl& control)
 	{
 		control.changeTo<Disabled>();
 	}
@@ -65,7 +65,7 @@ struct Active : FSM::State
 
 struct Idle : FSM::State
 {
-	void update(FullControl& control) noexcept
+	void update(FullControl& control)
 	{
 		control.changeTo<Active>();
 	}
@@ -73,7 +73,7 @@ struct Idle : FSM::State
 
 struct A : FSM::State
 {
-	void enter(PlanControl& control) noexcept
+	void enter(PlanControl& control)
 	{
 		auto plan = control.plan();
 
@@ -82,22 +82,22 @@ struct A : FSM::State
 		plan.change<C, D>();
 	}
 
-	void update(FullControl& control) noexcept { control.succeed(); }
+	void update(FullControl& control) { control.succeed(); }
 };
 
 struct B : FSM::State
 {
-	void update(FullControl& control) noexcept { control.succeed(); }
+	void update(FullControl& control) { control.succeed(); }
 };
 
 struct C : FSM::State
 {
-	void update(FullControl& control) noexcept { control.succeed(); }
+	void update(FullControl& control) { control.succeed(); }
 };
 
 struct D : FSM::State
 {
-	void update(FullControl& control) noexcept { control.succeed(); }
+	void update(FullControl& control) { control.succeed(); }
 };
 
 TEST_CASE("FSM.Reported.issue_49")

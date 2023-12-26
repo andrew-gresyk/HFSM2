@@ -110,7 +110,7 @@ struct On
 	: FSM::State // necessary boilerplate!
 {
 	// called on state entry
-	void enter(Control& control) noexcept {
+	void enter(Control& control) {
 		control.context().cycleCount = 0;
 		std::cout << "On" << std::endl;
 	}
@@ -122,13 +122,13 @@ struct On
 struct Red
 	: FSM::State
 {
-	void enter(Control& control) noexcept {
+	void enter(Control& control) {
 		++control.context().cycleCount;
 		std::cout << "  Red" << std::endl;
 	}
 
 	// state can initiate transitions to _any_ other state
-	void update(FullControl& control) noexcept {
+	void update(FullControl& control) {
 		// multiple transitions can be initiated, can be useful in a hierarchy
 		if (control.context().cycleCount > 3)
 			control.changeTo<Off>();
@@ -142,11 +142,11 @@ struct Red
 struct YellowDownwards
 	: FSM::State
 {
-	void enter(Control&) noexcept {
+	void enter(Control&) {
 		std::cout << "    Yellow v" << std::endl;
 	}
 
-	void update(FullControl& control) noexcept {
+	void update(FullControl& control) {
 		control.changeTo<Green>();
 	}
 };
@@ -156,11 +156,11 @@ struct YellowDownwards
 struct YellowUpwards
 	: FSM::State
 {
-	void enter(Control&) noexcept {
+	void enter(Control&) {
 		std::cout << "    Yellow ^" << std::endl;
 	}
 
-	void update(FullControl& control) noexcept {
+	void update(FullControl& control) {
 		control.changeTo<Red>();
 	}
 };
@@ -170,11 +170,11 @@ struct YellowUpwards
 struct Green
 	: FSM::State
 {
-	void enter(Control&) noexcept {
+	void enter(Control&) {
 		std::cout << "      Green" << std::endl;
 	}
 
-	void update(FullControl& control) noexcept {
+	void update(FullControl& control) {
 		control.changeTo<YellowUpwards>();
 	}
 };
@@ -185,15 +185,14 @@ struct Green
 struct Off
 	: FSM::State
 {
-	void enter(Control&) noexcept {
+	void enter(Control&) {
 		std::cout << "Off" << std::endl;
 	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int
-main() noexcept {
+int main() {
 	// shared data storage instance
 	Context context;
 

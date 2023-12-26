@@ -90,7 +90,7 @@ struct Logger
 {
 	void recordMethod(const Context& /*context*/,
 					  const hfsm2::StateID /*origin*/,
-					  const Method method) noexcept override
+					  const Method method) override
 	{
 		std::cout //<< hfsm2::stateName(origin) << "::"
 				  << hfsm2::methodName(method) << "()\n";
@@ -99,7 +99,7 @@ struct Logger
 	void recordTransition(const Context& /*context*/,
 						  const hfsm2::StateID /*origin*/,
 						  const TransitionType transitionType,
-						  const hfsm2::StateID /*target*/) noexcept override
+						  const hfsm2::StateID /*target*/) override
 	{
 		std::cout //<< hfsm2::stateName(origin) << ": "
 				  << hfsm2::transitionName(transitionType) << "<"
@@ -115,12 +115,12 @@ struct Top
 	: FSM::State // necessary boilerplate!
 {
 	// all state methods:
-	void entryGuard(GuardControl&)					noexcept {}	// not going to be called in this example
-	void enter(Control&)							noexcept {}
-	void update(FullControl&)						noexcept {}
+	void entryGuard(GuardControl&)					{}	// not going to be called in this example
+	void enter(Control&)							{}
+	void update(FullControl&)						{}
 	template <typename TEvent>
-	void react(const TEvent&, FullControl&)			noexcept {}
-	void exit(Control&)								noexcept {}
+	void react(const TEvent&, FullControl&)			{}
+	void exit(Control&)								{}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -130,12 +130,12 @@ struct From
 	: FSM::State
 {
 	// all state methods:
-	void entryGuard(GuardControl&)					noexcept {}	// not going to be called in this example
-	void enter(Control&)							noexcept {}
-	void update(FullControl&)						noexcept {}
+	void entryGuard(GuardControl&)					{}	// not going to be called in this example
+	void enter(Control&)							{}
+	void update(FullControl&)						{}
 	template <typename TEvent>
-	void react(const TEvent&, FullControl& control)	noexcept { control.changeTo<To>(); }
-	void exit(Control&)								noexcept {}
+	void react(const TEvent&, FullControl& control)	{ control.changeTo<To>(); }
+	void exit(Control&)								{}
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -145,18 +145,17 @@ struct To
 	: FSM::State
 {
 	// all state methods:
-	void entryGuard(GuardControl&)					noexcept {}
-	void enter(Control&)							noexcept {}
-	void update(FullControl&)						noexcept {}
+	void entryGuard(GuardControl&)					{}
+	void enter(Control&)							{}
+	void update(FullControl&)						{}
 	template <typename TEvent>
-	void react(const TEvent&, FullControl&)			noexcept {}	// not going to be called in this example
-	void exit(Control&)								noexcept {}
+	void react(const TEvent&, FullControl&)			{}	// not going to be called in this example
+	void exit(Control&)								{}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int
-main() noexcept {
+int main() {
 	{
 		// logger
 		Logger logger;

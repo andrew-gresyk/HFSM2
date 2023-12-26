@@ -4,10 +4,10 @@
 // An HFSM2 port of https://gist.github.com/martinmoene/797b1923f9c6c1ae355bb2d6870be25e
 // by Martin Moene (see https://twitter.com/MartinMoene/status/1118453128834232320)
 
-#include <assert.h>
-
 #include <iostream>
 #include <string>
+
+#include <assert.h>
 
 #define HFSM2_ENABLE_LOG_INTERFACE
 #define HFSM2_ENABLE_STRUCTURE_REPORT
@@ -64,7 +64,7 @@ static_assert(FSM::stateId<Paused>()  ==  3, "");
 struct Logger
 	: M::LoggerInterface
 {
-	static const char* stateName(const StateID stateId) noexcept {
+	static const char* stateName(const StateID stateId) {
 		switch (stateId) {
 		case 1:
 			return "Idle";
@@ -81,7 +81,7 @@ struct Logger
 	void recordTransition(const Context& /*context*/,
 						  const StateID origin,
 						  const TransitionType /*transition*/,
-						  const StateID target) noexcept override
+						  const StateID target) override
 	{
 		std::cout << stateName(origin) << " -> " << stateName(target) << "\n";
 	}
@@ -94,7 +94,7 @@ struct Base
 	: FSM::State
 {
 	template <typename Event>
-	void react(const Event&, FullControl&) noexcept {
+	void react(const Event&, FullControl&) {
 		std::cout << "[unsupported transition]\n";
 	}
 };
@@ -105,7 +105,7 @@ struct Idle
 {
 	using Base::react;
 
-	void react(const Play& event, FullControl& control) noexcept {
+	void react(const Play& event, FullControl& control) {
 		control.context() = event.title;
 		control.changeTo<Playing>();
 	}
@@ -116,11 +116,11 @@ struct Playing
 {
 	using Base::react;
 
-	void react(const Pause&, FullControl& control) noexcept {
+	void react(const Pause&, FullControl& control) {
 		control.changeTo<Paused>();
 	}
 
-	void react(const Stop&, FullControl& control) noexcept {
+	void react(const Stop&, FullControl& control) {
 		control.changeTo<Idle>();
 	}
 };
@@ -130,19 +130,18 @@ struct Paused
 {
 	using Base::react;
 
-	void react(const Resume&, FullControl& control) noexcept {
+	void react(const Resume&, FullControl& control) {
 		control.changeTo<Playing>();
 	}
 
-	void react(const Stop&, FullControl& control) noexcept {
+	void react(const Stop&, FullControl& control) {
 		control.changeTo<Idle>();
 	}
 };
 
 //------------------------------------------------------------------------------
 
-int
-main() noexcept {
+int main() {
 	// construct everything
 	Context title;
 	Logger logger;
