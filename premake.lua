@@ -31,7 +31,7 @@ workspace "hfsm2"
 	systemversion "latest"
 	--systemversion "$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))"
 
-	targetdir "binaries-$(PlatformArchitecture)/"
+	targetdir "binaries/"
 	targetname "$(ProjectName)-$(Configuration)-$(PlatformArchitecture)"
 	warnings "High"
 
