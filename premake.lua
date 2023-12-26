@@ -1,7 +1,7 @@
 workspace "hfsm2"
 	configurations {
-		"debug",
-		"release"
+		"Debug",
+		"Release"
 	}
 	conformancemode "On"
 	debugdir "."
@@ -23,8 +23,8 @@ workspace "hfsm2"
 	location "projects/premake"
 	objdir "$(BUILD_ROOT)/$(SolutionName)-$(PlatformArchitecture)/$(ProjectName)-$(Configuration)/"
 	platforms {
-		"32",
-		"64",
+		"x86",
+		"x64",
 	}
 
 	system "windows"

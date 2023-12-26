@@ -15,8 +15,8 @@ jobs:
 
     strategy:
       matrix:
-        BUILD_CONFIG: [ release, debug ]
-        BUILD_PLATFORM: [ 32, 64 ]
+        BUILD_CONFIG: [ Release, Debug ]
+        BUILD_PLATFORM: [ x86, x64 ]
 
     steps:
     - uses: actions/checkout@v4
@@ -31,4 +31,4 @@ jobs:
 
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: "binaries-${{matrix.BUILD_PLATFORM}}/test-17-${{matrix.BUILD_CONFIG}} ${{matrix.BUILD_PLATFORM}}-${{matrix.BUILD_PLATFORM}}.exe"
+      run: "binaries-${{matrix.BUILD_PLATFORM}}/test-17-${{matrix.BUILD_CONFIG}}-${{matrix.BUILD_PLATFORM}}.exe"
