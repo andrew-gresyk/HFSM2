@@ -13,7 +13,7 @@ namespace test_contexts_random {
 using Context = int;
 
 struct DummyRNG {
-	inline float next() noexcept { return 0.0f; }
+	inline float next() { return 0.0f; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////

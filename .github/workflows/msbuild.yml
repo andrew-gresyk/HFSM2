@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 env:
-  SOLUTION_FILE_PATH: projects\visual-studio\hfsm2-vs.sln
+  SOLUTION_FILE_PATH: projects\premake\hfsm2-vs.sln
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         BUILD_CONFIG: [ Release, Debug ]
-        BUILD_PLATFORM: [ x86, x64 ]
+        BUILD_PLATFORM: [ 32, 64 ]
 
     steps:
     - uses: actions/checkout@v4
@@ -31,4 +31,4 @@ jobs:
 
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: binaries-${{matrix.BUILD_PLATFORM}}\test-17-${{matrix.BUILD_CONFIG}}-${{matrix.BUILD_PLATFORM}}.exe
+      run: "binaries/test-17-${{matrix.BUILD_CONFIG}}-${{matrix.BUILD_PLATFORM}}.exe"

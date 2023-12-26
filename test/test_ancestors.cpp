@@ -32,12 +32,12 @@ struct Event {
 	};
 
 	Event(const hfsm2::StateID origin_,
-		  const Type type_) noexcept
+		  const Type type_)
 		: origin{origin_}
 		, type{type_}
 	{}
 
-	Event(const Type type_ = Type::COUNT) noexcept
+	Event(const Type type_ = Type::COUNT)
 		: type{type_}
 	{}
 
@@ -51,7 +51,7 @@ using Events = std::vector<Event>;
 
 void
 assertSequence(Events& history,
-			   const Events& reference) noexcept
+			   const Events& reference)
 {
 	const auto count = std::max(history.size(), reference.size());
 

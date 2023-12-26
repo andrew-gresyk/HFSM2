@@ -1,5 +1,5 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.3.3 (2023-12-21)
+// 2.4.0 (2023-12-25)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 3
-#define HFSM2_VERSION_PATCH 3
+#define HFSM2_VERSION_MINOR 4
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 

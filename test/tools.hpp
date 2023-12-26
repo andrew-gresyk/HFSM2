@@ -79,7 +79,7 @@ struct Event final {
 	Event(const hfsm2::StateID origin_,
 		  const Type type_,
 		  const hfsm2::StateID target_ = hfsm2::INVALID_STATE_ID,
-		  const float utility_ = 0.0f)									noexcept
+		  const float utility_ = 0.0f)
 		: origin{origin_}
 		, type{type_}
 		, target{target_}
@@ -88,7 +88,7 @@ struct Event final {
 
 	Event(const Type type_,
 		  const hfsm2::StateID target_,
-		  const float utility_ = 0.0f)									noexcept
+		  const float utility_ = 0.0f)
 		: origin{hfsm2::INVALID_STATE_ID}
 		, type{type_}
 		, target{target_}
@@ -128,48 +128,48 @@ struct LoggerT final
 
 	void recordMethod(const Context& context,
 					  const StateID origin,
-					  const Method method)					   noexcept override;
+					  const Method method) override;
 
 	void recordTransition(const Context& context,
 						  const StateID origin,
 						  const TransitionType transitionType,
-						  const StateID target)				   noexcept override;
+						  const StateID target) override;
 
 #ifdef HFSM2_ENABLE_PLANS
 
 	void recordTaskStatus(const Context& context,
 						  const RegionID region,
 						  const StateID origin,
-						  const StatusEvent event)			   noexcept override;
+						  const StatusEvent event) override;
 
 	void recordPlanStatus(const Context& context,
 						  const RegionID region,
-						  const StatusEvent event)			   noexcept override;
+						  const StatusEvent event) override;
 
 #endif
 
 	void recordCancelledPending(const Context& context,
-								const StateID origin)		   noexcept override;
+								const StateID origin) override;
 
 	void recordSelectResolution(const Context& context,
 								const StateID head,
-								const Prong prong)			   noexcept override;
+								const Prong prong) override;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	void recordUtilityResolution(const Context& context,
 								 const StateID head,
 								 const Prong prong,
-								 const Utilty utilty)		   noexcept override;
+								 const Utilty utilty) override;
 
 	void recordRandomResolution(const Context& context,
 								const StateID head,
 								const Prong prong,
-								const Utilty utilty)		   noexcept override;
+								const Utilty utilty) override;
 
 #endif
 
-	void assertSequence(const Events& reference)						noexcept;
+	void assertSequence(const Events& reference);
 
 	Events history;
 };
@@ -182,14 +182,14 @@ using Types = std::vector<hfsm2::StateID>;
 template <typename TMachine>
 void assertActive(TMachine& machine,
 				  const Types& all,
-				  const Types& toCheck)									noexcept;
+				  const Types& toCheck);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TMachine>
 void assertResumable(TMachine& machine,
 					 const Types& all,
-					 const Types& toCheck)								noexcept;
+					 const Types& toCheck);
 
 //------------------------------------------------------------------------------
 
@@ -200,7 +200,7 @@ using StructureReference = std::vector<hfsm2::StructureEntry>;
 template <typename TStructure>
 void
 assertStructure(const TStructure& structure,
-				const StructureReference& reference)			noexcept;
+				const StructureReference& reference);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -209,7 +209,7 @@ using ActivityReference = std::vector<int8_t>;
 template <typename TActivityHistory>
 void
 assertActivity(const TActivityHistory& activity,
-			   const ActivityReference& reference)						noexcept;
+			   const ActivityReference& reference);
 
 #endif
 
@@ -220,7 +220,7 @@ assertActivity(const TActivityHistory& activity,
 template <typename TMachine>
 void assertLastTransitions(TMachine& machine,
 						   const Types& all,
-						   const Types& toCheck)						noexcept;
+						   const Types& toCheck);
 
 #endif
 

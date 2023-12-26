@@ -54,7 +54,7 @@ struct Event {};
 struct Off
     : FSM::State
 {
-    void entryGuard(FullControl& control) noexcept {           // called before state activation, use to re-route transitions
+    void entryGuard(FullControl& control) {					   // called before state activation, use to re-route transitions
         if (control.context().powerOn)                         // access shared data
             control.changeTo<On>();                            // initiate a transition into 'On' region
     }
@@ -63,7 +63,7 @@ struct Off
 struct On
     : FSM::State
 {
-    void enter(PlanControl& control) noexcept {                // called on state activation
+    void enter(PlanControl& control) {					       // called on state activation
         auto plan = control.plan();                            // access the plan for the region
 
         plan.change<Red, Yellow>();                            // sequence plan steps, executed when the previous state succeeds
@@ -72,19 +72,19 @@ struct On
         plan.change<Yellow, Red>();
     }
 
-    void exit(PlanControl& /*control*/) noexcept {}            // called on state deactivation
+    void exit(PlanControl& /*control*/) {}		               // called on state deactivation
 
-    void planSucceeded(FullControl& control) noexcept {        // called on the successful completion of all plan steps
+    void planSucceeded(FullControl& control) {                 // called on the successful completion of all plan steps
         control.changeTo<Done>();
     }
 
-    void planFailed(FullControl& /*control*/) noexcept {}      // called if any of the plan steps fails
+    void planFailed(FullControl& /*control*/) {}               // called if any of the plan steps fails
 };
 
 struct Red
     : FSM::State
 {
-    void update(FullControl& control) noexcept {               // called on periodic state machine updates
+    void update(FullControl& control) {                        // called on periodic state machine updates
         control.succeed();                                     // notify successful completion of the plan step
     }                                                          // plan will advance to the 'Yellow' state
 };
@@ -92,7 +92,7 @@ struct Red
 struct Yellow
     : FSM::State
 {
-    void update(FullControl& control) noexcept {
+    void update(FullControl& control) {
         control.succeed();                                     // plan will advance to the 'Green' state on the first entry
                                                                // and 'Red' state on the second one
     }
@@ -101,7 +101,7 @@ struct Yellow
 struct Green
     : FSM::State
 {
-    void react(const Event&, FullControl& control) noexcept {  // called on external events
+    void react(const Event&, FullControl& control) {           // called on external events
         control.succeed();                                     // advance to the next plan step
     }
 };
