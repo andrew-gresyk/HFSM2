@@ -31,4 +31,4 @@ jobs:
 
     - name: Test
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: "binaries-${{matrix.BUILD_PLATFORM}}\test-17-${{matrix.BUILD_CONFIG}} ${{matrix.BUILD_PLATFORM}}-${{matrix.BUILD_PLATFORM}}.exe"
+      run: "binaries-${{matrix.BUILD_PLATFORM}}/test-17-${{matrix.BUILD_CONFIG}} ${{matrix.BUILD_PLATFORM}}-${{matrix.BUILD_PLATFORM}}.exe"
