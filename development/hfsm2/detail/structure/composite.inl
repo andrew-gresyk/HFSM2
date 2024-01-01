@@ -100,8 +100,9 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepReenter(PlanControl& control) noexcept {
 
 		active  = requested;
 
-		if (requested == resumable)
+		if (requested == resumable) {
 			resumable = INVALID_PRONG;
+		}
 
 		SubStates::wideEnter  (control, active);
 	}
@@ -185,7 +186,7 @@ template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN_, TA_, SG_, TH_, TS_...>::deepPreReact(FullControl& control,
+C_<TN_, TA_, SG_, TH_, TS_...>::deepPreReact(EventControl& control,
 											 const TEvent& event) noexcept
 {
 	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
@@ -195,14 +196,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepPreReact(FullControl& control,
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const TaskStatus h =
-		HeadState::deepPreReact(control, event);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
-
-	HFSM2_IF_PLANS(subStatus(control) |=)
-		SubStates::widePreReact(control, event, active);
-
-	return h;
+	return PreReactWrapper::execute(*this, control, event, active);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -211,7 +205,7 @@ template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN_, TA_, SG_, TH_, TS_...>::deepReact(FullControl& control,
+C_<TN_, TA_, SG_, TH_, TS_...>::deepReact(EventControl& control,
 										  const TEvent& event) noexcept
 {
 	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
@@ -221,14 +215,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepReact(FullControl& control,
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const TaskStatus h =
-		HeadState::deepReact (control, event);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
-
-	HFSM2_IF_PLANS( subStatus(control) |=)
-		SubStates::wideReact (control, event, active);
-
-	return h;
+	return ReactWrapper::execute(*this, control, event, active);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -237,7 +224,7 @@ template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-C_<TN_, TA_, SG_, TH_, TS_...>::deepPostReact(FullControl& control,
+C_<TN_, TA_, SG_, TH_, TS_...>::deepPostReact(EventControl& control,
 											  const TEvent& event) noexcept
 {
 	HFSM2_ASSERT(compoRequested(control) == INVALID_PRONG);
@@ -247,14 +234,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepPostReact(FullControl& control,
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	HFSM2_IF_PLANS( subStatus	(control) |=)
-		SubStates::widePostReact(control, event, active);
-
-	const TaskStatus h =
-		HeadState::deepPostReact(control, event);
-	HFSM2_IF_PLANS(headStatus	(control) |= h);
-
-	return h;
+	return PostReactWrapper::execute(*this, control, event, active);
 }
 
 //------------------------------------------------------------------------------
@@ -269,8 +249,9 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepQuery(ConstControl& control,
 	const Prong  active = compoActive(control);
 	HFSM2_ASSERT(active < WIDTH);
 
-	HeadState::deepQuery(control, event);
-	SubStates::wideQuery(control, event, active);
+	ScopedCRegion region{control, REGION_ID};
+
+	QueryWrapper::execute(*this, control, event, active);
 }
 
 //------------------------------------------------------------------------------

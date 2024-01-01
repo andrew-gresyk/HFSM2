@@ -225,6 +225,7 @@ template <
   , Long NCompoCount
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   HFSM2_IF_SERIALIZATION(, Long NSerialBits)
   HFSM2_IF_PLANS(, Long NTaskCapacity)
   , typename TPayload
@@ -254,6 +255,8 @@ struct ArgsT final {
 	static constexpr Short COMPO_COUNT			= NCompoCount;
 	static constexpr Short ORTHO_COUNT			= NOrthoCount;
 	static constexpr Short ORTHO_UNITS			= NOrthoUnits;
+
+	using ReactOrder	= TReactOrder;
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 	static constexpr Short SERIAL_BITS			= NSerialBits;
@@ -357,6 +360,8 @@ struct RF_ final {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	using ReactOrder		= typename Config::ReactOrder;
+
 	using StateList			= typename Apex::StateList;
 	using RegionList		= typename Apex::RegionList;
 
@@ -389,6 +394,7 @@ struct RF_ final {
 								, COMPO_COUNT
 								, ORTHO_COUNT
 								, ORTHO_UNITS
+								, ReactOrder
 								HFSM2_IF_SERIALIZATION(, SERIAL_BITS)
 								HFSM2_IF_PLANS(, TASK_CAPACITY)
 								, Payload
@@ -402,6 +408,7 @@ struct RF_ final {
 	using Control			= ControlT	   <Args>;
 	using FullControl		= FullControlT <Args>;
 	using GuardControl		= GuardControlT<Args>;
+	using EventControl		= EventControlT<Args>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

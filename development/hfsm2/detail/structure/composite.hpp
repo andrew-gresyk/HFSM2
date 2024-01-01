@@ -25,7 +25,7 @@ struct HFSM2_EMPTY_BASES C_
 		, TL_<TSubStates...>
 	  >
 {
-	using Indices		= TIndices;
+	using Indices			= TIndices;
 	static constexpr StateID  HEAD_ID	  = Indices::STATE_ID;
 	static constexpr Short	  COMPO_INDEX = Indices::COMPO_INDEX;
 	static constexpr Short	  ORTHO_INDEX = Indices::ORTHO_INDEX;
@@ -36,59 +36,67 @@ struct HFSM2_EMPTY_BASES C_
 	static constexpr RegionID REGION_ID	  = COMPO_INDEX + ORTHO_INDEX;
 	static constexpr ForkID	  COMPO_ID	  = COMPO_INDEX + 1;
 
-	using Args			= TArgs;
+	using Args				= TArgs;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	using Rank			= typename Args::Rank;
-	using Utility		= typename Args::Utility;
-	using UP			= typename Args::UP;
+	using Rank				= typename Args::Rank;
+	using Utility			= typename Args::Utility;
+	using UP				= typename Args::UP;
 #endif
 
-	using StateList		= typename Args::StateList;
-	using RegionList	= typename Args::RegionList;
+	using StateList			= typename Args::StateList;
+	using RegionList		= typename Args::RegionList;
 
-	using Registry		= RegistryT<Args>;
-	using StateParents	= typename Registry::StateParents;
+	using ReactOrder		= typename Args::ReactOrder;
 
-	using ConstControl	= ConstControlT<Args>;
-	using Control		= ControlT	   <Args>;
-	using ScopedOrigin	= typename Control::Origin;
+	using Registry			= RegistryT<Args>;
+	using StateParents		= typename Registry::StateParents;
 
-	using PlanControl	= PlanControlT <Args>;
-	using ScopedRegion	= typename PlanControl::Region;
+	using ConstControl		= ConstControlT<Args>;
+	using ScopedCRegion		= typename ConstControl::Region;
+
+	using Control			= ControlT	   <Args>;
+	using ScopedOrigin		= typename Control::Origin;
+
+	using PlanControl		= PlanControlT <Args>;
+	using FullControl		= FullControlT <Args>;
+	using ControlLock		= typename FullControl::Lock;
+	using ScopedRegion		= typename PlanControl::Region;
+
+	using GuardControl		= GuardControlT<Args>;
+	using EventControl		= EventControlT<Args>;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using Plan			= typename PlanControl::Plan;
+	using Plan				= typename PlanControl::Plan;
 #endif
 
-	using FullControl	= FullControlT <Args>;
-	using ControlLock	= typename FullControl::Lock;
+	using Head				= THead;
+	using HeadState			= S_<Indices, Args, Head>;
 
-	using GuardControl	= GuardControlT<Args>;
+	using SubStates			= CS_<
+								  I_<
+									  HEAD_ID + 1,
+									  COMPO_INDEX + 1,
+									  ORTHO_INDEX,
+									  ORTHO_UNIT
+								  >,
+								  Args,
+								  STRATEGY,
+								  0,
+								  TL_<TSubStates...>
+							  >;
 
-	using Head			= THead;
-	using HeadState		= S_<Indices, Args, Head>;
+	using PreReactWrapper	= PreReactWrapperT <HeadState, SubStates, ReactOrder>;
+	using ReactWrapper		= ReactWrapperT	   <HeadState, SubStates, ReactOrder>;
+	using PostReactWrapper	= PostReactWrapperT<HeadState, SubStates, ReactOrder>;
+	using QueryWrapper		= QueryWrapperT	   <HeadState, SubStates, ReactOrder>;
 
-	using SubStates		= CS_<
-							  I_<
-								  HEAD_ID + 1,
-								  COMPO_INDEX + 1,
-								  ORTHO_INDEX,
-								  ORTHO_UNIT
-							  >,
-							  Args,
-							  STRATEGY,
-							  0,
-							  TL_<TSubStates...>
-						  >;
-
-	using Info			= CI_<STRATEGY, Head, TSubStates...>;
-
+	using Info				= CI_<STRATEGY, Head, TSubStates...>;
 	static constexpr Short WIDTH		  = Info::WIDTH;
 
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
-	using Ranks			=	 Rank[WIDTH];
-	using Utilities		= Utility[WIDTH];
+	using Ranks				=	 Rank[WIDTH];
+	using Utilities			= Utility[WIDTH];
 #endif
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
@@ -139,13 +147,13 @@ struct HFSM2_EMPTY_BASES C_
 	HFSM2_CONSTEXPR(14)	TaskStatus	deepPostUpdate				  ( FullControl& control					 )			noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	deepPreReact				  ( FullControl& control, const TEvent& event)			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	deepPreReact				  (EventControl& control, const TEvent& event)			noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	deepReact					  ( FullControl& control, const TEvent& event)			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	deepReact					  (EventControl& control, const TEvent& event)			noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	deepPostReact				  ( FullControl& control, const TEvent& event)			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	deepPostReact				  (EventControl& control, const TEvent& event)			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void		deepQuery					  (ConstControl& control,		TEvent& event)	  const noexcept;

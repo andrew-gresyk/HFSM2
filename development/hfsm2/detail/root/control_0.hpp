@@ -17,6 +17,9 @@ class ConstControlT {
 	template <typename, typename>
 	friend class R_;
 
+	template <typename, typename, typename>
+	friend struct QueryWrapperT;
+
 protected:
 	using Context			= typename TArgs::Context;
 
@@ -122,6 +125,12 @@ public:
 	/// @return context
 	/// @see Control::_()
 	HFSM2_CONSTEXPR(11)	const Context& context()					  const noexcept	{ return _core.context;											}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Stops processing of the current query down the hierarchy
+	/// @see Config::BottomUpReactions
+	HFSM2_CONSTEXPR(14)	void consumeQuery()									noexcept	{ _consumed = true;												}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -246,6 +255,7 @@ protected:
 	const Core& _core;
 	StateID _originId = INVALID_STATE_ID;
 	RegionID _regionId = 0;
+	bool _consumed = false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

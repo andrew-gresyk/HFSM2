@@ -260,6 +260,7 @@
     <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_1.inl" />
     <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_2.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_2.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\reactions.inl" />
     <ClInclude Include="..\..\development\hfsm2\detail\structure\state_1.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\structure\state_1.inl" />
     <ClInclude Include="..\..\development\hfsm2\detail\structure\state_2.hpp" />
@@ -295,6 +296,7 @@
     <ClCompile Include="..\..\test\test_plans_payloads.cpp" />
     <ClCompile Include="..\..\test\test_query.cpp" />
     <ClCompile Include="..\..\test\test_randomize.cpp" />
+    <ClCompile Include="..\..\test\test_react_order.cpp" />
     <ClCompile Include="..\..\test\test_replication.cpp" />
     <ClCompile Include="..\..\test\test_resume.cpp" />
     <ClCompile Include="..\..\test\test_select.cpp" />

@@ -221,6 +221,7 @@ template <
   , Long NCompoCount
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   HFSM2_IF_SERIALIZATION(, Long NSerialBits)
   HFSM2_IF_PLANS(, Long NTaskCapacity)
   , typename TPayload
@@ -233,6 +234,7 @@ class FullControlT<
 			, NCompoCount
 			, NOrthoCount
 			, NOrthoUnits
+			, TReactOrder
 			HFSM2_IF_SERIALIZATION(, NSerialBits)
 			HFSM2_IF_PLANS(, NTaskCapacity)
 			, TPayload
@@ -246,6 +248,7 @@ class FullControlT<
 				   , NCompoCount
 				   , NOrthoCount
 				   , NOrthoUnits
+				   , TReactOrder
 				   HFSM2_IF_SERIALIZATION(, NSerialBits)
 				   HFSM2_IF_PLANS(, NTaskCapacity)
 				   , TPayload
@@ -271,6 +274,7 @@ class FullControlT<
 				   , NCompoCount
 				   , NOrthoCount
 				   , NOrthoUnits
+				   , TReactOrder
 				   HFSM2_IF_SERIALIZATION(, NSerialBits)
 				   HFSM2_IF_PLANS(, NTaskCapacity)
 				   , TPayload
@@ -445,7 +449,7 @@ protected:
 	using FullControlBase::_locked;
 };
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//------------------------------------------------------------------------------
 
 template <
 	typename TConfig
@@ -454,6 +458,7 @@ template <
   , Long NCompoCount
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   HFSM2_IF_SERIALIZATION(, Long NSerialBits)
   HFSM2_IF_PLANS(, Long NTaskCapacity)
 >
@@ -465,6 +470,7 @@ class FullControlT<
 			, NCompoCount
 			, NOrthoCount
 			, NOrthoUnits
+			, TReactOrder
 			HFSM2_IF_SERIALIZATION(, NSerialBits)
 			HFSM2_IF_PLANS(, NTaskCapacity)
 			, void
@@ -478,6 +484,7 @@ class FullControlT<
 				   , NCompoCount
 				   , NOrthoCount
 				   , NOrthoUnits
+				   , TReactOrder
 				   HFSM2_IF_SERIALIZATION(, NSerialBits)
 				   HFSM2_IF_PLANS(, NTaskCapacity)
 				   , void
@@ -503,6 +510,7 @@ class FullControlT<
 				   , NCompoCount
 				   , NOrthoCount
 				   , NOrthoUnits
+				   , TReactOrder
 				   HFSM2_IF_SERIALIZATION(, NSerialBits)
 				   HFSM2_IF_PLANS(, NTaskCapacity)
 				   , void

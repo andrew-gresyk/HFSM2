@@ -129,7 +129,7 @@ template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::widePreReact(FullControl& control,
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::widePreReact(EventControl& control,
 												   const TEvent& event,
 												   const Prong prong) noexcept
 {
@@ -146,7 +146,7 @@ template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReact(FullControl& control,
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideReact(EventControl& control,
 												const TEvent& event,
 												const Prong prong) noexcept
 {
@@ -163,7 +163,7 @@ template <typename TN_, typename TA_, Strategy SG_, Prong NP_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::widePostReact(FullControl& control,
+CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::widePostReact(EventControl& control,
 													const TEvent& event,
 													const Prong prong) noexcept
 {

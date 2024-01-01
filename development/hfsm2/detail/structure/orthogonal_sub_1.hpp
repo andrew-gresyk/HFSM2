@@ -67,6 +67,7 @@ struct HFSM2_EMPTY_BASES OS_<
 	using PlanControl	= PlanControlT <Args>;
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
+	using EventControl	= EventControlT<Args>;
 
 	using InitialInfo	= WrapInfo<TInitial>;
 	using InitialStates	= typename InitialInfo::StateList;
@@ -103,13 +104,13 @@ struct HFSM2_EMPTY_BASES OS_<
 	HFSM2_CONSTEXPR(14)	TaskStatus	widePostUpdate		 ( FullControl& control												   )		noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	widePreReact		 ( FullControl& control, const TEvent& event						   )		noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	widePreReact		 (EventControl& control, const TEvent& event						   )		noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	wideReact			 ( FullControl& control, const TEvent& event						   )		noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	wideReact			 (EventControl& control, const TEvent& event						   )		noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	widePostReact		 ( FullControl& control, const TEvent& event						   )		noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	widePostReact		 (EventControl& control, const TEvent& event						   )		noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void		wideQuery			 (ConstControl& control,	   TEvent& event						   )  const noexcept;

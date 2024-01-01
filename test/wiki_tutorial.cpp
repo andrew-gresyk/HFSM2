@@ -54,7 +54,7 @@ struct Event {};
 struct Off
     : FSM::State
 {
-    void entryGuard(FullControl& control) {					   // called before state activation, use to re-route transitions
+    void entryGuard(FullControl& control) {                    // called before state activation, use to re-route transitions
         if (control.context().powerOn)                         // access shared data
             control.changeTo<On>();                            // initiate a transition into 'On' region
     }
@@ -63,7 +63,7 @@ struct Off
 struct On
     : FSM::State
 {
-    void enter(PlanControl& control) {					       // called on state activation
+    void enter(PlanControl& control) {                         // called on state activation
         auto plan = control.plan();                            // access the plan for the region
 
         plan.change<Red, Yellow>();                            // sequence plan steps, executed when the previous state succeeds
@@ -72,7 +72,7 @@ struct On
         plan.change<Yellow, Red>();
     }
 
-    void exit(PlanControl& /*control*/) {}		               // called on state deactivation
+    void exit(PlanControl& /*control*/) {}                     // called on state deactivation
 
     void planSucceeded(FullControl& control) {                 // called on the successful completion of all plan steps
         control.changeTo<Done>();
@@ -101,7 +101,7 @@ struct Yellow
 struct Green
     : FSM::State
 {
-    void react(const Event&, FullControl& control) {           // called on external events
+    void react(const Event&, EventControl& control) {          // called on external events
         control.succeed();                                     // advance to the next plan step
     }
 };

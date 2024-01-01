@@ -17,6 +17,7 @@ template <
   , Long NCompoCount
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   HFSM2_IF_SERIALIZATION(, Long NSerialBits)
   , Long NTaskCapacity
   , typename TPayload
@@ -29,6 +30,7 @@ class PayloadPlanT<
 			, NCompoCount
 			, NOrthoCount
 			, NOrthoUnits
+			, TReactOrder
 			HFSM2_IF_SERIALIZATION(, NSerialBits)
 			, NTaskCapacity
 			, TPayload
@@ -42,6 +44,7 @@ class PayloadPlanT<
 				   , NCompoCount
 				   , NOrthoCount
 				   , NOrthoUnits
+				   , TReactOrder
 				   HFSM2_IF_SERIALIZATION(, NSerialBits)
 				   , NTaskCapacity
 				   , TPayload
@@ -67,6 +70,7 @@ class PayloadPlanT<
 				   , NCompoCount
 				   , NOrthoCount
 				   , NOrthoUnits
+				   , TReactOrder
 				   HFSM2_IF_SERIALIZATION(, NSerialBits)
 				   , NTaskCapacity
 				   , TPayload
@@ -357,6 +361,7 @@ template <
   , Long NCompoCount
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   HFSM2_IF_SERIALIZATION(, Long NSerialBits)
   , Long NTaskCapacity
 >
@@ -368,6 +373,7 @@ class PayloadPlanT<
 			, NCompoCount
 			, NOrthoCount
 			, NOrthoUnits
+			, TReactOrder
 			HFSM2_IF_SERIALIZATION(, NSerialBits)
 			, NTaskCapacity
 			, void
@@ -381,6 +387,7 @@ class PayloadPlanT<
 				   , NCompoCount
 				   , NOrthoCount
 				   , NOrthoUnits
+				   , TReactOrder
 				   HFSM2_IF_SERIALIZATION(, NSerialBits)
 				   , NTaskCapacity
 				   , void
@@ -406,6 +413,7 @@ class PayloadPlanT<
 				   , NCompoCount
 				   , NOrthoCount
 				   , NOrthoUnits
+				   , TReactOrder
 				   HFSM2_IF_SERIALIZATION(, NSerialBits)
 				   , NTaskCapacity
 				   , void

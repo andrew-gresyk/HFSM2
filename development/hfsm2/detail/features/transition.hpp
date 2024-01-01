@@ -183,9 +183,9 @@ struct TransitionBase {
 	HFSM2_CONSTEXPR(11)
 	bool
 	operator == (const TransitionBase& other)					  const noexcept	{
-		return origin	   == other.origin &&
+		return origin	   == other.origin		&&
 			   destination == other.destination &&
-			   method	   == other.method &&
+			   method	   == other.method		&&
 			   type		   == other.type;
 	}
 
@@ -194,9 +194,9 @@ struct TransitionBase {
 	HFSM2_CONSTEXPR(11)
 	bool
 	operator != (const TransitionBase& other)					  const noexcept	{
-		return origin	   != other.origin ||
+		return origin	   != other.origin		||
 			   destination != other.destination ||
-			   method	   != other.method ||
+			   method	   != other.method		||
 			   type		   != other.type;
 	}
 

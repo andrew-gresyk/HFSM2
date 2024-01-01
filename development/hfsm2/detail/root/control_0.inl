@@ -44,5 +44,27 @@ ConstControlT<TArgs>::Region::~Region() noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+ConstControlT<TArgs>::setRegion(const RegionID regionId_) noexcept {
+	HFSM2_ASSERT(_regionId <= regionId_ && regionId_ < RegionList::SIZE);
+
+	_regionId = regionId_;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+ConstControlT<TArgs>::resetRegion(const RegionID regionId_) noexcept {
+	HFSM2_ASSERT(regionId_ <= _regionId && _regionId < RegionList::SIZE);
+
+	_regionId = regionId_;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 }
 }

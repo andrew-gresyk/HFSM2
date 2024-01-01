@@ -37,6 +37,7 @@ struct HFSM2_EMPTY_BASES A_<TFirst, TRest...>
 
 	using typename First::FullControl;
 	using typename First::GuardControl;
+	using typename First::EventControl;
 
 	using First::stateId;
 	using First::regionId;
@@ -56,15 +57,15 @@ struct HFSM2_EMPTY_BASES A_<TFirst, TRest...>
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 widePreReact  (const TEvent& event	 ,
-												FullControl& control)			noexcept;
+												EventControl& control)			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 wideReact	   (const TEvent& event	 ,
-												FullControl& control)			noexcept;
+												EventControl& control)			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 widePostReact (const TEvent& event	 ,
-												FullControl& control)			noexcept;
+												EventControl& control)			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 wideQuery	   (	  TEvent& event	 ,

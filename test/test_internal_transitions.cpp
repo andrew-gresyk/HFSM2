@@ -71,7 +71,7 @@ class Timed
 {
 public:
 	void enter(PlanControl&)						{ _elapsed = 0.0f;			}
-	void preUpdate(FullControl& control)			{ _elapsed += control._();	} //-V669
+	void preUpdate(FullControl& control)			{ _elapsed += control._();	}
 
 	float elapsed() const							{ return _elapsed;			}
 
@@ -113,7 +113,7 @@ struct A
 	//void entryGuard(GuardControl&)											{}
 	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	//void react(const Action&, FullControl&)									{}
+	//void react(const Action&, EventControl&)									{}
 	void exit(PlanControl&)														{}
 };
 
@@ -160,7 +160,7 @@ struct A_2_1
 {
 	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void react(const Action&, FullControl&)										{}
+	void react(const Action&, EventControl&)									{}
 	void exit(PlanControl&)														{}
 };
 
@@ -169,7 +169,7 @@ struct A_2_2
 {
 	void enter(PlanControl&)													{}
 	//void update(FullControl&)													{}
-	//void react(const Action&, FullControl&)									{}
+	//void react(const Action&, EventControl&)									{}
 	void exit(PlanControl&)														{}
 };
 
@@ -180,7 +180,7 @@ struct B
 {
 	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void react(const Action&, FullControl&)										{}
+	void react(const Action&, EventControl&)									{}
 	void exit(PlanControl&)														{}
 };
 

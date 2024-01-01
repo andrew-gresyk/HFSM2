@@ -52,6 +52,7 @@ protected:
 	using PlanControl			= PlanControlT <Args>;
 	using FullControl			= FullControlT <Args>;
 	using GuardControl			= GuardControlT<Args>;
+	using EventControl			= EventControlT<Args>;
 
 	static constexpr Short	SUBSTITUTION_LIMIT	= Forward::SUBSTITUTION_LIMIT;
 
@@ -121,16 +122,6 @@ public:
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	/// @brief Access context
-	/// @return context
-	HFSM2_CONSTEXPR(14)		  Context& context()												noexcept	{ return _core.context;		}
-
-	/// @brief Access context
-	/// @return context
-	HFSM2_CONSTEXPR(11)	const Context& context()										  const noexcept	{ return _core.context;		}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 	/// @brief Get state identifier for a state type
 	/// @tparam `TState` State type
 	/// @return Numeric state identifier
@@ -144,6 +135,16 @@ public:
 	template <typename TState>
 	static
 	HFSM2_CONSTEXPR(11) RegionID regionId()														noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	/// @brief Access context
+	/// @return context
+	HFSM2_CONSTEXPR(14)		  Context& context()												noexcept	{ return _core.context;							}
+
+	/// @brief Access context
+	/// @return context
+	HFSM2_CONSTEXPR(11)	const Context& context()										  const noexcept	{ return _core.context;							}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
