@@ -55,6 +55,7 @@ template <
   , Long
   , Long
   , Long
+  , typename
   HFSM2_IF_SERIALIZATION(, Long)
   , Long
   , typename
@@ -73,6 +74,7 @@ template <
   , Long NCompoCount
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   HFSM2_IF_SERIALIZATION(, Long NSerialBits)
   , Long NTaskCapacity
   , typename TPayload
@@ -85,6 +87,7 @@ struct PlanDataT<
 			 , NCompoCount
 			 , NOrthoCount
 			 , NOrthoUnits
+			 , TReactOrder
 			 HFSM2_IF_SERIALIZATION(, NSerialBits)
 			 , NTaskCapacity
 			 , TPayload
@@ -142,6 +145,7 @@ template <
   , Long NCompoCount
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   HFSM2_IF_SERIALIZATION(, Long NSerialBits)
   , Long NTaskCapacity
 >
@@ -153,6 +157,7 @@ struct PlanDataT<
 			 , NCompoCount
 			 , NOrthoCount
 			 , NOrthoUnits
+			 , TReactOrder
 			 HFSM2_IF_SERIALIZATION(, NSerialBits)
 			 , NTaskCapacity
 			 , void
@@ -205,6 +210,7 @@ template <
   , typename TRegionList
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   , Long NTaskCapacity
   , typename TPayload
 >
@@ -216,6 +222,7 @@ struct PlanDataT<
 			 , 0
 			 , NOrthoCount
 			 , NOrthoUnits
+			 , TReactOrder
 			 HFSM2_IF_SERIALIZATION(, 0)
 			 , NTaskCapacity
 			 , TPayload
@@ -241,6 +248,7 @@ template <
   , typename TRegionList
   , Long NOrthoCount
   , Long NOrthoUnits
+  , typename TReactOrder
   , Long NTaskCapacity
 >
 struct PlanDataT<
@@ -251,6 +259,7 @@ struct PlanDataT<
 			 , 0
 			 , NOrthoCount
 			 , NOrthoUnits
+			 , TReactOrder
 			 HFSM2_IF_SERIALIZATION(, 0)
 			 , NTaskCapacity
 			 , void

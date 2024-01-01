@@ -38,6 +38,7 @@ struct HFSM2_EMPTY_BASES S_
 
 	using FullControl	= FullControlT <TArgs>;
 	using GuardControl	= GuardControlT<TArgs>;
+	using EventControl	= EventControlT<TArgs>;
 
 	using Empty			= EmptyT<TArgs>;
 	using Head			= THead;
@@ -70,13 +71,13 @@ struct HFSM2_EMPTY_BASES S_
 	HFSM2_CONSTEXPR(14)	TaskStatus	 deepPostUpdate		  ( FullControl& control)								noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	 deepPreReact		  ( FullControl& control, const TEvent&	event)			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	 deepPreReact		  (EventControl& control, const TEvent&	event)			noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	 deepReact			  ( FullControl& control, const TEvent&	event)			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	 deepReact			  (EventControl& control, const TEvent&	event)			noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	 deepPostReact		  ( FullControl& control, const TEvent&	event)			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	 deepPostReact		  (EventControl& control, const TEvent&	event)			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void		 deepQuery			  (ConstControl& control,		TEvent& event)	  const noexcept;

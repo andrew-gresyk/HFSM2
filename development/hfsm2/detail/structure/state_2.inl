@@ -116,10 +116,10 @@ template <typename TN_, typename TA_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-S_<TN_, TA_, EmptyT<TA_>>::deepPreReact(FullControl& HFSM2_IF_LOG_STATE_METHOD(control),
+S_<TN_, TA_, EmptyT<TA_>>::deepPreReact(EventControl& HFSM2_IF_LOG_STATE_METHOD(control),
 										const TEvent& HFSM2_UNUSED(event)) noexcept
 {
-	HFSM2_LOG_STATE_METHOD(static_cast<void (Empty::*)(const TEvent&, FullControl&)>(&Empty::preReact),
+	HFSM2_LOG_STATE_METHOD(static_cast<void (Empty::*)(const TEvent&, EventControl&)>(&Empty::preReact),
 						   Method::PRE_REACT);
 
 	return TaskStatus{};
@@ -131,10 +131,10 @@ template <typename TN_, typename TA_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-S_<TN_, TA_, EmptyT<TA_>>::deepReact(FullControl& HFSM2_IF_LOG_STATE_METHOD(control),
+S_<TN_, TA_, EmptyT<TA_>>::deepReact(EventControl& HFSM2_IF_LOG_STATE_METHOD(control),
 									 const TEvent& HFSM2_UNUSED(event)) noexcept
 {
-	HFSM2_LOG_STATE_METHOD(static_cast<void (Empty::*)(const TEvent&, FullControl&)>(&Empty::react),
+	HFSM2_LOG_STATE_METHOD(static_cast<void (Empty::*)(const TEvent&, EventControl&)>(&Empty::react),
 						   Method::REACT);
 
 	return TaskStatus{};
@@ -146,10 +146,10 @@ template <typename TN_, typename TA_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-S_<TN_, TA_, EmptyT<TA_>>::deepPostReact(FullControl& HFSM2_IF_LOG_STATE_METHOD(control),
+S_<TN_, TA_, EmptyT<TA_>>::deepPostReact(EventControl& HFSM2_IF_LOG_STATE_METHOD(control),
 										 const TEvent& HFSM2_UNUSED(event)) noexcept
 {
-	HFSM2_LOG_STATE_METHOD(static_cast<void (Empty::*)(const TEvent&, FullControl&)>(&Empty::postReact),
+	HFSM2_LOG_STATE_METHOD(static_cast<void (Empty::*)(const TEvent&, EventControl&)>(&Empty::postReact),
 						   Method::POST_REACT);
 
 	return TaskStatus{};

@@ -118,7 +118,7 @@ template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN_, TA_, NP_, TI_, TR_...>::widePreReact(FullControl& control,
+OS_<TN_, TA_, NP_, TI_, TR_...>::widePreReact(EventControl& control,
 											  const TEvent& event) noexcept
 {
 	TaskStatus status;
@@ -134,7 +134,7 @@ template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN_, TA_, NP_, TI_, TR_...>::wideReact(FullControl& control,
+OS_<TN_, TA_, NP_, TI_, TR_...>::wideReact(EventControl& control,
 										   const TEvent& event) noexcept
 {
 	TaskStatus status;
@@ -150,7 +150,7 @@ template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN_, TA_, NP_, TI_, TR_...>::widePostReact(FullControl& control,
+OS_<TN_, TA_, NP_, TI_, TR_...>::widePostReact(EventControl& control,
 											   const TEvent& event) noexcept
 {
 	TaskStatus status;

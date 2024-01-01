@@ -74,10 +74,14 @@ R_<TG_, TA_>::react(const TEvent& event) noexcept {
 	HFSM2_ASSERT(_core.registry.isActive());
 
 	TransitionSets emptyTransitions;
-	FullControl control{_core, emptyTransitions};
+	EventControl control{_core, emptyTransitions};
 
 	_apex. deepPreReact(control, event);
+
+	control._consumed = false;
 	_apex.	  deepReact(control, event);
+
+	control._consumed = false;
 	_apex.deepPostReact(control, event);
 
 #if HFSM2_PLANS_AVAILABLE()

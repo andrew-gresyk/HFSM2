@@ -7,7 +7,7 @@ template <typename T, Long NC_>
 template <typename N>
 HFSM2_CONSTEXPR(14)
 T&
-StaticArrayT<T, NC_>::operator[] (const N index) noexcept	{
+StaticArrayT<T, NC_>::operator[] (const N index) noexcept {
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
 	return _items[static_cast<Index>(index)];

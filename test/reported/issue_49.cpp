@@ -37,7 +37,7 @@ struct Disabled : FSM::State
 		control.changeTo<Enabled>();
 	}
 
-	void react(const Enable&, FullControl& control)
+	void react(const Enable&, EventControl& control)
 	{
 		control.changeTo<Enabled>();
 	}
@@ -47,7 +47,7 @@ struct Disabled : FSM::State
 
 struct Enabled : FSM::State
 {
-	void react(const Disable&, FullControl& control)
+	void react(const Disable&, EventControl& control)
 	{
 		control.changeTo<Disabled>();
 	}

@@ -135,19 +135,12 @@ template <typename TN_, typename TA_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN_, TA_, TH_, TS_...>::deepPreReact(FullControl& control,
+O_<TN_, TA_, TH_, TS_...>::deepPreReact(EventControl& control,
 										const TEvent& event) noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const TaskStatus h =
-		HeadState::deepPreReact(control, event);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
-
-	HFSM2_IF_PLANS(subStatus(control) |=)
-		SubStates::widePreReact(control, event);
-
-	return h;
+	return PreReactWrapper::execute(*this, control, event);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -156,19 +149,12 @@ template <typename TN_, typename TA_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN_, TA_, TH_, TS_...>::deepReact(FullControl& control,
+O_<TN_, TA_, TH_, TS_...>::deepReact(EventControl& control,
 									 const TEvent& event) noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	const TaskStatus h =
-		HeadState::deepReact(control, event);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
-
-	HFSM2_IF_PLANS(subStatus(control) |=)
-		SubStates::wideReact(control, event);
-
-	return h;
+	return ReactWrapper::execute(*this, control, event);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -177,19 +163,12 @@ template <typename TN_, typename TA_, typename TH_, typename... TS_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-O_<TN_, TA_, TH_, TS_...>::deepPostReact(FullControl& control,
+O_<TN_, TA_, TH_, TS_...>::deepPostReact(EventControl& control,
 										 const TEvent& event) noexcept
 {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	HFSM2_IF_PLANS(subStatus(control) |=)
-		SubStates::widePostReact(control, event);
-
-	const TaskStatus h =
-		HeadState::deepPostReact(control, event);
-	HFSM2_IF_PLANS(headStatus(control) |= h);
-
-	return h;
+	return PostReactWrapper::execute(*this, control, event);
 }
 
 //------------------------------------------------------------------------------
@@ -201,9 +180,9 @@ void
 O_<TN_, TA_, TH_, TS_...>::deepQuery(ConstControl& control,
 									 TEvent& event) const noexcept
 {
-	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
+	ScopedCRegion region{control, REGION_ID};
 
-	SubStates::wideQuery(control, event);
+	QueryWrapper::execute(*this, control, event);
 }
 
 //------------------------------------------------------------------------------

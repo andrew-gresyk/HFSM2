@@ -249,6 +249,9 @@
     <ClInclude Include="..\..\development\hfsm2\detail\structure\orthogonal_sub_2.inl">
       <Filter>development\hfsm2\detail\structure</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\structure\reactions.inl">
+      <Filter>development\hfsm2\detail\structure</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\structure\state_1.hpp">
       <Filter>development\hfsm2\detail\structure</Filter>
     </ClInclude>
@@ -348,6 +351,9 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test_randomize.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\test_react_order.cpp">
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test_replication.cpp">

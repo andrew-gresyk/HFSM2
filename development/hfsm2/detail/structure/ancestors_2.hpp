@@ -4,7 +4,7 @@ namespace detail {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TFirst>
-struct A_<TFirst>
+struct HFSM2_EMPTY_BASES A_<TFirst>
 	: TFirst
 {
 	using First		= TFirst;
@@ -31,9 +31,12 @@ struct A_<TFirst>
 
 	using typename First::FullControl;
 	using typename First::GuardControl;
+	using typename First::EventControl;
 
 	using First::stateId;
 	using First::regionId;
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)	Prong	 select		   (const Control&		 )			noexcept	{ return 0;					}
 
@@ -55,15 +58,15 @@ struct A_<TFirst>
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 preReact	   (const TEvent&		 ,
-											    FullControl&		)			noexcept	{}
+												EventControl&		 )			noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 react		   (const TEvent&		 ,
-											    FullControl&		)			noexcept	{}
+												EventControl&		 )			noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 postReact	   (const TEvent&		 ,
-											    FullControl&		)			noexcept	{}
+												EventControl&		 )			noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 query		   (	  TEvent&		 ,
@@ -91,15 +94,15 @@ struct A_<TFirst>
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 widePreReact  (const TEvent& event	 ,
-												FullControl& control)			noexcept;
+												EventControl& control)			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 wideReact	   (const TEvent& event	 ,
-												FullControl& control)			noexcept;
+												EventControl& control)			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 widePostReact (const TEvent& event	 ,
-												FullControl& control)			noexcept;
+												EventControl& control)			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 wideQuery	   (	  TEvent& event	 ,

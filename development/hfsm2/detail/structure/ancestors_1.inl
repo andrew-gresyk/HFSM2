@@ -68,7 +68,7 @@ template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
 A_<TF_, TR_...>::widePreReact(const TEvent& event,
-							  FullControl& control) noexcept
+							  EventControl& control) noexcept
 {
 	First::	   preReact(event, control);
 	Rest ::widePreReact(event, control);
@@ -81,7 +81,7 @@ template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
 A_<TF_, TR_...>::wideReact(const TEvent& event,
-						   FullControl& control) noexcept
+						   EventControl& control) noexcept
 {
 	First::	   react(event, control);
 	Rest ::wideReact(event, control);
@@ -94,7 +94,7 @@ template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 void
 A_<TF_, TR_...>::widePostReact(const TEvent& event,
-							   FullControl& control) noexcept
+							   EventControl& control) noexcept
 {
 	Rest ::widePostReact(event, control);
 	First::	   postReact(event, control);

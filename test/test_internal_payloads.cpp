@@ -75,7 +75,7 @@ class Timed
 {
 public:
 	void enter(PlanControl&)						{ _elapsed = 0.0f;			}
-	void preUpdate(FullControl& control)			{ _elapsed += control._();	} //-V669
+	void preUpdate(FullControl& control)			{ _elapsed += control._();	}
 
 	float elapsed() const							{ return _elapsed;			}
 
@@ -100,7 +100,7 @@ public:
 	}
 
 	void react(const RegionStateIndex& event,
-			   FullControl& control)
+			   EventControl& control)
 	{
 		if (control.stateId() == event.stateId)
 			REQUIRE(control.activeSubState() == event.prong);
@@ -239,7 +239,7 @@ struct A_2_1
 {
 	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void react(const RegionStateIndex&, FullControl&)							{}
+	void react(const RegionStateIndex&, EventControl&)							{}
 	void exit(PlanControl&)														{}
 };
 
@@ -265,7 +265,7 @@ struct A_2_2
 	}
 
 	//void update(FullControl&)													{}
-	//void react(const RegionStateIndex&, FullControl&)							{}
+	//void react(const RegionStateIndex&, EventControl&)						{}
 	void exit(PlanControl&)														{}
 };
 
@@ -276,7 +276,7 @@ struct B
 {
 	void enter(PlanControl&)													{}
 	void update(FullControl&)													{}
-	void react(const RegionStateIndex&, FullControl&)							{}
+	void react(const RegionStateIndex&, EventControl&)							{}
 	void exit(PlanControl&)														{}
 };
 

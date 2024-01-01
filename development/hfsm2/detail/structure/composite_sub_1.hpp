@@ -65,6 +65,7 @@ struct HFSM2_EMPTY_BASES CS_<
 	using PlanControl	= PlanControlT <Args>;
 	using FullControl	= FullControlT <Args>;
 	using GuardControl	= GuardControlT<Args>;
+	using EventControl	= EventControlT<Args>;
 
 	using LStateList	= LHalfTypes<TStates...>;
 	using LHalfInfo		= CSI_<LStateList>;
@@ -105,13 +106,13 @@ struct HFSM2_EMPTY_BASES CS_<
 	HFSM2_CONSTEXPR(14)	TaskStatus	widePostUpdate			   ( FullControl& control,						  const Prong prong)		noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	widePreReact			   ( FullControl& control, const TEvent& event,	  const Prong prong)		noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	widePreReact			   (EventControl& control, const TEvent& event,	  const Prong prong)		noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	wideReact				   ( FullControl& control, const TEvent& event,	  const Prong prong)		noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	wideReact				   (EventControl& control, const TEvent& event,	  const Prong prong)		noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	widePostReact			   ( FullControl& control, const TEvent& event,	  const Prong prong)		noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	widePostReact			   (EventControl& control, const TEvent& event,	  const Prong prong)		noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void		wideQuery				   (ConstControl& control,		 TEvent& event,	  const Prong prong)  const noexcept;

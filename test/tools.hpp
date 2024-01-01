@@ -128,44 +128,44 @@ struct LoggerT final
 
 	void recordMethod(const Context& context,
 					  const StateID origin,
-					  const Method method) override;
+					  const Method method)								override;
 
 	void recordTransition(const Context& context,
 						  const StateID origin,
 						  const TransitionType transitionType,
-						  const StateID target) override;
+						  const StateID target)							override;
 
 #ifdef HFSM2_ENABLE_PLANS
 
 	void recordTaskStatus(const Context& context,
 						  const RegionID region,
 						  const StateID origin,
-						  const StatusEvent event) override;
+						  const StatusEvent event)						override;
 
 	void recordPlanStatus(const Context& context,
 						  const RegionID region,
-						  const StatusEvent event) override;
+						  const StatusEvent event)						override;
 
 #endif
 
 	void recordCancelledPending(const Context& context,
-								const StateID origin) override;
+								const StateID origin)					override;
 
 	void recordSelectResolution(const Context& context,
 								const StateID head,
-								const Prong prong) override;
+								const Prong prong)						override;
 
 #ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 	void recordUtilityResolution(const Context& context,
 								 const StateID head,
 								 const Prong prong,
-								 const Utilty utilty) override;
+								 const Utilty utilty)					override;
 
 	void recordRandomResolution(const Context& context,
 								const StateID head,
 								const Prong prong,
-								const Utilty utilty) override;
+								const Utilty utilty)					override;
 
 #endif
 

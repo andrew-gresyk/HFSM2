@@ -198,7 +198,7 @@ struct Off : FSM::State
 {
 	using FSM::State::react;
 
-	void react(const TurnOn&, FullControl& control)
+	void react(const TurnOn&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<On>();
@@ -224,13 +224,13 @@ struct On : FSM::State
 		control.context().reset();
 	}
 
-	void react(const Clear&, FullControl& control)
+	void react(const Clear&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<On>();
 	}
 
-	void react(const TurnOff&, FullControl& control)
+	void react(const TurnOff&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Off>();
@@ -244,7 +244,7 @@ struct Ready : FSM::State
 {
 	using FSM::State::react;
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().clearOperand1();
@@ -252,7 +252,7 @@ struct Ready : FSM::State
 		control.changeTo<Zero1>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().clearOperand1();
@@ -260,14 +260,14 @@ struct Ready : FSM::State
 		control.changeTo<Int1>();
 	}
 
-	void react(const Point&, FullControl& control)
+	void react(const Point&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().clearOperand1();
 		control.changeTo<Frac1>();
 	}
 
-	void react(const Operator& op, FullControl& control)
+	void react(const Operator& op, EventControl& control)
 	{
 		PRINTCALL;
 		// This is where bottom-op invocation order is needed
@@ -314,7 +314,7 @@ struct Result : FSM::State
 		control.context().display();
 	}
 
-	void react(const Equals&, FullControl& control)
+	void react(const Equals&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().performOp();
@@ -343,32 +343,32 @@ struct Negated1 : FSM::State
 		control.context().display();
 	}
 
-	void react(const ClearEntry&, FullControl& control)
+	void react(const ClearEntry&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Begin>();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Zero1>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand1(digit.digit);
 		control.changeTo<Int1>();
 	}
 
-	void react(const Point&, FullControl& control)
+	void react(const Point&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Frac1>();
 	}
 
-	void react(const Operator& op, FullControl& control)
+	void react(const Operator& op, EventControl& control)
 	{
 		PRINTCALL;
 		if (op.mathOperator == MathOperator::MINUS)
@@ -383,14 +383,14 @@ struct Operand1 : FSM::State
 {
 	using FSM::State::react;
 
-	void react(const ClearEntry&, FullControl& control)
+	void react(const ClearEntry&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().clearOperand1();
 		control.changeTo<Ready>();
 	}
 
-	void react(const Operator& op, FullControl& control)
+	void react(const Operator& op, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().mathOperator = op.mathOperator;
@@ -419,20 +419,20 @@ struct Zero1 : FSM::State
 		control.context().display();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Zero1>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand1(digit.digit);
 		control.changeTo<Int1>();
 	}
 
-	void react(const Point&, FullControl& control)
+	void react(const Point&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Frac1>();
@@ -458,21 +458,21 @@ struct Int1 : FSM::State
 		control.context().display();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand1(0);
 		control.changeTo<Int1>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand1(digit.digit);
 		control.changeTo<Int1>();
 	}
 
-	void react(const Point&, FullControl& control)
+	void react(const Point&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Frac1>();
@@ -504,14 +504,14 @@ struct Frac1 : FSM::State
 		control.context().endFraction();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand1(0);
 		control.changeTo<Frac1>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand1(digit.digit);
@@ -558,27 +558,27 @@ struct opEntered : FSM::State
 		control.context().display();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand2(0);
 		control.changeTo<Zero2>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand2(digit.digit);
 		control.changeTo<Int2>();
 	}
 
-	void react(const Point&, FullControl& control)
+	void react(const Point&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Frac2>();
 	}
 
-	void react(const Operator& op, FullControl& control)
+	void react(const Operator& op, EventControl& control)
 	{
 		PRINTCALL;
 		if (op.mathOperator==MathOperator::MINUS)
@@ -612,32 +612,32 @@ struct Negated2 : FSM::State
 		control.context().display();
 	}
 
-	void react(const ClearEntry&, FullControl& control)
+	void react(const ClearEntry&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<opEntered>();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Zero2>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand2(digit.digit);
 		control.changeTo<Int2>();
 	}
 
-	void react(const Point&, FullControl& control)
+	void react(const Point&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Frac2>();
 	}
 
-	void react(const Operator& op, FullControl& control)
+	void react(const Operator& op, EventControl& control)
 	{
 		PRINTCALL;
 		if (op.mathOperator == MathOperator::MINUS)
@@ -664,7 +664,7 @@ struct Operand2 : FSM::State
 		control.context().display();
 	}
 
-	void react(const Operator& op, FullControl& control)
+	void react(const Operator& op, EventControl& control)
 	{
 		PRINTCALL;
 		if (control.context().performOp())
@@ -676,7 +676,7 @@ struct Operand2 : FSM::State
 			control.changeTo<Error>();
 	}
 
-	void react(const Equals&, FullControl& control)
+	void react(const Equals&, EventControl& control)
 	{
 		PRINTCALL;
 		if (control.context().performOp())
@@ -685,7 +685,7 @@ struct Operand2 : FSM::State
 			control.changeTo<Error>();
 	}
 
-	void react(const ClearEntry&, FullControl& control)
+	void react(const ClearEntry&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().clearOperand2();
@@ -714,20 +714,20 @@ struct Zero2 : FSM::State
 		control.context().display();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Zero2>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand2(digit.digit);
 		control.changeTo<Int2>();
 	}
 
-	void react(const Point&, FullControl& control)
+	void react(const Point&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Frac2>();
@@ -753,21 +753,21 @@ struct Int2 : FSM::State
 		control.context().display();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand2(0);
 		control.changeTo<Int2>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand2(digit.digit);
 		control.changeTo<Int2>();
 	}
 
-	void react(const Point&, FullControl& control)
+	void react(const Point&, EventControl& control)
 	{
 		PRINTCALL;
 		control.changeTo<Frac2>();
@@ -800,14 +800,14 @@ struct Frac2 : FSM::State
 		control.context().endFraction();
 	}
 
-	void react(const Digit_0&, FullControl& control)
+	void react(const Digit_0&, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand2(0);
 		control.changeTo<Frac2>();
 	}
 
-	void react(const Digit_1_9& digit, FullControl& control)
+	void react(const Digit_1_9& digit, EventControl& control)
 	{
 		PRINTCALL;
 		control.context().insertInOperand2(digit.digit);

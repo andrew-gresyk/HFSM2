@@ -166,10 +166,10 @@ template <typename TN_, typename TA_, typename TH_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-S_<TN_, TA_, TH_>::deepPreReact(FullControl& control,
+S_<TN_, TA_, TH_>::deepPreReact(EventControl& control,
 								const TEvent& event) noexcept
 {
-	auto method = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::preReact);
+	auto method = static_cast<void (Head::*)(const TEvent&, EventControl&)>(&Head::preReact);
 
 	HFSM2_LOG_STATE_METHOD(method,
 						   Method::PRE_REACT);
@@ -188,10 +188,10 @@ template <typename TN_, typename TA_, typename TH_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-S_<TN_, TA_, TH_>::deepReact(FullControl& control,
+S_<TN_, TA_, TH_>::deepReact(EventControl& control,
 							 const TEvent& event) noexcept
 {
-	auto method = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::react);
+	auto method = static_cast<void (Head::*)(const TEvent&, EventControl&)>(&Head::react);
 
 	HFSM2_LOG_STATE_METHOD(method,
 						   Method::REACT);
@@ -210,10 +210,10 @@ template <typename TN_, typename TA_, typename TH_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-S_<TN_, TA_, TH_>::deepPostReact(FullControl& control,
+S_<TN_, TA_, TH_>::deepPostReact(EventControl& control,
 								 const TEvent& event) noexcept
 {
-	auto method = static_cast<void (Head::*)(const TEvent&, FullControl&)>(&Head::postReact);
+	auto method = static_cast<void (Head::*)(const TEvent&, EventControl&)>(&Head::postReact);
 
 	HFSM2_LOG_STATE_METHOD(method,
 						   Method::POST_REACT);

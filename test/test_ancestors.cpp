@@ -111,13 +111,13 @@ struct AncestorT
 	void postUpdate		  ( FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::POST_UPDATE);	REQUIRE(control.stateId() == stateId<T>());	}
 
 	void preReact		  (const Event&,
-							FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::PRE_REACT);	REQUIRE(control.stateId() == stateId<T>());	}
+						   EventControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::PRE_REACT);	REQUIRE(control.stateId() == stateId<T>());	}
 
 	void react			  (const Event&,
-							FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::REACT);		REQUIRE(control.stateId() == stateId<T>());	}
+						   EventControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::REACT);		REQUIRE(control.stateId() == stateId<T>());	}
 
 	void postReact		  (const Event&,
-							FullControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::POST_REACT);	REQUIRE(control.stateId() == stateId<T>());	}
+						   EventControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::POST_REACT);	REQUIRE(control.stateId() == stateId<T>());	}
 
 	void exitGuard		  (GuardControl& control)	{ control._().emplace_back(stateId<T>(), Event::Type::EXIT_GUARD);	REQUIRE(control.stateId() == stateId<T>());	}
 

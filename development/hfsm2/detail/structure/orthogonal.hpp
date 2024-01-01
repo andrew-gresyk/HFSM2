@@ -43,6 +43,8 @@ struct HFSM2_EMPTY_BASES O_
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
+	using ReactOrder	= typename Args::ReactOrder;
+
 	using Registry		= RegistryT<Args>;
 	using StateParents	= typename Registry::StateParents;
 	using OrthoForks	= typename Registry::OrthoForks;
@@ -50,6 +52,8 @@ struct HFSM2_EMPTY_BASES O_
 	using ProngCBits	= typename OrthoForks::CBits;
 
 	using ConstControl	= ConstControlT<Args>;
+	using ScopedCRegion	= typename ConstControl::Region;
+
 	using Control		= ControlT	   <Args>;
 	using ScopedOrigin	= typename Control::Origin;
 
@@ -58,8 +62,11 @@ struct HFSM2_EMPTY_BASES O_
 
 	using FullControl	= FullControlT <Args>;
 	using ControlLock	= typename FullControl::Lock;
+	using ScopedRegion	= typename PlanControl::Region;
 
 	using GuardControl	= GuardControlT<Args>;
+	using EventControl	= EventControlT<Args>;
+
 
 	using Head			= THead;
 	using HeadState		= S_<Indices, Args, Head>;
@@ -81,9 +88,14 @@ struct HFSM2_EMPTY_BASES O_
 							  TSubStates...
 						  >;
 
+	using PreReactWrapper	= PreReactWrapperT <HeadState, SubStates, ReactOrder>;
+	using ReactWrapper		= ReactWrapperT	   <HeadState, SubStates, ReactOrder>;
+	using PostReactWrapper	= PostReactWrapperT<HeadState, SubStates, ReactOrder>;
+	using QueryWrapper		= QueryWrapperT	   <HeadState, SubStates, ReactOrder>;
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested (	   Registry& registry)		noexcept	{ return			   registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
+	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested (		Registry& registry)		noexcept	{ return			   registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
 	HFSM2_CONSTEXPR(11)	static ProngCBits orthoRequested (const Registry& registry)		noexcept	{ return			   registry.orthoRequested.template cbits<ORTHO_UNIT, WIDTH>();	}
 
 	HFSM2_CONSTEXPR(11)	static ProngBits  orthoRequested (		Control& control )		noexcept	{ return control._core.registry.orthoRequested.template  bits<ORTHO_UNIT, WIDTH>();	}
@@ -111,13 +123,13 @@ struct HFSM2_EMPTY_BASES O_
 	HFSM2_CONSTEXPR(14)	TaskStatus	deepPostUpdate		 ( FullControl& control						  )			noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	deepPreReact		 ( FullControl& control, const TEvent& event  )			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	deepPreReact		 (EventControl& control, const TEvent& event  )			noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	deepReact			 ( FullControl& control, const TEvent& event  )			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	deepReact			 (EventControl& control, const TEvent& event  )			noexcept;
 
 	template <typename TEvent>
-	HFSM2_CONSTEXPR(14)	TaskStatus	deepPostReact		 ( FullControl& control, const TEvent& event  )			noexcept;
+	HFSM2_CONSTEXPR(14)	TaskStatus	deepPostReact		 (EventControl& control, const TEvent& event  )			noexcept;
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void		deepQuery			 (ConstControl& control,	   TEvent& event  )	  const noexcept;

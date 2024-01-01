@@ -93,7 +93,7 @@ template <typename TN_, typename TA_, Prong NP_, typename TI_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN_, TA_, NP_, TI_>::widePreReact(FullControl& control,
+OS_<TN_, TA_, NP_, TI_>::widePreReact(EventControl& control,
 									  const TEvent& event) noexcept
 {
 	return Initial::deepPreReact(control, event);
@@ -105,7 +105,7 @@ template <typename TN_, typename TA_, Prong NP_, typename TI_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN_, TA_, NP_, TI_>::wideReact(FullControl& control,
+OS_<TN_, TA_, NP_, TI_>::wideReact(EventControl& control,
 								   const TEvent& event) noexcept
 {
 	return Initial::deepReact(control, event);
@@ -117,7 +117,7 @@ template <typename TN_, typename TA_, Prong NP_, typename TI_>
 template <typename TEvent>
 HFSM2_CONSTEXPR(14)
 TaskStatus
-OS_<TN_, TA_, NP_, TI_>::widePostReact(FullControl& control,
+OS_<TN_, TA_, NP_, TI_>::widePostReact(EventControl& control,
 									   const TEvent& event) noexcept
 {
 	return Initial::deepPostReact(control, event);

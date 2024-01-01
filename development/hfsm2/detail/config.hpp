@@ -32,10 +32,6 @@ struct G_ final {
 	using RNG				 = TRNG;
 #endif
 
-#if HFSM2_LOG_INTERFACE_AVAILABLE()
-	using LoggerInterface	 = LoggerInterfaceT<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Utility)>;
-#endif
-
 	static constexpr Short SUBSTITUTION_LIMIT = NSubstitutionLimit;
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -49,8 +45,12 @@ struct G_ final {
 	using Task				 = TaskT<Payload>;
 #endif
 
+#if HFSM2_LOG_INTERFACE_AVAILABLE()
+	using LoggerInterface	 = LoggerInterfaceT<FEATURE_TAG, Context HFSM2_IF_UTILITY_THEORY(, Utility)>;
+#endif
+
 	/// @brief Set Context type
-	/// @tparam T Context type for data shared between states and/or data interface between FSM and external code
+	/// @tparam `T` Context type for data shared between states and/or data interface between FSM and external code
 	template <typename T>
 	using ContextT			 = G_<FEATURE_TAG, T	  , Activation, ReactOrder HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
@@ -63,38 +63,38 @@ struct G_ final {
 #if HFSM2_UTILITY_THEORY_AVAILABLE()
 
 	/// @brief Set Rank type
-	/// @tparam T Rank type for 'TRank State::rank() const' method
+	/// @tparam `T` Rank type for 'TRank State::rank() const' method
 	template <typename T>
 	using RankT				 = G_<FEATURE_TAG, Context, Activation, ReactOrder						   , T   , Utility, RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 	/// @brief Set Utility type
-	/// @tparam T Utility type for 'TUtility State::utility() const' method
+	/// @tparam `T` Utility type for 'TUtility State::utility() const' method
 	template <typename T>
 	using UtilityT			 = G_<FEATURE_TAG, Context, Activation, ReactOrder						   , Rank, T      , RNG , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 	/// @brief Set RNG type
-	/// @tparam T RNG type used in 'Random' regions
+	/// @tparam `T` RNG type used in 'Random' regions
 	template <typename T>
 	using RandomT			 = G_<FEATURE_TAG, Context, Activation, ReactOrder						   , Rank, Utility, T   , SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #endif
 
 	/// @brief Set Substitution limit
-	/// @tparam N Maximum number times 'guard()' methods can substitute their states for others
-	template <Long N>
+	/// @tparam `N` Maximum number times 'guard()' methods can substitute their states for others
+	template <Short N>
 	using SubstitutionLimitN = G_<FEATURE_TAG, Context, Activation, ReactOrder HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), N                  HFSM2_IF_PLANS(, TASK_CAPACITY), Payload>;
 
 #if HFSM2_PLANS_AVAILABLE()
 
 	/// @brief Set Task capacity
-	/// @tparam N Maximum number of tasks across all plans
+	/// @tparam `N` Maximum number of tasks across all plans
 	template <Long N>
 	using TaskCapacityN		 = G_<FEATURE_TAG, Context, Activation, ReactOrder HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT                , N             , Payload>;
 
 #endif
 
 	/// @brief Set Transition Payload type
-	/// @tparam T Utility type for 'TUtility State::utility() const' method
+	/// @tparam `T` Payload type
 	template <typename T>
 	using PayloadT			 = G_<FEATURE_TAG, Context, Activation, ReactOrder HFSM2_IF_UTILITY_THEORY(, Rank, Utility, RNG), SUBSTITUTION_LIMIT HFSM2_IF_PLANS(, TASK_CAPACITY), T      >;
 
@@ -364,8 +364,8 @@ using Config = detail::G_<
 					   >;
 
 /// @brief 'Template namespace' for FSM classes
-/// @tparam TConfig 'ConfigT<>' type configuration for MachineT<>
-/// @see ConfigT<>
+/// @tparam `TConfig` `ConfigT<>` type configuration for MachineT<>
+/// @see `ConfigT<>`
 template <typename TConfig = Config>
 using MachineT = detail::M_<TConfig>;
 

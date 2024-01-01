@@ -30,6 +30,7 @@ protected:
 	using PlanControl	= PlanControlT <TArgs>;
 	using FullControl	= FullControlT <TArgs>;
 	using GuardControl	= GuardControlT<TArgs>;
+	using EventControl	= EventControlT<TArgs>;
 
 #if HFSM2_PLANS_AVAILABLE()
 	using Plan			= PayloadPlanT <TArgs>;
@@ -49,15 +50,15 @@ public:
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 preReact	  (const TEvent&		 ,
-												FullControl&		)			noexcept	{}
+											   EventControl&		 )			noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 react		  (const TEvent&		 ,
-												FullControl&		)			noexcept	{}
+											   EventControl&		 )			noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 postReact	  (const TEvent&		 ,
-												FullControl&		)			noexcept	{}
+											   EventControl&		 )			noexcept	{}
 
 	template <typename TEvent>
 	HFSM2_CONSTEXPR(14)	void	 query		  (		 TEvent&		 ,
