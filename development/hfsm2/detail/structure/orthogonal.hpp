@@ -58,8 +58,6 @@ struct HFSM2_EMPTY_BASES O_
 	using ScopedOrigin	= typename Control::Origin;
 
 	using PlanControl	= PlanControlT <Args>;
-	using ScopedRegion	= typename PlanControl::Region;
-
 	using FullControl	= FullControlT <Args>;
 	using ControlLock	= typename FullControl::Lock;
 	using ScopedRegion	= typename PlanControl::Region;

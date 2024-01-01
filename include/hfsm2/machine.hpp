@@ -1771,7 +1771,7 @@ template <typename T, Long NC_>
 template <typename N>
 HFSM2_CONSTEXPR(14)
 T&
-StaticArrayT<T, NC_>::operator[] (const N index) noexcept	{
+StaticArrayT<T, NC_>::operator[] (const N index) noexcept {
 	HFSM2_ASSERT(0 <= index && index < CAPACITY);
 
 	return _items[static_cast<Index>(index)];
@@ -2500,18 +2500,18 @@ struct TransitionBase {
 	HFSM2_CONSTEXPR(11)
 	bool
 	operator == (const TransitionBase& other)					  const noexcept	{
-		return origin	   == other.origin &&
+		return origin	   == other.origin		&&
 			   destination == other.destination &&
-			   method	   == other.method &&
+			   method	   == other.method		&&
 			   type		   == other.type;
 	}
 
 	HFSM2_CONSTEXPR(11)
 	bool
 	operator != (const TransitionBase& other)					  const noexcept	{
-		return origin	   != other.origin ||
+		return origin	   != other.origin		||
 			   destination != other.destination ||
-			   method	   != other.method ||
+			   method	   != other.method		||
 			   type		   != other.type;
 	}
 
@@ -11450,8 +11450,8 @@ struct HFSM2_EMPTY_BASES C_
 	using Control			= ControlT	   <Args>;
 	using ScopedOrigin		= typename Control::Origin;
 
-	using FullControl		= FullControlT <Args>;
 	using PlanControl		= PlanControlT <Args>;
+	using FullControl		= FullControlT <Args>;
 	using ControlLock		= typename FullControl::Lock;
 	using ScopedRegion		= typename PlanControl::Region;
 
@@ -13695,8 +13695,6 @@ struct HFSM2_EMPTY_BASES O_
 	using ScopedOrigin	= typename Control::Origin;
 
 	using PlanControl	= PlanControlT <Args>;
-	using ScopedRegion	= typename PlanControl::Region;
-
 	using FullControl	= FullControlT <Args>;
 	using ControlLock	= typename FullControl::Lock;
 	using ScopedRegion	= typename PlanControl::Region;
@@ -14767,14 +14765,6 @@ public:
 
 	HFSM2_CONSTEXPR(20)	~R_()																	noexcept;
 
-	/// @brief Access context
-	/// @return context
-	HFSM2_CONSTEXPR(14)		  Context& context()												noexcept	{ return _core.context;		}
-
-	/// @brief Access context
-	/// @return context
-	HFSM2_CONSTEXPR(11)	const Context& context()										  const noexcept	{ return _core.context;		}
-
 	/// @brief Get state identifier for a state type
 	/// @tparam `TState` State type
 	/// @return Numeric state identifier
@@ -14788,6 +14778,14 @@ public:
 	template <typename TState>
 	static
 	HFSM2_CONSTEXPR(11) RegionID regionId()														noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
+
+	/// @brief Access context
+	/// @return context
+	HFSM2_CONSTEXPR(14)		  Context& context()												noexcept	{ return _core.context;							}
+
+	/// @brief Access context
+	/// @return context
+	HFSM2_CONSTEXPR(11)	const Context& context()										  const noexcept	{ return _core.context;							}
 
 	/// @brief Access state instance
 	/// @tparam `TState` State type
