@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+	message(STATUS "Found ccache in ${CCACHE_PROGRAM}")
+	set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+endif()
+
 project(hfsm2_test)
 
 file(GLOB SOURCE_FILES "test/*.cpp" "test/shared/*.cpp")

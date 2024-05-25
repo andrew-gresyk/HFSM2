@@ -3,24 +3,26 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename, typename, typename >
+template <typename, typename>
 struct PreReactWrapperT;
 
 //------------------------------------------------------------------------------
 
-template <typename THeadState, typename TSubStates>
-struct PreReactWrapperT<THeadState, TSubStates, TopDown> {
-	using HeadState = THeadState;
-	using SubStates = TSubStates;
+template <typename TRegion>
+struct PreReactWrapperT<TRegion, TopDown> {
+	using Region		= TRegion;
+	using HeadState		= typename Region::HeadState;
+	using SubStates		= typename Region::SubStates;
+	using EventControl	= typename Region::EventControl;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event,
 			const Prong active) noexcept
 	{
@@ -43,12 +45,12 @@ struct PreReactWrapperT<THeadState, TSubStates, TopDown> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event) noexcept
 	{
 		if (!control._consumed) {
@@ -73,19 +75,21 @@ struct PreReactWrapperT<THeadState, TSubStates, TopDown> {
 
 //------------------------------------------------------------------------------
 
-template <typename THeadState, typename TSubStates>
-struct PreReactWrapperT<THeadState, TSubStates, BottomUp> {
-	using HeadState = THeadState;
-	using SubStates = TSubStates;
+template <typename TRegion>
+struct PreReactWrapperT<TRegion, BottomUp> {
+	using Region		= TRegion;
+	using HeadState		= typename Region::HeadState;
+	using SubStates		= typename Region::SubStates;
+	using EventControl	= typename Region::EventControl;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event,
 			const Prong active) noexcept
 	{
@@ -108,12 +112,12 @@ struct PreReactWrapperT<THeadState, TSubStates, BottomUp> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event) noexcept
 	{
 		if (!control._consumed) {
@@ -138,24 +142,26 @@ struct PreReactWrapperT<THeadState, TSubStates, BottomUp> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename, typename, typename >
+template <typename, typename>
 struct ReactWrapperT;
 
 //------------------------------------------------------------------------------
 
-template <typename THeadState, typename TSubStates>
-struct ReactWrapperT<THeadState, TSubStates, TopDown> {
-	using HeadState = THeadState;
-	using SubStates = TSubStates;
+template <typename TRegion>
+struct ReactWrapperT<TRegion, TopDown> {
+	using Region		= TRegion;
+	using HeadState		= typename Region::HeadState;
+	using SubStates		= typename Region::SubStates;
+	using EventControl	= typename Region::EventControl;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event,
 			const Prong active) noexcept
 	{
@@ -178,12 +184,12 @@ struct ReactWrapperT<THeadState, TSubStates, TopDown> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event) noexcept
 	{
 		if (!control._consumed) {
@@ -208,19 +214,21 @@ struct ReactWrapperT<THeadState, TSubStates, TopDown> {
 
 //------------------------------------------------------------------------------
 
-template <typename THeadState, typename TSubStates>
-struct ReactWrapperT<THeadState, TSubStates, BottomUp> {
-	using HeadState = THeadState;
-	using SubStates = TSubStates;
+template <typename TRegion>
+struct ReactWrapperT<TRegion, BottomUp> {
+	using Region		= TRegion;
+	using HeadState		= typename Region::HeadState;
+	using SubStates		= typename Region::SubStates;
+	using EventControl	= typename Region::EventControl;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event,
 			const Prong active) noexcept
 	{
@@ -243,12 +251,12 @@ struct ReactWrapperT<THeadState, TSubStates, BottomUp> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event) noexcept
 	{
 		if (!control._consumed) {
@@ -273,24 +281,26 @@ struct ReactWrapperT<THeadState, TSubStates, BottomUp> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename, typename, typename >
+template <typename, typename>
 struct PostReactWrapperT;
 
 //------------------------------------------------------------------------------
 
-template <typename THeadState, typename TSubStates>
-struct PostReactWrapperT<THeadState, TSubStates, TopDown> {
-	using HeadState = THeadState;
-	using SubStates = TSubStates;
+template <typename TRegion>
+struct PostReactWrapperT<TRegion, TopDown> {
+	using Region		= TRegion;
+	using HeadState		= typename Region::HeadState;
+	using SubStates		= typename Region::SubStates;
+	using EventControl	= typename Region::EventControl;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event,
 			const Prong active) noexcept
 	{
@@ -315,12 +325,12 @@ struct PostReactWrapperT<THeadState, TSubStates, TopDown> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event) noexcept
 	{
 		if (!control._consumed) {
@@ -347,19 +357,21 @@ struct PostReactWrapperT<THeadState, TSubStates, TopDown> {
 
 //------------------------------------------------------------------------------
 
-template <typename THeadState, typename TSubStates>
-struct PostReactWrapperT<THeadState, TSubStates, BottomUp> {
-	using HeadState = THeadState;
-	using SubStates = TSubStates;
+template <typename TRegion>
+struct PostReactWrapperT<TRegion, BottomUp> {
+	using Region		= TRegion;
+	using HeadState		= typename Region::HeadState;
+	using SubStates		= typename Region::SubStates;
+	using EventControl	= typename Region::EventControl;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event,
 			const Prong active) noexcept
 	{
@@ -384,12 +396,12 @@ struct PostReactWrapperT<THeadState, TSubStates, BottomUp> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	TaskStatus
-	execute(TRegion& region,
-			typename TRegion::EventControl& control,
+	execute(Region& region,
+			EventControl& control,
 			const TEvent& event) noexcept
 	{
 		if (!control._consumed) {
@@ -416,24 +428,26 @@ struct PostReactWrapperT<THeadState, TSubStates, BottomUp> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename, typename, typename>
+template <typename, typename>
 struct QueryWrapperT;
 
 //------------------------------------------------------------------------------
 
-template <typename THeadState, typename TSubStates>
-struct QueryWrapperT<THeadState, TSubStates, TopDown> {
-	using HeadState = THeadState;
-	using SubStates = TSubStates;
+template <typename TRegion>
+struct QueryWrapperT<TRegion, TopDown> {
+	using Region		= TRegion;
+	using HeadState		= typename Region::HeadState;
+	using SubStates		= typename Region::SubStates;
+	using ConstControl	= typename Region::ConstControl;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	void
-	execute(const TRegion& region,
-			typename TRegion::ConstControl& control,
+	execute(const Region& region,
+			ConstControl& control,
 			TEvent& event,
 			const Prong active) noexcept
 	{
@@ -449,12 +463,12 @@ struct QueryWrapperT<THeadState, TSubStates, TopDown> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	void
-	execute(const TRegion& region,
-			typename TRegion::ConstControl& control,
+	execute(const Region& region,
+			ConstControl& control,
 			TEvent& event) noexcept
 	{
 		const HeadState& headState = static_cast<const HeadState&>(region);
@@ -472,19 +486,21 @@ struct QueryWrapperT<THeadState, TSubStates, TopDown> {
 
 //------------------------------------------------------------------------------
 
-template <typename THeadState, typename TSubStates>
-struct QueryWrapperT<THeadState, TSubStates, BottomUp> {
-	using HeadState = THeadState;
-	using SubStates = TSubStates;
+template <typename TRegion>
+struct QueryWrapperT<TRegion, BottomUp> {
+	using Region		= TRegion;
+	using HeadState		= typename Region::HeadState;
+	using SubStates		= typename Region::SubStates;
+	using ConstControl	= typename Region::ConstControl;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	void
-	execute(const TRegion& region,
-			typename TRegion::ConstControl& control,
+	execute(const Region& region,
+			ConstControl& control,
 			TEvent& event,
 			const Prong active) noexcept
 	{
@@ -500,12 +516,12 @@ struct QueryWrapperT<THeadState, TSubStates, BottomUp> {
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	template <typename TRegion, typename TEvent>
+	template <typename TEvent>
 	static
 	HFSM2_CONSTEXPR(14)
 	void
-	execute(const TRegion& region,
-			typename TRegion::ConstControl& control,
+	execute(const Region& region,
+			ConstControl& control,
 			TEvent& event) noexcept
 	{
 		const HeadState& headState = static_cast<const HeadState&>(region);

@@ -17,7 +17,7 @@ class ConstControlT {
 	template <typename, typename>
 	friend class R_;
 
-	template <typename, typename, typename>
+	template <typename, typename>
 	friend struct QueryWrapperT;
 
 protected:

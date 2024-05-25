@@ -86,10 +86,10 @@ struct HFSM2_EMPTY_BASES C_
 								  TL_<TSubStates...>
 							  >;
 
-	using PreReactWrapper	= PreReactWrapperT <HeadState, SubStates, ReactOrder>;
-	using ReactWrapper		= ReactWrapperT	   <HeadState, SubStates, ReactOrder>;
-	using PostReactWrapper	= PostReactWrapperT<HeadState, SubStates, ReactOrder>;
-	using QueryWrapper		= QueryWrapperT	   <HeadState, SubStates, ReactOrder>;
+	using PreReactWrapper	= PreReactWrapperT <C_, ReactOrder>;
+	using ReactWrapper		= ReactWrapperT	   <C_, ReactOrder>;
+	using PostReactWrapper	= PostReactWrapperT<C_, ReactOrder>;
+	using QueryWrapper		= QueryWrapperT	   <C_, ReactOrder>;
 
 	using Info				= CI_<STRATEGY, Head, TSubStates...>;
 	static constexpr Short WIDTH		  = Info::WIDTH;
