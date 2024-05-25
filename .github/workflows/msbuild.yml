@@ -19,12 +19,12 @@ jobs:
         PLATFORM:
           - {
               OS: windows-2019,
-              SOLUTION_FILE_PATH: projects\premake\ffsm2-vs-2019.sln,
+              SOLUTION_FILE_PATH: projects\premake\hfsm2-vs-2019.sln,
               PROJECT_FILE_NAME: test-15
             }
           - {
               OS: windows-2022,
-              SOLUTION_FILE_PATH: projects\premake\ffsm2-vs-2022.sln,
+              SOLUTION_FILE_PATH: projects\premake\hfsm2-vs-2022.sln,
               PROJECT_FILE_NAME: test-17
             }
 
