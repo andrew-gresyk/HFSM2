@@ -32,7 +32,7 @@ workspace "hfsm2"
 	--systemversion "$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))"
 
 	targetdir "binaries/"
-	targetname "$(ProjectName)-$(Configuration)-$(PlatformArchitecture)"
+	targetname "$(ProjectName)-$(Configuration)-$(Platform)"
 	warnings "High"
 
 	filter "toolset:msc-v140 or msc-v141"

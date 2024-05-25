@@ -10,13 +10,13 @@ class EventControlT final
 	template <typename, typename>
 	friend class R_;
 
-	template <typename, typename, typename>
+	template <typename, typename>
 	friend struct PreReactWrapperT;
 
-	template <typename, typename, typename>
+	template <typename, typename>
 	friend struct ReactWrapperT;
 
-	template <typename, typename, typename>
+	template <typename, typename>
 	friend struct PostReactWrapperT;
 
 	using FullControl	= FullControlT<TArgs>;

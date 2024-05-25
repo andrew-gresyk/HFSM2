@@ -19,27 +19,20 @@ TEST_CASE("Wiki.Plans.Traffic Light") {
 
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    struct Apex
-        : FSM::State
-    {
+    struct Apex   : FSM::State {};
+
+    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    struct Red    : FSM::State {
         void enter(PlanControl& control) {
-            // create an empty plan
             auto plan = control.plan();
 
-            // 'Red' will be implicitly activated as an initial substate
-            // of the composite root region
-            //
-            // loop yellow -> green -> yellow -> red
             plan.change<Red, Yellow>();
             plan.change<Yellow, Green>();
             plan.change<Green, Yellow>();
             plan.change<Yellow, Red>();
         }
-    };
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    struct Red    : FSM::State {
         void update(FullControl& control) { control.succeed(); }
     };
 
@@ -68,6 +61,15 @@ TEST_CASE("Wiki.Plans.Traffic Light") {
 
     fsm.update();
     REQUIRE(fsm.isActive<Red>());
+
+    fsm.update();
+    REQUIRE(fsm.isActive<Yellow>());
+
+    fsm.update();
+    REQUIRE(fsm.isActive<Green>());
+
+    fsm.update();
+    REQUIRE(fsm.isActive<Yellow>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -86,10 +86,10 @@ struct HFSM2_EMPTY_BASES O_
 							  TSubStates...
 						  >;
 
-	using PreReactWrapper	= PreReactWrapperT <HeadState, SubStates, ReactOrder>;
-	using ReactWrapper		= ReactWrapperT	   <HeadState, SubStates, ReactOrder>;
-	using PostReactWrapper	= PostReactWrapperT<HeadState, SubStates, ReactOrder>;
-	using QueryWrapper		= QueryWrapperT	   <HeadState, SubStates, ReactOrder>;
+	using PreReactWrapper	= PreReactWrapperT <O_, ReactOrder>;
+	using ReactWrapper		= ReactWrapperT	   <O_, ReactOrder>;
+	using PostReactWrapper	= PostReactWrapperT<O_, ReactOrder>;
+	using QueryWrapper		= QueryWrapperT	   <O_, ReactOrder>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
