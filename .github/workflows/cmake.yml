@@ -106,7 +106,17 @@ jobs:
               VERSION: '15'
             }
           - {
-              OS: macos-12,
+              OS: macos-13,
+              CC: clang,
+              CXX: clang++
+            }
+          - {
+              OS: macos-14,
+              CC: clang,
+              CXX: clang++
+            }
+          - {
+              OS: macos-15,
               CC: clang,
               CXX: clang++
             }

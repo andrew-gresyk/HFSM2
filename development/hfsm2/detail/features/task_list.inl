@@ -59,7 +59,7 @@ TaskListT<TP_, NC_>::emplace(TA_&&... args) noexcept {
 			_vacantTail = INVALID;
 		}
 
-		new (&item) Item{forward<TA_>(args)...};
+		new (&item) Item{::hfsm2::forward<TA_>(args)...};
 		++_count;
 
 		HFSM2_IF_ASSERT(verifyStructure());

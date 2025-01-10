@@ -71,7 +71,7 @@ typename DynamicArrayT<T, NC_>::Index
 DynamicArrayT<T, NC_>::emplace(TArgs&&... args) noexcept {
 	HFSM2_ASSERT(_count < CAPACITY);
 
-	new (&_items[_count]) Item{forward<TArgs>(args)...};
+	new (&_items[_count]) Item{::hfsm2::forward<TArgs>(args)...};
 
 	return _count++;
 }
