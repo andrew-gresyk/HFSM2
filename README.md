@@ -24,7 +24,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - GCC: **8, 9, 10, 11, 12, 13**
 - GCC (ARM): **9**
 - Clang: **6, 7, 8, 9, 10, 11, 12, 13, 14, 15**
-- AppleClang: **14**
+- AppleClang: **15, 16**
 
 ---
 
