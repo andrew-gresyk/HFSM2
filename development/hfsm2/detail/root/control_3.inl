@@ -232,8 +232,6 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		_taskStatus.result = TaskStatus::FAILURE;
 		headState.wrapPlanFailed(*this);
 
-		plan().clear();
-
 		return FullControlBase::template buildPlanStatus<TState>();
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
@@ -267,8 +265,6 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
-
-			plan().clear();
 
 			return FullControlBase::template buildPlanStatus<TState>();
 		}
@@ -422,8 +418,6 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		_taskStatus.result = TaskStatus::FAILURE;
 		headState.wrapPlanFailed(*this);
 
-		plan().clear();
-
 		return FullControlBase::template buildPlanStatus<TState>();
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
@@ -454,8 +448,6 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
-
-			plan().clear();
 
 			return FullControlBase::template buildPlanStatus<TState>();
 		}

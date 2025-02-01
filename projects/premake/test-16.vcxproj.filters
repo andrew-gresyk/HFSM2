@@ -284,6 +284,9 @@
     <ClCompile Include="..\..\test\reported\issue_49.cpp">
       <Filter>test\reported</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\reported\resuming_plan.cpp">
+      <Filter>test\reported</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp">
       <Filter>test\shared</Filter>
     </ClCompile>

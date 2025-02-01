@@ -338,11 +338,6 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepExit(PlanControl& control) noexcept {
 
 	resumable = active;
 	active	  = INVALID_PRONG;
-
-#if HFSM2_PLANS_AVAILABLE()
-	Plan plan = control.plan(REGION_ID);
-	plan.clear();
-#endif
 }
 
 // COMMON

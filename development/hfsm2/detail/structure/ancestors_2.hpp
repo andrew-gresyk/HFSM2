@@ -77,8 +77,8 @@ struct HFSM2_EMPTY_BASES A_<TFirst>
 	HFSM2_CONSTEXPR(14)	void	 exit		   ( PlanControl&		 )			noexcept	{}
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	 planSucceeded ( FullControl& control)			noexcept	{ control.succeed();		}
-	HFSM2_CONSTEXPR(14)	void	 planFailed	   ( FullControl& control)			noexcept	{ control.fail();			}
+	HFSM2_CONSTEXPR(14)	void	 planSucceeded ( FullControl& control)			noexcept;
+	HFSM2_CONSTEXPR(14)	void	 planFailed	   ( FullControl& control)			noexcept;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

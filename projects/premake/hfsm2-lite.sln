@@ -21,6 +21,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-clang", "test-clang.vc
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "tools", "tools.pyproj", "{2347027E-E5DE-43C4-8EF9-5F1411ADE33B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_", "_", "{CAF6FD08-F000-458A-9DC3-74685C05D7F2}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\hfsm2.natvis = ..\..\hfsm2.natvis
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
