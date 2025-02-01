@@ -3,6 +3,29 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TF_>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF_>::planSucceeded(FullControl& control) noexcept {
+	control.succeed();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TF_>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF_>::planFailed(FullControl& control) noexcept {
+	control.plan().clear();
+	control.fail();
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
 template <typename TF_>
 HFSM2_CONSTEXPR(14)
 void

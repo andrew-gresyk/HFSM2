@@ -76,6 +76,7 @@ struct A : FSM::State
 	void enter(PlanControl& control)
 	{
 		auto plan = control.plan();
+		plan.clear();
 
 		plan.change<A, B>();
 		plan.change<B, C>();

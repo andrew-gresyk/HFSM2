@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.5.2 (2025-01-10)
+// 2.6.0 (2025-02-01)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 5
-#define HFSM2_VERSION_PATCH 2
+#define HFSM2_VERSION_MINOR 6
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -7142,8 +7142,6 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		_taskStatus.result = TaskStatus::FAILURE;
 		headState.wrapPlanFailed(*this);
 
-		plan().clear();
-
 		return FullControlBase::template buildPlanStatus<TState>();
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
@@ -7177,8 +7175,6 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
-
-			plan().clear();
 
 			return FullControlBase::template buildPlanStatus<TState>();
 		}
@@ -7316,8 +7312,6 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		_taskStatus.result = TaskStatus::FAILURE;
 		headState.wrapPlanFailed(*this);
 
-		plan().clear();
-
 		return FullControlBase::template buildPlanStatus<TState>();
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
@@ -7348,8 +7342,6 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			headState.wrapPlanSucceeded(*this);
-
-			plan().clear();
 
 			return FullControlBase::template buildPlanStatus<TState>();
 		}
@@ -7857,8 +7849,8 @@ struct HFSM2_EMPTY_BASES A_<TFirst>
 	HFSM2_CONSTEXPR(14)	void	 exit		   ( PlanControl&		 )			noexcept	{}
 
 #if HFSM2_PLANS_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void	 planSucceeded ( FullControl& control)			noexcept	{ control.succeed();		}
-	HFSM2_CONSTEXPR(14)	void	 planFailed	   ( FullControl& control)			noexcept	{ control.fail();			}
+	HFSM2_CONSTEXPR(14)	void	 planSucceeded ( FullControl& control)			noexcept;
+	HFSM2_CONSTEXPR(14)	void	 planFailed	   ( FullControl& control)			noexcept;
 #endif
 
 	HFSM2_CONSTEXPR(14)	void	 wideEntryGuard(GuardControl& control)			noexcept;
@@ -7897,6 +7889,25 @@ struct HFSM2_EMPTY_BASES A_<TFirst>
 
 namespace hfsm2 {
 namespace detail {
+
+#if HFSM2_PLANS_AVAILABLE()
+
+template <typename TF_>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF_>::planSucceeded(FullControl& control) noexcept {
+	control.succeed();
+}
+
+template <typename TF_>
+HFSM2_CONSTEXPR(14)
+void
+A_<TF_>::planFailed(FullControl& control) noexcept {
+	control.plan().clear();
+	control.fail();
+}
+
+#endif
 
 template <typename TF_>
 HFSM2_CONSTEXPR(14)
@@ -11998,11 +12009,6 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepExit(PlanControl& control) noexcept {
 
 	resumable = active;
 	active	  = INVALID_PRONG;
-
-#if HFSM2_PLANS_AVAILABLE()
-	Plan plan = control.plan(REGION_ID);
-	plan.clear();
-#endif
 }
 
 template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
