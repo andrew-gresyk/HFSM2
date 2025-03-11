@@ -24,9 +24,6 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-    #env:
-    #  CC: gcc-14
-    #  CXX: g++-14
     permissions:
       actions: read
       contents: read
@@ -63,19 +60,12 @@ jobs:
     #- name: Autobuild
     #  uses: github/codeql-action/autobuild@v3
 
-    # install dependencies
-    #- name: Install GCC on ubuntu
-    #  run: |
-    #    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    #    sudo apt-get update
-    #    sudo apt-get install gcc-14 g++-14
-
-    # build main test
-    - name: Configure Test
+    # Custom build
+    - name: Configure
       run: cmake -B ./build -DHFSM2_BUILD_TESTS=ON -DHFSM2_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
       working-directory: ${{ github.workspace }}
 
-    - name: Build Test
+    - name: Build
       run: cmake --build ./build --config Debug
       working-directory: ${{ github.workspace }}
 
