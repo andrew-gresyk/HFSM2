@@ -49,6 +49,11 @@ jobs:
               CXX: g++-13
             }
           - {
+              OS: ubuntu-24.04,
+              CC: gcc-14,
+              CXX: g++-14
+            }
+          - {
               OS: ubuntu-20.04,
               CC: clang-6.0,
               CXX: clang++-6.0,
@@ -106,6 +111,24 @@ jobs:
               VERSION: '15'
             }
           - {
+              OS: ubuntu-24.04,
+              CC: clang-16,
+              CXX: clang++-16,
+              VERSION: '16'
+            }
+          - {
+              OS: ubuntu-24.04,
+              CC: clang-17,
+              CXX: clang++-17,
+              VERSION: '17'
+            }
+          - {
+              OS: ubuntu-24.04,
+              CC: clang-18,
+              CXX: clang++-18,
+              VERSION: '18'
+            }
+          - {
               OS: macos-13,
               CC: clang,
               CXX: clang++
@@ -150,7 +173,7 @@ jobs:
 
     # main test
     - name: Configure Test
-      run: cmake -B ./build -DHFSM2_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+      run: cmake -B ./build -DHFSM2_BUILD_TESTS=ON -DHFSM2_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
       working-directory: ${{ github.workspace }}
 
     - name: Build Test
