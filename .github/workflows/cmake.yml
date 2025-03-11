@@ -49,6 +49,11 @@ jobs:
               CXX: g++-13
             }
           - {
+              OS: ubuntu-24.04,
+              CC: gcc-14,
+              CXX: g++-14
+            }
+          - {
               OS: ubuntu-20.04,
               CC: clang-6.0,
               CXX: clang++-6.0,
@@ -106,6 +111,24 @@ jobs:
               VERSION: '15'
             }
           - {
+              OS: ubuntu-24.04,
+              CC: clang-16,
+              CXX: clang++-16,
+              VERSION: '16'
+            }
+          - {
+              OS: ubuntu-24.04,
+              CC: clang-17,
+              CXX: clang++-17,
+              VERSION: '17'
+            }
+          - {
+              OS: ubuntu-24.04,
+              CC: clang-18,
+              CXX: clang++-18,
+              VERSION: '18'
+            }
+          - {
               OS: macos-13,
               CC: clang,
               CXX: clang++
@@ -126,14 +149,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # install dependencies
     - name: Install GCC on ubuntu
       if: |
         startsWith(matrix.PLATFORM.OS, 'ubuntu-') &&
         startsWith(matrix.PLATFORM.CC, 'gcc-') &&
         matrix.PLATFORM.INSTALL
-      # run: |
-      # echo "deb http://dk.archive.ubuntu.com/ubuntu/ bionic main universe" | sudo tee /etc/apt/sources.list
       run: |
         sudo add-apt-repository ppa:ubuntu-toolchain-r/test
         sudo apt-get update
@@ -148,56 +168,10 @@ jobs:
       with:
           version: ${{ matrix.PLATFORM.VERSION }}
 
-    # main test
-    - name: Configure Test
-      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
+    - name: Configure
+      run: cmake -B ./build -DHFSM2_BUILD_TESTS=ON -DHFSM2_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
       working-directory: ${{ github.workspace }}
 
-    - name: Build Test
+    - name: Build
       run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
       working-directory: ${{ github.workspace }}
-
-    # examples/advanced_event_handling
-    - name: Configure 'examples/advanced_event_handling'
-      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/advanced_event_handling
-
-    - name: Build 'examples/advanced_event_handling'
-      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/advanced_event_handling
-
-    # examples/basic_audio_player
-    - name: Configure 'examples/basic_audio_player'
-      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/basic_audio_player
-
-    - name: Build 'examples/basic_audio_player'
-      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/basic_audio_player
-
-    # examples/basic_traffic_light
-    - name: Configure 'examples/basic_traffic_light'
-      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/basic_traffic_light
-
-    - name: Build 'examples/basic_traffic_light'
-      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/basic_traffic_light
-
-    # examples/calculator - disabled, uses <conio.h> and _getch()
-    # - name: Configure 'examples/calculator'
-    #   run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
-    #   working-directory: ${{ github.workspace }}/examples/calculator
-    #
-    # - name: Build 'examples/calculator'
-    #   run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
-    #   working-directory: ${{ github.workspace }}/examples/calculator
-
-    # examples/debug_logger_interface
-    - name: Configure 'examples/debug_logger_interface'
-      run: cmake -B ./build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/debug_logger_interface
-
-    - name: Build 'examples/debug_logger_interface'
-      run: cmake --build ./build --config ${{ matrix.BUILD_CONFIG }}
-      working-directory: ${{ github.workspace }}/examples/debug_logger_interface
