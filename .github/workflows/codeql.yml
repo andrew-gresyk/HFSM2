@@ -57,8 +57,17 @@ jobs:
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
+    #- name: Autobuild
+    #  uses: github/codeql-action/autobuild@v3
+
+    # Build main test
+    - name: Configure Test
+      run: cmake -B ./build -DHFSM2_BUILD_TESTS=ON -DHFSM2_BUILD_EXAMPLES -DCMAKE_BUILD_TYPE=Debug
+      working-directory: ${{ github.workspace }}
+
+    - name: Build Test
+      run: cmake --build ./build --config Debug
+      working-directory: ${{ github.workspace }}
 
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
