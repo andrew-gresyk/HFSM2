@@ -5,7 +5,7 @@
 #include <hfsm2/machine.hpp>
 
 #include <iostream>
-#include <conio.h>
+#include <stdio.h>
 
 
 #define DEBUG 1
@@ -826,7 +826,7 @@ int main()
 	do
 	{
 		PRINTCALL;
-		ch = _getch();
+		ch = getchar();
 		switch(ch)
 		{
 			case '0': { machine.react(Digit_0{}); break; }
