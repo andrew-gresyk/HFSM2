@@ -65,11 +65,8 @@ if(HFSM2_BUILD_TESTS)
 
 	file(GLOB TEST_SOURCE_FILES
 		 "test/*.cpp"
-		 "test/reported/*.cpp"
-		 "test/shared/*.cpp")
+		 "test/*/*.cpp")
 	add_executable(${PROJECT_NAME}_test ${TEST_SOURCE_FILES})
-
-	target_link_libraries(${PROJECT_NAME}_test PRIVATE ${PROJECT_NAME})
 
 	target_include_directories(${PROJECT_NAME}_test PRIVATE
 			"${CMAKE_CURRENT_SOURCE_DIR}/external")
