@@ -64,8 +64,8 @@ if(HFSM2_BUILD_TESTS)
 	enable_testing()
 
 	file(GLOB TEST_SOURCE_FILES
-		 "test/*.cpp"
-		 "test/*/*.cpp")
+		 "${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp"
+		 "${CMAKE_CURRENT_SOURCE_DIR}/test/*/*.cpp")
 	add_executable(${PROJECT_NAME}_test ${TEST_SOURCE_FILES})
 
 	target_include_directories(${PROJECT_NAME}_test PRIVATE
