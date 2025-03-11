@@ -72,6 +72,8 @@ if(HFSM2_BUILD_TESTS)
 			"${CMAKE_CURRENT_SOURCE_DIR}/external"
 			"${CMAKE_CURRENT_SOURCE_DIR}/include")
 
+	target_compile_features(${PROJECT_NAME}_test PRIVATE cxx_std_11)
+
 	if(MSVC)
 		target_compile_options(${PROJECT_NAME}_test PRIVATE /W4 /WX)
 	else()
