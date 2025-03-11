@@ -6,7 +6,7 @@ project(${EXAMPLE_NAME}_example)
 file(GLOB SOURCE_FILES "*.cpp")
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE hfsm2)
 
