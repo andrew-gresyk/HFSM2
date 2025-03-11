@@ -69,7 +69,8 @@ if(HFSM2_BUILD_TESTS)
 	add_executable(${PROJECT_NAME}_test ${TEST_SOURCE_FILES})
 
 	target_include_directories(${PROJECT_NAME}_test PRIVATE
-			"${CMAKE_CURRENT_SOURCE_DIR}/external")
+			"${CMAKE_CURRENT_SOURCE_DIR}/external"
+			"${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 	if(MSVC)
 		target_compile_options(${PROJECT_NAME}_test PRIVATE /W4 /WX)
