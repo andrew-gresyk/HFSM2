@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(hfsm2 VERSION 2.7.0 LANGUAGES CXX)
+project(hfsm2 VERSION 2.6.0 LANGUAGES CXX)
 
 # Create an interface library (header-only)
 add_library(${PROJECT_NAME} INTERFACE)
@@ -63,13 +63,15 @@ option(HFSM2_BUILD_TESTS "Build the HFSM2 tests" OFF)
 if(HFSM2_BUILD_TESTS)
 	enable_testing()
 
-	file(GLOB TEST_SOURCE_FILES "test/*.cpp" "test/shared/*.cpp")
+	file(GLOB TEST_SOURCE_FILES
+		 "test/*.cpp"
+		 "test/reported/*.cpp"
+		 "test/shared/*.cpp")
 	add_executable(${PROJECT_NAME}_test ${TEST_SOURCE_FILES})
 
 	target_link_libraries(${PROJECT_NAME}_test PRIVATE ${PROJECT_NAME})
 
 	target_include_directories(${PROJECT_NAME}_test PRIVATE
-			"${CMAKE_CURRENT_SOURCE_DIR}/development"
 			"${CMAKE_CURRENT_SOURCE_DIR}/external")
 
 	if(MSVC)
