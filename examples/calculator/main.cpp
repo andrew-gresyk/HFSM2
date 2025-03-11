@@ -5,6 +5,7 @@
 #include <hfsm2/machine.hpp>
 
 #include <iostream>
+#include <math.h>
 #include <stdio.h>
 
 
@@ -92,13 +93,13 @@ struct Context {
 		PRINTCALL;
 		if (decimalFactor > 1.0)
 		{
-			operand1 += std::copysign(static_cast<double>(digit) / decimalFactor, operand1);
+			operand1 += copysign(static_cast<double>(digit) / decimalFactor, operand1);
 			decimalFactor *= 10.0;
 		}
 		else
 		{
 			operand1 *= 10.0;
-			operand1 += std::copysign(digit, operand1);
+			operand1 += copysign(digit, operand1);
 		}
 	}
 
@@ -107,13 +108,13 @@ struct Context {
 		PRINTCALL;
 		if (decimalFactor != 1.0)
 		{
-			operand2 += std::copysign(digit / decimalFactor, operand2);
+			operand2 += copysign(digit / decimalFactor, operand2);
 			decimalFactor *= 10.0;
 		}
 		else
 		{
 			operand2 *= 10.0;
-			operand2 += std::copysign(digit, operand2);
+			operand2 += copysign(digit, operand2);
 		}
 	}
 
