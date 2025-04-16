@@ -49,23 +49,6 @@ jobs:
             }
           - {
               OS: ubuntu-22.04,
-              CC: clang-10,
-              CXX: clang++-10,
-              VERSION: '10'
-            }
-          - {
-              OS: ubuntu-22.04,
-              CC: clang-11,
-              CXX: clang++-11,
-              VERSION: '11'
-            }
-          - {
-              OS: ubuntu-22.04,
-              CC: clang-12,
-              CXX: clang++-12
-            }
-          - {
-              OS: ubuntu-22.04,
               CC: clang-13,
               CXX: clang++-13
             }
