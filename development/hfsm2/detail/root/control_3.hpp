@@ -532,6 +532,8 @@ protected:
 #endif
 
 public:
+	using FullControlBase::context;
+
 	using FullControlBase::isActive;
 	using FullControlBase::changeTo;
 
@@ -541,6 +543,7 @@ protected:
 	using FullControlBase::_core;
 	using FullControlBase::_regionId;
 
+	using FullControlBase::_regionStateId;
 	using FullControlBase::_taskStatus;
 };
 
