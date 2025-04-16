@@ -7,6 +7,12 @@ namespace detail {
 
 template <typename TArgs>
 class PlanT {
+	template <typename, typename, Strategy, typename, typename...>
+	friend struct C_;
+
+	template <typename, typename, typename, typename...>
+	friend struct O_;
+
 	using Args			= TArgs;
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
@@ -22,6 +28,7 @@ public:
 	using Tasks			= typename PlanData::Tasks;
 	using TaskLinks		= typename PlanData::TaskLinks;
 	using TaskIndex		= typename TaskLinks::Index;
+	using TasksBits		= typename PlanData::TasksBits;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -89,6 +96,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	bool linkTask(const Long index)					noexcept;
 
 	HFSM2_CONSTEXPR(14)	void clearTasks()								noexcept;
+	HFSM2_CONSTEXPR(14)	void clearStatuses()							noexcept;
 
 public:
 	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;

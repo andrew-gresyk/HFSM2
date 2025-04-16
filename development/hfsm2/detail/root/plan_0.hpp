@@ -61,7 +61,7 @@ private:
 	HFSM2_CONSTEXPR(11)	CPlanT(const PlanData& planData,
 							   const RegionID regionId_)				noexcept
 		: _planData{planData}
-		, _bounds{planData.tasksBounds[regionId_]}
+		, _bounds{planData.taskBounds[regionId_]}
 	{}
 
 	template <typename TState>

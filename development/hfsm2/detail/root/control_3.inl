@@ -23,43 +23,6 @@ FullControlBaseT<TArgs>::Lock::~Lock() noexcept {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#if HFSM2_PLANS_AVAILABLE()
-
-template <typename TArgs>
-template <typename TState>
-HFSM2_CONSTEXPR(14)
-TaskStatus
-FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
-	constexpr StateID STATE_ID = TState::STATE_ID;
-
-	switch (_taskStatus.result) {
-	case TaskStatus::NONE:
-		HFSM2_BREAK();
-		break;
-
-	case TaskStatus::SUCCESS:
-		_core.planData.tasksSuccesses.template set<STATE_ID>();
-
-		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
-		break;
-
-	case TaskStatus::FAILURE:
-		_core.planData.tasksFailures .template set<STATE_ID>();
-
-		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
-		break;
-
-	default:
-		HFSM2_BREAK();
-	}
-
-	return {_taskStatus.result};
-}
-
-#endif
-
-//------------------------------------------------------------------------------
-
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
@@ -181,14 +144,7 @@ FullControlBaseT<TArgs>::succeed(const StateID stateId_) noexcept {
 
 	_core.planData.tasksSuccesses.set(stateId_);
 
-	// TODO: promote taskSuccess all the way up for all regions without plans
-	if (_regionId < RegionList::SIZE && !_core.planData.planExists.get(_regionId)) {
-		HFSM2_ASSERT(_regionStateId < StateList::SIZE);
-
-		_core.planData.tasksSuccesses.set(_regionStateId);
-	}
-
-	HFSM2_LOG_TASK_STATUS(context(), _regionId, stateId_, StatusEvent::SUCCEEDED);
+	HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::SUCCEEDED);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -201,14 +157,7 @@ FullControlBaseT<TArgs>::fail(const StateID stateId_) noexcept {
 
 	_core.planData.tasksFailures.set(stateId_);
 
-	// TODO: promote taskFailure all the way up for all regions without plans
-	if (_regionId < RegionList::SIZE && !_core.planData.planExists.get(_regionId)) {
-		HFSM2_ASSERT(_regionStateId < StateList::SIZE);
-
-		_core.planData.tasksFailures.set(_regionStateId);
-	}
-
-	HFSM2_LOG_TASK_STATUS(context(), _regionId, stateId_, StatusEvent::FAILED);
+	HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::FAILED);
 }
 
 #endif
@@ -230,9 +179,11 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 
 	if (subStatus.result == TaskStatus::FAILURE) {
 		_taskStatus.result = TaskStatus::FAILURE;
+		HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::FAILED);
+
 		headState.wrapPlanFailed(*this);
 
-		return FullControlBase::template buildPlanStatus<TState>();
+		return TaskStatus{_taskStatus.result};
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
@@ -264,9 +215,12 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 			return TaskStatus{};
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
+			HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::SUCCEEDED);
+
+			plan().clearTasks();
 			headState.wrapPlanSucceeded(*this);
 
-			return FullControlBase::template buildPlanStatus<TState>();
+			return TaskStatus{_taskStatus.result};
 		}
 	} else
 		return TaskStatus{};
@@ -416,9 +370,11 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 
 	if (subStatus.result == TaskStatus::FAILURE) {
 		_taskStatus.result = TaskStatus::FAILURE;
+		HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::FAILED);
+
 		headState.wrapPlanFailed(*this);
 
-		return FullControlBase::template buildPlanStatus<TState>();
+		return TaskStatus{_taskStatus.result};
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
@@ -447,9 +403,12 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 			return TaskStatus{};
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
+			HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::SUCCEEDED);
+
+			plan().clearTasks();
 			headState.wrapPlanSucceeded(*this);
 
-			return FullControlBase::template buildPlanStatus<TState>();
+			return TaskStatus{_taskStatus.result};
 		}
 	} else
 		return TaskStatus{};

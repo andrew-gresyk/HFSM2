@@ -44,13 +44,6 @@ protected:
 
 	using PlanControl::PlanControl;
 
-#if HFSM2_PLANS_AVAILABLE()
-
-	template <typename TState>
-	HFSM2_CONSTEXPR(14)	TaskStatus buildPlanStatus()				noexcept;
-
-#endif
-
 public:
 	using PlanControl::context;
 
@@ -539,6 +532,8 @@ protected:
 #endif
 
 public:
+	using FullControlBase::context;
+
 	using FullControlBase::isActive;
 	using FullControlBase::changeTo;
 
@@ -548,6 +543,7 @@ protected:
 	using FullControlBase::_core;
 	using FullControlBase::_regionId;
 
+	using FullControlBase::_regionStateId;
 	using FullControlBase::_taskStatus;
 };
 

@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <vector>
 
+namespace test_tools {
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #define UNUSED(x)
@@ -119,7 +121,6 @@ struct LoggerT final
 	using typename Interface::Method;
 	using typename Interface::Prong;
 	using typename Interface::StateID;
-	using typename Interface::RegionID;
 	using typename Interface::TransitionType;
 
 #ifdef HFSM2_ENABLE_PLANS
@@ -138,12 +139,12 @@ struct LoggerT final
 #ifdef HFSM2_ENABLE_PLANS
 
 	void recordTaskStatus(const Context& context,
-						  const RegionID region,
+						  const StateID region,
 						  const StateID origin,
 						  const StatusEvent event)						override;
 
 	void recordPlanStatus(const Context& context,
-						  const RegionID region,
+						  const StateID region,
 						  const StatusEvent event)						override;
 
 #endif
@@ -225,5 +226,7 @@ void assertLastTransitions(TMachine& machine,
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
+
+}
 
 #include "tools.inl"

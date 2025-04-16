@@ -4,6 +4,8 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
+using namespace test_tools;
+
 namespace test_resume {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,11 +154,11 @@ TEST_CASE("FSM.Resumable") {
 			logger.assertSequence({
 				{						Event::Type::RESUME, FSM::stateId<Apex>() },
 
-				{ FSM::stateId<O   >(),	Event::Type::EXIT_GUARD },
-				{ FSM::stateId<OR  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<OR_2>(),	Event::Type::EXIT_GUARD },
-				{ FSM::stateId<OC  >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<OR  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<OC_2>(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<OC  >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<O   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
 
 				{ FSM::stateId<OR_2>(),	Event::Type::EXIT },

@@ -3,8 +3,6 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma pack(push, 1)
-
 struct alignas(2 * sizeof(Prong)) Parent final {
 	HFSM2_CONSTEXPR(11)
 	Parent() = default;
@@ -30,8 +28,6 @@ struct alignas(2 * sizeof(Prong)) Parent final {
 	ForkID forkId = INVALID_FORK_ID;
 	Prong  prong  = INVALID_PRONG;
 };
-
-#pragma pack(pop)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -105,14 +101,15 @@ struct RegistryT<
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
+	using StateParents	= StaticArrayT<Parent,  STATE_COUNT>;
 
-	using CompoParents	= StaticArrayT<Parent, COMPO_COUNT>;
-	using OrthoParents	= StaticArrayT<Parent, ORTHO_COUNT>;
-	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
-	using RegionSizes	= StaticArrayT<Short,  REGION_COUNT>;
+	using CompoParents	= StaticArrayT<Parent,  COMPO_COUNT>;
+	using OrthoParents	= StaticArrayT<Parent,  ORTHO_COUNT>;
+	using OrthoUnits	= StaticArrayT<Units,   ORTHO_UNITS>;
+	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
+	using RegionSizes	= StaticArrayT<Short,   REGION_COUNT>;
 
-	using CompoForks	= StaticArrayT<Prong,  COMPO_COUNT>;
+	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
 	using OrthoBits		= typename OrthoForks::Bits;
 	using CompoRemains	= BitArrayT	  <COMPO_COUNT>;
@@ -149,6 +146,8 @@ struct RegistryT<
 	CompoParents compoParents;
 	OrthoParents orthoParents;
 	OrthoUnits	 orthoUnits;
+
+	RegionHeads	 regionHeads;
 	RegionSizes	 regionSizes;
 
 	CompoForks compoRequested{INVALID_PRONG};
@@ -200,11 +199,12 @@ struct RegistryT<
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
-	using CompoParents	= StaticArrayT<Parent, COMPO_COUNT>;
-	using RegionSizes	= StaticArrayT<Short,  REGION_COUNT>;
+	using StateParents	= StaticArrayT<Parent,  STATE_COUNT>;
+	using CompoParents	= StaticArrayT<Parent,  COMPO_COUNT>;
+	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
+	using RegionSizes	= StaticArrayT<Short,   REGION_COUNT>;
 
-	using CompoForks	= StaticArrayT<Prong,  COMPO_COUNT>;
+	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <0>;
 	using CompoRemains	= BitArrayT	  <COMPO_COUNT>;
 
@@ -236,6 +236,8 @@ struct RegistryT<
 
 	StateParents stateParents;
 	CompoParents compoParents;
+
+	RegionHeads	 regionHeads;
 	RegionSizes	 regionSizes;
 
 	CompoForks compoRequested{INVALID_PRONG};

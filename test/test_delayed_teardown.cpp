@@ -6,6 +6,8 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
+using namespace test_tools;
+
 namespace test_delayed_teardown {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -240,9 +242,7 @@ TEST_CASE("FSM.Delayed Teardown") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,		FSM::stateId<Step2>() },
 
-				{ FSM::stateId<Step1   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1 >(),	Event::Type::EXIT_GUARD },
-				{ FSM::stateId<Step1_2 >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Work    >(),	Event::Type::EXIT_GUARD },
 
 				{ FSM::stateId<Work    >(),	Event::Type::CANCEL_PENDING },
@@ -298,7 +298,7 @@ TEST_CASE("FSM.Delayed Teardown") {
 				{ FSM::stateId<Step1_2 >(),	Event::Type::UPDATE },
 				{ FSM::stateId<Teardown>(),	Event::Type::UPDATE },
 
-				{ FSM::regionId<Step1_2>(),	Event::Type::TASK_SUCCESS,	FSM::stateId<Teardown>() },
+				{ FSM::stateId<Step1_2>(),	Event::Type::TASK_SUCCESS,	FSM::stateId<Teardown>() },
 
 				{ FSM::stateId<Step1_1 >(),	Event::Type::POST_UPDATE },
 				{ FSM::stateId<Teardown>(),	Event::Type::POST_UPDATE },
@@ -308,10 +308,10 @@ TEST_CASE("FSM.Delayed Teardown") {
 
 				{ FSM::stateId<Step1_2 >(),	Event::Type::CHANGE,		FSM::stateId<Step2   >() },
 
-				{ FSM::stateId<Step1   >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1 >(),	Event::Type::EXIT_GUARD },
-				{ FSM::stateId<Step1_2 >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Teardown>(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1_2 >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1   >(),	Event::Type::EXIT_GUARD },
 
 				{ FSM::stateId<Step2   >(),	Event::Type::ENTRY_GUARD },
 

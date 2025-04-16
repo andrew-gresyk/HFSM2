@@ -58,7 +58,7 @@ R_<TG_, TA_>::update() noexcept {
 
 #if HFSM2_PLANS_AVAILABLE()
 	_apex.deepUpdatePlans(control);
-	_core.planData.clearRegionStatuses();
+	_core.planData.clearStatuses();
 #endif
 
 	processRequest();
@@ -86,7 +86,7 @@ R_<TG_, TA_>::react(const TEvent& event) noexcept {
 
 #if HFSM2_PLANS_AVAILABLE()
 	_apex.deepUpdatePlans(control);
-	_core.planData.clearRegionStatuses();
+	_core.planData.clearStatuses();
 #endif
 
 	processRequest();

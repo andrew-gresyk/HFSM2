@@ -1,6 +1,8 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
+namespace test_tools {
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename TConfig>
@@ -150,7 +152,7 @@ LoggerT<TConfig>::recordTransition(const Context& UNUSED(context),
 template <typename TConfig>
 void
 LoggerT<TConfig>::recordTaskStatus(const Context& UNUSED(context),
-								   const RegionID region,
+								   const StateID region,
 								   const StateID origin,
 								   const StatusEvent event)
 {
@@ -173,7 +175,7 @@ LoggerT<TConfig>::recordTaskStatus(const Context& UNUSED(context),
 template <typename TConfig>
 void
 LoggerT<TConfig>::recordPlanStatus(const Context& UNUSED(context),
-								   const RegionID region,
+								   const StateID region,
 								   const StatusEvent event)
 {
 	switch (event) {
@@ -369,3 +371,5 @@ assertLastTransitions(TMachine& machine,
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
+
+}

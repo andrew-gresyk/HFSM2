@@ -155,8 +155,9 @@ TEST_CASE("Wiki.Plans.Detailed Demo") {
     {
         void update(FullControl& control) {
             // even though CompositeTask has no plan attached to it,
-            // the sub-state can 'succeed' the entire region
-            control.succeed();
+            // a state can 'succeed' any other state,
+            // in this case - it's parent region
+            control.succeed<CompositeTask>();
         }
     };
 
@@ -172,7 +173,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo") {
         void update(FullControl& control) {
             // the task can also be marked successful
             // from its sub-state one level down
-            control.succeed();
+            control.succeed<OrthogonalTask>();
         }
     };
 

@@ -23,7 +23,6 @@ struct LoggerInterfaceT {
 	using Method		 = ::hfsm2::Method;
 	using Prong			 = ::hfsm2::Prong;
 	using StateID		 = ::hfsm2::StateID;
-	using RegionID		 = ::hfsm2::RegionID;
 	using TransitionType = ::hfsm2::TransitionType;
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -53,7 +52,7 @@ struct LoggerInterfaceT {
 	virtual
 	void
 	recordTaskStatus(const Context& HFSM2_UNUSED(context),
-					 const RegionID HFSM2_UNUSED(region),
+					 const StateID HFSM2_UNUSED(region),
 					 const StateID HFSM2_UNUSED(origin),
 					 const StatusEvent HFSM2_UNUSED(event))
 	{}
@@ -62,7 +61,7 @@ struct LoggerInterfaceT {
 	virtual
 	void
 	recordPlanStatus(const Context& HFSM2_UNUSED(context),
-					 const RegionID HFSM2_UNUSED(region),
+					 const StateID HFSM2_UNUSED(region),
 					 const StatusEvent HFSM2_UNUSED(event))
 	{}
 

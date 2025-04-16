@@ -18,12 +18,6 @@ jobs:
       matrix:
         PLATFORM:
           - {
-              OS: ubuntu-20.04,
-              CC: gcc-8,
-              CXX: g++-8,
-              INSTALL: true
-            }
-          - {
               OS: ubuntu-22.04,
               CC: gcc-9,
               CXX: g++-9
@@ -52,47 +46,6 @@ jobs:
               OS: ubuntu-24.04,
               CC: gcc-14,
               CXX: g++-14
-            }
-          - {
-              OS: ubuntu-20.04,
-              CC: clang-6.0,
-              CXX: clang++-6.0,
-              VERSION: '6.0'
-            }
-          - {
-              OS: ubuntu-20.04,
-              CC: clang-7,
-              CXX: clang++-7,
-              VERSION: '7'
-            }
-          - {
-              OS: ubuntu-20.04,
-              CC: clang-8,
-              CXX: clang++-8,
-              VERSION: '8'
-            }
-          - {
-              OS: ubuntu-20.04,
-              CC: clang-9,
-              CXX: clang++-9,
-              VERSION: '9'
-            }
-          - {
-              OS: ubuntu-20.04,
-              CC: clang-10,
-              CXX: clang++-10,
-              VERSION: '10'
-            }
-          - {
-              OS: ubuntu-20.04,
-              CC: clang-11,
-              CXX: clang++-11,
-              VERSION: '11'
-            }
-          - {
-              OS: ubuntu-20.04,
-              CC: clang-12,
-              CXX: clang++-12
             }
           - {
               OS: ubuntu-22.04,

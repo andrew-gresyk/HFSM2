@@ -147,8 +147,6 @@ enum Strategy {
 
 //------------------------------------------------------------------------------
 
-#pragma pack(push, 1)
-
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
@@ -310,8 +308,6 @@ struct TransitionT<void> final
 {
 	using TransitionBase::TransitionBase;
 };
-
-#pragma pack(pop)
 
 ////////////////////////////////////////////////////////////////////////////////
 

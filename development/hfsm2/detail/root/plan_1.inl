@@ -109,7 +109,7 @@ PlanT<TArgs>::PlanT(Registry& registry,
 	: _registry{registry}
 	, _planData{planData}
 	, _regionId{regionId_}
-	, _bounds{planData.tasksBounds[regionId_]}
+	, _bounds{planData.taskBounds[regionId_]}
 {}
 
 //------------------------------------------------------------------------------
@@ -204,6 +204,30 @@ PlanT<TArgs>::clearTasks() noexcept {
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
+void
+PlanT<TArgs>::clearStatuses() noexcept {
+	TasksBits bitsToClear;
+	bitsToClear.set();
+
+	const StateID begin = _registry.regionHeads[_regionId];
+
+	const StateID end   = _registry.regionHeads[_regionId] +
+						  _registry.regionSizes[_regionId];
+
+	for (StateID i = begin; i < end; ++i)
+		bitsToClear.clear(i);
+
+	_planData.tasksSuccesses &= bitsToClear;
+	_planData.tasksFailures  &= bitsToClear;
+
+	_planData.headStatuses[_regionId].clear();
+	_planData. subStatuses[_regionId].clear();
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
 PlanT<TArgs>::operator bool() const noexcept {
 	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
 				 _bounds.last  < TASK_CAPACITY ||
@@ -219,14 +243,7 @@ HFSM2_CONSTEXPR(14)
 void
 PlanT<TArgs>::clear() noexcept {
 	clearTasks();
-
-	for (RegionID i = _regionId;
-		 i < _registry.regionSizes[_regionId];
-		 ++i)
-	{
-		_planData.tasksSuccesses.clear(i);
-		_planData.tasksFailures .clear(i);
-	}
+	clearStatuses();
 }
 
 //------------------------------------------------------------------------------

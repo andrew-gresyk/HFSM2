@@ -4,6 +4,8 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
+using namespace test_tools;
+
 namespace test_self_transitions {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,8 +135,8 @@ TEST_CASE("FSM.Self Transition") {
 			logger.assertSequence({
 				{						 Event::Type::CHANGE,		FSM::stateId<A    >() },
 
-				{ FSM::stateId<A    >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<A_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<A    >(), Event::Type::EXIT_GUARD },
 
 				{ FSM::stateId<A    >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTRY_GUARD },
@@ -158,8 +160,9 @@ TEST_CASE("FSM.Self Transition") {
 			logger.assertSequence({
 				{						 Event::Type::CHANGE, FSM::stateId<B    >() },
 
-				{ FSM::stateId<A    >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<A_1  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<A    >(), Event::Type::EXIT_GUARD },
+
 				{ FSM::stateId<B    >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<B_1  >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<B_1_1>(), Event::Type::ENTRY_GUARD },
@@ -197,11 +200,12 @@ TEST_CASE("FSM.Self Transition") {
 			logger.assertSequence({
 				{						 Event::Type::CHANGE, FSM::stateId<B    >() },
 
-				{ FSM::stateId<B    >(), Event::Type::EXIT_GUARD },
-				{ FSM::stateId<B_1  >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<B_1_1>(), Event::Type::EXIT_GUARD },
-				{ FSM::stateId<B_2  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_1  >(), Event::Type::EXIT_GUARD },
 				{ FSM::stateId<B_2_1>(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B_2  >(), Event::Type::EXIT_GUARD },
+				{ FSM::stateId<B    >(), Event::Type::EXIT_GUARD },
+
 				{ FSM::stateId<B    >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<B_1  >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<B_1_1>(), Event::Type::ENTRY_GUARD },
