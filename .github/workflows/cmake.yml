@@ -19,12 +19,6 @@ jobs:
         PLATFORM:
           - {
               OS: ubuntu-22.04,
-              CC: gcc-8,
-              CXX: g++-8,
-              INSTALL: true
-            }
-          - {
-              OS: ubuntu-22.04,
               CC: gcc-9,
               CXX: g++-9
             }
