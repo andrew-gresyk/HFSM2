@@ -3,7 +3,7 @@
 
 #include "tools.hpp"
 
-#include <doctest/doctest.h>
+using namespace test_tools;
 
 namespace test_contexts {
 

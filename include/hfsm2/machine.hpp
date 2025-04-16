@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.6.1 (2025-03-19)
+// 2.7.0 (2025-04-17)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 6
-#define HFSM2_VERSION_PATCH 1
+#define HFSM2_VERSION_MINOR 7
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -2470,8 +2470,6 @@ enum Strategy {
 //#endif
 };
 
-#pragma pack(push, 1)
-
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
@@ -2604,8 +2602,6 @@ struct TransitionT<void> final
 	using TransitionBase::TransitionBase;
 };
 
-#pragma pack(pop)
-
 }
 
 struct Request final {
@@ -2636,7 +2632,6 @@ struct LoggerInterfaceT {
 	using Method		 = ::hfsm2::Method;
 	using Prong			 = ::hfsm2::Prong;
 	using StateID		 = ::hfsm2::StateID;
-	using RegionID		 = ::hfsm2::RegionID;
 	using TransitionType = ::hfsm2::TransitionType;
 
 #if HFSM2_PLANS_AVAILABLE()
@@ -2666,7 +2661,7 @@ struct LoggerInterfaceT {
 	virtual
 	void
 	recordTaskStatus(const Context& HFSM2_UNUSED(context),
-					 const RegionID HFSM2_UNUSED(region),
+					 const StateID HFSM2_UNUSED(region),
 					 const StateID HFSM2_UNUSED(origin),
 					 const StatusEvent HFSM2_UNUSED(event))
 	{}
@@ -2675,7 +2670,7 @@ struct LoggerInterfaceT {
 	virtual
 	void
 	recordPlanStatus(const Context& HFSM2_UNUSED(context),
-					 const RegionID HFSM2_UNUSED(region),
+					 const StateID HFSM2_UNUSED(region),
 					 const StatusEvent HFSM2_UNUSED(event))
 	{}
 
@@ -2783,8 +2778,6 @@ struct StructureStateInfo final {
 namespace hfsm2 {
 namespace detail {
 
-#pragma pack(push, 1)
-
 struct TaskBase {
 	static_assert(sizeof(Long) == sizeof(StateID), "");
 
@@ -2873,8 +2866,6 @@ struct TaskT<void> final
 {
 	using TaskBase::TaskBase;
 };
-
-#pragma pack(pop)
 
 }
 }
@@ -3112,8 +3103,6 @@ TaskListT<TP_, NC_>::verifyStructure(const Index occupied) const noexcept {
 namespace hfsm2 {
 namespace detail {
 
-#pragma pack(push, 1)
-
 struct alignas(2 * sizeof(Prong)) Parent final {
 	HFSM2_CONSTEXPR(11)
 	Parent() = default;
@@ -3139,8 +3128,6 @@ struct alignas(2 * sizeof(Prong)) Parent final {
 	ForkID forkId = INVALID_FORK_ID;
 	Prong  prong  = INVALID_PRONG;
 };
-
-#pragma pack(pop)
 
 template <typename TRegistry>
 struct BackUpT final {
@@ -3208,14 +3195,15 @@ struct RegistryT<
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
+	using StateParents	= StaticArrayT<Parent,  STATE_COUNT>;
 
-	using CompoParents	= StaticArrayT<Parent, COMPO_COUNT>;
-	using OrthoParents	= StaticArrayT<Parent, ORTHO_COUNT>;
-	using OrthoUnits	= StaticArrayT<Units,  ORTHO_UNITS>;
-	using RegionSizes	= StaticArrayT<Short,  REGION_COUNT>;
+	using CompoParents	= StaticArrayT<Parent,  COMPO_COUNT>;
+	using OrthoParents	= StaticArrayT<Parent,  ORTHO_COUNT>;
+	using OrthoUnits	= StaticArrayT<Units,   ORTHO_UNITS>;
+	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
+	using RegionSizes	= StaticArrayT<Short,   REGION_COUNT>;
 
-	using CompoForks	= StaticArrayT<Prong,  COMPO_COUNT>;
+	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
 	using OrthoBits		= typename OrthoForks::Bits;
 	using CompoRemains	= BitArrayT	  <COMPO_COUNT>;
@@ -3252,6 +3240,8 @@ struct RegistryT<
 	CompoParents compoParents;
 	OrthoParents orthoParents;
 	OrthoUnits	 orthoUnits;
+
+	RegionHeads	 regionHeads;
 	RegionSizes	 regionSizes;
 
 	CompoForks compoRequested{INVALID_PRONG};
@@ -3301,11 +3291,12 @@ struct RegistryT<
 	using Payload		= TPayload;
 	using Transition	= TransitionT<Payload>;
 
-	using StateParents	= StaticArrayT<Parent, STATE_COUNT>;
-	using CompoParents	= StaticArrayT<Parent, COMPO_COUNT>;
-	using RegionSizes	= StaticArrayT<Short,  REGION_COUNT>;
+	using StateParents	= StaticArrayT<Parent,  STATE_COUNT>;
+	using CompoParents	= StaticArrayT<Parent,  COMPO_COUNT>;
+	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
+	using RegionSizes	= StaticArrayT<Short,   REGION_COUNT>;
 
-	using CompoForks	= StaticArrayT<Prong,  COMPO_COUNT>;
+	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <0>;
 	using CompoRemains	= BitArrayT	  <COMPO_COUNT>;
 
@@ -3337,6 +3328,8 @@ struct RegistryT<
 
 	StateParents stateParents;
 	CompoParents compoParents;
+
+	RegionHeads	 regionHeads;
 	RegionSizes	 regionSizes;
 
 	CompoForks compoRequested{INVALID_PRONG};
@@ -3826,8 +3819,6 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 namespace hfsm2 {
 namespace detail {
 
-#pragma pack(push, 1)
-
 struct TaskStatus final {
 	enum Result {
 		NONE,
@@ -3845,8 +3836,6 @@ struct TaskStatus final {
 
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
 };
-
-#pragma pack(pop)
 
 HFSM2_CONSTEXPR(14) TaskStatus  operator |  (TaskStatus& l, const TaskStatus r)	noexcept;
 HFSM2_CONSTEXPR(14) TaskStatus& operator |= (TaskStatus& l, const TaskStatus r)	noexcept;
@@ -3930,7 +3919,7 @@ struct PlanDataT<
 	Payloads taskPayloads;
 	TasksBits payloadExists;
 
-	TasksBounds tasksBounds;
+	TasksBounds taskBounds;
 	TasksBits tasksSuccesses;
 	TasksBits tasksFailures;
 	RegionBits planExists;
@@ -3940,7 +3929,7 @@ struct PlanDataT<
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept;
+	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept;
 	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
@@ -3994,7 +3983,7 @@ struct PlanDataT<
 	Tasks tasks;
 	TaskLinks taskLinks;
 
-	TasksBounds tasksBounds;
+	TasksBounds taskBounds;
 	TasksBits tasksSuccesses;
 	TasksBits tasksFailures;
 	RegionBits planExists;
@@ -4004,7 +3993,7 @@ struct PlanDataT<
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept;
+	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept;
 	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
 
 #if HFSM2_ASSERT_AVAILABLE()
@@ -4041,7 +4030,7 @@ struct PlanDataT<
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept	{}
 	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{}
 
 #if HFSM2_ASSERT_AVAILABLE()
@@ -4076,7 +4065,7 @@ struct PlanDataT<
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
 
-	HFSM2_CONSTEXPR(14)	void clearRegionStatuses()							noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept	{}
 	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{}
 
 #if HFSM2_ASSERT_AVAILABLE()
@@ -4164,26 +4153,27 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearRegionStatuses() noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearStatuses() noexcept {
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+
 	headStatuses.clear();
-	subStatuses	.clear();
+	 subStatuses.clear();
 }
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clear() noexcept {
-	tasks		  .clear();
-	taskLinks	  .clear();
-	taskPayloads  .clear();
-	payloadExists .clear();
+	tasks		 .clear();
+	taskLinks	 .clear();
+	taskPayloads .clear();
+	payloadExists.clear();
 
-	tasksBounds	  .clear();
-	tasksSuccesses.clear();
-	tasksFailures .clear();
-	planExists	  .clear();
+	taskBounds	 .clear();
+	planExists	 .clear();
 
-	clearRegionStatuses();
+	clearStatuses();
 }
 
 #if HFSM2_ASSERT_AVAILABLE()
@@ -4205,7 +4195,7 @@ HFSM2_CONSTEXPR(14)
 Long
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlan(const RegionID regionId) const noexcept {
 	Long length = 0;
-	const Bounds& bounds = tasksBounds[regionId];
+	const Bounds& bounds = taskBounds[regionId];
 
 	if (bounds.first != INVALID_LONG) {
 		HFSM2_ASSERT(bounds.last != INVALID_LONG);
@@ -4268,24 +4258,25 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearRegionStatuses() noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearStatuses() noexcept {
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+
 	headStatuses.clear();
-	subStatuses	.clear();
+	 subStatuses.clear();
 }
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clear() noexcept {
-	tasks		  .clear();
-	taskLinks	  .clear();
+	tasks	  .clear();
+	taskLinks .clear();
 
-	tasksBounds	  .clear();
-	tasksSuccesses.clear();
-	tasksFailures .clear();
-	planExists	  .clear();
+	taskBounds.clear();
+	planExists.clear();
 
-	clearRegionStatuses();
+	clearStatuses();
 }
 
 #if HFSM2_ASSERT_AVAILABLE()
@@ -4307,7 +4298,7 @@ HFSM2_CONSTEXPR(14)
 Long
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlan(const RegionID regionId) const noexcept {
 	Long length = 0;
-	const Bounds& bounds = tasksBounds[regionId];
+	const Bounds& bounds = taskBounds[regionId];
 
 	if (bounds.first != INVALID_LONG) {
 		HFSM2_ASSERT(bounds.last != INVALID_LONG);
@@ -4404,7 +4395,7 @@ private:
 	HFSM2_CONSTEXPR(11)	CPlanT(const PlanData& planData,
 							   const RegionID regionId_)				noexcept
 		: _planData{planData}
-		, _bounds{planData.tasksBounds[regionId_]}
+		, _bounds{planData.taskBounds[regionId_]}
 	{}
 
 	template <typename TState>
@@ -4530,6 +4521,12 @@ namespace detail {
 
 template <typename TArgs>
 class PlanT {
+	template <typename, typename, Strategy, typename, typename...>
+	friend struct C_;
+
+	template <typename, typename, typename, typename...>
+	friend struct O_;
+
 	using Args			= TArgs;
 	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
@@ -4545,6 +4542,7 @@ public:
 	using Tasks			= typename PlanData::Tasks;
 	using TaskLinks		= typename PlanData::TaskLinks;
 	using TaskIndex		= typename TaskLinks::Index;
+	using TasksBits		= typename PlanData::TasksBits;
 
 	struct CIterator final {
 		HFSM2_CONSTEXPR(14)	CIterator(const PlanT& plan)				noexcept;
@@ -4606,6 +4604,7 @@ protected:
 	HFSM2_CONSTEXPR(14)	bool linkTask(const Long index)					noexcept;
 
 	HFSM2_CONSTEXPR(14)	void clearTasks()								noexcept;
+	HFSM2_CONSTEXPR(14)	void clearStatuses()							noexcept;
 
 public:
 	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;
@@ -4931,7 +4930,7 @@ PlanT<TArgs>::PlanT(Registry& registry,
 	: _registry{registry}
 	, _planData{planData}
 	, _regionId{regionId_}
-	, _bounds{planData.tasksBounds[regionId_]}
+	, _bounds{planData.taskBounds[regionId_]}
 {}
 
 template <typename TArgs>
@@ -5018,6 +5017,28 @@ PlanT<TArgs>::clearTasks() noexcept {
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
+void
+PlanT<TArgs>::clearStatuses() noexcept {
+	TasksBits bitsToClear;
+	bitsToClear.set();
+
+	const StateID begin = _registry.regionHeads[_regionId];
+
+	const StateID end   = _registry.regionHeads[_regionId] +
+						  _registry.regionSizes[_regionId];
+
+	for (StateID i = begin; i < end; ++i)
+		bitsToClear.clear(i);
+
+	_planData.tasksSuccesses &= bitsToClear;
+	_planData.tasksFailures  &= bitsToClear;
+
+	_planData.headStatuses[_regionId].clear();
+	_planData. subStatuses[_regionId].clear();
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
 PlanT<TArgs>::operator bool() const noexcept {
 	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
 				 _bounds.last  < TASK_CAPACITY ||
@@ -5031,14 +5052,7 @@ HFSM2_CONSTEXPR(14)
 void
 PlanT<TArgs>::clear() noexcept {
 	clearTasks();
-
-	for (RegionID i = _regionId;
-		 i < _registry.regionSizes[_regionId];
-		 ++i)
-	{
-		_planData.tasksSuccesses.clear(i);
-		_planData.tasksFailures .clear(i);
-	}
+	clearStatuses();
 }
 
 template <typename TArgs>
@@ -6472,13 +6486,6 @@ protected:
 
 	using PlanControl::PlanControl;
 
-#if HFSM2_PLANS_AVAILABLE()
-
-	template <typename TState>
-	HFSM2_CONSTEXPR(14)	TaskStatus buildPlanStatus()				noexcept;
-
-#endif
-
 public:
 	using PlanControl::context;
 
@@ -6953,41 +6960,6 @@ FullControlBaseT<TArgs>::Lock::~Lock() noexcept {
 		control->_locked = false;
 }
 
-#if HFSM2_PLANS_AVAILABLE()
-
-template <typename TArgs>
-template <typename TState>
-HFSM2_CONSTEXPR(14)
-TaskStatus
-FullControlBaseT<TArgs>::buildPlanStatus() noexcept {
-	constexpr StateID STATE_ID = TState::STATE_ID;
-
-	switch (_taskStatus.result) {
-	case TaskStatus::NONE:
-		HFSM2_BREAK();
-		break;
-
-	case TaskStatus::SUCCESS:
-		_core.planData.tasksSuccesses.template set<STATE_ID>();
-
-		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::SUCCEEDED);
-		break;
-
-	case TaskStatus::FAILURE:
-		_core.planData.tasksFailures .template set<STATE_ID>();
-
-		HFSM2_LOG_PLAN_STATUS(context(), _regionId, StatusEvent::FAILED);
-		break;
-
-	default:
-		HFSM2_BREAK();
-	}
-
-	return {_taskStatus.result};
-}
-
-#endif
-
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
@@ -7095,14 +7067,7 @@ FullControlBaseT<TArgs>::succeed(const StateID stateId_) noexcept {
 
 	_core.planData.tasksSuccesses.set(stateId_);
 
-	// TODO: promote taskSuccess all the way up for all regions without plans
-	if (_regionId < RegionList::SIZE && !_core.planData.planExists.get(_regionId)) {
-		HFSM2_ASSERT(_regionStateId < StateList::SIZE);
-
-		_core.planData.tasksSuccesses.set(_regionStateId);
-	}
-
-	HFSM2_LOG_TASK_STATUS(context(), _regionId, stateId_, StatusEvent::SUCCEEDED);
+	HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::SUCCEEDED);
 }
 
 template <typename TArgs>
@@ -7113,14 +7078,7 @@ FullControlBaseT<TArgs>::fail(const StateID stateId_) noexcept {
 
 	_core.planData.tasksFailures.set(stateId_);
 
-	// TODO: promote taskFailure all the way up for all regions without plans
-	if (_regionId < RegionList::SIZE && !_core.planData.planExists.get(_regionId)) {
-		HFSM2_ASSERT(_regionStateId < StateList::SIZE);
-
-		_core.planData.tasksFailures.set(_regionStateId);
-	}
-
-	HFSM2_LOG_TASK_STATUS(context(), _regionId, stateId_, StatusEvent::FAILED);
+	HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::FAILED);
 }
 
 #endif
@@ -7140,9 +7098,11 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 
 	if (subStatus.result == TaskStatus::FAILURE) {
 		_taskStatus.result = TaskStatus::FAILURE;
+		HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::FAILED);
+
 		headState.wrapPlanFailed(*this);
 
-		return FullControlBase::template buildPlanStatus<TState>();
+		return TaskStatus{_taskStatus.result};
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
@@ -7174,9 +7134,12 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 			return TaskStatus{};
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
+			HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::SUCCEEDED);
+
+			plan().clearTasks();
 			headState.wrapPlanSucceeded(*this);
 
-			return FullControlBase::template buildPlanStatus<TState>();
+			return TaskStatus{_taskStatus.result};
 		}
 	} else
 		return TaskStatus{};
@@ -7310,9 +7273,11 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 
 	if (subStatus.result == TaskStatus::FAILURE) {
 		_taskStatus.result = TaskStatus::FAILURE;
+		HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::FAILED);
+
 		headState.wrapPlanFailed(*this);
 
-		return FullControlBase::template buildPlanStatus<TState>();
+		return TaskStatus{_taskStatus.result};
 	} else if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
@@ -7341,9 +7306,12 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 			return TaskStatus{};
 		} else {
 			_taskStatus.result = TaskStatus::SUCCESS;
+			HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::SUCCEEDED);
+
+			plan().clearTasks();
 			headState.wrapPlanSucceeded(*this);
 
-			return FullControlBase::template buildPlanStatus<TState>();
+			return TaskStatus{_taskStatus.result};
 		}
 	} else
 		return TaskStatus{};
@@ -7903,7 +7871,6 @@ template <typename TF_>
 HFSM2_CONSTEXPR(14)
 void
 A_<TF_>::planFailed(FullControl& control) noexcept {
-	control.plan().clear();
 	control.fail();
 }
 
@@ -11712,6 +11679,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepRegister(Registry& registry,
 											 const Parent parent) noexcept
 {
 	registry.compoParents[COMPO_INDEX] = parent;
+	registry.regionHeads [REGION_ID]   = HEAD_ID;
 	registry.regionSizes [REGION_ID]   = REGION_SIZE;
 
 	HeadState::deepRegister(registry, parent);
@@ -11991,8 +11959,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return HeadState::deepExitGuard(control) ||
-		   SubStates::wideExitGuard(control, active);
+	return SubStates::wideExitGuard(control, active) ||
+		   HeadState::deepExitGuard(control);
 }
 
 template <typename TN_, typename TA_, Strategy SG_, typename TH_, typename... TS_>
@@ -13854,6 +13822,7 @@ O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
 {
 	registry.orthoParents[ORTHO_INDEX] = parent;
 	registry.orthoUnits	 [ORTHO_INDEX] = Units{ORTHO_UNIT, WIDTH};
+	registry.regionHeads [REGION_ID]   = HEAD_ID;
 	registry.regionSizes [REGION_ID]   = REGION_SIZE;
 
 	HeadState::deepRegister(registry, parent);
@@ -14055,8 +14024,8 @@ bool
 O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return HeadState::deepExitGuard(control) ||
-		   SubStates::wideExitGuard(control);
+	return SubStates::wideExitGuard(control) ||
+		   HeadState::deepExitGuard(control);
 }
 
 template <typename TN_, typename TA_, typename TH_, typename... TS_>
@@ -15344,7 +15313,7 @@ R_<TG_, TA_>::update() noexcept {
 
 #if HFSM2_PLANS_AVAILABLE()
 	_apex.deepUpdatePlans(control);
-	_core.planData.clearRegionStatuses();
+	_core.planData.clearStatuses();
 #endif
 
 	processRequest();
@@ -15370,7 +15339,7 @@ R_<TG_, TA_>::react(const TEvent& event) noexcept {
 
 #if HFSM2_PLANS_AVAILABLE()
 	_apex.deepUpdatePlans(control);
-	_core.planData.clearRegionStatuses();
+	_core.planData.clearStatuses();
 #endif
 
 	processRequest();

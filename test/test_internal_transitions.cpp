@@ -4,6 +4,8 @@
 #define HFSM2_ENABLE_TRANSITION_HISTORY
 #include "tools.hpp"
 
+using namespace test_tools;
+
 namespace test_internal_transitions {
 
 ////////////////////////////////////////////////////////////////////////////////

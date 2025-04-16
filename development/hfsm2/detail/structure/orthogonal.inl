@@ -11,6 +11,7 @@ O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
 {
 	registry.orthoParents[ORTHO_INDEX] = parent;
 	registry.orthoUnits	 [ORTHO_INDEX] = Units{ORTHO_UNIT, WIDTH};
+	registry.regionHeads [REGION_ID]   = HEAD_ID;
 	registry.regionSizes [REGION_ID]   = REGION_SIZE;
 
 	HeadState::deepRegister(registry, parent);
@@ -240,8 +241,8 @@ bool
 O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return HeadState::deepExitGuard(control) ||
-		   SubStates::wideExitGuard(control);
+	return SubStates::wideExitGuard(control) ||
+		   HeadState::deepExitGuard(control);
 }
 
 //------------------------------------------------------------------------------

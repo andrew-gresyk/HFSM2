@@ -289,6 +289,7 @@
     <ClCompile Include="..\..\test\test_orthogonal_root.cpp" />
     <ClCompile Include="..\..\test\test_plan_external.cpp" />
     <ClCompile Include="..\..\test\test_plan_external_payloads.cpp" />
+    <ClCompile Include="..\..\test\test_plan_hierarchy.cpp" />
     <ClCompile Include="..\..\test\test_plans.cpp" />
     <ClCompile Include="..\..\test\test_plans_payloads.cpp" />
     <ClCompile Include="..\..\test\test_query.cpp" />

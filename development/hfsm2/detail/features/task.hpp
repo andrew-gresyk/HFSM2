@@ -5,8 +5,6 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma pack(push, 1)
-
 struct TaskBase {
 	static_assert(sizeof(Long) == sizeof(StateID), "");
 
@@ -109,8 +107,6 @@ struct TaskT<void> final
 {
 	using TaskBase::TaskBase;
 };
-
-#pragma pack(pop)
 
 ////////////////////////////////////////////////////////////////////////////////
 

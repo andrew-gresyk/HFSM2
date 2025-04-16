@@ -44,13 +44,6 @@ protected:
 
 	using PlanControl::PlanControl;
 
-#if HFSM2_PLANS_AVAILABLE()
-
-	template <typename TState>
-	HFSM2_CONSTEXPR(14)	TaskStatus buildPlanStatus()				noexcept;
-
-#endif
-
 public:
 	using PlanControl::context;
 

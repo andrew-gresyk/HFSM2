@@ -4,6 +4,8 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
+using namespace test_tools;
+
 namespace test_manual_activation {
 
 ////////////////////////////////////////////////////////////////////////////////

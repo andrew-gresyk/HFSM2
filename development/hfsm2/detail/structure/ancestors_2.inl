@@ -18,7 +18,6 @@ template <typename TF_>
 HFSM2_CONSTEXPR(14)
 void
 A_<TF_>::planFailed(FullControl& control) noexcept {
-	control.plan().clear();
 	control.fail();
 }
 

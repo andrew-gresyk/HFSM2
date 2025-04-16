@@ -89,9 +89,12 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearRegionStatuses() noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearStatuses() noexcept {
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+
 	headStatuses.clear();
-	subStatuses	.clear();
+	 subStatuses.clear();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -100,17 +103,15 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clear() noexcept {
-	tasks		  .clear();
-	taskLinks	  .clear();
-	taskPayloads  .clear();
-	payloadExists .clear();
+	tasks		 .clear();
+	taskLinks	 .clear();
+	taskPayloads .clear();
+	payloadExists.clear();
 
-	tasksBounds	  .clear();
-	tasksSuccesses.clear();
-	tasksFailures .clear();
-	planExists	  .clear();
+	taskBounds	 .clear();
+	planExists	 .clear();
 
-	clearRegionStatuses();
+	clearStatuses();
 }
 
 //------------------------------------------------------------------------------
@@ -136,7 +137,7 @@ HFSM2_CONSTEXPR(14)
 Long
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlan(const RegionID regionId) const noexcept {
 	Long length = 0;
-	const Bounds& bounds = tasksBounds[regionId];
+	const Bounds& bounds = taskBounds[regionId];
 
 	if (bounds.first != INVALID_LONG) {
 		HFSM2_ASSERT(bounds.last != INVALID_LONG);
@@ -205,9 +206,12 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
 void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearRegionStatuses() noexcept {
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearStatuses() noexcept {
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+
 	headStatuses.clear();
-	subStatuses	.clear();
+	 subStatuses.clear();
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -216,15 +220,13 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clear() noexcept {
-	tasks		  .clear();
-	taskLinks	  .clear();
+	tasks	  .clear();
+	taskLinks .clear();
 
-	tasksBounds	  .clear();
-	tasksSuccesses.clear();
-	tasksFailures .clear();
-	planExists	  .clear();
+	taskBounds.clear();
+	planExists.clear();
 
-	clearRegionStatuses();
+	clearStatuses();
 }
 
 //------------------------------------------------------------------------------
@@ -250,7 +252,7 @@ HFSM2_CONSTEXPR(14)
 Long
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlan(const RegionID regionId) const noexcept {
 	Long length = 0;
-	const Bounds& bounds = tasksBounds[regionId];
+	const Bounds& bounds = taskBounds[regionId];
 
 	if (bounds.first != INVALID_LONG) {
 		HFSM2_ASSERT(bounds.last != INVALID_LONG);

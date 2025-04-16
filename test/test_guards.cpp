@@ -4,7 +4,9 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
-namespace test_guard {
+using namespace test_tools;
+
+namespace test_guards {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -90,13 +92,13 @@ struct Step1
 		case 2:
 		case 3:
 		case 4:
-		case 5:
-		case 6:
 			REQUIRE(pendingTransitions.count() == 1);
 			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
 														   hfsm2::TransitionType::CHANGE});
 			break;
 
+		case 5:
+		case 6:
 		case 7:
 			REQUIRE(pendingTransitions.count() == 1);
 			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step3  >(),
@@ -128,12 +130,13 @@ struct Step1_1
 		case 3:
 		case 4:
 		case 5:
+		case 6:
 			REQUIRE(pendingTransitions.count() == 1);
 			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
 														   hfsm2::TransitionType::CHANGE});
 			break;
 
-		case 6:
+		case 7:
 			REQUIRE(pendingTransitions.count() == 1);
 			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step3  >(),
 														   hfsm2::TransitionType::CHANGE});
@@ -164,12 +167,13 @@ struct Step1_2
 		case 3:
 		case 4:
 		case 5:
+		case 6:
 			REQUIRE(pendingTransitions.count() == 1);
 			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step2  >(),
 														   hfsm2::TransitionType::CHANGE});
 			break;
 
-		case 6:
+		case 7:
 			REQUIRE(pendingTransitions.count() == 1);
 			REQUIRE(pendingTransitions[0] == M::Transition{FSM::stateId<Step3  >(),
 														   hfsm2::TransitionType::CHANGE});
@@ -304,28 +308,6 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
-				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
-				{ FSM::stateId<Step1  >(),	Event::Type::CANCEL_PENDING },
-			});
-
-			assertActive(machine, all, {
-				FSM::stateId<Apex   >(),
-				FSM::stateId<Step1  >(),
-				FSM::stateId<Step1_1>(),
-				FSM::stateId<Step1_2>(),
-			});
-
-			assertResumable(machine, all, {});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		machine.immediateChangeTo<Step2>();
-		{
-			logger.assertSequence({
-				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
-
-				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::CANCEL_PENDING },
 
@@ -349,10 +331,32 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
-				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::Type::CANCEL_PENDING },
+			});
+
+			assertActive(machine, all, {
+				FSM::stateId<Apex   >(),
+				FSM::stateId<Step1  >(),
+				FSM::stateId<Step1_1>(),
+				FSM::stateId<Step1_2>(),
+			});
+
+			assertResumable(machine, all, {});
+		}
+
+		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+		machine.immediateChangeTo<Step2>();
+		{
+			logger.assertSequence({
+				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
+
+				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1_2>(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1  >(),	Event::Type::CANCEL_PENDING },
 			});
 
 			assertActive(machine, all, {
@@ -373,9 +377,9 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
-				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 
 				{ FSM::stateId<Step2  >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<Step2  >(),	Event::Type::CANCEL_PENDING },
@@ -398,9 +402,9 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
-				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 
 				{ FSM::stateId<Step2  >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<Step2_1>(),	Event::Type::ENTRY_GUARD },
@@ -426,9 +430,9 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step2  >() },
 
-				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 
 				{ FSM::stateId<Step2  >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<Step2_1>(),	Event::Type::ENTRY_GUARD },
@@ -454,9 +458,9 @@ TEST_CASE("FSM.Entry Guard") {
 			logger.assertSequence({
 				{							Event::Type::CHANGE,	FSM::stateId<Step3  >() },
 
-				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_1>(),	Event::Type::EXIT_GUARD },
 				{ FSM::stateId<Step1_2>(),	Event::Type::EXIT_GUARD },
+				{ FSM::stateId<Step1  >(),	Event::Type::EXIT_GUARD },
 
 				{ FSM::stateId<Step3  >(),	Event::Type::ENTRY_GUARD },
 

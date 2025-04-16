@@ -10,6 +10,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepRegister(Registry& registry,
 											 const Parent parent) noexcept
 {
 	registry.compoParents[COMPO_INDEX] = parent;
+	registry.regionHeads [REGION_ID]   = HEAD_ID;
 	registry.regionSizes [REGION_ID]   = REGION_SIZE;
 
 	HeadState::deepRegister(registry, parent);
@@ -318,8 +319,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return HeadState::deepExitGuard(control) ||
-		   SubStates::wideExitGuard(control, active);
+	return SubStates::wideExitGuard(control, active) ||
+		   HeadState::deepExitGuard(control);
 }
 
 //------------------------------------------------------------------------------
