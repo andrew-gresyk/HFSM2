@@ -37,7 +37,7 @@ workspace "hfsm2"
 	filter {}
 
 	targetdir "binaries/"
-	targetname "$(ProjectName)-$(Configuration)-$(PlatformArchitecture)"
+	targetname "$(ProjectName)-$(Configuration)-$(Platform)"
 	warnings "High"
 
 	filter "configurations:debug"
@@ -58,8 +58,8 @@ workspace "hfsm2"
 
 	filter "toolset:msc-v141 or msc-v142 or msc-v143"
 		buildoptions {
-			"/bigobj"
-			"/permissive-"
+			"/bigobj",
+			"/permissive-",
 		}
 
 	filter "toolset:msc-ClangCL"
