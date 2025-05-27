@@ -1,7 +1,7 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
-#if !defined _MSC_VER || _MSC_VER > 1900
+#ifndef _MSC_VER
 
 #define HFSM2_ENABLE_UTILITY_THEORY
 #define HFSM2_ENABLE_PLANS
