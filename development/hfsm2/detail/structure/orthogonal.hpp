@@ -71,7 +71,7 @@ struct HFSM2_EMPTY_BASES O_
 
 	using Info			= OI_<Head, TSubStates...>;
 	static constexpr Short WIDTH		= Info::WIDTH;
-	static constexpr Short REGION_SIZE	= Info::STATE_COUNT;
+	static constexpr Long  REGION_SIZE	= Info::STATE_COUNT;
 	static constexpr Short ORTHO_UNITS	= Info::ORTHO_UNITS;
 
 	using SubStates		= OS_<

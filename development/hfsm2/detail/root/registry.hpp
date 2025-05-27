@@ -107,7 +107,7 @@ struct RegistryT<
 	using OrthoParents	= StaticArrayT<Parent,  ORTHO_COUNT>;
 	using OrthoUnits	= StaticArrayT<Units,   ORTHO_UNITS>;
 	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
-	using RegionSizes	= StaticArrayT<Short,   REGION_COUNT>;
+	using RegionSizes	= StaticArrayT<Long,    REGION_COUNT>;
 
 	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
@@ -202,7 +202,7 @@ struct RegistryT<
 	using StateParents	= StaticArrayT<Parent,  STATE_COUNT>;
 	using CompoParents	= StaticArrayT<Parent,  COMPO_COUNT>;
 	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
-	using RegionSizes	= StaticArrayT<Short,   REGION_COUNT>;
+	using RegionSizes	= StaticArrayT<Long,    REGION_COUNT>;
 
 	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <0>;

@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.7.0 (2025-04-17)
+// 2.7.1 (2025-05-27)
 //
 // Created by Andrew Gresyk
 //
@@ -33,7 +33,7 @@
 
 #define HFSM2_VERSION_MAJOR 2
 #define HFSM2_VERSION_MINOR 7
-#define HFSM2_VERSION_PATCH 0
+#define HFSM2_VERSION_PATCH 1
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -391,6 +391,9 @@ struct BottomUp;
 using Short		 = uint8_t;
 static constexpr Short		INVALID_SHORT		= UINT8_MAX;
 
+using Long		 = uint16_t;
+static constexpr Long		INVALID_LONG		= UINT16_MAX;
+
 using Prong		 = Short;
 static constexpr Prong		INVALID_PRONG		= INVALID_SHORT;
 
@@ -399,9 +402,6 @@ static constexpr RegionID	INVALID_REGION_ID	= INVALID_SHORT;
 
 using ForkID	 = int8_t;
 static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;
-
-using Long		 = uint16_t;
-static constexpr Long		INVALID_LONG		= UINT16_MAX;
 
 using StateID	 = Long;
 static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;
@@ -3201,7 +3201,7 @@ struct RegistryT<
 	using OrthoParents	= StaticArrayT<Parent,  ORTHO_COUNT>;
 	using OrthoUnits	= StaticArrayT<Units,   ORTHO_UNITS>;
 	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
-	using RegionSizes	= StaticArrayT<Short,   REGION_COUNT>;
+	using RegionSizes	= StaticArrayT<Long,    REGION_COUNT>;
 
 	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
@@ -3294,7 +3294,7 @@ struct RegistryT<
 	using StateParents	= StaticArrayT<Parent,  STATE_COUNT>;
 	using CompoParents	= StaticArrayT<Parent,  COMPO_COUNT>;
 	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
-	using RegionSizes	= StaticArrayT<Short,   REGION_COUNT>;
+	using RegionSizes	= StaticArrayT<Long,    REGION_COUNT>;
 
 	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
 	using OrthoForks	= BitArrayT	  <0>;
@@ -11492,7 +11492,7 @@ struct HFSM2_EMPTY_BASES C_
 	static constexpr Short WIDTH_BITS	  = Info::WIDTH_BITS;
 #endif
 
-	static constexpr Short REGION_SIZE	  = Info::STATE_COUNT;
+	static constexpr Long  REGION_SIZE	  = Info::STATE_COUNT;
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 	HFSM2_CONSTEXPR(11)	static Prong		compoRequested		  (const Registry& registry)	noexcept	{ return registry.compoRequested[COMPO_INDEX];	}
@@ -13700,7 +13700,7 @@ struct HFSM2_EMPTY_BASES O_
 
 	using Info			= OI_<Head, TSubStates...>;
 	static constexpr Short WIDTH		= Info::WIDTH;
-	static constexpr Short REGION_SIZE	= Info::STATE_COUNT;
+	static constexpr Long  REGION_SIZE	= Info::STATE_COUNT;
 	static constexpr Short ORTHO_UNITS	= Info::ORTHO_UNITS;
 
 	using SubStates		= OS_<

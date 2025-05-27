@@ -9,11 +9,9 @@ workspace "hfsm2"
 		"UNICODE",
 		"_UNICODE",
 	}
+	fatalwarnings "All"
 	filename "hfsm2-all"
-	flags {
-		"FatalCompileWarnings",
-		"NoPCH",
-	}
+	flags "NoPCH"
 	includedirs {
 		"development",
 		"include",
@@ -29,17 +27,18 @@ workspace "hfsm2"
 
 	system "windows"
 	systemversion "latest"
-	--systemversion "$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))"
-
-	targetdir "binaries/"
-	targetname "$(ProjectName)-$(Configuration)-$(Platform)"
-	warnings "High"
 
 	filter "toolset:msc-v140 or msc-v141"
 		if os.getversion().majorversion == 10 then
 			local sWin10SDK = os.getWindowsRegistry( "HKLM:SOFTWARE\\Wow6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0\\ProductVersion" )
 			if sWin10SDK ~= nil then systemversion( sWin10SDK .. ".0" ) end
 		end
+		--systemversion "$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))"
+	filter {}
+
+	targetdir "binaries/"
+	targetname "$(ProjectName)-$(Configuration)-$(PlatformArchitecture)"
+	warnings "High"
 
 	filter "configurations:debug"
 		defines "_DEBUG"
@@ -48,29 +47,24 @@ workspace "hfsm2"
 	filter "configurations:release"
 		defines "NDEBUG"
 		intrinsics "On"
+		linktimeoptimization "On"
 		optimize "Speed"
-		flags {
-			"LinkTimeOptimization",
-		}
 
-	filter { "platforms:32" }
+	filter "platforms:32"
 		architecture "x86"
 
-	filter { "platforms:64" }
+	filter "platforms:64"
 		architecture "x86_64"
 
-	filter "toolset:msc-ClangCL"
+	filter "toolset:msc-v141 or msc-v142 or msc-v143"
 		buildoptions {
-			"-Wpedantic",
-		}
-		linkoptions {
-			"/INCREMENTAL:NO"
+			"/bigobj"
+			"/permissive-"
 		}
 
-	filter "toolset:msc-v143"
-		buildoptions {
-			"/permissive-",
-		}
+	filter "toolset:msc-ClangCL"
+		buildoptions "-Wpedantic"
+		linkoptions "/INCREMENTAL:NO"
 
 -- advanced_event_handling
 

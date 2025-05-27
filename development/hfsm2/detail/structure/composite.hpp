@@ -103,7 +103,7 @@ struct HFSM2_EMPTY_BASES C_
 	static constexpr Short WIDTH_BITS	  = Info::WIDTH_BITS;
 #endif
 
-	static constexpr Short REGION_SIZE	  = Info::STATE_COUNT;
+	static constexpr Long  REGION_SIZE	  = Info::STATE_COUNT;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
