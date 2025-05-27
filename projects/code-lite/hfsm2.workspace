@@ -2,11 +2,11 @@
 <CodeLite_Workspace Name="hfsm2" Database="" Version="10000">
   <Project Name="test" Path="test/test.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
+    <WorkspaceConfiguration Name="Debug">
       <Environment/>
       <Project Name="test" ConfigName="Debug_Windows"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="no">
+    <WorkspaceConfiguration Name="Release">
       <Environment/>
       <Project Name="test" ConfigName="Release_Windows"/>
     </WorkspaceConfiguration>

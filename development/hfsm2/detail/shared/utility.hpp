@@ -15,6 +15,11 @@ struct BottomUp;
 using Short		 = uint8_t;
 static constexpr Short		INVALID_SHORT		= UINT8_MAX;
 
+using Long		 = uint16_t;
+static constexpr Long		INVALID_LONG		= UINT16_MAX;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 using Prong		 = Short;
 static constexpr Prong		INVALID_PRONG		= INVALID_SHORT;
 
@@ -25,9 +30,6 @@ using ForkID	 = int8_t;
 static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-using Long		 = uint16_t;
-static constexpr Long		INVALID_LONG		= UINT16_MAX;
 
 using StateID	 = Long;
 static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;

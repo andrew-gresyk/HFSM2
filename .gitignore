@@ -12,6 +12,7 @@ cmake-*
 /build*
 /hfsm_test.dir
 /projects/code-lite/build-*
+/projects/code-lite/compile_commands.json
 /projects/code-lite/tags
 /projects/code-lite/Makefile
 /projects/code-lite/test/compile_flags.txt
