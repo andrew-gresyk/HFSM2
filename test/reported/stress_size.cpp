@@ -21,7 +21,7 @@ using M = hfsm2::MachineT<Config>;
 
 //------------------------------------------------------------------------------
 
-#pragma region FSM
+//#pragma region FSM
 
 #define S(s) struct s
 
@@ -725,11 +725,11 @@ using FSM =
 
 #undef S
 
-#pragma endregion
+//#pragma endregion
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma region States
+//#pragma region States
 
 struct S_start : FSM::State {};
 struct S0 : FSM::State {};
@@ -1126,7 +1126,7 @@ struct join_exc_52 : FSM::State {};
 struct join_exc_50 : FSM::State {};
 struct S_end : FSM::State {};
 
-#pragma endregion
+//#pragma endregion
 
 ////////////////////////////////////////////////////////////////////////////////
 
