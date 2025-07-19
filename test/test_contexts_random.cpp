@@ -4,8 +4,6 @@
 #define HFSM2_ENABLE_UTILITY_THEORY
 #include "tools.hpp"
 
-using namespace test_tools;
-
 namespace test_contexts_random {
 
 //------------------------------------------------------------------------------

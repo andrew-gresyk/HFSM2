@@ -63,27 +63,56 @@ struct S9	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 11, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  1, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  1, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  0, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  0, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 11, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  1, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  1, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 10, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  0, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  0, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const Types all = {
-	FSM::stateId<S0>(),
-	FSM::stateId<S1>(),
-	FSM::stateId<S2>(),
-	FSM::stateId<S3>(),
-	FSM::stateId<S4>(),
-	FSM::stateId<S5>(),
-	FSM::stateId<S6>(),
-	FSM::stateId<S7>(),
-	FSM::stateId<S8>(),
-	FSM::stateId<S9>(),
-};
+void step0(FSM::Instance& machine, Logger& logger) {
+	logger.assertSequence({
+		{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<S0  >(),	Event::Type::ENTRY_GUARD },
+
+		{ FSM::stateId<Apex>(),	Event::Type::ENTER },
+		{ FSM::stateId<S0  >(),	Event::Type::ENTER },
+	});
+
+	assertActive(machine, {
+		FSM::stateId<Apex>(),
+		FSM::stateId<S0  >(),
+	});
+
+	assertResumable(machine, {});
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+void step1(FSM::Instance& machine, Logger& logger) {
+	machine.immediateChangeTo<S1>();
+
+	logger.assertSequence({
+		{						Event::Type::CHANGE, FSM::stateId<S1>() },
+
+		{ FSM::stateId<S0>(),	Event::Type::EXIT_GUARD },
+		{ FSM::stateId<S1>(),	Event::Type::ENTRY_GUARD },
+
+		{ FSM::stateId<S0>(),	Event::Type::EXIT },
+		{ FSM::stateId<S1>(),	Event::Type::ENTER },
+	});
+
+	assertActive(machine, {
+		FSM::stateId<Apex>(),
+		FSM::stateId<S1  >(),
+	});
+
+	assertResumable(machine, {
+		FSM::stateId<S0  >(),
+	});
+}
 
 //------------------------------------------------------------------------------
 
@@ -91,54 +120,14 @@ TEST_CASE("FSM.Composite BST") {
 	Logger logger;
 
 	{
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 		FSM::Instance machine{&logger};
-		{
-			logger.assertSequence({
-				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<S0  >(),	Event::Type::ENTRY_GUARD },
-
-				{ FSM::stateId<Apex>(),	Event::Type::ENTER },
-				{ FSM::stateId<S0  >(),	Event::Type::ENTER },
-			});
-
-			assertActive(machine, all, {
-				FSM::stateId<S0>(),
-			});
-
-			assertResumable(machine, all, {});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		machine.immediateChangeTo<S1>();
-		{
-			logger.assertSequence({
-				{						 Event::Type::CHANGE, FSM::stateId<S1>() },
-
-				{ FSM::stateId<S0>(),	 Event::Type::EXIT_GUARD },
-				{ FSM::stateId<S1>(),	 Event::Type::ENTRY_GUARD },
-
-				{ FSM::stateId<S0>(),	 Event::Type::EXIT },
-				{ FSM::stateId<S1>(),	 Event::Type::ENTER },
-			});
-
-			assertActive(machine, all, {
-				FSM::stateId<S1>(),
-			});
-
-			assertResumable(machine, all, {
-				FSM::stateId<S0>(),
-			});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		step0(machine, logger);
+		step1(machine, logger);
 	}
 
 	logger.assertSequence({
-		{ FSM::stateId<S1>(),	 Event::Type::EXIT },
-		{ hfsm2::StateID{0},	 Event::Type::EXIT },
+		{ FSM::stateId<S1  >(),	Event::Type::EXIT },
+		{ hfsm2::ROOT_ID      ,	Event::Type::EXIT },
 	});
 }
 

@@ -300,13 +300,13 @@ struct S_;
 template <typename, typename, Strategy, typename, typename...>
 struct C_;
 
-template <typename, typename, Strategy, Short, typename>
+template <typename, typename, Strategy, Prong, typename>
 struct CS_;
 
 template <typename, typename, typename, typename...>
 struct O_;
 
-template <typename, typename, Short, typename...>
+template <typename, typename, Prong, typename...>
 struct OS_;
 
 template <typename, typename>

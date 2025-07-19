@@ -51,49 +51,45 @@ struct B
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const Types all = {
-	FSM::stateId<A>(),
-	FSM::stateId<B>(),
-};
-
-//------------------------------------------------------------------------------
-
 TEST_CASE("FSM.Manual Activation") {
 	Logger logger;
 
-	{
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	WHEN("Starting") {
 		FSM::Instance machine{&logger};
 
 		logger.assertSequence({});
-		assertActive(machine, all, {});
+		assertActive(machine, {});
 
 		machine.enter();
 
 		logger.assertSequence({
-			{ hfsm2::StateID{0},	Event::Type::ENTRY_GUARD },
-			{ FSM::stateId<A>(),	Event::Type::ENTRY_GUARD },
+			{ hfsm2::ROOT_ID   , Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<A>(), Event::Type::ENTRY_GUARD },
 
-			{ FSM::stateId<A>(),	Event::Type::CHANGE,	FSM::stateId<B>() },
+			{ FSM::stateId<A>(), Event::Type::CHANGE,	FSM::stateId<B>() },
 
-			{ hfsm2::StateID{0},	Event::Type::ENTRY_GUARD },
-			{ FSM::stateId<B>(),	Event::Type::ENTRY_GUARD },
+			{ hfsm2::ROOT_ID,	 Event::Type::ENTRY_GUARD },
+			{ FSM::stateId<B>(), Event::Type::ENTRY_GUARD },
 
-			{ hfsm2::StateID{0},	Event::Type::ENTER },
-			{ FSM::stateId<B>(),	Event::Type::ENTER },
+			{ hfsm2::ROOT_ID,	 Event::Type::ENTER },
+			{ FSM::stateId<B>(), Event::Type::ENTER },
 		});
 
-		assertActive(machine, all, {
+		assertActive(machine, {
+			hfsm2::ROOT_ID   ,
 			FSM::stateId<B>(),
 		});
 
 		machine.exit();
 
 		logger.assertSequence({
-			{ FSM::stateId<B>(),	Event::Type::EXIT },
-			{ hfsm2::StateID{0},	Event::Type::EXIT },
+			{ FSM::stateId<B>(), Event::Type::EXIT },
+			{ hfsm2::ROOT_ID   , Event::Type::EXIT },
 		});
 
-		assertActive(machine, all, {});
+		assertActive(machine, {});
 	}
 
 	logger.assertSequence({});

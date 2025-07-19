@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.7.1 (2025-05-27)
+// 2.8.0 (2025-07-20)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 7
-#define HFSM2_VERSION_PATCH 1
+#define HFSM2_VERSION_MINOR 8
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -400,11 +400,12 @@ static constexpr Prong		INVALID_PRONG		= INVALID_SHORT;
 using RegionID	 = Short;
 static constexpr RegionID	INVALID_REGION_ID	= INVALID_SHORT;
 
-using ForkID	 = int8_t;
-static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;
+using ForkID	 = int16_t;
+static constexpr ForkID		INVALID_FORK_ID		= INT16_MIN;
 
 using StateID	 = Long;
 static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;
+static constexpr StateID	ROOT_ID				= 0;
 
 template <
 	bool B
@@ -3103,7 +3104,7 @@ TaskListT<TP_, NC_>::verifyStructure(const Index occupied) const noexcept {
 namespace hfsm2 {
 namespace detail {
 
-struct alignas(2 * sizeof(Prong)) Parent final {
+struct alignas(2 * sizeof(ForkID)) Parent final {
 	HFSM2_CONSTEXPR(11)
 	Parent() = default;
 
@@ -3396,7 +3397,7 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(11)
 bool
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isActive() const noexcept {
-	return compoActive[0] != INVALID_PRONG;
+	return compoActive[ROOT_ID] != INVALID_PRONG;
 }
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
@@ -3414,7 +3415,7 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 				return parent.prong == compoActive[parent.forkId - 1];
 		}
 
-		return true;
+		return isActive();
 	}
 
 	return false;
@@ -3642,7 +3643,7 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ H
 HFSM2_CONSTEXPR(11)
 bool
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isActive() const noexcept {
-	return compoActive[0] != INVALID_PRONG;
+	return compoActive[ROOT_ID] != INVALID_PRONG;
 }
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
@@ -3655,7 +3656,7 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 
 			return parent.prong == compoActive[parent.forkId - 1];
 		} else
-			return true;
+			return isActive();
 	}
 
 	return false;
@@ -6466,6 +6467,8 @@ class FullControlBaseT
 	friend class R_;
 
 protected:
+	static constexpr Long STATE_COUNT	= TArgs::STATE_COUNT;
+
 	using PlanControl	= PlanControlT<TArgs>;
 
 	using typename PlanControl::StateList;
@@ -7066,22 +7069,26 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::succeed(const StateID stateId_) noexcept {
-	_taskStatus.result = TaskStatus::SUCCESS;
+	if (ROOT_ID < stateId_ && stateId_ < STATE_COUNT) {
+		_taskStatus.result = TaskStatus::SUCCESS;
 
-	_core.planData.tasksSuccesses.set(stateId_);
+		_core.planData.tasksSuccesses.set(stateId_);
 
-	HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::SUCCEEDED);
+		HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::SUCCEEDED);
+	}
 }
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::fail(const StateID stateId_) noexcept {
-	_taskStatus.result = TaskStatus::FAILURE;
+	if (ROOT_ID < stateId_ && stateId_ < STATE_COUNT) {
+		_taskStatus.result = TaskStatus::FAILURE;
 
-	_core.planData.tasksFailures.set(stateId_);
+		_core.planData.tasksFailures.set(stateId_);
 
-	HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::FAILED);
+		HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::FAILED);
+	}
 }
 
 #endif
@@ -8664,7 +8671,7 @@ struct S_<TIndices, TArgs, EmptyT<TArgs>>
 
 	HFSM2_CONSTEXPR(14)	Parent		 stateParent		  (		Control& control)								noexcept	{ return control._core.registry.stateParents[STATE_ID];	}
 
-	HFSM2_CONSTEXPR(14)	void		 deepRegister		  (	   Registry&		, const Parent		)			noexcept	{}
+	HFSM2_CONSTEXPR(14)	void		 deepRegister		  (	   Registry& registry, const Parent parent)			noexcept;
 
 	HFSM2_CONSTEXPR(14)	Prong		 wrapSelect			  (		Control& control)								noexcept;
 
@@ -8786,6 +8793,15 @@ struct S_<TIndices, TArgs, EmptyT<TArgs>>
 
 namespace hfsm2 {
 namespace detail {
+
+template <typename TN_, typename TA_>
+HFSM2_CONSTEXPR(14)
+void
+S_<TN_, TA_, EmptyT<TA_>>::deepRegister(Registry& registry,
+										const Parent parent) noexcept
+{
+	registry.stateParents[STATE_ID] = parent;
+}
 
 template <typename TN_, typename TA_>
 HFSM2_CONSTEXPR(14)
@@ -9382,13 +9398,13 @@ struct S_;
 template <typename, typename, Strategy, typename, typename...>
 struct C_;
 
-template <typename, typename, Strategy, Short, typename>
+template <typename, typename, Strategy, Prong, typename>
 struct CS_;
 
 template <typename, typename, typename, typename...>
 struct O_;
 
-template <typename, typename, Short, typename...>
+template <typename, typename, Prong, typename...>
 struct OS_;
 
 template <typename, typename>
@@ -11988,7 +12004,7 @@ void
 C_<TN_, TA_, SG_, TH_, TS_...>::deepForwardActive(Control& control,
 												  const Request request) noexcept
 {
-	HFSM2_ASSERT(control._core.registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(HEAD_ID == ROOT_ID || control._core.registry.isActive(HEAD_ID));
 
 	const Prong requested = compoRequested(control);
 
@@ -15366,18 +15382,22 @@ template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG_, TA_>::succeed(const StateID stateId_) noexcept {
-	_core.planData.tasksSuccesses.set(stateId_);
+	if (HFSM2_CHECKED(ROOT_ID < stateId_ && stateId_ < STATE_COUNT)) {
+		_core.planData.tasksSuccesses.set(stateId_);
 
-	HFSM2_LOG_TASK_STATUS(_core.context, INVALID_REGION_ID, stateId_, StatusEvent::SUCCEEDED);
+		HFSM2_LOG_TASK_STATUS(_core.context, INVALID_REGION_ID, stateId_, StatusEvent::SUCCEEDED);
+	}
 }
 
 template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG_, TA_>::fail(const StateID stateId_) noexcept {
-	_core.planData.tasksFailures.set(stateId_);
+	if (HFSM2_CHECKED(ROOT_ID < stateId_ && stateId_ < STATE_COUNT)) {
+		_core.planData.tasksFailures.set(stateId_);
 
-	HFSM2_LOG_TASK_STATUS(_core.context, INVALID_REGION_ID, stateId_, StatusEvent::FAILED);
+		HFSM2_LOG_TASK_STATUS(_core.context, INVALID_REGION_ID, stateId_, StatusEvent::FAILED);
+	}
 }
 
 #endif

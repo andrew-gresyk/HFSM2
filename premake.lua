@@ -57,10 +57,7 @@ workspace "hfsm2"
 		architecture "x86_64"
 
 	filter "toolset:msc-v141 or msc-v142 or msc-v143"
-		buildoptions {
-			"/bigobj",
-			"/permissive-",
-		}
+		buildoptions "/permissive-"
 
 	filter "toolset:msc-ClangCL"
 		buildoptions "-Wpedantic"
@@ -70,41 +67,31 @@ workspace "hfsm2"
 
 project "advanced_event_handling-14"
 	cppdialect "C++11"
-	files {
-		"examples/advanced_event_handling/**.*",
-	}
+	files "examples/advanced_event_handling/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v140"
 
 project "advanced_event_handling-15"
 	cppdialect "C++14"
-	files {
-		"examples/advanced_event_handling/**.*",
-	}
+	files "examples/advanced_event_handling/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v141"
 
 project "advanced_event_handling-16"
 	cppdialect "C++17"
-	files {
-		"examples/advanced_event_handling/**.*",
-	}
+	files "examples/advanced_event_handling/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v142"
 
 project "advanced_event_handling-17"
 	cppdialect "C++20"
-	files {
-		"examples/advanced_event_handling/**.*",
-	}
+	files "examples/advanced_event_handling/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v143"
 
 project "advanced_event_handling-clang"
 	cppdialect "C++20"
-	files {
-		"examples/advanced_event_handling/**.*",
-	}
+	files "examples/advanced_event_handling/**.*"
 	kind "ConsoleApp"
 	toolset "msc-ClangCL"
 
@@ -112,41 +99,31 @@ project "advanced_event_handling-clang"
 
 project "basic_audio_player-14"
 	cppdialect "C++11"
-	files {
-		"examples/basic_audio_player/**.*",
-	}
+	files "examples/basic_audio_player/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v140"
 
 project "basic_audio_player-15"
 	cppdialect "C++14"
-	files {
-		"examples/basic_audio_player/**.*",
-	}
+	files "examples/basic_audio_player/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v141"
 
 project "basic_audio_player-16"
 	cppdialect "C++17"
-	files {
-		"examples/basic_audio_player/**.*",
-	}
+	files "examples/basic_audio_player/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v142"
 
 project "basic_audio_player-17"
 	cppdialect "C++20"
-	files {
-		"examples/basic_audio_player/**.*",
-	}
+	files "examples/basic_audio_player/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v143"
 
 project "basic_audio_player-clang"
 	cppdialect "C++20"
-	files {
-		"examples/basic_audio_player/**.*",
-	}
+	files "examples/basic_audio_player/**.*"
 	kind "ConsoleApp"
 	toolset "msc-ClangCL"
 
@@ -154,41 +131,31 @@ project "basic_audio_player-clang"
 
 project "basic_traffic_light-14"
 	cppdialect "C++11"
-	files {
-		"examples/basic_traffic_light/**.*",
-	}
+	files "examples/basic_traffic_light/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v140"
 
 project "basic_traffic_light-15"
 	cppdialect "C++14"
-	files {
-		"examples/basic_traffic_light/**.*",
-	}
+	files "examples/basic_traffic_light/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v141"
 
 project "basic_traffic_light-16"
 	cppdialect "C++17"
-	files {
-		"examples/basic_traffic_light/**.*",
-	}
+	files "examples/basic_traffic_light/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v142"
 
 project "basic_traffic_light-17"
 	cppdialect "C++20"
-	files {
-		"examples/basic_traffic_light/**.*",
-	}
+	files "examples/basic_traffic_light/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v143"
 
 project "basic_traffic_light-clang"
 	cppdialect "C++20"
-	files {
-		"examples/basic_traffic_light/**.*",
-	}
+	files "examples/basic_traffic_light/**.*"
 	kind "ConsoleApp"
 	toolset "msc-ClangCL"
 
@@ -196,41 +163,31 @@ project "basic_traffic_light-clang"
 
 project "calculator-14"
 	cppdialect "C++11"
-	files {
-		"examples/calculator/**.*",
-	}
+	files "examples/calculator/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v140"
 
 project "calculator-15"
 	cppdialect "C++14"
-	files {
-		"examples/calculator/**.*",
-	}
+	files "examples/calculator/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v141"
 
 project "calculator-16"
 	cppdialect "C++17"
-	files {
-		"examples/calculator/**.*",
-	}
+	files "examples/calculator/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v142"
 
 project "calculator-17"
 	cppdialect "C++20"
-	files {
-		"examples/calculator/**.*",
-	}
+	files "examples/calculator/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v143"
 
 project "calculator-clang"
 	cppdialect "C++20"
-	files {
-		"examples/calculator/**.*",
-	}
+	files "examples/calculator/**.*"
 	kind "ConsoleApp"
 	toolset "msc-ClangCL"
 
@@ -238,41 +195,31 @@ project "calculator-clang"
 
 project "debug_logger_interface-14"
 	cppdialect "C++11"
-	files {
-		"examples/debug_logger_interface/**.*",
-	}
+	files "examples/debug_logger_interface/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v140"
 
 project "debug_logger_interface-15"
 	cppdialect "C++14"
-	files {
-		"examples/debug_logger_interface/**.*",
-	}
+	files "examples/debug_logger_interface/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v141"
 
 project "debug_logger_interface-16"
 	cppdialect "C++17"
-	files {
-		"examples/debug_logger_interface/**.*",
-	}
+	files "examples/debug_logger_interface/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v142"
 
 project "debug_logger_interface-17"
 	cppdialect "C++20"
-	files {
-		"examples/debug_logger_interface/**.*",
-	}
+	files "examples/debug_logger_interface/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v143"
 
 project "debug_logger_interface-clang"
 	cppdialect "C++20"
-	files {
-		"examples/debug_logger_interface/**.*",
-	}
+	files "examples/debug_logger_interface/**.*"
 	kind "ConsoleApp"
 	toolset "msc-ClangCL"
 
@@ -280,41 +227,31 @@ project "debug_logger_interface-clang"
 
 project "temp-14"
 	cppdialect "C++11"
-	files {
-		"examples/temp/**.*",
-	}
+	files "examples/temp/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v140"
 
 project "temp-15"
 	cppdialect "C++14"
-	files {
-		"examples/temp/**.*",
-	}
+	files "examples/temp/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v141"
 
 project "temp-16"
 	cppdialect "C++17"
-	files {
-		"examples/temp/**.*",
-	}
+	files "examples/temp/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v142"
 
 project "temp-17"
 	cppdialect "C++20"
-	files {
-		"examples/temp/**.*",
-	}
+	files "examples/temp/**.*"
 	kind "ConsoleApp"
 	toolset "msc-v143"
 
 project "temp-clang"
 	cppdialect "C++20"
-	files {
-		"examples/temp/**.*",
-	}
+	files "examples/temp/**.*"
 	kind "ConsoleApp"
 	toolset "msc-ClangCL"
 

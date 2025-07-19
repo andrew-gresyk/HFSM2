@@ -20,7 +20,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 
 ## Compiler Support
 
-- Visual Studio: **2015, 2017, 2019, 2022**
+- Visual Studio: 2015, 2017, 2019, **2022**
 - GCC: **9, 10, 11, 12, 13, 14**
 - GCC (ARM): **9**
 - Clang: **13, 14, 15, 16, 17, 18**
@@ -62,7 +62,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - Flexible configuration using `HFSM2_ENABLE_*` macros
 - Scalable, supports robust state re-use via state injections
 - **[Hierarchical](https://github.com/andrew-gresyk/HFSM2/wiki/Transitions-within-Hierarchy)**, with a selection of composite (sub-machine) and orthogonal regions
-- Gamedev-friendly, supports explicit `State::update()`
+- Gamedev and embedded friendly
 - Also supports traditional event-based workflow with `State::react()`
 - Inspect anything: previous and current transitions, state activation status, and more!
 - Game AI-friendly with **[dynamic planning](https://github.com/andrew-gresyk/HFSM2/wiki/Plans)** support

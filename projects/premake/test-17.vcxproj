@@ -105,7 +105,7 @@
       <AdditionalIncludeDirectories>..\..\development;..\..\include;..\..\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/bigobj /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/permissive- %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -124,7 +124,7 @@
       <AdditionalIncludeDirectories>..\..\development;..\..\include;..\..\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/bigobj /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/permissive- %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -146,7 +146,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <AdditionalOptions>/bigobj /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/permissive- %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -170,7 +170,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <AdditionalOptions>/bigobj /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/permissive- %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -268,6 +268,9 @@
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\reported\issue_49.cpp" />
     <ClCompile Include="..\..\test\reported\resuming_plan.cpp" />
+    <ClCompile Include="..\..\test\reported\stress_size.cpp" />
+    <ClCompile Include="..\..\test\reported\test_plan_hierarchy.cpp" />
+    <ClCompile Include="..\..\test\reported\test_stress.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_stream.cpp" />
     <ClCompile Include="..\..\test\shared\test_random.cpp" />
@@ -287,7 +290,6 @@
     <ClCompile Include="..\..\test\test_orthogonal_root.cpp" />
     <ClCompile Include="..\..\test\test_plan_external.cpp" />
     <ClCompile Include="..\..\test\test_plan_external_payloads.cpp" />
-    <ClCompile Include="..\..\test\test_plan_hierarchy.cpp" />
     <ClCompile Include="..\..\test\test_plans.cpp" />
     <ClCompile Include="..\..\test\test_plans_payloads.cpp" />
     <ClCompile Include="..\..\test\test_query.cpp" />
@@ -298,8 +300,6 @@
     <ClCompile Include="..\..\test\test_select.cpp" />
     <ClCompile Include="..\..\test\test_self_transitions.cpp" />
     <ClCompile Include="..\..\test\test_serialization.cpp" />
-    <ClCompile Include="..\..\test\test_stress.cpp" />
-    <ClCompile Include="..\..\test\test_types.cpp" />
     <ClCompile Include="..\..\test\test_utility_regions.cpp" />
     <ClCompile Include="..\..\test\test_utilize.cpp" />
     <ClCompile Include="..\..\test\wiki_class_member.cpp" />

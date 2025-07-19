@@ -114,9 +114,11 @@ template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG_, TA_>::succeed(const StateID stateId_) noexcept {
-	_core.planData.tasksSuccesses.set(stateId_);
+	if (HFSM2_CHECKED(ROOT_ID < stateId_ && stateId_ < STATE_COUNT)) {
+		_core.planData.tasksSuccesses.set(stateId_);
 
-	HFSM2_LOG_TASK_STATUS(_core.context, INVALID_REGION_ID, stateId_, StatusEvent::SUCCEEDED);
+		HFSM2_LOG_TASK_STATUS(_core.context, INVALID_REGION_ID, stateId_, StatusEvent::SUCCEEDED);
+	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -125,9 +127,11 @@ template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG_, TA_>::fail(const StateID stateId_) noexcept {
-	_core.planData.tasksFailures.set(stateId_);
+	if (HFSM2_CHECKED(ROOT_ID < stateId_ && stateId_ < STATE_COUNT)) {
+		_core.planData.tasksFailures.set(stateId_);
 
-	HFSM2_LOG_TASK_STATUS(_core.context, INVALID_REGION_ID, stateId_, StatusEvent::FAILED);
+		HFSM2_LOG_TASK_STATUS(_core.context, INVALID_REGION_ID, stateId_, StatusEvent::FAILED);
+	}
 }
 
 #endif

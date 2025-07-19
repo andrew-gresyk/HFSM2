@@ -20,6 +20,8 @@ class FullControlBaseT
 	friend class R_;
 
 protected:
+	static constexpr Long STATE_COUNT	= TArgs::STATE_COUNT;
+
 	using PlanControl	= PlanControlT<TArgs>;
 
 	using typename PlanControl::StateList;

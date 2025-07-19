@@ -53,7 +53,7 @@ struct S_<TIndices, TArgs, EmptyT<TArgs>>
 
 	HFSM2_CONSTEXPR(14)	Parent		 stateParent		  (		Control& control)								noexcept	{ return control._core.registry.stateParents[STATE_ID];	}
 
-	HFSM2_CONSTEXPR(14)	void		 deepRegister		  (	   Registry&		, const Parent		)			noexcept	{}
+	HFSM2_CONSTEXPR(14)	void		 deepRegister		  (	   Registry& registry, const Parent parent)			noexcept;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -287,6 +287,15 @@
     <ClCompile Include="..\..\test\reported\resuming_plan.cpp">
       <Filter>test\reported</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\reported\stress_size.cpp">
+      <Filter>test\reported</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\reported\test_plan_hierarchy.cpp">
+      <Filter>test\reported</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\reported\test_stress.cpp">
+      <Filter>test\reported</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\test\shared\test_bit_array.cpp">
       <Filter>test\shared</Filter>
     </ClCompile>
@@ -344,9 +353,6 @@
     <ClCompile Include="..\..\test\test_plan_external_payloads.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\test_plan_hierarchy.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\test_plans.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -375,12 +381,6 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test_serialization.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\test_stress.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\test_types.cpp">
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\test_utility_regions.cpp">

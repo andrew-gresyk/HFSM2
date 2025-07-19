@@ -1,7 +1,7 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
 // Created by Andrew Gresyk
 
-#include "tools.hpp"
+#include "../tools.hpp"
 
 using namespace test_tools;
 
@@ -140,57 +140,25 @@ struct S3				: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 27, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  == 10, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  8, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 22, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  2, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  2, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 27, "");
+static_assert(FSM::Instance::Info::REGION_COUNT == 10, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  8, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 22, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  2, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  2, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<Apex>(),
-	FSM::stateId<S1>(),
-	FSM::stateId<O2>(),
-	FSM::stateId<O2_C1>(),
-	FSM::stateId<O2_C1_S1>(),
-	FSM::stateId<O2_C1_S2>(),
-	FSM::stateId<O2_C1_O3>(),
-	FSM::stateId<O2_C1_O3_C1>(),
-	FSM::stateId<O2_C1_O3_C1_S1>(),
-	FSM::stateId<O2_C1_O3_C1_S2>(),
-	FSM::stateId<O2_C1_O3_C2>(),
-	FSM::stateId<O2_C1_O3_C2_S1>(),
-	FSM::stateId<O2_C1_O3_C2_S2>(),
-	FSM::stateId<O2_C1_O3_C2_S3>(),
-	FSM::stateId<O2_C2>(),
-	FSM::stateId<O2_C2_S1>(),
-	FSM::stateId<O2_C2_C2>(),
-	FSM::stateId<O2_C2_C2_S1>(),
-	FSM::stateId<O2_C2_C2_S2>(),
-	FSM::stateId<O2_C2_C3>(),
-	FSM::stateId<O2_C2_C3_S1>(),
-	FSM::stateId<O2_C2_C3_S2>(),
-	FSM::stateId<O2_C2_C4>(),
-	FSM::stateId<O2_C2_C4_S1>(),
-	FSM::stateId<O2_C2_C4_S2>(),
-	FSM::stateId<O2_C2_S5>(),
-	FSM::stateId<S3>(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Stress") {
 	FSM::Instance machine;
 
 	WHEN("FSM is activated initially") {
-		assertActive(machine, all, {
+		assertActive(machine, {
 			FSM::stateId<Apex>(),
 			FSM::stateId<S1>(),
 		});
 
-		assertResumable(machine, all, {});
+		assertResumable(machine, {});
 	}
 }
 

@@ -411,35 +411,14 @@ struct Work_2	  : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 19, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  8, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  6, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 14, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  2, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  2, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 19, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  8, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  6, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 14, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  2, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  2, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<Planned  >(),
-	FSM::stateId<Step1_BT >(),
-	FSM::stateId<Step1_1  >(),
-	FSM::stateId<Step1_2  >(),
-	FSM::stateId<Step1_3  >(),
-	FSM::stateId<Hybrid   >(),
-	FSM::stateId<Step2L_P >(),
-	FSM::stateId<Step2L_1 >(),
-	FSM::stateId<Step2L_2 >(),
-	FSM::stateId<Step2R_P >(),
-	FSM::stateId<Step2R_1 >(),
-	FSM::stateId<Step2R_2 >(),
-	FSM::stateId<Unplanned>(),
-	FSM::stateId<Terminal >(),
-	FSM::stateId<Work_1   >(),
-	FSM::stateId<Work_2   >(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Plan (payloads)") {
 	Logger logger;
@@ -461,14 +440,14 @@ TEST_CASE("FSM.Plan (payloads)") {
 				{ FSM::stateId<Step1_1   >(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex      >(),
 				FSM::stateId<Planned   >(),
 				FSM::stateId<Step1_BT  >(),
 				FSM::stateId<Step1_1   >(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -500,14 +479,14 @@ TEST_CASE("FSM.Plan (payloads)") {
 				{ FSM::stateId<Step1_2   >(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex      >(),
 				FSM::stateId<Planned   >(),
 				FSM::stateId<Step1_BT  >(),
 				FSM::stateId<Step1_2   >(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<Step1_1   >(),
 			});
 		}
@@ -544,14 +523,14 @@ TEST_CASE("FSM.Plan (payloads)") {
 				{ FSM::stateId<Step1_3   >(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex      >(),
 				FSM::stateId<Planned   >(),
 				FSM::stateId<Step1_BT  >(),
 				FSM::stateId<Step1_3   >(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<Step1_2   >(),
 			});
 		}
@@ -602,7 +581,7 @@ TEST_CASE("FSM.Plan (payloads)") {
 				{ FSM::stateId<Step2R_1  >(), Event::Type::ENTER  },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex      >(),
 				FSM::stateId<Planned   >(),
 				FSM::stateId<Hybrid    >(),
@@ -612,7 +591,7 @@ TEST_CASE("FSM.Plan (payloads)") {
 				FSM::stateId<Step2R_1  >(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<Step1_BT  >(),
 				FSM::stateId<Step1_3   >(),
 			});
@@ -667,7 +646,7 @@ TEST_CASE("FSM.Plan (payloads)") {
 				{ FSM::stateId<Step2R_2  >(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex      >(),
 				FSM::stateId<Planned   >(),
 				FSM::stateId<Hybrid    >(),
@@ -677,7 +656,7 @@ TEST_CASE("FSM.Plan (payloads)") {
 				FSM::stateId<Step2R_2  >(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<Step1_BT  >(),
 				FSM::stateId<Step1_3   >(),
 				FSM::stateId<Step2L_1  >(),
@@ -745,7 +724,7 @@ TEST_CASE("FSM.Plan (payloads)") {
 				{ FSM::stateId<Terminal_R>(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex      >(),
 				FSM::stateId<Planned   >(),
 				FSM::stateId<Terminal  >(),
@@ -753,7 +732,7 @@ TEST_CASE("FSM.Plan (payloads)") {
 				FSM::stateId<Terminal_R>(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<Step1_3   >(),
 				FSM::stateId<Hybrid    >(),
 				FSM::stateId<Step2L_P  >(),

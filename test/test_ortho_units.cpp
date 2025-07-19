@@ -98,39 +98,14 @@ struct O3_05 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 19, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  4, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  1, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  ==  3, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  3, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  3, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 19, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  4, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  1, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS ==  3, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  3, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  3, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<O1   >(),
-	FSM::stateId<O1_01>(),
-	FSM::stateId<O1_02>(),
-	FSM::stateId<O1_03>(),
-	FSM::stateId<O1_04>(),
-	FSM::stateId<O1_05>(),
-
-	FSM::stateId<O2   >(),
-	FSM::stateId<O2_01>(),
-	FSM::stateId<O2_02>(),
-	FSM::stateId<O2_03>(),
-	FSM::stateId<O2_04>(),
-	FSM::stateId<O2_05>(),
-
-	FSM::stateId<O3   >(),
-	FSM::stateId<O3_01>(),
-	FSM::stateId<O3_02>(),
-	FSM::stateId<O3_03>(),
-	FSM::stateId<O3_04>(),
-	FSM::stateId<O3_05>(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.OrthoUnits") {
 	Logger logger;
@@ -158,7 +133,8 @@ TEST_CASE("FSM.OrthoUnits") {
 				{ FSM::stateId<O1_05>(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				FSM::stateId<Apex >(),
 				FSM::stateId<O1   >(),
 				FSM::stateId<O1_01>(),
 				FSM::stateId<O1_02>(),
@@ -167,7 +143,7 @@ TEST_CASE("FSM.OrthoUnits") {
 				FSM::stateId<O1_05>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

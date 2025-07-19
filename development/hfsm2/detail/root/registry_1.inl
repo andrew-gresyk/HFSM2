@@ -29,7 +29,7 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(11)
 bool
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isActive() const noexcept {
-	return compoActive[0] != INVALID_PRONG;
+	return compoActive[ROOT_ID] != INVALID_PRONG;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -49,7 +49,7 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 				return parent.prong == compoActive[parent.forkId - 1];
 		}
 
-		return true;
+		return isActive();
 	}
 
 	return false;

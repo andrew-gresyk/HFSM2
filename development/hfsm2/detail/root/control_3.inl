@@ -140,11 +140,13 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::succeed(const StateID stateId_) noexcept {
-	_taskStatus.result = TaskStatus::SUCCESS;
+	if (ROOT_ID < stateId_ && stateId_ < STATE_COUNT) {
+		_taskStatus.result = TaskStatus::SUCCESS;
 
-	_core.planData.tasksSuccesses.set(stateId_);
+		_core.planData.tasksSuccesses.set(stateId_);
 
-	HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::SUCCEEDED);
+		HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::SUCCEEDED);
+	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -153,11 +155,13 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
 FullControlBaseT<TArgs>::fail(const StateID stateId_) noexcept {
-	_taskStatus.result = TaskStatus::FAILURE;
+	if (ROOT_ID < stateId_ && stateId_ < STATE_COUNT) {
+		_taskStatus.result = TaskStatus::FAILURE;
 
-	_core.planData.tasksFailures.set(stateId_);
+		_core.planData.tasksFailures.set(stateId_);
 
-	HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::FAILED);
+		HFSM2_LOG_TASK_STATUS(context(), _regionStateId, stateId_, StatusEvent::FAILED);
+	}
 }
 
 #endif

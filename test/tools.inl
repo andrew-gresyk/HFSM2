@@ -109,25 +109,25 @@ LoggerT<TConfig>::recordTransition(const Context& UNUSED(context),
 
 	switch (transitionType) {
 		case TransitionType::CHANGE:
-			history.emplace_back(origin, Event::Type::CHANGE,    target);
+			history.emplace_back(origin, Event::Type::CHANGE   , target);
 			break;
 
 		case TransitionType::RESTART:
-			history.emplace_back(origin, Event::Type::RESTART,   target);
+			history.emplace_back(origin, Event::Type::RESTART  , target);
 			break;
 
 		case TransitionType::RESUME:
-			history.emplace_back(origin, Event::Type::RESUME,    target);
+			history.emplace_back(origin, Event::Type::RESUME   , target);
 			break;
 
 		case TransitionType::SELECT:
-			history.emplace_back(origin, Event::Type::SELECT,    target);
+			history.emplace_back(origin, Event::Type::SELECT   , target);
 			break;
 
 	//#ifdef HFSM2_ENABLE_UTILITY_THEORY
 
 		case TransitionType::UTILIZE:
-			history.emplace_back(origin, Event::Type::UTILIZE,   target);
+			history.emplace_back(origin, Event::Type::UTILIZE  , target);
 			break;
 
 		case TransitionType::RANDOMIZE:
@@ -137,7 +137,7 @@ LoggerT<TConfig>::recordTransition(const Context& UNUSED(context),
 	//#endif
 
 		case TransitionType::SCHEDULE:
-			history.emplace_back(origin, Event::Type::SCHEDULE,  target);
+			history.emplace_back(origin, Event::Type::SCHEDULE , target);
 			break;
 
 		default:
@@ -170,7 +170,7 @@ LoggerT<TConfig>::recordTaskStatus(const Context& UNUSED(context),
 	}
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename TConfig>
 void
@@ -251,15 +251,18 @@ LoggerT<TConfig>::assertSequence(const Events& reference) {
 	const auto count = std::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {
-		REQUIRE(i < history.size());
+		REQUIRE(i < history  .size());
 		REQUIRE(i < reference.size());
 
-		if (i < history.size() &&
+		if (i < history	 .size() &&
 			i < reference.size())
 		{
-			REQUIRE(history[i].type	  == reference[i].type	);
-			REQUIRE(history[i].origin == reference[i].origin);
-			REQUIRE(history[i].target == reference[i].target);
+			const Event h = history  [i];
+			const Event r = reference[i];
+
+			REQUIRE(h.type	 == r.type	);
+			REQUIRE(h.origin == r.origin);
+			REQUIRE(h.target == r.target);
 		}
 	}
 
@@ -268,18 +271,23 @@ LoggerT<TConfig>::assertSequence(const Events& reference) {
 
 //------------------------------------------------------------------------------
 
+using Types = std::vector<hfsm2::StateID>;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 template <typename TMachine>
 void
 assertActive(TMachine& machine,
-			 const Types& all,
-			 const Types& toCheck)
+			 const Types& reference)
 {
-	for (const auto& type : all) {
-		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.isActive(type));
-		else
-			REQUIRE(!machine.isActive(type));
-	}
+	Types actual;
+	actual.reserve(reference.size());
+
+	for (hfsm2::StateID id = 0; id < TMachine::Info::STATE_COUNT; ++id)
+		if (machine.isActive(id))
+			actual.push_back(id);
+
+	REQUIRE(actual == reference);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -287,15 +295,16 @@ assertActive(TMachine& machine,
 template <typename TMachine>
 void
 assertResumable(TMachine& machine,
-				const Types& all,
-				const Types& toCheck)
+				const Types& reference)
 {
-	for (const auto& type : all) {
-		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.isResumable(type));
-		else
-			REQUIRE(!machine.isResumable(type));
-	}
+	Types actual;
+	actual.reserve(reference.size());
+
+	for (hfsm2::StateID id = 0; id < TMachine::Info::STATE_COUNT; ++id)
+		if (machine.isResumable(id))
+			actual.push_back(id);
+
+	REQUIRE(actual == reference);
 }
 
 //------------------------------------------------------------------------------
@@ -357,15 +366,16 @@ assertActivity(const TActivityHistory& activity,
 template <typename TMachine>
 void
 assertLastTransitions(TMachine& machine,
-					  const Types& all,
-					  const Types& toCheck)
+					  const Types& reference)
 {
-	for (const auto& type : all) {
-		if (std::find(toCheck.begin(), toCheck.end(), type) != toCheck.end())
-			REQUIRE( machine.lastTransitionTo(type));
-		else
-			REQUIRE(!machine.lastTransitionTo(type));
-	}
+	Types actual;
+	actual.reserve(reference.size());
+
+	for (hfsm2::StateID id = 0; id < TMachine::Info::STATE_COUNT; ++id)
+		if (machine.lastTransitionTo(id))
+			actual.push_back(id);
+
+	REQUIRE(actual == reference);
 }
 
 #endif

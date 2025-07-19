@@ -9,11 +9,11 @@
 
 #include <doctest/doctest.h>
 
-#include <assert.h>
-#include <wchar.h> // wcscmp()
-
 #include <algorithm>
 #include <vector>
+
+#include <assert.h>
+#include <wchar.h> // wcscmp()
 
 namespace test_tools {
 
@@ -178,22 +178,6 @@ using Logger = LoggerT<::hfsm2::Config>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using Types = std::vector<hfsm2::StateID>;
-
-template <typename TMachine>
-void assertActive(TMachine& machine,
-				  const Types& all,
-				  const Types& toCheck);
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TMachine>
-void assertResumable(TMachine& machine,
-					 const Types& all,
-					 const Types& toCheck);
-
-//------------------------------------------------------------------------------
-
 #ifdef HFSM2_ENABLE_STRUCTURE_REPORT
 
 using StructureReference = std::vector<hfsm2::StructureEntry>;
@@ -211,17 +195,6 @@ template <typename TActivityHistory>
 void
 assertActivity(const TActivityHistory& activity,
 			   const ActivityReference& reference);
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
-
-template <typename TMachine>
-void assertLastTransitions(TMachine& machine,
-						   const Types& all,
-						   const Types& toCheck);
 
 #endif
 

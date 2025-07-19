@@ -6,12 +6,12 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
-using namespace test_tools;
-
 #include <algorithm>
 #include <vector>
 
 #include <wchar.h>
+
+using namespace test_tools;
 
 namespace test_debug {
 
@@ -94,27 +94,143 @@ struct N_2	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 15, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 15, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  6, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  5, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 10, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  1, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const Types all = {
-	FSM::stateId<I  >(),
-	FSM::stateId<O  >(),
-	FSM::stateId<R  >(),
-	FSM::stateId<R_1>(),
-	FSM::stateId<R_2>(),
-	FSM::stateId<C_1>(),
-	FSM::stateId<C_2>(),
-	FSM::stateId<U  >(),
-	FSM::stateId<U_1>(),
-	FSM::stateId<U_2>(),
-};
+void step0(FSM::Instance& machine, Logger& logger) {
+	logger.assertSequence({
+		{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
+
+		{ FSM::stateId<Apex>(),	Event::Type::ENTER },
+		{ FSM::stateId<I   >(),	Event::Type::ENTER },
+	});
+
+	assertActive(machine, {
+		FSM::stateId<Apex>(),
+		FSM::stateId<I   >(),
+	});
+
+	assertResumable(machine, {});
+
+	assertStructure(machine.structure(), {
+		hfsm2::StructureEntry{ true,  L"", "Apex"},
+		hfsm2::StructureEntry{ true,  L" ├ ", "I"},
+		hfsm2::StructureEntry{ false, L" └ ", "O"},
+		hfsm2::StructureEntry{ false, L"   ╟ ", "R"},
+		hfsm2::StructureEntry{ false, L"   ║ ├ ", "R_1"},
+		hfsm2::StructureEntry{ false, L"   ║ └ ", "R_2"},
+		hfsm2::StructureEntry{ false, L"   ╟ ┬ ", "C_1"},
+		hfsm2::StructureEntry{ false, L"   ║ └ ", "C_2"},
+		hfsm2::StructureEntry{ false, L"   ╟ ", "U"},
+		hfsm2::StructureEntry{ false, L"   ║ ├ ", "U_1"},
+		hfsm2::StructureEntry{ false, L"   ║ └ ", "U_2"},
+		hfsm2::StructureEntry{ false, L"   ╙ ", "N"},
+		hfsm2::StructureEntry{ false, L"     ├ ", "N_1"},
+		hfsm2::StructureEntry{ false, L"     └ ", "N_2"},
+	});
+
+	assertActivity(machine.activityHistory(), {
+		+1,
+		+1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+		-1,
+	});
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+void step1(FSM::Instance& machine, Logger& logger) {
+	machine.immediateChangeTo<O>();
+
+	logger.assertSequence({
+		{						Event::Type::CHANGE, FSM::stateId<O   >() },
+
+		{ FSM::stateId<U_1 >(),	Event::Type::UTILITY },
+		{ FSM::stateId<U_2 >(),	Event::Type::UTILITY },
+		{ FSM::stateId<U   >(),	Event::Type::UTILITY_RESOLUTION, 0 },
+
+		{ FSM::stateId<N_1 >(),	Event::Type::REPORT_RANK },
+		{ FSM::stateId<N_2 >(),	Event::Type::REPORT_RANK },
+		{ FSM::stateId<N_1 >(),	Event::Type::UTILITY },
+		{ FSM::stateId<N_2 >(),	Event::Type::UTILITY },
+		{ FSM::stateId<N   >(),	Event::Type::RANDOM_RESOLUTION, 1 },
+
+		{ FSM::stateId<I   >(),	Event::Type::EXIT_GUARD },
+
+		{ FSM::stateId<O   >(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<R   >(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<R_1 >(),	Event::Type::ENTRY_GUARD },
+		{ hfsm2::StateID{6}	  ,	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<C_1 >(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<U   >(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<U_1 >(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<N   >(),	Event::Type::ENTRY_GUARD },
+		{ FSM::stateId<N_2 >(),	Event::Type::ENTRY_GUARD },
+
+		{ FSM::stateId<I   >(),	Event::Type::EXIT },
+
+		{ FSM::stateId<O   >(),	Event::Type::ENTER },
+		{ FSM::stateId<R   >(),	Event::Type::ENTER },
+		{ FSM::stateId<R_1 >(),	Event::Type::ENTER },
+		{ hfsm2::StateID{6}	  ,	Event::Type::ENTER },
+		{ FSM::stateId<C_1 >(),	Event::Type::ENTER },
+		{ FSM::stateId<U   >(),	Event::Type::ENTER },
+		{ FSM::stateId<U_1 >(),	Event::Type::ENTER },
+		{ FSM::stateId<N   >(),	Event::Type::ENTER },
+		{ FSM::stateId<N_2 >(),	Event::Type::ENTER },
+	});
+
+	assertActive(machine, {
+		FSM::stateId<Apex>(),
+		FSM::stateId<O   >(),
+		FSM::stateId<R   >(),
+		FSM::stateId<R_1 >(),
+		hfsm2::StateID{6}	,
+		FSM::stateId<C_1 >(),
+		FSM::stateId<U   >(),
+		FSM::stateId<U_1 >(),
+		FSM::stateId<N   >(),
+		FSM::stateId<N_2 >(),
+	});
+
+	assertResumable(machine, {
+		FSM::stateId<I   >(),
+	});
+
+	assertActivity(machine.activityHistory(), {
+		+2,
+		-1,
+		+1,
+		+1,
+		+1,
+		-2,
+		+1,
+		-2,
+		+1,
+		+1,
+		-2,
+		+1,
+		-2,
+		+1,
+	});
+}
 
 //------------------------------------------------------------------------------
 
@@ -123,137 +239,9 @@ TEST_CASE("FSM.Debug") {
 	Logger logger;
 
 	{
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 		FSM::Instance machine{generator, &logger};
-		{
-			logger.assertSequence({
-				{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
-
-				{ FSM::stateId<Apex>(),	Event::Type::ENTER },
-				{ FSM::stateId<I   >(),	Event::Type::ENTER },
-			});
-
-			assertActive(machine, all, {
-				FSM::stateId<Apex>(),
-				FSM::stateId<I   >(),
-			});
-
-			assertResumable(machine, all, {});
-
-			assertStructure(machine.structure(), {
-				hfsm2::StructureEntry{ true,  L"", "Apex"},
-				hfsm2::StructureEntry{ true,  L" ├ ", "I"},
-				hfsm2::StructureEntry{ false, L" └ ", "O"},
-				hfsm2::StructureEntry{ false, L"   ╟ ", "R"},
-				hfsm2::StructureEntry{ false, L"   ║ ├ ", "R_1"},
-				hfsm2::StructureEntry{ false, L"   ║ └ ", "R_2"},
-				hfsm2::StructureEntry{ false, L"   ╟ ┬ ", "C_1"},
-				hfsm2::StructureEntry{ false, L"   ║ └ ", "C_2"},
-				hfsm2::StructureEntry{ false, L"   ╟ ", "U"},
-				hfsm2::StructureEntry{ false, L"   ║ ├ ", "U_1"},
-				hfsm2::StructureEntry{ false, L"   ║ └ ", "U_2"},
-				hfsm2::StructureEntry{ false, L"   ╙ ", "N"},
-				hfsm2::StructureEntry{ false, L"     ├ ", "N_1"},
-				hfsm2::StructureEntry{ false, L"     └ ", "N_2"},
-			});
-
-			assertActivity(machine.activityHistory(), {
-				+1,
-				+1,
-				-1,
-				-1,
-				-1,
-				-1,
-				-1,
-				-1,
-				-1,
-				-1,
-				-1,
-				-1,
-				-1,
-				-1,
-			});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-		machine.immediateChangeTo<O   >();
-		{
-			logger.assertSequence({
-				{						Event::Type::CHANGE, FSM::stateId<O   >() },
-
-				{ FSM::stateId<U_1 >(),	Event::Type::UTILITY },
-				{ FSM::stateId<U_2 >(),	Event::Type::UTILITY },
-				{ FSM::stateId<U   >(),	Event::Type::UTILITY_RESOLUTION, 0 },
-
-				{ FSM::stateId<N_1 >(),	Event::Type::REPORT_RANK },
-				{ FSM::stateId<N_2 >(),	Event::Type::REPORT_RANK },
-				{ FSM::stateId<N_1 >(),	Event::Type::UTILITY },
-				{ FSM::stateId<N_2 >(),	Event::Type::UTILITY },
-				{ FSM::stateId<N   >(),	Event::Type::RANDOM_RESOLUTION, 1 },
-
-				{ FSM::stateId<I   >(),	Event::Type::EXIT_GUARD },
-
-				{ FSM::stateId<O   >(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<R   >(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<R_1 >(),	Event::Type::ENTRY_GUARD },
-				{ hfsm2::StateID{6}	  ,	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<C_1 >(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<U   >(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<U_1 >(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<N   >(),	Event::Type::ENTRY_GUARD },
-				{ FSM::stateId<N_2 >(),	Event::Type::ENTRY_GUARD },
-
-				{ FSM::stateId<I   >(),	Event::Type::EXIT },
-
-				{ FSM::stateId<O   >(),	Event::Type::ENTER },
-				{ FSM::stateId<R   >(),	Event::Type::ENTER },
-				{ FSM::stateId<R_1 >(),	Event::Type::ENTER },
-				{ hfsm2::StateID{6}	  ,	Event::Type::ENTER },
-				{ FSM::stateId<C_1 >(),	Event::Type::ENTER },
-				{ FSM::stateId<U   >(),	Event::Type::ENTER },
-				{ FSM::stateId<U_1 >(),	Event::Type::ENTER },
-				{ FSM::stateId<N   >(),	Event::Type::ENTER },
-				{ FSM::stateId<N_2 >(),	Event::Type::ENTER },
-			});
-
-			assertActive(machine, all, {
-				FSM::stateId<O   >(),
-				FSM::stateId<R   >(),
-				FSM::stateId<R_1 >(),
-				hfsm2::StateID{6}	,
-				FSM::stateId<C_1 >(),
-				FSM::stateId<U   >(),
-				FSM::stateId<U_1 >(),
-				FSM::stateId<N   >(),
-				FSM::stateId<N_2 >(),
-			});
-
-			assertResumable(machine, all, {
-				FSM::stateId<I   >(),
-			});
-
-			assertActivity(machine.activityHistory(), {
-				+2,
-				-1,
-				+1,
-				+1,
-				+1,
-				-2,
-				+1,
-				-2,
-				+1,
-				+1,
-				-2,
-				+1,
-				-2,
-				+1,
-			});
-		}
-
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		step0(machine, logger);
+		step1(machine, logger);
 	}
 
 	logger.assertSequence({
@@ -266,7 +254,7 @@ TEST_CASE("FSM.Debug") {
 		{ FSM::stateId<N_2 >(),	Event::Type::EXIT },
 		{ FSM::stateId<N   >(),	Event::Type::EXIT },
 		{ FSM::stateId<O   >(),	Event::Type::EXIT },
-		{ hfsm2::StateID{0}, 	Event::Type::EXIT },
+		{ hfsm2::ROOT_ID      , Event::Type::EXIT },
 	});
 }
 

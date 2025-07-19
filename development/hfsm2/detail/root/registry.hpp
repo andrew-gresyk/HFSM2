@@ -3,7 +3,7 @@ namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct alignas(2 * sizeof(Prong)) Parent final {
+struct alignas(2 * sizeof(ForkID)) Parent final {
 	HFSM2_CONSTEXPR(11)
 	Parent() = default;
 

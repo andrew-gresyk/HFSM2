@@ -75,30 +75,14 @@ struct O2_C2_S2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  3, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  ==  6, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  3, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  3, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 13, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  6, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  3, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS ==  6, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  3, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  3, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<C1      >(),
-	FSM::stateId<C1_S1   >(),
-	FSM::stateId<C1_O2_S1>(),
-	FSM::stateId<C1_O2_S2>(),
-	FSM::stateId<O2      >(),
-	FSM::stateId<O2_C1   >(),
-	FSM::stateId<O2_C1_S1>(),
-	FSM::stateId<O2_C1_S2>(),
-	FSM::stateId<O2_C2   >(),
-	FSM::stateId<O2_C2_S1>(),
-	FSM::stateId<O2_C2_S2>(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Orthogonal Root") {
 	Logger logger;
@@ -109,7 +93,7 @@ TEST_CASE("FSM.Orthogonal Root") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},		Event::Type::ENTRY_GUARD },
+				{ hfsm2::ROOT_ID          , Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<C1      >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<C1_S1   >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<O2      >(),	Event::Type::ENTRY_GUARD },
@@ -118,7 +102,7 @@ TEST_CASE("FSM.Orthogonal Root") {
 				{ FSM::stateId<O2_C2   >(),	Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<O2_C2_S1>(),	Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0},		Event::Type::ENTER },
+				{ hfsm2::ROOT_ID          , Event::Type::ENTER },
 				{ FSM::stateId<C1      >(),	Event::Type::ENTER },
 				{ FSM::stateId<C1_S1   >(),	Event::Type::ENTER },
 				{ FSM::stateId<O2      >(),	Event::Type::ENTER },
@@ -128,7 +112,8 @@ TEST_CASE("FSM.Orthogonal Root") {
 				{ FSM::stateId<O2_C2_S1>(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				hfsm2::ROOT_ID          ,
 				FSM::stateId<C1      >(),
 				FSM::stateId<C1_S1   >(),
 				FSM::stateId<O2      >(),
@@ -138,7 +123,7 @@ TEST_CASE("FSM.Orthogonal Root") {
 				FSM::stateId<O2_C2_S1>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -152,7 +137,7 @@ TEST_CASE("FSM.Orthogonal Root") {
 		{ FSM::stateId<O2_C2_S1>(),	Event::Type::EXIT },
 		{ FSM::stateId<O2_C2   >(),	Event::Type::EXIT },
 		{ FSM::stateId<O2      >(),	Event::Type::EXIT },
-		{ hfsm2::StateID{0},		Event::Type::EXIT },
+		{ hfsm2::ROOT_ID          , Event::Type::EXIT },
 	});
 }
 

@@ -248,27 +248,14 @@ struct Step3 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 8, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  == 3, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 == 1, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 3, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 == 2, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   == 2, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 8, "");
+static_assert(FSM::Instance::Info::REGION_COUNT == 3, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	== 1, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 3, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	== 2, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  == 2, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<Apex   >(),
-	FSM::stateId<Step1  >(),
-	FSM::stateId<Step1_1>(),
-	FSM::stateId<Step1_2>(),
-	FSM::stateId<Step2  >(),
-	FSM::stateId<Step2_1>(),
-	FSM::stateId<Step2_2>(),
-	FSM::stateId<Step3  >(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Entry Guard") {
 	Logger logger;
@@ -290,14 +277,14 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step1_2>(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex   >(),
 				FSM::stateId<Step1  >(),
 				FSM::stateId<Step1_1>(),
 				FSM::stateId<Step1_2>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -314,14 +301,14 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step1_2>(),	Event::Type::EXIT_GUARD },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex   >(),
 				FSM::stateId<Step1  >(),
 				FSM::stateId<Step1_1>(),
 				FSM::stateId<Step1_2>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -336,14 +323,14 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step1_2>(),	Event::Type::CANCEL_PENDING },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex   >(),
 				FSM::stateId<Step1  >(),
 				FSM::stateId<Step1_1>(),
 				FSM::stateId<Step1_2>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -359,14 +346,14 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step1  >(),	Event::Type::CANCEL_PENDING },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex   >(),
 				FSM::stateId<Step1  >(),
 				FSM::stateId<Step1_1>(),
 				FSM::stateId<Step1_2>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -385,14 +372,14 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step2  >(),	Event::Type::CANCEL_PENDING },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex   >(),
 				FSM::stateId<Step1  >(),
 				FSM::stateId<Step1_1>(),
 				FSM::stateId<Step1_2>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -413,14 +400,14 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step2_2>(),	Event::Type::ENTRY_GUARD },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex   >(),
 				FSM::stateId<Step1  >(),
 				FSM::stateId<Step1_1>(),
 				FSM::stateId<Step1_2>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -440,14 +427,14 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step2_2>(),	Event::Type::CANCEL_PENDING },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex   >(),
 				FSM::stateId<Step1  >(),
 				FSM::stateId<Step1_1>(),
 				FSM::stateId<Step1_2>(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -471,12 +458,12 @@ TEST_CASE("FSM.Entry Guard") {
 				{ FSM::stateId<Step3  >(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex   >(),
 				FSM::stateId<Step3  >(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<Step1  >(),
 				FSM::stateId<Step1_1>(),
 				FSM::stateId<Step1_2>()
