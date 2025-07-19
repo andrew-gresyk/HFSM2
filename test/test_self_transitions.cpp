@@ -76,31 +76,14 @@ struct B_2_2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 13, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  6, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  5, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 10, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  1, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<A    >(),
-	FSM::stateId<A_1  >(),
-	FSM::stateId<A_2  >(),
-	FSM::stateId<A_2_1>(),
-	FSM::stateId<A_2_2>(),
-	FSM::stateId<B    >(),
-	FSM::stateId<B_1  >(),
-	FSM::stateId<B_1_1>(),
-	FSM::stateId<B_1_2>(),
-	FSM::stateId<B_2  >(),
-	FSM::stateId<B_2_1>(),
-	FSM::stateId<B_2_2>(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Self Transition") {
 	Logger logger;
@@ -111,21 +94,22 @@ TEST_CASE("FSM.Self Transition") {
 		FSM::Instance machine{&logger};
 		{
 			logger.assertSequence({
-				{ hfsm2::StateID{0},	 Event::Type::ENTRY_GUARD },
+				{ hfsm2::ROOT_ID,	 Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<A    >(), Event::Type::ENTRY_GUARD },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTRY_GUARD },
 
-				{ hfsm2::StateID{0},	 Event::Type::ENTER },
+				{ hfsm2::ROOT_ID,	 Event::Type::ENTER },
 				{ FSM::stateId<A    >(), Event::Type::ENTER },
 				{ FSM::stateId<A_1  >(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				hfsm2::ROOT_ID,
 				FSM::stateId<A    >(),
 				FSM::stateId<A_1  >(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -145,12 +129,13 @@ TEST_CASE("FSM.Self Transition") {
 				{ FSM::stateId<A_1  >(), Event::Type::REENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				hfsm2::ROOT_ID,
 				FSM::stateId<A    >(),
 				FSM::stateId<A_1  >(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -179,7 +164,8 @@ TEST_CASE("FSM.Self Transition") {
 				{ FSM::stateId<B_2_1>(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				hfsm2::ROOT_ID,
 				FSM::stateId<B    >(),
 				FSM::stateId<B_1  >(),
 				FSM::stateId<B_1_1>(),
@@ -187,7 +173,7 @@ TEST_CASE("FSM.Self Transition") {
 				FSM::stateId<B_2_1>(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<A    >(),
 				FSM::stateId<A_1  >(),
 			});
@@ -219,7 +205,8 @@ TEST_CASE("FSM.Self Transition") {
 				{ FSM::stateId<B_2_1>(), Event::Type::REENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				hfsm2::ROOT_ID,
 				FSM::stateId<B    >(),
 				FSM::stateId<B_1  >(),
 				FSM::stateId<B_1_1>(),
@@ -227,7 +214,7 @@ TEST_CASE("FSM.Self Transition") {
 				FSM::stateId<B_2_1>(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<A    >(),
 				FSM::stateId<A_1  >(),
 			});
@@ -242,7 +229,7 @@ TEST_CASE("FSM.Self Transition") {
 		{ FSM::stateId<B_2_1>(), Event::Type::EXIT },
 		{ FSM::stateId<B_2  >(), Event::Type::EXIT },
 		{ FSM::stateId<B    >(), Event::Type::EXIT },
-		{ hfsm2::StateID{0},	 Event::Type::EXIT },
+		{ hfsm2::ROOT_ID,	 Event::Type::EXIT },
 	};
 	logger.assertSequence(reference);
 }

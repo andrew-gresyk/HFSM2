@@ -297,44 +297,16 @@ struct Work_2	  : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 26, "STATE_COUNT" );
-static_assert(FSM::Instance::Info::REGION_COUNT  == 11, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  8, "COMPO_COUNT" );
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 19, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  3, "ORTHO_COUNT" );
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  3, "ORTHO_UNITS" );
+static_assert(FSM::Instance::Info::STATE_COUNT  == 26, "");
+static_assert(FSM::Instance::Info::REGION_COUNT == 11, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  8, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 19, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  3, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  3, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const Types all = {
-	FSM::stateId<Planned  >(),
-	FSM::stateId<Step1_BT >(),
-	FSM::stateId<Step1_1  >(),
-	FSM::stateId<Step1_2  >(),
-	FSM::stateId<Step1_3  >(),
-	FSM::stateId<Hybrid   >(),
-	FSM::stateId<Step2L_P >(),
-	FSM::stateId<Step2L_1 >(),
-	FSM::stateId<Step2L_2 >(),
-	FSM::stateId<Step2R_P >(),
-	FSM::stateId<Step2R_1 >(),
-	FSM::stateId<Step2R_2 >(),
-	FSM::stateId<Fork     >(),
-	FSM::stateId<Step3L_P >(),
-	FSM::stateId<Step3L_1 >(),
-	FSM::stateId<Step3L_2 >(),
-	FSM::stateId<Step3R_P >(),
-	FSM::stateId<Step3R_1 >(),
-	FSM::stateId<Step3R_2 >(),
-	FSM::stateId<Unplanned>(),
-	FSM::stateId<Terminal >(),
-	FSM::stateId<Work_1   >(),
-	FSM::stateId<Work_2   >(),
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-void step1(FSM::Instance& machine, Logger& logger) {
+void step0(FSM::Instance& machine, Logger& logger) {
 	logger.assertSequence({
 		{ FSM::stateId<Apex      >(), Event::Type::ENTRY_GUARD },
 		{ FSM::stateId<Planned   >(), Event::Type::ENTRY_GUARD },
@@ -347,19 +319,19 @@ void step1(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Step1_1   >(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex      >(),
 		FSM::stateId<Planned   >(),
 		FSM::stateId<Step1_BT  >(),
 		FSM::stateId<Step1_1   >(),
 	});
 
-	assertResumable(machine, all, {});
+	assertResumable(machine, {});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void step2(FSM::Instance& machine, Logger& logger) {
+void step1(FSM::Instance& machine, Logger& logger) {
 	machine.update();
 
 	logger.assertSequence({
@@ -387,21 +359,21 @@ void step2(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Step1_2   >(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex      >(),
 		FSM::stateId<Planned   >(),
 		FSM::stateId<Step1_BT  >(),
 		FSM::stateId<Step1_2   >(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Step1_1   >(),
 	});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void step3(FSM::Instance& machine, Logger& logger) {
+void step2(FSM::Instance& machine, Logger& logger) {
 	machine.update();
 
 	logger.assertSequence({
@@ -430,21 +402,21 @@ void step3(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Step1_2   >(), Event::Type::REENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex      >(),
 		FSM::stateId<Planned   >(),
 		FSM::stateId<Step1_BT  >(),
 		FSM::stateId<Step1_2   >(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Step1_1   >(),
 	});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void step4(FSM::Instance& machine, Logger& logger) {
+void step3(FSM::Instance& machine, Logger& logger) {
 	machine.update();
 
 	logger.assertSequence({
@@ -475,21 +447,21 @@ void step4(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Step1_3   >(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex      >(),
 		FSM::stateId<Planned   >(),
 		FSM::stateId<Step1_BT  >(),
 		FSM::stateId<Step1_3   >(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Step1_2   >(),
 	});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void step5(FSM::Instance& machine, Logger& logger) {
+void step4(FSM::Instance& machine, Logger& logger) {
 	machine.update();
 
 	logger.assertSequence({
@@ -534,7 +506,7 @@ void step5(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Step2R_1  >(), Event::Type::ENTER  },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex      >(),
 		FSM::stateId<Planned   >(),
 		FSM::stateId<Hybrid    >(),
@@ -544,7 +516,7 @@ void step5(FSM::Instance& machine, Logger& logger) {
 		FSM::stateId<Step2R_1  >(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Step1_BT  >(),
 		FSM::stateId<Step1_3   >(),
 	});
@@ -552,7 +524,7 @@ void step5(FSM::Instance& machine, Logger& logger) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void step6(FSM::Instance& machine, Logger& logger) {
+void step5(FSM::Instance& machine, Logger& logger) {
 	machine.update();
 
 	logger.assertSequence({
@@ -600,7 +572,7 @@ void step6(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Step2R_2  >(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex      >(),
 		FSM::stateId<Planned   >(),
 		FSM::stateId<Hybrid    >(),
@@ -610,7 +582,7 @@ void step6(FSM::Instance& machine, Logger& logger) {
 		FSM::stateId<Step2R_2  >(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Step1_BT  >(),
 		FSM::stateId<Step1_3   >(),
 		FSM::stateId<Step2L_1  >(),
@@ -620,7 +592,7 @@ void step6(FSM::Instance& machine, Logger& logger) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void step7(FSM::Instance& machine, Logger& logger) {
+void step6(FSM::Instance& machine, Logger& logger) {
 	machine.update();
 
 	logger.assertSequence({
@@ -684,7 +656,7 @@ void step7(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Step3R_2  >(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex      >(),
 		FSM::stateId<Planned   >(),
 		FSM::stateId<Fork      >(),
@@ -694,7 +666,7 @@ void step7(FSM::Instance& machine, Logger& logger) {
 		FSM::stateId<Step3R_2  >(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Step1_3   >(),
 		FSM::stateId<Hybrid    >(),
 		FSM::stateId<Step2L_P  >(),
@@ -706,13 +678,13 @@ void step7(FSM::Instance& machine, Logger& logger) {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void step8(FSM::Instance& machine, Logger& logger) {
+void step7(FSM::Instance& machine, Logger& logger) {
 	machine.update();
 
 	logger.assertSequence({
 		{ FSM::stateId<Apex      >(), Event::Type::PRE_UPDATE },
 		{ FSM::stateId<Planned   >(), Event::Type::PRE_UPDATE },
-		{ FSM::stateId<Fork	  >(), Event::Type::PRE_UPDATE },
+		{ FSM::stateId<Fork      >(), Event::Type::PRE_UPDATE },
 		{ FSM::stateId<Step3L_P  >(), Event::Type::PRE_UPDATE },
 		{ FSM::stateId<Step3L_2  >(), Event::Type::PRE_UPDATE },
 		{ FSM::stateId<Step3R_P  >(), Event::Type::PRE_UPDATE },
@@ -760,7 +732,7 @@ void step8(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Terminal_R>(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex      >(),
 		FSM::stateId<Planned   >(),
 		FSM::stateId<Terminal  >(),
@@ -768,7 +740,7 @@ void step8(FSM::Instance& machine, Logger& logger) {
 		FSM::stateId<Terminal_R>(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Step1_3   >(),
 		FSM::stateId<Step2L_2  >(),
 		FSM::stateId<Step2R_2  >(),
@@ -788,6 +760,7 @@ TEST_CASE("FSM.Plans") {
 	{
 		FSM::Instance machine{&logger};
 
+		step0(machine, logger);
 		step1(machine, logger);
 		step2(machine, logger);
 		step3(machine, logger);
@@ -795,7 +768,6 @@ TEST_CASE("FSM.Plans") {
 		step5(machine, logger);
 		step6(machine, logger);
 		step7(machine, logger);
-		step8(machine, logger);
 	}
 
 	logger.assertSequence({

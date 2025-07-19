@@ -138,25 +138,10 @@ struct R
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-struct A
-	: FSM::StateT<AncestorT<A>>
-{};
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-struct B
-	: FSM::StateT<AncestorT<B>>
-{};
+struct A : FSM::StateT<AncestorT<A>> {};
+struct B : FSM::StateT<AncestorT<B>> {};
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<R>(),
-	FSM::stateId<A>(),
-	FSM::stateId<B>(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Ancestors") {
 	Events events;
@@ -176,11 +161,11 @@ TEST_CASE("FSM.Ancestors") {
 			{ FSM::stateId<B>(), Event::Type::ENTER },
 		});
 
-		assertActive(machine, all, {
+		assertActive(machine, {
 			FSM::stateId<R>(),
 			FSM::stateId<B>(),
 		});
-		assertResumable(machine, all, {});
+		assertResumable(machine, {});
 
 		machine.update();
 		assertSequence(events, {

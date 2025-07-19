@@ -350,7 +350,7 @@ void
 C_<TN_, TA_, SG_, TH_, TS_...>::deepForwardActive(Control& control,
 												  const Request request) noexcept
 {
-	HFSM2_ASSERT(control._core.registry.isActive(HEAD_ID));
+	HFSM2_ASSERT(HEAD_ID == ROOT_ID || control._core.registry.isActive(HEAD_ID));
 
 	const Prong requested = compoRequested(control);
 

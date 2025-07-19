@@ -5,6 +5,17 @@ namespace detail {
 
 template <typename TN_, typename TA_>
 HFSM2_CONSTEXPR(14)
+void
+S_<TN_, TA_, EmptyT<TA_>>::deepRegister(Registry& registry,
+										const Parent parent) noexcept
+{
+	registry.stateParents[STATE_ID] = parent;
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TN_, typename TA_>
+HFSM2_CONSTEXPR(14)
 Prong
 S_<TN_, TA_, EmptyT<TA_>>::wrapSelect(Control& HFSM2_IF_LOG_STATE_METHOD(control)) noexcept {
 	HFSM2_LOG_STATE_METHOD(&Empty::select,

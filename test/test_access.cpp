@@ -4,8 +4,6 @@
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 #include "tools.hpp"
 
-using namespace test_tools;
-
 namespace test_access {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,12 +74,12 @@ struct B_2_2 : FSM::State { const hfsm2::StateID id = FSM::stateId<B_2_2>(); };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 13, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  5, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 13, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  6, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  5, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 10, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  1, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 

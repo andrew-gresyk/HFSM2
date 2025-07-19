@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(hfsm2 VERSION 2.7.0 LANGUAGES CXX)
+project(hfsm2 VERSION 2.8.0 LANGUAGES CXX)
 
 # Create an interface library (header-only)
 add_library(${PROJECT_NAME} INTERFACE)

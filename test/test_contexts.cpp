@@ -3,8 +3,6 @@
 
 #include "tools.hpp"
 
-using namespace test_tools;
-
 namespace test_contexts {
 
 //------------------------------------------------------------------------------

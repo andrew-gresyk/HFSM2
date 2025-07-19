@@ -82,31 +82,14 @@ struct O2_C2_S2	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	  ==  5, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	  ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
-static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "ACTIVE_BITS");
-static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "RESUMABLE_BITS");
-
-////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<C1      >(),
-	FSM::stateId<C1_S1   >(),
-	FSM::stateId<C1_C2   >(),
-	FSM::stateId<C1_C2_S1>(),
-	FSM::stateId<C1_C2_S2>(),
-	FSM::stateId<O2      >(),
-	FSM::stateId<O2_C1   >(),
-	FSM::stateId<O2_C1_S1>(),
-	FSM::stateId<O2_C1_S2>(),
-	FSM::stateId<O2_C2   >(),
-	FSM::stateId<O2_C2_S1>(),
-	FSM::stateId<O2_C2_S2>(),
-};
+static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "");
+static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	  ==  5, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	  ==  1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "");
+static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "");
+static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "");
 
 }
 
@@ -176,44 +159,27 @@ struct O2_C2_S2	: FSM::State {};
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	  ==  5, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	  ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "ORTHO_UNITS");
-static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "ACTIVE_BITS");
-static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "RESUMABLE_BITS");
-
-//------------------------------------------------------------------------------
-
-const Types all = {
-	FSM::stateId<C1      >(),
-	FSM::stateId<C1_S1   >(),
-	FSM::stateId<C1_C2   >(),
-	FSM::stateId<C1_C2_S1>(),
-	FSM::stateId<C1_C2_S2>(),
-	FSM::stateId<O2      >(),
-	FSM::stateId<O2_C1   >(),
-	FSM::stateId<O2_C1_S1>(),
-	FSM::stateId<O2_C1_S2>(),
-	FSM::stateId<O2_C2   >(),
-	FSM::stateId<O2_C2_S1>(),
-	FSM::stateId<O2_C2_S2>(),
-};
+static_assert(FSM::Instance::Info::STATE_COUNT	  == 13, "");
+static_assert(FSM::Instance::Info::REGION_COUNT	  ==  6, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	  ==  5, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS	  == 10, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	  ==  1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS	  ==  1, "");
+static_assert(FSM::Instance::Info::ACTIVE_BITS	  ==  3, "");
+static_assert(FSM::Instance::Info::RESUMABLE_BITS == 10, "");
 
 }
 
 //------------------------------------------------------------------------------
 
-static_assert(server::FSM::Instance::Info::STATE_COUNT	  == client::FSM::Instance::Info::STATE_COUNT	, "STATE_COUNT");
-static_assert(server::FSM::Instance::Info::REGION_COUNT	  == client::FSM::Instance::Info::REGION_COUNT	, "REGION_COUNT");
-static_assert(server::FSM::Instance::Info::COMPO_COUNT	  == client::FSM::Instance::Info::COMPO_COUNT	, "COMPO_COUNT");
-static_assert(server::FSM::Instance::Info::COMPO_PRONGS	  == client::FSM::Instance::Info::COMPO_PRONGS	, "COMPO_PRONGS");
-static_assert(server::FSM::Instance::Info::ORTHO_COUNT	  == client::FSM::Instance::Info::ORTHO_COUNT	, "ORTHO_COUNT");
-static_assert(server::FSM::Instance::Info::ORTHO_UNITS	  == client::FSM::Instance::Info::ORTHO_UNITS	, "ORTHO_UNITS");
-static_assert(server::FSM::Instance::Info::ACTIVE_BITS	  == client::FSM::Instance::Info::ACTIVE_BITS	, "ACTIVE_BITS");
-static_assert(server::FSM::Instance::Info::RESUMABLE_BITS == client::FSM::Instance::Info::RESUMABLE_BITS, "RESUMABLE_BITS");
+static_assert(server::FSM::Instance::Info::STATE_COUNT	  == client::FSM::Instance::Info::STATE_COUNT	, "");
+static_assert(server::FSM::Instance::Info::REGION_COUNT	  == client::FSM::Instance::Info::REGION_COUNT	, "");
+static_assert(server::FSM::Instance::Info::COMPO_COUNT	  == client::FSM::Instance::Info::COMPO_COUNT	, "");
+static_assert(server::FSM::Instance::Info::COMPO_PRONGS	  == client::FSM::Instance::Info::COMPO_PRONGS	, "");
+static_assert(server::FSM::Instance::Info::ORTHO_COUNT	  == client::FSM::Instance::Info::ORTHO_COUNT	, "");
+static_assert(server::FSM::Instance::Info::ORTHO_UNITS	  == client::FSM::Instance::Info::ORTHO_UNITS	, "");
+static_assert(server::FSM::Instance::Info::ACTIVE_BITS	  == client::FSM::Instance::Info::ACTIVE_BITS	, "");
+static_assert(server::FSM::Instance::Info::RESUMABLE_BITS == client::FSM::Instance::Info::RESUMABLE_BITS, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -227,11 +193,11 @@ void step1(server::FSM::Instance& authority,
 
 	logger.assertSequence({});
 
-	assertActive(authority,  server::all, {});
-	assertActive(replicated, client::all, {});
+	assertActive(authority,  {});
+	assertActive(replicated, {});
 
-	assertResumable(authority,  server::all, {});
-	assertResumable(replicated, client::all, {});
+	assertResumable(authority,  {});
+	assertResumable(replicated, {});
 }
 
 //------------------------------------------------------------------------------
@@ -247,23 +213,25 @@ void step2(server::FSM::Instance& authority,
 	replicated.load(serverBuffer);
 
 	logger.assertSequence({
-		{ hfsm2::StateID{0},						Event::Type::ENTER },
+		{ hfsm2::ROOT_ID                          , Event::Type::ENTER },
 		{ client::FSM::stateId<client::C1      >(),	Event::Type::ENTER },
 		{ client::FSM::stateId<client::C1_S1   >(),	Event::Type::ENTER },
 	});
 
-	assertActive(authority,  server::all, {
+	assertActive(authority,  {
+		hfsm2::ROOT_ID                          ,
 		server::FSM::stateId<server::C1      >(),
 		server::FSM::stateId<server::C1_S1   >(),
 	});
 
-	assertActive(replicated, client::all, {
+	assertActive(replicated, {
+		hfsm2::ROOT_ID                          ,
 		client::FSM::stateId<client::C1      >(),
 		client::FSM::stateId<client::C1_S1   >(),
 	});
 
-	assertResumable(authority,  server::all, {});
-	assertResumable(replicated, client::all, {});
+	assertResumable(authority,  {});
+	assertResumable(replicated, {});
 }
 
 //------------------------------------------------------------------------------
@@ -304,7 +272,8 @@ void step4(server::FSM::Instance& authority,
 		{ client::FSM::stateId<client::O2_C2_S1>(),	Event::Type::ENTER },
 	});
 
-	assertActive(authority,  server::all, {
+	assertActive(authority,  {
+		hfsm2::ROOT_ID                          ,
 		server::FSM::stateId<server::O2      >(),
 		server::FSM::stateId<server::O2_C1   >(),
 		server::FSM::stateId<server::O2_C1_S2>(),
@@ -312,7 +281,8 @@ void step4(server::FSM::Instance& authority,
 		server::FSM::stateId<server::O2_C2_S1>(),
 	});
 
-	assertActive(replicated, client::all, {
+	assertActive(replicated, {
+		hfsm2::ROOT_ID                          ,
 		client::FSM::stateId<client::O2      >(),
 		client::FSM::stateId<client::O2_C1   >(),
 		client::FSM::stateId<client::O2_C1_S2>(),
@@ -320,12 +290,12 @@ void step4(server::FSM::Instance& authority,
 		client::FSM::stateId<client::O2_C2_S1>(),
 	});
 
-	assertResumable(authority,  server::all, {
+	assertResumable(authority,  {
 		server::FSM::stateId<server::C1      >(),
 		server::FSM::stateId<server::C1_S1   >(),
 	});
 
-	assertResumable(replicated, client::all, {
+	assertResumable(replicated, {
 		client::FSM::stateId<client::C1      >(),
 		client::FSM::stateId<client::C1_S1   >(),
 	});
@@ -349,14 +319,14 @@ void step5(server::FSM::Instance& authority,
 		{ client::FSM::stateId<client::O2_C2_S1>(),	Event::Type::EXIT },
 		{ client::FSM::stateId<client::O2_C2   >(),	Event::Type::EXIT },
 		{ client::FSM::stateId<client::O2      >(),	Event::Type::EXIT },
-		{ hfsm2::StateID{0},						Event::Type::EXIT },
+		{ hfsm2::ROOT_ID                          , Event::Type::EXIT },
 	});
 
-	assertActive(authority,  server::all, {});
-	assertActive(replicated, client::all, {});
+	assertActive(authority,  {});
+	assertActive(replicated, {});
 
-	assertResumable(authority,  server::all, {});
-	assertResumable(replicated, client::all, {});
+	assertResumable(authority,  {});
+	assertResumable(replicated, {});
 }
 
 //------------------------------------------------------------------------------

@@ -74,17 +74,6 @@ struct D2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const Types all = {
-	FSM::stateId<C1>(),
-	FSM::stateId<I1>(),
-	FSM::stateId<D1>(),
-	FSM::stateId<C2>(),
-	FSM::stateId<I2>(),
-	FSM::stateId<D2>(),
-};
-
-//------------------------------------------------------------------------------
-
 TEST_CASE("FSM.Prepend Plans") {
 	Logger logger;
 
@@ -93,7 +82,8 @@ TEST_CASE("FSM.Prepend Plans") {
 
 		logger.assertSequence({});
 
-		assertActive(machine, all, {
+		assertActive(machine, {
+			FSM::stateId<R >(),
 			FSM::stateId<C1>(),
 			FSM::stateId<I1>(),
 			FSM::stateId<C2>(),
@@ -132,7 +122,8 @@ TEST_CASE("FSM.Prepend Plans") {
 			machine.		 changeTo<D1>();
 			machine.immediateChangeTo<D2>();
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				FSM::stateId<R >(),
 				FSM::stateId<C1>(),
 				FSM::stateId<D1>(),
 				FSM::stateId<C2>(),

@@ -63,27 +63,14 @@ struct OC_2	: FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 9, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  == 4, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 == 3, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 6, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 == 1, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   == 1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 9, "");
+static_assert(FSM::Instance::Info::REGION_COUNT == 4, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	== 3, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 6, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	== 1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  == 1, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<I   >(),
-	FSM::stateId<O   >(),
-	FSM::stateId<OR  >(),
-	FSM::stateId<OR_1>(),
-	FSM::stateId<OR_2>(),
-	FSM::stateId<OC  >(),
-	FSM::stateId<OC_1>(),
-	FSM::stateId<OC_2>(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Resumable") {
 	Logger logger;
@@ -101,12 +88,12 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<I   >(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex>(),
 				FSM::stateId<I   >(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -134,7 +121,8 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<OC_2>(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				FSM::stateId<Apex>(),
 				FSM::stateId<O   >(),
 				FSM::stateId<OR  >(),
 				FSM::stateId<OR_2>(),
@@ -142,7 +130,7 @@ TEST_CASE("FSM.Resumable") {
 				FSM::stateId<OC_2>(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<I   >(),
 			});
 		}
@@ -170,12 +158,12 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<I   >(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex>(),
 				FSM::stateId<I   >(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<O   >(),
 				FSM::stateId<OR  >(),
 				FSM::stateId<OR_2>(),
@@ -208,7 +196,8 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<OC_1>(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				FSM::stateId<Apex>(),
 				FSM::stateId<O   >(),
 				FSM::stateId<OR  >(),
 				FSM::stateId<OR_2>(),
@@ -216,7 +205,7 @@ TEST_CASE("FSM.Resumable") {
 				FSM::stateId<OC_1>(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<I   >(),
 				FSM::stateId<OC_2>(),
 			});
@@ -246,7 +235,8 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<OC_1>(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				FSM::stateId<Apex>(),
 				FSM::stateId<O   >(),
 				FSM::stateId<OR  >(),
 				FSM::stateId<OR_1>(),
@@ -254,7 +244,7 @@ TEST_CASE("FSM.Resumable") {
 				FSM::stateId<OC_1>(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<I   >(),
 				FSM::stateId<OR_2>(),
 				FSM::stateId<OC_2>(),
@@ -285,7 +275,8 @@ TEST_CASE("FSM.Resumable") {
 				{ FSM::stateId<OC_2>(),	Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
+				FSM::stateId<Apex>(),
 				FSM::stateId<O   >(),
 				FSM::stateId<OR  >(),
 				FSM::stateId<OR_2>(),
@@ -293,7 +284,7 @@ TEST_CASE("FSM.Resumable") {
 				FSM::stateId<OC_2>(),
 			});
 
-			assertResumable(machine, all, {
+			assertResumable(machine, {
 				FSM::stateId<I   >(),
 			});
 		}

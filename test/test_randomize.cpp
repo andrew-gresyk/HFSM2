@@ -95,33 +95,14 @@ struct C_100 : FSM::State { Rank rank(const Control&) {return 1; } Utility utili
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 15, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  4, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  3, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 12, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 15, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  4, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  3, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 12, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  1, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<I    >(),
-	FSM::stateId<O    >(),
-	FSM::stateId<N    >(),
-	FSM::stateId<N_000>(),
-	FSM::stateId<N_025>(),
-	FSM::stateId<N_050>(),
-	FSM::stateId<N_075>(),
-	FSM::stateId<N_100>(),
-	FSM::stateId<C    >(),
-	FSM::stateId<C_000>(),
-	FSM::stateId<C_025>(),
-	FSM::stateId<C_050>(),
-	FSM::stateId<C_075>(),
-	FSM::stateId<C_100>(),
-};
-
-//------------------------------------------------------------------------------
 
 TEST_CASE("FSM.Randomize") {
 	hfsm2::FloatRandom generator{0};
@@ -140,12 +121,12 @@ TEST_CASE("FSM.Randomize") {
 				{ FSM::stateId<I    >(), Event::Type::ENTER },
 			});
 
-			assertActive(machine, all, {
+			assertActive(machine, {
 				FSM::stateId<Apex >(),
 				FSM::stateId<I    >(),
 			});
 
-			assertResumable(machine, all, {});
+			assertResumable(machine, {});
 		}
 
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -184,7 +165,7 @@ TEST_CASE("FSM.Randomize") {
 					{ FSM::stateId<C_000>(), Event::Type::ENTER },
 				});
 
-				assertActive(machine, all, {
+				assertActive(machine, {
 					FSM::stateId<Apex >(),
 					FSM::stateId<O    >(),
 					FSM::stateId<N    >(),
@@ -193,7 +174,7 @@ TEST_CASE("FSM.Randomize") {
 					FSM::stateId<C_000>(),
 				});
 
-				assertResumable(machine, all, {
+				assertResumable(machine, {
 					FSM::stateId<I    >(),
 				});
 			}
@@ -223,7 +204,7 @@ TEST_CASE("FSM.Randomize") {
 					{ FSM::stateId<C_000>(), Event::Type::ENTER },
 				});
 
-				assertActive(machine, all, {
+				assertActive(machine, {
 					FSM::stateId<Apex >(),
 					FSM::stateId<O    >(),
 					FSM::stateId<N    >(),
@@ -232,7 +213,7 @@ TEST_CASE("FSM.Randomize") {
 					FSM::stateId<C_000>(),
 				});
 
-				assertResumable(machine, all, {
+				assertResumable(machine, {
 					FSM::stateId<I    >(),
 				});
 			}
@@ -288,7 +269,7 @@ TEST_CASE("FSM.Randomize") {
 					{ FSM::stateId<C_025>(), Event::Type::ENTER },
 				});
 
-				assertActive(machine, all, {
+				assertActive(machine, {
 					FSM::stateId<Apex >(),
 					FSM::stateId<O    >(),
 					FSM::stateId<N    >(),
@@ -342,7 +323,7 @@ TEST_CASE("FSM.Randomize") {
 					{ FSM::stateId<C_075>(), Event::Type::ENTER },
 				});
 
-				assertActive(machine, all, {
+				assertActive(machine, {
 					FSM::stateId<Apex >(),
 					FSM::stateId<O    >(),
 					FSM::stateId<N    >(),
@@ -353,7 +334,7 @@ TEST_CASE("FSM.Randomize") {
 
 			#endif
 
-				assertResumable(machine, all, {
+				assertResumable(machine, {
 					FSM::stateId<I    >(),
 				});
 			}

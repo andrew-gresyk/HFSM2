@@ -139,46 +139,14 @@ struct OU_3 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT   == 28, "STATE_COUNT");
-static_assert(FSM::Instance::Info::REGION_COUNT  ==  9, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT	 ==  8, "COMPO_COUNT");
-static_assert(FSM::Instance::Info::COMPO_PRONGS  == 24, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT	 ==  1, "ORTHO_COUNT");
-static_assert(FSM::Instance::Info::ORTHO_UNITS   ==  1, "ORTHO_UNITS");
+static_assert(FSM::Instance::Info::STATE_COUNT  == 28, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  9, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT	==  8, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS == 24, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT	==  1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  1, "");
 
 ////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM::stateId<I   >(),
-	FSM::stateId<F   >(),
-	FSM::stateId<C   >(),
-	FSM::stateId<C_1 >(),
-	FSM::stateId<C_2 >(),
-	FSM::stateId<C_3 >(),
-	FSM::stateId<R   >(),
-	FSM::stateId<R_1 >(),
-	FSM::stateId<R_2 >(),
-	FSM::stateId<R_3 >(),
-	FSM::stateId<U   >(),
-	FSM::stateId<U_1 >(),
-	FSM::stateId<U_2 >(),
-	FSM::stateId<U_3 >(),
-	FSM::stateId<O   >(),
-	FSM::stateId<OC  >(),
-	FSM::stateId<OC_1>(),
-	FSM::stateId<OC_2>(),
-	FSM::stateId<OC_3>(),
-	FSM::stateId<OR  >(),
-	FSM::stateId<OR_1>(),
-	FSM::stateId<OR_2>(),
-	FSM::stateId<OR_3>(),
-	FSM::stateId<OU  >(),
-	FSM::stateId<OU_1>(),
-	FSM::stateId<OU_2>(),
-	FSM::stateId<OU_3>(),
-};
-
-//------------------------------------------------------------------------------
 
 void step1(FSM::Instance& machine, Logger& logger) {
 	logger.assertSequence({
@@ -189,12 +157,12 @@ void step1(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<I   >(),	Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex>(),
 		FSM::stateId<I   >(),
 	});
 
-	assertResumable(machine, all, {});
+	assertResumable(machine, {});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -246,13 +214,14 @@ void step2(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<C_1 >(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
+		FSM::stateId<Apex>(),
 		FSM::stateId<F   >(),
 		FSM::stateId<C   >(),
 		FSM::stateId<C_1 >(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<I   >(),
 	});
 }
@@ -272,7 +241,7 @@ TEST_CASE("FSM.Utility Regions") {
 		{ FSM::stateId<C_1 >(),	 Event::Type::EXIT },
 		{ FSM::stateId<C   >(),	 Event::Type::EXIT },
 		{ FSM::stateId<F   >(),	 Event::Type::EXIT },
-		{ hfsm2::StateID{0},	 Event::Type::EXIT },
+		{ FSM::stateId<Apex>(),	 Event::Type::EXIT },
 	});
 }
 

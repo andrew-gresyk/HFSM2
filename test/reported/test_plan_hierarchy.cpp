@@ -7,7 +7,7 @@
 
 #define HFSM2_ENABLE_PLANS
 #define HFSM2_ENABLE_VERBOSE_DEBUG_LOG
-#include "tools.hpp"
+#include "../tools.hpp"
 
 using namespace test_tools;
 
@@ -117,26 +117,12 @@ struct Top_4  : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static_assert(FSM::Instance::Info::STATE_COUNT  == 12, "STATE_COUNT" );
-static_assert(FSM::Instance::Info::REGION_COUNT ==  5, "REGION_COUNT");
-static_assert(FSM::Instance::Info::COMPO_COUNT  ==  4, "COMPO_COUNT" );
-static_assert(FSM::Instance::Info::COMPO_PRONGS ==  9, "COMPO_PRONGS");
-static_assert(FSM::Instance::Info::ORTHO_COUNT  ==  1, "ORTHO_COUNT" );
-static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  1, "ORTHO_UNITS" );
-
-////////////////////////////////////////////////////////////////////////////////
-
-const Types all = {
-	FSM:: stateId<Top_1 >(),
-	FSM:: stateId<Bot1_1>(),
-	FSM:: stateId<Bot1_2>(),
-	FSM:: stateId<Top_2 >(),
-	FSM:: stateId<Bot2_1>(),
-	FSM:: stateId<Bot2_2>(),
-	FSM:: stateId<Top_3 >(),
-	FSM:: stateId<Bot3_1>(),
-	FSM:: stateId<Bot3_2>(),
-};
+static_assert(FSM::Instance::Info::STATE_COUNT  == 12, "");
+static_assert(FSM::Instance::Info::REGION_COUNT ==  5, "");
+static_assert(FSM::Instance::Info::COMPO_COUNT  ==  4, "");
+static_assert(FSM::Instance::Info::COMPO_PRONGS ==  9, "");
+static_assert(FSM::Instance::Info::ORTHO_COUNT  ==  1, "");
+static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  1, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -163,13 +149,13 @@ void step0(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Bot1_1>(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex  >(),
 		FSM::stateId<Top_1 >(),
 		FSM::stateId<Bot1_1>(),
 	});
 
-	assertResumable(machine, all, {});
+	assertResumable(machine, {});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -197,16 +183,15 @@ void step1(FSM::Instance& machine, Logger& logger) {
 
 		{ FSM::stateId<Apex  >(), Event::Type::PLAN_FAILURE },
 		{ FSM::stateId<Apex  >(), Event::Type::PLAN_FAILED },
-		{ FSM::stateId<Apex  >(), Event::Type::TASK_FAILURE, FSM::stateId<Apex  >() },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex  >(),
 		FSM::stateId<Top_1 >(),
 		FSM::stateId<Bot1_1>(),
 	});
 
-	assertResumable(machine, all, {});
+	assertResumable(machine, {});
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -238,13 +223,13 @@ void step2(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Bot1_2>(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex  >(),
 		FSM::stateId<Top_1 >(),
 		FSM::stateId<Bot1_2>(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Bot1_1>(),
 	});
 }
@@ -289,7 +274,7 @@ void step3(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Bot3_1>(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex  >(),
 		FSM::stateId<Fork  >(),
 		FSM::stateId<Top_2 >(),
@@ -298,7 +283,7 @@ void step3(FSM::Instance& machine, Logger& logger) {
 		FSM::stateId<Bot3_1>(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Top_1 >(),
 		FSM::stateId<Bot1_2>(),
 	});
@@ -344,10 +329,9 @@ void step4(FSM::Instance& machine, Logger& logger) {
 
 		{ FSM::stateId<Apex  >(), Event::Type::PLAN_FAILURE },
 		{ FSM::stateId<Apex  >(), Event::Type::PLAN_FAILED },
-		{ FSM::stateId<Apex  >(), Event::Type::TASK_FAILURE, FSM::stateId<Apex  >() },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex  >(),
 		FSM::stateId<Fork  >(),
 		FSM::stateId<Top_2 >(),
@@ -356,7 +340,7 @@ void step4(FSM::Instance& machine, Logger& logger) {
 		FSM::stateId<Bot3_1>(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Top_1 >(),
 		FSM::stateId<Bot1_2>(),
 	});
@@ -406,7 +390,7 @@ void step5(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Bot3_2>(), Event::Type::ENTER },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex  >(),
 		FSM::stateId<Fork  >(),
 		FSM::stateId<Top_2 >(),
@@ -415,7 +399,7 @@ void step5(FSM::Instance& machine, Logger& logger) {
 		FSM::stateId<Bot3_2>(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Top_1 >(),
 		FSM::stateId<Bot1_2>(),
 		FSM::stateId<Bot2_1>(),
@@ -462,7 +446,7 @@ void step6(FSM::Instance& machine, Logger& logger) {
 		{ FSM::stateId<Top_3 >(), Event::Type::TASK_SUCCESS, FSM::stateId<Top_3 >() },
 	});
 
-	assertActive(machine, all, {
+	assertActive(machine, {
 		FSM::stateId<Apex  >(),
 		FSM::stateId<Fork  >(),
 		FSM::stateId<Top_2 >(),
@@ -471,7 +455,7 @@ void step6(FSM::Instance& machine, Logger& logger) {
 		FSM::stateId<Bot3_2>(),
 	});
 
-	assertResumable(machine, all, {
+	assertResumable(machine, {
 		FSM::stateId<Top_1 >(),
 		FSM::stateId<Bot1_2>(),
 		FSM::stateId<Bot2_1>(),

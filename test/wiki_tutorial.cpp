@@ -21,7 +21,7 @@ struct Context {
 // (Optional) Define type config:
 using Config = hfsm2::Config::ContextT<Context>;
 
-// (Optional, recommended) Definehfsm2::Machine for convenience:
+// (Optional, recommended) Define hfsm2::Machine for convenience:
 using M = hfsm2::MachineT<Config>;
 
 //------------------------------------------------------------------------------

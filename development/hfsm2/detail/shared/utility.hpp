@@ -26,13 +26,14 @@ static constexpr Prong		INVALID_PRONG		= INVALID_SHORT;
 using RegionID	 = Short;
 static constexpr RegionID	INVALID_REGION_ID	= INVALID_SHORT;
 
-using ForkID	 = int8_t;
-static constexpr ForkID		INVALID_FORK_ID		= INT8_MIN;
+using ForkID	 = int16_t;
+static constexpr ForkID		INVALID_FORK_ID		= INT16_MIN;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 using StateID	 = Long;
 static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;
+static constexpr StateID	ROOT_ID				= 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 
