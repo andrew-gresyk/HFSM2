@@ -100,7 +100,7 @@ jobs:
         BUILD_CONFIG: [ Release, Debug ]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Install GCC on ubuntu
       if: |
