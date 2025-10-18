@@ -7,7 +7,7 @@ namespace test_tools {
 
 template <typename TConfig>
 void
-LoggerT<TConfig>::recordMethod(const Context& /*context*/,
+LoggerT<TConfig>::recordMethod(const Context& UNUSED(context),
 							   const StateID origin,
 							   const Method method)
 {
@@ -248,7 +248,7 @@ LoggerT<TConfig>::recordRandomResolution(const Context& UNUSED(context),
 template <typename TConfig>
 void
 LoggerT<TConfig>::assertSequence(const Events& reference) {
-	const auto count = std::max(history.size(), reference.size());
+	const auto count = hfsm2::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {
 		REQUIRE(i < history  .size());

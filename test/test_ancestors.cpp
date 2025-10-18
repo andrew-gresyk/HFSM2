@@ -55,7 +55,7 @@ void
 assertSequence(Events& history,
 			   const Events& reference)
 {
-	const auto count = std::max(history.size(), reference.size());
+	const auto count = hfsm2::max(history.size(), reference.size());
 
 	for (unsigned i = 0; i < count; ++i) {
 		REQUIRE(i < history.size());

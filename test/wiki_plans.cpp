@@ -171,8 +171,7 @@ TEST_CASE("Wiki.Plans.Detailed Demo") {
         : FSM::State
     {
         void update(FullControl& control) {
-            // the task can also be marked successful
-            // from its sub-state one level down
+            // succeed parent region
             control.succeed<OrthogonalTask>();
         }
     };
