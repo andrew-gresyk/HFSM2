@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.8.0 (2025-07-20)
+// 2.8.1 (2025-10-18)
 //
 // Created by Andrew Gresyk
 //
@@ -33,7 +33,7 @@
 
 #define HFSM2_VERSION_MAJOR 2
 #define HFSM2_VERSION_MINOR 8
-#define HFSM2_VERSION_PATCH 0
+#define HFSM2_VERSION_PATCH 1
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -391,9 +391,6 @@ struct BottomUp;
 using Short		 = uint8_t;
 static constexpr Short		INVALID_SHORT		= UINT8_MAX;
 
-using Long		 = uint16_t;
-static constexpr Long		INVALID_LONG		= UINT16_MAX;
-
 using Prong		 = Short;
 static constexpr Prong		INVALID_PRONG		= INVALID_SHORT;
 
@@ -402,6 +399,9 @@ static constexpr RegionID	INVALID_REGION_ID	= INVALID_SHORT;
 
 using ForkID	 = int16_t;
 static constexpr ForkID		INVALID_FORK_ID		= INT16_MIN;
+
+using Long		 = uint16_t;
+static constexpr Long		INVALID_LONG		= UINT16_MAX;
 
 using StateID	 = Long;
 static constexpr StateID	INVALID_STATE_ID	= INVALID_LONG;
@@ -8318,6 +8318,9 @@ TaskStatus
 S_<TN_, TA_, TH_>::deepPreReact(EventControl& control,
 								const TEvent& event) noexcept
 {
+	// If you see `error: 'static_cast': cannot convert from `...` to
+	//   `void (__cdecl Class::* )(const TEvent &,_::EventControlT<> &)`
+	//   add `using FSM::State::preReact;` within state declaration
 	auto method = static_cast<void (Head::*)(const TEvent&, EventControl&)>(&Head::preReact);
 
 	HFSM2_LOG_STATE_METHOD(method,
@@ -8338,6 +8341,9 @@ TaskStatus
 S_<TN_, TA_, TH_>::deepReact(EventControl& control,
 							 const TEvent& event) noexcept
 {
+	// If you see `error: 'static_cast': cannot convert from `...` to
+	//   `void (__cdecl Class::* )(const TEvent &,_::EventControlT<> &)`
+	//   add `using FSM::State::react;` within state declaration
 	auto method = static_cast<void (Head::*)(const TEvent&, EventControl&)>(&Head::react);
 
 	HFSM2_LOG_STATE_METHOD(method,
@@ -8358,6 +8364,9 @@ TaskStatus
 S_<TN_, TA_, TH_>::deepPostReact(EventControl& control,
 								 const TEvent& event) noexcept
 {
+	// If you see `error: 'static_cast': cannot convert from `...` to
+	//   `void (__cdecl Class::* )(const TEvent &,_::EventControlT<> &)`
+	//   add `using FSM::State::postReact;` within state declaration
 	auto method = static_cast<void (Head::*)(const TEvent&, EventControl&)>(&Head::postReact);
 
 	HFSM2_LOG_STATE_METHOD(method,
@@ -8378,6 +8387,9 @@ void
 S_<TN_, TA_, TH_>::deepQuery(ConstControl& control,
 							 TEvent&  event) const noexcept
 {
+	// If you see `error: 'static_cast': cannot convert from `...` to
+	//   `void (__cdecl Class::* )(const TEvent &,_::ConstControlT<> &)`
+	//   add `using FSM::State::query;` within state declaration
 	auto method = static_cast<void (Head::*)(TEvent&, ConstControl&) const>(&Head::query);
 
 	HFSM2_LOG_STATE_METHOD(method,

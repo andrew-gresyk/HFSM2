@@ -10,6 +10,8 @@
 // Include HFSM2 header:
 #include <hfsm2/machine.hpp>
 
+namespace wiki_tutorial {
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Define interface class between the state machine and its host
@@ -19,7 +21,8 @@ struct Context {
 };
 
 // (Optional) Define type config:
-using Config = hfsm2::Config::ContextT<Context>;
+using Config = hfsm2::Config
+                    ::ContextT<Context&>;
 
 // (Optional, recommended) Define hfsm2::Machine for convenience:
 using M = hfsm2::MachineT<Config>;
@@ -58,6 +61,8 @@ struct Off
         if (control.context().powerOn)                         // access shared data
             control.changeTo<On>();                            // initiate a transition into 'On' region
     }
+
+    void exit(PlanControl& /*control*/) {}                     // called on state deactivation
 };
 
 struct On
@@ -139,3 +144,5 @@ TEST_CASE("Wiki.Tutorial") {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+}

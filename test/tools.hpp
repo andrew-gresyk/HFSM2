@@ -9,7 +9,6 @@
 
 #include <doctest/doctest.h>
 
-#include <algorithm>
 #include <vector>
 
 #include <assert.h>
