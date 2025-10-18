@@ -4,6 +4,8 @@
 #define HFSM2_ENABLE_UTILITY_THEORY
 #include "../tools.hpp"
 
+#include <stdlib.h>
+
 namespace test_random {
 
 ////////////////////////////////////////////////////////////////////////////////
