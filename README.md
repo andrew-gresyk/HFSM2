@@ -97,7 +97,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 - [Kevin Greene](https://github.com/kgreenek)
 - [Kjeld Mathias Petersen](https://github.com/DonMathi)
 - [Lau Bakman](https://github.com/lbakman)
-- Mehdi Houshmand
+- [Mehdi Houshmand](https://github.com/Mehdih7)
 - [mrcmry](https://github.com/mrcmry)
 - [Phil Nash](https://github.com/philsquared)
 - [Romain Cheminade](https://github.com/romaincheminade)
