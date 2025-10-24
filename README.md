@@ -91,7 +91,7 @@ Header-only heriarchical FSM framework in C++11, with fully statically-defined s
 ## Special Thanks
 
 - [alexandrosk0](https://github.com/alexandrosk0)
-- [Casey Sanchez](https://github.com/Tannz0rz)
+- [Casey Sanchez](https://github.com/CaseySanchez)
 - [DJuego](https://github.com/DJuego)
 - [Jan Aleksandrov](https://github.com/Niproblema)
 - [Kevin Greene](https://github.com/kgreenek)
