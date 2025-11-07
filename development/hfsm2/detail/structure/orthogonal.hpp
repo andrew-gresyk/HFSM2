@@ -190,8 +190,6 @@ struct HFSM2_EMPTY_BASES O_
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
-	static constexpr Long NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
-
 	HFSM2_CONSTEXPR(14)	void deepGetNames(const Long parent,
 										  const RegionType region,
 										  const Short depth,

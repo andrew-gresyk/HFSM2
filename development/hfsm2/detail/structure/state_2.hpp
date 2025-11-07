@@ -163,8 +163,6 @@ struct S_<TIndices, TArgs, EmptyT<TArgs>>
 
 	HFSM2_IF_TYPEINDEX(const std::type_index TYPE = typeid(None));
 
-	static constexpr Long NAME_COUNT = 0;
-
 #endif
 
 #if HFSM2_LOG_INTERFACE_AVAILABLE()

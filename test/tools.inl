@@ -326,10 +326,17 @@ assertStructure(const TStructure& structure,
 			i < reference.size())
 		{
 			REQUIRE(structure[i].isActive == reference[i].isActive);
-			REQUIRE(wcscmp(structure[i].prefix, reference[i].prefix) == 0);
+
+			if (structure[i].prefix == nullptr)
+				REQUIRE(reference[i].prefix == nullptr);
+			else
+				REQUIRE(wcscmp(structure[i].prefix, reference[i].prefix) == 0);
 
 		#ifdef _MSC_VER
-			REQUIRE(strcmp(structure[i].name,   reference[i].name)	 == 0);
+			if (structure[i].name   == nullptr)
+				REQUIRE(reference[i].name   == nullptr);
+			else
+				REQUIRE(strcmp(structure[i].name  , reference[i].name)	 == 0);
 		#endif
 		}
 	}

@@ -157,8 +157,6 @@ struct HFSM2_EMPTY_BASES S_
 
 	HFSM2_IF_TYPEINDEX(const std::type_index TYPE = typeid(Head));
 
-	static constexpr Long NAME_COUNT = 1;
-
 #endif
 
 #if HFSM2_LOG_INTERFACE_AVAILABLE()

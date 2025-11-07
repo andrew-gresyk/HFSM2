@@ -1,5 +1,5 @@
 ﻿// HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.8.1 (2025-10-18)
+// 2.9.0 (2025-11-07)
 //
 // Created by Andrew Gresyk
 //
@@ -32,8 +32,8 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 8
-#define HFSM2_VERSION_PATCH 1
+#define HFSM2_VERSION_MINOR 9
+#define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -2735,9 +2735,18 @@ using LoggerInterface = LoggerInterfaceT<>;
 namespace hfsm2 {
 
 struct StructureEntry final {
+	HFSM2_CONSTEXPR(11)
+	StructureEntry(const bool isActive_ = false,
+				   const wchar_t* const prefix_ = nullptr,
+				   const char   * const name_   = nullptr)				noexcept
+		: isActive{isActive_}
+		, prefix  {prefix_  }
+		, name    {name_    }
+	{}
+
 	bool isActive;
 	const wchar_t* prefix;
-	const char* name;
+	const char   * name;
 };
 
 namespace detail {
@@ -8122,8 +8131,6 @@ struct HFSM2_EMPTY_BASES S_
 
 	HFSM2_IF_TYPEINDEX(const std::type_index TYPE = typeid(Head));
 
-	static constexpr Long NAME_COUNT = 1;
-
 #endif
 
 #if HFSM2_LOG_INTERFACE_AVAILABLE()
@@ -8774,8 +8781,6 @@ struct S_<TIndices, TArgs, EmptyT<TArgs>>
 #if HFSM2_DEBUG_STATE_TYPE_AVAILABLE() || HFSM2_STRUCTURE_REPORT_AVAILABLE() || HFSM2_LOG_INTERFACE_AVAILABLE()
 
 	HFSM2_IF_TYPEINDEX(const std::type_index TYPE = typeid(None));
-
-	static constexpr Long NAME_COUNT = 0;
 
 #endif
 
@@ -10276,8 +10281,6 @@ struct HFSM2_EMPTY_BASES CS_<
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
-	static constexpr Long NAME_COUNT = LHalf::NAME_COUNT + RHalf::NAME_COUNT;
-
 	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
 										  const RegionType region,
 										  const Short depth,
@@ -10957,8 +10960,6 @@ struct HFSM2_EMPTY_BASES CS_<
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
-
-	static constexpr Long NAME_COUNT = Single::NAME_COUNT;
 
 	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
 										  const RegionType region,
@@ -11686,8 +11687,6 @@ struct HFSM2_EMPTY_BASES C_
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
-
-	static constexpr Long NAME_COUNT = HeadState::NAME_COUNT + SubStates::NAME_COUNT;
 
 	HFSM2_CONSTEXPR(14)	void deepGetNames(const Long parent,
 										  const RegionType region,
@@ -12797,8 +12796,6 @@ struct HFSM2_EMPTY_BASES OS_<
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
-	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
-
 	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
 										  const Short depth,
 										  StructureStateInfos& stateInfos)	  const noexcept;
@@ -13326,8 +13323,6 @@ struct HFSM2_EMPTY_BASES OS_<
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
-	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT;
-
 	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
 										  const Short depth,
 										  StructureStateInfos& stateInfos)							  const noexcept;
@@ -13828,8 +13823,6 @@ struct HFSM2_EMPTY_BASES O_
 
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
-
-	static constexpr Long NAME_COUNT	 = HeadState::NAME_COUNT  + SubStates::NAME_COUNT;
 
 	HFSM2_CONSTEXPR(14)	void deepGetNames(const Long parent,
 										  const RegionType region,
@@ -14734,10 +14727,6 @@ public:
 	using ReadStream			= typename Args::ReadStream;
 #endif
 
-#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
-	static constexpr Long NAME_COUNT = Apex::NAME_COUNT;
-#endif
-
 public:
 	using Info					= WrapInfo<TApex>;
 
@@ -15170,11 +15159,11 @@ public:
 
 	/// @brief Array of 'StructureEntry' representing FSM structure
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	using Structure				= DynamicArrayT<StructureEntry, NAME_COUNT>;
+	using Structure				= StaticArrayT<StructureEntry, STATE_COUNT>;
 
 	/// @brief Array of 'int8_t' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @see `HFSM2_ENABLE_STRUCTURE_REPORT`
-	using ActivityHistory		= DynamicArrayT<int8_t,		 NAME_COUNT>;
+	using ActivityHistory		= StaticArrayT<int8_t,         STATE_COUNT>;
 
 	/// @brief Get the array of `StructureEntry` representing FSM structure
 	/// @return FSM structure
@@ -15278,7 +15267,6 @@ protected:
 	HFSM2_CONSTEXPR(14)	void udpateActivity()													noexcept;
 
 	Prefixes _prefixes;
-	NamedStates _namedStates;
 
 	Structure _structure;
 	ActivityHistory _activityHistory;
@@ -15985,9 +15973,6 @@ R_<TG_, TA_>::getStateNames() noexcept {
 		const StructureStateInfo& stateInfo = stateInfos[s];
 		Prefix& prefix = _prefixes[s];
 
-		if (stateInfo.name[0] != '\0')
-			_namedStates.set(s);
-
 		if (margin > stateInfo.depth && stateInfo.name[0] != '\0')
 			margin = stateInfo.depth;
 
@@ -16023,16 +16008,17 @@ R_<TG_, TA_>::getStateNames() noexcept {
 	if (margin > 0)
 		margin -= 1;
 
-	_structure.clear();
 	for (Long s = 0; s < stateInfos.count(); ++s) {
 		const StructureStateInfo& stateInfo = stateInfos[s];
 		Prefix& prefix = _prefixes[s];
 		const Long space = stateInfo.depth * 2;
 
 		if (stateInfo.name[0] != L'\0') {
-			_structure.emplace(StructureEntry{false, &prefix[margin * 2], stateInfo.name});
-			_activityHistory.emplace(static_cast<int8_t>(0));
-		} else if (s + 1 < stateInfos.count()) {
+			_structure[s] = StructureEntry{false, &prefix[margin * 2], stateInfo.name};
+			_activityHistory[s] = static_cast<int8_t>(0);
+		}
+		else
+		if (s + 1 < stateInfos.count()) {
 			Prefix& nextPrefix = _prefixes[s + 1];
 
 			if (s > 0)
@@ -16057,26 +16043,25 @@ template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG_, TA_>::udpateActivity() noexcept {
-	for (Long s = 0, i = 0; s < STATE_COUNT; ++s)
-		if (_namedStates.get(s)) {
-			_structure[i].isActive = isActive(s);
+	for (Long s = 0, i = 0; s < STATE_COUNT; ++s) {
+		_structure[i].isActive = isActive(s);
 
-			typename ActivityHistory::Item& activity = _activityHistory[i];
+		typename ActivityHistory::Item& activity = _activityHistory[i];
 
-			if (_structure[i].isActive) {
-				if (activity < 0)
-					activity = +1;
-				else
-					activity = activity < INT8_MAX ? activity + 1 : activity;
-			} else {
-				if (activity > 0)
-					activity = -1;
-				else
-					activity = activity > INT8_MIN ? activity - 1 : activity;
-			}
-
-			++i;
+		if (_structure[i].isActive) {
+			if (activity < 0)
+				activity = +1;
+			else
+				activity = activity < INT8_MAX ? activity + 1 : activity;
+		} else {
+			if (activity > 0)
+				activity = -1;
+			else
+				activity = activity > INT8_MIN ? activity - 1 : activity;
 		}
+
+		++i;
+	}
 }
 
 #endif

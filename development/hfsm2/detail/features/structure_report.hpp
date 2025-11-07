@@ -5,9 +5,18 @@ namespace hfsm2 {
 //------------------------------------------------------------------------------
 
 struct StructureEntry final {
+	HFSM2_CONSTEXPR(11)
+	StructureEntry(const bool isActive_ = false,
+				   const wchar_t* const prefix_ = nullptr,
+				   const char   * const name_   = nullptr)				noexcept
+		: isActive{isActive_}
+		, prefix  {prefix_  }
+		, name    {name_    }
+	{}
+
 	bool isActive;
 	const wchar_t* prefix;
-	const char* name;
+	const char   * name;
 };
 
 namespace detail {

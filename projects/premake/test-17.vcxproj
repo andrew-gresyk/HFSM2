@@ -281,6 +281,7 @@
     <ClCompile Include="..\..\test\test_contexts.cpp" />
     <ClCompile Include="..\..\test\test_contexts_random.cpp" />
     <ClCompile Include="..\..\test\test_debug.cpp" />
+    <ClCompile Include="..\..\test\test_debug_structure.cpp" />
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp" />
     <ClCompile Include="..\..\test\test_guards.cpp" />
     <ClCompile Include="..\..\test\test_internal_payloads.cpp" />
