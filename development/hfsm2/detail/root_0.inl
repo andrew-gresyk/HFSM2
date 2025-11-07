@@ -767,9 +767,6 @@ R_<TG_, TA_>::getStateNames() noexcept {
 		const StructureStateInfo& stateInfo = stateInfos[s];
 		Prefix& prefix = _prefixes[s];
 
-		if (stateInfo.name[0] != '\0')
-			_namedStates.set(s);
-
 		if (margin > stateInfo.depth && stateInfo.name[0] != '\0')
 			margin = stateInfo.depth;
 
@@ -805,16 +802,17 @@ R_<TG_, TA_>::getStateNames() noexcept {
 	if (margin > 0)
 		margin -= 1;
 
-	_structure.clear();
 	for (Long s = 0; s < stateInfos.count(); ++s) {
 		const StructureStateInfo& stateInfo = stateInfos[s];
 		Prefix& prefix = _prefixes[s];
 		const Long space = stateInfo.depth * 2;
 
 		if (stateInfo.name[0] != L'\0') {
-			_structure.emplace(StructureEntry{false, &prefix[margin * 2], stateInfo.name});
-			_activityHistory.emplace(static_cast<int8_t>(0));
-		} else if (s + 1 < stateInfos.count()) {
+			_structure[s] = StructureEntry{false, &prefix[margin * 2], stateInfo.name};
+			_activityHistory[s] = static_cast<int8_t>(0);
+		}
+		else
+		if (s + 1 < stateInfos.count()) {
 			Prefix& nextPrefix = _prefixes[s + 1];
 
 			if (s > 0)
@@ -841,26 +839,25 @@ template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 void
 R_<TG_, TA_>::udpateActivity() noexcept {
-	for (Long s = 0, i = 0; s < STATE_COUNT; ++s)
-		if (_namedStates.get(s)) {
-			_structure[i].isActive = isActive(s);
+	for (Long s = 0, i = 0; s < STATE_COUNT; ++s) {
+		_structure[i].isActive = isActive(s);
 
-			typename ActivityHistory::Item& activity = _activityHistory[i];
+		typename ActivityHistory::Item& activity = _activityHistory[i];
 
-			if (_structure[i].isActive) {
-				if (activity < 0)
-					activity = +1;
-				else
-					activity = activity < INT8_MAX ? activity + 1 : activity;
-			} else {
-				if (activity > 0)
-					activity = -1;
-				else
-					activity = activity > INT8_MIN ? activity - 1 : activity;
-			}
-
-			++i;
+		if (_structure[i].isActive) {
+			if (activity < 0)
+				activity = +1;
+			else
+				activity = activity < INT8_MAX ? activity + 1 : activity;
+		} else {
+			if (activity > 0)
+				activity = -1;
+			else
+				activity = activity > INT8_MIN ? activity - 1 : activity;
 		}
+
+		++i;
+	}
 }
 
 #endif

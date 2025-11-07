@@ -170,8 +170,6 @@ struct HFSM2_EMPTY_BASES OS_<
 #if HFSM2_STRUCTURE_REPORT_AVAILABLE()
 	using StructureStateInfos = typename Args::StructureStateInfos;
 
-	static constexpr Long NAME_COUNT	 = Initial::NAME_COUNT  + Remaining::NAME_COUNT;
-
 	HFSM2_CONSTEXPR(14)	void wideGetNames(const Long parent,
 										  const Short depth,
 										  StructureStateInfos& stateInfos)	  const noexcept;

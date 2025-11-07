@@ -66,10 +66,6 @@ public:
 	using ReadStream			= typename Args::ReadStream;
 #endif
 
-#if HFSM2_STRUCTURE_REPORT_AVAILABLE()
-	static constexpr Long NAME_COUNT = Apex::NAME_COUNT;
-#endif
-
 public:
 	using Info					= WrapInfo<TApex>;
 
@@ -561,11 +557,11 @@ public:
 
 	/// @brief Array of 'StructureEntry' representing FSM structure
 	/// @see HFSM2_ENABLE_STRUCTURE_REPORT
-	using Structure				= DynamicArrayT<StructureEntry, NAME_COUNT>;
+	using Structure				= StaticArrayT<StructureEntry, STATE_COUNT>;
 
 	/// @brief Array of 'int8_t' representing FSM activation history (negative - 'update()' cycles since deactivated, positive - 'update()' cycles since activated)
 	/// @see `HFSM2_ENABLE_STRUCTURE_REPORT`
-	using ActivityHistory		= DynamicArrayT<int8_t,		 NAME_COUNT>;
+	using ActivityHistory		= StaticArrayT<int8_t,         STATE_COUNT>;
 
 	/// @brief Get the array of `StructureEntry` representing FSM structure
 	/// @return FSM structure
@@ -677,7 +673,6 @@ protected:
 	HFSM2_CONSTEXPR(14)	void udpateActivity()													noexcept;
 
 	Prefixes _prefixes;
-	NamedStates _namedStates;
 
 	Structure _structure;
 	ActivityHistory _activityHistory;

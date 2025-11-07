@@ -326,6 +326,9 @@
     <ClCompile Include="..\..\test\test_debug.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\test_debug_structure.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\test\test_delayed_teardown.cpp">
       <Filter>test</Filter>
     </ClCompile>

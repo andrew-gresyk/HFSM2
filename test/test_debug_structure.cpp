@@ -13,7 +13,7 @@
 
 using namespace test_tools;
 
-namespace test_debug {
+namespace test_debug_structure {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +28,7 @@ using Logger = LoggerT<Config>;
 
 #define S(s) struct s
 
-using FSM = M::Root<S(Apex),
+using FSM = M::PeerRoot<
 				S(I),
 				M::Orthogonal<S(O),
 					M::Resumable<S(R),
@@ -54,18 +54,18 @@ using FSM = M::Root<S(Apex),
 
 //------------------------------------------------------------------------------
 
-static_assert(FSM::regionId<Apex>()	==  0, "");
 static_assert(FSM::regionId<O	>()	==  1, "");
 static_assert(FSM::regionId<R	>()	==  2, "");
+
 static_assert(FSM::regionId<U	>()	==  4, "");
 static_assert(FSM::regionId<N	>()	==  5, "");
 
-static_assert(FSM::stateId<Apex>() ==  0, "");
 static_assert(FSM::stateId<I   >() ==  1, "");
 static_assert(FSM::stateId<O   >() ==  2, "");
 static_assert(FSM::stateId<R   >() ==  3, "");
 static_assert(FSM::stateId<R_1 >() ==  4, "");
 static_assert(FSM::stateId<R_2 >() ==  5, "");
+
 static_assert(FSM::stateId<C_1 >() ==  7, "");
 static_assert(FSM::stateId<C_2 >() ==  8, "");
 static_assert(FSM::stateId<U   >() ==  9, "");
@@ -77,7 +77,6 @@ static_assert(FSM::stateId<N_2 >() == 14, "");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Apex	: FSM::State {};
 struct I	: FSM::State {};
 struct O	: FSM::State {};
 struct R	: FSM::State {};
@@ -105,36 +104,36 @@ static_assert(FSM::Instance::Info::ORTHO_UNITS  ==  1, "");
 
 void step0(FSM::Instance& machine, Logger& logger) {
 	logger.assertSequence({
-		{ FSM::stateId<Apex>(),	Event::Type::ENTRY_GUARD },
+		{ hfsm2::ROOT_ID      , Event::Type::ENTRY_GUARD },
 		{ FSM::stateId<I   >(),	Event::Type::ENTRY_GUARD },
 
-		{ FSM::stateId<Apex>(),	Event::Type::ENTER },
+		{ hfsm2::ROOT_ID      , Event::Type::ENTER },
 		{ FSM::stateId<I   >(),	Event::Type::ENTER },
 	});
 
 	assertActive(machine, {
-		FSM::stateId<Apex>(),
+		hfsm2::ROOT_ID      ,
 		FSM::stateId<I   >(),
 	});
 
 	assertResumable(machine, {});
 
 	assertStructure(machine.structure(), {
-		hfsm2::StructureEntry{ true , L"", "Apex"},
-		hfsm2::StructureEntry{ true , L" ├ ", "I"},
-		hfsm2::StructureEntry{ false, L" └ ", "O"},
-		hfsm2::StructureEntry{ false, L"   ╟ ", "R"},
-		hfsm2::StructureEntry{ false, L"   ║ ├ ", "R_1"},
-		hfsm2::StructureEntry{ false, L"   ║ └ ", "R_2"},
-		hfsm2::StructureEntry{ false                    },
-		hfsm2::StructureEntry{ false, L"   ╟ ┬ ", "C_1"},
-		hfsm2::StructureEntry{ false, L"   ║ └ ", "C_2"},
-		hfsm2::StructureEntry{ false, L"   ╟ ", "U"},
-		hfsm2::StructureEntry{ false, L"   ║ ├ ", "U_1"},
-		hfsm2::StructureEntry{ false, L"   ║ └ ", "U_2"},
-		hfsm2::StructureEntry{ false, L"   ╙ ", "N"},
-		hfsm2::StructureEntry{ false, L"     ├ ", "N_1"},
-		hfsm2::StructureEntry{ false, L"     └ ", "N_2"},
+		hfsm2::StructureEntry{ true                     },
+		hfsm2::StructureEntry{ true , L" ┌ "    , "I"   },
+		hfsm2::StructureEntry{ false, L" └ "    , "O"   },
+		hfsm2::StructureEntry{ false, L"   ╟ "  , "R"	},
+		hfsm2::StructureEntry{ false, L"   ║ ├ ", "R_1"	},
+		hfsm2::StructureEntry{ false, L"   ║ └ ", "R_2"	},
+		hfsm2::StructureEntry{ false  					},
+		hfsm2::StructureEntry{ false, L"   ╟ ┬ ", "C_1"	},
+		hfsm2::StructureEntry{ false, L"   ║ └ ", "C_2"	},
+		hfsm2::StructureEntry{ false, L"   ╟ "	, "U"	},
+		hfsm2::StructureEntry{ false, L"   ║ ├ ", "U_1"	},
+		hfsm2::StructureEntry{ false, L"   ║ └ ", "U_2"	},
+		hfsm2::StructureEntry{ false, L"   ╙ "  , "N"	},
+		hfsm2::StructureEntry{ false, L"     ├ ", "N_1"	},
+		hfsm2::StructureEntry{ false, L"     └ ", "N_2"	},
 	});
 
 	assertActivity(machine.activityHistory(), {
@@ -200,7 +199,7 @@ void step1(FSM::Instance& machine, Logger& logger) {
 	});
 
 	assertActive(machine, {
-		FSM::stateId<Apex>(),
+		hfsm2::ROOT_ID		,
 		FSM::stateId<O   >(),
 		FSM::stateId<R   >(),
 		FSM::stateId<R_1 >(),
@@ -237,7 +236,7 @@ void step1(FSM::Instance& machine, Logger& logger) {
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("FSM.Debug") {
+TEST_CASE("FSM.Debug Structure") {
 	hfsm2::FloatRandom generator{0};
 	Logger logger;
 
