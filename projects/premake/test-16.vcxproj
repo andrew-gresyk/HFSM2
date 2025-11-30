@@ -215,8 +215,9 @@
     <ClInclude Include="..\..\development\hfsm2\detail\root\plan_2.inl" />
     <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.inl" />
-    <ClInclude Include="..\..\development\hfsm2\detail\root\registry.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\registry_1.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\root\registry_1.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\root\registry_2.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\root\registry_2.inl" />
     <ClInclude Include="..\..\development\hfsm2\detail\root_0.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\root_0.inl" />
@@ -266,6 +267,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp" />
+    <ClCompile Include="..\..\test\reported\issue_123.cpp" />
     <ClCompile Include="..\..\test\reported\issue_49.cpp" />
     <ClCompile Include="..\..\test\reported\resuming_plan.cpp" />
     <ClCompile Include="..\..\test\reported\stress_size.cpp" />

@@ -643,19 +643,15 @@ protected:
 	HFSM2_CONSTEXPR(14)	void processRequest()													noexcept;
 	HFSM2_CONSTEXPR(14)	void processTransitions(TransitionSets& currentTransitions)				noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool applyRequests(const TransitionSets& currentTransitions,
-										   Control& control)									noexcept;
-
-	HFSM2_CONSTEXPR(14)	bool applyRequest (const TransitionSets& currentTransitions,
-										   Control& control,
+	HFSM2_CONSTEXPR(14)	void applyRequest (Control& control,
 										   const Transition& request,
 										   const Short index)									noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool cancelledByEntryGuards(const TransitionSets& currentTransitions,
-													const TransitionSet&  pendingTransitions)	noexcept;
+	HFSM2_CONSTEXPR(14)	bool approvedByEntryGuards(const TransitionSets& currentTransitions,
+												   const TransitionSet&  pendingTransitions)	noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool cancelledByGuards(const TransitionSets& currentTransitions,
-											   const TransitionSet&  pendingTransitions)		noexcept;
+	HFSM2_CONSTEXPR(14)	bool approvedByGuards(const TransitionSets& currentTransitions,
+											  const TransitionSet&  pendingTransitions)			noexcept;
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void save(WriteStream& stream)									  const noexcept;

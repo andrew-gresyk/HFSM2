@@ -264,9 +264,9 @@ template <typename T>
 HFSM2_CONSTEXPR(14)
 void
 swap(T& l, T& r)														noexcept	{
-	T t = move(l);
-	l = move(r);
-	r = move(t);
+	T t = ::hfsm2::move(l);
+	l = ::hfsm2::move(r);
+	r = ::hfsm2::move(t);
 }
 
 //------------------------------------------------------------------------------
@@ -277,8 +277,8 @@ template <
 >
 HFSM2_CONSTEXPR(14)
 void
-overwrite(TTo& to, const TFrom& from)									noexcept	{
-	static_assert(sizeof(TTo) == sizeof(TFrom), "");
+overwriteWith(TTo& to, const TFrom& from)								noexcept	{
+	static_assert(sizeof(TTo) >= sizeof(TFrom), "");
 
 #if defined(__GNUC__) || defined(__GNUG__)
 	memcpy  (&to,			  &from, sizeof(from));
@@ -298,16 +298,17 @@ TO
 reinterpret(const TI& in)												noexcept	{
 	TO out{};
 
-	overwrite(out, in);
+	overwriteWith(out, in);
 
 	return out;
 }
 
 //------------------------------------------------------------------------------
 
-template<class T>
+template<typename T>
 HFSM2_CONSTEXPR(14)
-void destroy(T& t)														noexcept	{
+void
+destroy(T& t)															noexcept	{
 	t.~T();
 }
 

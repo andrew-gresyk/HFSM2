@@ -21,7 +21,7 @@ OS_<TN_, TA_, NP_, TI_>::wideForwardEntryGuard(GuardControl& control,
 											   const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial::deepForwardEntryGuard(control) : false;
+		Initial::deepForwardEntryGuard(control) : true;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -157,7 +157,7 @@ OS_<TN_, TA_, NP_, TI_>::wideForwardExitGuard(GuardControl& control,
 											  const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial::deepForwardExitGuard(control) : false;
+		Initial::deepForwardExitGuard(control) : true;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

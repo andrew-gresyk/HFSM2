@@ -141,6 +141,8 @@ RV_<G_<NFT_, TC_, Manual, TRO_ HFSM2_IF_UTILITY_THEORY(, TR_, TU_, TG_), NSL_ HF
 		TransitionSets emptyTransitions;
 		PlanControl control{_core, emptyTransitions};
 
+		_apex.deepRequestChange(control, {TransitionType::CHANGE, INVALID_SHORT});
+
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)
 				_core.previousTransitions.emplace(transitions[i]);
@@ -157,20 +159,6 @@ RV_<G_<NFT_, TC_, Manual, TRO_ HFSM2_IF_UTILITY_THEORY(, TR_, TU_, TG_), NSL_ HF
 	}
 
 	return false;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <FeatureTag NFT_, typename TC_, typename TRO_ HFSM2_IF_UTILITY_THEORY(, typename TR_, typename TU_, typename TG_), Short NSL_ HFSM2_IF_PLANS(, Long NTC_), typename TP_, typename TA_>
-template <Long NCount>
-HFSM2_CONSTEXPR(14)
-bool
-RV_<G_<NFT_, TC_, Manual, TRO_ HFSM2_IF_UTILITY_THEORY(, TR_, TU_, TG_), NSL_ HFSM2_IF_PLANS(, NTC_), TP_>, TA_>::replayEnter(const DynamicArrayT<Transition, NCount>& transitions)  noexcept {
-	if (transitions.count())
-		return replayEnter(&transitions[0],
-						   transitions.count());
-	else
-		return false;
 }
 
 #endif

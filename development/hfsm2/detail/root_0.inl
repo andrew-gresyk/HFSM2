@@ -335,7 +335,7 @@ template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 bool
 R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
-							  const Short count) noexcept
+								const Short count) noexcept
 {
 	HFSM2_ASSERT(transitions);
 	HFSM2_ASSERT(_core.registry.isActive());
@@ -413,37 +413,46 @@ R_<TG_, TA_>::initialEnter() noexcept {
 	TransitionSets currentTransitions;
 	TransitionSet  pendingTransitions;
 
-	RegistryBackUp undo;
 	PlanControl control{_core, currentTransitions};
 
-	_apex.deepRequestChange(control, {TransitionType::RESTART, INVALID_SHORT});
+	_apex.deepRequestChange(control, {TransitionType::CHANGE, INVALID_SHORT});
 
-	cancelledByEntryGuards(currentTransitions,
-						   pendingTransitions);
+	approvedByEntryGuards(currentTransitions,
+						  pendingTransitions);
 
-	for (Long i = 0;
-		 i < SUBSTITUTION_LIMIT && _core.requests.count();
-		 ++i)
+	RegistryBackUp backup;
+	_core.registry.backup(backup);
+
+	for (Long s = 0;
+		 s < SUBSTITUTION_LIMIT && _core.requests.count();
+		 ++s)
 	{
-		backup(_core.registry, undo);
+		for (Short i = 0; i < _core.requests.count(); ++i) {
+			const Transition& request = _core.requests[i];
 
-		if (applyRequests(currentTransitions,
-						  control))
-		{
+			if (HFSM2_CHECKED(request.destination < STATE_COUNT))
+				applyRequest(control, request, i);
+		}
+
+		if (_core.registry != backup) {
 			pendingTransitions = _core.requests;
 			_core.requests.clear();
 
-			if (cancelledByEntryGuards(currentTransitions,
-									   pendingTransitions))
+			if (approvedByEntryGuards(currentTransitions,
+									  pendingTransitions))
 			{
+				currentTransitions += pendingTransitions;
+				_core.registry.backup(backup);
+			}
+			else {
 				HFSM2_BREAK();
 
-				restore(_core.registry, undo);
-			} else
-				currentTransitions += pendingTransitions;
+				_core.registry.restore(backup);
+			}
 
 			pendingTransitions.clear();
-		} else
+		}
+		else
 			_core.requests.clear();
 	}
 	HFSM2_ASSERT(_core.requests.count() == 0);
@@ -521,31 +530,40 @@ R_<TG_, TA_>::processTransitions(TransitionSets& currentTransitions) noexcept {
 
 	TransitionSet pendingTransitions;
 
-	RegistryBackUp registryUndo;
 	PlanControl control{_core, currentTransitions};
 
-	for (Long i = 0;
-		 i < SUBSTITUTION_LIMIT && _core.requests.count();
-		 ++i)
-	{
-		backup(_core.registry, registryUndo);
+	RegistryBackUp backup;
+	_core.registry.backup(backup);
 
-		if (applyRequests(currentTransitions,
-						  control))
-		{
+	for (Long s = 0;
+		 s < SUBSTITUTION_LIMIT && _core.requests.count();
+		 ++s)
+	{
+		for (Short i = 0; i < _core.requests.count(); ++i) {
+			const Transition& request = _core.requests[i];
+
+			if (HFSM2_CHECKED(request.destination < STATE_COUNT))
+				applyRequest(control, request, i);
+		}
+
+		if (_core.registry != backup) {
 			pendingTransitions = _core.requests;
 			_core.requests.clear();
 
-			if (cancelledByGuards(currentTransitions,
-								  pendingTransitions))
+			if (approvedByGuards(currentTransitions,
+								 pendingTransitions))
 			{
-				HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
-				restore(_core.registry, registryUndo);
-			} else
 				currentTransitions += pendingTransitions;
+				_core.registry.backup(backup);
+			}
+			else {
+				HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+				_core.registry.restore(backup);
+			}
 
 			pendingTransitions.clear();
-		} else
+		}
+		else
 			_core.requests.clear();
 	}
 	HFSM2_ASSERT(_core.requests.count() == 0);
@@ -561,32 +579,11 @@ R_<TG_, TA_>::processTransitions(TransitionSets& currentTransitions) noexcept {
 
 template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
-bool
-R_<TG_, TA_>::applyRequests(const TransitionSets& currentTransitions,
-							Control& control) noexcept
-{
-	bool changesMade = false;
-
-	for (Short i = 0; i < _core.requests.count(); ++i)
-		changesMade |= applyRequest(currentTransitions, control, _core.requests[i], i);
-
-	return changesMade;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TA_>
-HFSM2_CONSTEXPR(14)
-bool
-R_<TG_, TA_>::applyRequest(const TransitionSets& currentTransitions,
-						   Control& control,
+void
+R_<TG_, TA_>::applyRequest(Control& control,
 						   const Transition& request,
 						   const Short index) noexcept
 {
-	for (Short i = 0; i < currentTransitions.count(); ++i)
-		if (currentTransitions[i] == request)
-			return false;
-
 	switch (request.type) {
 	case TransitionType::CHANGE:
 	case TransitionType::RESTART:
@@ -598,23 +595,20 @@ R_<TG_, TA_>::applyRequest(const TransitionSets& currentTransitions,
 	case TransitionType::RANDOMIZE:
 #endif
 
-		// TODO: have both return success status
-		if (_core.registry.requestImmediate(request))
+		if (request.destination == 0)
+			_apex.deepRequest      (control, {request.type, index});
+		else {
+			_core.registry.requestImmediate(request);
 			_apex.deepForwardActive(control, {request.type, index});
-		else
-			_apex.deepRequest	   (control, {request.type, index});
-
-		return true;
+		}
+		break;
 
 	case TransitionType::SCHEDULE:
 		_core.registry.requestScheduled(request.destination);
-
-		return false;
+		break;
 
 	default:
 		HFSM2_BREAK();
-
-		return false;
 	}
 }
 
@@ -624,8 +618,8 @@ R_<TG_, TA_>::applyRequest(const TransitionSets& currentTransitions,
 template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 bool
-R_<TG_, TA_>::cancelledByEntryGuards(const TransitionSets& currentTransitions,
-									 const TransitionSet&  pendingTransitions) noexcept
+R_<TG_, TA_>::approvedByEntryGuards(const TransitionSets& currentTransitions,
+									const TransitionSet&  pendingTransitions) noexcept
 {
 	GuardControl guardControl{_core,
 							  currentTransitions,
@@ -639,14 +633,14 @@ R_<TG_, TA_>::cancelledByEntryGuards(const TransitionSets& currentTransitions,
 template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 bool
-R_<TG_, TA_>::cancelledByGuards(const TransitionSets& currentTransitions,
-								const TransitionSet&  pendingTransitions) noexcept
+R_<TG_, TA_>::approvedByGuards(const TransitionSets& currentTransitions,
+							   const TransitionSet&  pendingTransitions) noexcept
 {
 	GuardControl guardControl{_core,
 							  currentTransitions,
 							  pendingTransitions};
 
-	return _apex.deepForwardExitGuard(guardControl) ||
+	return _apex.deepForwardExitGuard(guardControl) &&
 		   _apex.deepForwardEntryGuard(guardControl);
 }
 
@@ -736,16 +730,16 @@ R_<TG_, TA_>::applyRequests(Control& control,
 							const Transition* const transitions,
 							const Short count) noexcept
 {
-	TransitionSets currentTransitions;
-
 	if (HFSM2_CHECKED(transitions && count)) {
-		bool changesMade = false;
+		RegistryBackUp backup;
+		_core.registry.backup(backup);
 
 		for (Short i = 0; i < count; ++i)
-			changesMade |= applyRequest(currentTransitions, control, transitions[i], i);
+			applyRequest(control, transitions[i], i);
 
-		return changesMade;
-	} else
+		return _core.registry != backup;
+	}
+	else
 		return false;
 }
 

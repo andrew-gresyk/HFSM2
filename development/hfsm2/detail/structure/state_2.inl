@@ -62,7 +62,7 @@ S_<TN_, TA_, EmptyT<TA_>>::deepEntryGuard(GuardControl& HFSM2_IF_LOG_STATE_METHO
 	HFSM2_LOG_STATE_METHOD(&Empty::entryGuard,
 						   Method::ENTRY_GUARD);
 
-	return false;
+	return true;
 }
 
 //------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ S_<TN_, TA_, EmptyT<TA_>>::deepExitGuard(GuardControl& HFSM2_IF_LOG_STATE_METHOD
 	HFSM2_LOG_STATE_METHOD(&Empty::exitGuard,
 						   Method::EXIT_GUARD);
 
-	return false;
+	return true;
 }
 
 //------------------------------------------------------------------------------

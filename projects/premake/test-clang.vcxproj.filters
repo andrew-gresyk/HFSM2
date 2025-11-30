@@ -132,10 +132,13 @@
     <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.inl">
       <Filter>development\hfsm2\detail\root</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\registry.hpp">
+    <ClInclude Include="..\..\development\hfsm2\detail\root\registry_1.hpp">
       <Filter>development\hfsm2\detail\root</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\root\registry_1.inl">
+      <Filter>development\hfsm2\detail\root</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\root\registry_2.hpp">
       <Filter>development\hfsm2\detail\root</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\root\registry_2.inl">
@@ -280,6 +283,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\test\main.cpp">
       <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\reported\issue_123.cpp">
+      <Filter>test\reported</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\reported\issue_49.cpp">
       <Filter>test\reported</Filter>

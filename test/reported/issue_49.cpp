@@ -8,6 +8,8 @@
 
 #include <doctest/doctest.h>
 
+namespace issue_49 {
+
 using Config = hfsm2::Config
 					::TaskCapacityN<3>;
 
@@ -101,8 +103,7 @@ struct D : FSM::State
 	void update(FullControl& control) { control.succeed(); }
 };
 
-TEST_CASE("FSM.Reported.issue_49")
-{
+TEST_CASE("FSM.Reported.Issue_49") {
 	FSM::Instance fsm;
 
 	REQUIRE(fsm.isActive<Disabled>());
@@ -144,4 +145,6 @@ TEST_CASE("FSM.Reported.issue_49")
 
 	fsm.update();
 	REQUIRE(fsm.isActive<B>());
+}
+
 }

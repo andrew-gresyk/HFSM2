@@ -60,7 +60,7 @@ struct HFSM2_EMPTY_BASES S_
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	HFSM2_CONSTEXPR(14)	bool		 deepForwardEntryGuard(GuardControl&		)								noexcept	{ return false;		}
+	HFSM2_CONSTEXPR(14)	bool		 deepForwardEntryGuard(GuardControl&		)								noexcept	{ return true;		}
 	HFSM2_CONSTEXPR(14)	bool		 deepEntryGuard		  (GuardControl& control)								noexcept;
 
 	HFSM2_CONSTEXPR(14)	void		 deepEnter			  ( PlanControl& control)								noexcept;

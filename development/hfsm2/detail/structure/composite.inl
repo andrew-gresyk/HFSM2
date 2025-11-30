@@ -47,7 +47,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepEntryGuard(GuardControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return HeadState::deepEntryGuard(control) ||
+	return HeadState::deepEntryGuard(control) &&
 		   SubStates::wideEntryGuard(control, requested);
 }
 
@@ -319,7 +319,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return SubStates::wideExitGuard(control, active) ||
+	return SubStates::wideExitGuard(control, active) &&
 		   HeadState::deepExitGuard(control);
 }
 

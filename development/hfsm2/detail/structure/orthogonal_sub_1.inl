@@ -22,11 +22,11 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideForwardEntryGuard(GuardControl& control,
 													   const ProngCBits prongs) noexcept
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
-				   Initial	::deepForwardEntryGuard(control		   ) : false;
+				   Initial	::deepForwardEntryGuard(control		   ) : true;
 
 	const bool r = Remaining::wideForwardEntryGuard(control, prongs);
 
-	return i || r;
+	return i && r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -38,7 +38,7 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideForwardEntryGuard(GuardControl& control) no
 	const bool i = Initial	::deepForwardEntryGuard(control);
 	const bool r = Remaining::wideForwardEntryGuard(control);
 
-	return i || r;
+	return i && r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -50,7 +50,7 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideEntryGuard(GuardControl& control) noexcept 
 	const bool i = Initial	::deepEntryGuard(control);
 	const bool r = Remaining::wideEntryGuard(control);
 
-	return i || r;
+	return i && r;
 }
 
 //------------------------------------------------------------------------------
@@ -199,11 +199,11 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideForwardExitGuard(GuardControl& control,
 													  const ProngCBits prongs) noexcept
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
-				   Initial	::deepForwardExitGuard(control		  ) : false;
+				   Initial	::deepForwardExitGuard(control		  ) : true;
 
 	const bool r = Remaining::wideForwardExitGuard(control, prongs);
 
-	return i || r;
+	return i && r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -215,7 +215,7 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideForwardExitGuard(GuardControl& control) noe
 	const bool i = Initial	::deepForwardExitGuard(control);
 	const bool r = Remaining::wideForwardExitGuard(control);
 
-	return i || r;
+	return i && r;
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -227,7 +227,7 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideExitGuard(GuardControl& control) noexcept {
 	const bool i = Initial	::deepExitGuard(control);
 	const bool r = Remaining::wideExitGuard(control);
 
-	return i || r;
+	return i && r;
 }
 
 //------------------------------------------------------------------------------

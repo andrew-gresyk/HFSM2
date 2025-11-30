@@ -40,6 +40,19 @@ StaticArrayT<T, NC_>::fill(const Item filler) noexcept {
 template <typename T, Long NC_>
 HFSM2_CONSTEXPR(14)
 bool
+StaticArrayT<T, NC_>::operator != (const Array& other) const noexcept {
+	for (unsigned i = 0; i < CAPACITY; ++i)
+		if (_items[i] != other._items[i])
+			return true;
+
+	return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+bool
 StaticArrayT<T, NC_>::empty() const noexcept {
 	for (const Item& item : _items)
 		if (item != filler<Item>())
