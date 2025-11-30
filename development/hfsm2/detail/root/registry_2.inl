@@ -154,9 +154,8 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 			const Prong& active = compoActive[parent.forkId - 1];
 			Prong& requested = compoRequested[parent.forkId - 1];
 
-			if (requested != INVALID_PRONG &&
-				requested != parent.prong  ||
-				active    != parent.prong)
+			if ((requested != parent.prong && requested != INVALID_PRONG) ||
+				active     != parent.prong)
 			{
 				requested  = parent.prong;
 			}

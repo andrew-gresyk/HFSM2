@@ -203,11 +203,10 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 			const Prong& active = compoActive[parent.forkId - 1];
 			Prong& requested = compoRequested[parent.forkId - 1];
 
-			if (requested != INVALID_PRONG &&
-				requested != parent.prong  ||
-				active    != parent.prong)
+			if ((requested != parent.prong && requested != INVALID_PRONG) ||
+				active     != parent.prong)
 			{
-				requested  = parent.prong;
+				requested   = parent.prong;
 			}
 			else {
 				parent = forkParent(parent.forkId);
