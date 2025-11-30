@@ -8,11 +8,6 @@
 #include <stdlib.h>
 #include <hfsm2/machine.hpp>
 
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4100)
-#endif
-
 struct Context {};
 using Config = hfsm2::Config ::ContextT<Context&>;
 using M = hfsm2::MachineT<Config>;
@@ -31,26 +26,26 @@ struct Off : FSM::State {
 		printf("/Off entry guard: change to On\n");
 		control.changeTo<On>();
 	}
-	void enter(PlanControl& control) { printf("  /Off enter\n"); }
-	void exitGuard(GuardControl& control) { printf("\\Off exit guard\n"); }
-	void exit(PlanControl& control) { printf("  \\Off exit\n"); }
+	void enter(PlanControl& /*control*/) { printf("  /Off enter\n"); }
+	void exitGuard(GuardControl& /*control*/) { printf("\\Off exit guard\n"); }
+	void exit(PlanControl& /*control*/) { printf("  \\Off exit\n"); }
 };
 
 struct Work : FSM::State {
-	void entryGuard(GuardControl& control) { printf("/Work entry guard\n"); }
-	void enter(PlanControl& control) { printf("  /Work enter\n"); }
-	void exitGuard(GuardControl& control) { printf("\\Work exit guard\n"); }
-	void exit(PlanControl& control) { printf("  \\Work exit\n"); }
+	void entryGuard(GuardControl& /*control*/) { printf("/Work entry guard\n"); }
+	void enter(PlanControl& /*control*/) { printf("  /Work enter\n"); }
+	void exitGuard(GuardControl& /*control*/) { printf("\\Work exit guard\n"); }
+	void exit(PlanControl& /*control*/) { printf("  \\Work exit\n"); }
 };
 
 struct On : FSM::State {
-	void entryGuard(GuardControl& control) { printf("/On entry guard\n"); }
-	void enter(PlanControl& control) { printf("  /On enter\n"); }
-	void reenter(PlanControl& control) { printf("  |On reenter\n"); }
-	void exitGuard(GuardControl& control) { printf("\\On exit guard\n"); }
-	void exit(PlanControl& control) { printf("  \\On exit\n"); }
+	void entryGuard(GuardControl& /*control*/) { printf("/On entry guard\n"); }
+	void enter(PlanControl& /*control*/) { printf("  /On enter\n"); }
+	void reenter(PlanControl& /*control*/) { printf("  |On reenter\n"); }
+	void exitGuard(GuardControl& /*control*/) { printf("\\On exit guard\n"); }
+	void exit(PlanControl& /*control*/) { printf("  \\On exit\n"); }
 
-	void react(const CloseEvent& event, EventControl& control) {
+	void react(const CloseEvent& /*event*/, EventControl& control) {
 		printf("    -On react: change to Off\n");
 		control.changeTo<Off>();
 	}
@@ -66,9 +61,5 @@ int main() {
 
 	return 0;
 }
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
