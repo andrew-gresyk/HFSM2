@@ -117,6 +117,8 @@ public:
 	template <typename TIndex>
 	HFSM2_CONSTEXPR(14)	void clear(const TIndex index)					noexcept;
 
+	HFSM2_CONSTEXPR(14)	bool operator != (const BitArray& other)  const noexcept;
+
 	HFSM2_CONSTEXPR(14)	bool operator &  (const BitArray& other)  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	void operator &= (const BitArray& other)		noexcept;

@@ -80,27 +80,6 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
 HFSM2_CONSTEXPR(14)
 bool
-RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingChange(const StateID stateId) const noexcept {
-	if (HFSM2_CHECKED(stateId < STATE_COUNT))
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM2_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return compoRequested[parent.forkId - 1] !=
-					   compoActive	 [parent.forkId - 1];
-		}
-
-	return false;
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
-HFSM2_CONSTEXPR(14)
-bool
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingEnter(const StateID stateId) const noexcept {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
@@ -112,6 +91,27 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 			if (parent.forkId > 0)
 				return parent.prong != compoActive	 [parent.forkId - 1] &&
 					   parent.prong == compoRequested[parent.forkId - 1];
+		}
+
+	return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(14)
+bool
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingChange(const StateID stateId) const noexcept {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
+		for (Parent parent = stateParents[stateId];
+			 parent;
+			 parent = forkParent(parent.forkId))
+		{
+			HFSM2_ASSERT(parent.forkId != 0);
+
+			if (parent.forkId > 0)
+				return compoRequested[parent.forkId - 1] !=
+					   compoActive	 [parent.forkId - 1];
 		}
 
 	return false;
@@ -167,55 +167,72 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
 HFSM2_CONSTEXPR(14)
-bool
+void
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::requestImmediate(const Transition& request) noexcept {
-	if (request.destination == 0)
-		return false;
-	else if (HFSM2_CHECKED(request.destination < STATE_COUNT)) {
-		Parent parent;
+	HFSM2_ASSERT(request.destination > 0);
+	HFSM2_ASSERT(request.destination < STATE_COUNT);
 
-		for (parent = stateParents[request.destination];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			if (parent.forkId > 0) {
-				compoRequested[parent.forkId - 1] = parent.prong;
-				parent = forkParent(parent.forkId);
+	Parent parent;
 
-				break;
-			} else if (parent.forkId < 0)
-				requestedOrthoFork(parent.forkId).set(parent.prong);
-			else
-				HFSM2_BREAK();
+	for (parent = stateParents[request.destination];
+		 parent;
+		 parent = forkParent(parent.forkId))
+	{
+		if (parent.forkId > 0) {
+			Prong& requested = compoRequested[parent.forkId - 1];
+
+			requested = parent.prong;
+			parent = forkParent(parent.forkId);
+
+			break;
 		}
-
-		for (; parent; parent = forkParent(parent.forkId)) {
-			if (parent.forkId > 0) {
-				compoRemains.set(parent.forkId - 1);
-
-				if (compoActive	  [parent.forkId - 1] != parent.prong)
-					compoRequested[parent.forkId - 1]  = parent.prong;
-				else {
-					parent = forkParent(parent.forkId);
-					break;
-				}
-			} else if (parent.forkId < 0)
-				requestedOrthoFork(parent.forkId).set(parent.prong);
-			else
-				HFSM2_BREAK();
-		}
-
-		for (; parent; parent = forkParent(parent.forkId)) {
-			if (parent.forkId > 0)
-				compoRemains.set(parent.forkId - 1);
-			else if (parent.forkId < 0)
-				requestedOrthoFork(parent.forkId).set(parent.prong);
-			else
-				HFSM2_BREAK();
-		}
+		else
+		if (parent.forkId < 0)
+			requestedOrthoFork(parent.forkId).set(parent.prong);
+		else
+			HFSM2_BREAK();
 	}
 
-	return true;
+	for (;
+		 parent;
+		 parent = forkParent(parent.forkId))
+	{
+		if (parent.forkId > 0) {
+			compoRemains.set(parent.forkId - 1);
+
+			const Prong& active = compoActive[parent.forkId - 1];
+			Prong& requested = compoRequested[parent.forkId - 1];
+
+			if (requested != INVALID_PRONG &&
+				requested != parent.prong  ||
+				active    != parent.prong)
+			{
+				requested  = parent.prong;
+			}
+			else {
+				parent = forkParent(parent.forkId);
+				break;
+			}
+		}
+		else
+		if (parent.forkId < 0)
+			requestedOrthoFork(parent.forkId).set(parent.prong);
+		else
+			HFSM2_BREAK();
+	}
+
+	for (;
+		 parent;
+		 parent = forkParent(parent.forkId))
+	{
+		if (parent.forkId > 0)
+			compoRemains.set(parent.forkId - 1);
+		else
+		if (parent.forkId < 0)
+			requestedOrthoFork(parent.forkId).set(parent.prong);
+		else
+			HFSM2_BREAK();
+	}
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -267,6 +284,36 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 		&& compoRemains	 .empty()
 		&& compoActive	 .empty()
 		&& compoResumable.empty();
+}
+
+//------------------------------------------------------------------------------
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::backup(BackUp& copy) const noexcept {
+	overwriteWith(copy.compoRequested, compoRequested);
+	overwriteWith(copy.orthoRequested, orthoRequested);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::restore(const BackUp& copy) noexcept {
+	overwriteWith(compoRequested, copy.compoRequested);
+	overwriteWith(orthoRequested, copy.orthoRequested);
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(11)
+bool
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::operator != (const BackUp& copy) const noexcept {
+	return compoRequested != copy.compoRequested
+		|| orthoRequested != copy.orthoRequested;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

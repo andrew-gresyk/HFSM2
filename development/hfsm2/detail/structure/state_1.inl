@@ -72,7 +72,7 @@ S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) noexcept {
 	Head::wideEntryGuard(control);
 	Head::	  entryGuard(control);
 
-	return !cancelledBefore && control._cancelled;
+	return cancelledBefore || !control._cancelled;
 }
 
 //------------------------------------------------------------------------------
@@ -293,7 +293,7 @@ S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) noexcept {
 	Head::wideExitGuard(control);
 	Head::	  exitGuard(control);
 
-	return !cancelledBefore && control._cancelled;
+	return cancelledBefore || !control._cancelled;
 }
 
 //------------------------------------------------------------------------------

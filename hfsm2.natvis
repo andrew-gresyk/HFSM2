@@ -22,7 +22,7 @@
 
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-	<Type Name="hfsm2::detail::ArrayT&lt;*&gt;">
+	<Type Name="hfsm2::detail::DynamicArrayT&lt;*&gt;">
 		<DisplayString>&lt;{(unsigned) _count &amp; 0xFF}&gt;</DisplayString>
 		<Expand HideRawView="true">
 			<ArrayItems>

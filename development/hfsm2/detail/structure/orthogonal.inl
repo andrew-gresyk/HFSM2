@@ -42,7 +42,7 @@ bool
 O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return HeadState::deepEntryGuard(control) ||
+	return HeadState::deepEntryGuard(control) &&
 		   SubStates::wideEntryGuard(control);
 }
 
@@ -241,7 +241,7 @@ bool
 O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return SubStates::wideExitGuard(control) ||
+	return SubStates::wideExitGuard(control) &&
 		   HeadState::deepExitGuard(control);
 }
 

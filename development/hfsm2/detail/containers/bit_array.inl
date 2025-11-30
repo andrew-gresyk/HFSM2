@@ -316,7 +316,20 @@ BitArrayT<NCapacity>::clear(const TIndex index) noexcept {
 template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<NCapacity>::operator & (const BitArray& other) const noexcept {
+BitArrayT<NCapacity>::operator != (const BitArray& other) const noexcept {
+	for (Index i = 0; i < UNIT_COUNT; ++i)
+		if (_storage[i] != other._storage[i])
+			return true;
+
+	return false;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+template <unsigned NCapacity>
+HFSM2_CONSTEXPR(14)
+bool
+BitArrayT<NCapacity>::operator &  (const BitArray& other) const noexcept {
 	for (Index i = 0; i < UNIT_COUNT; ++i)
 		if ((_storage[i] & other._storage[i]) == 0)
 			return false;

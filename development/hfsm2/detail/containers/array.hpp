@@ -35,6 +35,8 @@ public:
 
 	static constexpr Index CAPACITY	= NCapacity;
 
+	using Array		= StaticArrayT<Item, CAPACITY>;
+
 public:
 	HFSM2_CONSTEXPR(14)	StaticArrayT() = default;
 	HFSM2_CONSTEXPR(14)	StaticArrayT(const Item filler)					noexcept	{ fill(filler);						}
@@ -46,6 +48,8 @@ public:
 	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)	  const noexcept;
 
 	HFSM2_CONSTEXPR(11)	Index count()							  const noexcept	{ return CAPACITY;					}
+
+	HFSM2_CONSTEXPR(14)	bool operator != (const Array& other)	  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	void fill(const Item filler)					noexcept;
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(filler<Item>());				}
@@ -96,37 +100,37 @@ public:
 
 public:
 	template <typename... TArgs>
-	HFSM2_CONSTEXPR(14)	Index emplace(const TArgs &... args)				noexcept;
+	HFSM2_CONSTEXPR(14)	Index emplace(const TArgs &... args)			noexcept;
 
 	template <typename... TArgs>
-	HFSM2_CONSTEXPR(14)	Index emplace(		TArgs&&... args)				noexcept;
+	HFSM2_CONSTEXPR(14)	Index emplace(		TArgs&&... args)			noexcept;
 
 	template <typename N>
-	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)				noexcept;
+	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)			noexcept;
 
 	template <typename N>
-	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)		  const noexcept;
+	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)	  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	Index count()								  const noexcept	{ return _count;					}
+	HFSM2_CONSTEXPR(11)	Index count()							  const noexcept	{ return _count;					}
 
-	HFSM2_CONSTEXPR(14)	 void clear()										noexcept	{ _count = 0;						}
-	HFSM2_CONSTEXPR(11)	 bool empty()								  const noexcept	{ return _count == 0;				}
+	HFSM2_CONSTEXPR(14)	 void clear()									noexcept	{ _count = 0;						}
+	HFSM2_CONSTEXPR(11)	 bool empty()							  const noexcept	{ return _count == 0;				}
 
 	template <Long N>
 	HFSM2_CONSTEXPR(14)	DynamicArrayT& operator += (const DynamicArrayT<Item, N>& other)	noexcept;
 
-	HFSM2_CONSTEXPR(14)	 Iterator  begin()									noexcept	{ return  Iterator(*this, first());	}
-	HFSM2_CONSTEXPR(11)	CIterator  begin()							  const noexcept	{ return CIterator(*this, first());	}
-	HFSM2_CONSTEXPR(11)	CIterator cbegin()							  const noexcept	{ return CIterator(*this, first());	}
+	HFSM2_CONSTEXPR(14)	 Iterator  begin()								noexcept	{ return  Iterator(*this, first());	}
+	HFSM2_CONSTEXPR(11)	CIterator  begin()						  const noexcept	{ return CIterator(*this, first());	}
+	HFSM2_CONSTEXPR(11)	CIterator cbegin()						  const noexcept	{ return CIterator(*this, first());	}
 
-	HFSM2_CONSTEXPR(14)	 Iterator	 end()									noexcept	{ return  Iterator(*this, limit());	}
-	HFSM2_CONSTEXPR(11)	CIterator	 end()							  const noexcept	{ return CIterator(*this, limit());	}
-	HFSM2_CONSTEXPR(11)	CIterator	cend()							  const noexcept	{ return CIterator(*this, limit());	}
+	HFSM2_CONSTEXPR(14)	 Iterator	 end()								noexcept	{ return  Iterator(*this, limit());	}
+	HFSM2_CONSTEXPR(11)	CIterator	 end()						  const noexcept	{ return CIterator(*this, limit());	}
+	HFSM2_CONSTEXPR(11)	CIterator	cend()						  const noexcept	{ return CIterator(*this, limit());	}
 
 private:
-	HFSM2_CONSTEXPR(11)	Index first()								  const noexcept	{ return 0;							}
-	HFSM2_CONSTEXPR(11)	Index next(const Index index)				  const noexcept	{ return index + 1;					}
-	HFSM2_CONSTEXPR(11)	Index limit()								  const noexcept	{ return _count;					}
+	HFSM2_CONSTEXPR(11)	Index first()							  const noexcept	{ return 0;							}
+	HFSM2_CONSTEXPR(11)	Index next(const Index index)			  const noexcept	{ return index + 1;					}
+	HFSM2_CONSTEXPR(11)	Index limit()							  const noexcept	{ return _count;					}
 
 private:
 	Index _count = 0;

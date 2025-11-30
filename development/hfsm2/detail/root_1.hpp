@@ -273,13 +273,14 @@ public:
 	/// @param `transitions` Array of 'Transition's to replay
 	/// @see `HFSM2_ENABLE_TRANSITION_HISTORY`
 	template <Long NCount>
-	HFSM2_CONSTEXPR(14)	bool replayEnter(const DynamicArrayT<Transition, NCount>& transitions)	noexcept;
+	HFSM2_CONSTEXPR(14)	bool replayEnter(const DynamicArrayT<Transition, NCount>& transitions)	noexcept	{ return replayEnter(&transitions[0],
+																																 transitions.count());	}
 
 	/// @brief Start the FSM from a specific state
 	///   Can be used to synchronize multiple FSMs
 	/// @param `transition` 'Transition' to replay
 	/// @see `HFSM2_ENABLE_TRANSITION_HISTORY`
-	HFSM2_CONSTEXPR(14)	bool replayEnter(const Transition& transition)							noexcept	{ return replayEnter(&transition, 1);	}
+	HFSM2_CONSTEXPR(14)	bool replayEnter(const Transition& transition)							noexcept	{ return replayEnter(&transition, 1);		}
 
 #endif
 

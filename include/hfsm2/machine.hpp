@@ -596,9 +596,9 @@ template <typename T>
 HFSM2_CONSTEXPR(14)
 void
 swap(T& l, T& r)														noexcept	{
-	T t = move(l);
-	l = move(r);
-	r = move(t);
+	T t = ::hfsm2::move(l);
+	l = ::hfsm2::move(r);
+	r = ::hfsm2::move(t);
 }
 
 template <
@@ -607,8 +607,8 @@ template <
 >
 HFSM2_CONSTEXPR(14)
 void
-overwrite(TTo& to, const TFrom& from)									noexcept	{
-	static_assert(sizeof(TTo) == sizeof(TFrom), "");
+overwriteWith(TTo& to, const TFrom& from)								noexcept	{
+	static_assert(sizeof(TTo) >= sizeof(TFrom), "");
 
 #if defined(__GNUC__) || defined(__GNUG__)
 	memcpy  (&to,			  &from, sizeof(from));
@@ -626,14 +626,15 @@ TO
 reinterpret(const TI& in)												noexcept	{
 	TO out{};
 
-	overwrite(out, in);
+	overwriteWith(out, in);
 
 	return out;
 }
 
-template<class T>
+template<typename T>
 HFSM2_CONSTEXPR(14)
-void destroy(T& t)														noexcept	{
+void
+destroy(T& t)															noexcept	{
 	t.~T();
 }
 
@@ -1649,6 +1650,8 @@ public:
 
 	static constexpr Index CAPACITY	= NCapacity;
 
+	using Array		= StaticArrayT<Item, CAPACITY>;
+
 public:
 	HFSM2_CONSTEXPR(14)	StaticArrayT() = default;
 	HFSM2_CONSTEXPR(14)	StaticArrayT(const Item filler)					noexcept	{ fill(filler);						}
@@ -1660,6 +1663,8 @@ public:
 	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)	  const noexcept;
 
 	HFSM2_CONSTEXPR(11)	Index count()							  const noexcept	{ return CAPACITY;					}
+
+	HFSM2_CONSTEXPR(14)	bool operator != (const Array& other)	  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	void fill(const Item filler)					noexcept;
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(filler<Item>());				}
@@ -1706,37 +1711,37 @@ public:
 
 public:
 	template <typename... TArgs>
-	HFSM2_CONSTEXPR(14)	Index emplace(const TArgs &... args)				noexcept;
+	HFSM2_CONSTEXPR(14)	Index emplace(const TArgs &... args)			noexcept;
 
 	template <typename... TArgs>
-	HFSM2_CONSTEXPR(14)	Index emplace(		TArgs&&... args)				noexcept;
+	HFSM2_CONSTEXPR(14)	Index emplace(		TArgs&&... args)			noexcept;
 
 	template <typename N>
-	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)				noexcept;
+	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)			noexcept;
 
 	template <typename N>
-	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)		  const noexcept;
+	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)	  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	Index count()								  const noexcept	{ return _count;					}
+	HFSM2_CONSTEXPR(11)	Index count()							  const noexcept	{ return _count;					}
 
-	HFSM2_CONSTEXPR(14)	 void clear()										noexcept	{ _count = 0;						}
-	HFSM2_CONSTEXPR(11)	 bool empty()								  const noexcept	{ return _count == 0;				}
+	HFSM2_CONSTEXPR(14)	 void clear()									noexcept	{ _count = 0;						}
+	HFSM2_CONSTEXPR(11)	 bool empty()							  const noexcept	{ return _count == 0;				}
 
 	template <Long N>
 	HFSM2_CONSTEXPR(14)	DynamicArrayT& operator += (const DynamicArrayT<Item, N>& other)	noexcept;
 
-	HFSM2_CONSTEXPR(14)	 Iterator  begin()									noexcept	{ return  Iterator(*this, first());	}
-	HFSM2_CONSTEXPR(11)	CIterator  begin()							  const noexcept	{ return CIterator(*this, first());	}
-	HFSM2_CONSTEXPR(11)	CIterator cbegin()							  const noexcept	{ return CIterator(*this, first());	}
+	HFSM2_CONSTEXPR(14)	 Iterator  begin()								noexcept	{ return  Iterator(*this, first());	}
+	HFSM2_CONSTEXPR(11)	CIterator  begin()						  const noexcept	{ return CIterator(*this, first());	}
+	HFSM2_CONSTEXPR(11)	CIterator cbegin()						  const noexcept	{ return CIterator(*this, first());	}
 
-	HFSM2_CONSTEXPR(14)	 Iterator	 end()									noexcept	{ return  Iterator(*this, limit());	}
-	HFSM2_CONSTEXPR(11)	CIterator	 end()							  const noexcept	{ return CIterator(*this, limit());	}
-	HFSM2_CONSTEXPR(11)	CIterator	cend()							  const noexcept	{ return CIterator(*this, limit());	}
+	HFSM2_CONSTEXPR(14)	 Iterator	 end()								noexcept	{ return  Iterator(*this, limit());	}
+	HFSM2_CONSTEXPR(11)	CIterator	 end()						  const noexcept	{ return CIterator(*this, limit());	}
+	HFSM2_CONSTEXPR(11)	CIterator	cend()						  const noexcept	{ return CIterator(*this, limit());	}
 
 private:
-	HFSM2_CONSTEXPR(11)	Index first()								  const noexcept	{ return 0;							}
-	HFSM2_CONSTEXPR(11)	Index next(const Index index)				  const noexcept	{ return index + 1;					}
-	HFSM2_CONSTEXPR(11)	Index limit()								  const noexcept	{ return _count;					}
+	HFSM2_CONSTEXPR(11)	Index first()							  const noexcept	{ return 0;							}
+	HFSM2_CONSTEXPR(11)	Index next(const Index index)			  const noexcept	{ return index + 1;					}
+	HFSM2_CONSTEXPR(11)	Index limit()							  const noexcept	{ return _count;					}
 
 private:
 	Index _count = 0;
@@ -1794,6 +1799,17 @@ void
 StaticArrayT<T, NC_>::fill(const Item filler) noexcept {
 	for (Item& item : _items)
 		item = filler;
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+bool
+StaticArrayT<T, NC_>::operator != (const Array& other) const noexcept {
+	for (unsigned i = 0; i < CAPACITY; ++i)
+		if (_items[i] != other._items[i])
+			return true;
+
+	return false;
 }
 
 template <typename T, Long NC_>
@@ -1973,6 +1989,8 @@ public:
 
 	template <typename TIndex>
 	HFSM2_CONSTEXPR(14)	void clear(const TIndex index)					noexcept;
+
+	HFSM2_CONSTEXPR(14)	bool operator != (const BitArray& other)  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	bool operator &  (const BitArray& other)  const noexcept;
 
@@ -2277,7 +2295,18 @@ BitArrayT<NCapacity>::clear(const TIndex index) noexcept {
 template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
 bool
-BitArrayT<NCapacity>::operator & (const BitArray& other) const noexcept {
+BitArrayT<NCapacity>::operator != (const BitArray& other) const noexcept {
+	for (Index i = 0; i < UNIT_COUNT; ++i)
+		if (_storage[i] != other._storage[i])
+			return true;
+
+	return false;
+}
+
+template <unsigned NCapacity>
+HFSM2_CONSTEXPR(14)
+bool
+BitArrayT<NCapacity>::operator &  (const BitArray& other) const noexcept {
 	for (Index i = 0; i < UNIT_COUNT; ++i)
 		if ((_storage[i] & other._storage[i]) == 0)
 			return false;
@@ -3139,16 +3168,6 @@ struct alignas(2 * sizeof(ForkID)) Parent final {
 	Prong  prong  = INVALID_PRONG;
 };
 
-template <typename TRegistry>
-struct BackUpT final {
-	using CompoForks = typename TRegistry::CompoForks;
-	using OrthoForks = typename TRegistry::OrthoForks;
-
-	CompoForks compoRequested;
-	OrthoForks orthoRequested;
-	CompoForks compoResumable;
-};
-
 template <
 	typename
   , typename
@@ -3193,188 +3212,87 @@ struct RegistryT<
 		   >
 	   > final
 {
-	using StateList		= TStateList;
-	using RegionList	= TRegionList;
+	using StateList			= TStateList;
+	using RegionList		= TRegionList;
 
-	static constexpr Long  STATE_COUNT		= StateList::SIZE;
+	static constexpr Long  STATE_COUNT		= StateList ::SIZE;
 	static constexpr Long  REGION_COUNT		= RegionList::SIZE;
 	static constexpr Short COMPO_COUNT		= NCompoCount;
 	static constexpr Short ORTHO_COUNT		= NOrthoCount;
 	static constexpr Short ORTHO_UNITS		= NOrthoUnits;
 
-	using Payload		= TPayload;
-	using Transition	= TransitionT<Payload>;
+	using Payload			= TPayload;
+	using Transition		= TransitionT<Payload>;
 
-	using StateParents	= StaticArrayT<Parent,  STATE_COUNT>;
+	using StateParents		= StaticArrayT<Parent  , STATE_COUNT >;
+	using CompoParents		= StaticArrayT<Parent  , COMPO_COUNT>;
+	using OrthoParents		= StaticArrayT<Parent  , ORTHO_COUNT>;
+	using OrthoUnits		= StaticArrayT<Units   , ORTHO_UNITS>;
+	using RegionHeads		= StaticArrayT<StateID , REGION_COUNT>;
+	using RegionSizes		= StaticArrayT<Long    , REGION_COUNT>;
 
-	using CompoParents	= StaticArrayT<Parent,  COMPO_COUNT>;
-	using OrthoParents	= StaticArrayT<Parent,  ORTHO_COUNT>;
-	using OrthoUnits	= StaticArrayT<Units,   ORTHO_UNITS>;
-	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
-	using RegionSizes	= StaticArrayT<Long,    REGION_COUNT>;
+	using CompoForks		= StaticArrayT<Prong   , COMPO_COUNT >;
 
-	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
-	using OrthoForks	= BitArrayT	  <ORTHO_UNITS * 8>;
-	using OrthoBits		= typename OrthoForks::Bits;
-	using CompoRemains	= BitArrayT	  <COMPO_COUNT>;
-
-	using BackUp		= BackUpT	  <RegistryT>;
+	using OrthoForks		= BitArrayT	  <			 ORTHO_UNITS * 8>;
+	using OrthoBits			= typename OrthoForks::Bits;
+	using CompoRemains		= BitArrayT	  <COMPO_COUNT>;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using CompoStatuses	= BitArrayT	  <COMPO_COUNT>;
+	using CompoStatuses		= BitArrayT	  <			 COMPO_COUNT >;
 #endif
+
+	struct BackUp final {
+		CompoForks compoRequested;
+		OrthoForks orthoRequested;
+	};
 
 	HFSM2_CONSTEXPR(14)	Prong activeSubState		(const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(11)	bool isActive				()						  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isActive				(const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isResumable			(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(11)	bool  isActive				()						  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isActive				(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isResumable			(const StateID stateId)	  const noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool isPendingChange		(const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingEnter			(const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingExit			(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isPendingEnter		(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isPendingChange		(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isPendingExit			(const StateID stateId)	  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	const Parent& forkParent	(const ForkID forkId)	  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	OrthoBits requestedOrthoFork(const ForkID forkId)			noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool requestImmediate		(const Transition& request)		noexcept;
-	HFSM2_CONSTEXPR(14)	void requestScheduled		(const StateID stateId)			noexcept;
+	HFSM2_CONSTEXPR(14)	void  requestImmediate		(const Transition& request)		noexcept;
 
-	HFSM2_CONSTEXPR(14)	void clearRequests			()								noexcept;
-	HFSM2_CONSTEXPR(14)	void clear					()								noexcept;
+	HFSM2_CONSTEXPR(14)	void  requestScheduled		(const StateID stateId)			noexcept;
 
-	HFSM2_CONSTEXPR(11)	bool empty					()						  const noexcept;
+	HFSM2_CONSTEXPR(14)	void  clearRequests			()								noexcept;
+	HFSM2_CONSTEXPR(14)	void  clear					()								noexcept;
 
-	StateParents stateParents;
-	CompoParents compoParents;
-	OrthoParents orthoParents;
-	OrthoUnits	 orthoUnits;
+	HFSM2_CONSTEXPR(11)	bool  empty					()						  const noexcept;
 
-	RegionHeads	 regionHeads;
-	RegionSizes	 regionSizes;
+	HFSM2_CONSTEXPR(14) void  backup				(	   BackUp& copy)	  const noexcept;
+	HFSM2_CONSTEXPR(14) void  restore				(const BackUp& copy)			noexcept;
 
-	CompoForks compoRequested{INVALID_PRONG};
-	OrthoForks orthoRequested;
-	CompoForks compoActive	 {INVALID_PRONG};
-	CompoForks compoResumable{INVALID_PRONG};
+	HFSM2_CONSTEXPR(11)	bool  operator !=			(const BackUp& copy)	  const noexcept;
 
-	CompoRemains compoRemains;
+	StateParents	stateParents;
+	CompoParents 	compoParents;
+	OrthoParents 	orthoParents;
+	OrthoUnits	 	orthoUnits;
 
-#if HFSM2_PLANS_AVAILABLE()
-	CompoStatuses compoStatuses;
-#endif
-};
+	RegionHeads		regionHeads;
+	RegionSizes		regionSizes;
 
-template <
-	typename TConfig
-  , typename TStateList
-  , typename TRegionList
-  , Long NCompoCount
-  , typename TReactOrder
-  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-  HFSM2_IF_PLANS(, Long NTaskCapacity)
-  , typename TPayload
->
-struct RegistryT<
-		   ArgsT<
-			   TConfig
-			 , TStateList
-			 , TRegionList
-			 , NCompoCount
-			 , 0
-			 , 0
-			 , TReactOrder
-			 HFSM2_IF_SERIALIZATION(, NSerialBits)
-			 HFSM2_IF_PLANS(, NTaskCapacity)
-			 , TPayload
-		   >
-	   > final
-{
-	using StateList		= TStateList;
-	using RegionList	= TRegionList;
+	CompoForks		compoRequested{INVALID_PRONG};
+	OrthoForks		orthoRequested;
+	CompoForks		compoActive   {INVALID_PRONG};
+	CompoForks		compoResumable{INVALID_PRONG};
 
-	static constexpr Long  STATE_COUNT		= StateList::SIZE;
-	static constexpr Long  REGION_COUNT		= RegionList::SIZE;
-	static constexpr Short COMPO_COUNT		= NCompoCount;
-
-	using Payload		= TPayload;
-	using Transition	= TransitionT<Payload>;
-
-	using StateParents	= StaticArrayT<Parent,  STATE_COUNT>;
-	using CompoParents	= StaticArrayT<Parent,  COMPO_COUNT>;
-	using RegionHeads	= StaticArrayT<StateID, REGION_COUNT>;
-	using RegionSizes	= StaticArrayT<Long,    REGION_COUNT>;
-
-	using CompoForks	= StaticArrayT<Prong,   COMPO_COUNT>;
-	using OrthoForks	= BitArrayT	  <0>;
-	using CompoRemains	= BitArrayT	  <COMPO_COUNT>;
-
-	using BackUp		= BackUpT	  <RegistryT>;
-
-#if HFSM2_PLANS_AVAILABLE()
-	using CompoStatuses	= BitArrayT	  <COMPO_COUNT>;
-#endif
-
-	HFSM2_CONSTEXPR(14)	Prong activeSubState	(const StateID stateId)	  const noexcept;
-
-	HFSM2_CONSTEXPR(11)	bool isActive			()						  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isActive			(const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isResumable		(const StateID stateId)	  const noexcept;
-
-	HFSM2_CONSTEXPR(14)	bool isPendingChange	(const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingEnter		(const StateID stateId)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool isPendingExit		(const StateID stateId)	  const noexcept;
-
-	HFSM2_CONSTEXPR(14)	const Parent& forkParent(const ForkID forkId)	  const noexcept;
-
-	HFSM2_CONSTEXPR(14)	bool requestImmediate	(const Transition& request)		noexcept;
-	HFSM2_CONSTEXPR(14)	void requestScheduled	(const StateID stateId)			noexcept;
-
-	HFSM2_CONSTEXPR(14)	void clearRequests		()								noexcept;
-	HFSM2_CONSTEXPR(14)	void clear				()								noexcept;
-
-	HFSM2_CONSTEXPR(11)	bool empty				()						  const noexcept;
-
-	StateParents stateParents;
-	CompoParents compoParents;
-
-	RegionHeads	 regionHeads;
-	RegionSizes	 regionSizes;
-
-	CompoForks compoRequested{INVALID_PRONG};
-	OrthoForks orthoRequested;
-	CompoForks compoActive	 {INVALID_PRONG};
-	CompoForks compoResumable{INVALID_PRONG};
-
-	CompoRemains compoRemains;
+	CompoRemains	compoRemains;
 
 #if HFSM2_PLANS_AVAILABLE()
 	CompoStatuses compoStatuses;
 #endif
 };
-
-template <typename TRegistry>
-HFSM2_CONSTEXPR(14)
-void
-backup(const TRegistry& registry,
-	   BackUpT<TRegistry>& copy) noexcept
-{
-	overwrite(copy.compoRequested, registry.compoRequested);
-	overwrite(copy.orthoRequested, registry.orthoRequested);
-	overwrite(copy.compoResumable, registry.compoResumable);
-}
-
-template <typename TRegistry>
-HFSM2_CONSTEXPR(14)
-void
-restore(TRegistry& registry,
-		const BackUpT<TRegistry>& copy) noexcept
-{
-	overwrite(registry.compoRequested, copy.compoRequested);
-	overwrite(registry.orthoRequested, copy.orthoRequested);
-	overwrite(registry.compoResumable, copy.compoResumable);
-}
 
 }
 }
@@ -3451,25 +3369,6 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
 HFSM2_CONSTEXPR(14)
 bool
-RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingChange(const StateID stateId) const noexcept {
-	if (HFSM2_CHECKED(stateId < STATE_COUNT))
-		for (Parent parent = stateParents[stateId];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			HFSM2_ASSERT(parent.forkId != 0);
-
-			if (parent.forkId > 0)
-				return compoRequested[parent.forkId - 1] !=
-					   compoActive	 [parent.forkId - 1];
-		}
-
-	return false;
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
-HFSM2_CONSTEXPR(14)
-bool
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingEnter(const StateID stateId) const noexcept {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		for (Parent parent = stateParents[stateId];
@@ -3481,6 +3380,25 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 			if (parent.forkId > 0)
 				return parent.prong != compoActive	 [parent.forkId - 1] &&
 					   parent.prong == compoRequested[parent.forkId - 1];
+		}
+
+	return false;
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(14)
+bool
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingChange(const StateID stateId) const noexcept {
+	if (HFSM2_CHECKED(stateId < STATE_COUNT))
+		for (Parent parent = stateParents[stateId];
+			 parent;
+			 parent = forkParent(parent.forkId))
+		{
+			HFSM2_ASSERT(parent.forkId != 0);
+
+			if (parent.forkId > 0)
+				return compoRequested[parent.forkId - 1] !=
+					   compoActive	 [parent.forkId - 1];
 		}
 
 	return false;
@@ -3528,55 +3446,72 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
 HFSM2_CONSTEXPR(14)
-bool
+void
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::requestImmediate(const Transition& request) noexcept {
-	if (request.destination == 0)
-		return false;
-	else if (HFSM2_CHECKED(request.destination < STATE_COUNT)) {
-		Parent parent;
+	HFSM2_ASSERT(request.destination > 0);
+	HFSM2_ASSERT(request.destination < STATE_COUNT);
 
-		for (parent = stateParents[request.destination];
-			 parent;
-			 parent = forkParent(parent.forkId))
-		{
-			if (parent.forkId > 0) {
-				compoRequested[parent.forkId - 1] = parent.prong;
-				parent = forkParent(parent.forkId);
+	Parent parent;
 
-				break;
-			} else if (parent.forkId < 0)
-				requestedOrthoFork(parent.forkId).set(parent.prong);
-			else
-				HFSM2_BREAK();
+	for (parent = stateParents[request.destination];
+		 parent;
+		 parent = forkParent(parent.forkId))
+	{
+		if (parent.forkId > 0) {
+			Prong& requested = compoRequested[parent.forkId - 1];
+
+			requested = parent.prong;
+			parent = forkParent(parent.forkId);
+
+			break;
 		}
-
-		for (; parent; parent = forkParent(parent.forkId)) {
-			if (parent.forkId > 0) {
-				compoRemains.set(parent.forkId - 1);
-
-				if (compoActive	  [parent.forkId - 1] != parent.prong)
-					compoRequested[parent.forkId - 1]  = parent.prong;
-				else {
-					parent = forkParent(parent.forkId);
-					break;
-				}
-			} else if (parent.forkId < 0)
-				requestedOrthoFork(parent.forkId).set(parent.prong);
-			else
-				HFSM2_BREAK();
-		}
-
-		for (; parent; parent = forkParent(parent.forkId)) {
-			if (parent.forkId > 0)
-				compoRemains.set(parent.forkId - 1);
-			else if (parent.forkId < 0)
-				requestedOrthoFork(parent.forkId).set(parent.prong);
-			else
-				HFSM2_BREAK();
-		}
+		else
+		if (parent.forkId < 0)
+			requestedOrthoFork(parent.forkId).set(parent.prong);
+		else
+			HFSM2_BREAK();
 	}
 
-	return true;
+	for (;
+		 parent;
+		 parent = forkParent(parent.forkId))
+	{
+		if (parent.forkId > 0) {
+			compoRemains.set(parent.forkId - 1);
+
+			const Prong& active = compoActive[parent.forkId - 1];
+			Prong& requested = compoRequested[parent.forkId - 1];
+
+			if (requested != INVALID_PRONG &&
+				requested != parent.prong  ||
+				active    != parent.prong)
+			{
+				requested  = parent.prong;
+			}
+			else {
+				parent = forkParent(parent.forkId);
+				break;
+			}
+		}
+		else
+		if (parent.forkId < 0)
+			requestedOrthoFork(parent.forkId).set(parent.prong);
+		else
+			HFSM2_BREAK();
+	}
+
+	for (;
+		 parent;
+		 parent = forkParent(parent.forkId))
+	{
+		if (parent.forkId > 0)
+			compoRemains.set(parent.forkId - 1);
+		else
+		if (parent.forkId < 0)
+			requestedOrthoFork(parent.forkId).set(parent.prong);
+		else
+			HFSM2_BREAK();
+	}
 }
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
@@ -3621,6 +3556,131 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 		&& compoActive	 .empty()
 		&& compoResumable.empty();
 }
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::backup(BackUp& copy) const noexcept {
+	overwriteWith(copy.compoRequested, compoRequested);
+	overwriteWith(copy.orthoRequested, orthoRequested);
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::restore(const BackUp& copy) noexcept {
+	overwriteWith(compoRequested, copy.compoRequested);
+	overwriteWith(orthoRequested, copy.orthoRequested);
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(11)
+bool
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::operator != (const BackUp& copy) const noexcept {
+	return compoRequested != copy.compoRequested
+		|| orthoRequested != copy.orthoRequested;
+}
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  , typename TReactOrder
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  HFSM2_IF_PLANS(, Long NTaskCapacity)
+  , typename TPayload
+>
+struct RegistryT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , NCompoCount
+			 , 0
+			 , 0
+			 , TReactOrder
+			 HFSM2_IF_SERIALIZATION(, NSerialBits)
+			 HFSM2_IF_PLANS(, NTaskCapacity)
+			 , TPayload
+		   >
+	   > final
+{
+	using StateList			= TStateList;
+	using RegionList		= TRegionList;
+
+	static constexpr Long  STATE_COUNT		= StateList ::SIZE;
+	static constexpr Long  REGION_COUNT		= RegionList::SIZE;
+	static constexpr Short COMPO_COUNT		= NCompoCount;
+
+	using Payload			= TPayload;
+	using Transition		= TransitionT<Payload>;
+
+	using StateParents		= StaticArrayT<Parent  , STATE_COUNT >;
+	using CompoParents		= StaticArrayT<Parent  , COMPO_COUNT >;
+	using RegionHeads		= StaticArrayT<StateID , REGION_COUNT>;
+	using RegionSizes		= StaticArrayT<Long    , REGION_COUNT>;
+
+	using CompoForks		= StaticArrayT<Prong   , COMPO_COUNT >;
+	using OrthoForks		= BitArrayT	  <0>;
+	using CompoRemains		= BitArrayT	  <			 COMPO_COUNT >;
+
+#if HFSM2_PLANS_AVAILABLE()
+	using CompoStatuses		= BitArrayT	  <			 COMPO_COUNT >;
+#endif
+
+	struct BackUp final {
+		CompoForks compoRequested;
+	};
+
+	HFSM2_CONSTEXPR(14)	Prong activeSubState	(const StateID stateId)	  const noexcept;
+
+	HFSM2_CONSTEXPR(11)	bool  isActive			()						  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isActive			(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isResumable		(const StateID stateId)	  const noexcept;
+
+	HFSM2_CONSTEXPR(14)	bool  isPendingEnter	(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isPendingChange	(const StateID stateId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool  isPendingExit		(const StateID stateId)	  const noexcept;
+
+	HFSM2_CONSTEXPR(14)	const Parent& forkParent(const ForkID forkId)	  const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void  requestImmediate	(const Transition& request)		noexcept;
+
+	HFSM2_CONSTEXPR(14)	void  requestScheduled	(const StateID stateId)			noexcept;
+
+	HFSM2_CONSTEXPR(14)	void  clearRequests		()								noexcept;
+	HFSM2_CONSTEXPR(14)	void  clear				()								noexcept;
+
+	HFSM2_CONSTEXPR(11)	bool  empty				()						  const noexcept;
+
+	HFSM2_CONSTEXPR(14) void  backup			(	   BackUp& copy)	  const noexcept;
+	HFSM2_CONSTEXPR(14) void  restore			(const BackUp& copy)			noexcept;
+
+	HFSM2_CONSTEXPR(11)	bool  operator !=		(const BackUp& copy)	  const noexcept;
+
+	StateParents	stateParents;
+	CompoParents	compoParents;
+	RegionHeads		regionHeads;
+	RegionSizes		regionSizes;
+
+	CompoForks		compoRequested{INVALID_PRONG};
+	OrthoForks		orthoRequested;
+	CompoForks		compoActive   {INVALID_PRONG};
+	CompoForks		compoResumable{INVALID_PRONG};
+
+	CompoRemains	compoRemains;
+
+#if HFSM2_PLANS_AVAILABLE()
+	CompoStatuses	compoStatuses;
+#endif
+};
 
 }
 }
@@ -3688,13 +3748,13 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
 HFSM2_CONSTEXPR(14)
 bool
-RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingChange(const StateID stateId) const noexcept {
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingEnter(const StateID stateId) const noexcept {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
 
-			return compoRequested[parent.forkId - 1] !=
-				   compoActive	 [parent.forkId - 1];
+			return parent.prong != compoActive	 [parent.forkId - 1] &&
+				   parent.prong == compoRequested[parent.forkId - 1];
 		}
 
 	return false;
@@ -3703,13 +3763,13 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
 HFSM2_CONSTEXPR(14)
 bool
-RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingEnter(const StateID stateId) const noexcept {
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::isPendingChange(const StateID stateId) const noexcept {
 	if (HFSM2_CHECKED(stateId < STATE_COUNT))
 		if (Parent parent = stateParents[stateId]) {
 			HFSM2_ASSERT(parent.forkId > 0);
 
-			return parent.prong != compoActive	 [parent.forkId - 1] &&
-				   parent.prong == compoRequested[parent.forkId - 1];
+			return compoRequested[parent.forkId - 1] !=
+				   compoActive	 [parent.forkId - 1];
 		}
 
 	return false;
@@ -3741,44 +3801,48 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
 HFSM2_CONSTEXPR(14)
-bool
+void
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::requestImmediate(const Transition& request) noexcept {
-	// record request
-	// promote it to all children
+	HFSM2_ASSERT(request.destination > 0);
+	HFSM2_ASSERT(request.destination < STATE_COUNT);
 
-	if (request.destination == 0)
-		return false;
-	else if (HFSM2_CHECKED(request.destination < STATE_COUNT)) {
-		Parent parent = stateParents[request.destination];
+	Parent parent = stateParents[request.destination];
 
-		if (HFSM2_CHECKED(parent)) {
+	if (HFSM2_CHECKED(parent)) {
+		HFSM2_ASSERT(parent.forkId > 0);
+
+		compoRequested[parent.forkId - 1] = parent.prong;
+
+		for (parent = forkParent(parent.forkId);
+			 parent;
+			 parent = forkParent(parent.forkId))
+		{
 			HFSM2_ASSERT(parent.forkId > 0);
+			compoRemains.set(parent.forkId - 1);
 
-			compoRequested[parent.forkId - 1] = parent.prong;
+			const Prong& active = compoActive[parent.forkId - 1];
+			Prong& requested = compoRequested[parent.forkId - 1];
 
-			for (parent = forkParent(parent.forkId);
-				 parent;
-				 parent = forkParent(parent.forkId))
+			if (requested != INVALID_PRONG &&
+				requested != parent.prong  ||
+				active    != parent.prong)
 			{
-				HFSM2_ASSERT(parent.forkId > 0);
-				compoRemains.set(parent.forkId - 1);
-
-				if (compoActive	  [parent.forkId - 1] != parent.prong)
-					compoRequested[parent.forkId - 1]  = parent.prong;
-				else {
-					parent = forkParent(parent.forkId);
-					break;
-				}
+				requested  = parent.prong;
 			}
-
-			for (; parent; parent = forkParent(parent.forkId)) {
-				HFSM2_ASSERT(parent.forkId > 0);
-				compoRemains.set(parent.forkId - 1);
+			else {
+				parent = forkParent(parent.forkId);
+				break;
 			}
 		}
-	}
 
-	return true;
+		for (;
+			 parent;
+			 parent = forkParent(parent.forkId))
+		{
+			HFSM2_ASSERT(parent.forkId > 0);
+			compoRemains.set(parent.forkId - 1);
+		}
+	}
 }
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
@@ -3821,6 +3885,27 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 		&& compoRemains	 .empty()
 		&& compoActive	 .empty()
 		&& compoResumable.empty();
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::backup(BackUp& copy) const noexcept {
+	overwriteWith(copy.compoRequested, compoRequested);
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::restore(const BackUp& copy) noexcept {
+	overwriteWith(compoRequested, copy.compoRequested);
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_) HFSM2_IF_PLANS(, Long NTC_), typename TTP_>
+HFSM2_CONSTEXPR(11)
+bool
+RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::operator != (const BackUp& copy) const noexcept {
+	return compoRequested != copy.compoRequested;
 }
 
 }
@@ -8048,7 +8133,7 @@ struct HFSM2_EMPTY_BASES S_
 	HFSM2_CONSTEXPR(14)	Utility		 wrapUtility		  (		Control& control)								noexcept;
 #endif
 
-	HFSM2_CONSTEXPR(14)	bool		 deepForwardEntryGuard(GuardControl&		)								noexcept	{ return false;		}
+	HFSM2_CONSTEXPR(14)	bool		 deepForwardEntryGuard(GuardControl&		)								noexcept	{ return true;		}
 	HFSM2_CONSTEXPR(14)	bool		 deepEntryGuard		  (GuardControl& control)								noexcept;
 
 	HFSM2_CONSTEXPR(14)	void		 deepEnter			  ( PlanControl& control)								noexcept;
@@ -8240,7 +8325,7 @@ S_<TN_, TA_, TH_>::deepEntryGuard(GuardControl& control) noexcept {
 	Head::wideEntryGuard(control);
 	Head::	  entryGuard(control);
 
-	return !cancelledBefore && control._cancelled;
+	return cancelledBefore || !control._cancelled;
 }
 
 template <typename TN_, typename TA_, typename TH_>
@@ -8439,7 +8524,7 @@ S_<TN_, TA_, TH_>::deepExitGuard(GuardControl& control) noexcept {
 	Head::wideExitGuard(control);
 	Head::	  exitGuard(control);
 
-	return !cancelledBefore && control._cancelled;
+	return cancelledBefore || !control._cancelled;
 }
 
 template <typename TN_, typename TA_, typename TH_>
@@ -8699,7 +8784,7 @@ struct S_<TIndices, TArgs, EmptyT<TArgs>>
 	HFSM2_CONSTEXPR(14)	Utility		 wrapUtility		  (		Control& control)								noexcept;
 #endif
 
-	HFSM2_CONSTEXPR(14)	bool		 deepForwardEntryGuard(GuardControl&		)								noexcept	{ return false;		}
+	HFSM2_CONSTEXPR(14)	bool		 deepForwardEntryGuard(GuardControl&		)								noexcept	{ return true;		}
 	HFSM2_CONSTEXPR(14)	bool		 deepEntryGuard		  (GuardControl& control)								noexcept;
 
 	HFSM2_CONSTEXPR(14)	void		 deepEnter			  ( PlanControl& control)								noexcept;
@@ -8861,7 +8946,7 @@ S_<TN_, TA_, EmptyT<TA_>>::deepEntryGuard(GuardControl& HFSM2_IF_LOG_STATE_METHO
 	HFSM2_LOG_STATE_METHOD(&Empty::entryGuard,
 						   Method::ENTRY_GUARD);
 
-	return false;
+	return true;
 }
 
 template <typename TN_, typename TA_>
@@ -8984,7 +9069,7 @@ S_<TN_, TA_, EmptyT<TA_>>::deepExitGuard(GuardControl& HFSM2_IF_LOG_STATE_METHOD
 	HFSM2_LOG_STATE_METHOD(&Empty::exitGuard,
 						   Method::EXIT_GUARD);
 
-	return false;
+	return true;
 }
 
 template <typename TN_, typename TA_>
@@ -11742,7 +11827,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepEntryGuard(GuardControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return HeadState::deepEntryGuard(control) ||
+	return HeadState::deepEntryGuard(control) &&
 		   SubStates::wideEntryGuard(control, requested);
 }
 
@@ -11989,7 +12074,7 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return SubStates::wideExitGuard(control, active) ||
+	return SubStates::wideExitGuard(control, active) &&
 		   HeadState::deepExitGuard(control);
 }
 
@@ -12826,11 +12911,11 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideForwardEntryGuard(GuardControl& control,
 													   const ProngCBits prongs) noexcept
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
-				   Initial	::deepForwardEntryGuard(control		   ) : false;
+				   Initial	::deepForwardEntryGuard(control		   ) : true;
 
 	const bool r = Remaining::wideForwardEntryGuard(control, prongs);
 
-	return i || r;
+	return i && r;
 }
 
 template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
@@ -12840,7 +12925,7 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideForwardEntryGuard(GuardControl& control) no
 	const bool i = Initial	::deepForwardEntryGuard(control);
 	const bool r = Remaining::wideForwardEntryGuard(control);
 
-	return i || r;
+	return i && r;
 }
 
 template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
@@ -12850,7 +12935,7 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideEntryGuard(GuardControl& control) noexcept 
 	const bool i = Initial	::deepEntryGuard(control);
 	const bool r = Remaining::wideEntryGuard(control);
 
-	return i || r;
+	return i && r;
 }
 
 template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
@@ -12977,11 +13062,11 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideForwardExitGuard(GuardControl& control,
 													  const ProngCBits prongs) noexcept
 {
 	const bool i = prongs.get(PRONG_INDEX) ?
-				   Initial	::deepForwardExitGuard(control		  ) : false;
+				   Initial	::deepForwardExitGuard(control		  ) : true;
 
 	const bool r = Remaining::wideForwardExitGuard(control, prongs);
 
-	return i || r;
+	return i && r;
 }
 
 template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
@@ -12991,7 +13076,7 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideForwardExitGuard(GuardControl& control) noe
 	const bool i = Initial	::deepForwardExitGuard(control);
 	const bool r = Remaining::wideForwardExitGuard(control);
 
-	return i || r;
+	return i && r;
 }
 
 template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
@@ -13001,7 +13086,7 @@ OS_<TN_, TA_, NP_, TI_, TR_...>::wideExitGuard(GuardControl& control) noexcept {
 	const bool i = Initial	::deepExitGuard(control);
 	const bool r = Remaining::wideExitGuard(control);
 
-	return i || r;
+	return i && r;
 }
 
 template <typename TN_, typename TA_, Prong NP_, typename TI_, typename... TR_>
@@ -13352,7 +13437,7 @@ OS_<TN_, TA_, NP_, TI_>::wideForwardEntryGuard(GuardControl& control,
 											   const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial::deepForwardEntryGuard(control) : false;
+		Initial::deepForwardEntryGuard(control) : true;
 }
 
 template <typename TN_, typename TA_, Prong NP_, typename TI_>
@@ -13462,7 +13547,7 @@ OS_<TN_, TA_, NP_, TI_>::wideForwardExitGuard(GuardControl& control,
 											  const ProngCBits prongs) noexcept
 {
 	return prongs.get(PRONG_INDEX) ?
-		Initial::deepForwardExitGuard(control) : false;
+		Initial::deepForwardExitGuard(control) : true;
 }
 
 template <typename TN_, typename TA_, Prong NP_, typename TI_>
@@ -13873,7 +13958,7 @@ bool
 O_<TN_, TA_, TH_, TS_...>::deepEntryGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return HeadState::deepEntryGuard(control) ||
+	return HeadState::deepEntryGuard(control) &&
 		   SubStates::wideEntryGuard(control);
 }
 
@@ -14048,7 +14133,7 @@ bool
 O_<TN_, TA_, TH_, TS_...>::deepExitGuard(GuardControl& control) noexcept {
 	ScopedRegion region{control, REGION_ID, HEAD_ID, REGION_SIZE};
 
-	return SubStates::wideExitGuard(control) ||
+	return SubStates::wideExitGuard(control) &&
 		   HeadState::deepExitGuard(control);
 }
 
@@ -15237,19 +15322,15 @@ protected:
 	HFSM2_CONSTEXPR(14)	void processRequest()													noexcept;
 	HFSM2_CONSTEXPR(14)	void processTransitions(TransitionSets& currentTransitions)				noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool applyRequests(const TransitionSets& currentTransitions,
-										   Control& control)									noexcept;
-
-	HFSM2_CONSTEXPR(14)	bool applyRequest (const TransitionSets& currentTransitions,
-										   Control& control,
+	HFSM2_CONSTEXPR(14)	void applyRequest (Control& control,
 										   const Transition& request,
 										   const Short index)									noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool cancelledByEntryGuards(const TransitionSets& currentTransitions,
-													const TransitionSet&  pendingTransitions)	noexcept;
+	HFSM2_CONSTEXPR(14)	bool approvedByEntryGuards(const TransitionSets& currentTransitions,
+												   const TransitionSet&  pendingTransitions)	noexcept;
 
-	HFSM2_CONSTEXPR(14)	bool cancelledByGuards(const TransitionSets& currentTransitions,
-											   const TransitionSet&  pendingTransitions)		noexcept;
+	HFSM2_CONSTEXPR(14)	bool approvedByGuards(const TransitionSets& currentTransitions,
+											  const TransitionSet&  pendingTransitions)			noexcept;
 
 #if HFSM2_SERIALIZATION_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void save(WriteStream& stream)									  const noexcept;
@@ -15571,7 +15652,7 @@ template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 bool
 R_<TG_, TA_>::replayTransitions(const Transition* const transitions,
-							  const Short count) noexcept
+								const Short count) noexcept
 {
 	HFSM2_ASSERT(transitions);
 	HFSM2_ASSERT(_core.registry.isActive());
@@ -15643,37 +15724,46 @@ R_<TG_, TA_>::initialEnter() noexcept {
 	TransitionSets currentTransitions;
 	TransitionSet  pendingTransitions;
 
-	RegistryBackUp undo;
 	PlanControl control{_core, currentTransitions};
 
-	_apex.deepRequestChange(control, {TransitionType::RESTART, INVALID_SHORT});
+	_apex.deepRequestChange(control, {TransitionType::CHANGE, INVALID_SHORT});
 
-	cancelledByEntryGuards(currentTransitions,
-						   pendingTransitions);
+	approvedByEntryGuards(currentTransitions,
+						  pendingTransitions);
 
-	for (Long i = 0;
-		 i < SUBSTITUTION_LIMIT && _core.requests.count();
-		 ++i)
+	RegistryBackUp backup;
+	_core.registry.backup(backup);
+
+	for (Long s = 0;
+		 s < SUBSTITUTION_LIMIT && _core.requests.count();
+		 ++s)
 	{
-		backup(_core.registry, undo);
+		for (Short i = 0; i < _core.requests.count(); ++i) {
+			const Transition& request = _core.requests[i];
 
-		if (applyRequests(currentTransitions,
-						  control))
-		{
+			if (HFSM2_CHECKED(request.destination < STATE_COUNT))
+				applyRequest(control, request, i);
+		}
+
+		if (_core.registry != backup) {
 			pendingTransitions = _core.requests;
 			_core.requests.clear();
 
-			if (cancelledByEntryGuards(currentTransitions,
-									   pendingTransitions))
+			if (approvedByEntryGuards(currentTransitions,
+									  pendingTransitions))
 			{
+				currentTransitions += pendingTransitions;
+				_core.registry.backup(backup);
+			}
+			else {
 				HFSM2_BREAK();
 
-				restore(_core.registry, undo);
-			} else
-				currentTransitions += pendingTransitions;
+				_core.registry.restore(backup);
+			}
 
 			pendingTransitions.clear();
-		} else
+		}
+		else
 			_core.requests.clear();
 	}
 	HFSM2_ASSERT(_core.requests.count() == 0);
@@ -15745,31 +15835,40 @@ R_<TG_, TA_>::processTransitions(TransitionSets& currentTransitions) noexcept {
 
 	TransitionSet pendingTransitions;
 
-	RegistryBackUp registryUndo;
 	PlanControl control{_core, currentTransitions};
 
-	for (Long i = 0;
-		 i < SUBSTITUTION_LIMIT && _core.requests.count();
-		 ++i)
-	{
-		backup(_core.registry, registryUndo);
+	RegistryBackUp backup;
+	_core.registry.backup(backup);
 
-		if (applyRequests(currentTransitions,
-						  control))
-		{
+	for (Long s = 0;
+		 s < SUBSTITUTION_LIMIT && _core.requests.count();
+		 ++s)
+	{
+		for (Short i = 0; i < _core.requests.count(); ++i) {
+			const Transition& request = _core.requests[i];
+
+			if (HFSM2_CHECKED(request.destination < STATE_COUNT))
+				applyRequest(control, request, i);
+		}
+
+		if (_core.registry != backup) {
 			pendingTransitions = _core.requests;
 			_core.requests.clear();
 
-			if (cancelledByGuards(currentTransitions,
-								  pendingTransitions))
+			if (approvedByGuards(currentTransitions,
+								 pendingTransitions))
 			{
-				HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
-				restore(_core.registry, registryUndo);
-			} else
 				currentTransitions += pendingTransitions;
+				_core.registry.backup(backup);
+			}
+			else {
+				HFSM2_IF_TRANSITION_HISTORY(_core.transitionTargets.clear());
+				_core.registry.restore(backup);
+			}
 
 			pendingTransitions.clear();
-		} else
+		}
+		else
 			_core.requests.clear();
 	}
 	HFSM2_ASSERT(_core.requests.count() == 0);
@@ -15782,30 +15881,11 @@ R_<TG_, TA_>::processTransitions(TransitionSets& currentTransitions) noexcept {
 
 template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
-bool
-R_<TG_, TA_>::applyRequests(const TransitionSets& currentTransitions,
-							Control& control) noexcept
-{
-	bool changesMade = false;
-
-	for (Short i = 0; i < _core.requests.count(); ++i)
-		changesMade |= applyRequest(currentTransitions, control, _core.requests[i], i);
-
-	return changesMade;
-}
-
-template <typename TG_, typename TA_>
-HFSM2_CONSTEXPR(14)
-bool
-R_<TG_, TA_>::applyRequest(const TransitionSets& currentTransitions,
-						   Control& control,
+void
+R_<TG_, TA_>::applyRequest(Control& control,
 						   const Transition& request,
 						   const Short index) noexcept
 {
-	for (Short i = 0; i < currentTransitions.count(); ++i)
-		if (currentTransitions[i] == request)
-			return false;
-
 	switch (request.type) {
 	case TransitionType::CHANGE:
 	case TransitionType::RESTART:
@@ -15817,31 +15897,28 @@ R_<TG_, TA_>::applyRequest(const TransitionSets& currentTransitions,
 	case TransitionType::RANDOMIZE:
 #endif
 
-		// TODO: have both return success status
-		if (_core.registry.requestImmediate(request))
+		if (request.destination == 0)
+			_apex.deepRequest      (control, {request.type, index});
+		else {
+			_core.registry.requestImmediate(request);
 			_apex.deepForwardActive(control, {request.type, index});
-		else
-			_apex.deepRequest	   (control, {request.type, index});
-
-		return true;
+		}
+		break;
 
 	case TransitionType::SCHEDULE:
 		_core.registry.requestScheduled(request.destination);
-
-		return false;
+		break;
 
 	default:
 		HFSM2_BREAK();
-
-		return false;
 	}
 }
 
 template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 bool
-R_<TG_, TA_>::cancelledByEntryGuards(const TransitionSets& currentTransitions,
-									 const TransitionSet&  pendingTransitions) noexcept
+R_<TG_, TA_>::approvedByEntryGuards(const TransitionSets& currentTransitions,
+									const TransitionSet&  pendingTransitions) noexcept
 {
 	GuardControl guardControl{_core,
 							  currentTransitions,
@@ -15853,14 +15930,14 @@ R_<TG_, TA_>::cancelledByEntryGuards(const TransitionSets& currentTransitions,
 template <typename TG_, typename TA_>
 HFSM2_CONSTEXPR(14)
 bool
-R_<TG_, TA_>::cancelledByGuards(const TransitionSets& currentTransitions,
-								const TransitionSet&  pendingTransitions) noexcept
+R_<TG_, TA_>::approvedByGuards(const TransitionSets& currentTransitions,
+							   const TransitionSet&  pendingTransitions) noexcept
 {
 	GuardControl guardControl{_core,
 							  currentTransitions,
 							  pendingTransitions};
 
-	return _apex.deepForwardExitGuard(guardControl) ||
+	return _apex.deepForwardExitGuard(guardControl) &&
 		   _apex.deepForwardEntryGuard(guardControl);
 }
 
@@ -15944,16 +16021,16 @@ R_<TG_, TA_>::applyRequests(Control& control,
 							const Transition* const transitions,
 							const Short count) noexcept
 {
-	TransitionSets currentTransitions;
-
 	if (HFSM2_CHECKED(transitions && count)) {
-		bool changesMade = false;
+		RegistryBackUp backup;
+		_core.registry.backup(backup);
 
 		for (Short i = 0; i < count; ++i)
-			changesMade |= applyRequest(currentTransitions, control, transitions[i], i);
+			applyRequest(control, transitions[i], i);
 
-		return changesMade;
-	} else
+		return _core.registry != backup;
+	}
+	else
 		return false;
 }
 
@@ -16328,13 +16405,14 @@ public:
 	/// @param `transitions` Array of 'Transition's to replay
 	/// @see `HFSM2_ENABLE_TRANSITION_HISTORY`
 	template <Long NCount>
-	HFSM2_CONSTEXPR(14)	bool replayEnter(const DynamicArrayT<Transition, NCount>& transitions)	noexcept;
+	HFSM2_CONSTEXPR(14)	bool replayEnter(const DynamicArrayT<Transition, NCount>& transitions)	noexcept	{ return replayEnter(&transitions[0],
+																																 transitions.count());	}
 
 	/// @brief Start the FSM from a specific state
 	///   Can be used to synchronize multiple FSMs
 	/// @param `transition` 'Transition' to replay
 	/// @see `HFSM2_ENABLE_TRANSITION_HISTORY`
-	HFSM2_CONSTEXPR(14)	bool replayEnter(const Transition& transition)							noexcept	{ return replayEnter(&transition, 1);	}
+	HFSM2_CONSTEXPR(14)	bool replayEnter(const Transition& transition)							noexcept	{ return replayEnter(&transition, 1);		}
 
 #endif
 
@@ -16488,6 +16566,8 @@ RV_<G_<NFT_, TC_, Manual, TRO_ HFSM2_IF_UTILITY_THEORY(, TR_, TU_, TG_), NSL_ HF
 		TransitionSets emptyTransitions;
 		PlanControl control{_core, emptyTransitions};
 
+		_apex.deepRequestChange(control, {TransitionType::CHANGE, INVALID_SHORT});
+
 		if (HFSM2_CHECKED(applyRequests(control, transitions, count))) {
 			for (Short i = 0; i < count; ++i)
 				_core.previousTransitions.emplace(transitions[i]);
@@ -16504,18 +16584,6 @@ RV_<G_<NFT_, TC_, Manual, TRO_ HFSM2_IF_UTILITY_THEORY(, TR_, TU_, TG_), NSL_ HF
 	}
 
 	return false;
-}
-
-template <FeatureTag NFT_, typename TC_, typename TRO_ HFSM2_IF_UTILITY_THEORY(, typename TR_, typename TU_, typename TG_), Short NSL_ HFSM2_IF_PLANS(, Long NTC_), typename TP_, typename TA_>
-template <Long NCount>
-HFSM2_CONSTEXPR(14)
-bool
-RV_<G_<NFT_, TC_, Manual, TRO_ HFSM2_IF_UTILITY_THEORY(, TR_, TU_, TG_), NSL_ HFSM2_IF_PLANS(, NTC_), TP_>, TA_>::replayEnter(const DynamicArrayT<Transition, NCount>& transitions)  noexcept {
-	if (transitions.count())
-		return replayEnter(&transitions[0],
-						   transitions.count());
-	else
-		return false;
 }
 
 #endif
