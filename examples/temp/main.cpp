@@ -8,7 +8,10 @@
 #include <stdlib.h>
 #include <hfsm2/machine.hpp>
 
-#pragma warning(disable: 4100)
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4100)
+#endif
 
 struct Context {};
 using Config = hfsm2::Config ::ContextT<Context&>;
@@ -63,5 +66,9 @@ int main() {
 
 	return 0;
 }
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
