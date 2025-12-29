@@ -112,7 +112,7 @@ jobs:
         startsWith(matrix.PLATFORM.OS, 'ubuntu-') &&
         startsWith(matrix.PLATFORM.CC, 'clang-') &&
         matrix.PLATFORM.VERSION
-      uses: egor-tensin/setup-clang@v1
+      uses: egor-tensin/setup-clang@v2
       with:
           version: ${{ matrix.PLATFORM.VERSION }}
 
