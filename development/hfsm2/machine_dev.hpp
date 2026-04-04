@@ -1,5 +1,5 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.10.0 (2025-11-30)
+// 2.11.0 (2026-04-05)
 //
 // Created by Andrew Gresyk
 //
@@ -9,7 +9,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2025
+// Copyright (c) 2026
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@
 #pragma once
 
 #define HFSM2_VERSION_MAJOR 2
-#define HFSM2_VERSION_MINOR 10
+#define HFSM2_VERSION_MINOR 11
 #define HFSM2_VERSION_PATCH 0
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
@@ -56,13 +56,15 @@
 #include "detail/shared/macros_on.hpp"
 
 #include "detail/shared/utility.hpp"
+#include "detail/shared/utility_bits.hpp"
 #include "detail/shared/iterator.hpp"
 #include "detail/shared/bit_stream.hpp"
 #include "detail/shared/random.hpp"
 #include "detail/shared/type_list.hpp"
 
 #include "detail/containers/array.hpp"
-#include "detail/containers/bit_array.hpp"
+#include "detail/containers/bit_flat_set.hpp"
+#include "detail/containers/bit_slice_set.hpp"
 
 #include "detail/features/transition.hpp"
 #include "detail/features/logger_interface.hpp"

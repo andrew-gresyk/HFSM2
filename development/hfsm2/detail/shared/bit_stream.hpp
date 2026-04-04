@@ -23,7 +23,7 @@ class StreamBufferT {
 
 public:
 	static constexpr Long BIT_CAPACITY	= NBitCapacity;
-	static constexpr Long BYTE_COUNT	= contain(BIT_CAPACITY, 8u);
+	static constexpr Long BYTE_COUNT	= ceilingDivide(BIT_CAPACITY, 8u);
 
 	using StreamBuffer	= StreamBufferT<BIT_CAPACITY>;
 	using Data			= uint8_t	   [BYTE_COUNT	];

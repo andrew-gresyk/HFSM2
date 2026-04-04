@@ -90,20 +90,20 @@ struct RegistryT<
 	using Transition		= TransitionT<Payload>;
 
 	using StateParents		= StaticArrayT<Parent  , STATE_COUNT >;
-	using CompoParents		= StaticArrayT<Parent  , COMPO_COUNT>;
-	using OrthoParents		= StaticArrayT<Parent  , ORTHO_COUNT>;
-	using OrthoUnits		= StaticArrayT<Units   , ORTHO_UNITS>;
+	using CompoParents		= StaticArrayT<Parent  , COMPO_COUNT >;
+	using OrthoParents		= StaticArrayT<Parent  , ORTHO_COUNT >;
+	using OrthoUnits		= StaticArrayT<BitSlice, ORTHO_UNITS >;
 	using RegionHeads		= StaticArrayT<StateID , REGION_COUNT>;
 	using RegionSizes		= StaticArrayT<Long    , REGION_COUNT>;
 
 	using CompoForks		= StaticArrayT<Prong   , COMPO_COUNT >;
 
-	using OrthoForks		= BitArrayT	  <			 ORTHO_UNITS * 8>;
+	using OrthoForks		= BitSliceSetT <         ORTHO_UNITS * 8>;
 	using OrthoBits			= typename OrthoForks::Bits;
-	using CompoRemains		= BitArrayT	  <COMPO_COUNT>;
+	using CompoRemains		= BitFlatSetT  <         COMPO_COUNT >;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using CompoStatuses		= BitArrayT	  <			 COMPO_COUNT >;
+	using CompoStatuses		= BitFlatSetT <			 COMPO_COUNT >;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

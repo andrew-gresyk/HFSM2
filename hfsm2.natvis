@@ -22,6 +22,47 @@
 
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
+	<Type Name="hfsm2::detail::BitFlatSetT&lt;*&gt;">
+		<Expand HideRawView="true">
+			<IndexListItems>
+				<Size>CAPACITY</Size>
+				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+
+	<Type Name="hfsm2::detail::BitSliceSetT&lt;*&gt;">
+		<Expand HideRawView="true">
+			<IndexListItems>
+				<Size>CAPACITY</Size>
+				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm2::detail::BitSliceSetT&lt;*&gt;::Bits">
+		<DisplayString>&lt;{CAPACITY &amp; 0x1}&gt;</DisplayString>
+		<Expand HideRawView="true">
+			<IndexListItems>
+				<Size>CAPACITY</Size>
+				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm2::detail::BitSliceSetT&lt;*&gt;::CBits">
+		<Expand HideRawView="true">
+			<IndexListItems>
+				<Size>CAPACITY</Size>
+				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
+
 	<Type Name="hfsm2::detail::DynamicArrayT&lt;*&gt;">
 		<DisplayString>&lt;{(unsigned) _count &amp; 0xFF}&gt;</DisplayString>
 		<Expand HideRawView="true">
@@ -40,36 +81,6 @@
 				<Size>$T2</Size>
 				<ValuePointer>_items</ValuePointer>
 			</ArrayItems>
-		</Expand>
-	</Type>
-
-	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
-
-	<Type Name="hfsm2::detail::BitArrayT&lt;*&gt;">
-		<Expand HideRawView="true">
-			<IndexListItems>
-				<Size>CAPACITY</Size>
-				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
-			</IndexListItems>
-		</Expand>
-	</Type>
-
-	<Type Name="hfsm2::detail::BitArrayT&lt;*&gt;::Bits">
-		<DisplayString>&lt;{CAPACITY &amp; 0x1}&gt;</DisplayString>
-		<Expand HideRawView="true">
-			<IndexListItems>
-				<Size>CAPACITY</Size>
-				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
-			</IndexListItems>
-		</Expand>
-	</Type>
-
-	<Type Name="hfsm2::detail::BitArrayT&lt;*&gt;::CBits">
-		<Expand HideRawView="true">
-			<IndexListItems>
-				<Size>CAPACITY</Size>
-				<ValueNode>(_storage[$i / 8] &gt;&gt; ($i % 8)) &amp; 0x1</ValueNode>
-			</IndexListItems>
 		</Expand>
 	</Type>
 

@@ -16,7 +16,7 @@ struct HFSM2_EMPTY_BASES O_
 			  TIndices::STATE_ID + 1
 			, TIndices::COMPO_INDEX
 			, TIndices::ORTHO_INDEX + 1
-			, TIndices::ORTHO_UNIT + contain(OI_<THead, TSubStates...>::WIDTH, 8)
+			, TIndices::ORTHO_UNIT + ceilingDivide(OI_<THead, TSubStates...>::WIDTH, 8)
 		  >
 		, TArgs
 		, 0
@@ -79,7 +79,7 @@ struct HFSM2_EMPTY_BASES O_
 								  HEAD_ID + 1,
 								  COMPO_INDEX,
 								  ORTHO_INDEX + 1,
-								  ORTHO_UNIT + contain(WIDTH, 8)
+								  ORTHO_UNIT + ceilingDivide(WIDTH, 8)
 							  >,
 							  Args,
 							  0,

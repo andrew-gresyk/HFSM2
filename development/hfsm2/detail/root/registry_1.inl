@@ -158,7 +158,7 @@ HFSM2_CONSTEXPR(14)
 typename RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::OrthoBits
 RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_) HFSM2_IF_PLANS(, NTC_), TTP_>>::requestedOrthoFork(const ForkID forkId) noexcept {
 	HFSM2_ASSERT(forkId < 0);
-	const Units& units = orthoUnits[-forkId - 1];
+	const BitSlice& units = orthoUnits[-forkId - 1];
 
 	return orthoRequested.bits(units);
 }

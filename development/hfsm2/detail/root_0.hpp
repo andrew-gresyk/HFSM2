@@ -91,7 +91,7 @@ public:
 	using Prefix				= StaticArrayT<wchar_t, Info::REVERSE_DEPTH * 2 + 2>;
 	using Prefixes				= StaticArrayT<Prefix, STATE_COUNT>;
 
-	using NamedStates			= BitArrayT<STATE_COUNT>;
+	using NamedStates			= BitFlatSetT<STATE_COUNT>;
 
 	using StructureStateInfos	= typename Args::StructureStateInfos;
 #endif

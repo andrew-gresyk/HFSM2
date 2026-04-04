@@ -166,7 +166,7 @@ struct OI_ final {
 	static constexpr Short COMPO_COUNT		= SubStates::COMPO_COUNT;
 	static constexpr Long  COMPO_PRONGS		= SubStates::COMPO_PRONGS;
 	static constexpr Short ORTHO_COUNT		= SubStates::ORTHO_COUNT   + 1;
-	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS   + contain(WIDTH, 8);
+	static constexpr Short ORTHO_UNITS		= SubStates::ORTHO_UNITS   + ceilingDivide(WIDTH, 8);
 
 	static constexpr Long  STATE_COUNT		=  StateList::SIZE;
 	static constexpr Short REGION_COUNT		= RegionList::SIZE;
@@ -281,10 +281,12 @@ struct ArgsT final {
 
 //------------------------------------------------------------------------------
 
-template <StateID NStateID,
-		  Short NCompoIndex,
-		  Short NOrthoIndex,
-		  Short NOrthoUnit>
+template <
+	StateID NStateID
+  , Short NCompoIndex
+  , Short NOrthoIndex
+  , Short NOrthoUnit
+>
 struct I_ final {
 	static constexpr StateID STATE_ID	 = NStateID;
 	static constexpr Short	 COMPO_INDEX = NCompoIndex;

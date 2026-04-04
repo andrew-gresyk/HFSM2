@@ -235,8 +235,8 @@ template <
 >
 HFSM2_CONSTEXPR(11)
 T
-contain(const T x,
-		const TT to)													noexcept
+ceilingDivide(const T x,
+			  const TT to)												noexcept
 {
 	return (x + static_cast<T>(to) - 1) / static_cast<T>(to);
 }

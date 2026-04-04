@@ -44,11 +44,11 @@ struct RegistryT<
 	using RegionSizes		= StaticArrayT<Long    , REGION_COUNT>;
 
 	using CompoForks		= StaticArrayT<Prong   , COMPO_COUNT >;
-	using OrthoForks		= BitArrayT	  <0>;
-	using CompoRemains		= BitArrayT	  <			 COMPO_COUNT >;
+	using OrthoForks		= BitSliceSetT<0>;
+	using CompoRemains		= BitFlatSetT <          COMPO_COUNT >;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using CompoStatuses		= BitArrayT	  <			 COMPO_COUNT >;
+	using CompoStatuses		= BitFlatSetT <          COMPO_COUNT >;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

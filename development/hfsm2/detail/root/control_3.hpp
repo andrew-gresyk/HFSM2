@@ -30,7 +30,7 @@ protected:
 	using typename PlanControl::Transition;
 
 #if HFSM2_PLANS_AVAILABLE()
-	using TasksBits		= BitArrayT<StateList::SIZE>;
+	using TasksBits		= BitFlatSetT<StateList::SIZE>;
 #endif
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

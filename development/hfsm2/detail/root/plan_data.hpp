@@ -99,18 +99,16 @@ struct PlanDataT<
 	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
 
 	using Task				= TaskT		  <Payload>;
-	using Tasks				= TaskListT   <Payload,  TASK_CAPACITY>;
+	using Tasks				= TaskListT   <Payload , TASK_CAPACITY>;
 	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
-	using Payloads			= StaticArrayT<Payload,  TASK_CAPACITY>;
 
-	using TasksBounds		= StaticArrayT<Bounds,	   REGION_COUNT>;
-	using TasksBits			= BitArrayT   <				STATE_COUNT>;
-	using RegionBits		= BitArrayT   <			   REGION_COUNT>;
+	using TasksBounds		= StaticArrayT<Bounds    , REGION_COUNT>;
+	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
+	using RegionBits		= BitFlatSetT <	           REGION_COUNT>;
 	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
 
 	Tasks tasks;
 	TaskLinks taskLinks;
-	Payloads taskPayloads;
 	TasksBits payloadExists;
 
 	TasksBounds taskBounds;
@@ -168,12 +166,12 @@ struct PlanDataT<
 	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
 
 	using Task				= TaskT		  <void>;
-	using Tasks				= TaskListT	  <void,	 TASK_CAPACITY>;
+	using Tasks				= TaskListT	  <void    , TASK_CAPACITY>;
 	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
 
-	using TasksBounds		= StaticArrayT<Bounds,	   REGION_COUNT>;
-	using TasksBits			= BitArrayT	  <				STATE_COUNT>;
-	using RegionBits		= BitArrayT	  <			   REGION_COUNT>;
+	using TasksBounds		= StaticArrayT<Bounds    , REGION_COUNT>;
+	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
+	using RegionBits		= BitFlatSetT <	           REGION_COUNT>;
 	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
 
 	Tasks tasks;

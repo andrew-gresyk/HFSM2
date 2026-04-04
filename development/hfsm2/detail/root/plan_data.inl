@@ -105,7 +105,6 @@ void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clear() noexcept {
 	tasks		 .clear();
 	taskLinks	 .clear();
-	taskPayloads .clear();
 	payloadExists.clear();
 
 	taskBounds	 .clear();

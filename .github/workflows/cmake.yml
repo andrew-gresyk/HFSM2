@@ -17,6 +17,7 @@ jobs:
     strategy:
       matrix:
         PLATFORM:
+
           - {
               OS: ubuntu-22.04,
               CC: gcc-10,
@@ -32,6 +33,7 @@ jobs:
               CC: gcc-12,
               CXX: g++-12
             }
+
           - {
               OS: ubuntu-24.04,
               CC: gcc-13,
@@ -42,6 +44,13 @@ jobs:
               CC: gcc-14,
               CXX: g++-14
             }
+          - {
+              OS: ubuntu-24.04,
+              CC: gcc-15,
+              CXX: g++-15,
+              INSTALL: true
+            }
+
           - {
               OS: ubuntu-22.04,
               CC: clang-13,
@@ -58,29 +67,34 @@ jobs:
               CXX: clang++-15,
               VERSION: '15'
             }
+
           - {
               OS: ubuntu-24.04,
               CC: clang-16,
-              CXX: clang++-16,
-              VERSION: '16'
+              CXX: clang++-16
             }
           - {
               OS: ubuntu-24.04,
               CC: clang-17,
-              CXX: clang++-17,
-              VERSION: '17'
+              CXX: clang++-17
             }
           - {
               OS: ubuntu-24.04,
               CC: clang-18,
-              CXX: clang++-18,
-              VERSION: '18'
+              CXX: clang++-18
             }
+
           - {
-              OS: macos-13,
+              OS: macos-15-intel,
               CC: clang,
               CXX: clang++
             }
+          - {
+              OS: macos-26-intel,
+              CC: clang,
+              CXX: clang++
+            }
+
           - {
               OS: macos-14,
               CC: clang,
@@ -88,6 +102,11 @@ jobs:
             }
           - {
               OS: macos-15,
+              CC: clang,
+              CXX: clang++
+            }
+          - {
+              OS: macos-26,
               CC: clang,
               CXX: clang++
             }
@@ -112,7 +131,7 @@ jobs:
         startsWith(matrix.PLATFORM.OS, 'ubuntu-') &&
         startsWith(matrix.PLATFORM.CC, 'clang-') &&
         matrix.PLATFORM.VERSION
-      uses: egor-tensin/setup-clang@v1
+      uses: egor-tensin/setup-clang@v2
       with:
           version: ${{ matrix.PLATFORM.VERSION }}
 

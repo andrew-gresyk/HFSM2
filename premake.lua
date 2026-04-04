@@ -9,9 +9,9 @@ workspace "hfsm2"
 		"UNICODE",
 		"_UNICODE",
 	}
+	enablepch "Off"
 	fatalwarnings "All"
 	filename "hfsm2-all"
-	flags "NoPCH"
 	includedirs {
 		"development",
 		"include",
@@ -28,22 +28,33 @@ workspace "hfsm2"
 	system "windows"
 	systemversion "latest"
 
-	filter "toolset:msc-v140 or msc-v141"
-		if os.getversion().majorversion == 10 then
-			local sWin10SDK = os.getWindowsRegistry( "HKLM:SOFTWARE\\Wow6432Node\\Microsoft\\Microsoft SDKs\\Windows\\v10.0\\ProductVersion" )
-			if sWin10SDK ~= nil then systemversion( sWin10SDK .. ".0" ) end
-		end
-		--systemversion "$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))"
-	filter {}
-
 	targetdir "binaries/"
 	targetname "$(ProjectName)-$(Configuration)-$(Platform)"
 	warnings "High"
 
+	filter "toolset:msc-v140 or msc-v141"
+		-- v140/v141 need an explicit SDK version ('latest' resolves to '10.0' which they reject)
+		-- v140 is also incompatible with SDK 10.0.26100+, so find the newest compatible one
+		local sdkVersions = {}
+		for _, d in ipairs(os.matchdirs("C:/Program Files (x86)/Windows Kits/10/Include/10.0.*")) do
+			table.insert(sdkVersions, path.getname(d))
+		end
+		table.sort(sdkVersions)
+	filter "toolset:msc-v140"
+		for i = #sdkVersions, 1, -1 do
+			if sdkVersions[i] < "10.0.26100.0" then
+				systemversion(sdkVersions[i])
+				break
+			end
+		end
+	filter "toolset:msc-v141"
+		if #sdkVersions > 0 then
+			systemversion(sdkVersions[#sdkVersions])
+		end
+
 	filter "configurations:debug"
 		defines "_DEBUG"
 		symbols "On"
-
 	filter "configurations:release"
 		defines "NDEBUG"
 		intrinsics "On"
@@ -52,7 +63,6 @@ workspace "hfsm2"
 
 	filter "platforms:32"
 		architecture "x86"
-
 	filter "platforms:64"
 		architecture "x86_64"
 

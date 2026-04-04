@@ -70,28 +70,28 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\binaries\</OutDir>
+    <OutDir>$(ProjectDir)..\..\binaries\</OutDir>
     <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\x86\Debug\calculator-clang\</IntDir>
     <TargetName>$(ProjectName)-$(Configuration)-$(Platform)</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\binaries\</OutDir>
+    <OutDir>$(ProjectDir)..\..\binaries\</OutDir>
     <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\x64\Debug\calculator-clang\</IntDir>
     <TargetName>$(ProjectName)-$(Configuration)-$(Platform)</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\binaries\</OutDir>
+    <OutDir>$(ProjectDir)..\..\binaries\</OutDir>
     <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\x86\Release\calculator-clang\</IntDir>
     <TargetName>$(ProjectName)-$(Configuration)-$(Platform)</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\binaries\</OutDir>
+    <OutDir>$(ProjectDir)..\..\binaries\</OutDir>
     <IntDir>$(BUILD_ROOT)\$(SolutionName)-$(PlatformArchitecture)\$(ProjectName)-$(Configuration)\x64\Release\calculator-clang\</IntDir>
     <TargetName>$(ProjectName)-$(Configuration)-$(Platform)</TargetName>
     <TargetExt>.exe</TargetExt>
@@ -115,6 +115,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/INCREMENTAL:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -135,6 +137,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/INCREMENTAL:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -160,6 +164,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/INCREMENTAL:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -185,6 +191,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/INCREMENTAL:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\calculator\main.cpp" />

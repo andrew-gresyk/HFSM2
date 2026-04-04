@@ -35,7 +35,7 @@ public:
 
 	static constexpr Index CAPACITY	= NCapacity;
 
-	using Array		= StaticArrayT<Item, CAPACITY>;
+	using Self		= StaticArrayT<Item, CAPACITY>;
 
 public:
 	HFSM2_CONSTEXPR(14)	StaticArrayT() = default;
@@ -49,7 +49,7 @@ public:
 
 	HFSM2_CONSTEXPR(11)	Index count()							  const noexcept	{ return CAPACITY;					}
 
-	HFSM2_CONSTEXPR(14)	bool operator != (const Array& other)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool operator != (const Self& other)	  const noexcept;
 
 	HFSM2_CONSTEXPR(14)	void fill(const Item filler)					noexcept;
 	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(filler<Item>());				}

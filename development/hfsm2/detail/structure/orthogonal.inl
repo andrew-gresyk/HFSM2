@@ -10,7 +10,7 @@ O_<TN_, TA_, TH_, TS_...>::deepRegister(Registry& registry,
 										const Parent parent) noexcept
 {
 	registry.orthoParents[ORTHO_INDEX] = parent;
-	registry.orthoUnits	 [ORTHO_INDEX] = Units{ORTHO_UNIT, WIDTH};
+	registry.orthoUnits	 [ORTHO_INDEX] = BitSlice{ORTHO_UNIT, WIDTH};
 	registry.regionHeads [REGION_ID]   = HEAD_ID;
 	registry.regionSizes [REGION_ID]   = REGION_SIZE;
 

@@ -45,10 +45,16 @@
     <ClInclude Include="..\..\development\hfsm2\detail\containers\array.inl">
       <Filter>development\hfsm2\detail\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_array.hpp">
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_flat_set.hpp">
       <Filter>development\hfsm2\detail\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_array.inl">
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_flat_set.inl">
+      <Filter>development\hfsm2\detail\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_slice_set.hpp">
+      <Filter>development\hfsm2\detail\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_slice_set.inl">
       <Filter>development\hfsm2\detail\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\features\logger_interface.hpp">
@@ -198,6 +204,9 @@
     <ClInclude Include="..\..\development\hfsm2\detail\shared\utility.hpp">
       <Filter>development\hfsm2\detail\shared</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\shared\utility_bits.hpp">
+      <Filter>development\hfsm2\detail\shared</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\structure\ancestors_1.hpp">
       <Filter>development\hfsm2\detail\structure</Filter>
     </ClInclude>
@@ -302,7 +311,10 @@
     <ClCompile Include="..\..\test\reported\test_stress.cpp">
       <Filter>test\reported</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\shared\test_bit_array.cpp">
+    <ClCompile Include="..\..\test\shared\test_bit_flat_set.cpp">
+      <Filter>test\shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\shared\test_bit_slice_set.cpp">
       <Filter>test\shared</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\shared\test_bit_stream.cpp">

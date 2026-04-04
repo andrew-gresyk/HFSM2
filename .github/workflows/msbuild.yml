@@ -22,6 +22,11 @@ jobs:
               SOLUTION_FILE_PATH: projects\premake\hfsm2-vs-2022.sln,
               PROJECT_FILE_NAME: test-17
             }
+          - {
+              OS: windows-11-arm,
+              SOLUTION_FILE_PATH: projects\premake\hfsm2-vs-2022.sln,
+              PROJECT_FILE_NAME: test-17
+            }
 
         BUILD_CONFIG: [ Release, Debug ]
         BUILD_PLATFORM: [ Win32, x64 ]
