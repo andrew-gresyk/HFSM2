@@ -158,7 +158,7 @@
 
 //------------------------------------------------------------------------------
 
-#if defined HFSM2_DISABLE_TYPEINDEX
+#if !defined HFSM2_DISABLE_TYPEINDEX
 	#define HFSM2_TYPEINDEX_AVAILABLE()										true
 	#define HFSM2_IF_TYPEINDEX(...)									 __VA_ARGS__
 	#define HFSM2_TYPEINDEX_MASK										(1 << 0)
