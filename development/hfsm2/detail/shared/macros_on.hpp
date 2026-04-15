@@ -33,6 +33,7 @@
 //------------------------------------------------------------------------------
 
 #define HFSM2_CONSTEXPR(A)								   HFSM2_CONSTEXPR_##A()
+#define HFSM2_CONSTEXPR_AVAILABLE(A)			 HFSM2_CONSTEXPR_AVAILABLE_##A()
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -54,8 +55,14 @@
 
 #if __cplusplus >= 201703L
 	#define HFSM2_CONSTEXPR_17()									   constexpr
+	#define HFSM2_CONSTEXPR_AVAILABLE_17()									true
+
+	#define HFSM2_NOEXCEPT_17(...)						   noexcept(__VA_ARGS__)
 #else
 	#define HFSM2_CONSTEXPR_17()										  inline
+	#define HFSM2_CONSTEXPR_AVAILABLE_17()								   false
+
+	#define HFSM2_NOEXCEPT_17(...)
 #endif
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -104,7 +111,7 @@
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef _DEBUG
+#if defined _DEBUG
 	#define HFSM2_IF_DEBUG(...)										 __VA_ARGS__
 	#define HFSM2_UNLESS_DEBUG(...)
 	#define HFSM2_DEBUG_OR(y, n)											   y
@@ -140,7 +147,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM2_ENABLE_ALL
+#if defined HFSM2_ENABLE_ALL
 	#define HFSM2_ENABLE_DEBUG_STATE_TYPE
 	#define HFSM2_ENABLE_PLANS
 	#define HFSM2_ENABLE_SERIALIZATION
@@ -151,7 +158,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifndef HFSM2_DISABLE_TYPEINDEX
+#if defined HFSM2_DISABLE_TYPEINDEX
 	#define HFSM2_TYPEINDEX_AVAILABLE()										true
 	#define HFSM2_IF_TYPEINDEX(...)									 __VA_ARGS__
 	#define HFSM2_TYPEINDEX_MASK										(1 << 0)
@@ -163,7 +170,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_DEBUG_STATE_TYPE
+#if defined HFSM2_ENABLE_DEBUG_STATE_TYPE
 	#define HFSM2_DEBUG_STATE_TYPE_AVAILABLE()								true
 	#define HFSM2_DEBUG_STATE_TYPE_MASK									(1 << 1)
 #else
@@ -173,7 +180,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_PLANS
+#if defined HFSM2_ENABLE_PLANS
 	#define HFSM2_PLANS_AVAILABLE()											true
 	#define HFSM2_IF_PLANS(...)										 __VA_ARGS__
 	#define HFSM2_PLANS_MASK											(1 << 2)
@@ -185,7 +192,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_SERIALIZATION
+#if defined HFSM2_ENABLE_SERIALIZATION
 	#define HFSM2_SERIALIZATION_AVAILABLE()									true
 	#define HFSM2_IF_SERIALIZATION(...)								 __VA_ARGS__
 	#define HFSM2_SERIALIZATION_MASK									(1 << 3)
@@ -197,7 +204,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_STRUCTURE_REPORT
+#if defined HFSM2_ENABLE_STRUCTURE_REPORT
 	#define HFSM2_STRUCTURE_REPORT_AVAILABLE()								true
 	#define HFSM2_IF_STRUCTURE_REPORT(...)							 __VA_ARGS__
 	#define HFSM2_STRUCTURE_REPORT_MASK									(1 << 4)
@@ -209,7 +216,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_TRANSITION_HISTORY
+#if defined HFSM2_ENABLE_TRANSITION_HISTORY
 	#define HFSM2_TRANSITION_HISTORY_AVAILABLE()							true
 	#define HFSM2_IF_TRANSITION_HISTORY(...)						 __VA_ARGS__
 	#define HFSM2_TRANSITION_HISTORY_MASK								(1 << 5)
@@ -221,7 +228,7 @@
 
 //------------------------------------------------------------------------------
 
-#ifdef HFSM2_ENABLE_UTILITY_THEORY
+#if defined HFSM2_ENABLE_UTILITY_THEORY
 	#define HFSM2_UTILITY_THEORY_AVAILABLE()								true
 	#define HFSM2_IF_UTILITY_THEORY(...)							 __VA_ARGS__
 	#define HFSM2_UTILITY_THEORY_MASK									(1 << 6)
@@ -233,7 +240,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HFSM2_ENABLE_VERBOSE_DEBUG_LOG
+#if defined HFSM2_ENABLE_VERBOSE_DEBUG_LOG
 	#define HFSM2_ENABLE_LOG_INTERFACE
 
 	#define HFSM2_VERBOSE_DEBUG_LOG_AVAILABLE()								true
@@ -245,7 +252,7 @@
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#ifdef HFSM2_ENABLE_LOG_INTERFACE
+#if defined HFSM2_ENABLE_LOG_INTERFACE
 	#define HFSM2_LOG_INTERFACE_AVAILABLE()									true
 	#define HFSM2_IF_LOG_INTERFACE(...)								 __VA_ARGS__
 	#define HFSM2_LOG_INTERFACE_MASK									(1 << 8)

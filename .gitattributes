@@ -1,0 +1,5 @@
+*.c text eol=crlf
+*.cpp text eol=crlf
+*.h text eol=crlf
+*.hpp text eol=crlf
+*.inl text eol=crlf

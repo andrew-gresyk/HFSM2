@@ -57,12 +57,13 @@
 
 #include "detail/shared/utility.hpp"
 #include "detail/shared/utility_bits.hpp"
-#include "detail/shared/iterator.hpp"
 #include "detail/shared/bit_stream.hpp"
 #include "detail/shared/random.hpp"
 #include "detail/shared/type_list.hpp"
 
-#include "detail/containers/array.hpp"
+#include "detail/containers/iterator.hpp"
+#include "detail/containers/static_array.hpp"
+#include "detail/containers/dynamic_array.hpp"
 #include "detail/containers/bit_flat_set.hpp"
 #include "detail/containers/bit_slice_set.hpp"
 

@@ -47,6 +47,8 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #undef HFSM2_CONSTEXPR_17
+#undef HFSM2_CONSTEXPR_AVAILABLE_17
+#undef HFSM2_NOEXCEPT_17
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

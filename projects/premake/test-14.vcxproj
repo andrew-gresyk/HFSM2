@@ -196,12 +196,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\development\hfsm2\detail\config.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\containers\array.hpp" />
-    <ClInclude Include="..\..\development\hfsm2\detail\containers\array.inl" />
     <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_flat_set.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_flat_set.inl" />
     <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_slice_set.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\containers\bit_slice_set.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\dynamic_array.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\dynamic_array.inl" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\iterator.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\static_array.hpp" />
+    <ClInclude Include="..\..\development\hfsm2\detail\containers\static_array.inl" />
     <ClInclude Include="..\..\development\hfsm2\detail\features\logger_interface.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\features\structure_report.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\features\task.hpp" />
@@ -244,7 +247,6 @@
     <ClInclude Include="..\..\development\hfsm2\detail\root_4.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\shared\bit_stream.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\shared\bit_stream.inl" />
-    <ClInclude Include="..\..\development\hfsm2\detail\shared\iterator.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_off.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\shared\macros_on.hpp" />
     <ClInclude Include="..\..\development\hfsm2\detail\shared\random.hpp" />
@@ -291,7 +293,9 @@
     <ClCompile Include="..\..\test\shared\test_bit_flat_set.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_slice_set.cpp" />
     <ClCompile Include="..\..\test\shared\test_bit_stream.cpp" />
+    <ClCompile Include="..\..\test\shared\test_dynamic_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_random.cpp" />
+    <ClCompile Include="..\..\test\shared\test_static_array.cpp" />
     <ClCompile Include="..\..\test\shared\test_task_list.cpp" />
     <ClCompile Include="..\..\test\test_access.cpp" />
     <ClCompile Include="..\..\test\test_ancestors.cpp" />

@@ -25,7 +25,7 @@ BitFlatSetT<NCapacity>::set() noexcept {
 #endif
 }
 
-//------------------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)
@@ -98,6 +98,19 @@ BitFlatSetT<NCapacity>::clear(const TIndex index) noexcept {
 }
 
 //------------------------------------------------------------------------------
+
+template <unsigned NCapacity>
+HFSM2_CONSTEXPR(14)
+bool
+BitFlatSetT<NCapacity>::operator & (const This& other) const noexcept {
+	for (Index i = 0; i < UNIT_COUNT; ++i)
+		if ((_storage[i] & other._storage[i]) == 0)
+			return false;
+
+	return true;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <unsigned NCapacity>
 HFSM2_CONSTEXPR(14)

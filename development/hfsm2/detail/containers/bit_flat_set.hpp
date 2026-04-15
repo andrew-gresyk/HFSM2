@@ -6,12 +6,12 @@ namespace detail {
 template <unsigned NCapacity>
 class BitFlatSetT final {
 public:
-	using Index			= UCapacity<NCapacity>;
+	using Index		= UCapacity<NCapacity>;
 
 	static constexpr Index CAPACITY   = NCapacity;
 	static constexpr Index UNIT_COUNT = ceilingDivide(CAPACITY, 8);
 
-	using This	= BitFlatSetT<CAPACITY>;
+	using This		= BitFlatSetT<CAPACITY>;
 
 public:
 	HFSM2_CONSTEXPR(14)	BitFlatSetT()									noexcept	{ clear();			}
@@ -32,6 +32,7 @@ public:
 	template <typename TIndex>
 	HFSM2_CONSTEXPR(14)	void clear(const TIndex index)					noexcept;
 
+	HFSM2_CONSTEXPR(14)	bool operator &  (const This& other)	  const noexcept;
 	HFSM2_CONSTEXPR(14)	void operator &= (const This& other)			noexcept;
 
 private:

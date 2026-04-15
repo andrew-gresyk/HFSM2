@@ -11,6 +11,8 @@ namespace test_bit_slice_set {
 
 template <typename TBitSet>
 struct BitSliceSetTests {
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	static void defaultConstruction() {
 		TBitSet bits;
 
@@ -32,6 +34,8 @@ struct BitSliceSetTests {
 		CHECK(!static_cast<bool>(bits.template cbits<0, TBitSet::CAPACITY>()));
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	static void compileTimeViews() {
 		TBitSet bits;
 
@@ -51,6 +55,8 @@ struct BitSliceSetTests {
 		CHECK(!cview.get(8u));
 		CHECK( cview.get(9u));
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	static void byteAlignedView() {
 		TBitSet bits;
@@ -82,6 +88,8 @@ struct BitSliceSetTests {
 		CHECK( wholeView.get(16u));
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	static void runtimeViewOffsetSpan() {
 		TBitSet bits;
 		auto whole = bits.template bits<0, TBitSet::CAPACITY>();
@@ -101,6 +109,7 @@ struct BitSliceSetTests {
 		const TBitSet& cbits = bits;
 		auto wholeView = cbits.template cbits<0, TBitSet::CAPACITY>();
 		auto sliceView = cbits.template cbits<1, 10>();
+		auto runtimeSliceView = cbits.cbits(units);
 
 		CHECK( wholeView.get(5u));
 		CHECK( wholeView.get(8u));
@@ -116,6 +125,12 @@ struct BitSliceSetTests {
 		CHECK( sliceView.get(7u));
 		CHECK(!sliceView.get(8u));
 		CHECK( sliceView.get(9u));
+		CHECK(static_cast<bool>(runtimeSliceView));
+		CHECK( runtimeSliceView.get(0u));
+		CHECK(!runtimeSliceView.get(1u));
+		CHECK( runtimeSliceView.get(7u));
+		CHECK(!runtimeSliceView.get(8u));
+		CHECK( runtimeSliceView.get(9u));
 
 		view.clear();
 
@@ -127,6 +142,8 @@ struct BitSliceSetTests {
 		CHECK(!clearedView.get(17u));
 		CHECK( clearedView.get(18u));
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	static void viewClearPreservesAdjacentBits() {
 		TBitSet bits;
@@ -154,6 +171,8 @@ struct BitSliceSetTests {
 		CHECK( wholeView.get(10u));
 	}
 
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	static void inequality() {
 		TBitSet left;
 		TBitSet right;
@@ -164,6 +183,8 @@ struct BitSliceSetTests {
 
 		CHECK(left != right);
 	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 };
 
 ////////////////////////////////////////////////////////////////////////////////
