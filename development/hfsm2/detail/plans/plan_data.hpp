@@ -40,7 +40,6 @@ struct PlanDataT<
 	using StateList			= TStateList;
 	using RegionList		= TRegionList;
 	using Payload			= TPayload;
-	using TaskStatus		= TaskStatus;
 
 	static constexpr Long STATE_COUNT	= StateList ::SIZE;
 	static constexpr Long REGION_COUNT	= RegionList::SIZE;
@@ -105,7 +104,6 @@ struct PlanDataT<
 {
 	using StateList			= TStateList;
 	using RegionList		= TRegionList;
-	using TaskStatus		= TaskStatus;
 
 	static constexpr Long  STATE_COUNT	= StateList ::SIZE;
 	static constexpr Long REGION_COUNT	= RegionList::SIZE;
