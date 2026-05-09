@@ -16443,7 +16443,7 @@ private:
 	Slot _slots[CAPACITY];
 };
 
-#if __cplusplus < 201703L
+#if __cplusplus == 201402L
 
 template <typename T, Long NTC_, Long NRC_>
 constexpr typename TaskListT<T, NTC_, NRC_>::Index
