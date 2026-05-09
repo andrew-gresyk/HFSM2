@@ -9,11 +9,11 @@ template <typename TItem, Long NTaskCapacity, Long NRegionCount>
 class TaskListT {
 public:
 	using Item		= TItem;
-	using Index		= Long;
+	using Index		= UCapacity<NTaskCapacity>;
 
 	static constexpr Index CAPACITY		= NTaskCapacity;
 	static constexpr Long  REGION_COUNT	= NRegionCount;
-	static constexpr Index INVALID		= INVALID_LONG;
+	static constexpr Index INVALID		= static_cast<Index>(-1);
 
 	struct Bounds final {
 		Index first	= INVALID;
@@ -81,6 +81,8 @@ public:
 	HFSM2_CONSTEXPR(11)	bool  empty()								  const noexcept	{ return _count == 0;													}
 	HFSM2_CONSTEXPR(11)	bool  occupied(const Index index)			  const noexcept	{ return index < _last && _occupied.get(index);							}
 
+	HFSM2_CONSTEXPR(11) static Index invalid()								noexcept	{ return INVALID;														}
+
 private:
 	HFSM2_CONSTEXPR(14)		  Item& item(const Index index)					noexcept	{ return *::hfsm2::reinterpret_launder<Item>(slot(index).storage);		}
 	HFSM2_CONSTEXPR(11)	const Item& item(const Index index)			  const noexcept	{ return *::hfsm2::reinterpret_launder<Item>(slot(index).storage);		}
@@ -115,13 +117,13 @@ private:
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-#if __cplusplus == 201402L
-
-template <typename T, Long NTC_, Long NRC_>
-constexpr typename TaskListT<T, NTC_, NRC_>::Index
-TaskListT<T, NTC_, NRC_>::INVALID;
-
-#endif
+//#if __cplusplus == 201402L
+//
+//template <typename T, Long NTC_, Long NRC_>
+//constexpr typename TaskListT<T, NTC_, NRC_>::Index
+//TaskListT<T, NTC_, NRC_>::INVALID;
+//
+//#endif
 
 //------------------------------------------------------------------------------
 

@@ -66,7 +66,7 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlans() const noexcept {
-	Long planCount = 0;
+	TaskIndex planCount = 0;
 
 	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
 		planCount += verifyPlan(regionId);
@@ -78,19 +78,19 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
-Long
+typename PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::TaskIndex
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlan(const RegionID regionId) const noexcept {
-	Long length = 0;
+	TaskIndex length = 0;
 	const Bounds& regionBounds = tasks.bounds(regionId);
 
 	if (regionBounds) {
 		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
 
-		for (Long slow = regionBounds.first, fast = slow; ; ) {
+		for (TaskIndex slow = regionBounds.first, fast = slow; ; ) {
 			++length;
 
 			if (slow != regionBounds.last) {
-				const Long slowNext = tasks.next(slow);
+				const TaskIndex slowNext = tasks.next(slow);
 				HFSM2_ASSERT(slowNext != INVALID_LONG);
 				slow = slowNext;
 
@@ -181,7 +181,7 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlans() const noexcept {
-	Long planCount = 0;
+	TaskIndex planCount = 0;
 
 	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
 		planCount += verifyPlan(regionId);
@@ -193,19 +193,19 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
-Long
+typename PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::TaskIndex
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlan(const RegionID regionId) const noexcept {
-	Long length = 0;
+	TaskIndex length = 0;
 	const Bounds& regionBounds = tasks.bounds(regionId);
 
 	if (regionBounds) {
 		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
 
-		for (Long slow = regionBounds.first, fast = slow; ; ) {
+		for (TaskIndex slow = regionBounds.first, fast = slow; ; ) {
 			++length;
 
 			if (slow != regionBounds.last) {
-				const Long slowNext = tasks.next(slow);
+				const TaskIndex slowNext = tasks.next(slow);
 				HFSM2_ASSERT(slowNext != INVALID_LONG);
 				slow = slowNext;
 

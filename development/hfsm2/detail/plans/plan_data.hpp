@@ -47,6 +47,7 @@ struct PlanDataT<
 
 	using Task				= TaskT<Payload>;
 	using Tasks				= TaskListT<Task, TASK_CAPACITY, REGION_COUNT>;
+	using TaskIndex			= typename Tasks::Index;
 	using Bounds			= typename Tasks::Bounds;
 
 	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
@@ -70,7 +71,7 @@ struct PlanDataT<
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
-	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID regionId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	TaskIndex verifyPlan(const RegionID regionId) const noexcept;
 #endif
 };
 
@@ -111,6 +112,7 @@ struct PlanDataT<
 
 	using Task				= TaskT<void>;
 	using Tasks				= TaskListT<Task, TASK_CAPACITY, REGION_COUNT>;
+	using TaskIndex			= typename Tasks::Index;
 	using Bounds			= typename Tasks::Bounds;
 
 	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
@@ -133,7 +135,7 @@ struct PlanDataT<
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
-	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID regionId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	TaskIndex verifyPlan(const RegionID regionId) const noexcept;
 #endif
 };
 

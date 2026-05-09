@@ -4,6 +4,19 @@
     <VirtualDirectory Name="hfsm2">
       <File Name="../../../development/hfsm2/machine_dev.hpp"/>
       <VirtualDirectory Name="detail">
+        <VirtualDirectory Name="plans">
+          <File Name="../../../development/hfsm2/detail/plans/task_list.inl"/>
+          <File Name="../../../development/hfsm2/detail/plans/task_list.hpp"/>
+          <File Name="../../../development/hfsm2/detail/plans/task.hpp"/>
+          <File Name="../../../development/hfsm2/detail/plans/plan_data.inl"/>
+          <File Name="../../../development/hfsm2/detail/plans/plan_data.hpp"/>
+          <File Name="../../../development/hfsm2/detail/plans/plan_2.inl"/>
+          <File Name="../../../development/hfsm2/detail/plans/plan_2.hpp"/>
+          <File Name="../../../development/hfsm2/detail/plans/plan_1.inl"/>
+          <File Name="../../../development/hfsm2/detail/plans/plan_1.hpp"/>
+          <File Name="../../../development/hfsm2/detail/plans/plan_0.inl"/>
+          <File Name="../../../development/hfsm2/detail/plans/plan_0.hpp"/>
+        </VirtualDirectory>
         <File Name="../../../development/hfsm2/detail/root_4.hpp"/>
         <File Name="../../../development/hfsm2/detail/root_3.inl"/>
         <File Name="../../../development/hfsm2/detail/root_3.hpp"/>
@@ -40,23 +53,19 @@
           <File Name="../../../development/hfsm2/detail/structure/composite.hpp"/>
         </VirtualDirectory>
         <VirtualDirectory Name="shared">
+          <File Name="../../../development/hfsm2/detail/shared/utility_bits.hpp"/>
           <File Name="../../../development/hfsm2/detail/shared/utility.hpp"/>
           <File Name="../../../development/hfsm2/detail/shared/type_list.hpp"/>
           <File Name="../../../development/hfsm2/detail/shared/random.inl"/>
           <File Name="../../../development/hfsm2/detail/shared/random.hpp"/>
           <File Name="../../../development/hfsm2/detail/shared/macros_on.hpp"/>
           <File Name="../../../development/hfsm2/detail/shared/macros_off.hpp"/>
-          <File Name="../../../development/hfsm2/detail/shared/iterator.hpp"/>
           <File Name="../../../development/hfsm2/detail/shared/bit_stream.inl"/>
           <File Name="../../../development/hfsm2/detail/shared/bit_stream.hpp"/>
         </VirtualDirectory>
         <VirtualDirectory Name="root">
-          <File Name="../../../development/hfsm2/detail/root/plan_2.inl"/>
-          <File Name="../../../development/hfsm2/detail/root/plan_2.hpp"/>
-          <File Name="../../../development/hfsm2/detail/root/plan_1.inl"/>
-          <File Name="../../../development/hfsm2/detail/root/plan_1.hpp"/>
-          <File Name="../../../development/hfsm2/detail/root/plan_0.inl"/>
-          <File Name="../../../development/hfsm2/detail/root/plan_0.hpp"/>
+          <File Name="../../../development/hfsm2/detail/root/registry_2.hpp"/>
+          <File Name="../../../development/hfsm2/detail/root/registry_1.hpp"/>
           <File Name="../../../development/hfsm2/detail/root/control_5.hpp"/>
           <File Name="../../../development/hfsm2/detail/root/control_4.inl"/>
           <File Name="../../../development/hfsm2/detail/root/control_4.hpp"/>
@@ -72,21 +81,20 @@
           <File Name="../../../development/hfsm2/detail/root/core.hpp"/>
           <File Name="../../../development/hfsm2/detail/root/registry_2.inl"/>
           <File Name="../../../development/hfsm2/detail/root/registry_1.inl"/>
-          <File Name="../../../development/hfsm2/detail/root/registry.hpp"/>
-          <File Name="../../../development/hfsm2/detail/root/plan_data.inl"/>
-          <File Name="../../../development/hfsm2/detail/root/plan_data.hpp"/>
         </VirtualDirectory>
         <VirtualDirectory Name="features">
+          <File Name="../../../development/hfsm2/detail/features/task_status.inl"/>
+          <File Name="../../../development/hfsm2/detail/features/task_status.hpp"/>
           <File Name="../../../development/hfsm2/detail/features/transition.hpp"/>
-          <File Name="../../../development/hfsm2/detail/features/task.hpp"/>
           <File Name="../../../development/hfsm2/detail/features/structure_report.hpp"/>
           <File Name="../../../development/hfsm2/detail/features/logger_interface.hpp"/>
         </VirtualDirectory>
         <VirtualDirectory Name="containers">
-          <File Name="../../../development/hfsm2/detail/containers/bit_array.inl"/>
-          <File Name="../../../development/hfsm2/detail/containers/bit_array.hpp"/>
-          <File Name="../../../development/hfsm2/detail/containers/list.inl"/>
-          <File Name="../../../development/hfsm2/detail/containers/list.hpp"/>
+          <File Name="../../../development/hfsm2/detail/containers/iterator.hpp"/>
+          <File Name="../../../development/hfsm2/detail/containers/bit_slice_set.inl"/>
+          <File Name="../../../development/hfsm2/detail/containers/bit_slice_set.hpp"/>
+          <File Name="../../../development/hfsm2/detail/containers/bit_flat_set.inl"/>
+          <File Name="../../../development/hfsm2/detail/containers/bit_flat_set.hpp"/>
           <File Name="../../../development/hfsm2/detail/containers/dynamic_array.inl"/>
           <File Name="../../../development/hfsm2/detail/containers/dynamic_array.hpp"/>
           <File Name="../../../development/hfsm2/detail/containers/static_array.inl"/>
@@ -105,12 +113,11 @@
     <Topleveldir>/Work/HFSM2</Topleveldir>
   </Reconciliation>
   <VirtualDirectory Name="test">
+    <File Name="../../../test/test_debug_structure.cpp"/>
     <File Name="../../../test/wiki_transitions_within_hierarchy.cpp"/>
     <File Name="../../../test/wiki_class_member.hpp"/>
     <File Name="../../../test/wiki_class_member.cpp"/>
-    <File Name="../../../test/test_types.cpp"/>
     <File Name="../../../test/test_react_order.cpp"/>
-    <File Name="../../../test/test_plan_hierarchy.cpp"/>
     <File Name="../../../test/test_query.cpp"/>
     <File Name="../../../test/test_plan_external_payloads.cpp"/>
     <File Name="../../../test/test_plan_external.cpp"/>
@@ -121,13 +128,16 @@
     <File Name="../../../test/test_ancestors.cpp"/>
     <File Name="../../../test/tools.inl"/>
     <VirtualDirectory Name="reported">
+      <File Name="../../../test/reported/test_stress.cpp"/>
+      <File Name="../../../test/reported/test_plan_hierarchy.cpp"/>
+      <File Name="../../../test/reported/issue_134.cpp"/>
+      <File Name="../../../test/reported/issue_123.cpp"/>
       <File Name="../../../test/reported/resuming_plan.cpp"/>
       <File Name="../../../test/reported/issue_49.cpp"/>
     </VirtualDirectory>
     <File Name="../../../test/tools.hpp"/>
     <File Name="../../../test/test_utilize.cpp"/>
     <File Name="../../../test/test_utility_regions.cpp"/>
-    <File Name="../../../test/test_stress.cpp"/>
     <File Name="../../../test/test_serialization.cpp"/>
     <File Name="../../../test/test_self_transitions.cpp"/>
     <File Name="../../../test/test_resume.cpp"/>
@@ -149,11 +159,13 @@
     <File Name="../../../test/test_access.cpp"/>
     <File Name="../../../test/main.cpp"/>
     <VirtualDirectory Name="shared">
+      <File Name="../../../test/shared/test_dynamic_array.cpp"/>
+      <File Name="../../../test/shared/test_bit_slice_set.cpp"/>
+      <File Name="../../../test/shared/test_bit_flat_set.cpp"/>
       <File Name="../../../test/shared/test_static_array.cpp"/>
       <File Name="../../../test/shared/test_task_list.cpp"/>
       <File Name="../../../test/shared/test_random.cpp"/>
       <File Name="../../../test/shared/test_bit_stream.cpp"/>
-      <File Name="../../../test/shared/test_bit_array.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
@@ -170,7 +182,7 @@
   <Dependencies/>
   <Settings Type="Executable">
     <GlobalSettings>
-      <Compiler Options="-Werror -Wall -Wextra -Wpedantic -Wshadow -Wold-style-cast;-std=c++11" C_Options="-Werror -Wall -Wextra -Wpedantic -Wshadow -Wold-style-cast" Assembler="">
+      <Compiler Options="-Werror -Wall -Wextra -Wpedantic -Wshadow -Wold-style-cast;-std=c++14" C_Options="-Werror -Wall -Wextra -Wpedantic -Wshadow -Wold-style-cast" Assembler="">
         <IncludePath Value="."/>
         <IncludePath Value="$(WorkspacePath)/../../development"/>
         <IncludePath Value="$(WorkspacePath)/../../external"/>

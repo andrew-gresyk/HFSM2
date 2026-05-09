@@ -43,11 +43,11 @@ public:
 		HFSM2_CONSTEXPR(14)	const Task& operator  *()			  const noexcept	{ return  _plan._planData.tasks[_curr];		}
 		HFSM2_CONSTEXPR(11)	const Task* operator ->()			  const noexcept	{ return &_plan._planData.tasks[_curr];		}
 
-		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
+		HFSM2_CONSTEXPR(14)	TaskIndex next()					  const noexcept;
 
 		const PlanT& _plan;
-		Long _curr;
-		Long _next;
+		TaskIndex _curr;
+		TaskIndex _next;
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -66,11 +66,11 @@ public:
 
 		HFSM2_CONSTEXPR(14)	void remove()								noexcept	{ _plan.remove(_curr);						}
 
-		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
+		HFSM2_CONSTEXPR(14)	TaskIndex next()					  const noexcept;
 
 		PlanT& _plan;
-		Long _curr;
-		Long _next;
+		TaskIndex _curr;
+		TaskIndex _next;
 	};
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -327,7 +327,7 @@ public:
 	HFSM2_CONSTEXPR(11)	CIterator begin()						  const noexcept	{ return CIterator{*this};	}
 
 private:
-	HFSM2_CONSTEXPR(14)	void remove(const Long task)					noexcept;
+	HFSM2_CONSTEXPR(14)	void remove(const TaskIndex task)				noexcept;
 
 protected:
 	Registry& _registry;

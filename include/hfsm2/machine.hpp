@@ -16343,11 +16343,11 @@ template <typename TItem, Long NTaskCapacity, Long NRegionCount>
 class TaskListT {
 public:
 	using Item		= TItem;
-	using Index		= Long;
+	using Index		= UCapacity<NTaskCapacity>;
 
 	static constexpr Index CAPACITY		= NTaskCapacity;
 	static constexpr Long  REGION_COUNT	= NRegionCount;
-	static constexpr Index INVALID		= INVALID_LONG;
+	static constexpr Index INVALID		= static_cast<Index>(-1);
 
 	struct Bounds final {
 		Index first	= INVALID;
@@ -16411,6 +16411,8 @@ public:
 	HFSM2_CONSTEXPR(11)	bool  empty()								  const noexcept	{ return _count == 0;													}
 	HFSM2_CONSTEXPR(11)	bool  occupied(const Index index)			  const noexcept	{ return index < _last && _occupied.get(index);							}
 
+	HFSM2_CONSTEXPR(11) static Index invalid()								noexcept	{ return INVALID;														}
+
 private:
 	HFSM2_CONSTEXPR(14)		  Item& item(const Index index)					noexcept	{ return *::hfsm2::reinterpret_launder<Item>(slot(index).storage);		}
 	HFSM2_CONSTEXPR(11)	const Item& item(const Index index)			  const noexcept	{ return *::hfsm2::reinterpret_launder<Item>(slot(index).storage);		}
@@ -16443,13 +16445,13 @@ private:
 	Slot _slots[CAPACITY];
 };
 
-#if __cplusplus == 201402L
-
-template <typename T, Long NTC_, Long NRC_>
-constexpr typename TaskListT<T, NTC_, NRC_>::Index
-TaskListT<T, NTC_, NRC_>::INVALID;
-
-#endif
+//#if __cplusplus == 201402L
+//
+//template <typename T, Long NTC_, Long NRC_>
+//constexpr typename TaskListT<T, NTC_, NRC_>::Index
+//TaskListT<T, NTC_, NRC_>::INVALID;
+//
+//#endif
 
 template <typename TItem, Long NRegionCount>
 class TaskListT<TItem, 0, NRegionCount> final {
@@ -16860,6 +16862,7 @@ struct PlanDataT<
 
 	using Task				= TaskT<Payload>;
 	using Tasks				= TaskListT<Task, TASK_CAPACITY, REGION_COUNT>;
+	using TaskIndex			= typename Tasks::Index;
 	using Bounds			= typename Tasks::Bounds;
 
 	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
@@ -16883,7 +16886,7 @@ struct PlanDataT<
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
-	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID regionId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	TaskIndex verifyPlan(const RegionID regionId) const noexcept;
 #endif
 };
 
@@ -16922,6 +16925,7 @@ struct PlanDataT<
 
 	using Task				= TaskT<void>;
 	using Tasks				= TaskListT<Task, TASK_CAPACITY, REGION_COUNT>;
+	using TaskIndex			= typename Tasks::Index;
 	using Bounds			= typename Tasks::Bounds;
 
 	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
@@ -16944,7 +16948,7 @@ struct PlanDataT<
 
 #if HFSM2_ASSERT_AVAILABLE()
 	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
-	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID regionId)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	TaskIndex verifyPlan(const RegionID regionId) const noexcept;
 #endif
 };
 
@@ -17082,7 +17086,7 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlans() const noexcept {
-	Long planCount = 0;
+	TaskIndex planCount = 0;
 
 	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
 		planCount += verifyPlan(regionId);
@@ -17092,19 +17096,19 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
 HFSM2_CONSTEXPR(14)
-Long
+typename PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::TaskIndex
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlan(const RegionID regionId) const noexcept {
-	Long length = 0;
+	TaskIndex length = 0;
 	const Bounds& regionBounds = tasks.bounds(regionId);
 
 	if (regionBounds) {
 		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
 
-		for (Long slow = regionBounds.first, fast = slow; ; ) {
+		for (TaskIndex slow = regionBounds.first, fast = slow; ; ) {
 			++length;
 
 			if (slow != regionBounds.last) {
-				const Long slowNext = tasks.next(slow);
+				const TaskIndex slowNext = tasks.next(slow);
 				HFSM2_ASSERT(slowNext != INVALID_LONG);
 				slow = slowNext;
 
@@ -17185,7 +17189,7 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlans() const noexcept {
-	Long planCount = 0;
+	TaskIndex planCount = 0;
 
 	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
 		planCount += verifyPlan(regionId);
@@ -17195,19 +17199,19 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 
 template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
 HFSM2_CONSTEXPR(14)
-Long
+typename PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::TaskIndex
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlan(const RegionID regionId) const noexcept {
-	Long length = 0;
+	TaskIndex length = 0;
 	const Bounds& regionBounds = tasks.bounds(regionId);
 
 	if (regionBounds) {
 		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
 
-		for (Long slow = regionBounds.first, fast = slow; ; ) {
+		for (TaskIndex slow = regionBounds.first, fast = slow; ; ) {
 			++length;
 
 			if (slow != regionBounds.last) {
-				const Long slowNext = tasks.next(slow);
+				const TaskIndex slowNext = tasks.next(slow);
 				HFSM2_ASSERT(slowNext != INVALID_LONG);
 				slow = slowNext;
 
@@ -17457,11 +17461,11 @@ public:
 		HFSM2_CONSTEXPR(14)	const Task& operator  *()			  const noexcept	{ return  _plan._planData.tasks[_curr];		}
 		HFSM2_CONSTEXPR(11)	const Task* operator ->()			  const noexcept	{ return &_plan._planData.tasks[_curr];		}
 
-		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
+		HFSM2_CONSTEXPR(14)	TaskIndex next()					  const noexcept;
 
 		const PlanT& _plan;
-		Long _curr;
-		Long _next;
+		TaskIndex _curr;
+		TaskIndex _next;
 	};
 
 	struct Iterator final {
@@ -17478,11 +17482,11 @@ public:
 
 		HFSM2_CONSTEXPR(14)	void remove()								noexcept	{ _plan.remove(_curr);						}
 
-		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
+		HFSM2_CONSTEXPR(14)	TaskIndex next()					  const noexcept;
 
 		PlanT& _plan;
-		Long _curr;
-		Long _next;
+		TaskIndex _curr;
+		TaskIndex _next;
 	};
 
 protected:
@@ -17721,7 +17725,7 @@ public:
 	HFSM2_CONSTEXPR(11)	CIterator begin()						  const noexcept	{ return CIterator{*this};	}
 
 private:
-	HFSM2_CONSTEXPR(14)	void remove(const Long task)					noexcept;
+	HFSM2_CONSTEXPR(14)	void remove(const TaskIndex task)				noexcept;
 
 protected:
 	Registry& _registry;
@@ -17766,11 +17770,11 @@ PlanT<TArgs>::CIterator::operator ++() noexcept {
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
-Long
+typename PlanT<TArgs>::TaskIndex
 PlanT<TArgs>::CIterator::next() const noexcept {
 	return _curr < PlanT::TASK_CAPACITY ?
 		_plan._planData.tasks.next(_curr) :
-		INVALID_LONG;
+		Tasks::invalid();
 }
 
 template <typename TArgs>
@@ -17800,11 +17804,11 @@ PlanT<TArgs>::Iterator::operator ++() noexcept {
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
-Long
+typename PlanT<TArgs>::TaskIndex
 PlanT<TArgs>::Iterator::next() const noexcept {
 	return _curr < PlanT::TASK_CAPACITY ?
 		_plan._planData.tasks.next(_curr) :
-		INVALID_LONG;
+		Tasks::invalid();
 }
 
 template <typename TArgs>
@@ -17827,7 +17831,7 @@ PlanT<TArgs>::append(const StateID origin,
 	if (_planData.tasks.count() < TASK_CAPACITY) {
 		_planData.planExists.set(_regionId);
 
-		return _planData.tasks.emplace(_regionId, origin, destination, type) != Tasks::INVALID;
+		return _planData.tasks.emplace(_regionId, origin, destination, type) != Tasks::invalid();
 	}
 	else
 		return false;
@@ -17885,7 +17889,7 @@ PlanT<TArgs>::clear() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-PlanT<TArgs>::remove(const Long index) noexcept {
+PlanT<TArgs>::remove(const TaskIndex index) noexcept {
 	HFSM2_ASSERT(_planData.planExists.get(_regionId));
 	HFSM2_ASSERT(index < TASK_CAPACITY);
 
@@ -18320,7 +18324,7 @@ PayloadPlanT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 	if (_planData.tasks.count() < TASK_CAPACITY) {
 		_planData.planExists.set(_regionId);
 
-		return _planData.tasks.emplace(_regionId, origin, destination, type, payload) != PlanBase::Tasks::INVALID;
+		return _planData.tasks.emplace(_regionId, origin, destination, type, payload) != PlanBase::Tasks::invalid();
 	}
 	else
 		return false;

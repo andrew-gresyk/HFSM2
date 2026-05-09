@@ -38,11 +38,11 @@ PlanT<TArgs>::CIterator::operator ++() noexcept {
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
-Long
+typename PlanT<TArgs>::TaskIndex
 PlanT<TArgs>::CIterator::next() const noexcept {
 	return _curr < PlanT::TASK_CAPACITY ?
 		_plan._planData.tasks.next(_curr) :
-		INVALID_LONG;
+		Tasks::invalid();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,11 +80,11 @@ PlanT<TArgs>::Iterator::operator ++() noexcept {
 
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
-Long
+typename PlanT<TArgs>::TaskIndex
 PlanT<TArgs>::Iterator::next() const noexcept {
 	return _curr < PlanT::TASK_CAPACITY ?
 		_plan._planData.tasks.next(_curr) :
-		INVALID_LONG;
+		Tasks::invalid();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ PlanT<TArgs>::append(const StateID origin,
 	if (_planData.tasks.count() < TASK_CAPACITY) {
 		_planData.planExists.set(_regionId);
 
-		return _planData.tasks.emplace(_regionId, origin, destination, type) != Tasks::INVALID;
+		return _planData.tasks.emplace(_regionId, origin, destination, type) != Tasks::invalid();
 	}
 	else
 		return false;
@@ -179,7 +179,7 @@ PlanT<TArgs>::clear() noexcept {
 template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 void
-PlanT<TArgs>::remove(const Long index) noexcept {
+PlanT<TArgs>::remove(const TaskIndex index) noexcept {
 	HFSM2_ASSERT(_planData.planExists.get(_regionId));
 	HFSM2_ASSERT(index < TASK_CAPACITY);
 

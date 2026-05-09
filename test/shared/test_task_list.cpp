@@ -93,12 +93,12 @@ TEST_CASE("Shared.TaskListT<Tracked,5,3>.InsertRemoveAndClearRegion") {
 	CHECK(tasks.prev(b) == a);
 	CHECK(tasks.next(b) == c);
 	CHECK(tasks.prev(c) == b);
-	CHECK(tasks.next(c) == TaskList::INVALID);
+	CHECK(tasks.next(c) == TaskList::invalid());
 
 	CHECK(tasks.bounds(REGION_1).first == d);
 	CHECK(tasks.bounds(REGION_1).last  == d);
-	CHECK(tasks.prev(d) == TaskList::INVALID);
-	CHECK(tasks.next(d) == TaskList::INVALID);
+	CHECK(tasks.prev(d) == TaskList::invalid());
+	CHECK(tasks.next(d) == TaskList::invalid());
 
 	tasks.remove(REGION_0, b);
 
@@ -165,10 +165,10 @@ TEST_CASE("Shared.TaskListT<Tracked,5,3>.CopyMoveAndCapacity") {
 	CHECK(moved[b].value == 20u);
 	CHECK(s_moved == 2);
 
-	CHECK(moved.emplace(REGION_0, 30u) != TaskList::INVALID);
-	CHECK(moved.emplace(REGION_0, 40u) != TaskList::INVALID);
-	CHECK(moved.emplace(REGION_0, 50u) != TaskList::INVALID);
-	CHECK(moved.emplace(REGION_0, 60u) == TaskList::INVALID);
+	CHECK(moved.emplace(REGION_0, 30u) != TaskList::invalid());
+	CHECK(moved.emplace(REGION_0, 40u) != TaskList::invalid());
+	CHECK(moved.emplace(REGION_0, 50u) != TaskList::invalid());
+	CHECK(moved.emplace(REGION_0, 60u) == TaskList::invalid());
 
 	source.clear();
 	copy  .clear();

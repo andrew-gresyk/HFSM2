@@ -17,7 +17,7 @@ PayloadPlanT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 	if (_planData.tasks.count() < TASK_CAPACITY) {
 		_planData.planExists.set(_regionId);
 
-		return _planData.tasks.emplace(_regionId, origin, destination, type, payload) != PlanBase::Tasks::INVALID;
+		return _planData.tasks.emplace(_regionId, origin, destination, type, payload) != PlanBase::Tasks::invalid();
 	}
 	else
 		return false;
