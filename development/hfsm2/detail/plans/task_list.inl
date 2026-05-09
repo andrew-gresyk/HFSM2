@@ -132,7 +132,7 @@ TaskListT<T, NTC_, NRC_>::operator[] (const Index index) noexcept {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 template <typename T, Long NTC_, Long NRC_>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 const typename TaskListT<T, NTC_, NRC_>::Item&
 TaskListT<T, NTC_, NRC_>::operator[] (const Index index) const noexcept {
 	HFSM2_ASSERT(occupied(index));

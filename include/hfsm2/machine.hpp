@@ -16399,7 +16399,7 @@ public:
 	HFSM2_CONSTEXPR(14)	void clearRegion(const RegionID regionId)			noexcept;
 
 	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index index)			noexcept;
-	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index index)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	const Item& operator[] (const Index index)	  const noexcept;
 
 	HFSM2_CONSTEXPR(14)		  Bounds& bounds(const RegionID regionId)		noexcept	{ HFSM2_ASSERT(regionId < REGION_COUNT);	return _bounds[regionId];	}
 	HFSM2_CONSTEXPR(14)	const Bounds& bounds(const RegionID regionId) const noexcept	{ HFSM2_ASSERT(regionId < REGION_COUNT);	return _bounds[regionId];	}
@@ -16578,7 +16578,7 @@ TaskListT<T, NTC_, NRC_>::operator[] (const Index index) noexcept {
 }
 
 template <typename T, Long NTC_, Long NRC_>
-HFSM2_CONSTEXPR(11)
+HFSM2_CONSTEXPR(14)
 const typename TaskListT<T, NTC_, NRC_>::Item&
 TaskListT<T, NTC_, NRC_>::operator[] (const Index index) const noexcept {
 	HFSM2_ASSERT(occupied(index));
