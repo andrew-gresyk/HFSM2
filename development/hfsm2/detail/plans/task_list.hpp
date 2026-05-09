@@ -117,58 +117,6 @@ private:
 
 template <typename TItem, Long NRegionCount>
 class TaskListT<TItem, 0, NRegionCount> final {
-public:
-	using Item		= TItem;
-	using Index		= Long;
-
-	static constexpr Index CAPACITY		= 0;
-	static constexpr Long  REGION_COUNT	= NRegionCount;
-	static constexpr Index INVALID		= INVALID_LONG;
-
-	struct Bounds final {
-		Index first	= INVALID;
-		Index last	= INVALID;
-
-		// Zero-capacity lists can never expose real region bounds.
-		HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept	{ return false;						}
-		HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ first = INVALID; last  = INVALID;	}
-	};
-
-						TaskListT()											noexcept = default;
-	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{ _bounds.clear();	}
-
-	template <typename... TArgs>
-	HFSM2_CONSTEXPR(14)	Index emplace(const RegionID, TArgs&&...)			noexcept	{ return INVALID;	}
-
-	HFSM2_CONSTEXPR(14)	void remove(const RegionID, const Index)			noexcept	{}
-	HFSM2_CONSTEXPR(14)	void clearRegion(const RegionID)					noexcept	{}
-
-	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index)				noexcept	{ HFSM2_BREAK(); return *::hfsm2::reinterpret_launder<Item>(_storage);	}
-	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index)		  const noexcept	{ HFSM2_BREAK(); return *::hfsm2::reinterpret_launder<Item>(_storage);	}
-
-	HFSM2_CONSTEXPR(14)		  Bounds& bounds(const RegionID regionId)		noexcept	{ HFSM2_ASSERT(regionId < REGION_COUNT); return _bounds[regionId];	}
-	HFSM2_CONSTEXPR(14)	const Bounds& bounds(const RegionID regionId) const noexcept	{ HFSM2_ASSERT(regionId < REGION_COUNT); return _bounds[regionId];	}
-
-	HFSM2_CONSTEXPR(11)	Index prev(const Index)						  const noexcept	{ return INVALID;	}
-	HFSM2_CONSTEXPR(11)	Index next(const Index)						  const noexcept	{ return INVALID;	}
-
-	HFSM2_CONSTEXPR(11)	Index count()								  const noexcept	{ return 0;			}
-	HFSM2_CONSTEXPR(11)	bool  empty()								  const noexcept	{ return true;		}
-	HFSM2_CONSTEXPR(11)	bool  occupied(const Index)					  const noexcept	{ return false;		}
-
-private:
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
-
-	alignas(Item) uint8_t _storage[sizeof(Item)];
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
-
-	StaticArrayT<Bounds, REGION_COUNT> _bounds;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

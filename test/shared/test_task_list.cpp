@@ -205,24 +205,6 @@ TEST_CASE("Shared.TaskListT<Tracked,5,3>.SelfAssignment") {
 	CHECK(s_destructed == s_constructed);
 }
 
-//------------------------------------------------------------------------------
-
-TEST_CASE("Shared.TaskListT<Tracked,0,2>.ZeroCapacity") {
-	EmptyList tasks;
-
-	CHECK(tasks.empty());
-	CHECK(tasks.count() == 0);
-	CHECK(tasks.emplace(REGION_0, 10u) == EmptyList::INVALID);
-	CHECK(!tasks.occupied(0));
-	CHECK(!tasks.bounds(REGION_0));
-
-	tasks.clearRegion(REGION_0);
-	tasks.clear();
-
-	CHECK(tasks.empty());
-	CHECK(tasks.count() == 0);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 }
