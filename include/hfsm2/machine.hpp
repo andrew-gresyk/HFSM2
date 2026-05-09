@@ -17102,35 +17102,35 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 	const Bounds& regionBounds = tasks.bounds(regionId);
 
 	if (regionBounds) {
-		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
+		HFSM2_ASSERT(regionBounds.last != Tasks::invalid());
 
 		for (TaskIndex slow = regionBounds.first, fast = slow; ; ) {
 			++length;
 
 			if (slow != regionBounds.last) {
 				const TaskIndex slowNext = tasks.next(slow);
-				HFSM2_ASSERT(slowNext != INVALID_LONG);
+				HFSM2_ASSERT(slowNext != Tasks::invalid());
 				slow = slowNext;
 
 				// loop check
-				if (fast != INVALID_LONG) {
+				if (fast != Tasks::invalid()) {
 					fast = tasks.next(fast);
 
-					if (fast != INVALID_LONG)
+					if (fast != Tasks::invalid())
 						fast = tasks.next(fast);
 
-					HFSM2_ASSERT(fast == INVALID_LONG || slow != fast);
+					HFSM2_ASSERT(fast == Tasks::invalid() || slow != fast);
 				}
 			}
 			else {
-				HFSM2_ASSERT(tasks.next(slow) == INVALID_LONG);
+				HFSM2_ASSERT(tasks.next(slow) == Tasks::invalid());
 
 				break;
 			}
 		}
 	}
 	else
-		HFSM2_ASSERT(regionBounds.last == INVALID_LONG);
+		HFSM2_ASSERT(regionBounds.last == Tasks::invalid());
 
 	return length;
 }
@@ -17205,35 +17205,35 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 	const Bounds& regionBounds = tasks.bounds(regionId);
 
 	if (regionBounds) {
-		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
+		HFSM2_ASSERT(regionBounds.last != Tasks::invalid());
 
 		for (TaskIndex slow = regionBounds.first, fast = slow; ; ) {
 			++length;
 
 			if (slow != regionBounds.last) {
 				const TaskIndex slowNext = tasks.next(slow);
-				HFSM2_ASSERT(slowNext != INVALID_LONG);
+				HFSM2_ASSERT(slowNext != Tasks::invalid());
 				slow = slowNext;
 
 				// loop check
-				if (fast != INVALID_LONG) {
+				if (fast != Tasks::invalid()) {
 					fast = tasks.next(fast);
 
-					if (fast != INVALID_LONG)
+					if (fast != Tasks::invalid())
 						fast = tasks.next(fast);
 
-					HFSM2_ASSERT(fast == INVALID_LONG || slow != fast);
+					HFSM2_ASSERT(fast == Tasks::invalid() || slow != fast);
 				}
 			}
 			else {
-				HFSM2_ASSERT(tasks.next(slow) == INVALID_LONG);
+				HFSM2_ASSERT(tasks.next(slow) == Tasks::invalid());
 
 				break;
 			}
 		}
 	}
 	else
-		HFSM2_ASSERT(regionBounds.last == INVALID_LONG);
+		HFSM2_ASSERT(regionBounds.last == Tasks::invalid());
 
 	return length;
 }
@@ -17755,7 +17755,7 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 PlanT<TArgs>::CIterator::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr  < PlanT::TASK_CAPACITY ||
-				 _curr == INVALID_LONG);
+				 _curr == Tasks::invalid());
 
 	return _curr < PlanT::TASK_CAPACITY;
 }
@@ -17789,7 +17789,7 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 PlanT<TArgs>::Iterator::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < PlanT::TASK_CAPACITY ||
-				 _curr == INVALID_LONG);
+				 _curr == Tasks::invalid());
 
 	return _curr < PlanT::TASK_CAPACITY;
 }
@@ -17873,7 +17873,7 @@ PlanT<TArgs>::operator bool() const noexcept {
 
 	HFSM2_ASSERT(bounds.first < TASK_CAPACITY &&
 				 bounds.last  < TASK_CAPACITY ||
-				 bounds.last == INVALID_LONG);
+				 bounds.last == Tasks::invalid());
 
 	return bounds.first < TASK_CAPACITY;
 }

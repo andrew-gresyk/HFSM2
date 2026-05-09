@@ -84,35 +84,35 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 	const Bounds& regionBounds = tasks.bounds(regionId);
 
 	if (regionBounds) {
-		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
+		HFSM2_ASSERT(regionBounds.last != Tasks::invalid());
 
 		for (TaskIndex slow = regionBounds.first, fast = slow; ; ) {
 			++length;
 
 			if (slow != regionBounds.last) {
 				const TaskIndex slowNext = tasks.next(slow);
-				HFSM2_ASSERT(slowNext != INVALID_LONG);
+				HFSM2_ASSERT(slowNext != Tasks::invalid());
 				slow = slowNext;
 
 				// loop check
-				if (fast != INVALID_LONG) {
+				if (fast != Tasks::invalid()) {
 					fast = tasks.next(fast);
 
-					if (fast != INVALID_LONG)
+					if (fast != Tasks::invalid())
 						fast = tasks.next(fast);
 
-					HFSM2_ASSERT(fast == INVALID_LONG || slow != fast);
+					HFSM2_ASSERT(fast == Tasks::invalid() || slow != fast);
 				}
 			}
 			else {
-				HFSM2_ASSERT(tasks.next(slow) == INVALID_LONG);
+				HFSM2_ASSERT(tasks.next(slow) == Tasks::invalid());
 
 				break;
 			}
 		}
 	}
 	else
-		HFSM2_ASSERT(regionBounds.last == INVALID_LONG);
+		HFSM2_ASSERT(regionBounds.last == Tasks::invalid());
 
 	return length;
 }
@@ -199,35 +199,35 @@ PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(,
 	const Bounds& regionBounds = tasks.bounds(regionId);
 
 	if (regionBounds) {
-		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
+		HFSM2_ASSERT(regionBounds.last != Tasks::invalid());
 
 		for (TaskIndex slow = regionBounds.first, fast = slow; ; ) {
 			++length;
 
 			if (slow != regionBounds.last) {
 				const TaskIndex slowNext = tasks.next(slow);
-				HFSM2_ASSERT(slowNext != INVALID_LONG);
+				HFSM2_ASSERT(slowNext != Tasks::invalid());
 				slow = slowNext;
 
 				// loop check
-				if (fast != INVALID_LONG) {
+				if (fast != Tasks::invalid()) {
 					fast = tasks.next(fast);
 
-					if (fast != INVALID_LONG)
+					if (fast != Tasks::invalid())
 						fast = tasks.next(fast);
 
-					HFSM2_ASSERT(fast == INVALID_LONG || slow != fast);
+					HFSM2_ASSERT(fast == Tasks::invalid() || slow != fast);
 				}
 			}
 			else {
-				HFSM2_ASSERT(tasks.next(slow) == INVALID_LONG);
+				HFSM2_ASSERT(tasks.next(slow) == Tasks::invalid());
 
 				break;
 			}
 		}
 	}
 	else
-		HFSM2_ASSERT(regionBounds.last == INVALID_LONG);
+		HFSM2_ASSERT(regionBounds.last == Tasks::invalid());
 
 	return length;
 }

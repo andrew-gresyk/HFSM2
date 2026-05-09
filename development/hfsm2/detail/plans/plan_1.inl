@@ -19,7 +19,7 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 PlanT<TArgs>::CIterator::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr  < PlanT::TASK_CAPACITY ||
-				 _curr == INVALID_LONG);
+				 _curr == Tasks::invalid());
 
 	return _curr < PlanT::TASK_CAPACITY;
 }
@@ -61,7 +61,7 @@ template <typename TArgs>
 HFSM2_CONSTEXPR(14)
 PlanT<TArgs>::Iterator::operator bool() const noexcept {
 	HFSM2_ASSERT(_curr < PlanT::TASK_CAPACITY ||
-				 _curr == INVALID_LONG);
+				 _curr == Tasks::invalid());
 
 	return _curr < PlanT::TASK_CAPACITY;
 }
@@ -159,7 +159,7 @@ PlanT<TArgs>::operator bool() const noexcept {
 
 	HFSM2_ASSERT(bounds.first < TASK_CAPACITY &&
 				 bounds.last  < TASK_CAPACITY ||
-				 bounds.last == INVALID_LONG);
+				 bounds.last == Tasks::invalid());
 
 	return bounds.first < TASK_CAPACITY;
 }
