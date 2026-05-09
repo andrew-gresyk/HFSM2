@@ -113,6 +113,16 @@ private:
 	Slot _slots[CAPACITY];
 };
 
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#if __cplusplus < 201703L
+
+template <typename T, Long NTC_, Long NRC_>
+constexpr typename TaskListT<T, NTC_, NRC_>::Index
+TaskListT<T, NTC_, NRC_>::INVALID;
+
+#endif
+
 //------------------------------------------------------------------------------
 
 template <typename TItem, Long NRegionCount>
