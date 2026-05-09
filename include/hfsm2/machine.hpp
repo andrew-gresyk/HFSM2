@@ -2700,6 +2700,18 @@ struct TransitionT final
 	using Storage = uint8_t[sizeof(Payload)];
 	using This	  = TransitionT<Payload>;
 
+	HFSM2_CONSTEXPR(14)
+		  Payload&
+	payloadStorage()													noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	HFSM2_CONSTEXPR(11)
+	const Payload&
+	payloadStorage()											  const noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
 	HFSM2_CONSTEXPR(11)
 	TransitionT()														noexcept = default;
 
@@ -2817,18 +2829,6 @@ struct TransitionT final
 	payload()													  const noexcept	{
 		return payloadSet ?
 			&payloadStorage() : nullptr;
-	}
-
-	HFSM2_CONSTEXPR(14)
-		  Payload&
-	payloadStorage()													noexcept	{
-		return *::hfsm2::reinterpret_launder<Payload>(storage);
-	}
-
-	HFSM2_CONSTEXPR(11)
-	const Payload&
-	payloadStorage()											  const noexcept	{
-		return *::hfsm2::reinterpret_launder<Payload>(storage);
 	}
 
 	HFSM2_CONSTEXPR(14)
@@ -3191,6 +3191,18 @@ struct TaskT final
 	using Storage = uint8_t[sizeof(Payload)];
 	using This	  = TaskT<Payload>;
 
+	HFSM2_CONSTEXPR(14)
+		  Payload&
+	payloadStorage()													noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	HFSM2_CONSTEXPR(11)
+	const Payload&
+	payloadStorage()											  const noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
 	HFSM2_CONSTEXPR(11)	TaskT()											noexcept = default;
 
 	HFSM2_CONSTEXPR(11)	TaskT(const StateID origin_,
@@ -3260,18 +3272,6 @@ struct TaskT final
 	payload()													  const noexcept	{
 		return payloadSet ?
 			&payloadStorage() : nullptr;
-	}
-
-	HFSM2_CONSTEXPR(14)
-		  Payload&
-	payloadStorage()													noexcept	{
-		return *::hfsm2::reinterpret_launder<Payload>(storage);
-	}
-
-	HFSM2_CONSTEXPR(11)
-	const Payload&
-	payloadStorage()											  const noexcept	{
-		return *::hfsm2::reinterpret_launder<Payload>(storage);
 	}
 
 	HFSM2_CONSTEXPR(14)

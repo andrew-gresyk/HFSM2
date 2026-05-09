@@ -222,6 +222,22 @@ struct TransitionT final
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+	HFSM2_CONSTEXPR(14)
+		  Payload&
+	payloadStorage()													noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(11)
+	const Payload&
+	payloadStorage()											  const noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 	HFSM2_CONSTEXPR(11)
 	TransitionT()														noexcept = default;
 
@@ -363,22 +379,6 @@ struct TransitionT final
 	payload()													  const noexcept	{
 		return payloadSet ?
 			&payloadStorage() : nullptr;
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(14)
-		  Payload&
-	payloadStorage()													noexcept	{
-		return *::hfsm2::reinterpret_launder<Payload>(storage);
-	}
-
-	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-	HFSM2_CONSTEXPR(11)
-	const Payload&
-	payloadStorage()											  const noexcept	{
-		return *::hfsm2::reinterpret_launder<Payload>(storage);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
