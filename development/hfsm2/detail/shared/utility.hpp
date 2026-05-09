@@ -353,6 +353,7 @@ template<typename T>
 HFSM2_CONSTEXPR(14)
 void
 destroy(T& t)															noexcept	{
+	(void)t;
 	t.~T();
 }
 

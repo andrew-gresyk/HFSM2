@@ -78,8 +78,6 @@
         </VirtualDirectory>
         <VirtualDirectory Name="features">
           <File Name="../../../development/hfsm2/detail/features/transition.hpp"/>
-          <File Name="../../../development/hfsm2/detail/features/task_list.inl"/>
-          <File Name="../../../development/hfsm2/detail/features/task_list.hpp"/>
           <File Name="../../../development/hfsm2/detail/features/task.hpp"/>
           <File Name="../../../development/hfsm2/detail/features/structure_report.hpp"/>
           <File Name="../../../development/hfsm2/detail/features/logger_interface.hpp"/>
@@ -87,8 +85,12 @@
         <VirtualDirectory Name="containers">
           <File Name="../../../development/hfsm2/detail/containers/bit_array.inl"/>
           <File Name="../../../development/hfsm2/detail/containers/bit_array.hpp"/>
-          <File Name="../../../development/hfsm2/detail/containers/array.inl"/>
-          <File Name="../../../development/hfsm2/detail/containers/array.hpp"/>
+          <File Name="../../../development/hfsm2/detail/containers/list.inl"/>
+          <File Name="../../../development/hfsm2/detail/containers/list.hpp"/>
+          <File Name="../../../development/hfsm2/detail/containers/dynamic_array.inl"/>
+          <File Name="../../../development/hfsm2/detail/containers/dynamic_array.hpp"/>
+          <File Name="../../../development/hfsm2/detail/containers/static_array.inl"/>
+          <File Name="../../../development/hfsm2/detail/containers/static_array.hpp"/>
         </VirtualDirectory>
       </VirtualDirectory>
     </VirtualDirectory>
@@ -147,6 +149,7 @@
     <File Name="../../../test/test_access.cpp"/>
     <File Name="../../../test/main.cpp"/>
     <VirtualDirectory Name="shared">
+      <File Name="../../../test/shared/test_static_array.cpp"/>
       <File Name="../../../test/shared/test_task_list.cpp"/>
       <File Name="../../../test/shared/test_random.cpp"/>
       <File Name="../../../test/shared/test_bit_stream.cpp"/>

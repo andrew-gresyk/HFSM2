@@ -540,7 +540,8 @@ CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideSaveActive(const Registry& registry,
 	if (prong < R_PRONG) {
 		LHalf::wideSaveActive   (registry, stream, prong);
 		RHalf::wideSaveResumable(registry, stream);
-	} else {
+	}
+	else {
 		LHalf::wideSaveResumable(registry, stream);
 		RHalf::wideSaveActive   (registry, stream, prong);
 	}
@@ -572,7 +573,8 @@ CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideLoadRequested(Registry& registry,
 	if (prong < R_PRONG) {
 		LHalf::wideLoadRequested(registry, stream, prong);
 		RHalf::wideLoadResumable(registry, stream);
-	} else {
+	}
+	else {
 		LHalf::wideLoadResumable(registry, stream);
 		RHalf::wideLoadRequested(registry, stream, prong);
 	}

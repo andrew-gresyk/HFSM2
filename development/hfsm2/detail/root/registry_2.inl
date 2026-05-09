@@ -43,7 +43,8 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong == compoActive[parent.forkId - 1];
-		} else
+		}
+		else
 			return isActive();
 	}
 

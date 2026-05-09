@@ -39,7 +39,8 @@ struct PreReactWrapperT<TRegion, TopDown> {
 					subStates.widePreReact(control, event, active);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -66,7 +67,8 @@ struct PreReactWrapperT<TRegion, TopDown> {
 					subStates.widePreReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -106,7 +108,8 @@ struct PreReactWrapperT<TRegion, BottomUp> {
 					headState.deepPreReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -133,7 +136,8 @@ struct PreReactWrapperT<TRegion, BottomUp> {
 					headState.deepPreReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -178,7 +182,8 @@ struct ReactWrapperT<TRegion, TopDown> {
 					subStates.wideReact(control, event, active);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -205,7 +210,8 @@ struct ReactWrapperT<TRegion, TopDown> {
 					subStates.wideReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -245,7 +251,8 @@ struct ReactWrapperT<TRegion, BottomUp> {
 					headState.deepReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -272,7 +279,8 @@ struct ReactWrapperT<TRegion, BottomUp> {
 					headState.deepReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 

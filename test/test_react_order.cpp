@@ -74,7 +74,7 @@ struct D2 : FSM::State {};
 
 ////////////////////////////////////////////////////////////////////////////////
 
-TEST_CASE("FSM.Prepend Plans") {
+TEST_CASE("FSM.Append Plans") {
 	Logger logger;
 
 	WHEN("Created") {

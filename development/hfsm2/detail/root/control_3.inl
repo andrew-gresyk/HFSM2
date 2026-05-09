@@ -188,7 +188,9 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		headState.wrapPlanFailed(*this);
 
 		return TaskStatus{_taskStatus.result};
-	} else if (subStatus.result == TaskStatus::SUCCESS) {
+	}
+	else
+	if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
 			successesToClear.set();
@@ -217,7 +219,8 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 			_core.planData.tasksSuccesses &= successesToClear;
 
 			return TaskStatus{};
-		} else {
+		}
+		else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::SUCCEEDED);
 
@@ -226,7 +229,8 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 
 			return TaskStatus{_taskStatus.result};
 		}
-	} else
+	}
+	else
 		return TaskStatus{};
 }
 
@@ -379,7 +383,9 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		headState.wrapPlanFailed(*this);
 
 		return TaskStatus{_taskStatus.result};
-	} else if (subStatus.result == TaskStatus::SUCCESS) {
+	}
+	else
+	if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
 			successesToClear.set();
@@ -405,7 +411,8 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 			_core.planData.tasksSuccesses &= successesToClear;
 
 			return TaskStatus{};
-		} else {
+		}
+		else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::SUCCEEDED);
 
@@ -414,7 +421,8 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 
 			return TaskStatus{_taskStatus.result};
 		}
-	} else
+	}
+	else
 		return TaskStatus{};
 }
 

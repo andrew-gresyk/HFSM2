@@ -218,16 +218,54 @@ struct TransitionT final
 {
 	using Payload = TPayload;
 	using Storage = uint8_t[sizeof(Payload)];
+	using This	  = TransitionT<Payload>;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-	using TransitionBase::TransitionBase;
+	HFSM2_CONSTEXPR(11)
+	TransitionT()														noexcept = default;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT()														noexcept	{
-		new (&storage) Payload{};
+	TransitionT(const StateID destination_,
+				const TransitionType type_)								noexcept
+		: TransitionBase{destination_, type_}
+	{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+	TransitionT(const StateID origin_,
+				const StateID destination_,
+				const TransitionType type_)								noexcept
+		: TransitionBase{origin_, destination_, type_}
+	{}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+	TransitionT(const This& other)								  HFSM2_NOEXCEPT_17(noexcept(Payload{              other.payloadStorage() }))
+		: TransitionBase{other.origin, other.destination, other.type}
+	{
+		method = other.method;
+		payloadSet = other.payloadSet;
+
+		if (other.payloadSet)
+			new (storage) Payload{other.payloadStorage()};
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+	TransitionT(This&& other)									  HFSM2_NOEXCEPT_17(noexcept(Payload{::hfsm2::move(other.payloadStorage())}))
+		: TransitionBase{other.origin, other.destination, other.type}
+	{
+		method = other.method;
+		payloadSet = other.payloadSet;
+
+		if (other.payloadSet)
+			new (storage) Payload{::hfsm2::move(other.payloadStorage())};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -235,11 +273,11 @@ struct TransitionT final
 	HFSM2_CONSTEXPR(14)
 	TransitionT(const StateID destination_,
 				const TransitionType type_,
-				const Payload& payload)									noexcept
+				const Payload& payload)							  HFSM2_NOEXCEPT_17(noexcept(Payload{payload}))
 		: TransitionBase{destination_, type_}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{payload};
+		new (storage) Payload{payload};
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -248,11 +286,54 @@ struct TransitionT final
 	TransitionT(const StateID origin_,
 				const StateID destination_,
 				const TransitionType type_,
-				const Payload& payload)									noexcept
+				const Payload& payload)							  HFSM2_NOEXCEPT_17(noexcept(Payload{payload}))
 		: TransitionBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{payload};
+		new (storage) Payload{payload};
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(20)
+	~TransitionT()														noexcept	{
+		clearPayload();
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+	This&
+	operator = (const This& other)								  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() =               other.payloadStorage() ) && noexcept(Payload{              other.payloadStorage() }))	{
+		if (this == &other)
+			return *this;
+
+		origin		= other.origin;
+		destination = other.destination;
+		method		= other.method;
+		type		= other.type;
+
+		assignPayload(other);
+
+		return *this;
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+	This&
+	operator = (This&& other)									  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() = ::hfsm2::move(other.payloadStorage())) && noexcept(Payload{::hfsm2::move(other.payloadStorage())}))	{
+		if (this == &other)
+			return *this;
+
+		origin		= other.origin;
+		destination = other.destination;
+		method		= other.method;
+		type		= other.type;
+
+		assignPayload(::hfsm2::move(other));
+
+		return *this;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -281,7 +362,68 @@ struct TransitionT final
 	const Payload*
 	payload()													  const noexcept	{
 		return payloadSet ?
-			reinterpret_cast<const Payload*>(&storage) : nullptr;
+			&payloadStorage() : nullptr;
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+		  Payload&
+	payloadStorage()													noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(11)
+	const Payload&
+	payloadStorage()											  const noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+	void
+	clearPayload()														noexcept	{
+		if (payloadSet) {
+			::hfsm2::destroy(payloadStorage());
+			payloadSet = false;
+		}
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+	void
+	assignPayload(const This& other)							  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() =               other.payloadStorage() ) && noexcept(Payload{              other.payloadStorage() }))	{
+		if (other.payloadSet) {
+			if (payloadSet)
+				payloadStorage() = other.payloadStorage();
+			else {
+				new (storage) Payload{other.payloadStorage()};
+				payloadSet = true;
+			}
+		}
+		else
+			clearPayload();
+	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+	HFSM2_CONSTEXPR(14)
+	void
+	assignPayload(This&& other)									  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() = ::hfsm2::move(other.payloadStorage())) && noexcept(Payload{::hfsm2::move(other.payloadStorage())}))	{
+		if (other.payloadSet) {
+			if (payloadSet)
+				payloadStorage() = ::hfsm2::move(other.payloadStorage());
+			else {
+				new (storage) Payload{::hfsm2::move(other.payloadStorage())};
+				payloadSet = true;
+			}
+		}
+		else
+			clearPayload();
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

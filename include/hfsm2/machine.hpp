@@ -680,6 +680,7 @@ template<typename T>
 HFSM2_CONSTEXPR(14)
 void
 destroy(T& t)															noexcept	{
+	(void)t;
 	t.~T();
 }
 
@@ -1635,495 +1636,6 @@ constexpr bool contains() noexcept	{ return index<TList, T>() != INVALID_LONG;	}
 namespace hfsm2 {
 namespace detail {
 
-template <
-	typename TContainer,
-	typename TItem,
-	typename TIndex
->
-class IteratorT {
-public:
-	using Container = TContainer;
-	using Item		= TItem;
-	using Index		= TIndex;
-
-	template <typename, Long>
-	friend class DynamicArrayT;
-
-	template <typename, Long>
-	friend class StaticArrayT;
-
-private:
-	HFSM2_CONSTEXPR(11)	IteratorT(Container& container,
-								  const Index cursor)					noexcept
-		: _container{container}
-		, _cursor   {cursor   }
-	{}
-
-public:
-	HFSM2_CONSTEXPR(14)	bool operator != (const IteratorT& other) const noexcept	{
-		HFSM2_ASSERT(&_container == &other._container);
-
-		return _cursor != other._cursor;
-	}
-
-	HFSM2_CONSTEXPR(14)	IteratorT& operator ++()						noexcept	{
-		_cursor = _container.next(_cursor);
-
-		return *this;
-	}
-
-	HFSM2_CONSTEXPR(14)		  Item& operator *()						noexcept	{ return  _container[_cursor];	}
-	HFSM2_CONSTEXPR(11)	const Item& operator *()				  const noexcept	{ return  _container[_cursor];	}
-
-	HFSM2_CONSTEXPR(14)		  Item* operator->()						noexcept	{ return &_container[_cursor];	}
-	HFSM2_CONSTEXPR(11)	const Item* operator->()				  const noexcept	{ return &_container[_cursor];	}
-
-private:
-	Container& _container;
-
-	Index _cursor;
-};
-
-template <
-	typename TContainer,
-	typename TItem,
-	typename TIndex
->
-class IteratorT<const TContainer, TItem, TIndex> {
-public:
-	using Container = TContainer;
-	using Item		= TItem;
-	using Index		= TIndex;
-
-	template <typename, Long>
-	friend class DynamicArrayT;
-
-	template <typename, Long>
-	friend class StaticArrayT;
-
-private:
-	HFSM2_CONSTEXPR(11)	IteratorT(const Container& container,
-								  const Index cursor)					noexcept
-		: _container{container}
-		, _cursor   {cursor   }
-	{}
-
-public:
-	HFSM2_CONSTEXPR(14)	bool operator != (const IteratorT& other) const noexcept	{
-		HFSM2_ASSERT(&_container == &other._container);
-
-		return _cursor != other._cursor;
-	}
-
-	HFSM2_CONSTEXPR(14)	IteratorT& operator ++()						noexcept	{
-		_cursor = _container.next(_cursor);
-
-		return *this;
-	}
-
-	HFSM2_CONSTEXPR(11)	const Item& operator *()				  const noexcept	{ return _container[_cursor];	}
-
-	HFSM2_CONSTEXPR(11)	const Item* operator->()				  const noexcept	{ return &operator *();			}
-
-private:
-	const Container& _container;
-
-	Index _cursor;
-};
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TItem>
-HFSM2_CONSTEXPR(11)
-TItem
-filler()																noexcept	{
-	return TItem{};
-}
-
-template <>
-HFSM2_CONSTEXPR(11)
-Short
-filler<Short>()															noexcept	{
-	return INVALID_SHORT;
-}
-
-template <typename TItem, Long NCapacity>
-class StaticArrayT final {
-	template <typename, typename, typename>
-	friend class IteratorT;
-
-public:
-	using Item		= TItem;
-	using Index		= UCapacity<NCapacity>;
-
-	using  Iterator	= IteratorT<      StaticArrayT, Item, Index>;
-	using CIterator	= IteratorT<const StaticArrayT, Item, Index>;
-
-	static constexpr Index CAPACITY	= NCapacity;
-
-	using This		= StaticArrayT<Item, CAPACITY>;
-
-public:
-	HFSM2_CONSTEXPR(11)	StaticArrayT()								   = default;
-	HFSM2_CONSTEXPR(14)	StaticArrayT(const Item filler)					noexcept	{ fill(filler);						}
-
-	template <typename N>
-	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)			noexcept;
-
-	template <typename N>
-	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)	  const noexcept;
-
-	HFSM2_CONSTEXPR(11)	Index count()							  const noexcept	{ return CAPACITY;					}
-
-	HFSM2_CONSTEXPR(14)	bool operator == (const This& other)	  const noexcept;
-	HFSM2_CONSTEXPR(14)	bool operator != (const This& other)	  const noexcept;
-
-	HFSM2_CONSTEXPR(14)	void fill(const Item filler)					noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(filler<Item>());				}
-	HFSM2_CONSTEXPR(14)	bool empty()							  const noexcept;
-
-	HFSM2_CONSTEXPR(14)	 Iterator  begin()								noexcept	{ return  Iterator(*this, first());	}
-	HFSM2_CONSTEXPR(11)	CIterator  begin()						  const noexcept	{ return CIterator(*this, first());	}
-	HFSM2_CONSTEXPR(11)	CIterator cbegin()						  const noexcept	{ return CIterator(*this, first());	}
-
-	HFSM2_CONSTEXPR(14)	 Iterator	 end()								noexcept	{ return  Iterator(*this, limit());	}
-	HFSM2_CONSTEXPR(11)	CIterator	 end()						  const noexcept	{ return CIterator(*this, limit());	}
-	HFSM2_CONSTEXPR(11)	CIterator	cend()						  const noexcept	{ return CIterator(*this, limit());	}
-
-private:
-	HFSM2_CONSTEXPR(11)	Index first()							  const noexcept	{ return 0;							}
-	HFSM2_CONSTEXPR(11)	Index  next(const Index index)			  const noexcept	{ return index + 1;					}
-	HFSM2_CONSTEXPR(11)	Index limit()							  const noexcept	{ return CAPACITY;					}
-
-private:
-	Item _items[CAPACITY] {};
-};
-
-template <typename TItem>
-class StaticArrayT<TItem, 0> final {
-public:
-	using Item		= TItem;
-
-public:
-	HFSM2_CONSTEXPR(11)	StaticArrayT()								   = default;
-	HFSM2_CONSTEXPR(11)	StaticArrayT(const Item)						noexcept	{}
-};
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename T, Long NC_>
-template <typename N>
-HFSM2_CONSTEXPR(14)
-T&
-StaticArrayT<T, NC_>::operator[] (const N index) noexcept {
-	HFSM2_ASSERT(0 <= index && index < CAPACITY);
-
-	return _items[static_cast<Index>(index)];
-}
-
-template <typename T, Long NC_>
-template <typename N>
-HFSM2_CONSTEXPR(14)
-const T&
-StaticArrayT<T, NC_>::operator[] (const N index) const noexcept	{
-	HFSM2_ASSERT(0 <= index && index < CAPACITY);
-
-	return _items[static_cast<Index>(index)];
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-void
-StaticArrayT<T, NC_>::fill(const Item filler) noexcept {
-	for (Item& item : _items)
-		item = filler;
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-bool
-StaticArrayT<T, NC_>::operator == (const This& other) const noexcept {
-	for (Index i = 0; i < CAPACITY; ++i)
-		if (_items[i] != other._items[i])
-			return false;
-
-	return true;
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-bool
-StaticArrayT<T, NC_>::operator != (const This& other) const noexcept {
-	for (Index i = 0; i < CAPACITY; ++i)
-		if (_items[i] != other._items[i])
-			return true;
-
-	return false;
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-bool
-StaticArrayT<T, NC_>::empty() const noexcept {
-	for (const Item& item : _items)
-		if (item != filler<Item>())
-			return false;
-
-	return true;
-}
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TItem, Long NCapacity>
-class DynamicArrayT final {
-	template <typename, typename, typename>
-	friend class IteratorT;
-
-public:
-	using Item		= TItem;
-	using Index		= UCapacity<NCapacity>;
-
-	using  Iterator	= IteratorT<      DynamicArrayT, Item, Index>;
-	using CIterator	= IteratorT<const DynamicArrayT, Item, Index>;
-
-	static constexpr Index CAPACITY	= NCapacity;
-	using Storage	= uint8_t[sizeof(Item) * CAPACITY];
-
-	using This		= DynamicArrayT<Item, CAPACITY>;
-
-	static_assert(sizeof(Item) % alignof(Item) == 0, "");
-
-public:
-						 DynamicArrayT()								noexcept	= default;
-	HFSM2_CONSTEXPR(14)	 DynamicArrayT(const This & other)				noexcept;
-	HFSM2_CONSTEXPR(14)	 DynamicArrayT(      This&& other)				noexcept;
-	HFSM2_CONSTEXPR(20)	~DynamicArrayT()								noexcept;
-
-	HFSM2_CONSTEXPR(14)	DynamicArrayT& operator = (const This & other)	noexcept;
-	HFSM2_CONSTEXPR(14)	DynamicArrayT& operator = (      This&& other)	noexcept;
-
-	template <typename... TArgs>
-	HFSM2_CONSTEXPR(14)	Index emplace(TArgs&&... args)			  HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::forward<TArgs>(args)...}));
-
-	template <typename N>
-	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)			noexcept;
-
-	template <typename N>
-	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)	  const noexcept;
-
-	HFSM2_CONSTEXPR(11)	Index count()							  const noexcept	{ return _count;					}
-
-	HFSM2_CONSTEXPR(14)	 void clear()									noexcept;
-	HFSM2_CONSTEXPR(11)	 bool empty()							  const noexcept	{ return _count == 0;				}
-
-	template <Long N>
-	HFSM2_CONSTEXPR(14)	DynamicArrayT& operator += (const DynamicArrayT<Item, N>& other)	noexcept;
-
-	HFSM2_CONSTEXPR(14)	 Iterator  begin()								noexcept	{ return  Iterator(*this, first());	}
-	HFSM2_CONSTEXPR(11)	CIterator  begin()						  const noexcept	{ return CIterator(*this, first());	}
-	HFSM2_CONSTEXPR(11)	CIterator cbegin()						  const noexcept	{ return CIterator(*this, first());	}
-
-	HFSM2_CONSTEXPR(14)	 Iterator    end()								noexcept	{ return  Iterator(*this, limit());	}
-	HFSM2_CONSTEXPR(11)	CIterator    end()						  const noexcept	{ return CIterator(*this, limit());	}
-	HFSM2_CONSTEXPR(11)	CIterator   cend()						  const noexcept	{ return CIterator(*this, limit());	}
-
-private:
-	HFSM2_CONSTEXPR(11)	Index first()							  const noexcept	{ return 0;							}
-	HFSM2_CONSTEXPR(11)	Index next(const Index index)			  const noexcept	{ return index + 1;					}
-	HFSM2_CONSTEXPR(11)	Index limit()							  const noexcept	{ return _count;					}
-
-	HFSM2_CONSTEXPR(14)		  Item   & item   (const Index index)		noexcept;
-	HFSM2_CONSTEXPR(11)	const Item   & item   (const Index index) const noexcept;
-
-	HFSM2_CONSTEXPR(14)		  uint8_t* storage(const Index index)		noexcept;
-	HFSM2_CONSTEXPR(11)	const uint8_t* storage(const Index index) const noexcept;
-
-private:
-	Index _count = 0;
-
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
-#endif
-
-	alignas(Item) Storage _storage {};
-
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
-};
-
-template <typename TItem>
-class DynamicArrayT<TItem, 0> final {
-public:
-	using Item	= TItem;
-	using Index	= UCapacity<0>;
-
-	static constexpr Index CAPACITY = 0;
-};
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-DynamicArrayT<T, NC_>::DynamicArrayT(const This& other) noexcept {
-	for (const Item& item : other)
-		emplace(item);
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-DynamicArrayT<T, NC_>::DynamicArrayT(This&& other) noexcept {
-	for (Item& item : other)
-		emplace(::hfsm2::move(item));
-
-	other.clear();
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(20)
-DynamicArrayT<T, NC_>::~DynamicArrayT() noexcept {
-	clear();
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-DynamicArrayT<T, NC_>&
-DynamicArrayT<T, NC_>::operator = (const This& other) noexcept {
-	if (this == &other)
-		return *this;
-
-	clear();
-
-	for (const Item& item : other)
-		emplace(item);
-
-	return *this;
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-DynamicArrayT<T, NC_>&
-DynamicArrayT<T, NC_>::operator = (This&& other) noexcept {
-	if (this == &other)
-		return *this;
-
-	clear();
-
-	for (Index i = 0; i < other._count; ++i)
-		emplace(::hfsm2::move(other.item(i)));
-
-	other.clear();
-
-	return *this;
-}
-
-template <typename T, Long NC_>
-template <typename... TArgs>
-HFSM2_CONSTEXPR(14)
-typename DynamicArrayT<T, NC_>::Index
-DynamicArrayT<T, NC_>::emplace(TArgs&&... args) HFSM2_NOEXCEPT_17(noexcept(T{::hfsm2::forward<TArgs>(args)...})) {
-	HFSM2_ASSERT(_count < CAPACITY);
-
-	new (storage(_count)) Item{::hfsm2::forward<TArgs>(args)...};
-
-	return _count++;
-}
-
-template <typename T, Long NC_>
-template <typename N>
-HFSM2_CONSTEXPR(14)
-typename DynamicArrayT<T, NC_>::Item&
-DynamicArrayT<T, NC_>::operator[] (const N index) noexcept {
-	HFSM2_ASSERT(0 <= index && index < _count);
-
-	return item(static_cast<Index>(index));
-}
-
-template <typename T, Long NC_>
-template <typename N>
-HFSM2_CONSTEXPR(14)
-const typename DynamicArrayT<T, NC_>::Item&
-DynamicArrayT<T, NC_>::operator[] (const N index) const noexcept {
-	HFSM2_ASSERT(0 <= index && index < _count);
-
-	return item(static_cast<Index>(index));
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-void
-DynamicArrayT<T, NC_>::clear() noexcept {
-	for (Index i = _count; i > 0; --i)
-		item(i - 1).~Item();
-
-	_count = 0;
-}
-
-template <typename T, Long NC_>
-template <Long N>
-HFSM2_CONSTEXPR(14)
-DynamicArrayT<T, NC_>&
-DynamicArrayT<T, NC_>::operator += (const DynamicArrayT<T, N>& other) noexcept {
-	HFSM2_ASSERT(static_cast<const void*>(this) != static_cast<const void*>(&other));
-	HFSM2_ASSERT(_count + other.count() <= CAPACITY);
-
-	for (const auto& item : other)
-		emplace(item);
-
-	return *this;
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-typename DynamicArrayT<T, NC_>::Item&
-DynamicArrayT<T, NC_>::item(const Index index) noexcept {
-	return *::hfsm2::reinterpret_launder<Item>(storage(index));
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(11)
-const typename DynamicArrayT<T, NC_>::Item&
-DynamicArrayT<T, NC_>::item(const Index index) const noexcept {
-	return *::hfsm2::reinterpret_launder<Item>(storage(index));
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(14)
-uint8_t*
-DynamicArrayT<T, NC_>::storage(const Index index) noexcept {
-	return &_storage[index * sizeof(Item)];
-}
-
-template <typename T, Long NC_>
-HFSM2_CONSTEXPR(11)
-const uint8_t*
-DynamicArrayT<T, NC_>::storage(const Index index) const noexcept {
-	return &_storage[index * sizeof(Item)];
-}
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
 template <unsigned NCapacity>
 class BitFlatSetT final {
 public:
@@ -2543,6 +2055,458 @@ BitSliceSetT<NCapacity>::operator != (const This& other) const noexcept {
 }
 
 namespace hfsm2 {
+namespace detail {
+
+template <
+	typename TContainer,
+	typename TItem,
+	typename TIndex
+>
+class IteratorT {
+public:
+	using Container = TContainer;
+	using Item		= TItem;
+	using Index		= TIndex;
+
+	template <typename, Long>
+	friend class DynamicArrayT;
+
+	template <typename, Long>
+	friend class StaticArrayT;
+
+private:
+	HFSM2_CONSTEXPR(11)	IteratorT(Container& container,
+								  const Index cursor)					noexcept
+		: _container{container}
+		, _cursor   {cursor   }
+	{}
+
+public:
+	HFSM2_CONSTEXPR(14)	bool operator != (const IteratorT& other) const noexcept	{
+		HFSM2_ASSERT(&_container == &other._container);
+
+		return _cursor != other._cursor;
+	}
+
+	HFSM2_CONSTEXPR(14)	IteratorT& operator ++()						noexcept	{
+		_cursor = _container.next(_cursor);
+
+		return *this;
+	}
+
+	HFSM2_CONSTEXPR(14)		  Item& operator *()						noexcept	{ return  _container[_cursor];	}
+	HFSM2_CONSTEXPR(11)	const Item& operator *()				  const noexcept	{ return  _container[_cursor];	}
+
+	HFSM2_CONSTEXPR(14)		  Item* operator->()						noexcept	{ return &_container[_cursor];	}
+	HFSM2_CONSTEXPR(11)	const Item* operator->()				  const noexcept	{ return &_container[_cursor];	}
+
+private:
+	Container& _container;
+
+	Index _cursor;
+};
+
+template <
+	typename TContainer,
+	typename TItem,
+	typename TIndex
+>
+class IteratorT<const TContainer, TItem, TIndex> {
+public:
+	using Container = TContainer;
+	using Item		= TItem;
+	using Index		= TIndex;
+
+	template <typename, Long>
+	friend class DynamicArrayT;
+
+	template <typename, Long>
+	friend class StaticArrayT;
+
+private:
+	HFSM2_CONSTEXPR(11)	IteratorT(const Container& container,
+								  const Index cursor)					noexcept
+		: _container{container}
+		, _cursor   {cursor   }
+	{}
+
+public:
+	HFSM2_CONSTEXPR(14)	bool operator != (const IteratorT& other) const noexcept	{
+		HFSM2_ASSERT(&_container == &other._container);
+
+		return _cursor != other._cursor;
+	}
+
+	HFSM2_CONSTEXPR(14)	IteratorT& operator ++()						noexcept	{
+		_cursor = _container.next(_cursor);
+
+		return *this;
+	}
+
+	HFSM2_CONSTEXPR(11)	const Item& operator *()				  const noexcept	{ return _container[_cursor];	}
+
+	HFSM2_CONSTEXPR(11)	const Item* operator->()				  const noexcept	{ return &operator *();			}
+
+private:
+	const Container& _container;
+
+	Index _cursor;
+};
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TItem, Long NCapacity>
+class DynamicArrayT final {
+	template <typename, typename, typename>
+	friend class IteratorT;
+
+public:
+	using Item		= TItem;
+	using Index		= UCapacity<NCapacity>;
+
+	using  Iterator	= IteratorT<      DynamicArrayT, Item, Index>;
+	using CIterator	= IteratorT<const DynamicArrayT, Item, Index>;
+
+	static constexpr Index CAPACITY	= NCapacity;
+	using Storage	= uint8_t[sizeof(Item) * CAPACITY];
+
+	using This		= DynamicArrayT<Item, CAPACITY>;
+
+	static_assert(sizeof(Item) % alignof(Item) == 0, "");
+
+public:
+						 DynamicArrayT()														noexcept	= default;
+	HFSM2_CONSTEXPR(14)	 DynamicArrayT(const This & other)								  HFSM2_NOEXCEPT_17(noexcept(Item{              other.item(0) }));
+	HFSM2_CONSTEXPR(14)	 DynamicArrayT(      This&& other)								  HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))}));
+	HFSM2_CONSTEXPR(20)	~DynamicArrayT()														noexcept	{ clear();	}
+
+	HFSM2_CONSTEXPR(14)	DynamicArrayT& operator = (const This & other)					  HFSM2_NOEXCEPT_17(noexcept(Item{              other.item(0) }));
+	HFSM2_CONSTEXPR(14)	DynamicArrayT& operator = (      This&& other)					  HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))}));
+
+	template <typename... TArgs>
+	HFSM2_CONSTEXPR(14)	Index emplace(TArgs&&... args)									  HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::forward<TArgs>(args)...}));
+
+	template <typename N>
+	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)									noexcept;
+
+	template <typename N>
+	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)							  const noexcept;
+
+	HFSM2_CONSTEXPR(11)	Index count()													  const noexcept	{ return _count;					}
+
+	HFSM2_CONSTEXPR(14)	 void clear()															noexcept;
+	HFSM2_CONSTEXPR(11)	 bool empty()													  const noexcept	{ return _count == 0;				}
+
+	template <Long N>
+	HFSM2_CONSTEXPR(14)	DynamicArrayT& operator += (const DynamicArrayT<Item, N>& other)  HFSM2_NOEXCEPT_17(noexcept(Item{*other.begin()}));
+
+	HFSM2_CONSTEXPR(14)	 Iterator  begin()														noexcept	{ return  Iterator(*this, first());	}
+	HFSM2_CONSTEXPR(11)	CIterator  begin()												  const noexcept	{ return CIterator(*this, first());	}
+	HFSM2_CONSTEXPR(11)	CIterator cbegin()												  const noexcept	{ return CIterator(*this, first());	}
+
+	HFSM2_CONSTEXPR(14)	 Iterator    end()														noexcept	{ return  Iterator(*this, limit());	}
+	HFSM2_CONSTEXPR(11)	CIterator    end()												  const noexcept	{ return CIterator(*this, limit());	}
+	HFSM2_CONSTEXPR(11)	CIterator   cend()												  const noexcept	{ return CIterator(*this, limit());	}
+
+private:
+	HFSM2_CONSTEXPR(11)	Index first()													  const noexcept	{ return 0;							}
+	HFSM2_CONSTEXPR(11)	Index next(const Index index)									  const noexcept	{ return index + 1;					}
+	HFSM2_CONSTEXPR(11)	Index limit()													  const noexcept	{ return _count;					}
+
+	HFSM2_CONSTEXPR(14)		  Item   & item   (const Index index)								noexcept	{ return *::hfsm2::reinterpret_launder<Item>(&_storage[index * sizeof(Item)]);	}
+	HFSM2_CONSTEXPR(11)	const Item   & item   (const Index index)						  const noexcept	{ return *::hfsm2::reinterpret_launder<Item>(&_storage[index * sizeof(Item)]);	}
+
+private:
+	Index _count = 0;
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	alignas(Item) Storage _storage {};
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+};
+
+template <typename TItem>
+class DynamicArrayT<TItem, 0> final {
+public:
+	using Item	= TItem;
+	using Index	= UCapacity<0>;
+
+	static constexpr Index CAPACITY = 0;
+};
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+DynamicArrayT<T, NC_>::DynamicArrayT(const This& other) HFSM2_NOEXCEPT_17(noexcept(Item{other.item(0)})) {
+	for (const Item& item : other)
+		emplace(item);
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+DynamicArrayT<T, NC_>::DynamicArrayT(This&& other) HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))})) {
+	for (Item& item : other)
+		emplace(::hfsm2::move(item));
+
+	other.clear();
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+DynamicArrayT<T, NC_>&
+DynamicArrayT<T, NC_>::operator = (const This& other) HFSM2_NOEXCEPT_17(noexcept(Item{other.item(0)})) {
+	if (this == &other)
+		return *this;
+
+	clear();
+
+	for (const Item& item : other)
+		emplace(item);
+
+	return *this;
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+DynamicArrayT<T, NC_>&
+DynamicArrayT<T, NC_>::operator = (This&& other) HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))})) {
+	if (this == &other)
+		return *this;
+
+	clear();
+
+	for (Index i = 0; i < other._count; ++i)
+		emplace(::hfsm2::move(other.item(i)));
+
+	other.clear();
+
+	return *this;
+}
+
+template <typename T, Long NC_>
+template <typename... TArgs>
+HFSM2_CONSTEXPR(14)
+typename DynamicArrayT<T, NC_>::Index
+DynamicArrayT<T, NC_>::emplace(TArgs&&... args) HFSM2_NOEXCEPT_17(noexcept(T{::hfsm2::forward<TArgs>(args)...})) {
+	HFSM2_ASSERT(_count < CAPACITY);
+
+	new (&_storage[_count * sizeof(Item)]) Item{::hfsm2::forward<TArgs>(args)...};
+
+	return _count++;
+}
+
+template <typename T, Long NC_>
+template <typename N>
+HFSM2_CONSTEXPR(14)
+typename DynamicArrayT<T, NC_>::Item&
+DynamicArrayT<T, NC_>::operator[] (const N index) noexcept {
+	HFSM2_ASSERT(0 <= index && index < _count);
+
+	return item(static_cast<Index>(index));
+}
+
+template <typename T, Long NC_>
+template <typename N>
+HFSM2_CONSTEXPR(14)
+const typename DynamicArrayT<T, NC_>::Item&
+DynamicArrayT<T, NC_>::operator[] (const N index) const noexcept {
+	HFSM2_ASSERT(0 <= index && index < _count);
+
+	return item(static_cast<Index>(index));
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+void
+DynamicArrayT<T, NC_>::clear() noexcept {
+	for (Index i = _count; i > 0; --i)
+		item(i - 1).~Item();
+
+	_count = 0;
+}
+
+template <typename T, Long NC_>
+template <Long N>
+HFSM2_CONSTEXPR(14)
+DynamicArrayT<T, NC_>&
+DynamicArrayT<T, NC_>::operator += (const DynamicArrayT<T, N>& other) HFSM2_NOEXCEPT_17(noexcept(Item{*other.begin()})) {
+	HFSM2_ASSERT(static_cast<const void*>(this) != static_cast<const void*>(&other));
+	HFSM2_ASSERT(_count + other.count() <= CAPACITY);
+
+	for (const auto& item : other)
+		emplace(item);
+
+	return *this;
+}
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TItem>
+HFSM2_CONSTEXPR(11)
+TItem
+filler()																noexcept	{
+	return TItem{};
+}
+
+template <>
+HFSM2_CONSTEXPR(11)
+Short
+filler<Short>()															noexcept	{
+	return INVALID_SHORT;
+}
+
+template <typename TItem, Long NCapacity>
+class StaticArrayT final {
+	template <typename, typename, typename>
+	friend class IteratorT;
+
+public:
+	using Item		= TItem;
+	using Index		= UCapacity<NCapacity>;
+
+	using  Iterator	= IteratorT<      StaticArrayT, Item, Index>;
+	using CIterator	= IteratorT<const StaticArrayT, Item, Index>;
+
+	static constexpr Index CAPACITY	= NCapacity;
+
+	using This		= StaticArrayT<Item, CAPACITY>;
+
+public:
+	HFSM2_CONSTEXPR(11)	StaticArrayT()								   = default;
+	HFSM2_CONSTEXPR(14)	StaticArrayT(const Item filler)					noexcept	{ fill(filler);						}
+
+	template <typename N>
+	HFSM2_CONSTEXPR(14)		  Item& operator[] (const N index)			noexcept;
+
+	template <typename N>
+	HFSM2_CONSTEXPR(14)	const Item& operator[] (const N index)	  const noexcept;
+
+	HFSM2_CONSTEXPR(11)	Index count()							  const noexcept	{ return CAPACITY;					}
+
+	HFSM2_CONSTEXPR(14)	bool operator == (const This& other)	  const noexcept;
+	HFSM2_CONSTEXPR(14)	bool operator != (const This& other)	  const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void fill(const Item filler)					noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ fill(filler<Item>());				}
+	HFSM2_CONSTEXPR(14)	bool empty()							  const noexcept;
+
+	HFSM2_CONSTEXPR(14)	 Iterator  begin()								noexcept	{ return  Iterator(*this, first());	}
+	HFSM2_CONSTEXPR(11)	CIterator  begin()						  const noexcept	{ return CIterator(*this, first());	}
+	HFSM2_CONSTEXPR(11)	CIterator cbegin()						  const noexcept	{ return CIterator(*this, first());	}
+
+	HFSM2_CONSTEXPR(14)	 Iterator	 end()								noexcept	{ return  Iterator(*this, limit());	}
+	HFSM2_CONSTEXPR(11)	CIterator	 end()						  const noexcept	{ return CIterator(*this, limit());	}
+	HFSM2_CONSTEXPR(11)	CIterator	cend()						  const noexcept	{ return CIterator(*this, limit());	}
+
+private:
+	HFSM2_CONSTEXPR(11)	Index first()							  const noexcept	{ return 0;							}
+	HFSM2_CONSTEXPR(11)	Index  next(const Index index)			  const noexcept	{ return index + 1;					}
+	HFSM2_CONSTEXPR(11)	Index limit()							  const noexcept	{ return CAPACITY;					}
+
+private:
+	Item _items[CAPACITY] {};
+};
+
+template <typename TItem>
+class StaticArrayT<TItem, 0> final {
+public:
+	using Item		= TItem;
+
+public:
+	HFSM2_CONSTEXPR(11)	StaticArrayT()								   = default;
+	HFSM2_CONSTEXPR(11)	StaticArrayT(const Item)						noexcept	{}
+};
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename T, Long NC_>
+template <typename N>
+HFSM2_CONSTEXPR(14)
+T&
+StaticArrayT<T, NC_>::operator[] (const N index) noexcept {
+	HFSM2_ASSERT(0 <= index && index < CAPACITY);
+
+	return _items[static_cast<Index>(index)];
+}
+
+template <typename T, Long NC_>
+template <typename N>
+HFSM2_CONSTEXPR(14)
+const T&
+StaticArrayT<T, NC_>::operator[] (const N index) const noexcept	{
+	HFSM2_ASSERT(0 <= index && index < CAPACITY);
+
+	return _items[static_cast<Index>(index)];
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+void
+StaticArrayT<T, NC_>::fill(const Item filler) noexcept {
+	for (Item& item : _items)
+		item = filler;
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+bool
+StaticArrayT<T, NC_>::operator == (const This& other) const noexcept {
+	for (Index i = 0; i < CAPACITY; ++i)
+		if (_items[i] != other._items[i])
+			return false;
+
+	return true;
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+bool
+StaticArrayT<T, NC_>::operator != (const This& other) const noexcept {
+	for (Index i = 0; i < CAPACITY; ++i)
+		if (_items[i] != other._items[i])
+			return true;
+
+	return false;
+}
+
+template <typename T, Long NC_>
+HFSM2_CONSTEXPR(14)
+bool
+StaticArrayT<T, NC_>::empty() const noexcept {
+	for (const Item& item : _items)
+		if (item != filler<Item>())
+			return false;
+
+	return true;
+}
+
+}
+}
+
+namespace hfsm2 {
 
 enum class Method : uint8_t {
 	NONE,
@@ -2734,33 +2698,102 @@ struct TransitionT final
 {
 	using Payload = TPayload;
 	using Storage = uint8_t[sizeof(Payload)];
+	using This	  = TransitionT<Payload>;
 
-	using TransitionBase::TransitionBase;
+	HFSM2_CONSTEXPR(11)
+	TransitionT()														noexcept = default;
 
 	HFSM2_CONSTEXPR(14)
-	TransitionT()														noexcept	{
-		new (&storage) Payload{};
+	TransitionT(const StateID destination_,
+				const TransitionType type_)								noexcept
+		: TransitionBase{destination_, type_}
+	{}
+
+	HFSM2_CONSTEXPR(14)
+	TransitionT(const StateID origin_,
+				const StateID destination_,
+				const TransitionType type_)								noexcept
+		: TransitionBase{origin_, destination_, type_}
+	{}
+
+	HFSM2_CONSTEXPR(14)
+	TransitionT(const This& other)								  HFSM2_NOEXCEPT_17(noexcept(Payload{              other.payloadStorage() }))
+		: TransitionBase{other.origin, other.destination, other.type}
+	{
+		method = other.method;
+		payloadSet = other.payloadSet;
+
+		if (other.payloadSet)
+			new (storage) Payload{other.payloadStorage()};
+	}
+
+	HFSM2_CONSTEXPR(14)
+	TransitionT(This&& other)									  HFSM2_NOEXCEPT_17(noexcept(Payload{::hfsm2::move(other.payloadStorage())}))
+		: TransitionBase{other.origin, other.destination, other.type}
+	{
+		method = other.method;
+		payloadSet = other.payloadSet;
+
+		if (other.payloadSet)
+			new (storage) Payload{::hfsm2::move(other.payloadStorage())};
 	}
 
 	HFSM2_CONSTEXPR(14)
 	TransitionT(const StateID destination_,
 				const TransitionType type_,
-				const Payload& payload)									noexcept
+				const Payload& payload)							  HFSM2_NOEXCEPT_17(noexcept(Payload{payload}))
 		: TransitionBase{destination_, type_}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{payload};
+		new (storage) Payload{payload};
 	}
 
 	HFSM2_CONSTEXPR(14)
 	TransitionT(const StateID origin_,
 				const StateID destination_,
 				const TransitionType type_,
-				const Payload& payload)									noexcept
+				const Payload& payload)							  HFSM2_NOEXCEPT_17(noexcept(Payload{payload}))
 		: TransitionBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{payload};
+		new (storage) Payload{payload};
+	}
+
+	HFSM2_CONSTEXPR(20)
+	~TransitionT()														noexcept	{
+		clearPayload();
+	}
+
+	HFSM2_CONSTEXPR(14)
+	This&
+	operator = (const This& other)								  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() =               other.payloadStorage() ) && noexcept(Payload{              other.payloadStorage() }))	{
+		if (this == &other)
+			return *this;
+
+		origin		= other.origin;
+		destination = other.destination;
+		method		= other.method;
+		type		= other.type;
+
+		assignPayload(other);
+
+		return *this;
+	}
+
+	HFSM2_CONSTEXPR(14)
+	This&
+	operator = (This&& other)									  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() = ::hfsm2::move(other.payloadStorage())) && noexcept(Payload{::hfsm2::move(other.payloadStorage())}))	{
+		if (this == &other)
+			return *this;
+
+		origin		= other.origin;
+		destination = other.destination;
+		method		= other.method;
+		type		= other.type;
+
+		assignPayload(::hfsm2::move(other));
+
+		return *this;
 	}
 
 	HFSM2_CONSTEXPR(11)
@@ -2783,7 +2816,58 @@ struct TransitionT final
 	const Payload*
 	payload()													  const noexcept	{
 		return payloadSet ?
-			reinterpret_cast<const Payload*>(&storage) : nullptr;
+			&payloadStorage() : nullptr;
+	}
+
+	HFSM2_CONSTEXPR(14)
+		  Payload&
+	payloadStorage()													noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	HFSM2_CONSTEXPR(11)
+	const Payload&
+	payloadStorage()											  const noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	HFSM2_CONSTEXPR(14)
+	void
+	clearPayload()														noexcept	{
+		if (payloadSet) {
+			::hfsm2::destroy(payloadStorage());
+			payloadSet = false;
+		}
+	}
+
+	HFSM2_CONSTEXPR(14)
+	void
+	assignPayload(const This& other)							  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() =               other.payloadStorage() ) && noexcept(Payload{              other.payloadStorage() }))	{
+		if (other.payloadSet) {
+			if (payloadSet)
+				payloadStorage() = other.payloadStorage();
+			else {
+				new (storage) Payload{other.payloadStorage()};
+				payloadSet = true;
+			}
+		}
+		else
+			clearPayload();
+	}
+
+	HFSM2_CONSTEXPR(14)
+	void
+	assignPayload(This&& other)									  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() = ::hfsm2::move(other.payloadStorage())) && noexcept(Payload{::hfsm2::move(other.payloadStorage())}))	{
+		if (other.payloadSet) {
+			if (payloadSet)
+				payloadStorage() = ::hfsm2::move(other.payloadStorage());
+			else {
+				new (storage) Payload{::hfsm2::move(other.payloadStorage())};
+				payloadSet = true;
+			}
+		}
+		else
+			clearPayload();
 	}
 
 #ifdef _MSC_VER
@@ -2987,6 +3071,82 @@ struct StructureStateInfo final {
 
 #endif
 
+namespace hfsm2 {
+namespace detail {
+
+struct TaskStatus final {
+	enum Result {
+		NONE,
+		SUCCESS,
+		FAILURE
+	};
+
+	Result result = Result::NONE;
+	bool outerTransition = false;
+
+	HFSM2_CONSTEXPR(11)	TaskStatus(const Result result_ = Result::NONE,
+								   const bool outerTransition_ = false)			noexcept;
+
+	HFSM2_CONSTEXPR(11)	explicit operator bool()						  const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clear()											noexcept;
+};
+
+HFSM2_CONSTEXPR(14) TaskStatus  operator |  (TaskStatus& l, const TaskStatus r)	noexcept;
+HFSM2_CONSTEXPR(14) TaskStatus& operator |= (TaskStatus& l, const TaskStatus r)	noexcept;
+
+}
+}
+
+namespace hfsm2 {
+namespace detail {
+
+HFSM2_CONSTEXPR(11)
+TaskStatus::TaskStatus(const Result result_,
+					   const bool outerTransition_) noexcept
+	: result         {result_         }
+	, outerTransition{outerTransition_}
+{}
+
+HFSM2_CONSTEXPR(11)
+TaskStatus::operator bool() const noexcept	{
+	return result != Result::NONE || outerTransition;
+}
+
+HFSM2_CONSTEXPR(14)
+void
+TaskStatus::clear() noexcept {
+	result = Result::NONE;
+	outerTransition = false;
+}
+
+HFSM2_CONSTEXPR(14)
+TaskStatus
+operator | (TaskStatus& lhs,
+			const TaskStatus rhs) noexcept
+{
+	const TaskStatus::Result result = lhs.result > rhs.result ?
+		lhs.result : rhs.result;
+
+	return TaskStatus{result, lhs.outerTransition || rhs.outerTransition};
+}
+
+HFSM2_CONSTEXPR(14)
+TaskStatus&
+operator |= (TaskStatus& lhs,
+			 const TaskStatus rhs) noexcept
+{
+	const TaskStatus::Result result = lhs.result > rhs.result ?
+										  lhs.result : rhs.result;
+
+	lhs = TaskStatus{result, lhs.outerTransition || rhs.outerTransition};
+
+	return lhs;
+}
+
+}
+}
+
 #if HFSM2_PLANS_AVAILABLE()
 
 namespace hfsm2 {
@@ -3007,15 +3167,8 @@ struct TaskBase {
 
 	HFSM2_CONSTEXPR(11) bool cyclic()							  const noexcept	{ return origin == destination;	}
 
-	union {
-		StateID origin		= INVALID_STATE_ID;
-		Long prev;
-	};
-
-	union {
-		StateID destination	= INVALID_STATE_ID;
-		Long next;
-	};
+	StateID origin		= INVALID_STATE_ID;
+	StateID destination	= INVALID_STATE_ID;
 
 	TransitionType type = TransitionType::COUNT;
 };
@@ -3036,28 +3189,128 @@ struct TaskT final
 {
 	using Payload = TPayload;
 	using Storage = uint8_t[sizeof(Payload)];
+	using This	  = TaskT<Payload>;
 
-	using TaskBase::TaskBase;
+	HFSM2_CONSTEXPR(11)	TaskT()											noexcept = default;
 
-	HFSM2_CONSTEXPR(14)	TaskT()											noexcept	{
-		new (&storage) Payload{};
+	HFSM2_CONSTEXPR(11)	TaskT(const StateID origin_,
+							  const StateID destination_,
+							  const TransitionType type_)				noexcept
+		: TaskBase{origin_, destination_, type_}
+	{}
+
+	HFSM2_CONSTEXPR(14)	TaskT(const This& other)				  HFSM2_NOEXCEPT_17(noexcept(Payload{              other.payloadStorage() }))
+		: TaskBase{other.origin, other.destination, other.type}
+		, payloadSet{other.payloadSet}
+	{
+		if (other.payloadSet)
+			new (storage) Payload{other.payloadStorage()};
+	}
+
+	HFSM2_CONSTEXPR(14)	TaskT(This&& other)						  HFSM2_NOEXCEPT_17(noexcept(Payload{::hfsm2::move(other.payloadStorage())}))
+		: TaskBase{other.origin, other.destination, other.type}
+		, payloadSet{other.payloadSet}
+	{
+		if (other.payloadSet)
+			new (storage) Payload{::hfsm2::move(other.payloadStorage())};
 	}
 
 	HFSM2_CONSTEXPR(14)	TaskT(const StateID origin_,
 							  const StateID destination_,
 							  const TransitionType type_,
-							  const Payload& payload)					noexcept
+							  const Payload& payload)			  HFSM2_NOEXCEPT_17(noexcept(Payload{payload}))
 		: TaskBase{origin_, destination_, type_}
 		, payloadSet{true}
 	{
-		new (&storage) Payload{payload};
+		new (storage) Payload{payload};
+	}
+
+	HFSM2_CONSTEXPR(20)	~TaskT()										noexcept	{
+		clearPayload();
+	}
+
+	HFSM2_CONSTEXPR(14)	This& operator = (const This& other)	  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() =               other.payloadStorage() ) && noexcept(Payload{              other.payloadStorage() })) {
+		if (this == &other)
+			return *this;
+
+		origin		= other.origin;
+		destination = other.destination;
+		type		= other.type;
+
+		assignPayload(other);
+
+		return *this;
+	}
+
+	HFSM2_CONSTEXPR(14)	This& operator = (This&& other)			  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() = ::hfsm2::move(other.payloadStorage())) && noexcept(Payload{::hfsm2::move(other.payloadStorage())})) {
+		if (this == &other)
+			return *this;
+
+		origin		= other.origin;
+		destination = other.destination;
+		type		= other.type;
+
+		assignPayload(::hfsm2::move(other));
+
+		return *this;
 	}
 
 	HFSM2_CONSTEXPR(11)
 	const Payload*
 	payload()													  const noexcept	{
 		return payloadSet ?
-			reinterpret_cast<const Payload*>(&storage) : nullptr;
+			&payloadStorage() : nullptr;
+	}
+
+	HFSM2_CONSTEXPR(14)
+		  Payload&
+	payloadStorage()													noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	HFSM2_CONSTEXPR(11)
+	const Payload&
+	payloadStorage()											  const noexcept	{
+		return *::hfsm2::reinterpret_launder<Payload>(storage);
+	}
+
+	HFSM2_CONSTEXPR(14)
+	void
+	clearPayload()														noexcept	{
+		if (payloadSet) {
+			::hfsm2::destroy(payloadStorage());
+			payloadSet = false;
+		}
+	}
+
+	HFSM2_CONSTEXPR(14)
+	void
+	assignPayload(const This& other)							  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() =               other.payloadStorage() ) && noexcept(Payload{              other.payloadStorage() }))	{
+		if (other.payloadSet) {
+			if (payloadSet)
+				payloadStorage() = other.payloadStorage();
+			else {
+				new (storage) Payload{other.payloadStorage()};
+				payloadSet = true;
+			}
+		}
+		else
+			clearPayload();
+	}
+
+	HFSM2_CONSTEXPR(14)
+	void
+	assignPayload(This&& other)									  HFSM2_NOEXCEPT_17(noexcept(payloadStorage() = ::hfsm2::move(other.payloadStorage())) && noexcept(Payload{::hfsm2::move(other.payloadStorage())}))	{
+		if (other.payloadSet) {
+			if (payloadSet)
+				payloadStorage() =    ::hfsm2::move(other.payloadStorage()) ;
+			else {
+				new (storage) Payload{::hfsm2::move(other.payloadStorage())};
+				payloadSet = true;
+			}
+		}
+		else
+			clearPayload();
 	}
 
 #ifdef _MSC_VER
@@ -3087,231 +3340,14 @@ struct TaskT<void> final
 #endif
 
 #if HFSM2_PLANS_AVAILABLE()
-
 namespace hfsm2 {
 namespace detail {
-
-template <typename TPayload, Long NCapacity>
-class TaskListT {
-public:
-	using Index		= Long;
-
-	static constexpr Index CAPACITY	= NCapacity;
-	static constexpr Index INVALID	= Index (-1);
-
-private:
-	using Payload	= TPayload;
-	using Item		= TaskT<Payload>;
-
-public:
-	HFSM2_CONSTEXPR(14)	 void clear()											noexcept;
-
-	template <typename... TArgs>
-	HFSM2_CONSTEXPR(14)	Index emplace(TArgs&&... args)							noexcept;
-
-	HFSM2_CONSTEXPR(14)	void remove(const Index i)								noexcept;
-
-	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index i)					noexcept;
-	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index i)			  const noexcept;
-
-	HFSM2_CONSTEXPR(11)	Index count()									  const noexcept	{ return _count;		}
-	HFSM2_CONSTEXPR(11)	bool  empty()									  const noexcept	{ return _count == 0;	}
-
-private:
-	HFSM2_IF_ASSERT(void verifyStructure(const Index occupied = INVALID)  const noexcept);
-
-private:
-	Index _vacantHead = 0;
-	Index _vacantTail = 0;
-	Index _last		  = 0;
-	Index _count	  = 0;
-	Item _items[CAPACITY] {};
-};
-
-template <typename TItem>
-class TaskListT<TItem, 0> {};
-
+	template <typename> struct PlanDataT;
+	template <typename> class  PlanT;
+	template <typename> class  CPlanT;
+	template <typename> class  PayloadPlanT;
 }
 }
-
-#if HFSM2_PLANS_AVAILABLE()
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TP_, Long NC_>
-HFSM2_CONSTEXPR(14)
-void
-TaskListT<TP_, NC_>::clear() noexcept {
-	_vacantHead	= 0;
-	_vacantTail	= 0;
-	_last		= 0;
-	_count		= 0;
-}
-
-template <typename TP_, Long NC_>
-template <typename... TA_>
-HFSM2_CONSTEXPR(14)
-Long
-TaskListT<TP_, NC_>::emplace(TA_&&... args) noexcept {
-	HFSM2_ASSERT(_last  <= CAPACITY);
-
-	if (_count < CAPACITY) {
-		HFSM2_ASSERT(_vacantHead < CAPACITY);
-		HFSM2_ASSERT(_vacantTail < CAPACITY);
-
-		const Index index = _vacantHead;
-		Item& item = _items[index];
-
-		if (_vacantHead != _vacantTail) {
-			// recycle
-			HFSM2_ASSERT(item.prev == INVALID);
-			HFSM2_ASSERT(item.next != INVALID);
-
-			_vacantHead = item.next;
-
-			Item& head = _items[_vacantHead];
-			HFSM2_ASSERT(head.prev == index);
-			head.prev = INVALID;
-		} else if (_last < CAPACITY - 1) {
-			// grow
-			++_last;
-			_vacantHead = _last;
-			_vacantTail = _last;
-
-			Item& vacant = _items[_vacantHead];
-			vacant.prev = INVALID;
-			vacant.next = INVALID;
-		} else {
-			// last
-			HFSM2_ASSERT(_count == CAPACITY - 1);
-
-			_last = CAPACITY;
-			_vacantHead = INVALID;
-			_vacantTail = INVALID;
-		}
-
-		new (&item) Item{::hfsm2::forward<TA_>(args)...};
-		++_count;
-
-		HFSM2_IF_ASSERT(verifyStructure());
-
-		return index;
-	} else {
-		// full
-		HFSM2_ASSERT(_vacantHead == INVALID);
-		HFSM2_ASSERT(_vacantTail == INVALID);
-		HFSM2_ASSERT(_count		 == CAPACITY);
-		HFSM2_BREAK();
-
-		return INVALID;
-	}
-}
-
-template <typename TP_, Long NC_>
-HFSM2_CONSTEXPR(14)
-void
-TaskListT<TP_, NC_>::remove(const Index i) noexcept {
-	HFSM2_ASSERT(i < CAPACITY && _count);
-
-	Item& item = _items[i];
-
-	if (_count < CAPACITY) {
-		HFSM2_ASSERT(_vacantHead < CAPACITY);
-		HFSM2_ASSERT(_vacantTail < CAPACITY);
-
-		item.prev = INVALID;
-		item.next = _vacantHead;
-
-		Item& head = _items[_vacantHead];
-		head.prev = i;
-
-		_vacantHead = i;
-	} else {
-		// 0 -> 1
-		HFSM2_ASSERT(_count		 == CAPACITY);
-		HFSM2_ASSERT(_vacantHead == INVALID);
-		HFSM2_ASSERT(_vacantTail == INVALID);
-
-		item.prev = INVALID;
-		item.next = INVALID;
-
-		_vacantHead = i;
-		_vacantTail = i;
-	}
-
-	--_count;
-
-	HFSM2_IF_ASSERT(verifyStructure());
-}
-
-template <typename TP_, Long NC_>
-HFSM2_CONSTEXPR(14)
-typename TaskListT<TP_, NC_>::Item&
-TaskListT<TP_, NC_>::operator[] (const Index i) noexcept {
-	HFSM2_IF_ASSERT(verifyStructure());
-
-	return _items[i];
-}
-
-template <typename TP_, Long NC_>
-HFSM2_CONSTEXPR(11)
-const typename TaskListT<TP_, NC_>::Item&
-TaskListT<TP_, NC_>::operator[] (const Index i) const noexcept {
-	HFSM2_IF_ASSERT(verifyStructure());
-
-	return _items[i];
-}
-
-#if HFSM2_ASSERT_AVAILABLE()
-
-template <typename TP_, Long NC_>
-void
-TaskListT<TP_, NC_>::verifyStructure(const Index occupied) const noexcept {
-	if (_count < CAPACITY) {
-		HFSM2_ASSERT(_vacantHead < CAPACITY);
-		HFSM2_ASSERT(_vacantTail < CAPACITY);
-
-		HFSM2_ASSERT(_items[_vacantHead].prev == INVALID);
-		HFSM2_ASSERT(_items[_vacantTail].next == INVALID);
-
-		Index emptyCount = 1;
-
-		for (Index c = _vacantHead; c != _vacantTail; ) {
-			HFSM2_ASSERT(occupied != c);
-
-			const Item& current = _items[c];
-
-			const Long f = current.next;
-			if (f != INVALID) {
-				// next
-				const Item& following = _items[f];
-
-				HFSM2_ASSERT(following.prev == c);
-
-				c = f;
-				continue;
-			} else {
-				// end
-				HFSM2_ASSERT(_vacantTail == c);
-				HFSM2_ASSERT(_count		 == CAPACITY - emptyCount);
-
-				break;
-			}
-		}
-	} else {
-		HFSM2_ASSERT(_vacantHead == INVALID);
-		HFSM2_ASSERT(_vacantTail == INVALID);
-	}
-}
-
-#endif
-
-}
-}
-
-#endif
-
 #endif
 
 namespace hfsm2 {
@@ -3898,7 +3934,8 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 			HFSM2_ASSERT(parent.forkId > 0);
 
 			return parent.prong == compoActive[parent.forkId - 1];
-		} else
+		}
+		else
 			return isActive();
 	}
 
@@ -4083,1715 +4120,6 @@ RegistryT<ArgsT<TG_, TSL_, TRL_, NCC_, 0, 0, TRO_ HFSM2_IF_SERIALIZATION(, NSB_)
 
 }
 }
-
-namespace hfsm2 {
-namespace detail {
-
-struct TaskStatus final {
-	enum Result {
-		NONE,
-		SUCCESS,
-		FAILURE
-	};
-
-	Result result = Result::NONE;
-	bool outerTransition = false;
-
-	HFSM2_CONSTEXPR(11)	TaskStatus(const Result result_ = Result::NONE,
-								   const bool outerTransition_ = false)	noexcept;
-
-	HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept;
-
-	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
-};
-
-HFSM2_CONSTEXPR(14) TaskStatus  operator |  (TaskStatus& l, const TaskStatus r)	noexcept;
-HFSM2_CONSTEXPR(14) TaskStatus& operator |= (TaskStatus& l, const TaskStatus r)	noexcept;
-
-#if HFSM2_PLANS_AVAILABLE()
-
-struct TaskLink final {
-	Long prev		= INVALID_LONG;
-	Long next		= INVALID_LONG;
-};
-
-struct Bounds final {
-	Long first		= INVALID_LONG;
-	Long last		= INVALID_LONG;
-};
-
-template <
-	typename
-  , typename
-  , typename
-  , Long
-  , Long
-  , Long
-  , typename
-  HFSM2_IF_SERIALIZATION(, Long)
-  , Long
-  , typename
->
-struct ArgsT;
-
-template <typename>
-struct PlanDataT;
-
-template <
-	typename TConfig
-  , typename TStateList
-  , typename TRegionList
-  , Long NCompoCount
-  , Long NOrthoCount
-  , Long NOrthoUnits
-  , typename TReactOrder
-  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-  , Long NTaskCapacity
-  , typename TPayload
->
-struct PlanDataT<
-		   ArgsT<
-			   TConfig
-			 , TStateList
-			 , TRegionList
-			 , NCompoCount
-			 , NOrthoCount
-			 , NOrthoUnits
-			 , TReactOrder
-			 HFSM2_IF_SERIALIZATION(, NSerialBits)
-			 , NTaskCapacity
-			 , TPayload
-		   >
-	   > final
-{
-	using StateList			= TStateList;
-	using RegionList		= TRegionList;
-	using Payload			= TPayload;
-
-	static constexpr Long STATE_COUNT	= StateList ::SIZE;
-	static constexpr Long REGION_COUNT	= RegionList::SIZE;
-	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
-
-	using Task				= TaskT		  <Payload>;
-	using Tasks				= TaskListT   <Payload , TASK_CAPACITY>;
-	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
-
-	using TasksBounds		= StaticArrayT<Bounds    , REGION_COUNT>;
-	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
-	using RegionBits		= BitFlatSetT <	           REGION_COUNT>;
-	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
-
-	Tasks tasks;
-	TaskLinks taskLinks;
-	TasksBits payloadExists;
-
-	TasksBounds taskBounds;
-	TasksBits tasksSuccesses;
-	TasksBits tasksFailures;
-	RegionBits planExists;
-	RegionStatuses headStatuses;
-	RegionStatuses subStatuses;
-
-	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
-	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
-
-	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
-
-#if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
-	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID stateId)		  const noexcept;
-#endif
-};
-
-template <
-	typename TConfig
-  , typename TStateList
-  , typename TRegionList
-  , Long NCompoCount
-  , Long NOrthoCount
-  , Long NOrthoUnits
-  , typename TReactOrder
-  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-  , Long NTaskCapacity
->
-struct PlanDataT<
-		   ArgsT<
-			   TConfig
-			 , TStateList
-			 , TRegionList
-			 , NCompoCount
-			 , NOrthoCount
-			 , NOrthoUnits
-			 , TReactOrder
-			 HFSM2_IF_SERIALIZATION(, NSerialBits)
-			 , NTaskCapacity
-			 , void
-		   >
-	   > final
-{
-	using StateList			= TStateList;
-	using RegionList		= TRegionList;
-
-	static constexpr Long  STATE_COUNT	= StateList ::SIZE;
-	static constexpr Long REGION_COUNT	= RegionList::SIZE;
-	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
-
-	using Task				= TaskT		  <void>;
-	using Tasks				= TaskListT	  <void    , TASK_CAPACITY>;
-	using TaskLinks			= StaticArrayT<TaskLink, TASK_CAPACITY>;
-
-	using TasksBounds		= StaticArrayT<Bounds    , REGION_COUNT>;
-	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
-	using RegionBits		= BitFlatSetT <	           REGION_COUNT>;
-	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
-
-	Tasks tasks;
-	TaskLinks taskLinks;
-
-	TasksBounds taskBounds;
-	TasksBits tasksSuccesses;
-	TasksBits tasksFailures;
-	RegionBits planExists;
-	RegionStatuses headStatuses;
-	RegionStatuses subStatuses;
-
-	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
-	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
-
-	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept;
-	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
-
-#if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
-	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID stateId)		  const noexcept;
-#endif
-};
-
-template <
-	typename TConfig
-  , typename TStateList
-  , typename TRegionList
-  , Long NOrthoCount
-  , Long NOrthoUnits
-  , typename TReactOrder
-  , Long NTaskCapacity
-  , typename TPayload
->
-struct PlanDataT<
-		   ArgsT<
-			   TConfig
-			 , TStateList
-			 , TRegionList
-			 , 0
-			 , NOrthoCount
-			 , NOrthoUnits
-			 , TReactOrder
-			 HFSM2_IF_SERIALIZATION(, 0)
-			 , NTaskCapacity
-			 , TPayload
-		   >
-	   > final
-{
-	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
-	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
-
-	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept	{}
-	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{}
-
-#if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept	{}
-#endif
-};
-
-template <
-	typename TConfig
-  , typename TStateList
-  , typename TRegionList
-  , Long NOrthoCount
-  , Long NOrthoUnits
-  , typename TReactOrder
-  , Long NTaskCapacity
->
-struct PlanDataT<
-		   ArgsT<
-			   TConfig
-			 , TStateList
-			 , TRegionList
-			 , 0
-			 , NOrthoCount
-			 , NOrthoUnits
-			 , TReactOrder
-			 HFSM2_IF_SERIALIZATION(, 0)
-			 , NTaskCapacity
-			 , void
-		   >
-	   > final
-{
-	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
-	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
-
-	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept	{}
-	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{}
-
-#if HFSM2_ASSERT_AVAILABLE()
-	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept	{}
-#endif
-};
-
-#endif
-
-}
-}
-
-namespace hfsm2 {
-namespace detail {
-
-HFSM2_CONSTEXPR(11)
-TaskStatus::TaskStatus(const Result result_,
-					   const bool outerTransition_) noexcept
-	: result{result_}
-	, outerTransition{outerTransition_}
-{}
-
-HFSM2_CONSTEXPR(11)
-TaskStatus::operator bool() const noexcept	{
-	return result != Result::NONE || outerTransition;
-}
-
-HFSM2_CONSTEXPR(14)
-void
-TaskStatus::clear() noexcept {
-	result = Result::NONE;
-	outerTransition = false;
-}
-
-HFSM2_CONSTEXPR(14)
-TaskStatus
-operator | (TaskStatus& lhs,
-			const TaskStatus rhs) noexcept
-{
-	const TaskStatus::Result result = lhs.result > rhs.result ?
-		lhs.result : rhs.result;
-
-	return TaskStatus{result, lhs.outerTransition || rhs.outerTransition};
-}
-
-HFSM2_CONSTEXPR(14)
-TaskStatus&
-operator |= (TaskStatus& lhs,
-			 const TaskStatus rhs) noexcept
-{
-	const TaskStatus::Result result = lhs.result > rhs.result ?
-										  lhs.result : rhs.result;
-
-	lhs = TaskStatus{result, lhs.outerTransition || rhs.outerTransition};
-
-	return lhs;
-}
-
-#if HFSM2_PLANS_AVAILABLE()
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearTaskStatus(const StateID stateId) noexcept {
-	if (stateId != INVALID_STATE_ID) {
-		tasksSuccesses.clear(stateId);
-		tasksFailures .clear(stateId);
-	}
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
-#if HFSM2_ASSERT_AVAILABLE()
-
-	if (stateId != INVALID_STATE_ID) {
-		HFSM2_ASSERT(!tasksSuccesses.get(stateId));
-		HFSM2_ASSERT(!tasksFailures .get(stateId));
-	}
-
-#endif
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearStatuses() noexcept {
-	tasksSuccesses.clear();
-	tasksFailures .clear();
-
-	headStatuses.clear();
-	 subStatuses.clear();
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clear() noexcept {
-	tasks		 .clear();
-	taskLinks	 .clear();
-	payloadExists.clear();
-
-	taskBounds	 .clear();
-	planExists	 .clear();
-
-	clearStatuses();
-}
-
-#if HFSM2_ASSERT_AVAILABLE()
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlans() const noexcept {
-	Long planCount = 0;
-
-	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
-		planCount += verifyPlan(regionId);
-
-	HFSM2_ASSERT(tasks.count() == planCount);
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
-HFSM2_CONSTEXPR(14)
-Long
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlan(const RegionID regionId) const noexcept {
-	Long length = 0;
-	const Bounds& bounds = taskBounds[regionId];
-
-	if (bounds.first != INVALID_LONG) {
-		HFSM2_ASSERT(bounds.last != INVALID_LONG);
-
-		for (Long slow = bounds.first, fast = slow; ; ) {
-			++length;
-			const TaskLink& task = taskLinks[slow];
-
-			if (slow != bounds.last) {
-				HFSM2_ASSERT(task.next != INVALID_LONG);
-				slow = task.next;
-
-				// loop check
-				if (fast != INVALID_LONG) {
-					fast = taskLinks[fast].next;
-
-					if (fast != INVALID_LONG)
-						fast = taskLinks[fast].next;
-
-					HFSM2_ASSERT(fast == INVALID_LONG || slow != fast);
-				}
-			} else {
-				HFSM2_ASSERT(task.next == INVALID_LONG);
-
-				break;
-			}
-		};
-	} else
-		HFSM2_ASSERT(bounds.last == INVALID_LONG);
-
-	return length;
-}
-
-#endif
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearTaskStatus(const StateID stateId) noexcept {
-	if (stateId != INVALID_STATE_ID) {
-		tasksSuccesses.clear(stateId);
-		tasksFailures .clear(stateId);
-	}
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
-#if HFSM2_ASSERT_AVAILABLE()
-
-	if (stateId != INVALID_STATE_ID) {
-		HFSM2_ASSERT(!tasksSuccesses.get(stateId));
-		HFSM2_ASSERT(!tasksFailures .get(stateId));
-	}
-
-#endif
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearStatuses() noexcept {
-	tasksSuccesses.clear();
-	tasksFailures .clear();
-
-	headStatuses.clear();
-	 subStatuses.clear();
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clear() noexcept {
-	tasks	  .clear();
-	taskLinks .clear();
-
-	taskBounds.clear();
-	planExists.clear();
-
-	clearStatuses();
-}
-
-#if HFSM2_ASSERT_AVAILABLE()
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
-HFSM2_CONSTEXPR(14)
-void
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlans() const noexcept {
-	Long planCount = 0;
-
-	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
-		planCount += verifyPlan(regionId);
-
-	HFSM2_ASSERT(tasks.count() == planCount);
-}
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
-HFSM2_CONSTEXPR(14)
-Long
-PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlan(const RegionID regionId) const noexcept {
-	Long length = 0;
-	const Bounds& bounds = taskBounds[regionId];
-
-	if (bounds.first != INVALID_LONG) {
-		HFSM2_ASSERT(bounds.last != INVALID_LONG);
-
-		for (auto slow = bounds.first, fast = slow; ; ) {
-			++length;
-			const TaskLink& task = taskLinks[slow];
-
-			if (slow != bounds.last) {
-				HFSM2_ASSERT(task.next != INVALID_LONG);
-				slow = task.next;
-
-				// loop check
-				if (fast != INVALID_LONG) {
-					fast = taskLinks[fast].next;
-
-					if (fast != INVALID_LONG)
-						fast = taskLinks[fast].next;
-
-					HFSM2_ASSERT(fast == INVALID_LONG || slow != fast);
-				}
-			} else {
-				HFSM2_ASSERT(task.next == INVALID_LONG);
-
-				break;
-			}
-		};
-	} else
-		HFSM2_ASSERT(bounds.last == INVALID_LONG);
-
-	return length;
-}
-
-#endif
-#endif
-
-}
-}
-
-#if HFSM2_PLANS_AVAILABLE()
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TArgs>
-class CPlanT {
-	template <typename>
-	friend class ControlT;
-
-	template <typename>
-	friend class PlanControlT;
-
-	template <typename>
-	friend class FullControlT;
-
-	template <typename>
-	friend class GuardControlT;
-
-	template <typename, typename>
-	friend class R_;
-
-	using Args			= TArgs;
-	using Context		= typename Args::Context;
-	using StateList		= typename Args::StateList;
-	using RegionList	= typename Args::RegionList;
-
-	static constexpr Long TASK_CAPACITY = Args::TASK_CAPACITY;
-
-public:
-	using PlanData		= PlanDataT<Args>;
-	using Task			= typename PlanData::Task;
-	using TaskLinks		= typename PlanData::TaskLinks;
-
-	struct Iterator final {
-		HFSM2_CONSTEXPR(14)	Iterator(const CPlanT& plan)				noexcept;
-
-		HFSM2_CONSTEXPR(14)	explicit operator bool()			  const noexcept;
-
-		HFSM2_CONSTEXPR(14)	void operator ++()							noexcept;
-
-		HFSM2_CONSTEXPR(11)	bool operator != (const Iterator)	  const noexcept	{ return operator bool();					}
-
-		HFSM2_CONSTEXPR(11)	const Task& operator  *()			  const noexcept	{ return  _plan._planData.tasks[_curr];		}
-		HFSM2_CONSTEXPR(11)	const Task* operator ->()			  const noexcept	{ return &_plan._planData.tasks[_curr];		}
-
-		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
-
-		const CPlanT& _plan;
-		Long _curr;
-		Long _next;
-	};
-
-private:
-	HFSM2_CONSTEXPR(11)	CPlanT(const PlanData& planData,
-							   const RegionID regionId_)				noexcept
-		: _planData{planData}
-		, _bounds{planData.taskBounds[regionId_]}
-	{}
-
-	template <typename TState>
-	static
-	HFSM2_CONSTEXPR(11)  StateID  stateId()								noexcept	{ return					   index<StateList , TState>();		}
-
-	template <typename TState>
-	static
-	HFSM2_CONSTEXPR(11)	RegionID regionId()								noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
-
-public:
-	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;
-
-	/// @brief Begin iteration over plan tasks
-	/// @return CIterator to the first task
-	HFSM2_CONSTEXPR(14)	Iterator begin()								noexcept	{ return Iterator{*this};					}
-
-	/// @brief Iteration terminator
-	/// @return Dummy Iterator
-	HFSM2_CONSTEXPR(14)	Iterator end  ()								noexcept	{ return Iterator{*this};					}
-
-	/// @brief First task
-	/// @return First task
-	HFSM2_CONSTEXPR(14) const Task& first()						  const noexcept;
-
-	/// @brief Last task
-	/// @return Last task
-	HFSM2_CONSTEXPR(14) const Task&  last()						  const noexcept;
-
-private:
-	const PlanData& _planData;
-	const Bounds& _bounds;
-};
-
-}
-}
-
-#endif
-
-#if HFSM2_PLANS_AVAILABLE()
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-CPlanT<TArgs>::Iterator::Iterator(const CPlanT& plan) noexcept
-	: _plan{plan}
-	, _curr{plan._bounds.first}
-{
-	_next = next();
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-CPlanT<TArgs>::Iterator::operator bool() const noexcept {
-	HFSM2_ASSERT(_curr < CPlanT::TASK_CAPACITY ||
-				 _curr == INVALID_LONG);
-
-	return _curr < CPlanT::TASK_CAPACITY;
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-CPlanT<TArgs>::Iterator::operator ++() noexcept {
-	_curr = _next;
-	_next = next();
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-Long
-CPlanT<TArgs>::Iterator::next() const noexcept {
-	if (_curr < CPlanT::TASK_CAPACITY) {
-		const TaskLink& link = _plan._planData.taskLinks[_curr];
-
-		return link.next;
-	} else {
-		HFSM2_ASSERT(_curr == INVALID_LONG);
-
-		return INVALID_LONG;
-	}
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-CPlanT<TArgs>::operator bool() const noexcept {
-	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
-				 _bounds.last  < TASK_CAPACITY ||
-				 _bounds.last == INVALID_LONG);
-
-	return _bounds.first < TASK_CAPACITY;
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-const typename CPlanT<TArgs>::Task&
-CPlanT<TArgs>::first() const noexcept {
-	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY);
-
-	return _planData.tasks[_bounds.first];
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-const typename CPlanT<TArgs>::Task&
-CPlanT<TArgs>::last() const noexcept {
-	HFSM2_ASSERT(_bounds.last < TASK_CAPACITY);
-
-	return _planData.tasks[_bounds.last];
-}
-
-}
-}
-
-#endif
-
-#if HFSM2_PLANS_AVAILABLE()
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TArgs>
-class PlanT {
-	template <typename, typename, Strategy, typename, typename...>
-	friend struct C_;
-
-	template <typename, typename, typename, typename...>
-	friend struct O_;
-
-	using Args			= TArgs;
-	using Context		= typename Args::Context;
-	using StateList		= typename Args::StateList;
-	using RegionList	= typename Args::RegionList;
-
-	using Registry		= RegistryT<Args>;
-
-	static constexpr Long  TASK_CAPACITY	= Args::TASK_CAPACITY;
-
-public:
-	using PlanData		= PlanDataT<Args>;
-	using Task			= typename PlanData::Task;
-	using Tasks			= typename PlanData::Tasks;
-	using TaskLinks		= typename PlanData::TaskLinks;
-	using TaskIndex		= typename TaskLinks::Index;
-	using TasksBits		= typename PlanData::TasksBits;
-
-	struct CIterator final {
-		HFSM2_CONSTEXPR(14)	CIterator(const PlanT& plan)				noexcept;
-
-		HFSM2_CONSTEXPR(14)	explicit operator bool()			  const noexcept;
-
-		HFSM2_CONSTEXPR(14)	void operator ++()							noexcept;
-
-		HFSM2_CONSTEXPR(14)	bool operator != (const CIterator)	  const noexcept	{ return operator bool();					}
-
-		HFSM2_CONSTEXPR(14)	const Task& operator  *()			  const noexcept	{ return  _plan._planData.tasks[_curr];		}
-		HFSM2_CONSTEXPR(11)	const Task* operator ->()			  const noexcept	{ return &_plan._planData.tasks[_curr];		}
-
-		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
-
-		const PlanT& _plan;
-		Long _curr;
-		Long _next;
-	};
-
-	struct Iterator final {
-		HFSM2_CONSTEXPR(14)	Iterator(PlanT& plan)						noexcept;
-
-		HFSM2_CONSTEXPR(14)	explicit operator bool()			  const noexcept;
-
-		HFSM2_CONSTEXPR(14)	void operator ++()							noexcept;
-
-		HFSM2_CONSTEXPR(14)	bool operator != (const Iterator)	  const noexcept	{ return operator bool();					}
-
-		HFSM2_CONSTEXPR(14)	Task& operator  *()							noexcept	{ return  _plan._planData.tasks[_curr];		}
-		HFSM2_CONSTEXPR(14)	Task* operator ->()							noexcept	{ return &_plan._planData.tasks[_curr];		}
-
-		HFSM2_CONSTEXPR(14)	void remove()								noexcept	{ _plan.remove(_curr);						}
-
-		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
-
-		PlanT& _plan;
-		Long _curr;
-		Long _next;
-	};
-
-protected:
-	HFSM2_CONSTEXPR(11)	PlanT(Registry& registry,
-							  PlanData& planData,
-							  const RegionID regionId_)					noexcept;
-
-	template <typename TState>
-	static
-	HFSM2_CONSTEXPR(11)  StateID  stateId()								noexcept	{ return					   index<StateList , TState>();		}
-
-	template <typename TState>
-	static
-	HFSM2_CONSTEXPR(11) RegionID regionId()								noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
-
-	HFSM2_CONSTEXPR(14)	bool  append(const StateID origin,
-									 const StateID destination,
-									 const TransitionType type)			noexcept;
-
-	HFSM2_CONSTEXPR(14)	bool linkTask(const Long index)					noexcept;
-
-	HFSM2_CONSTEXPR(14)	void clearTasks()								noexcept;
-	HFSM2_CONSTEXPR(14)	void clearStatuses()							noexcept;
-
-public:
-	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;
-
-	/// @brief Clear all tasks from the plan
-	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, acts depending on the region type)
-	/// @param `origin` Origin state identifier
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool change   (const StateID origin,
-									   const StateID destination)		noexcept	{ return append	  (origin, destination, TransitionType::CHANGE	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, acts depending on the region type)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool change   (const StateID destination)		noexcept	{ return change	  (stateId<TOrigin>() , destination				 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, acts depending on the region type)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool change   ()								noexcept	{ return change	  (stateId<TOrigin>() , stateId<TDestination>()	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the initial state)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool restart  (const StateID origin,
-									   const StateID destination)		noexcept	{ return append	  (origin, destination, TransitionType::RESTART	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the initial state)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool restart  (const StateID destination)		noexcept	{ return restart  (stateId<TOrigin>() , destination				 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the initial state)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool restart  ()								noexcept	{ return restart  (stateId<TOrigin>() , stateId<TDestination>()	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state that was active previously)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool resume   (const StateID origin,
-									   const StateID destination)		noexcept	{ return append	  (origin, destination, TransitionType::RESUME	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state that was active previously)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool resume   (const StateID destination)		noexcept	{ return resume	  (stateId<TOrigin>() , destination				 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state that was active previously)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool resume   ()								noexcept	{ return resume	  (stateId<TOrigin>() , stateId<TDestination>()	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool select   (const StateID origin,
-									   const StateID destination)		noexcept	{ return append	  (origin, destination, TransitionType::SELECT	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool select   (const StateID destination)		noexcept	{ return select	  (stateId<TOrigin>() , destination				 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool select   ()								noexcept	{ return select	  (stateId<TOrigin>() , stateId<TDestination>()	 );	}
-
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state with the highest `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	HFSM2_CONSTEXPR(14)	bool utilize  (const StateID origin,
-									   const StateID destination)		noexcept	{ return append	  (origin, destination, TransitionType::UTILIZE	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state with the highest `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool utilize  (const StateID destination)		noexcept	{ return utilize  (stateId<TOrigin>() , destination				 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state with the highest `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool utilize  ()								noexcept	{ return utilize  (stateId<TOrigin>() , stateId<TDestination>()	 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	HFSM2_CONSTEXPR(14)	bool randomize(const StateID origin,
-									   const StateID destination)		noexcept	{ return append	  (origin, destination, TransitionType::RANDOMIZE);	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool randomize(const StateID destination)		noexcept	{ return randomize(stateId<TOrigin>() , destination				 );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool randomize()								noexcept	{ return randomize(stateId<TOrigin>() , stateId<TDestination>()	 );	}
-
-#endif
-
-	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool schedule (const StateID origin,
-									   const StateID destination)		noexcept	{ return append	  (origin, destination, TransitionType::SCHEDULE );	}
-
-	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool schedule (const StateID destination)		noexcept	{ return schedule (stateId<TOrigin>() , destination				 );	}
-
-	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool schedule ()								noexcept	{ return schedule (stateId<TOrigin>() , stateId<TDestination>()	 );	}
-
-	/// @brief Begin iteration over plan tasks
-	/// @return Iterator to the first task
-	HFSM2_CONSTEXPR(14)	 Iterator begin()								noexcept	{ return  Iterator{*this};	}
-
-	/// @brief Begin iteration over plan tasks
-	/// @return CIterator to the first task
-	HFSM2_CONSTEXPR(11)	CIterator begin()						  const noexcept	{ return CIterator{*this};	}
-
-private:
-	HFSM2_CONSTEXPR(14)	void remove(const Long task)					noexcept;
-
-protected:
-	Registry& _registry;
-	PlanData& _planData;
-	const RegionID _regionId;
-	Bounds& _bounds;
-};
-
-}
-}
-
-#endif
-
-#if HFSM2_PLANS_AVAILABLE()
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-PlanT<TArgs>::CIterator::CIterator(const PlanT& plan) noexcept
-	: _plan{plan}
-	, _curr{plan._bounds.first}
-	, _next{next()}
-{}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-PlanT<TArgs>::CIterator::operator bool() const noexcept {
-	HFSM2_ASSERT(_curr  < PlanT::TASK_CAPACITY ||
-				 _curr == INVALID_LONG);
-
-	return _curr < PlanT::TASK_CAPACITY;
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-PlanT<TArgs>::CIterator::operator ++() noexcept {
-	_curr = _next;
-	_next = next();
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-Long
-PlanT<TArgs>::CIterator::next() const noexcept {
-	if (_curr < PlanT::TASK_CAPACITY) {
-		const TaskLink& link = _plan._planData.taskLinks[_curr];
-
-		return link.next;
-	} else {
-		HFSM2_ASSERT(_curr == INVALID_LONG);
-
-		return INVALID_LONG;
-	}
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-PlanT<TArgs>::Iterator::Iterator(PlanT& plan) noexcept
-	: _plan{plan}
-	, _curr{plan._bounds.first}
-	, _next{next()}
-{}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-PlanT<TArgs>::Iterator::operator bool() const noexcept {
-	HFSM2_ASSERT(_curr < PlanT::TASK_CAPACITY ||
-				 _curr == INVALID_LONG);
-
-	return _curr < PlanT::TASK_CAPACITY;
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-PlanT<TArgs>::Iterator::operator ++() noexcept {
-	_curr = _next;
-	_next = next();
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-Long
-PlanT<TArgs>::Iterator::next() const noexcept {
-	if (_curr < PlanT::TASK_CAPACITY) {
-		const TaskLink& link = _plan._planData.taskLinks[_curr];
-
-		return link.next;
-	} else {
-		HFSM2_ASSERT(_curr == INVALID_LONG);
-
-		return INVALID_LONG;
-	}
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(11)
-PlanT<TArgs>::PlanT(Registry& registry,
-					PlanData& planData,
-					const RegionID regionId_) noexcept
-	: _registry{registry}
-	, _planData{planData}
-	, _regionId{regionId_}
-	, _bounds{planData.taskBounds[regionId_]}
-{}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-bool
-PlanT<TArgs>:: append(const StateID origin,
-					  const StateID destination,
-					  const TransitionType type) noexcept
-{
-	if (_planData.tasks.count() < TASK_CAPACITY) {
-		_planData.planExists.set(_regionId);
-
-		return linkTask(_planData.tasks.emplace(origin, destination, type));
-	} else
-		return false;
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-bool
-PlanT<TArgs>::linkTask(const Long index) noexcept {
-	if (index != Tasks::INVALID) {
-		if (_bounds.first == INVALID_LONG) {
-			HFSM2_ASSERT(_bounds.last == INVALID_LONG);
-			HFSM2_ASSERT(_planData.taskLinks[index].prev == INVALID_LONG);
-			HFSM2_ASSERT(_planData.taskLinks[index].next == INVALID_LONG);
-
-			_bounds.first = index;
-			_bounds.last  = index;
-		} else {
-			HFSM2_ASSERT(_bounds.first < TaskLinks::CAPACITY);
-			HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
-
-			TaskLink& lastLink = _planData.taskLinks[_bounds.last];
-			HFSM2_ASSERT(lastLink.next == INVALID_LONG);
-
-			lastLink.next  = index;
-
-			TaskLink& currLink = _planData.taskLinks[index];
-			HFSM2_ASSERT(currLink.prev == INVALID_LONG);
-
-			currLink.prev  = _bounds.last;
-
-			_bounds.last   = index;
-		}
-
-		return true;
-	} else
-		return false;
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-PlanT<TArgs>::clearTasks() noexcept {
-	if (_bounds.first < TaskLinks::CAPACITY) {
-		HFSM2_ASSERT(_bounds.last < TaskLinks::CAPACITY);
-
-		for (Long index = _bounds.first;
-			 index != INVALID_LONG;
-			 )
-		{
-			HFSM2_ASSERT(index < TaskLinks::CAPACITY);
-
-			const TaskLink& link = _planData.taskLinks[index];
-			HFSM2_ASSERT(index == _bounds.first ?
-							 link.prev == INVALID_LONG :
-							 link.prev <  TaskLinks::CAPACITY);
-
-			const Long next = link.next;
-
-			remove(index);
-
-			index = next;
-		}
-
-		_bounds.first = INVALID_LONG;
-		_bounds.last  = INVALID_LONG;
-	} else {
-		HFSM2_ASSERT(_bounds.first == INVALID_LONG);
-		HFSM2_ASSERT(_bounds.last  == INVALID_LONG);
-	}
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-PlanT<TArgs>::clearStatuses() noexcept {
-	TasksBits bitsToClear;
-	bitsToClear.set();
-
-	const StateID begin = _registry.regionHeads[_regionId];
-
-	const StateID end   = _registry.regionHeads[_regionId] +
-						  _registry.regionSizes[_regionId];
-
-	for (StateID i = begin; i < end; ++i)
-		bitsToClear.clear(i);
-
-	_planData.tasksSuccesses &= bitsToClear;
-	_planData.tasksFailures  &= bitsToClear;
-
-	_planData.headStatuses[_regionId].clear();
-	_planData. subStatuses[_regionId].clear();
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-PlanT<TArgs>::operator bool() const noexcept {
-	HFSM2_ASSERT(_bounds.first < TASK_CAPACITY &&
-				 _bounds.last  < TASK_CAPACITY ||
-				 _bounds.last == INVALID_LONG);
-
-	return _bounds.first < TASK_CAPACITY;
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-PlanT<TArgs>::clear() noexcept {
-	clearTasks();
-	clearStatuses();
-}
-
-template <typename TArgs>
-HFSM2_CONSTEXPR(14)
-void
-PlanT<TArgs>::remove(const Long index) noexcept {
-	HFSM2_ASSERT(_planData.planExists.get(_regionId));
-	HFSM2_ASSERT(_bounds.first < TaskLinks::CAPACITY);
-	HFSM2_ASSERT(_bounds.last  < TaskLinks::CAPACITY);
-
-	HFSM2_ASSERT(index < TaskLinks::CAPACITY);
-
-	TaskLink& link = _planData.taskLinks[index];
-
-	if (link.prev < TaskLinks::CAPACITY) {
-		TaskLink& prev = _planData.taskLinks[link.prev];
-		prev.next = link.next;
-	} else {
-		HFSM2_ASSERT(_bounds.first == index);
-		_bounds.first = link.next;
-	}
-
-	if (link.next < TaskLinks::CAPACITY) {
-		TaskLink& next = _planData.taskLinks[link.next];
-		next.prev = link.prev;
-	} else {
-		HFSM2_ASSERT(_bounds.last == index);
-		_bounds.last = link.prev;
-	}
-
-	link.prev = INVALID_LONG;
-	link.next = INVALID_LONG;
-
-	_planData.tasks.remove(index);
-}
-
-}
-}
-
-#endif
-
-#if HFSM2_PLANS_AVAILABLE()
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TArgs>
-class PayloadPlanT;
-
-template <
-	typename TConfig
-  , typename TStateList
-  , typename TRegionList
-  , Long NCompoCount
-  , Long NOrthoCount
-  , Long NOrthoUnits
-  , typename TReactOrder
-  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-  , Long NTaskCapacity
-  , typename TPayload
->
-class PayloadPlanT<
-		  ArgsT<
-			  TConfig
-			, TStateList
-			, TRegionList
-			, NCompoCount
-			, NOrthoCount
-			, NOrthoUnits
-			, TReactOrder
-			HFSM2_IF_SERIALIZATION(, NSerialBits)
-			, NTaskCapacity
-			, TPayload
-		  >
-	  > final
-	: public PlanT<
-				 ArgsT<
-					 TConfig
-				   , TStateList
-				   , TRegionList
-				   , NCompoCount
-				   , NOrthoCount
-				   , NOrthoUnits
-				   , TReactOrder
-				   HFSM2_IF_SERIALIZATION(, NSerialBits)
-				   , NTaskCapacity
-				   , TPayload
-				 >
-			 >
-{
-	template <typename>
-	friend class PlanControlT;
-
-	template <typename>
-	friend class FullControlT;
-
-	template <typename>
-	friend class GuardControlT;
-
-	template <typename, typename>
-	friend class R_;
-
-	using Args = ArgsT<
-					 TConfig
-				   , TStateList
-				   , TRegionList
-				   , NCompoCount
-				   , NOrthoCount
-				   , NOrthoUnits
-				   , TReactOrder
-				   HFSM2_IF_SERIALIZATION(, NSerialBits)
-				   , NTaskCapacity
-				   , TPayload
-				 >;
-
-	using Payload		= typename Args::Payload;
-
-	static constexpr Long  TASK_CAPACITY	= Args::TASK_CAPACITY;
-
-	using PlanBase		= PlanT<Args>;
-
-	using PlanBase::PlanBase;
-
-	using PlanBase::linkTask;
-
-	HFSM2_CONSTEXPR(14)	bool  append(const StateID origin,
-									 const StateID destination,
-									 const TransitionType type,
-									 const Payload& payload)			noexcept;
-
-public:
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, acts depending on the region type)
-	/// @param `origin` Origin state identifier
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID origin,
-										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::CHANGE   ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, acts depending on the region type)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::CHANGE   ,	   payload );	}
-
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, acts depending on the region type)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool changeWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::CHANGE   ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the initial state)
-	/// @param `origin` Origin state identifier
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID origin,
-										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RESTART  ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the initial state)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RESTART  ,	   payload );	}
-
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the initial state)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool restartWith  (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESTART  ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state that was active previously)
-	/// @param `origin` Origin state identifier
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID origin,
-										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RESUME   ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state that was active previously)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RESUME   ,	   payload );	}
-
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state that was active previously)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool resumeWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESUME   ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
-	/// @param `origin` Origin state identifier
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool selectWith   (const StateID origin,
-										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::SELECT   ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool selectWith   (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::SELECT   ,	   payload );	}
-
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool selectWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SELECT   ,	   payload );	}
-
-#if HFSM2_UTILITY_THEORY_AVAILABLE()
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state with the highest `utility()`
-	///   among those with the highest `rank()`)
-	/// @param `origin` Origin state identifier
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID origin,
-										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::UTILIZE  ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state with the highest `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::UTILIZE  ,	   payload );	}
-
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, activates the state with the highest `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::UTILIZE  ,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
-	///   among those with the highest `rank()`)
-	/// @param `origin` Origin state identifier
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID origin,
-										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RANDOMIZE,	   payload );	}
-
-	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RANDOMIZE,	   payload );	}
-
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
-	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
-	///   among those with the highest `rank()`)
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool randomizeWith(const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RANDOMIZE,	   payload );	}
-
-#endif
-
-	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
-	/// @param `origin` Origin state identifier
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	HFSM2_CONSTEXPR(14)	bool scheduleWith (const StateID origin,
-										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::SCHEDULE ,	   payload );	}
-
-	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
-	/// @tparam `TOrigin` Origin state type
-	/// @param `destination` Destination state identifier
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin>
-	HFSM2_CONSTEXPR(14)	bool scheduleWith (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::SCHEDULE ,	   payload );	}
-
-	/// @brief Prepend a task to schedule a transition to `destination` if `origin` completes with `success()`
-	/// @tparam `TOrigin` Origin state type
-	/// @tparam `TDestination` Destination state type
-	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
-	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
-	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool scheduleWith (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SCHEDULE ,	   payload );	}
-
-private:
-	using PlanBase::_planData;
-	using PlanBase::_regionId;
-};
-
-template <
-	typename TConfig
-  , typename TStateList
-  , typename TRegionList
-  , Long NCompoCount
-  , Long NOrthoCount
-  , Long NOrthoUnits
-  , typename TReactOrder
-  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
-  , Long NTaskCapacity
->
-class PayloadPlanT<
-		  ArgsT<
-			  TConfig
-			, TStateList
-			, TRegionList
-			, NCompoCount
-			, NOrthoCount
-			, NOrthoUnits
-			, TReactOrder
-			HFSM2_IF_SERIALIZATION(, NSerialBits)
-			, NTaskCapacity
-			, void
-		  >
-	  > final
-	: public PlanT<
-				 ArgsT<
-					 TConfig
-				   , TStateList
-				   , TRegionList
-				   , NCompoCount
-				   , NOrthoCount
-				   , NOrthoUnits
-				   , TReactOrder
-				   HFSM2_IF_SERIALIZATION(, NSerialBits)
-				   , NTaskCapacity
-				   , void
-				 >
-			 >
-{
-	template <typename, typename>
-	friend class R_;
-
-	template <typename>
-	friend class PlanControlT;
-
-	template <typename>
-	friend class FullControlT;
-
-	template <typename>
-	friend class GuardControlT;
-
-	using Args = ArgsT<
-					 TConfig
-				   , TStateList
-				   , TRegionList
-				   , NCompoCount
-				   , NOrthoCount
-				   , NOrthoUnits
-				   , TReactOrder
-				   HFSM2_IF_SERIALIZATION(, NSerialBits)
-				   , NTaskCapacity
-				   , void
-				 >;
-
-	using PlanBase = PlanT<Args>;
-
-	using PlanBase::PlanBase;
-};
-
-}
-}
-
-#endif
-
-#if HFSM2_PLANS_AVAILABLE()
-
-namespace hfsm2 {
-namespace detail {
-
-template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
-HFSM2_CONSTEXPR(14)
-bool
-PayloadPlanT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>:: append(const StateID origin,
-																												 const StateID destination,
-																												 const TransitionType transitionType,
-																												 const Payload& payload) noexcept
-{
-	if (_planData.tasks.count() < TASK_CAPACITY) {
-		_planData.planExists.set(_regionId);
-
-		return linkTask(_planData.tasks.emplace(origin, destination, transitionType, payload));
-	} else
-		return false;
-}
-
-}
-}
-
-#endif
 
 namespace hfsm2 {
 namespace detail {
@@ -7377,7 +5705,9 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		headState.wrapPlanFailed(*this);
 
 		return TaskStatus{_taskStatus.result};
-	} else if (subStatus.result == TaskStatus::SUCCESS) {
+	}
+	else
+	if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
 			successesToClear.set();
@@ -7406,7 +5736,8 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 			_core.planData.tasksSuccesses &= successesToClear;
 
 			return TaskStatus{};
-		} else {
+		}
+		else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::SUCCEEDED);
 
@@ -7415,7 +5746,8 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 
 			return TaskStatus{_taskStatus.result};
 		}
-	} else
+	}
+	else
 		return TaskStatus{};
 }
 
@@ -7552,7 +5884,9 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 		headState.wrapPlanFailed(*this);
 
 		return TaskStatus{_taskStatus.result};
-	} else if (subStatus.result == TaskStatus::SUCCESS) {
+	}
+	else
+	if (subStatus.result == TaskStatus::SUCCESS) {
 		if (Plan p = plan(_regionId)) {
 			TasksBits successesToClear;
 			successesToClear.set();
@@ -7578,7 +5912,8 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 			_core.planData.tasksSuccesses &= successesToClear;
 
 			return TaskStatus{};
-		} else {
+		}
+		else {
 			_taskStatus.result = TaskStatus::SUCCESS;
 			HFSM2_LOG_PLAN_STATUS(context(), _regionStateId, StatusEvent::SUCCEEDED);
 
@@ -7587,7 +5922,8 @@ FullControlT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATIO
 
 			return TaskStatus{_taskStatus.result};
 		}
-	} else
+	}
+	else
 		return TaskStatus{};
 }
 
@@ -9934,7 +8270,8 @@ struct PreReactWrapperT<TRegion, TopDown> {
 					subStates.widePreReact(control, event, active);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -9959,7 +8296,8 @@ struct PreReactWrapperT<TRegion, TopDown> {
 					subStates.widePreReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -9994,7 +8332,8 @@ struct PreReactWrapperT<TRegion, BottomUp> {
 					headState.deepPreReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -10019,7 +8358,8 @@ struct PreReactWrapperT<TRegion, BottomUp> {
 					headState.deepPreReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -10057,7 +8397,8 @@ struct ReactWrapperT<TRegion, TopDown> {
 					subStates.wideReact(control, event, active);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -10082,7 +8423,8 @@ struct ReactWrapperT<TRegion, TopDown> {
 					subStates.wideReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -10117,7 +8459,8 @@ struct ReactWrapperT<TRegion, BottomUp> {
 					headState.deepReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -10142,7 +8485,8 @@ struct ReactWrapperT<TRegion, BottomUp> {
 					headState.deepReact(control, event);
 
 			return h;
-		} else
+		}
+		else
 			return TaskStatus{};
 	}
 
@@ -11020,7 +9364,8 @@ CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideSaveActive(const Registry& registry,
 	if (prong < R_PRONG) {
 		LHalf::wideSaveActive   (registry, stream, prong);
 		RHalf::wideSaveResumable(registry, stream);
-	} else {
+	}
+	else {
 		LHalf::wideSaveResumable(registry, stream);
 		RHalf::wideSaveActive   (registry, stream, prong);
 	}
@@ -11048,7 +9393,8 @@ CS_<TN_, TA_, SG_, NP_, TL_<TS_...>>::wideLoadRequested(Registry& registry,
 	if (prong < R_PRONG) {
 		LHalf::wideLoadRequested(registry, stream, prong);
 		RHalf::wideLoadResumable(registry, stream);
-	} else {
+	}
+	else {
 		LHalf::wideLoadResumable(registry, stream);
 		RHalf::wideLoadRequested(registry, stream, prong);
 	}
@@ -12280,7 +10626,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepForwardActive(Control& control,
 		const Prong active = compoActive(control);
 
 		SubStates::wideForwardActive (control, request, active);
-	} else
+	}
+	else
 		SubStates::wideForwardRequest(control, request, requested);
 }
 
@@ -12779,7 +11126,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) noex
 
 	if (requested == INVALID_PRONG)
 		SubStates::wideChangeToRequested(control, active);
-	else if (requested != active) {
+	else
+	if (requested != active) {
 		SubStates::wideExit	  (control, active);
 
 		HFSM2_ASSERT(requested < WIDTH);
@@ -12789,13 +11137,16 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) noex
 		requested = INVALID_PRONG;
 
 		SubStates::wideEnter  (control, active);
-	} else if (compoRemain(control)) {
+	}
+	else
+	if (compoRemain(control)) {
 		SubStates::wideExit   (control, active);
 
 		requested = INVALID_PRONG;
 
 		SubStates::wideEnter  (control, active);
-	} else {
+	}
+	else {
 		requested = INVALID_PRONG;
 
 		// reconstruction done in S_::reenter()
@@ -12819,7 +11170,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepSaveActive(const Registry& registry,
 	if (resumable != INVALID_PRONG) {
 		stream.template write<1>(1);
 		stream.template write<WIDTH_BITS>(resumable);
-	} else
+	}
+	else
 		stream.template write<1>(0);
 
 	SubStates::wideSaveActive(registry,stream, active);
@@ -12836,7 +11188,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
 	if (resumable != INVALID_PRONG) {
 		stream.template write<1>(1);
 		stream.template write<WIDTH_BITS>(resumable);
-	} else
+	}
+	else
 		stream.template write<1>(0);
 
 	SubStates::wideSaveResumable(registry, stream);
@@ -12857,7 +11210,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepLoadRequested(Registry& registry,
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
 		HFSM2_ASSERT(resumable < WIDTH);
-	} else
+	}
+	else
 		resumable = INVALID_PRONG;
 
 	SubStates::wideLoadRequested(registry, stream, requested);
@@ -12874,7 +11228,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepLoadResumable(Registry& registry,
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
 		HFSM2_ASSERT(resumable < WIDTH);
-	} else
+	}
+	else
 		resumable = INVALID_PRONG;
 
 	SubStates::wideLoadResumable(registry, stream);
@@ -16302,7 +14657,8 @@ R_<TG_, TA_>::udpateActivity() noexcept {
 				activity = +1;
 			else
 				activity = activity < INT8_MAX ? activity + 1 : activity;
-		} else {
+		}
+		else {
 			if (activity > 0)
 				activity = -1;
 			else
@@ -17977,6 +16333,2049 @@ public:
 
 }
 }
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TItem, Long NTaskCapacity, Long NRegionCount>
+class TaskListT {
+public:
+	using Item		= TItem;
+	using Index		= Long;
+
+	static constexpr Index CAPACITY		= NTaskCapacity;
+	static constexpr Long  REGION_COUNT	= NRegionCount;
+	static constexpr Index INVALID		= INVALID_LONG;
+
+	struct Bounds final {
+		Index first	= INVALID;
+		Index last	= INVALID;
+
+		HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept	{ return first != INVALID;	}
+		HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ first = INVALID;
+																						  last  = INVALID;	}
+	};
+
+private:
+	using Storage = uint8_t[sizeof(Item)];
+	using This	  = TaskListT<Item, CAPACITY, REGION_COUNT>;
+
+	struct Slot {
+		Index prev = INVALID;
+		Index next = INVALID;
+
+#ifdef _MSC_VER
+		#pragma warning(push)
+		#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+		alignas(Item) Storage storage;
+
+#ifdef _MSC_VER
+		#pragma warning(pop)
+#endif
+	};
+
+public:
+	HFSM2_CONSTEXPR(14)	 TaskListT()										noexcept	{ reset();	}
+	HFSM2_CONSTEXPR(14)	 TaskListT(const This& other)				  HFSM2_NOEXCEPT_17(noexcept(Item{              other.item(0) }))	{ copyFrom(              other );		}
+	HFSM2_CONSTEXPR(14)	 TaskListT(This&& other)					  HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))}))	{ moveFrom(::hfsm2::move(other));		}
+	HFSM2_CONSTEXPR(20)	~TaskListT()										noexcept	{ clear();	}
+
+	HFSM2_CONSTEXPR(14)	This& operator = (const This & other)		  HFSM2_NOEXCEPT_17(noexcept(Item{              other.item(0) }));
+	HFSM2_CONSTEXPR(14)	This& operator = (      This&& other)		  HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))}));
+
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
+
+	template <typename... TArgs>
+	HFSM2_CONSTEXPR(14)	Index emplace   (const RegionID regionId,
+										 TArgs&&... args)			  HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::forward<TArgs>(args)...}));
+
+	HFSM2_CONSTEXPR(14)	void remove     (const RegionID regionId,
+										 const Index index)					noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clearRegion(const RegionID regionId)			noexcept;
+
+	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index index)			noexcept;
+	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index index)	  const noexcept;
+
+	HFSM2_CONSTEXPR(14)		  Bounds& bounds(const RegionID regionId)		noexcept	{ HFSM2_ASSERT(regionId < REGION_COUNT);	return _bounds[regionId];	}
+	HFSM2_CONSTEXPR(14)	const Bounds& bounds(const RegionID regionId) const noexcept	{ HFSM2_ASSERT(regionId < REGION_COUNT);	return _bounds[regionId];	}
+
+	HFSM2_CONSTEXPR(14)	Index prev(const Index index)				  const noexcept	{ HFSM2_ASSERT(occupied(index));			return slot(index).prev;	}
+	HFSM2_CONSTEXPR(14)	Index next(const Index index)				  const noexcept	{ HFSM2_ASSERT(occupied(index));			return slot(index).next;	}
+
+	HFSM2_CONSTEXPR(11)	Index count()								  const noexcept	{ return _count;														}
+	HFSM2_CONSTEXPR(11)	bool  empty()								  const noexcept	{ return _count == 0;													}
+	HFSM2_CONSTEXPR(11)	bool  occupied(const Index index)			  const noexcept	{ return index < _last && _occupied.get(index);							}
+
+private:
+	HFSM2_CONSTEXPR(14)		  Item& item(const Index index)					noexcept	{ return *::hfsm2::reinterpret_launder<Item>(slot(index).storage);		}
+	HFSM2_CONSTEXPR(11)	const Item& item(const Index index)			  const noexcept	{ return *::hfsm2::reinterpret_launder<Item>(slot(index).storage);		}
+
+	HFSM2_CONSTEXPR(14)		  Slot& slot(const Index index)					noexcept	{ return _slots[index];													}
+	HFSM2_CONSTEXPR(11)	const Slot& slot(const Index index)			  const noexcept	{ return _slots[index];													}
+
+	HFSM2_CONSTEXPR(14)	void reset()										noexcept;
+	HFSM2_CONSTEXPR(14)	void copyFrom(const This& other)			  HFSM2_NOEXCEPT_17(noexcept(Item{              other.item(0) }));
+	HFSM2_CONSTEXPR(14)	void moveFrom(This&& other)					  HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))}));
+
+	HFSM2_CONSTEXPR(14)	Index takeVacant()									noexcept;
+	HFSM2_CONSTEXPR(14)	void releaseVacant(const Index index)				noexcept;
+
+	HFSM2_CONSTEXPR(14)	void attach(const RegionID regionId,
+									const Index index)						noexcept;
+
+	HFSM2_CONSTEXPR(14)	void detach(const RegionID regionId,
+									const Index index)						noexcept;
+
+	HFSM2_IF_ASSERT(void verifyStructure() const noexcept);
+
+private:
+	Index _count		= 0;
+	Index _vacantHead	= INVALID;
+	Index _last			= 0;
+
+	BitFlatSetT<CAPACITY> _occupied;
+	StaticArrayT<Bounds, REGION_COUNT> _bounds;
+	Slot _slots[CAPACITY];
+};
+
+template <typename TItem, Long NRegionCount>
+class TaskListT<TItem, 0, NRegionCount> final {
+public:
+	using Item		= TItem;
+	using Index		= Long;
+
+	static constexpr Index CAPACITY		= 0;
+	static constexpr Long  REGION_COUNT	= NRegionCount;
+	static constexpr Index INVALID		= INVALID_LONG;
+
+	struct Bounds final {
+		Index first	= INVALID;
+		Index last	= INVALID;
+
+		// Zero-capacity lists can never expose real region bounds.
+		HFSM2_CONSTEXPR(11)	explicit operator bool()				  const noexcept	{ return false;						}
+		HFSM2_CONSTEXPR(14)	void clear()									noexcept	{ first = INVALID; last  = INVALID;	}
+	};
+
+						TaskListT()											noexcept = default;
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{ _bounds.clear();	}
+
+	template <typename... TArgs>
+	HFSM2_CONSTEXPR(14)	Index emplace(const RegionID, TArgs&&...)			noexcept	{ return INVALID;	}
+
+	HFSM2_CONSTEXPR(14)	void remove(const RegionID, const Index)			noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clearRegion(const RegionID)					noexcept	{}
+
+	HFSM2_CONSTEXPR(14)		  Item& operator[] (const Index)				noexcept	{ HFSM2_BREAK(); return *::hfsm2::reinterpret_launder<Item>(_storage);	}
+	HFSM2_CONSTEXPR(11)	const Item& operator[] (const Index)		  const noexcept	{ HFSM2_BREAK(); return *::hfsm2::reinterpret_launder<Item>(_storage);	}
+
+	HFSM2_CONSTEXPR(14)		  Bounds& bounds(const RegionID regionId)		noexcept	{ HFSM2_ASSERT(regionId < REGION_COUNT); return _bounds[regionId];	}
+	HFSM2_CONSTEXPR(14)	const Bounds& bounds(const RegionID regionId) const noexcept	{ HFSM2_ASSERT(regionId < REGION_COUNT); return _bounds[regionId];	}
+
+	HFSM2_CONSTEXPR(11)	Index prev(const Index)						  const noexcept	{ return INVALID;	}
+	HFSM2_CONSTEXPR(11)	Index next(const Index)						  const noexcept	{ return INVALID;	}
+
+	HFSM2_CONSTEXPR(11)	Index count()								  const noexcept	{ return 0;			}
+	HFSM2_CONSTEXPR(11)	bool  empty()								  const noexcept	{ return true;		}
+	HFSM2_CONSTEXPR(11)	bool  occupied(const Index)					  const noexcept	{ return false;		}
+
+private:
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4324) // structure was padded due to alignment specifier
+#endif
+
+	alignas(Item) uint8_t _storage[sizeof(Item)];
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
+	StaticArrayT<Bounds, REGION_COUNT> _bounds;
+};
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+typename TaskListT<T, NTC_, NRC_>::This&
+TaskListT<T, NTC_, NRC_>::operator = (const This& other) HFSM2_NOEXCEPT_17(noexcept(Item{other.item(0)})) {
+	if (this == &other)
+		return *this;
+
+	clear();
+	copyFrom(other);
+
+	return *this;
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+typename TaskListT<T, NTC_, NRC_>::This&
+TaskListT<T, NTC_, NRC_>::operator = (This&& other) HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))})) {
+	if (this == &other)
+		return *this;
+
+	clear();
+	moveFrom(::hfsm2::move(other));
+
+	return *this;
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::clear() noexcept {
+	for (Index i = 0; i < _last; ++i)
+		if (_occupied.get(i))
+			::hfsm2::destroy(item(i));
+
+	reset();
+}
+
+template <typename T, Long NTC_, Long NRC_>
+template <typename... TA_>
+HFSM2_CONSTEXPR(14)
+typename TaskListT<T, NTC_, NRC_>::Index
+TaskListT<T, NTC_, NRC_>::emplace(const RegionID regionId,
+								  TA_&&... args) HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::forward<TA_>(args)...}))
+{
+	HFSM2_ASSERT(regionId < REGION_COUNT);
+
+	if (_count >= CAPACITY)
+		return INVALID;
+
+	const Index index = takeVacant();
+	Slot& current = slot(index);
+
+	HFSM2_ASSERT(current.prev == INVALID);
+	HFSM2_ASSERT(current.next == INVALID);
+
+	new (current.storage) Item{::hfsm2::forward<TA_>(args)...};
+
+	_occupied.set(index);
+	++_count;
+
+	attach(regionId, index);
+
+	HFSM2_IF_ASSERT(verifyStructure());
+
+	return index;
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::remove(const RegionID regionId,
+								 const Index index) noexcept
+{
+	HFSM2_ASSERT(regionId < REGION_COUNT);
+	HFSM2_ASSERT(occupied(index));
+
+	detach(regionId, index);
+	::hfsm2::destroy(item(index));
+
+	_occupied.clear(index);
+	--_count;
+
+	releaseVacant(index);
+
+	HFSM2_IF_ASSERT(verifyStructure());
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::clearRegion(const RegionID regionId) noexcept {
+	HFSM2_ASSERT(regionId < REGION_COUNT);
+
+	for (Index index = bounds(regionId).first;
+		 index != INVALID;
+		 )
+	{
+		const Index nextIndex = next(index);
+		remove(regionId, index);
+		index = nextIndex;
+	}
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+typename TaskListT<T, NTC_, NRC_>::Item&
+TaskListT<T, NTC_, NRC_>::operator[] (const Index index) noexcept {
+	HFSM2_ASSERT(occupied(index));
+
+	return item(index);
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(11)
+const typename TaskListT<T, NTC_, NRC_>::Item&
+TaskListT<T, NTC_, NRC_>::operator[] (const Index index) const noexcept {
+	HFSM2_ASSERT(occupied(index));
+
+	return item(index);
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::reset() noexcept {
+	_count = 0;
+	_vacantHead = INVALID;
+	_last = 0;
+
+	_occupied.clear();
+	_bounds.clear();
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::copyFrom(const This& other) HFSM2_NOEXCEPT_17(noexcept(Item{other.item(0)})) {
+	_count		= other._count;
+	_vacantHead	= other._vacantHead;
+	_last		= other._last;
+	_occupied	= other._occupied;
+	_bounds		= other._bounds;
+
+	for (Index i = 0; i < _last; ++i) {
+		Slot& current = slot(i);
+		const Slot& source = other.slot(i);
+
+		current.prev = source.prev;
+		current.next = source.next;
+
+		if (_occupied.get(i))
+			new (current.storage) Item{other.item(i)};
+	}
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::moveFrom(This&& other) HFSM2_NOEXCEPT_17(noexcept(Item{::hfsm2::move(other.item(0))})) {
+	_count		= other._count;
+	_vacantHead	= other._vacantHead;
+	_last		= other._last;
+	_occupied	= other._occupied;
+	_bounds		= other._bounds;
+
+	for (Index i = 0; i < _last; ++i) {
+		Slot& current = slot(i);
+		Slot& source = other.slot(i);
+
+		current.prev = source.prev;
+		current.next = source.next;
+
+		if (_occupied.get(i))
+			new (current.storage) Item{::hfsm2::move(other.item(i))};
+	}
+
+	other.clear();
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+typename TaskListT<T, NTC_, NRC_>::Index
+TaskListT<T, NTC_, NRC_>::takeVacant() noexcept {
+	if (_vacantHead < CAPACITY) {
+		const Index index = _vacantHead;
+		_vacantHead = slot(index).next;
+		slot(index).next = INVALID;
+
+		return index;
+	}
+
+	HFSM2_ASSERT(_last < CAPACITY);
+
+	return _last++;
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::releaseVacant(const Index index) noexcept {
+	Slot& current = slot(index);
+	HFSM2_ASSERT(current.prev == INVALID);
+	current.next = _vacantHead;
+
+	_vacantHead = index;
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::attach(const RegionID regionId,
+								 const Index index) noexcept
+{
+	Bounds& regionBounds = bounds(regionId);
+
+	if (!regionBounds) {
+		regionBounds.first = index;
+		regionBounds.last  = index;
+	}
+	else {
+		HFSM2_ASSERT(occupied(regionBounds.last));
+
+		Slot& lastSlot = slot(regionBounds.last);
+		HFSM2_ASSERT(lastSlot.next == INVALID);
+
+		lastSlot.next = index;
+
+		Slot& current = slot(index);
+		current.prev = regionBounds.last;
+
+		regionBounds.last = index;
+	}
+}
+
+template <typename T, Long NTC_, Long NRC_>
+HFSM2_CONSTEXPR(14)
+void
+TaskListT<T, NTC_, NRC_>::detach(const RegionID regionId,
+								 const Index index) noexcept
+{
+	Bounds& regionBounds = bounds(regionId);
+	Slot& current = slot(index);
+
+	if (current.prev < CAPACITY)
+		slot(current.prev).next = current.next;
+	else {
+		HFSM2_ASSERT(regionBounds.first == index);
+		regionBounds.first = current.next;
+	}
+
+	if (current.next < CAPACITY)
+		slot(current.next).prev = current.prev;
+	else {
+		HFSM2_ASSERT(regionBounds.last == index);
+		regionBounds.last = current.prev;
+	}
+
+	current.prev = INVALID;
+	current.next = INVALID;
+}
+
+#if HFSM2_ASSERT_AVAILABLE()
+
+template <typename T, Long NTC_, Long NRC_>
+void
+TaskListT<T, NTC_, NRC_>::verifyStructure() const noexcept {
+	HFSM2_ASSERT(_count <= _last);
+	HFSM2_ASSERT(_last  <= CAPACITY);
+
+	Index occupiedCount = 0;
+	for (Index i = 0; i < _last; ++i)
+		if (_occupied.get(i))
+			++occupiedCount;
+
+	HFSM2_ASSERT(occupiedCount == _count);
+
+	BitFlatSetT<CAPACITY> visited;
+	visited.clear();
+
+	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId) {
+		const Bounds& regionBounds = bounds(regionId);
+
+		if (!regionBounds) {
+			HFSM2_ASSERT(regionBounds.last == INVALID);
+			continue;
+		}
+
+		HFSM2_ASSERT(regionBounds.first < CAPACITY);
+		HFSM2_ASSERT(regionBounds.last  < CAPACITY);
+
+		for (Index slow = regionBounds.first, fast = slow, prev = INVALID; ; ) {
+			HFSM2_ASSERT(slow < CAPACITY);
+			HFSM2_ASSERT(_occupied.get(slow));
+			HFSM2_ASSERT(!visited.get(slow));
+
+			visited.set(slow);
+
+			const Slot& current = slot(slow);
+			HFSM2_ASSERT(current.prev == prev);
+
+			if (slow != regionBounds.last) {
+				HFSM2_ASSERT(current.next < CAPACITY);
+
+				prev = slow;
+				slow = current.next;
+
+				if (fast != INVALID) {
+					fast = slot(fast).next;
+
+					if (fast != INVALID)
+						fast = slot(fast).next;
+
+					HFSM2_ASSERT(fast == INVALID || slow != fast);
+				}
+			}
+			else {
+				HFSM2_ASSERT(current.next == INVALID);
+				break;
+			}
+		}
+	}
+
+	for (Index i = 0; i < _last; ++i)
+		HFSM2_ASSERT(visited.get(i) == _occupied.get(i));
+
+	BitFlatSetT<CAPACITY> free;
+	free.clear();
+
+	for (Index index = _vacantHead;
+		 index != INVALID;
+		 index = slot(index).next)
+	{
+		HFSM2_ASSERT(index < CAPACITY);
+		HFSM2_ASSERT(!_occupied.get(index));
+		HFSM2_ASSERT(!free.get(index));
+
+		free.set(index);
+	}
+
+	for (Index i = 0; i < _last; ++i)
+		HFSM2_ASSERT(free.get(i) || _occupied.get(i));
+}
+
+#endif
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename>
+struct PlanDataT;
+
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  , typename TReactOrder
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  , Long NTaskCapacity
+  , typename TPayload
+>
+struct PlanDataT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , NCompoCount
+			 , NOrthoCount
+			 , NOrthoUnits
+			 , TReactOrder
+			 HFSM2_IF_SERIALIZATION(, NSerialBits)
+			 , NTaskCapacity
+			 , TPayload
+		   >
+	   > final
+{
+	using StateList			= TStateList;
+	using RegionList		= TRegionList;
+	using Payload			= TPayload;
+	using TaskStatus		= TaskStatus;
+
+	static constexpr Long STATE_COUNT	= StateList ::SIZE;
+	static constexpr Long REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
+
+	using Task				= TaskT<Payload>;
+	using Tasks				= TaskListT<Task, TASK_CAPACITY, REGION_COUNT>;
+	using Bounds			= typename Tasks::Bounds;
+
+	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
+	using RegionBits		= BitFlatSetT <	           REGION_COUNT>;
+	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
+
+	Tasks tasks;
+	TasksBits payloadExists;
+
+	TasksBits tasksSuccesses;
+	TasksBits tasksFailures;
+	RegionBits planExists;
+	RegionStatuses headStatuses;
+	RegionStatuses subStatuses;
+
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
+
+#if HFSM2_ASSERT_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
+	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID regionId)	  const noexcept;
+#endif
+};
+
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  , typename TReactOrder
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  , Long NTaskCapacity
+>
+struct PlanDataT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , NCompoCount
+			 , NOrthoCount
+			 , NOrthoUnits
+			 , TReactOrder
+			 HFSM2_IF_SERIALIZATION(, NSerialBits)
+			 , NTaskCapacity
+			 , void
+		   >
+	   > final
+{
+	using StateList			= TStateList;
+	using RegionList		= TRegionList;
+	using TaskStatus		= TaskStatus;
+
+	static constexpr Long  STATE_COUNT	= StateList ::SIZE;
+	static constexpr Long REGION_COUNT	= RegionList::SIZE;
+	static constexpr Long TASK_CAPACITY	= NTaskCapacity;
+
+	using Task				= TaskT<void>;
+	using Tasks				= TaskListT<Task, TASK_CAPACITY, REGION_COUNT>;
+	using Bounds			= typename Tasks::Bounds;
+
+	using TasksBits			= BitFlatSetT <	            STATE_COUNT>;
+	using RegionBits		= BitFlatSetT <	           REGION_COUNT>;
+	using RegionStatuses	= StaticArrayT<TaskStatus, REGION_COUNT>;
+
+	Tasks tasks;
+
+	TasksBits tasksSuccesses;
+	TasksBits tasksFailures;
+	RegionBits planExists;
+	RegionStatuses headStatuses;
+	RegionStatuses subStatuses;
+
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept;
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept;
+
+#if HFSM2_ASSERT_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept;
+	HFSM2_CONSTEXPR(14)	Long verifyPlan(const RegionID regionId)	  const noexcept;
+#endif
+};
+
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  , typename TReactOrder
+  , Long NTaskCapacity
+  , typename TPayload
+>
+struct PlanDataT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , 0
+			 , NOrthoCount
+			 , NOrthoUnits
+			 , TReactOrder
+			 HFSM2_IF_SERIALIZATION(, 0)
+			 , NTaskCapacity
+			 , TPayload
+		   >
+	   > final
+{
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
+
+	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{}
+
+#if HFSM2_ASSERT_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept	{}
+#endif
+};
+
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  , typename TReactOrder
+  , Long NTaskCapacity
+>
+struct PlanDataT<
+		   ArgsT<
+			   TConfig
+			 , TStateList
+			 , TRegionList
+			 , 0
+			 , NOrthoCount
+			 , NOrthoUnits
+			 , TReactOrder
+			 HFSM2_IF_SERIALIZATION(, 0)
+			 , NTaskCapacity
+			 , void
+		   >
+	   > final
+{
+	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID)				noexcept	{}
+	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID)		  const noexcept	{}
+
+	HFSM2_CONSTEXPR(14)	void clearStatuses()								noexcept	{}
+	HFSM2_CONSTEXPR(14)	void clear()										noexcept	{}
+
+#if HFSM2_ASSERT_AVAILABLE()
+	HFSM2_CONSTEXPR(14)	void verifyPlans()							  const noexcept	{}
+#endif
+};
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearTaskStatus(const StateID stateId) noexcept {
+	if (stateId != INVALID_STATE_ID) {
+		tasksSuccesses.clear(stateId);
+		tasksFailures .clear(stateId);
+	}
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
+#if HFSM2_ASSERT_AVAILABLE()
+
+	if (stateId != INVALID_STATE_ID) {
+		HFSM2_ASSERT(!tasksSuccesses.get(stateId));
+		HFSM2_ASSERT(!tasksFailures .get(stateId));
+	}
+
+#endif
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clearStatuses() noexcept {
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+
+	headStatuses.clear();
+	 subStatuses.clear();
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::clear() noexcept {
+	tasks		 .clear();
+	payloadExists.clear();
+
+	planExists	 .clear();
+
+	clearStatuses();
+}
+
+#if HFSM2_ASSERT_AVAILABLE()
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlans() const noexcept {
+	Long planCount = 0;
+
+	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
+		planCount += verifyPlan(regionId);
+
+	HFSM2_ASSERT(tasks.count() == planCount);
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
+HFSM2_CONSTEXPR(14)
+Long
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlan(const RegionID regionId) const noexcept {
+	Long length = 0;
+	const Bounds& regionBounds = tasks.bounds(regionId);
+
+	if (regionBounds) {
+		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
+
+		for (Long slow = regionBounds.first, fast = slow; ; ) {
+			++length;
+
+			if (slow != regionBounds.last) {
+				const Long slowNext = tasks.next(slow);
+				HFSM2_ASSERT(slowNext != INVALID_LONG);
+				slow = slowNext;
+
+				// loop check
+				if (fast != INVALID_LONG) {
+					fast = tasks.next(fast);
+
+					if (fast != INVALID_LONG)
+						fast = tasks.next(fast);
+
+					HFSM2_ASSERT(fast == INVALID_LONG || slow != fast);
+				}
+			}
+			else {
+				HFSM2_ASSERT(tasks.next(slow) == INVALID_LONG);
+
+				break;
+			}
+		}
+	}
+	else
+		HFSM2_ASSERT(regionBounds.last == INVALID_LONG);
+
+	return length;
+}
+
+#endif
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearTaskStatus(const StateID stateId) noexcept {
+	if (stateId != INVALID_STATE_ID) {
+		tasksSuccesses.clear(stateId);
+		tasksFailures .clear(stateId);
+	}
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyEmptyStatus(const StateID HFSM2_IF_ASSERT(stateId)) const noexcept {
+#if HFSM2_ASSERT_AVAILABLE()
+
+	if (stateId != INVALID_STATE_ID) {
+		HFSM2_ASSERT(!tasksSuccesses.get(stateId));
+		HFSM2_ASSERT(!tasksFailures .get(stateId));
+	}
+
+#endif
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clearStatuses() noexcept {
+	tasksSuccesses.clear();
+	tasksFailures .clear();
+
+	headStatuses.clear();
+	 subStatuses.clear();
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::clear() noexcept {
+	tasks	  .clear();
+
+	planExists.clear();
+
+	clearStatuses();
+}
+
+#if HFSM2_ASSERT_AVAILABLE()
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
+HFSM2_CONSTEXPR(14)
+void
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlans() const noexcept {
+	Long planCount = 0;
+
+	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
+		planCount += verifyPlan(regionId);
+
+	HFSM2_ASSERT(tasks.count() == planCount);
+}
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_>
+HFSM2_CONSTEXPR(14)
+Long
+PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, void>>::verifyPlan(const RegionID regionId) const noexcept {
+	Long length = 0;
+	const Bounds& regionBounds = tasks.bounds(regionId);
+
+	if (regionBounds) {
+		HFSM2_ASSERT(regionBounds.last != INVALID_LONG);
+
+		for (Long slow = regionBounds.first, fast = slow; ; ) {
+			++length;
+
+			if (slow != regionBounds.last) {
+				const Long slowNext = tasks.next(slow);
+				HFSM2_ASSERT(slowNext != INVALID_LONG);
+				slow = slowNext;
+
+				// loop check
+				if (fast != INVALID_LONG) {
+					fast = tasks.next(fast);
+
+					if (fast != INVALID_LONG)
+						fast = tasks.next(fast);
+
+					HFSM2_ASSERT(fast == INVALID_LONG || slow != fast);
+				}
+			}
+			else {
+				HFSM2_ASSERT(tasks.next(slow) == INVALID_LONG);
+
+				break;
+			}
+		}
+	}
+	else
+		HFSM2_ASSERT(regionBounds.last == INVALID_LONG);
+
+	return length;
+}
+
+#endif
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TArgs>
+class CPlanT {
+	template <typename>
+	friend class ControlT;
+
+	template <typename>
+	friend class PlanControlT;
+
+	template <typename>
+	friend class FullControlT;
+
+	template <typename>
+	friend class GuardControlT;
+
+	template <typename, typename>
+	friend class R_;
+
+	using Args			= TArgs;
+	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
+
+	static constexpr Long TASK_CAPACITY = Args::TASK_CAPACITY;
+
+public:
+	using PlanData		= PlanDataT<Args>;
+	using Task			= typename PlanData::Task;
+	using Tasks			= typename PlanData::Tasks;
+	using Bounds		= typename Tasks::Bounds;
+
+	struct Iterator final {
+		HFSM2_CONSTEXPR(14)	Iterator(const CPlanT& plan)				noexcept;
+
+		HFSM2_CONSTEXPR(14)	explicit operator bool()			  const noexcept;
+
+		HFSM2_CONSTEXPR(14)	void operator ++()							noexcept;
+
+		HFSM2_CONSTEXPR(11)	bool operator != (const Iterator)	  const noexcept	{ return operator bool();					}
+
+		HFSM2_CONSTEXPR(11)	const Task& operator  *()			  const noexcept	{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_CONSTEXPR(11)	const Task* operator ->()			  const noexcept	{ return &_plan._planData.tasks[_curr];		}
+
+		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
+
+		const CPlanT& _plan;
+		Long _curr;
+		Long _next;
+	};
+
+private:
+	HFSM2_CONSTEXPR(11)	CPlanT(const PlanData& planData,
+							   const RegionID regionId_)				noexcept
+		: _planData{planData }
+		, _regionId{regionId_}
+	{}
+
+	template <typename TState>
+	static
+	HFSM2_CONSTEXPR(11)  StateID  stateId()								noexcept	{ return					   index<StateList , TState>();		}
+
+	template <typename TState>
+	static
+	HFSM2_CONSTEXPR(11)	RegionID regionId()								noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
+
+public:
+	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;
+
+	/// @brief Begin iteration over plan tasks
+	/// @return CIterator to the first task
+	HFSM2_CONSTEXPR(14)	Iterator begin()								noexcept	{ return Iterator{*this};					}
+
+	/// @brief Iteration terminator
+	/// @return Dummy Iterator
+	HFSM2_CONSTEXPR(14)	Iterator end  ()								noexcept	{ return Iterator{*this};					}
+
+	/// @brief First task
+	/// @return First task
+	HFSM2_CONSTEXPR(14) const Task& first()						  const noexcept;
+
+	/// @brief Last task
+	/// @return Last task
+	HFSM2_CONSTEXPR(14) const Task&  last()						  const noexcept;
+
+private:
+	const PlanData& _planData;
+	const RegionID  _regionId;
+};
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+CPlanT<TArgs>::Iterator::Iterator(const CPlanT& plan) noexcept
+	: _plan{plan}
+	, _curr{plan._planData.tasks.bounds(plan._regionId).first}
+	, _next{next()}
+{}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+CPlanT<TArgs>::Iterator::operator bool() const noexcept {
+	HFSM2_ASSERT(_curr  < CPlanT::TASK_CAPACITY ||
+				 _curr == INVALID_LONG);
+
+	return _curr < CPlanT::TASK_CAPACITY;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+CPlanT<TArgs>::Iterator::operator ++() noexcept {
+	_curr = _next;
+	_next = next();
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+Long
+CPlanT<TArgs>::Iterator::next() const noexcept {
+	return _curr < CPlanT::TASK_CAPACITY ?
+		_plan._planData.tasks.next(_curr) :
+		INVALID_LONG;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+CPlanT<TArgs>::operator bool() const noexcept {
+	const Bounds& bounds = _planData.tasks.bounds(_regionId);
+
+	HFSM2_ASSERT(bounds.first < TASK_CAPACITY &&
+				 bounds.last  < TASK_CAPACITY ||
+				 bounds.last == INVALID_LONG);
+
+	return bounds.first < TASK_CAPACITY;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+const typename CPlanT<TArgs>::Task&
+CPlanT<TArgs>::first() const noexcept {
+	const Bounds& bounds = _planData.tasks.bounds(_regionId);
+
+	HFSM2_ASSERT(bounds.first < TASK_CAPACITY);
+
+	return _planData.tasks[bounds.first];
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+const typename CPlanT<TArgs>::Task&
+CPlanT<TArgs>::last() const noexcept {
+	const Bounds& bounds = _planData.tasks.bounds(_regionId);
+
+	HFSM2_ASSERT(bounds.last < TASK_CAPACITY);
+
+	return _planData.tasks[bounds.last];
+}
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TArgs>
+class PlanT {
+	template <typename, typename, Strategy, typename, typename...>
+	friend struct C_;
+
+	template <typename, typename, typename, typename...>
+	friend struct O_;
+
+	using Args			= TArgs;
+	using StateList		= typename Args::StateList;
+	using RegionList	= typename Args::RegionList;
+
+	using Registry		= RegistryT<Args>;
+
+	static constexpr Long  TASK_CAPACITY	= Args::TASK_CAPACITY;
+
+public:
+	using PlanData		= PlanDataT<Args>;
+	using Task			= typename PlanData::Task;
+	using Tasks			= typename PlanData::Tasks;
+	using Bounds		= typename Tasks::Bounds;
+	using TaskIndex		= typename Tasks::Index;
+	using TasksBits		= typename PlanData::TasksBits;
+
+	struct CIterator final {
+		HFSM2_CONSTEXPR(14)	CIterator(const PlanT& plan)				noexcept;
+
+		HFSM2_CONSTEXPR(14)	explicit operator bool()			  const noexcept;
+
+		HFSM2_CONSTEXPR(14)	void operator ++()							noexcept;
+
+		HFSM2_CONSTEXPR(14)	bool operator != (const CIterator)	  const noexcept	{ return operator bool();					}
+
+		HFSM2_CONSTEXPR(14)	const Task& operator  *()			  const noexcept	{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_CONSTEXPR(11)	const Task* operator ->()			  const noexcept	{ return &_plan._planData.tasks[_curr];		}
+
+		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
+
+		const PlanT& _plan;
+		Long _curr;
+		Long _next;
+	};
+
+	struct Iterator final {
+		HFSM2_CONSTEXPR(14)	Iterator(PlanT& plan)						noexcept;
+
+		HFSM2_CONSTEXPR(14)	explicit operator bool()			  const noexcept;
+
+		HFSM2_CONSTEXPR(14)	void operator ++()							noexcept;
+
+		HFSM2_CONSTEXPR(14)	bool operator != (const Iterator)	  const noexcept	{ return operator bool();					}
+
+		HFSM2_CONSTEXPR(14)	Task& operator  *()							noexcept	{ return  _plan._planData.tasks[_curr];		}
+		HFSM2_CONSTEXPR(14)	Task* operator ->()							noexcept	{ return &_plan._planData.tasks[_curr];		}
+
+		HFSM2_CONSTEXPR(14)	void remove()								noexcept	{ _plan.remove(_curr);						}
+
+		HFSM2_CONSTEXPR(14)	Long next()							  const noexcept;
+
+		PlanT& _plan;
+		Long _curr;
+		Long _next;
+	};
+
+protected:
+	HFSM2_CONSTEXPR(11)	PlanT(Registry& registry,
+							  PlanData& planData,
+							  const RegionID regionId_)					noexcept;
+
+	template <typename TState>
+	static
+	HFSM2_CONSTEXPR(11)  StateID  stateId()								noexcept	{ return					   index<StateList , TState>();		}
+
+	template <typename TState>
+	static
+	HFSM2_CONSTEXPR(11) RegionID regionId()								noexcept	{ return static_cast<RegionID>(index<RegionList, TState>());	}
+
+	HFSM2_CONSTEXPR(14)	bool  append(const StateID origin,
+									 const StateID destination,
+									 const TransitionType type)			noexcept;
+
+	HFSM2_CONSTEXPR(14)	void clearTasks()								noexcept;
+	HFSM2_CONSTEXPR(14)	void clearStatuses()							noexcept;
+
+public:
+	HFSM2_CONSTEXPR(14)	explicit operator bool()				  const noexcept;
+
+	/// @brief Clear all tasks from the plan
+	HFSM2_CONSTEXPR(14)	void clear()									noexcept;
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, acts depending on the region type)
+	/// @param `origin` Origin state identifier
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool change   (const StateID origin,
+									   const StateID destination)		noexcept	{ return append(origin            , destination            , TransitionType::CHANGE   );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, acts depending on the region type)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool change   (const StateID destination)		noexcept	{ return append(stateId<TOrigin>(), destination            , TransitionType::CHANGE   );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, acts depending on the region type)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool change   ()								noexcept	{ return append(stateId<TOrigin>(), stateId<TDestination>(), TransitionType::CHANGE   );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the initial state)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool restart  (const StateID origin,
+									   const StateID destination)		noexcept	{ return append(origin            , destination            , TransitionType::RESTART  );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the initial state)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool restart  (const StateID destination)		noexcept	{ return append(stateId<TOrigin>(), destination            , TransitionType::RESTART  );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the initial state)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool restart  ()								noexcept	{ return append(stateId<TOrigin>(), stateId<TDestination>(), TransitionType::RESTART  );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state that was active previously)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool resume   (const StateID origin,
+									   const StateID destination)		noexcept	{ return append(origin            , destination            , TransitionType::RESUME   );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state that was active previously)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool resume   (const StateID destination)		noexcept	{ return append(stateId<TOrigin>(), destination            , TransitionType::RESUME   );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state that was active previously)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool resume   ()								noexcept	{ return append(stateId<TOrigin>(), stateId<TDestination>(), TransitionType::RESUME   );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool select   (const StateID origin,
+									   const StateID destination)		noexcept	{ return append(origin            , destination            , TransitionType::SELECT   );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool select   (const StateID destination)		noexcept	{ return append(stateId<TOrigin>(), destination            , TransitionType::SELECT   );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool select   ()								noexcept	{ return append(stateId<TOrigin>(), stateId<TDestination>(), TransitionType::SELECT   );	}
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state with the highest `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	HFSM2_CONSTEXPR(14)	bool utilize  (const StateID origin,
+									   const StateID destination)		noexcept	{ return append(origin            , destination            , TransitionType::UTILIZE  );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state with the highest `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool utilize  (const StateID destination)		noexcept	{ return append(stateId<TOrigin>(), destination            , TransitionType::UTILIZE  );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state with the highest `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool utilize  ()								noexcept	{ return append(stateId<TOrigin>(), stateId<TDestination>(), TransitionType::UTILIZE  );	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	HFSM2_CONSTEXPR(14)	bool randomize(const StateID origin,
+									   const StateID destination)		noexcept	{ return append(origin            , destination            , TransitionType::RANDOMIZE);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool randomize(const StateID destination)		noexcept	{ return append(stateId<TOrigin>(), destination            , TransitionType::RANDOMIZE);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool randomize()								noexcept	{ return append(stateId<TOrigin>(), stateId<TDestination>(), TransitionType::RANDOMIZE);	}
+#endif
+
+	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool schedule (const StateID origin,
+									   const StateID destination)		noexcept	{ return append(origin            , destination            , TransitionType::SCHEDULE );	}
+
+	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool schedule (const StateID destination)		noexcept	{ return append(stateId<TOrigin>(), destination            , TransitionType::SCHEDULE );	}
+
+	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool schedule ()								noexcept	{ return append(stateId<TOrigin>(), stateId<TDestination>(), TransitionType::SCHEDULE );	}
+
+	/// @brief Begin iteration over plan tasks
+	/// @return Iterator to the first task
+	HFSM2_CONSTEXPR(14)	 Iterator begin()								noexcept	{ return  Iterator{*this};	}
+
+	/// @brief Begin iteration over plan tasks
+	/// @return CIterator to the first task
+	HFSM2_CONSTEXPR(11)	CIterator begin()						  const noexcept	{ return CIterator{*this};	}
+
+private:
+	HFSM2_CONSTEXPR(14)	void remove(const Long task)					noexcept;
+
+protected:
+	Registry& _registry;
+	PlanData& _planData;
+	const RegionID _regionId;
+};
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+PlanT<TArgs>::CIterator::CIterator(const PlanT& plan) noexcept
+	: _plan{plan}
+	, _curr{plan._planData.tasks.bounds(plan._regionId).first}
+	, _next{next()}
+{}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+PlanT<TArgs>::CIterator::operator bool() const noexcept {
+	HFSM2_ASSERT(_curr  < PlanT::TASK_CAPACITY ||
+				 _curr == INVALID_LONG);
+
+	return _curr < PlanT::TASK_CAPACITY;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+PlanT<TArgs>::CIterator::operator ++() noexcept {
+	_curr = _next;
+	_next = next();
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+Long
+PlanT<TArgs>::CIterator::next() const noexcept {
+	return _curr < PlanT::TASK_CAPACITY ?
+		_plan._planData.tasks.next(_curr) :
+		INVALID_LONG;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+PlanT<TArgs>::Iterator::Iterator(PlanT& plan) noexcept
+	: _plan{plan}
+	, _curr{plan._planData.tasks.bounds(plan._regionId).first}
+	, _next{next()}
+{}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+PlanT<TArgs>::Iterator::operator bool() const noexcept {
+	HFSM2_ASSERT(_curr < PlanT::TASK_CAPACITY ||
+				 _curr == INVALID_LONG);
+
+	return _curr < PlanT::TASK_CAPACITY;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+PlanT<TArgs>::Iterator::operator ++() noexcept {
+	_curr = _next;
+	_next = next();
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+Long
+PlanT<TArgs>::Iterator::next() const noexcept {
+	return _curr < PlanT::TASK_CAPACITY ?
+		_plan._planData.tasks.next(_curr) :
+		INVALID_LONG;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(11)
+PlanT<TArgs>::PlanT(Registry& registry,
+					PlanData& planData,
+					const RegionID regionId_) noexcept
+	: _registry{registry}
+	, _planData{planData}
+	, _regionId{regionId_}
+{}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+bool
+PlanT<TArgs>::append(const StateID origin,
+					 const StateID destination,
+					 const TransitionType type) noexcept
+{
+	if (_planData.tasks.count() < TASK_CAPACITY) {
+		_planData.planExists.set(_regionId);
+
+		return _planData.tasks.emplace(_regionId, origin, destination, type) != Tasks::INVALID;
+	}
+	else
+		return false;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+PlanT<TArgs>::clearTasks() noexcept {
+	_planData.tasks.clearRegion(_regionId);
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+PlanT<TArgs>::clearStatuses() noexcept {
+	TasksBits bitsToClear;
+	bitsToClear.set();
+
+	const StateID begin = _registry.regionHeads[_regionId];
+
+	const StateID end   = _registry.regionHeads[_regionId] +
+						  _registry.regionSizes[_regionId];
+
+	for (StateID i = begin; i < end; ++i)
+		bitsToClear.clear(i);
+
+	_planData.tasksSuccesses &= bitsToClear;
+	_planData.tasksFailures  &= bitsToClear;
+
+	_planData.headStatuses[_regionId].clear();
+	_planData. subStatuses[_regionId].clear();
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+PlanT<TArgs>::operator bool() const noexcept {
+	const Bounds& bounds = _planData.tasks.bounds(_regionId);
+
+	HFSM2_ASSERT(bounds.first < TASK_CAPACITY &&
+				 bounds.last  < TASK_CAPACITY ||
+				 bounds.last == INVALID_LONG);
+
+	return bounds.first < TASK_CAPACITY;
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+PlanT<TArgs>::clear() noexcept {
+	clearTasks();
+	clearStatuses();
+}
+
+template <typename TArgs>
+HFSM2_CONSTEXPR(14)
+void
+PlanT<TArgs>::remove(const Long index) noexcept {
+	HFSM2_ASSERT(_planData.planExists.get(_regionId));
+	HFSM2_ASSERT(index < TASK_CAPACITY);
+
+	_planData.tasks.remove(_regionId, index);
+}
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TArgs>
+class PayloadPlanT;
+
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  , typename TReactOrder
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  , Long NTaskCapacity
+  , typename TPayload
+>
+class PayloadPlanT<
+		  ArgsT<
+			  TConfig
+			, TStateList
+			, TRegionList
+			, NCompoCount
+			, NOrthoCount
+			, NOrthoUnits
+			, TReactOrder
+			HFSM2_IF_SERIALIZATION(, NSerialBits)
+			, NTaskCapacity
+			, TPayload
+		  >
+	  > final
+	: public PlanT<
+				 ArgsT<
+					 TConfig
+				   , TStateList
+				   , TRegionList
+				   , NCompoCount
+				   , NOrthoCount
+				   , NOrthoUnits
+				   , TReactOrder
+				   HFSM2_IF_SERIALIZATION(, NSerialBits)
+				   , NTaskCapacity
+				   , TPayload
+				 >
+			 >
+{
+	template <typename>
+	friend class PlanControlT;
+
+	template <typename>
+	friend class FullControlT;
+
+	template <typename>
+	friend class GuardControlT;
+
+	template <typename, typename>
+	friend class R_;
+
+	using Args = ArgsT<
+					 TConfig
+				   , TStateList
+				   , TRegionList
+				   , NCompoCount
+				   , NOrthoCount
+				   , NOrthoUnits
+				   , TReactOrder
+				   HFSM2_IF_SERIALIZATION(, NSerialBits)
+				   , NTaskCapacity
+				   , TPayload
+				 >;
+
+	using Payload		= typename Args::Payload;
+
+	static constexpr Long  TASK_CAPACITY	= Args::TASK_CAPACITY;
+
+	using PlanBase		= PlanT<Args>;
+
+	using PlanBase::PlanBase;
+
+	HFSM2_CONSTEXPR(14)	bool append(const StateID origin,
+									const StateID destination,
+									const TransitionType type,
+									const Payload& payload)				noexcept;
+
+public:
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, acts depending on the region type)
+	/// @param `origin` Origin state identifier
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID origin,
+										   const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::CHANGE   , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, acts depending on the region type)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::CHANGE   , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, acts depending on the region type)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool changeWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::CHANGE   , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the initial state)
+	/// @param `origin` Origin state identifier
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID origin,
+										   const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RESTART  , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the initial state)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RESTART  , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the initial state)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool restartWith  (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESTART  , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state that was active previously)
+	/// @param `origin` Origin state identifier
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID origin,
+										   const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RESUME   , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state that was active previously)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RESUME   , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state that was active previously)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool resumeWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESUME   , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
+	/// @param `origin` Origin state identifier
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool selectWith   (const StateID origin,
+										   const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::SELECT   , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool selectWith   (const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::SELECT   , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool selectWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SELECT   , payload);	}
+
+#if HFSM2_UTILITY_THEORY_AVAILABLE()
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state with the highest `utility()`
+	///   among those with the highest `rank()`)
+	/// @param `origin` Origin state identifier
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID origin,
+										   const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::UTILIZE  , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state with the highest `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::UTILIZE  , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, activates the state with the highest `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::UTILIZE  , payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
+	///   among those with the highest `rank()`)
+	/// @param `origin` Origin state identifier
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID origin,
+										   const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RANDOMIZE, payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RANDOMIZE, payload);	}
+
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
+	///   among those with the highest `rank()`)
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool randomizeWith(const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RANDOMIZE, payload);	}
+
+#endif
+
+	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
+	/// @param `origin` Origin state identifier
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	HFSM2_CONSTEXPR(14)	bool scheduleWith (const StateID origin,
+										   const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::SCHEDULE , payload);	}
+
+	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
+	/// @tparam `TOrigin` Origin state type
+	/// @param `destination` Destination state identifier
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin>
+	HFSM2_CONSTEXPR(14)	bool scheduleWith (const StateID destination,
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::SCHEDULE , payload);	}
+
+	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
+	/// @tparam `TOrigin` Origin state type
+	/// @tparam `TDestination` Destination state type
+	/// @param `payload` Payload
+	/// @return Success if FSM total number of tasks is below task capacity
+	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
+	template <typename TOrigin, typename TDestination>
+	HFSM2_CONSTEXPR(14)	bool scheduleWith (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SCHEDULE , payload);	}
+
+private:
+	using PlanBase::_planData;
+	using PlanBase::_regionId;
+};
+
+template <
+	typename TConfig
+  , typename TStateList
+  , typename TRegionList
+  , Long NCompoCount
+  , Long NOrthoCount
+  , Long NOrthoUnits
+  , typename TReactOrder
+  HFSM2_IF_SERIALIZATION(, Long NSerialBits)
+  , Long NTaskCapacity
+>
+class PayloadPlanT<
+		  ArgsT<
+			  TConfig
+			, TStateList
+			, TRegionList
+			, NCompoCount
+			, NOrthoCount
+			, NOrthoUnits
+			, TReactOrder
+			HFSM2_IF_SERIALIZATION(, NSerialBits)
+			, NTaskCapacity
+			, void
+		  >
+	  > final
+	: public PlanT<
+				 ArgsT<
+					 TConfig
+				   , TStateList
+				   , TRegionList
+				   , NCompoCount
+				   , NOrthoCount
+				   , NOrthoUnits
+				   , TReactOrder
+				   HFSM2_IF_SERIALIZATION(, NSerialBits)
+				   , NTaskCapacity
+				   , void
+				 >
+			 >
+{
+	template <typename, typename>
+	friend class R_;
+
+	template <typename>
+	friend class PlanControlT;
+
+	template <typename>
+	friend class FullControlT;
+
+	template <typename>
+	friend class GuardControlT;
+
+	using Args = ArgsT<
+					 TConfig
+				   , TStateList
+				   , TRegionList
+				   , NCompoCount
+				   , NOrthoCount
+				   , NOrthoUnits
+				   , TReactOrder
+				   HFSM2_IF_SERIALIZATION(, NSerialBits)
+				   , NTaskCapacity
+				   , void
+				 >;
+
+	using PlanBase = PlanT<Args>;
+
+	using PlanBase::PlanBase;
+};
+
+}
+}
+
+#endif
+
+#if HFSM2_PLANS_AVAILABLE()
+
+namespace hfsm2 {
+namespace detail {
+
+template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long NOU_, typename TRO_ HFSM2_IF_SERIALIZATION(, Long NSB_), Long NTC_, typename TTP_>
+HFSM2_CONSTEXPR(14)
+bool
+PayloadPlanT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::append(const StateID origin,
+																												const StateID destination,
+																												const TransitionType type,
+																												const Payload& payload) noexcept
+
+{
+	if (_planData.tasks.count() < TASK_CAPACITY) {
+		_planData.planExists.set(_regionId);
+
+		return _planData.tasks.emplace(_regionId, origin, destination, type, payload) != PlanBase::Tasks::INVALID;
+	}
+	else
+		return false;
+}
+
+}
+}
+
+#endif
 
 #if defined(__GNUC__) || defined(__GNUG__)
 	#pragma GCC diagnostic pop

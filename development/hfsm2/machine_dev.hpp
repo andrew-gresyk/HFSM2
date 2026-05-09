@@ -61,24 +61,32 @@
 #include "detail/shared/random.hpp"
 #include "detail/shared/type_list.hpp"
 
-#include "detail/containers/iterator.hpp"
-#include "detail/containers/static_array.hpp"
-#include "detail/containers/dynamic_array.hpp"
 #include "detail/containers/bit_flat_set.hpp"
 #include "detail/containers/bit_slice_set.hpp"
+#include "detail/containers/iterator.hpp"
+#include "detail/containers/dynamic_array.hpp"
+#include "detail/containers/static_array.hpp"
 
 #include "detail/features/transition.hpp"
 #include "detail/features/logger_interface.hpp"
 #include "detail/features/structure_report.hpp"
-#include "detail/features/task.hpp"
-#include "detail/features/task_list.hpp"
+#include "detail/features/task_status.hpp"
+
+#include "detail/plans/task.hpp"
+
+#if HFSM2_PLANS_AVAILABLE()
+namespace hfsm2 {
+namespace detail {
+	template <typename> struct PlanDataT;
+	template <typename> class  PlanT;
+	template <typename> class  CPlanT;
+	template <typename> class  PayloadPlanT;
+}
+}
+#endif
 
 #include "detail/root/registry_1.hpp"
 #include "detail/root/registry_2.hpp"
-#include "detail/root/plan_data.hpp"
-#include "detail/root/plan_0.hpp"
-#include "detail/root/plan_1.hpp"
-#include "detail/root/plan_2.hpp"
 #include "detail/root/core.hpp"
 #include "detail/root/control_0.hpp"
 #include "detail/root/control_1.hpp"
@@ -107,5 +115,11 @@
 #include "detail/root_2.hpp"
 #include "detail/root_3.hpp"
 #include "detail/root_4.hpp"
+
+#include "detail/plans/task_list.hpp"
+#include "detail/plans/plan_data.hpp"
+#include "detail/plans/plan_0.hpp"
+#include "detail/plans/plan_1.hpp"
+#include "detail/plans/plan_2.hpp"
 
 #include "detail/shared/macros_off.hpp"

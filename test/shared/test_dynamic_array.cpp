@@ -15,6 +15,7 @@ static unsigned s_copied            = 0;
 static unsigned s_moved             = 0;
 static unsigned s_destroyedOrder[8] = {};
 static unsigned s_destroyedCount    = 0;
+static unsigned s_transitionPayloadDestroyed = 0;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -73,11 +74,50 @@ struct OrderedTracked final {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-using TrackedArray		= hfsm2::detail::DynamicArrayT<Tracked, 8>;
-using SmallTrackedArray = hfsm2::detail::DynamicArrayT<Tracked, 4>;
-using OverAlignedArray	= hfsm2::detail::DynamicArrayT<OverAlignedTracked, 4>;
-using OrderedArray		= hfsm2::detail::DynamicArrayT<OrderedTracked, 4>;
-using EmptyArray		= hfsm2::detail::DynamicArrayT<int, 0>;
+struct PayloadHost final {
+	explicit PayloadHost(const int value_) noexcept
+		: value{value_}
+	{}
+
+	PayloadHost(const PayloadHost& other) noexcept
+		: value{other.value}
+	{}
+
+	PayloadHost(PayloadHost&& other) noexcept
+		: value{other.value}
+	{
+		other.value = 0;
+	}
+
+	PayloadHost& operator = (const PayloadHost& other) noexcept {
+		value = other.value;
+
+		return *this;
+	}
+
+	PayloadHost& operator = (PayloadHost&& other) noexcept {
+		value = other.value;
+		other.value = 0;
+
+		return *this;
+	}
+
+	~PayloadHost() noexcept {
+		++s_transitionPayloadDestroyed;
+	}
+
+	int value = 0;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+using TrackedArray				= hfsm2::detail::DynamicArrayT<Tracked, 8>;
+using SmallTrackedArray 		= hfsm2::detail::DynamicArrayT<Tracked, 4>;
+using OverAlignedArray			= hfsm2::detail::DynamicArrayT<OverAlignedTracked, 4>;
+using OrderedArray				= hfsm2::detail::DynamicArrayT<OrderedTracked, 4>;
+using EmptyArray				= hfsm2::detail::DynamicArrayT<int, 0>;
+using PayloadTransition 		= hfsm2::detail::TransitionT<PayloadHost>;
+using PayloadTransitionArray	= hfsm2::detail::DynamicArrayT<PayloadTransition, 4>;
 
 static_assert(std::is_empty<EmptyArray>::value,
 			  "capacity-0 dynamic array should carry no element storage");
@@ -90,6 +130,7 @@ static void resetCounters() noexcept {
 	s_copied         = 0;
 	s_moved          = 0;
 	s_destroyedCount = 0;
+	s_transitionPayloadDestroyed = 0;
 
 	for (unsigned& value : s_destroyedOrder)
 		value = 0;
@@ -287,6 +328,48 @@ TEST_CASE("Shared.DynamicArray<OverAlignedTracked,4>.SupportsOverAlignment") {
 	CHECK(array[1].values[0] == 22u);
 	CHECK(reinterpret_cast<uintptr_t>(&array[0]) % alignof(OverAlignedTracked) == 0);
 	CHECK(reinterpret_cast<uintptr_t>(&array[1]) % alignof(OverAlignedTracked) == 0);
+}
+
+//------------------------------------------------------------------------------
+
+TEST_CASE("Shared.DynamicArray<TransitionT<PayloadHost>,4>.SupportsNonTrivialPayloads") {
+	resetCounters();
+
+	PayloadTransitionArray source;
+	source.emplace(hfsm2::StateID{1}, hfsm2::TransitionType::CHANGE, PayloadHost{7});
+	source.emplace(hfsm2::StateID{2}, hfsm2::TransitionType::RESTART);
+
+	REQUIRE(source.count() == 2);
+	REQUIRE(source[0].payload());
+	REQUIRE(source[0].payload()->value == 7);
+	REQUIRE(!source[1].payload());
+
+	PayloadTransitionArray copy{source};
+
+	REQUIRE(copy.count() == 2);
+	REQUIRE(copy[0].payload());
+	REQUIRE(copy[0].payload()->value == 7);
+	REQUIRE(!copy[1].payload());
+
+	PayloadTransitionArray moved{hfsm2::move(source)};
+
+	REQUIRE(moved.count() == 2);
+	REQUIRE(moved[0].payload());
+	REQUIRE(moved[0].payload()->value == 7);
+	REQUIRE(!moved[1].payload());
+	REQUIRE(source.empty());
+
+	const unsigned destroyedBeforeMovedClear = s_transitionPayloadDestroyed;
+
+	moved.clear();
+
+	CHECK(s_transitionPayloadDestroyed - destroyedBeforeMovedClear == 1);
+
+	const unsigned destroyedBeforeCopyClear = s_transitionPayloadDestroyed;
+
+	copy.clear();
+
+	CHECK(s_transitionPayloadDestroyed - destroyedBeforeCopyClear == 1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

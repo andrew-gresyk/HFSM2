@@ -66,7 +66,7 @@
 		<Expand HideRawView="true">
 			<ArrayItems>
 				<Size>_count</Size>
-				<ValuePointer>_items</ValuePointer>
+				<ValuePointer>($T1*) &amp;_storage</ValuePointer>
 			</ArrayItems>
 		</Expand>
 	</Type>
@@ -87,20 +87,6 @@
 	<Type Name="hfsm2::detail::Parent">
 		<DisplayString Condition="forkId &gt; 0">({(unsigned) ( forkId - 1) &amp; 0xFF}) ► {(unsigned) prong &amp; 0xFF}</DisplayString>
 		<DisplayString Condition="forkId &lt; 0">[{(unsigned) (-forkId - 1) &amp; 0xFF}] ► {(unsigned) prong &amp; 0xFF}</DisplayString>
-	</Type>
-
-	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
-
-	<Type Name="hfsm2::detail::CompoFork">
-		<DisplayString>[{TYPE}]: &lt;{(unsigned) resumable &amp; 0xFF}&gt; ◄ ({(unsigned) active &amp; 0xFF}) ► &lt;{(unsigned) requested &amp; 0xFF}&gt;</DisplayString>
-		<Expand HideRawView="true" />
-	</Type>
-
-	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
-
-	<Type Name="hfsm2::detail::TransitionType">
-		<DisplayString>{type, en}: {*(std::type_index*)&amp;stateType._storage}</DisplayString>
-		<Expand HideRawView="true" />
 	</Type>
 
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
@@ -142,12 +128,12 @@
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::GuardControlT&lt;*,*&gt;">
-		<DisplayString>[{_taskStatus}] ({_pending})</DisplayString>
+		<DisplayString>[{_taskStatus}] ({_pendingTransitions})</DisplayString>
 	</Type>
 
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-	<Type Name="hfsm2::detail::Status">
+	<Type Name="hfsm2::detail::TaskStatus">
 		<DisplayString Condition="outerTransition">OuterTransition</DisplayString>
 		<DisplayString>{result}</DisplayString>
 		<Expand HideRawView="true" />
@@ -161,23 +147,7 @@
 		<Expand HideRawView="true" />
 	</Type>
 
-	<Type Name="hfsm2::detail::TaskListT&lt;*&gt;">
-		<Expand HideRawView="true">
-			<IndexListItems Condition="_count > 0">
-				<Size>CAPACITY</Size>
-				<ValueNode>_items[$i]</ValueNode>
-			</IndexListItems>
-		</Expand>
-	</Type>
-
-	<Type Name="hfsm2::detail::TaskLink">
-		<DisplayString Condition="prev == INVALID_STATE_ID &amp;&amp; next == INVALID_STATE_ID">[■]</DisplayString>
-		<DisplayString Condition="prev == INVALID_STATE_ID">[► {(unsigned) next}]</DisplayString>
-		<DisplayString Condition="next == INVALID_STATE_ID">[{(unsigned) prev} ◄]</DisplayString>
-		<DisplayString>[{(unsigned) prev} ◄► {(unsigned) next}]</DisplayString>
-	</Type>
-
-	<Type Name="hfsm2::detail::Bounds">
+	<Type Name="hfsm2::detail::TaskListT&lt;*,*,*&gt;::Bounds">
 		<DisplayString>[{(unsigned) first} .. {(unsigned) last}]</DisplayString>
 		<Expand HideRawView="true" />
 	</Type>
@@ -185,23 +155,51 @@
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
 	<Type Name="hfsm2::detail::PlanT&lt;*&gt;">
-		<DisplayString Condition="_bounds.first == INVALID_LONG">&lt;Empty&gt;</DisplayString>
-		<DisplayString>{_bounds}</DisplayString>
+		<DisplayString Condition="_planData.tasks._bounds[_regionId].first == INVALID_LONG">&lt;Empty&gt;</DisplayString>
+		<DisplayString>{_planData.tasks._bounds[_regionId]}</DisplayString>
 		<Expand HideRawView="true">
 			<CustomListItems MaxItemsPerView="100">
-				<Variable Name="i" InitialValue="_bounds.first" />
+				<Variable Name="first" InitialValue="_planData.tasks._bounds[_regionId].first" />
+				<Variable Name="last"  InitialValue="_planData.tasks._bounds[_regionId].last" />
+				<Variable Name="i"     InitialValue="first" />
 
-				<If Condition="_bounds.first != INVALID_LONG &amp;&amp; _bounds.first != _bounds.last">
+				<If Condition="first != INVALID_LONG &amp;&amp; first != last">
 					<Loop>
-						<Item>_planData.tasks._items[i]</Item>
-						<Exec>i = _planData.taskLinks[i].next</Exec>
-						<Break Condition="i == _bounds.last" />
+						<Item>*((Task*) &amp;_planData.tasks._slots[i].storage)</Item>
+						<Exec>i = _planData.tasks._slots[i].next</Exec>
+						<Break Condition="i == last" />
 					</Loop>
-					<Item>_planData.tasks._items[_bounds.last]</Item>
+					<Item>*((Task*) &amp;_planData.tasks._slots[last].storage)</Item>
 				</If>
 
-				<If Condition="_bounds.first != INVALID_LONG &amp;&amp; _bounds.first == _bounds.last">
-					<Item>_planData.tasks._items[_bounds.last]</Item>
+				<If Condition="first != INVALID_LONG &amp;&amp; first == last">
+					<Item>*((Task*) &amp;_planData.tasks._slots[last].storage)</Item>
+				</If>
+
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm2::detail::CPlanT&lt;*&gt;">
+		<DisplayString Condition="_planData.tasks._bounds[_regionId].first == INVALID_LONG">&lt;Empty&gt;</DisplayString>
+		<DisplayString>{_planData.tasks._bounds[_regionId]}</DisplayString>
+		<Expand HideRawView="true">
+			<CustomListItems MaxItemsPerView="100">
+				<Variable Name="first" InitialValue="_planData.tasks._bounds[_regionId].first" />
+				<Variable Name="last"  InitialValue="_planData.tasks._bounds[_regionId].last" />
+				<Variable Name="i"     InitialValue="first" />
+
+				<If Condition="first != INVALID_LONG &amp;&amp; first != last">
+					<Loop>
+						<Item>*((Task*) &amp;_planData.tasks._slots[i].storage)</Item>
+						<Exec>i = _planData.tasks._slots[i].next</Exec>
+						<Break Condition="i == last" />
+					</Loop>
+					<Item>*((Task*) &amp;_planData.tasks._slots[last].storage)</Item>
+				</If>
+
+				<If Condition="first != INVALID_LONG &amp;&amp; first == last">
+					<Item>*((Task*) &amp;_planData.tasks._slots[last].storage)</Item>
 				</If>
 
 			</CustomListItems>
@@ -210,11 +208,27 @@
 
 	<!-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ -->
 
+	<Type Name="hfsm2::detail::PlanT&lt;*&gt;::CIterator">
+		<DisplayString Condition="_curr == INVALID_LONG">&lt;Empty&gt;</DisplayString>
+		<DisplayString Condition="_curr != INVALID_LONG">{*((Task*) &amp;_plan._planData.tasks._slots[_curr].storage)}</DisplayString>
+		<Expand HideRawView="true">
+			<ExpandedItem Condition="_curr != INVALID_LONG">*((Task*) &amp;_plan._planData.tasks._slots[_curr].storage)</ExpandedItem>
+		</Expand>
+	</Type>
+
 	<Type Name="hfsm2::detail::PlanT&lt;*&gt;::Iterator">
 		<DisplayString Condition="_curr == INVALID_LONG">&lt;Empty&gt;</DisplayString>
-		<DisplayString Condition="_curr != INVALID_LONG">{_plan._planData.tasks._items[_curr]}</DisplayString>
+		<DisplayString Condition="_curr != INVALID_LONG">{*((Task*) &amp;_plan._planData.tasks._slots[_curr].storage)}</DisplayString>
 		<Expand HideRawView="true">
-			<ExpandedItem Condition="_curr != INVALID_LONG">_plan._planData.tasks._items[_curr]</ExpandedItem>
+			<ExpandedItem Condition="_curr != INVALID_LONG">*((Task*) &amp;_plan._planData.tasks._slots[_curr].storage)</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<Type Name="hfsm2::detail::CPlanT&lt;*&gt;::Iterator">
+		<DisplayString Condition="_curr == INVALID_LONG">&lt;Empty&gt;</DisplayString>
+		<DisplayString Condition="_curr != INVALID_LONG">{*((Task*) &amp;_plan._planData.tasks._slots[_curr].storage)}</DisplayString>
+		<Expand HideRawView="true">
+			<ExpandedItem Condition="_curr != INVALID_LONG">*((Task*) &amp;_plan._planData.tasks._slots[_curr].storage)</ExpandedItem>
 		</Expand>
 	</Type>
 
@@ -262,8 +276,8 @@
 
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-	<Type Name="hfsm2::Iterator&lt;*&gt;">
-		<DisplayString>[{_cursor}] = {_t[_cursor]}</DisplayString>
+	<Type Name="hfsm2::detail::IteratorT&lt;*,*,*&gt;">
+		<DisplayString>[{_cursor}] = {_container[_cursor]}</DisplayString>
 		<Expand>
 			<ExpandedItem>_container</ExpandedItem>
 		</Expand>

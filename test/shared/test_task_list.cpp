@@ -8,128 +8,219 @@ namespace test_task_list {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-using List = hfsm2::detail::TaskListT<void, 16>;
+static unsigned s_constructed = 0;
+static unsigned s_destructed  = 0;
+static unsigned s_copied      = 0;
+static unsigned s_moved       = 0;
 
 //------------------------------------------------------------------------------
 
-TEST_CASE("Shared.List<>") {
-	List list;
-	constexpr auto CAPACITY = List::CAPACITY;
-
-	REQUIRE(list.count()  == 0);
-
-	WHEN("fill, delete and re-insert an element") {
-		for (List::Index i = 0; i < CAPACITY; ++i) {
-			const auto index = list.emplace(static_cast<hfsm2::Long>(i),
-											static_cast<hfsm2::Long>(i),
-											hfsm2::TransitionType::COUNT);
-
-			REQUIRE(index == i);
-			REQUIRE(list.count() == i + 1);
-		}
-
-		for (List::Index i = 0; i < CAPACITY; ++i)
-			REQUIRE(list[i] == hfsm2::detail::TaskBase{static_cast<hfsm2::Long>(i),
-													   static_cast<hfsm2::Long>(i),
-													   hfsm2::TransitionType::COUNT});
-
-		THEN("at the start") {
-			REQUIRE(list.count() == CAPACITY);
-
-			list.remove(0);
-			REQUIRE(list.count() == CAPACITY - 1);
-
-			const auto index = list.emplace(static_cast<hfsm2::Long>(0u),
-											static_cast<hfsm2::Long>(0u),
-											hfsm2::TransitionType::COUNT);
-			REQUIRE(index == 0);
-			REQUIRE(list.count() == CAPACITY);
-		}
-
-		AND_THEN("at the mid") {
-			REQUIRE(list.count() == CAPACITY);
-
-			constexpr List::Index mid = CAPACITY / 2;
-			list.remove(mid);
-			REQUIRE(list.count() == CAPACITY - 1);
-
-			const auto index = list.emplace(static_cast<hfsm2::Long>(mid),
-											static_cast<hfsm2::Long>(mid),
-											hfsm2::TransitionType::COUNT);
-			REQUIRE(index == mid);
-			REQUIRE(list.count() == CAPACITY);
-		}
-
-		AND_THEN("at the end") {
-			REQUIRE(list.count() == CAPACITY);
-
-			constexpr List::Index end = CAPACITY - 1;
-			list.remove(end);
-			REQUIRE(list.count() == CAPACITY - 1);
-
-			const auto index = list.emplace(static_cast<hfsm2::Long>(end),
-											static_cast<hfsm2::Long>(end),
-											hfsm2::TransitionType::COUNT);
-			REQUIRE(index == end);
-			REQUIRE(list.count() == CAPACITY);
-		}
+struct Tracked final {
+	explicit Tracked(const unsigned value_) noexcept
+		: value{value_}
+	{
+		++s_constructed;
 	}
 
-	WHEN("fill, delete all and re-insert all elements") {
-		for (List::Index i = 0; i < CAPACITY; ++i) {
-			const auto index = list.emplace(static_cast<hfsm2::Long>(i),
-											static_cast<hfsm2::Long>(i),
-											hfsm2::TransitionType::COUNT);
-
-			REQUIRE(index == i);
-			REQUIRE(list.count() == i + 1);
-		}
-
-		for (List::Index i = 0; i < CAPACITY; ++i)
-			REQUIRE(list[i] == hfsm2::detail::TaskBase{static_cast<hfsm2::Long>(i),
-													   static_cast<hfsm2::Long>(i),
-													   hfsm2::TransitionType::COUNT});
-
-		THEN("from the start") {
-			REQUIRE(list.count() == CAPACITY);
-
-			for (List::Index i = 0; i < CAPACITY; ++i) {
-				list.remove(i);
-				REQUIRE(list.count() == CAPACITY - 1 - i);
-			}
-
-			for (List::Index i = 0; i < CAPACITY; ++i) {
-				const auto index = list.emplace(static_cast<hfsm2::Long>(i),
-												static_cast<hfsm2::Long>(i),
-												hfsm2::TransitionType::COUNT);
-
-				REQUIRE(index == CAPACITY - 1 - i);
-				REQUIRE(list.count() == i + 1);
-			}
-		}
-
-		AND_THEN("at the mid") {
-			REQUIRE(list.count() == CAPACITY);
-		}
-
-		AND_THEN("from the end") {
-			REQUIRE(list.count() == CAPACITY);
-
-			for (List::Index i = 0; i < CAPACITY; ++i) {
-				list.remove(CAPACITY - 1 - i);
-				REQUIRE(list.count() == CAPACITY - 1 - i);
-			}
-
-			for (List::Index i = 0; i < CAPACITY; ++i) {
-				const auto index = list.emplace(static_cast<hfsm2::Long>(i),
-												static_cast<hfsm2::Long>(i),
-												hfsm2::TransitionType::COUNT);
-
-				REQUIRE(index == i);
-				REQUIRE(list.count() == i + 1);
-			}
-		}
+	Tracked(const Tracked& other) noexcept
+		: value{other.value}
+	{
+		++s_constructed;
+		++s_copied;
 	}
+
+	Tracked(Tracked&& other) noexcept
+		: value{other.value}
+	{
+		other.value = 0;
+		++s_constructed;
+		++s_moved;
+	}
+
+	~Tracked() noexcept {
+		++s_destructed;
+	}
+
+	unsigned value = 0;
+};
+
+//------------------------------------------------------------------------------
+
+using TaskList  = hfsm2::detail::TaskListT<Tracked, 5, 3>;
+using EmptyList = hfsm2::detail::TaskListT<Tracked, 0, 2>;
+
+static constexpr hfsm2::RegionID REGION_0 = 0;
+static constexpr hfsm2::RegionID REGION_1 = 1;
+
+//------------------------------------------------------------------------------
+
+static void resetCounters() noexcept {
+	s_constructed = 0;
+	s_destructed  = 0;
+	s_copied      = 0;
+	s_moved       = 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_CASE("Shared.TaskListT<Tracked,5,3>.InsertRemoveAndClearRegion") {
+	resetCounters();
+
+	TaskList tasks;
+
+	CHECK(tasks.empty());
+	CHECK(tasks.count() == 0);
+	CHECK(!tasks.bounds(REGION_0));
+	CHECK(!tasks.bounds(REGION_1));
+
+	const TaskList::Index a = tasks.emplace(REGION_0, 10u);
+	const TaskList::Index b = tasks.emplace(REGION_0, 20u);
+	const TaskList::Index c = tasks.emplace(REGION_0, 30u);
+	const TaskList::Index d = tasks.emplace(REGION_1, 40u);
+
+	CHECK(a == 0);
+	CHECK(b == 1);
+	CHECK(c == 2);
+	CHECK(d == 3);
+	CHECK(tasks.count() == 4);
+	CHECK(!tasks.empty());
+	CHECK(s_constructed == 4);
+	CHECK(s_destructed  == 0);
+
+	CHECK(tasks.bounds(REGION_0).first == a);
+	CHECK(tasks.bounds(REGION_0).last  == c);
+	CHECK(tasks.next(a) == b);
+	CHECK(tasks.prev(b) == a);
+	CHECK(tasks.next(b) == c);
+	CHECK(tasks.prev(c) == b);
+	CHECK(tasks.next(c) == TaskList::INVALID);
+
+	CHECK(tasks.bounds(REGION_1).first == d);
+	CHECK(tasks.bounds(REGION_1).last  == d);
+	CHECK(tasks.prev(d) == TaskList::INVALID);
+	CHECK(tasks.next(d) == TaskList::INVALID);
+
+	tasks.remove(REGION_0, b);
+
+	CHECK(tasks.count() == 3);
+	CHECK(!tasks.occupied(b));
+	CHECK(s_destructed == 1);
+	CHECK(tasks.bounds(REGION_0).first == a);
+	CHECK(tasks.bounds(REGION_0).last  == c);
+	CHECK(tasks.next(a) == c);
+	CHECK(tasks.prev(c) == a);
+
+	const TaskList::Index e = tasks.emplace(REGION_1, 50u);
+
+	CHECK(e == b);
+	CHECK(tasks.count() == 4);
+	CHECK(tasks[e].value == 50u);
+	CHECK(tasks.bounds(REGION_1).first == d);
+	CHECK(tasks.bounds(REGION_1).last  == e);
+	CHECK(tasks.next(d) == e);
+	CHECK(tasks.prev(e) == d);
+
+	tasks.clearRegion(REGION_0);
+
+	CHECK(tasks.count() == 2);
+	CHECK(!tasks.bounds(REGION_0));
+	CHECK(tasks.bounds(REGION_1).first == d);
+	CHECK(tasks.bounds(REGION_1).last  == e);
+	CHECK(s_destructed == 3);
+
+	tasks.clear();
+
+	CHECK(tasks.empty());
+	CHECK(tasks.count() == 0);
+	CHECK(!tasks.bounds(REGION_0));
+	CHECK(!tasks.bounds(REGION_1));
+	CHECK(s_destructed == s_constructed);
+}
+
+//------------------------------------------------------------------------------
+
+TEST_CASE("Shared.TaskListT<Tracked,5,3>.CopyMoveAndCapacity") {
+	resetCounters();
+
+	TaskList source;
+	const TaskList::Index a = source.emplace(REGION_0, 10u);
+	const TaskList::Index b = source.emplace(REGION_1, 20u);
+
+	TaskList copy{source};
+
+	CHECK(copy.count() == 2);
+	CHECK(copy.bounds(REGION_0).first == a);
+	CHECK(copy.bounds(REGION_1).first == b);
+	CHECK(copy[a].value == 10u);
+	CHECK(copy[b].value == 20u);
+	CHECK(s_copied == 2);
+
+	TaskList moved{hfsm2::move(copy)};
+
+	CHECK(copy.empty());
+	CHECK(moved.count() == 2);
+	CHECK(moved.bounds(REGION_0).first == a);
+	CHECK(moved.bounds(REGION_1).first == b);
+	CHECK(moved[a].value == 10u);
+	CHECK(moved[b].value == 20u);
+	CHECK(s_moved == 2);
+
+	CHECK(moved.emplace(REGION_0, 30u) != TaskList::INVALID);
+	CHECK(moved.emplace(REGION_0, 40u) != TaskList::INVALID);
+	CHECK(moved.emplace(REGION_0, 50u) != TaskList::INVALID);
+	CHECK(moved.emplace(REGION_0, 60u) == TaskList::INVALID);
+
+	source.clear();
+	copy  .clear();
+	moved .clear();
+
+	CHECK(s_destructed == s_constructed);
+}
+
+//------------------------------------------------------------------------------
+
+TEST_CASE("Shared.TaskListT<Tracked,5,3>.SelfAssignment") {
+	resetCounters();
+
+	TaskList tasks;
+	const TaskList::Index a = tasks.emplace(REGION_0, 10u);
+	const TaskList::Index b = tasks.emplace(REGION_1, 20u);
+
+	// Self-assign through a reference so the compiler doesn't flag the
+	// direct `tasks = tasks` form. We're specifically checking the runtime
+	// `if (this == &other) return *this;` guards in operator=.
+	TaskList& selfRef = tasks;
+
+	tasks = selfRef;
+	CHECK(tasks.count() == 2);
+	CHECK(tasks[a].value == 10u);
+	CHECK(tasks[b].value == 20u);
+
+	tasks = hfsm2::move(selfRef);
+	CHECK(tasks.count() == 2);
+	CHECK(tasks[a].value == 10u);
+	CHECK(tasks[b].value == 20u);
+
+	tasks.clear();
+	CHECK(s_destructed == s_constructed);
+}
+
+//------------------------------------------------------------------------------
+
+TEST_CASE("Shared.TaskListT<Tracked,0,2>.ZeroCapacity") {
+	EmptyList tasks;
+
+	CHECK(tasks.empty());
+	CHECK(tasks.count() == 0);
+	CHECK(tasks.emplace(REGION_0, 10u) == EmptyList::INVALID);
+	CHECK(!tasks.occupied(0));
+	CHECK(!tasks.bounds(REGION_0));
+
+	tasks.clearRegion(REGION_0);
+	tasks.clear();
+
+	CHECK(tasks.empty());
+	CHECK(tasks.count() == 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -843,7 +843,8 @@ R_<TG_, TA_>::udpateActivity() noexcept {
 				activity = +1;
 			else
 				activity = activity < INT8_MAX ? activity + 1 : activity;
-		} else {
+		}
+		else {
 			if (activity > 0)
 				activity = -1;
 			else

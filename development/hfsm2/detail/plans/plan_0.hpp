@@ -23,7 +23,6 @@ class CPlanT {
 	friend class R_;
 
 	using Args			= TArgs;
-	using Context		= typename Args::Context;
 	using StateList		= typename Args::StateList;
 	using RegionList	= typename Args::RegionList;
 
@@ -32,7 +31,8 @@ class CPlanT {
 public:
 	using PlanData		= PlanDataT<Args>;
 	using Task			= typename PlanData::Task;
-	using TaskLinks		= typename PlanData::TaskLinks;
+	using Tasks			= typename PlanData::Tasks;
+	using Bounds		= typename Tasks::Bounds;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -60,8 +60,8 @@ public:
 private:
 	HFSM2_CONSTEXPR(11)	CPlanT(const PlanData& planData,
 							   const RegionID regionId_)				noexcept
-		: _planData{planData}
-		, _bounds{planData.taskBounds[regionId_]}
+		: _planData{planData }
+		, _regionId{regionId_}
 	{}
 
 	template <typename TState>
@@ -99,7 +99,7 @@ public:
 
 private:
 	const PlanData& _planData;
-	const Bounds& _bounds;
+	const RegionID  _regionId;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

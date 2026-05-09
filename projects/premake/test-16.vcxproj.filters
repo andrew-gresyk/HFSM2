@@ -16,6 +16,9 @@
     <Filter Include="development\hfsm2\detail\features">
       <UniqueIdentifier>{072D33C7-739B-8846-BC84-434628327EE2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="development\hfsm2\detail\plans">
+      <UniqueIdentifier>{A6C211BF-92E8-DB25-7B2E-61F167F300F2}</UniqueIdentifier>
+    </Filter>
     <Filter Include="development\hfsm2\detail\root">
       <UniqueIdentifier>{2CEFF9BF-9807-E1E9-61B4-7083CD8B7583}</UniqueIdentifier>
     </Filter>
@@ -72,17 +75,47 @@
     <ClInclude Include="..\..\development\hfsm2\detail\features\structure_report.hpp">
       <Filter>development\hfsm2\detail\features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\features\task.hpp">
+    <ClInclude Include="..\..\development\hfsm2\detail\features\task_status.hpp">
       <Filter>development\hfsm2\detail\features</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\features\task_list.hpp">
-      <Filter>development\hfsm2\detail\features</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\features\task_list.inl">
+    <ClInclude Include="..\..\development\hfsm2\detail\features\task_status.inl">
       <Filter>development\hfsm2\detail\features</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\features\transition.hpp">
       <Filter>development\hfsm2\detail\features</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\plan_0.hpp">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\plan_0.inl">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\plan_1.hpp">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\plan_1.inl">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\plan_2.hpp">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\plan_2.inl">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\plan_data.hpp">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\plan_data.inl">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\task.hpp">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\task_list.hpp">
+      <Filter>development\hfsm2\detail\plans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\development\hfsm2\detail\plans\task_list.inl">
+      <Filter>development\hfsm2\detail\plans</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\root\control_0.hpp">
       <Filter>development\hfsm2\detail\root</Filter>
@@ -121,30 +154,6 @@
       <Filter>development\hfsm2\detail\root</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\root\core.inl">
-      <Filter>development\hfsm2\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_0.hpp">
-      <Filter>development\hfsm2\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_0.inl">
-      <Filter>development\hfsm2\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_1.hpp">
-      <Filter>development\hfsm2\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_1.inl">
-      <Filter>development\hfsm2\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_2.hpp">
-      <Filter>development\hfsm2\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_2.inl">
-      <Filter>development\hfsm2\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.hpp">
-      <Filter>development\hfsm2\detail\root</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\development\hfsm2\detail\root\plan_data.inl">
       <Filter>development\hfsm2\detail\root</Filter>
     </ClInclude>
     <ClInclude Include="..\..\development\hfsm2\detail\root\registry_1.hpp">
@@ -300,6 +309,9 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\reported\issue_123.cpp">
+      <Filter>test\reported</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\reported\issue_134.cpp">
       <Filter>test\reported</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\reported\issue_49.cpp">

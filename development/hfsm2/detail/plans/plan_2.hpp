@@ -86,12 +86,10 @@ class PayloadPlanT<
 
 	using PlanBase::PlanBase;
 
-	using PlanBase::linkTask;
-
-	HFSM2_CONSTEXPR(14)	bool  append(const StateID origin,
-									 const StateID destination,
-									 const TransitionType type,
-									 const Payload& payload)			noexcept;
+	HFSM2_CONSTEXPR(14)	bool append(const StateID origin,
+									const StateID destination,
+									const TransitionType type,
+									const Payload& payload)				noexcept;
 
 public:
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -101,32 +99,32 @@ public:
 	/// @param `origin` Origin state identifier
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID origin,
 										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::CHANGE   ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::CHANGE   , payload);	}
 
 	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam `TOrigin` Origin state type
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin>
 	HFSM2_CONSTEXPR(14)	bool changeWith   (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::CHANGE   ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::CHANGE   , payload);	}
 
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, acts depending on the region type)
 	/// @tparam `TOrigin` Origin state type
 	/// @tparam `TDestination` Destination state type
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool changeWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::CHANGE   ,	   payload );	}
+	HFSM2_CONSTEXPR(14)	bool changeWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::CHANGE   , payload);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -135,32 +133,32 @@ public:
 	/// @param `origin` Origin state identifier
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID origin,
 										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RESTART  ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RESTART  , payload);	}
 
 	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, activates the initial state)
 	/// @tparam `TOrigin` Origin state type
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin>
 	HFSM2_CONSTEXPR(14)	bool restartWith  (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RESTART  ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RESTART  , payload);	}
 
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, activates the initial state)
 	/// @tparam `TOrigin` Origin state type
 	/// @tparam `TDestination` Destination state type
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool restartWith  (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESTART  ,	   payload );	}
+	HFSM2_CONSTEXPR(14)	bool restartWith  (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESTART  , payload);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -169,32 +167,32 @@ public:
 	/// @param `origin` Origin state identifier
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID origin,
 										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RESUME   ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RESUME   , payload);	}
 
 	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam `TOrigin` Origin state type
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin>
 	HFSM2_CONSTEXPR(14)	bool resumeWith   (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RESUME   ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RESUME   , payload);	}
 
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, activates the state that was active previously)
 	/// @tparam `TOrigin` Origin state type
 	/// @tparam `TDestination` Destination state type
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool resumeWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESUME   ,	   payload );	}
+	HFSM2_CONSTEXPR(14)	bool resumeWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RESUME   , payload);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -203,32 +201,32 @@ public:
 	/// @param `origin` Origin state identifier
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	HFSM2_CONSTEXPR(14)	bool selectWith   (const StateID origin,
 										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::SELECT   ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::SELECT   , payload);	}
 
 	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
 	/// @tparam `TOrigin` Origin state type
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin>
 	HFSM2_CONSTEXPR(14)	bool selectWith   (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::SELECT   ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::SELECT   , payload);	}
 
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, activates the sub-state by index returned by the region's `select()` method)
 	/// @tparam `TOrigin` Origin state type
 	/// @tparam `TDestination` Destination state type
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool selectWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SELECT   ,	   payload );	}
+	HFSM2_CONSTEXPR(14)	bool selectWith   (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SELECT   , payload);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -240,12 +238,12 @@ public:
 	/// @param `origin` Origin state identifier
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
 	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID origin,
 										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::UTILIZE  ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::UTILIZE  , payload);	}
 
 	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, activates the state with the highest `utility()`
@@ -253,24 +251,24 @@ public:
 	/// @tparam `TOrigin` Origin state type
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
 	template <typename TOrigin>
 	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::UTILIZE  ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::UTILIZE  , payload);	}
 
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, activates the state with the highest `utility()`
 	///   among those with the highest `rank()`)
 	/// @tparam `TOrigin` Origin state type
 	/// @tparam `TDestination` Destination state type
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::UTILIZE  ,	   payload );	}
+	HFSM2_CONSTEXPR(14)	bool utilizeWith  (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::UTILIZE  , payload);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -280,12 +278,12 @@ public:
 	/// @param `origin` Origin state identifier
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
 	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID origin,
 										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RANDOMIZE,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::RANDOMIZE, payload);	}
 
 	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
@@ -293,24 +291,24 @@ public:
 	/// @tparam `TOrigin` Origin state type
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
 	template <typename TOrigin>
 	HFSM2_CONSTEXPR(14)	bool randomizeWith(const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RANDOMIZE,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::RANDOMIZE, payload);	}
 
-	/// @brief Prepend a task to transition from `origin` to `destination` if `origin` completes with `success()`
+	/// @brief Append a task to transition from `origin` to `destination` if `origin` completes with `success()`
 	///   (if transitioning into a region, uses weighted random to activate the state proportional to `utility()`
 	///   among those with the highest `rank()`)
 	/// @tparam `TOrigin` Origin state type
 	/// @tparam `TDestination` Destination state type
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	/// @see `HFSM2_ENABLE_UTILITY_THEORY`
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool randomizeWith(const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RANDOMIZE,	   payload );	}
+	HFSM2_CONSTEXPR(14)	bool randomizeWith(const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::RANDOMIZE, payload);	}
 
 #endif
 
@@ -320,30 +318,30 @@ public:
 	/// @param `origin` Origin state identifier
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	HFSM2_CONSTEXPR(14)	bool scheduleWith (const StateID origin,
 										   const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::SCHEDULE ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(origin								 , destination								 , TransitionType::SCHEDULE , payload);	}
 
 	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
 	/// @tparam `TOrigin` Origin state type
 	/// @param `destination` Destination state identifier
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin>
 	HFSM2_CONSTEXPR(14)	bool scheduleWith (const StateID destination,
-										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::SCHEDULE ,	   payload );	}
+										   const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), destination								 , TransitionType::SCHEDULE , payload);	}
 
-	/// @brief Prepend a task to schedule a transition to `destination` if `origin` completes with `success()`
+	/// @brief Append a task to schedule a transition to `destination` if `origin` completes with `success()`
 	/// @tparam `TOrigin` Origin state type
 	/// @tparam `TDestination` Destination state type
 	/// @param `payload` Payload
-	/// @return Seccess if FSM total number of tasks is below task capacity
+	/// @return Success if FSM total number of tasks is below task capacity
 	/// @note use `Config::TaskCapacityN<>` to increase task capacity if necessary
 	template <typename TOrigin, typename TDestination>
-	HFSM2_CONSTEXPR(14)	bool scheduleWith (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SCHEDULE ,	   payload );	}
+	HFSM2_CONSTEXPR(14)	bool scheduleWith (const Payload& payload)		noexcept	{ return append(PlanBase::template stateId<TOrigin>(), PlanBase::template stateId<TDestination>(), TransitionType::SCHEDULE , payload);	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

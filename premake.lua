@@ -37,7 +37,11 @@ workspace "hfsm2"
 		-- v140 is also incompatible with SDK 10.0.26100+, so find the newest compatible one
 		local sdkVersions = {}
 		for _, d in ipairs(os.matchdirs("C:/Program Files (x86)/Windows Kits/10/Include/10.0.*")) do
-			table.insert(sdkVersions, path.getname(d))
+			-- skip the UCRT-only redistributable shim VS drops at 10.0.10240.0
+			-- (a real SDK has um/, the shim has only ucrt/)
+			if os.isdir(d .. "/um") then
+				table.insert(sdkVersions, path.getname(d))
+			end
 		end
 		table.sort(sdkVersions)
 	filter "toolset:msc-v140"
@@ -51,6 +55,11 @@ workspace "hfsm2"
 		if #sdkVersions > 0 then
 			systemversion(sdkVersions[#sdkVersions])
 		end
+
+	filter { "toolset:msc-v140", "configurations:debug" }
+		-- v140 debug builds ICE with Premake's default Edit and Continue settings.
+		editandcontinue "Off"
+		minimalrebuild "Off"
 
 	filter "configurations:debug"
 		defines "_DEBUG"
@@ -309,5 +318,7 @@ project "test-clang"
 		"development/**.*",
 		"test/**.*",
 	}
+	-- clang-cl 19.1.5 currently exhausts memory on this template stress test.
+	removefiles "test/reported/stress_size.cpp"
 	kind "ConsoleApp"
 	toolset "msc-ClangCL"

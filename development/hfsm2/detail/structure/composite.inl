@@ -358,7 +358,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepForwardActive(Control& control,
 		const Prong active = compoActive(control);
 
 		SubStates::wideForwardActive (control, request, active);
-	} else
+	}
+	else
 		SubStates::wideForwardRequest(control, request, requested);
 }
 
@@ -906,7 +907,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) noex
 
 	if (requested == INVALID_PRONG)
 		SubStates::wideChangeToRequested(control, active);
-	else if (requested != active) {
+	else
+	if (requested != active) {
 		SubStates::wideExit	  (control, active);
 
 		HFSM2_ASSERT(requested < WIDTH);
@@ -916,13 +918,16 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepChangeToRequested(PlanControl& control) noex
 		requested = INVALID_PRONG;
 
 		SubStates::wideEnter  (control, active);
-	} else if (compoRemain(control)) {
+	}
+	else
+	if (compoRemain(control)) {
 		SubStates::wideExit   (control, active);
 
 		requested = INVALID_PRONG;
 
 		SubStates::wideEnter  (control, active);
-	} else {
+	}
+	else {
 		requested = INVALID_PRONG;
 
 		// reconstruction done in S_::reenter()
@@ -948,7 +953,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepSaveActive(const Registry& registry,
 	if (resumable != INVALID_PRONG) {
 		stream.template write<1>(1);
 		stream.template write<WIDTH_BITS>(resumable);
-	} else
+	}
+	else
 		stream.template write<1>(0);
 
 	SubStates::wideSaveActive(registry,stream, active);
@@ -967,7 +973,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepSaveResumable(const Registry& registry,
 	if (resumable != INVALID_PRONG) {
 		stream.template write<1>(1);
 		stream.template write<WIDTH_BITS>(resumable);
-	} else
+	}
+	else
 		stream.template write<1>(0);
 
 	SubStates::wideSaveResumable(registry, stream);
@@ -990,7 +997,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepLoadRequested(Registry& registry,
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
 		HFSM2_ASSERT(resumable < WIDTH);
-	} else
+	}
+	else
 		resumable = INVALID_PRONG;
 
 	SubStates::wideLoadRequested(registry, stream, requested);
@@ -1009,7 +1017,8 @@ C_<TN_, TA_, SG_, TH_, TS_...>::deepLoadResumable(Registry& registry,
 	if (stream.template read<1>()) {
 		resumable = stream.template read<WIDTH_BITS>();
 		HFSM2_ASSERT(resumable < WIDTH);
-	} else
+	}
+	else
 		resumable = INVALID_PRONG;
 
 	SubStates::wideLoadResumable(registry, stream);
