@@ -3,6 +3,8 @@
 
 // Issue reported in https://github.com/andrew-gresyk/HFSM2/issues/139
 
+#if __cplusplus >= 201402L
+
 #include <memory>
 #include <hfsm2/machine.hpp>
 
@@ -24,3 +26,5 @@ void main() {
 ////////////////////////////////////////////////////////////////////////////////
 
 }
+
+#endif
