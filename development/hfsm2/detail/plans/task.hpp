@@ -79,7 +79,9 @@ struct TaskT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)	TaskT(const This& other)				  HFSM2_NOEXCEPT_17(noexcept(Payload{              other.payloadStorage() }))
-		: TaskBase{other.origin, other.destination, other.type}
+		: TaskBase{other.origin,
+				   other.destination,
+				   other.type}
 		, payloadSet{other.payloadSet}
 	{
 		if (other.payloadSet)
@@ -89,7 +91,9 @@ struct TaskT final
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	HFSM2_CONSTEXPR(14)	TaskT(This&& other)						  HFSM2_NOEXCEPT_17(noexcept(Payload{::hfsm2::move(other.payloadStorage())}))
-		: TaskBase{other.origin, other.destination, other.type}
+		: TaskBase{other.origin,
+				   other.destination,
+				   other.type}
 		, payloadSet{other.payloadSet}
 	{
 		if (other.payloadSet)

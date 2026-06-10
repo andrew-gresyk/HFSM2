@@ -290,6 +290,7 @@
     <ClCompile Include="..\..\test\main.cpp" />
     <ClCompile Include="..\..\test\reported\issue_123.cpp" />
     <ClCompile Include="..\..\test\reported\issue_134.cpp" />
+    <ClCompile Include="..\..\test\reported\issue_139.cpp" />
     <ClCompile Include="..\..\test\reported\issue_49.cpp" />
     <ClCompile Include="..\..\test\reported\resuming_plan.cpp" />
     <ClCompile Include="..\..\test\reported\stress_size.cpp" />

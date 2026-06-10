@@ -30,11 +30,11 @@ TaskStatus::clear() noexcept {
 
 HFSM2_CONSTEXPR(14)
 TaskStatus
-operator | (TaskStatus& lhs,
-			const TaskStatus rhs) noexcept
+operator |  (TaskStatus& lhs,
+			 const TaskStatus rhs) noexcept
 {
 	const TaskStatus::Result result = lhs.result > rhs.result ?
-		lhs.result : rhs.result;
+										  lhs.result : rhs.result;
 
 	return TaskStatus{result, lhs.outerTransition || rhs.outerTransition};
 }

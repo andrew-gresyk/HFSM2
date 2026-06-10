@@ -82,7 +82,7 @@ protected:
 
 	template <typename TState>
 	static
-	HFSM2_CONSTEXPR(11)  StateID  stateId()								noexcept	{ return					   index<StateList , TState>();		}
+	HFSM2_CONSTEXPR(11)  StateID  stateId()								noexcept	{ return					   index<StateList , TState>() ;	}
 
 	template <typename TState>
 	static
@@ -325,6 +325,8 @@ public:
 	/// @brief Begin iteration over plan tasks
 	/// @return CIterator to the first task
 	HFSM2_CONSTEXPR(11)	CIterator begin()						  const noexcept	{ return CIterator{*this};	}
+
+	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 private:
 	HFSM2_CONSTEXPR(14)	void remove(const TaskIndex task)				noexcept;
