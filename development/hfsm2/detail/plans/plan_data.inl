@@ -66,12 +66,12 @@ template <typename TG_, typename TSL_, typename TRL_, Long NCC_, Long NOC_, Long
 HFSM2_CONSTEXPR(14)
 void
 PlanDataT<ArgsT<TG_, TSL_, TRL_, NCC_, NOC_, NOU_, TRO_ HFSM2_IF_SERIALIZATION(, NSB_), NTC_, TTP_>>::verifyPlans() const noexcept {
-	TaskIndex planCount = 0;
+	TaskIndex taskCount = 0;
 
 	for (RegionID regionId = 0; regionId < REGION_COUNT; ++regionId)
-		planCount += verifyPlan(regionId);
+		taskCount += verifyPlan(regionId);
 
-	HFSM2_ASSERT(tasks.count() == planCount);
+	HFSM2_ASSERT(tasks.count() == taskCount);
 }
 
 //------------------------------------------------------------------------------

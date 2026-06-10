@@ -51,6 +51,9 @@ class PayloadPlanT<
 				 >
 			 >
 {
+	template <typename, typename>
+	friend class R_;
+
 	template <typename>
 	friend class PlanControlT;
 

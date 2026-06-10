@@ -272,17 +272,6 @@ fill(T& a, const char value)											noexcept	{
 
 //------------------------------------------------------------------------------
 
-template <typename T>
-HFSM2_CONSTEXPR(14)
-void
-swap(T& l, T& r)														noexcept	{
-	T t = ::hfsm2::move(l);
-	l   = ::hfsm2::move(r);
-	r   = ::hfsm2::move(t);
-}
-
-//------------------------------------------------------------------------------
-
 template <
 	typename TTo
   , typename TFrom

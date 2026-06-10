@@ -1,5 +1,5 @@
 // HFSM2 (hierarchical state machine for games and interactive applications)
-// 2.11.0 (2026-04-05)
+// 2.11.2 (2026-06-11)
 //
 // Created by Andrew Gresyk
 //
@@ -33,7 +33,7 @@
 
 #define HFSM2_VERSION_MAJOR 2
 #define HFSM2_VERSION_MINOR 11
-#define HFSM2_VERSION_PATCH 0
+#define HFSM2_VERSION_PATCH 2
 
 #define HFSM2_VERSION (10000 * HFSM2_VERSION_MAJOR + 100 * HFSM2_VERSION_MINOR + HFSM2_VERSION_PATCH)
 
@@ -73,20 +73,15 @@
 #include "detail/features/task_status.hpp"
 
 #include "detail/plans/task.hpp"
-
-#if HFSM2_PLANS_AVAILABLE()
-namespace hfsm2 {
-namespace detail {
-	template <typename> struct PlanDataT;
-	template <typename> class  PlanT;
-	template <typename> class  CPlanT;
-	template <typename> class  PayloadPlanT;
-}
-}
-#endif
-
 #include "detail/root/registry_1.hpp"
 #include "detail/root/registry_2.hpp"
+
+#include "detail/plans/task_list.hpp"
+#include "detail/plans/plan_data.hpp"
+#include "detail/plans/plan_0.hpp"
+#include "detail/plans/plan_1.hpp"
+#include "detail/plans/plan_2.hpp"
+
 #include "detail/root/core.hpp"
 #include "detail/root/control_0.hpp"
 #include "detail/root/control_1.hpp"
@@ -115,11 +110,5 @@ namespace detail {
 #include "detail/root_2.hpp"
 #include "detail/root_3.hpp"
 #include "detail/root_4.hpp"
-
-#include "detail/plans/task_list.hpp"
-#include "detail/plans/plan_data.hpp"
-#include "detail/plans/plan_0.hpp"
-#include "detail/plans/plan_1.hpp"
-#include "detail/plans/plan_2.hpp"
 
 #include "detail/shared/macros_off.hpp"

@@ -262,9 +262,11 @@ struct TransitionT final
 
 	HFSM2_CONSTEXPR(14)
 	TransitionT(const This& other)								  HFSM2_NOEXCEPT_17(noexcept(Payload{              other.payloadStorage() }))
-		: TransitionBase{other.origin, other.destination, other.type}
+		: TransitionBase{other.origin,
+						 other.destination,
+						 other.type}
 	{
-		method = other.method;
+		method     = other.method;
 		payloadSet = other.payloadSet;
 
 		if (other.payloadSet)
@@ -275,9 +277,11 @@ struct TransitionT final
 
 	HFSM2_CONSTEXPR(14)
 	TransitionT(This&& other)									  HFSM2_NOEXCEPT_17(noexcept(Payload{::hfsm2::move(other.payloadStorage())}))
-		: TransitionBase{other.origin, other.destination, other.type}
+		: TransitionBase{other.origin,
+						 other.destination,
+						 other.type}
 	{
-		method = other.method;
+		method     = other.method;
 		payloadSet = other.payloadSet;
 
 		if (other.payloadSet)
@@ -359,7 +363,7 @@ struct TransitionT final
 	operator == (const TransitionT& other)						  const noexcept	{
 		return TransitionBase::operator == (other) &&
 			   (payloadSet ==  other.payloadSet);
-		//	  (!payloadSet && !other.payloadSet || payload ==  other.payload);
+		//	  (!payloadSet && !other.payloadSet || payload == other.payload);
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

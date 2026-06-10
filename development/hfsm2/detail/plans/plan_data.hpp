@@ -61,7 +61,7 @@ struct PlanDataT<
 	TasksBits tasksFailures;
 	RegionBits planExists;
 	RegionStatuses headStatuses;
-	RegionStatuses subStatuses;
+	RegionStatuses  subStatuses;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
@@ -125,7 +125,7 @@ struct PlanDataT<
 	TasksBits tasksFailures;
 	RegionBits planExists;
 	RegionStatuses headStatuses;
-	RegionStatuses subStatuses;
+	RegionStatuses  subStatuses;
 
 	HFSM2_CONSTEXPR(14)	void clearTaskStatus  (const StateID stateId)		noexcept;
 	HFSM2_CONSTEXPR(14)	void verifyEmptyStatus(const StateID stateId) const noexcept;
